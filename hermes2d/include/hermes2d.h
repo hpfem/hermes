@@ -21,8 +21,9 @@
 #include "global.h"
 
 #include "solver/newton_solver.h"
-#include "solver/newton_solver_convergence_measurement.h"
+#include "solver/newton_convergence_measurement.h"
 #include "solver/picard_solver.h"
+#include "solver/picard_convergence_measurement.h"
 #include "solver/linear_solver.h"
 #include "calculation_continuity.h"
 

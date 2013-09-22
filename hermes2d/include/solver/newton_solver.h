@@ -24,7 +24,7 @@
 
 #include "global.h"
 #include "nonlinear_solver.h"
-#include "newton_solver_convergence_measurement.h"
+#include "newton_convergence_measurement.h"
 #include "exceptions.h"
 
 namespace Hermes
@@ -84,10 +84,6 @@ namespace Hermes
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
       virtual void solve(Scalar* coeff_vec);
 
-      /// Sets the current convergence measurement.
-      /// Default: none.
-      void set_convergence_measurement(int measurement);
-
       /// Sets the maximum allowed norm of the residual during the calculation.
       /// Default: 1E9
       void set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set);
@@ -105,7 +101,10 @@ namespace Hermes
       /// Default: this->set_tolerance(1e-8, ResidualNormAbsolute);
       /// \param[in] handleMultipleTolerancesAnd If true, multiple tolerances defined will have to be all fulfilled in order to proclaim
       /// solution as a correct one. If false, only one will be enough.
-      void set_tolerance(double newton_tol, NewtonSolverConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd = false);
+      void set_tolerance(double newton_tol, NewtonConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd = false);
+
+      /// Clear tolerances.
+      virtual void clear_tolerances();
 
 #pragma region damping-public
       /// Sets minimum damping coefficient.
@@ -191,6 +190,10 @@ namespace Hermes
 #pragma endregion
 
     protected:
+      /// Common constructors code.
+      /// Internal setting of default values (see individual set methods).
+      void init_newton();
+
       /// \return Whether or not should the processing continue.
       virtual void on_damping_factor_updated();
       /// \return Whether or not should the processing continue.
@@ -217,16 +220,11 @@ namespace Hermes
       /// Calculates the new damping coefficient.
       bool calculate_damping_factor(unsigned int& successful_steps);
 
-      int current_convergence_measurement;
-      
-      /// Internal setting of default values (see individual set methods).
-      void init_newton();
-
-      /// Tolerances for all NewtonSolverConvergenceMeasurementType numbered sequentially as the enum NewtonSolverConvergenceMeasurementType is.
-      double newton_tolerance[NewtonSolverConvergenceMeasurementTypeCount];
+      /// Tolerances for all NewtonConvergenceMeasurementType numbered sequentially as the enum NewtonConvergenceMeasurementType is.
+      double newton_tolerance[NewtonConvergenceMeasurementTypeCount];
 
       /// info about set tolerances.
-      bool newton_tolerance_set[NewtonSolverConvergenceMeasurementTypeCount];
+      bool newton_tolerance_set[NewtonConvergenceMeasurementTypeCount];
 
       /// If true, multiple tolerances defined will have to be all fulfilled in order to proclaim
       /// solution as a correct one. If false, only one will be enough.
@@ -304,7 +302,6 @@ namespace Hermes
 
     private:
 			Scalar* coeff_vec_back;
-      int ndof;
 
       friend class NewtonSolverConvergenceMeasurement<Scalar>;
     };

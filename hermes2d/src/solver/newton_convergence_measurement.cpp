@@ -20,7 +20,7 @@
 \brief Newton's method.
 */
 
-#include "solver/newton_solver_convergence_measurement.h"
+#include "solver/newton_convergence_measurement.h"
 #include "solver/newton_solver.h"
 
 namespace Hermes
@@ -59,7 +59,7 @@ namespace Hermes
       else
         converged = false;
 
-      double convergence_decision_value[NewtonSolverConvergenceMeasurementTypeCount];
+      double convergence_decision_value[NewtonConvergenceMeasurementTypeCount];
       convergence_decision_value[0] = ((initial_residual_norm - current_residual_norm) / initial_residual_norm);
       convergence_decision_value[1] = ((previous_residual_norm - current_residual_norm) / previous_residual_norm);
       convergence_decision_value[2] = (current_residual_norm / initial_residual_norm);
@@ -68,7 +68,7 @@ namespace Hermes
       convergence_decision_value[5] = current_solution_change_norm;
       convergence_decision_value[6] = (current_solution_change_norm / previous_solution_norm);
 
-      for(int i = 0; i < NewtonSolverConvergenceMeasurementTypeCount; i++)
+      for(int i = 0; i < NewtonConvergenceMeasurementTypeCount; i++)
       {
         if(!newton->newton_tolerance_set[i])
           continue;

@@ -32,10 +32,10 @@ namespace Hermes
 
     /// Convergence measurement strategies.
     /// Count of the types - for NewtonSolver to hold arrays of such a length.
-    const int NewtonSolverConvergenceMeasurementTypeCount = 7;
+    const int NewtonConvergenceMeasurementTypeCount = 7;
 
     /// This specifies the quantity that is compared to newton_tolerance (settable by set_tolerance()).
-    enum NewtonSolverConvergenceMeasurementType
+    enum NewtonConvergenceMeasurementType
     {
       ResidualNormRelativeToInitial = 0x0001,
       ResidualNormRelativeToPrevious = 0x0002,

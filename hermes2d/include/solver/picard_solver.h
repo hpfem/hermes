@@ -23,6 +23,7 @@
 #define __H2D_SOLVER_PICARD_H_
 
 #include "solver/nonlinear_solver.h"
+#include "solver/picard_convergence_measurement.h"
 
 namespace Hermes
 {
@@ -77,21 +78,29 @@ namespace Hermes
       PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~PicardSolver();
 
-      /// Sets the attribute verbose_output for the inner Newton's loop to the parameter passed.
-      void set_verbose_output_linear_solver(bool verbose_output_to_set);
-
       // See the base class for details, the following serves only for avoiding C++ name-hiding.
       using NonlinearSolver<Scalar>::solve;
+      
       /// Solve.
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
       virtual void solve(Scalar* coeff_vec);
 
+      /// Sets the current convergence measurement.
+      /// Default: none.
+      void set_convergence_measurement(int measurement);
+
+      /// Set the residual norm tolerance for ending the Picard's loop.
+      /// Default: this->set_tolerance(1e-3, SolutionDistanceFromPreviousRelative);
+      /// \param[in] handleMultipleTolerancesAnd If true, multiple tolerances defined will have to be all fulfilled in order to proclaim
+      /// solution as a correct one. If false, only one will be enough.
+      void set_tolerance(double newton_tol, PicardConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd = false);
+      
+      /// Clear tolerances.
+      virtual void clear_tolerances();
+
 #pragma region anderson-public
       /// Turn on / off the Anderson acceleration. By default it is off.
       void use_Anderson_acceleration(bool to_set);
-    
-      /// Set the relative tolerance, thus co-determine when to stop Picard's iterations.
-      void set_tolerance(double tol);
       
       /// Set how many last vectors will be used for Anderson acceleration. See the details about the Anderson acceleration for 
       /// explanation of this parameter.
@@ -102,11 +111,7 @@ namespace Hermes
       void set_anderson_beta(double beta);
 #pragma endregion
 
-    protected:
-      /// State querying helpers.
-      virtual bool isOkay() const;
-      inline std::string getClassName() const { return "PicardSolver"; }
-
+#pragma region ConvergenceState
       /// Convergence state.
       enum ConvergenceState
       {
@@ -117,21 +122,64 @@ namespace Hermes
         Error
       };
 
-      /// Find out the state.
-      typename PicardSolver<Scalar>::ConvergenceState get_convergence_state(double relative_error, int iteration);
+      class HERMES_API PicardException : public Hermes::Exceptions::Exception
+      {
+      public:
+        PicardException(typename PicardSolver<Scalar>::ConvergenceState convergenceState);
 
+        typename PicardSolver<Scalar>::ConvergenceState get_exception_state();
+
+      protected:
+        typename PicardSolver<Scalar>::ConvergenceState convergenceState;
+      };
+
+      /// Find out the state.
+      typename PicardSolver<Scalar>::ConvergenceState get_convergence_state();
+
+      /// Act upon the state.
+      /// \return If the main loop in solve() should finalize after this.
+      bool handle_convergence_state_return_finished(typename PicardSolver<Scalar>::ConvergenceState state, Scalar* coeff_vec);
+
+#pragma endregion
+      
+    protected:
+      /// Common constructors code.
+      /// Internal setting of default values (see individual set methods).
+      void init_picard();
+
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "PicardSolver"; }
+
+      /// Init - deinit one solving.
       virtual void init_solving(Scalar*& coeff_vec);
       void deinit_solving(Scalar* coeff_vec);
 
-      void init_picard();
-
-      double calculate_relative_error(Scalar* coeff_vec);
+      /// Finalize solving (+deinit)
+      /// For "good" finish.
+      void finalize_solving(Scalar* coeff_vec);
       
-      bool verbose_output_linear_solver;
-      int ndof;
+      /// Calculate and store solution norm and solution change norm.
+      void calculate_error(Scalar* coeff_vec);
+      
+      bool do_initial_step_return_finished(Scalar* coeff_vec);
+      void solve_linear_system(Scalar* coeff_vec);
 
-      /// Tolerance.
-      double picard_tolerance;
+      /// Tolerances for all PicardConvergenceMeasurementType numbered sequentially as the enum PicardConvergenceMeasurementType is.
+      double picard_tolerance[PicardConvergenceMeasurementTypeCount];
+
+      /// info about set tolerances.
+      bool picard_tolerance_set[PicardConvergenceMeasurementTypeCount];
+
+      /// If true, multiple tolerances defined will have to be all fulfilled in order to proclaim
+      /// solution as a correct one. If false, only one will be enough.
+      bool handleMultipleTolerancesAnd;
+
+      /// Shortcut method for getting the current iteration.
+      int get_current_iteration_number();
+      
+      /// Output info about the step.
+      void step_info();
 
 #pragma region anderson-private
       // Anderson.
@@ -158,13 +206,19 @@ namespace Hermes
 #pragma region OutputAttachable
       // For derived classes - read-only access.
       const OutputParameterUnsignedInt& iteration() const { return this->p_iteration; };
+      const OutputParameterDoubleVector& solution_norms() const { return this->p_solution_norms; };
+      const OutputParameterDoubleVector& solution_change_norms() const { return this->p_solution_change_norms; };
       const OutputParameterUnsignedInt& vec_in_memory() const { return this->p_vec_in_memory; };
 
     private:
       // Parameters for OutputAttachable mixin.
       OutputParameterUnsignedInt p_iteration;
+      OutputParameterDoubleVector p_solution_norms;
+      OutputParameterDoubleVector p_solution_change_norms;
       OutputParameterUnsignedInt p_vec_in_memory;
 #pragma endregion
+
+      friend class PicardSolverConvergenceMeasurement<Scalar>;
     };
   }
 }

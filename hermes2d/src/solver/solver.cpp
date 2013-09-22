@@ -84,6 +84,8 @@ namespace Hermes
       this->constant_jacobian = false;
 
       this->do_UMFPACK_reporting = false;
+
+      this->ndof = -1;
     }
 
     template<typename Scalar>

@@ -59,6 +59,9 @@ namespace Hermes
       /// Set the maximum number of iterations, thus co-determine when to stop iterations.
       void set_max_allowed_iterations(int max_allowed_iterations);
     
+      /// Clear tolerances.
+      virtual void clear_tolerances() = 0;
+
     protected:
       /// Maximum number of iterations allowed.
       int max_allowed_iterations;

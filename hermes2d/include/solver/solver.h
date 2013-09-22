@@ -161,6 +161,9 @@ namespace Hermes
       /// This instance owns its DP.
       const bool own_dp;
 
+      /// Number of degrees of freedom.
+      int ndof;
+
       /// For deciding if the jacobian is constant at this point.
       virtual bool reuse_jacobian_values();
 
