@@ -162,7 +162,9 @@ namespace Hermes
       /// Calculate and store solution norm and solution change norm.
       void calculate_error(Scalar* coeff_vec);
       
+      /// Initial iteratios is handled separately (though it is completely identical - this is just to reflect Newton solver).
       bool do_initial_step_return_finished(Scalar* coeff_vec);
+
       void solve_linear_system(Scalar* coeff_vec);
 
       /// Tolerances for all PicardConvergenceMeasurementType numbered sequentially as the enum PicardConvergenceMeasurementType is.

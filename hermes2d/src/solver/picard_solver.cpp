@@ -101,6 +101,9 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::calculate_anderson_coeffs()
     {
+      if(Hermes::Helpers::TypeIsComplex<Scalar>::value)
+        throw Exceptions::MethodNotImplementedException("PicardSolver<Scalar>::calculate_anderson_coeffs() - complex version of ludcmp.");
+
       // If num_last_vectors_used is 2, then there is only one residual, and thus only one alpha coeff which is 1.0.
       if(num_last_vectors_used == 2)
       {
@@ -113,7 +116,7 @@ namespace Hermes
       int n = num_last_vectors_used - 2;
 
       // Allocate the matrix system for the Anderson coefficients.
-      double** mat = new_matrix<double>(n, n);
+      Scalar** mat = new_matrix<Scalar>(n, n);
       Scalar* rhs = new Scalar[n];
 
       // Set up the matrix and rhs vector.
@@ -138,10 +141,7 @@ namespace Hermes
             val += (residual_n_k - residual_i_k) * (residual_n_k - residual_j_k);
           }
 
-          // FIXME: This is not a nice way to cast Scalar to double. Not mentioning
-          // that this will not work for Scalar = complex.
-          double* ptr = (double*)(&val);
-          mat[i][j] = *ptr;
+          mat[i][j] = val;
         }
       }
 
@@ -180,7 +180,7 @@ namespace Hermes
         {
           this->picard_tolerance[0] = tolerance_;
           this->picard_tolerance_set[0] = true;
-        }
+				}
         break;
       case SolutionChangeRelative:
         {
@@ -295,10 +295,7 @@ namespace Hermes
       {
         // If memory not full, just add the vector.
         if (vec_in_memory < num_last_vectors_used)
-        {
-          memcpy(previous_vectors[vec_in_memory], this->sln_vector, this->ndof*sizeof(Scalar));
-          vec_in_memory++;
-        }
+          memcpy(previous_vectors[vec_in_memory++], this->sln_vector, this->ndof * sizeof(Scalar));
         else
         {
           // If memory full, shift all vectors back, forgetting the oldest one.
@@ -321,9 +318,9 @@ namespace Hermes
           // Calculate new vector and store it in this->sln_vector[].
           for (int i = 0; i < this->ndof; i++)
           {
-            this->sln_vector[i] = 0;
+            this->sln_vector[i] = 0.;
             for (int j = 1; j < num_last_vectors_used; j++)
-              this->sln_vector[i] += anderson_coeffs[j-1] * previous_vectors[j][i] - (1.0 - anderson_beta) * anderson_coeffs[j-1] * (previous_vectors[j][i] - previous_vectors[j-1][i]);
+              this->sln_vector[i] += anderson_coeffs[j-1] * previous_vectors[j][i] - (1.0 - anderson_beta) * anderson_coeffs[j - 1] * (previous_vectors[j][i] - previous_vectors[j - 1][i]);
           }
         }
       }
@@ -345,8 +342,7 @@ namespace Hermes
     {
       // Output.
       this->info("\n\tPicard: iteration %d,", this->get_current_iteration_number());
-      this->info("\t\tsolution norm: %g,", this->get_parameter_value(this->p_solution_norms).back());
-      this->info("\t\tsolution change norm: %g.", this->get_parameter_value(this->p_solution_change_norms).back());
+      this->info("\n\tPicard: solution change (L2 norm): %g (%g%%).", this->get_parameter_value(this->p_solution_change_norms).back(), 100. * (this->get_parameter_value(this->p_solution_change_norms).back() / this->get_parameter_value(this->p_solution_norms).back()));
     }
 
     template<typename Scalar>
@@ -356,10 +352,10 @@ namespace Hermes
       this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(this->sln_vector, this->ndof));
 
       // coeff_vec stores the previous iteration.
-      double abs_error = 0;
+      double abs_error = 0.;
       for (int i = 0; i < this->ndof; i++)
         abs_error += std::abs((this->sln_vector[i] - coeff_vec[i]) * (this->sln_vector[i] - coeff_vec[i]));
-      abs_error = sqrt(abs_error);
+      abs_error = std::sqrt(abs_error);
 
       this->get_parameter_value(this->p_solution_change_norms).push_back(abs_error);
     }
@@ -406,11 +402,11 @@ namespace Hermes
       // Solve the linear system.
       this->solve_linear_system(coeff_vec);
 
+      // Calculate errors.
       this->calculate_error(coeff_vec);
-      if(this->picard_tolerance_set[SolutionChangeAbsolute])
-        this->info("\n\tPicard: initial solution norm: %g", this->get_parameter_value(this->p_solution_norms).back());
-      else
-        this->info("\n\tPicard: initial solution change norm: %g", this->get_parameter_value(this->p_solution_change_norms).back());
+
+      // Info.
+      this->step_info();
 
       // coeff_vec stores the previous iteration - after this, for the first ordinary step, it will hold the initial step solution.
       memcpy(coeff_vec, this->sln_vector, sizeof(Scalar)*this->ndof);
@@ -459,6 +455,7 @@ namespace Hermes
       this->set_parameter_value(this->p_solution_change_norms, &solution_change_norms);
 #pragma endregion
 
+      /// Initial iteratios is handled separately (though it is completely identical - this is just to reflect Newton solver).
       if(this->do_initial_step_return_finished(coeff_vec))
       {
         this->info("\tPicard: aborted.");
@@ -466,6 +463,8 @@ namespace Hermes
         this->finalize_solving(coeff_vec);
         return;
       }
+      else
+        it++; 
 
       while (true)
       {
