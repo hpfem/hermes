@@ -342,7 +342,10 @@ namespace Hermes
     {
       // Output.
       this->info("\n\tPicard: iteration %d,", this->get_current_iteration_number());
-      this->info("\n\tPicard: solution change (L2 norm): %g (%g%%).", this->get_parameter_value(this->p_solution_change_norms).back(), 100. * (this->get_parameter_value(this->p_solution_change_norms).back() / this->get_parameter_value(this->p_solution_norms).back()));
+      double sln_change_norm = this->get_parameter_value(this->p_solution_change_norms).back();
+      double sln_norm = this->get_parameter_value(this->p_solution_norms).back();
+        
+      this->info("\n\tPicard: solution change (L2 norm): %g (%g%%).", sln_change_norm, 100. * (sln_change_norm / sln_norm));
     }
 
     template<typename Scalar>
@@ -410,6 +413,10 @@ namespace Hermes
 
       // coeff_vec stores the previous iteration - after this, for the first ordinary step, it will hold the initial step solution.
       memcpy(coeff_vec, this->sln_vector, sizeof(Scalar)*this->ndof);
+
+      // Test convergence - if the first iteration is already a solution.
+      if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
+        return true;
 
       return (this->on_initial_step_end() == false);
     }

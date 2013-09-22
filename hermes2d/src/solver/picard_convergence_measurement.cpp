@@ -32,20 +32,13 @@ namespace Hermes
     {
       // get iteration.
       unsigned int iteration = picard->get_current_iteration_number();
-      if(iteration < 2)
-        return false;
 
       const Hermes::vector<double>& solution_norms = picard->get_parameter_value(picard->solution_norms());
       const Hermes::vector<double>& solution_change_norms = picard->get_parameter_value(picard->solution_change_norms());
 
-#ifdef _DEBUG
-      assert(solution_norms.size() > 1);
-#endif
-
       double initial_solution_norm = solution_norms[0];
-      double previous_solution_norm = solution_norms[iteration - 2];
       double current_solution_norm = solution_norms[iteration - 1];
-      double current_solution_change_norm = solution_change_norms[iteration - 2];
+      double current_solution_change_norm = solution_change_norms[iteration - 1];
 
       bool converged;
       if(picard->handleMultipleTolerancesAnd)
@@ -55,7 +48,7 @@ namespace Hermes
 
       double convergence_decision_value[PicardConvergenceMeasurementTypeCount];
       convergence_decision_value[0] = current_solution_change_norm;
-      convergence_decision_value[1] = (current_solution_change_norm / previous_solution_norm);
+      convergence_decision_value[1] = (current_solution_change_norm / current_solution_norm);
 
       for(int i = 0; i < PicardConvergenceMeasurementTypeCount; i++)
       {
