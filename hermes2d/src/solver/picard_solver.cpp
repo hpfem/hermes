@@ -311,7 +311,10 @@ namespace Hermes
           previous_vectors[num_last_vectors_used-1] = oldest_vec;
 
           memcpy(oldest_vec, this->sln_vector, this->ndof*sizeof(Scalar));
+        }
 
+        if (vec_in_memory >= num_last_vectors_used)
+        {
           // Calculate Anderson coefficients.
           calculate_anderson_coeffs();
 
@@ -327,7 +330,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardException::PicardException(typename PicardSolver<Scalar>::ConvergenceState convergenceState) : Exception("NewtonException"), convergenceState(convergenceState)
+    PicardSolver<Scalar>::PicardException::PicardException(typename PicardSolver<Scalar>::ConvergenceState convergenceState) : Exception("PicardException"), convergenceState(convergenceState)
     {
     }
 
