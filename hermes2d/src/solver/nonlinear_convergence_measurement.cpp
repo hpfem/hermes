@@ -20,7 +20,7 @@
 \brief Newton's method.
 */
 
-#include "solver/newton_convergence_measurement.h"
+#include "solver/nonlinear_convergence_measurement.h"
 #include "solver/newton_solver.h"
 
 namespace Hermes
@@ -28,7 +28,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    bool NewtonSolverConvergenceMeasurement<Scalar>::converged(NewtonSolver<Scalar>* newton)
+    bool NonlinearConvergenceMeasurement<Scalar>::converged(NonlinearSolver<Scalar>* newton)
     {
       // get iteration.
       unsigned int iteration = newton->get_current_iteration_number();
@@ -59,7 +59,7 @@ namespace Hermes
       else
         converged = false;
 
-      double convergence_decision_value[NewtonConvergenceMeasurementTypeCount];
+      double convergence_decision_value[NonlinearConvergenceMeasurementTypeCount];
       convergence_decision_value[0] = ((initial_residual_norm - current_residual_norm) / initial_residual_norm);
       convergence_decision_value[1] = ((previous_residual_norm - current_residual_norm) / previous_residual_norm);
       convergence_decision_value[2] = (current_residual_norm / initial_residual_norm);
@@ -68,11 +68,11 @@ namespace Hermes
       convergence_decision_value[5] = current_solution_change_norm;
       convergence_decision_value[6] = (current_solution_change_norm / previous_solution_norm);
 
-      for(int i = 0; i < NewtonConvergenceMeasurementTypeCount; i++)
+      for(int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
       {
-        if(!newton->newton_tolerance_set[i])
+        if(!newton->tolerance_set[i])
           continue;
-        bool converged_this_tolerance = (convergence_decision_value[i] < newton->newton_tolerance[i]);
+        bool converged_this_tolerance = (convergence_decision_value[i] < newton->tolerance[i]);
         if(newton->handleMultipleTolerancesAnd)
           converged = converged && converged_this_tolerance;
         else
@@ -83,7 +83,7 @@ namespace Hermes
       return converged;
     }
 
-    template class HERMES_API NewtonSolverConvergenceMeasurement<double>;
-    template class HERMES_API NewtonSolverConvergenceMeasurement<std::complex<double> >;
+    template class HERMES_API NonlinearConvergenceMeasurement<double>;
+    template class HERMES_API NonlinearConvergenceMeasurement<std::complex<double> >;
   }
 }

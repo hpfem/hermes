@@ -21,10 +21,9 @@
 #include "global.h"
 
 #include "solver/newton_solver.h"
-#include "solver/newton_convergence_measurement.h"
 #include "solver/picard_solver.h"
-#include "solver/picard_convergence_measurement.h"
 #include "solver/linear_solver.h"
+#include "solver/nonlinear_convergence_measurement.h"
 #include "calculation_continuity.h"
 
 #include "boundary_conditions/essential_boundary_conditions.h"

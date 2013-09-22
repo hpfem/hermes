@@ -59,36 +59,15 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::init_picard()
     {
-      this->handleMultipleTolerancesAnd = false;
-      this->max_allowed_iterations = 50;
       num_last_vectors_used = 3;
       anderson_beta = 1.0;
       anderson_is_on = false;
       this->dp->set_linear(false, false);
-      this->clear_tolerances();
-    }
-
-    template<typename Scalar>
-    void PicardSolver<Scalar>::clear_tolerances()
-    {
-      for(int i = 0; i < PicardConvergenceMeasurementTypeCount; i++)
-        this->picard_tolerance[i] = std::numeric_limits<double>::max();
-      memset(this->picard_tolerance_set, 0, sizeof(bool)*PicardConvergenceMeasurementTypeCount);
     }
 
     template<typename Scalar>
     bool PicardSolver<Scalar>::isOkay() const
     {
-      bool toleranceSet = false;
-      for(int i = 0; i < PicardConvergenceMeasurementTypeCount; i++)
-        if(this->picard_tolerance_set[i])
-          toleranceSet = true;
-      if(!toleranceSet)
-      {
-        throw Exceptions::Exception("No tolerance set in PicardSolver.");
-        return false;
-      }
-
       if(num_last_vectors_used <= 1)
       {
         throw Hermes::Exceptions::Exception("Picard: Bad number of last iterations to be used (must be at least one).");
@@ -167,33 +146,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::set_tolerance(double tolerance_, PicardConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd)
-    {
-      this->handleMultipleTolerancesAnd = handleMultipleTolerancesAnd;
-
-      if(tolerance_ < 0.0)
-        throw Exceptions::ValueException("picard_tolerance", tolerance_, 0.0);
-
-      switch(toleranceType)
-      {
-      case SolutionChangeAbsolute:
-        {
-          this->picard_tolerance[0] = tolerance_;
-          this->picard_tolerance_set[0] = true;
-				}
-        break;
-      case SolutionChangeRelative:
-        {
-          this->picard_tolerance[1] = tolerance_;
-          this->picard_tolerance_set[1] = true;
-        }
-        break;
-      default:
-        throw Exceptions::Exception("Unknown PicardConvergenceMeasurementType in PicardSolver::set_tolerance.");
-      }
-    }
-
-    template<typename Scalar>
     void PicardSolver<Scalar>::set_num_last_vector_used(int num)
     {
       this->num_last_vectors_used = num;
@@ -212,27 +164,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    typename PicardSolver<Scalar>::ConvergenceState PicardSolver<Scalar>::get_convergence_state()
-    {
-      if(this->get_current_iteration_number() >= this->max_allowed_iterations)
-        return AboveMaxIterations;
-
-      if(PicardSolverConvergenceMeasurement<Scalar>::converged(this))
-        return Converged;
-      else
-        return NotConverged;
-
-      return Error;
-    }
-
-    template<typename Scalar>
     int PicardSolver<Scalar>::get_current_iteration_number()
     {
       return this->get_parameter_value(this->p_iteration);
     }
 
     template<typename Scalar>
-    bool PicardSolver<Scalar>::handle_convergence_state_return_finished(typename PicardSolver<Scalar>::ConvergenceState state, Scalar* coeff_vec)
+    bool PicardSolver<Scalar>::handle_convergence_state_return_finished(NonlinearConvergenceState state, Scalar* coeff_vec)
     {
       // If we have not converged and everything else is ok, we finish.
       if(state == NotConverged)
@@ -248,7 +186,7 @@ namespace Hermes
         this->info("\tPicard: done.\n");
         break;
       case AboveMaxIterations:
-        throw PicardException(AboveMaxIterations);
+        throw Exceptions::NonlinearException(AboveMaxIterations);
         break;
       case Error:
         throw Exceptions::Exception("Unknown exception in PicardSolver.");
@@ -327,17 +265,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardException::PicardException(typename PicardSolver<Scalar>::ConvergenceState convergenceState) : Exception("PicardException"), convergenceState(convergenceState)
-    {
-    }
-
-    template<typename Scalar>
-    typename PicardSolver<Scalar>::ConvergenceState PicardSolver<Scalar>::PicardException::get_exception_state()
-    {
-      return this->convergenceState;
-    }
-
-    template<typename Scalar>
     void PicardSolver<Scalar>::step_info()
     {
       // Output.
@@ -402,6 +329,9 @@ namespace Hermes
     template<typename Scalar>
     bool PicardSolver<Scalar>::do_initial_step_return_finished(Scalar* coeff_vec)
     {
+      // Store the initial norm.
+      this->get_parameter_value(p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
+      
       // Solve the linear system.
       this->solve_linear_system(coeff_vec);
 
@@ -439,6 +369,7 @@ namespace Hermes
 
         // Use the solution vector for Anderson.
       this->handle_previous_vectors(this->get_parameter_value(this->p_vec_in_memory));
+      this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
     }
 
     template<typename Scalar>
@@ -454,10 +385,12 @@ namespace Hermes
       unsigned int it = 1;
       Hermes::vector<double> solution_norms;
       Hermes::vector<double> solution_change_norms;
+      Hermes::vector<double> residual_norms;
 
       // Link parameters.
       this->set_parameter_value(this->p_iteration, &it);
       this->set_parameter_value(this->p_vec_in_memory, &vec_in_memory);
+      this->set_parameter_value(this->p_residual_norms, &residual_norms);
       this->set_parameter_value(this->p_solution_norms, &solution_norms);
       this->set_parameter_value(this->p_solution_change_norms, &solution_change_norms);
 #pragma endregion

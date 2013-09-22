@@ -58,7 +58,8 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", mesh);
 
   // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh->refine_all_elements();
+  for(int i = 0; i < INIT_GLOB_REF_NUM; i++)
+    mesh->refine_all_elements();
   mesh->refine_towards_boundary("Bdy", INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
@@ -86,7 +87,7 @@ int main(int argc, char* argv[])
   picard.use_Anderson_acceleration(true);
 
   // Perform the Picard's iteration (Anderson acceleration on by default).
-  picard.set_tolerance(PICARD_TOL);
+  picard.set_tolerance(1e-7, NonlinearConvergenceMeasurementType::SolutionChangeRelative);
   picard.set_max_allowed_iterations(PICARD_MAX_ITER);
   picard.set_num_last_vector_used(PICARD_NUM_LAST_ITER_USED);
   picard.set_anderson_beta(PICARD_ANDERSON_BETA);

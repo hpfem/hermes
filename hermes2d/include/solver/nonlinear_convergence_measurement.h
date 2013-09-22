@@ -19,8 +19,8 @@
 /*! \file solver_newton.h
 \brief Newton's method.
 */
-#ifndef __H2D_SOLVER_NEWTON_CONVERGENCE_MEASUREMENT_H_
-#define __H2D_SOLVER_NEWTON_CONVERGENCE_MEASUREMENT_H_
+#ifndef __H2D_SOLVER_NONLINEAR_CONVERGENCE_MEASUREMENT_H_
+#define __H2D_SOLVER_NONLINEAR_CONVERGENCE_MEASUREMENT_H_
 
 #include "hermes_common.h"
 
@@ -28,30 +28,30 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    template<typename Scalar> class NewtonSolver;
+    template<typename Scalar> class NonlinearSolver;
 
     /// Convergence measurement strategies.
-    /// Count of the types - for NewtonSolver to hold arrays of such a length.
-    const int NewtonConvergenceMeasurementTypeCount = 7;
+    /// Count of the types - for solver to hold arrays of such a length.
+    const int NonlinearConvergenceMeasurementTypeCount = 7;
 
     /// This specifies the quantity that is compared to newton_tolerance (settable by set_tolerance()).
-    enum NewtonConvergenceMeasurementType
+    enum NonlinearConvergenceMeasurementType
     {
       ResidualNormRelativeToInitial = 0x0001,
       ResidualNormRelativeToPrevious = 0x0002,
       ResidualNormRatioToInitial = 0x0004,
       ResidualNormRatioToPrevious = 0x0008,
       ResidualNormAbsolute = 0x0010,
-      SolutionDistanceFromPreviousAbsolute = 0x0020,
-      SolutionDistanceFromPreviousRelative = 0x0040
+      SolutionChangeAbsolute = 0x0020,
+      SolutionChangeRelative = 0x0040
     };
 
     template<typename Scalar>
-    class HERMES_API NewtonSolverConvergenceMeasurement
+    class HERMES_API NonlinearConvergenceMeasurement
     {
     public:
       /// Convergence measurement function - returns converged true/false.
-      static bool converged(NewtonSolver<Scalar>* newtonSolver);
+      static bool converged(NonlinearSolver<Scalar>* newtonSolver);
     };
   }
 }
