@@ -63,6 +63,7 @@ namespace Hermes
       anderson_beta = 1.0;
       anderson_is_on = false;
       this->dp->set_linear(false, false);
+      this->set_tolerance(1e-3, SolutionChangeRelative);
     }
 
     template<typename Scalar>
