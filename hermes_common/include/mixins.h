@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_MIXINS_H
 
 #include "common.h"
-#include "hermes_vector.h"
+#include "data_structures/hermes_vector.h"
 #include "exceptions.h"
 #include "api.h"
 
