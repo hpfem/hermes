@@ -156,7 +156,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    typename NonlinearConvergenceState NonlinearSolver<Scalar>::get_convergence_state()
+    NonlinearConvergenceState NonlinearSolver<Scalar>::get_convergence_state()
     {
       double residual_norm = this->get_parameter_value(p_residual_norms).back();
 

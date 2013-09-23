@@ -25,6 +25,7 @@
 #include "common.h"
 #include "compat.h"
 #include "algebra_utilities.h"
+#include "exceptions.h"
 
 namespace Hermes
 {
@@ -129,7 +130,7 @@ namespace Hermes
         /// @param[in] filename obvious
         /// @param[in] var_name name of variable (will be searched for to output file)
         /// @param[in] fmt input file format
-        virtual void import_from_file(const char* filename, const char* var_name, Algebra::MatrixExportFormat fmt) { throw Exceptions::MethodNotOverridenException("MatrixRhsImportExport<Scalar>::import_from_file"); };
+        virtual void import_from_file(const char* filename, const char* var_name, Algebra::MatrixExportFormat fmt) { throw Hermes::Exceptions::MethodNotOverridenException("MatrixRhsImportExport<Scalar>::import_from_file"); };
         void import_from_file(std::string filename, const char* var_name, Algebra::MatrixExportFormat fmt);
         void import_from_file(std::string filename, std::string var_name, Algebra::MatrixExportFormat fmt);
       };

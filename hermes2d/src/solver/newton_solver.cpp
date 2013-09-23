@@ -203,8 +203,8 @@ namespace Hermes
         return true;
       }
 
-      double residual_norm = *(this->get_parameter_value(p_residual_norms).end() - 1);
-      double previous_residual_norm = *(this->get_parameter_value(p_residual_norms).end() - 2);
+      double residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 1);
+      double previous_residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 2);
 
       if(residual_norm < previous_residual_norm * this->sufficient_improvement_factor)
       {
@@ -326,7 +326,7 @@ namespace Hermes
     bool NewtonSolver<Scalar>::do_initial_step_return_finished(Scalar* coeff_vec)
     {
       // Store the initial norm.
-      this->get_parameter_value(p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
 
       // Assemble the system.
       if(this->jacobian_reusable && this->reuse_jacobian_values())
@@ -361,7 +361,7 @@ namespace Hermes
         return true;
       }
       else
-        this->get_parameter_value(p_residual_norms).push_back(this->calculate_residual_norm());
+        this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
 
       this->solve_linear_system(coeff_vec);
 
@@ -373,7 +373,7 @@ namespace Hermes
     {
       // Output.
       this->info("\n\tNewton: iteration %d,", this->get_current_iteration_number());
-      this->info("\t\tresidual norm: %g,", this->get_parameter_value(p_residual_norms).back());
+      this->info("\t\tresidual norm: %g,", this->get_parameter_value(this->p_residual_norms).back());
       this->info("\t\tsolution norm: %g,", this->get_parameter_value(this->p_solution_norms).back());
       this->info("\t\tsolution change norm: %g.", this->get_parameter_value(this->p_solution_change_norms).back());
       this->info("\t\trelative solution change: %g.", this->get_parameter_value(this->p_solution_change_norms).back() / this->get_parameter_value(this->p_solution_norms)[this->get_parameter_value(this->p_solution_norms).size() - 2]);
@@ -392,7 +392,7 @@ namespace Hermes
       this->process_vector_output(this->residual, this->get_current_iteration_number());
 
       // Current residual norm.
-      this->get_parameter_value(p_residual_norms).push_back(this->calculate_residual_norm());
+      this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
     }
 
     template<typename Scalar>
@@ -417,10 +417,10 @@ namespace Hermes
         coeff_vec[i] += current_damping_factor * sln_vector_local[i];
 
       // 2. store the solution change.
-      this->get_parameter_value(p_solution_change_norms).push_back(current_damping_factor * get_l2_norm(sln_vector_local, this->ndof));
+      this->get_parameter_value(this->p_solution_change_norms).push_back(current_damping_factor * get_l2_norm(sln_vector_local, this->ndof));
 
       // 3. store the solution norm.
-      this->get_parameter_value(p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
     }
 
     template<typename Scalar>
@@ -547,9 +547,9 @@ namespace Hermes
           if(!this->jacobian_reused_okay(successful_steps_jacobian))
           {
             this->warn("\t\treused Jacobian disapproved.");
-            this->get_parameter_value(p_residual_norms).pop_back();
-            this->get_parameter_value(p_solution_norms).pop_back();
-            this->get_parameter_value(p_solution_change_norms).pop_back();
+            this->get_parameter_value(this->p_residual_norms).pop_back();
+            this->get_parameter_value(this->p_solution_norms).pop_back();
+            this->get_parameter_value(this->p_solution_change_norms).pop_back();
             memcpy(coeff_vec, coeff_vec_back, sizeof(Scalar)*this->ndof);
             this->residual->set_vector(residual_back);
             break;
@@ -616,8 +616,8 @@ namespace Hermes
     template<typename Scalar>
     bool NewtonSolver<Scalar>::jacobian_reused_okay(unsigned int& successful_steps_with_reused_jacobian)
     {
-      double residual_norm = *(this->get_parameter_value(p_residual_norms).end() - 1);
-      double previous_residual_norm = *(this->get_parameter_value(p_residual_norms).end() - 2);
+      double residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 1);
+      double previous_residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 2);
 
       if((residual_norm / previous_residual_norm) > this->sufficient_improvement_factor_jacobian)
       {

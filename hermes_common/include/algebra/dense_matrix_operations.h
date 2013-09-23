@@ -24,6 +24,7 @@
 
 #include "common.h"
 #include "compat.h"
+#include "exceptions.h"
 
 namespace Hermes
 {

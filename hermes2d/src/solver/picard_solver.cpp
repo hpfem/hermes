@@ -330,7 +330,7 @@ namespace Hermes
     bool PicardSolver<Scalar>::do_initial_step_return_finished(Scalar* coeff_vec)
     {
       // Store the initial norm.
-      this->get_parameter_value(p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
       
       // Solve the linear system.
       this->solve_linear_system(coeff_vec);
