@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_EXCEPTIONS_H_
 
 #include "common.h"
-#include "compat.h"
+#include "util/compat.h"
 
 #undef assert
 #define assert(x) \

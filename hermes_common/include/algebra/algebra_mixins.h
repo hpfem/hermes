@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_ALGEBRA_MIXINS_H
 
 #include "common.h"
-#include "compat.h"
+#include "util/compat.h"
 #include "algebra_utilities.h"
 #include "exceptions.h"
 

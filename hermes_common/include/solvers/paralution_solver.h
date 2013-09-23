@@ -24,7 +24,7 @@
 #include "config.h"
 #ifdef WITH_PARALUTION
 #include "linear_matrix_solver.h"
-#include "cs_matrix.h"
+#include "algebra/cs_matrix.h"
 
 #include "paralution.hpp"
 #include "precond.h"

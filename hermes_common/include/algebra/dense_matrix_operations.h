@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_DENSE_MATRIX_OPERATIONS_H
 
 #include "common.h"
-#include "compat.h"
+#include "util/compat.h"
 #include "exceptions.h"
 
 namespace Hermes

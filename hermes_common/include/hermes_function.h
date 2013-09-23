@@ -16,7 +16,7 @@
 #ifndef __H2D_HERMES_FUNCTION_H
 #define __H2D_HERMES_FUNCTION_H
 
-#include "compat.h"
+#include "util/compat.h"
 #include "ord.h"
 #include "exceptions.h"
 #include "mixins.h"

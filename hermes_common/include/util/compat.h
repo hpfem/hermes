@@ -71,7 +71,7 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 #endif
 
 //C99 functions
-#include "c99_functions.h"
+#include "util/c99_functions.h"
 
 // Microsoft does not recognize long double and handles it just like double.
 #ifdef _MSC_VER

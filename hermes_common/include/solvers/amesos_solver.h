@@ -25,7 +25,7 @@
 #ifdef HAVE_AMESOS
 #include "linear_matrix_solver.h"
 #include "epetra.h"
-#include "compat.h"
+#include "util/compat.h"
 #include <Amesos.h>
 #include <Amesos_BaseSolver.h>
 

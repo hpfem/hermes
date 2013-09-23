@@ -22,7 +22,7 @@
 #ifndef __HERMES_COMMON_CALLSTACK_H_
 #define __HERMES_COMMON_CALLSTACK_H_
 
-#include "compat.h"
+#include "util/compat.h"
 #include "common.h"
 #ifdef WITH_STACKTRACE
   #ifdef _WINDOWS

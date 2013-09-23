@@ -16,7 +16,7 @@
 \brief Contains class Ord for calculation of integration order.
 */
 #include <complex>
-#include "compat.h"
+#include "util/compat.h"
 
 #ifndef __HERMES_COMMON_ORD_H_
 #define __HERMES_COMMON_ORD_H_

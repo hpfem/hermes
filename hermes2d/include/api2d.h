@@ -22,7 +22,7 @@
 #ifndef __HERMES_API_2D_H_
 #define __HERMES_API_2D_H_
 
-#include "compat.h"
+#include "util/compat.h"
 #include "hermes_common.h"
 #include "config.h"
 

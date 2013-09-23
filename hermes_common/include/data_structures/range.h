@@ -18,7 +18,7 @@
 #ifndef __HERMES_COMMON_RANGE_H
 #define __HERMES_COMMON_RANGE_H
 
-#include "compat.h"
+#include "util/compat.h"
 
 namespace Hermes
 {

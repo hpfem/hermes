@@ -20,6 +20,6 @@
     \brief The QuickSort routine from glibc-2.5 modified for sorting int arrays.
 */
 
-#include "compat.h"
+#include "util/compat.h"
 template<typename intType>
 HERMES_API void qsort_int(intType* pbase, size_t total_elems);

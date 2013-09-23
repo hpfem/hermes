@@ -24,9 +24,10 @@
 
 #include "precond.h"
 #include "exceptions.h"
-#include "cs_matrix.h"
-#include "vector.h"
+#include "algebra/cs_matrix.h"
+#include "algebra/vector.h"
 #include "mixins.h"
+#include "algebra/algebra_mixins.h"
 
 using namespace Hermes::Algebra;
 

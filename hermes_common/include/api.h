@@ -22,7 +22,7 @@
 #ifndef __HERMES_API_H_
 #define __HERMES_API_H_
 
-#include "compat.h"
+#include "util/compat.h"
 #include "common.h"
 
 namespace Hermes

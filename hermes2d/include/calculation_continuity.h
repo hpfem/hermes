@@ -21,7 +21,7 @@
 */
 
 #include "config.h"
-#include "compat.h"
+#include "util/compat.h"
 #include "function/solution.h"
 
 namespace Hermes
