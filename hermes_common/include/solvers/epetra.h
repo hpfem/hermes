@@ -24,7 +24,7 @@
 #include "config.h"
 #ifdef HAVE_EPETRA
 #define EPETRA_NO_64BIT_GLOBAL_INDICES
-#include "matrix.h"
+#include "algebra/matrix.h"
 #include <Epetra_SerialComm.h>
 #include <Epetra_Map.h>
 #include <Epetra_Vector.h>

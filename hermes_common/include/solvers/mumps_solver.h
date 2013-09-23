@@ -24,7 +24,7 @@
 #include "config.h"
 #ifdef WITH_MUMPS
 #include "linear_matrix_solver.h"
-#include "matrix.h"
+#include "algebra/matrix.h"
 
 extern "C"
 {

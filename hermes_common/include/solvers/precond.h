@@ -25,7 +25,7 @@
 #include "common.h"  // Also includes preprocessor definitions for the various
 // solver libraries via config.h.
 
-#include "matrix.h"
+#include "algebra/matrix.h"
 
 #ifdef HAVE_EPETRA
 #include <Epetra_Operator.h>

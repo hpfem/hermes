@@ -82,6 +82,7 @@ project(hermes_common)
     include/solvers/umfpack_solver.h
     include/solvers/precond_ml.h
     include/solvers/precond_ifpack.h
+    include/solvers/precond.h
   )
   
   SOURCE_GROUP(
@@ -137,6 +138,7 @@ project(hermes_common)
     include/solvers/umfpack_solver.h
     include/solvers/precond_ml.h
     include/solvers/precond_ifpack.h
+    include/solvers/precond.h
   )
   
   SOURCE_GROUP(

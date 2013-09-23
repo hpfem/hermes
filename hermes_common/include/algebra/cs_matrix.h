@@ -22,7 +22,7 @@
 #ifndef __HERMES_COMMON_CS_MATRIX_H
 #define __HERMES_COMMON_CS_MATRIX_H
 
-#include "matrix.h"
+#include "algebra/matrix.h"
 
 namespace Hermes
 {
