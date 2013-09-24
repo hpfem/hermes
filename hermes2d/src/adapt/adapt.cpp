@@ -239,7 +239,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *>& refinement_selectors)
+    bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors)
     {
       // Initialize.
       MeshSharedPtr meshes[H2D_MAX_COMPONENTS];

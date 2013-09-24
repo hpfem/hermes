@@ -137,7 +137,7 @@ namespace Hermes
       /**
       *  \param[in] refinement_selectors Vector of selectors.
       *  \return True if no element was refined. In usual case, this indicates that adaptivity is not able to refine anything and the adaptivity loop should end. */
-      bool adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors);
+      bool adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*> refinement_selectors);
 
       /// Refines elements based on results from the ErrorCalculator class.
       /**
