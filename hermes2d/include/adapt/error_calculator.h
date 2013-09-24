@@ -52,7 +52,7 @@ namespace Hermes
       /// Calculates the errors between coarse_solutions and fine_solutions.
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
       /// IMPORTANT: if the parameter is passed as false, this, and also any previous error calculations are lost and it is not possible to get back to them.
-      void calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& fine_solutions, bool sort_and_store = true);
+      void calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions, Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions, bool sort_and_store = true);
       
       /// Calculates the errors between coarse_solutions and fine_solutions.
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.

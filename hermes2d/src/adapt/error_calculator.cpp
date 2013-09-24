@@ -156,7 +156,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions_, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& fine_solutions_, bool sort_and_store)
+    void ErrorCalculator<Scalar>::calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions_, Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions_, bool sort_and_store)
     {
       this->coarse_solutions = coarse_solutions_;
       this->fine_solutions = fine_solutions_;
