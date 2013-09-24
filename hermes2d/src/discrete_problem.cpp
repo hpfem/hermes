@@ -71,6 +71,8 @@ namespace Hermes
       this->nonlinear = !to_set;
       if(dirichlet_lift_accordingly)
         this->add_dirichlet_lift = !this->nonlinear;
+      else
+        this->add_dirichlet_lift = this->nonlinear;
     }
 
     template<typename Scalar>
