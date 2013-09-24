@@ -16,28 +16,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file solver_newton.h
-\brief Newton's method.
+/*! \file nonlinear_convergence_measurement.h
+\brief nonlinear_convergence_measurement.
 */
 
 #include "solver/nonlinear_convergence_measurement.h"
-#include "solver/newton_solver.h"
+#include "solver/nonlinear_solver.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
     template<typename Scalar>
-    bool NonlinearConvergenceMeasurement<Scalar>::converged(NonlinearSolver<Scalar>* newton)
+    bool NonlinearConvergenceMeasurement<Scalar>::converged(NonlinearSolver<Scalar>* nonlinear_solver)
     {
       // get iteration.
-      unsigned int iteration = newton->get_current_iteration_number();
+      unsigned int iteration = nonlinear_solver->get_current_iteration_number();
       if(iteration < 2)
         return false;
 
-      const Hermes::vector<double>& residual_norms = newton->get_parameter_value(newton->residual_norms());
-      const Hermes::vector<double>& solution_norms = newton->get_parameter_value(newton->solution_norms());
-      const Hermes::vector<double>& solution_change_norms = newton->get_parameter_value(newton->solution_change_norms());
+      const Hermes::vector<double>& residual_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->residual_norms());
+      const Hermes::vector<double>& solution_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->solution_norms());
+      const Hermes::vector<double>& solution_change_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->solution_change_norms());
 
 #ifdef _DEBUG
       assert(residual_norms.size() > 1);
@@ -54,7 +54,7 @@ namespace Hermes
       double current_solution_change_norm = solution_change_norms[iteration - 2];
 
       bool converged;
-      if(newton->handleMultipleTolerancesAnd)
+      if(nonlinear_solver->handleMultipleTolerancesAnd)
         converged = true;
       else
         converged = false;
@@ -70,10 +70,10 @@ namespace Hermes
 
       for(int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
       {
-        if(!newton->tolerance_set[i])
+        if(!nonlinear_solver->tolerance_set[i])
           continue;
-        bool converged_this_tolerance = (convergence_decision_value[i] < newton->tolerance[i]);
-        if(newton->handleMultipleTolerancesAnd)
+        bool converged_this_tolerance = (convergence_decision_value[i] < nonlinear_solver->tolerance[i]);
+        if(nonlinear_solver->handleMultipleTolerancesAnd)
           converged = converged && converged_this_tolerance;
         else
           if(converged_this_tolerance)
