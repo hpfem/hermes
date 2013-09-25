@@ -51,7 +51,7 @@ namespace Hermes
       double initial_solution_norm = solution_norms[0];
       double previous_solution_norm = solution_norms[iteration - 2];
       double current_solution_norm = solution_norms[iteration - 1];
-      double current_solution_change_norm = solution_change_norms[iteration - 2];
+      double current_solution_change_norm = solution_change_norms[iteration - 1];
 
       bool converged;
       if(nonlinear_solver->handleMultipleTolerancesAnd)

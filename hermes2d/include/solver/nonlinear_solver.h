@@ -100,6 +100,9 @@ namespace Hermes
       /// solution as a correct one. If false, only one will be enough.
       void set_tolerance(double newton_tol, NonlinearConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd = false);
 
+      /// Get the number of iterations.
+      int get_num_iters() const;
+
     protected:
       /// State querying helpers.
       virtual bool isOkay() const;
@@ -152,6 +155,7 @@ namespace Hermes
       /// solution as a correct one. If false, only one will be enough.
       bool handleMultipleTolerancesAnd;
 
+      int num_iters;
 #pragma region OutputAttachable
       // For derived classes - read-only access.
       const OutputParameterDoubleVector& residual_norms() const { return this->p_residual_norms; };

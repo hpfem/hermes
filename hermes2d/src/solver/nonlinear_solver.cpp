@@ -156,6 +156,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int NonlinearSolver<Scalar>::get_num_iters() const
+    {
+      return this->num_iters;
+    }
+
+    template<typename Scalar>
     NonlinearConvergenceState NonlinearSolver<Scalar>::get_convergence_state()
     {
       double residual_norm = this->get_parameter_value(p_residual_norms).back();

@@ -81,9 +81,6 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::calculate_anderson_coeffs()
     {
-      if(Hermes::Helpers::TypeIsComplex<Scalar>::value)
-        throw Exceptions::MethodNotImplementedException("PicardSolver<Scalar>::calculate_anderson_coeffs() - complex version of ludcmp.");
-
       // If num_last_vectors_used is 2, then there is only one residual, and thus only one alpha coeff which is 1.0.
       if(num_last_vectors_used == 2)
       {
@@ -252,7 +249,7 @@ namespace Hermes
         if (vec_in_memory >= num_last_vectors_used)
         {
           // Calculate Anderson coefficients.
-          calculate_anderson_coeffs();
+          this->calculate_anderson_coeffs();
 
           // Calculate new vector and store it in this->sln_vector[].
           for (int i = 0; i < this->ndof; i++)
@@ -279,16 +276,22 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::calculate_error(Scalar* coeff_vec)
     {
-      // sln_vector stores the actual iteration.
-      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(this->sln_vector, this->ndof));
+      // This is the new sln_vector.
+      Scalar* new_sln_vector = this->matrix_solver->get_sln_vector();
+     
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(new_sln_vector, this->ndof));
 
-      // coeff_vec stores the previous iteration.
+      // sln_vector still stores the old solution.
+      // !!!! coeff_vec stores the Anderson-generated previous solution.
       double abs_error = 0.;
       for (int i = 0; i < this->ndof; i++)
-        abs_error += std::abs((this->sln_vector[i] - coeff_vec[i]) * (this->sln_vector[i] - coeff_vec[i]));
+        abs_error += std::abs((this->sln_vector[i] - new_sln_vector[i]) * (this->sln_vector[i] - new_sln_vector[i]));
       abs_error = std::sqrt(abs_error);
 
       this->get_parameter_value(this->p_solution_change_norms).push_back(abs_error);
+
+      // only now we can update the sln_vector.
+      memcpy(this->sln_vector, new_sln_vector, sizeof(Scalar)*this->ndof);
     }
 
     template<typename Scalar>
@@ -339,6 +342,9 @@ namespace Hermes
       // Calculate errors.
       this->calculate_error(coeff_vec);
 
+      // Use the solution vector for Anderson.
+      this->handle_previous_vectors(this->get_parameter_value(this->p_vec_in_memory));
+
       // Info.
       this->step_info();
 
@@ -366,10 +372,6 @@ namespace Hermes
       this->process_matrix_output(this->jacobian, this->get_current_iteration_number()); 
       this->process_vector_output(this->residual, this->get_current_iteration_number());
 
-      memcpy(this->sln_vector, this->matrix_solver->get_sln_vector(), sizeof(Scalar)*this->ndof);
-
-        // Use the solution vector for Anderson.
-      this->handle_previous_vectors(this->get_parameter_value(this->p_vec_in_memory));
       this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
     }
 
@@ -423,6 +425,9 @@ namespace Hermes
         // Calculate error.
         this->calculate_error(coeff_vec);
 
+        // Use the solution vector for Anderson.
+        this->handle_previous_vectors(this->get_parameter_value(this->p_vec_in_memory));
+
         // Output for the user.
         this->step_info();
 
@@ -450,6 +455,7 @@ namespace Hermes
     void PicardSolver<Scalar>::finalize_solving(Scalar* coeff_vec)
     {
       this->tick();
+      this->num_iters = this->get_current_iteration_number();
       this->info("\tPicard: solution duration: %f s.\n", this->last());
       this->on_finish();
       this->deinit_solving(coeff_vec);

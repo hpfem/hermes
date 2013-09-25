@@ -307,6 +307,7 @@ namespace Hermes
     {
       memcpy(this->sln_vector, coeff_vec, this->ndof * sizeof(Scalar));
       this->tick();
+      this->num_iters = this->get_current_iteration_number();
       this->info("\tNewton: solution duration: %f s.\n", this->last());
       this->on_finish();
       this->deinit_solving(coeff_vec);
