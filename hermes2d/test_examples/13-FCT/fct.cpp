@@ -303,7 +303,7 @@ void Flux_Correction::lumped_flux_limiter(CSCMatrix<double>* mass_matrix,CSCMatr
     throw Exceptions::Exception("fct-list=NULL");
   int ndof = mass_matrix->get_size();
   double* rhs = new double[ndof];
-  lumped_matrix->multiply_with_vector(u_L, rhs); 
+  lumped_matrix->multiply_with_vector(u_L, rhs, true); 
 
   double alpha,f, plus, minus,mass;
 

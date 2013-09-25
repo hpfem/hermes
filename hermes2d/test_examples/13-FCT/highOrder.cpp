@@ -45,7 +45,7 @@ double* High_Order::solve_High_Order(double* u_n)
   SimpleVector<double> * vec_rhs = new SimpleVector<double> (ndof);	
 
   //----------vec_rhs = (M\tau + (1-theta) K) u_n  --------
-  highmat_rhs->multiply_with_vector(u_n, coeff_vec_2); 
+  highmat_rhs->multiply_with_vector(u_n, coeff_vec_2, true); 
   vec_rhs->add_vector(coeff_vec_2);
 
   //// Solve the linear system and if successful, obtain the solution.   (M\tau -theta K) u_H   = vec_rhs

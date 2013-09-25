@@ -60,7 +60,7 @@ double* Low_Order::solve_Low_Order(CSCMatrix<double> * lumped_matrix, double* u_
 			
 						lumped_matrix->multiply_with_Scalar(1./time_step); //M_L/tau
 				//----------vec_rhs = (M_L/tau - theta (K+D)) u_n  --------
-			lowmat_rhs->multiply_with_vector(u_n, rhs); 
+			lowmat_rhs->multiply_with_vector(u_n, rhs, true); 
 			 vec_rhs->add_vector(rhs);
 			 
 // Solve the linear system and if successful, obtain the solution. M_L/tau u^L=  M_L/tau+ (1-theta)(K+D) u^n
