@@ -21,7 +21,7 @@
 */
 
 #include "solver/nonlinear_convergence_measurement.h"
-#include "solver/nonlinear_solver.h"
+#include "solver/newton_solver.h"
 
 namespace Hermes
 {
@@ -51,7 +51,8 @@ namespace Hermes
       double initial_solution_norm = solution_norms[0];
       double previous_solution_norm = solution_norms[iteration - 2];
       double current_solution_norm = solution_norms[iteration - 1];
-      double current_solution_change_norm = solution_change_norms[iteration - 1];
+      bool newton = (dynamic_cast<NewtonSolver<Scalar>*>(nonlinear_solver) != NULL);
+      double current_solution_change_norm = solution_change_norms[newton ? iteration - 2 : iteration - 1];
 
       bool converged;
       if(nonlinear_solver->handleMultipleTolerancesAnd)
