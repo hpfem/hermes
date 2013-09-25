@@ -334,16 +334,12 @@ namespace Hermes
     {
       if(!vector_out_initialized)
         vector_out = new Scalar[this->size];
-
       memset(vector_out, 0, sizeof(Scalar) * this->size);
-
-      int num_threads_used = HermesCommonApi.get_integral_param_value(numThreads);
-
       {
         for(int i = 0; i < this->size; i++)
         {
-          for(int j = 0; j < Ap[i + 1] - Ap[i]; j++)
-           vector_out[Ai[Ap[i] + j]] += Ax[Ap[i] + j] * vector_in[i];
+          for(int j = 0; j < this->Ap[i + 1] - this->Ap[i]; j++)
+           vector_out[this->Ai[this->Ap[i] + j]] += this->Ax[this->Ap[i] + j] * vector_in[i];
         }
       }
     }
