@@ -329,6 +329,25 @@ namespace Hermes
       return CSMatrix<Scalar>::get(m, n);
     }
 
+    template<typename Scalar>
+    void CSCMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar*& vector_out, bool vector_out_initialized) const
+    {
+      if(!vector_out_initialized)
+        vector_out = new Scalar[this->size];
+
+      memset(vector_out, 0, sizeof(Scalar) * this->size);
+
+      int num_threads_used = HermesCommonApi.get_integral_param_value(numThreads);
+
+      {
+        for(int i = 0; i < this->size; i++)
+        {
+          for(int j = 0; j < Ap[i + 1] - Ap[i]; j++)
+           vector_out[Ai[Ap[i] + j]] += Ax[Ap[i] + j] * vector_in[i];
+        }
+      }
+    }
+
     static int i_coordinate(int i, int j, bool invert)
     {
       if(invert)
