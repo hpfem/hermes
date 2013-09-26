@@ -23,7 +23,6 @@
 #include "exceptions.h"
 #include "api2d.h"
 #include <xercesc/util/PlatformUtils.hpp>
-
 using namespace xercesc;
 
 namespace Hermes
