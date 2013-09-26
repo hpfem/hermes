@@ -105,7 +105,6 @@ namespace Hermes
       LoopSolver<Scalar>* as_LoopSolver() const;
       IterSolver<Scalar>* as_IterSolver() const;
       AMGSolver<Scalar>* as_AMGSolver() const;
-
       virtual ~LinearMatrixSolver();
 
       /// Solve.
