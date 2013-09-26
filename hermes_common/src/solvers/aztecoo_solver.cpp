@@ -498,7 +498,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double AztecOOSolver<Scalar>::get_residual()
+    double AztecOOSolver<Scalar>::get_residual_norm()
     {
       return aztec.TrueResidual();
     }

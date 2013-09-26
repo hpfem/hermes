@@ -227,6 +227,7 @@ namespace Hermes
         this->paralutionSolver->MoveToAccelerator();
         this->matrix->get_paralutionMatrix().MoveToAccelerator();
         this->rhs->get_paralutionVector()->MoveToAccelerator();
+        x.MoveToAccelerator();
       }
 
       // Solve.
@@ -261,21 +262,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double AbstractParalutionLinearMatrixSolver<Scalar>::get_residual()
+    double AbstractParalutionLinearMatrixSolver<Scalar>::get_residual_norm()
     {
       return final_residual;
     }
 
-
-    
     template<typename Scalar>
-    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver() : AbstractParalutionLinearMatrixSolver<Scalar>(), IterSolver<Scalar>(), preconditioner(NULL), iterSolverType(CG)
+    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver() : AbstractParalutionLinearMatrixSolver<Scalar>(), IterSolver<Scalar>(), preconditioner(NULL)
     {
       this->set_precond(new Preconditioners::ParalutionPrecond<Scalar>(ILU));
     }
 
     template<typename Scalar>
-    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : AbstractParalutionLinearMatrixSolver<Scalar>(matrix, rhs), IterSolver<Scalar>(), preconditioner(NULL), iterSolverType(CG)
+    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : AbstractParalutionLinearMatrixSolver<Scalar>(matrix, rhs), IterSolver<Scalar>(), preconditioner(NULL)
     {
       this->set_precond(new Preconditioners::ParalutionPrecond<Scalar>(ILU));
     }
@@ -290,7 +289,7 @@ namespace Hermes
     template<typename Scalar>
     void IterativeParalutionLinearMatrixSolver<Scalar>::set_solver_type(IterSolverType iterSolverType)
     {
-      this->iterSolverType = iterSolverType;
+      IterSolver<double>::set_solver_type(iterSolverType);
       this->reset_internal_solver();
     }
 
@@ -353,26 +352,18 @@ namespace Hermes
     template<typename Scalar>
     AMGParalutionLinearMatrixSolver<Scalar>::AMGParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : AbstractParalutionLinearMatrixSolver<Scalar>(matrix, rhs), AMGSolver<Scalar>()
     {
-      this->smootherSolverType = CG;
-      this->smootherPreconditionerType = MultiColoredSGS;
+    }
+
+    template<typename Scalar>
+    void AMGParalutionLinearMatrixSolver<Scalar>::set_smoother(IterSolverType solverType_, PreconditionerType preconditionerType_)
+    {
+      AMGSolver<double>::set_smoother(solverType_, preconditionerType_);
     }
 
     template<typename Scalar>
     AMGParalutionLinearMatrixSolver<Scalar>::~AMGParalutionLinearMatrixSolver()
     {
     }
-
-    /*
-    template<typename Scalar>
-    void AMGParalutionLinearMatrixSolver<Scalar>::solve()
-    {
-      if(this->sln)
-        delete [] this->sln;
-      this->sln = new Scalar[this->get_matrix_size()];
-      memset(this->sln, Scalar(0), this->get_matrix_size() * sizeof(Scalar));
-      this->solve(this->sln);
-    }
-    */
 
     template<typename Scalar>
     void AMGParalutionLinearMatrixSolver<Scalar>::init_internal_solver()
@@ -397,22 +388,18 @@ namespace Hermes
           preconditioners[i] = ParalutionPrecond<Scalar>::return_paralutionPreconditioner(this->smootherPreconditionerType);
 
           smoothers[i]->SetPreconditioner(*preconditioners[i]);
-          smoothers[i]->Verbose(0);
+          if(this->get_verbose_output())
+            smoothers[i]->Verbose(10);
+          else
+            smoothers[i]->Verbose(0);
         }
 
         AMG_solver->SetSmoother(smoothers);
-        AMG_solver->SetSmootherPreIter(1);
-        AMG_solver->SetSmootherPostIter(2);
+        AMG_solver->SetSmootherPreIter(3);
+        AMG_solver->SetSmootherPostIter(3);
 
         AMG_solver->Build();
       }
-    }
-
-    template<typename Scalar>
-    void AMGParalutionLinearMatrixSolver<Scalar>::set_smoother(IterSolverType solverType_, PreconditionerType preconditionerType_)
-    {
-      this->smootherPreconditionerType = preconditionerType_;
-      this->smootherSolverType = solverType_;
     }
 
     template class HERMES_API IterativeParalutionLinearMatrixSolver<double>;

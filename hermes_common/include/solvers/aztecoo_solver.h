@@ -74,7 +74,7 @@ namespace Hermes
       virtual int get_matrix_size();
 
       virtual int get_num_iters();
-      virtual double get_residual();
+      virtual double get_residual_norm();
 
       /// Option setting function
       void set_option(int option, int value);
