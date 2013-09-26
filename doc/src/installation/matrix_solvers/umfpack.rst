@@ -2,8 +2,6 @@ UMFpack
 -------
 
 .. _UMFPack home page: http://www.cise.ufl.edu/research/sparse/umfpack/
-.. _solvers repository: https://github.com/hpfem/solvers
-.. _manual: https://github.com/hpfem/solvers/raw/master/manuals/UMF-UserGuide.pdf
 
 Linux
 ~~~~~
@@ -43,7 +41,6 @@ http://mywiki-science.wikispaces.com/UMFPACK
 Using UMFPACK in Hermes
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-After the installation has been completed, you may select ``SOLVER_UMFPACK`` as the matrix solver for your finite element problem,
-as detailed in the `Poisson tutorial <http://http://hpfem.org/hermes/doc/src/hermes2d/P01-linear/03-poisson.html>`__, or use
-it just to solve a standalone matrix problem :math:`Ax = b` as in the 
-`Using Matrix Solvers tutorial <http://http://hpfem.org/hermes/doc/src/hermes2d/P08-miscellaneous/35-matrix-solvers.html>`__.
+After the installation has been completed, you may select ``SOLVER_UMFPACK`` as the matrix solver for your finite element problems::
+
+  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_UMFPACK);
