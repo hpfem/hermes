@@ -186,10 +186,10 @@ namespace Hermes
         paralutionSolver->InitTol(this->tolerance, 0., std::numeric_limits<Scalar>::max());
         break;
       case RelativeTolerance:
-        paralutionSolver->InitTol(std::numeric_limits<Scalar>::max(), this->tolerance, std::numeric_limits<Scalar>::max());
+        paralutionSolver->InitTol(0., this->tolerance, std::numeric_limits<Scalar>::max());
         break;
       case DivergenceTolerance:
-        paralutionSolver->InitTol(std::numeric_limits<Scalar>::max(), 0., this->tolerance);
+        paralutionSolver->InitTol(0., 0., this->tolerance);
         break;
       }
 
