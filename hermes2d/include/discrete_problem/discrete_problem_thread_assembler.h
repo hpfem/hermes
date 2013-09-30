@@ -84,8 +84,8 @@ namespace Hermes
       Func<Scalar>** init_u_ext_values(int order);
       void deinit_u_ext_values(Func<Scalar>** u_ext_func);
 
-      Func<Scalar>** init_ext_values(int order, Func<Scalar>** u_ext_func_for_RungeKutta);
-      void deinit_ext_values(Func<Scalar>** ext_func);
+      Func<Scalar>** init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, int order, Func<Scalar>** u_ext_func);
+      void deinit_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Func<Scalar>** ext_func);
 
       PrecalcShapeset** pss;
       RefMap** refmaps;

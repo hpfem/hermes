@@ -248,6 +248,39 @@ namespace Hermes
 
       MeshFunction<double>* clone() const;
     };
+
+    /// @ingroup meshFunctions
+    /// Function operating on previous nonlinear solutions in assembling (u_ext)
+    template<typename Scalar>
+    class HERMES_API UExtFunction : public MeshFunction<Scalar>
+    {
+    protected:
+      /// \param[in] polynomialOrder The polynomial order used for the space where the solution of the
+      /// internal Laplace equation is sought.
+      UExtFunction(MeshSharedPtr mesh);
+      virtual ~UExtFunction() {};
+
+      /// Function returning the value.
+#ifndef H2D_USE_SECOND_DERIVATIVES
+      virtual void value (Scalar* values, Scalar* dx, Scalar* dy, Scalar result[3]) const = 0;
+      virtual void ord(Hermes::Ord* values, Hermes::Ord* dx, Hermes::Ord* dy, Hermes::Ord result[3]) const = 0;
+#else
+      virtual Scalar value (Scalar* values, Scalar* dx, Scalar* dy, Scalar* dxx, Scalar* dxy, Scalar* dyy, Scalar result[6]) const = 0;
+      virtual Hermes::Ord ord(Hermes::Ord* values, Hermes::Ord* dx, Hermes::Ord* dy, Hermes::Ord* dxx, Hermes::Ord* dxy, Hermes::Ord* dyy, Hermes::Ord result[6]) const = 0;
+#endif
+
+      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = NULL)
+      {
+        throw Exceptions::Exception("UExtFunction is only usable in assembling, not for getting point values.");
+        return NULL;
+      }
+
+      virtual void precalculate(int order, int mask) {};
+
+      MeshFunction<Scalar>* clone() const = 0;
+
+      template<typename Scalar> friend Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order);
+    };
   }
 }
 #endif

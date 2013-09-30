@@ -21,7 +21,7 @@
 #include "global.h"
 #include "quadrature/quad.h"
 #include "function/function.h"
-#include "function/solution.h"
+#include "function/exact_solution.h"
 #include "mesh/refmap.h"
 #include "mesh/traverse.h"
 #include <complex>
@@ -227,6 +227,9 @@ namespace Hermes
     /// Init the solution for the evaluation of the volumetric/surface integral.
     template<typename Scalar>
     HERMES_API Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order);
+
+    template<typename Scalar>
+    HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order);
   }
 }
 #endif

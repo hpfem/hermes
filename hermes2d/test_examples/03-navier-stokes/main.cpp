@@ -92,6 +92,9 @@ int main(int argc, char* argv[])
   MeshReaderH2D mloader;
   mloader.load("domain.mesh", mesh);
 
+  MeshFunctionSharedPtr<double> fn_0(new CustomUExtFunction(mesh, 0));
+  MeshFunctionSharedPtr<double> fn_1(new CustomUExtFunction(mesh, 1));
+
   // Initial mesh refinements.
   mesh->refine_towards_boundary(BDY_OBSTACLE, 2, false);
   mesh->refine_towards_boundary(BDY_TOP, 2, true);     // '4' is the number of levels,
@@ -134,7 +137,7 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   WeakFormNSNewton wf(STOKES, RE, TAU, xvel_prev_time, yvel_prev_time);
 
-  wf.set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time));
+  wf.set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time, fn_0, fn_1));
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;

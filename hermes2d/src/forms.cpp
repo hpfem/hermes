@@ -687,7 +687,7 @@ namespace Hermes
       }
       return u;
     }
-
+    
     template<typename Scalar>
     Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order)
     {
@@ -760,11 +760,96 @@ namespace Hermes
       return u;
     }
 
+    template<typename Scalar>
+    Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order)
+    {
+      int nc = fu->get_num_components();
+      Quad2D* quad = fu->get_quad_2d();
+
+      double3* pt = quad->get_points(order, fu->get_active_element()->get_mode());
+      int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
+      Func<Scalar>* u = new Func<Scalar>(np, nc);
+
+      // Sanity checks.
+      if(fu == NULL)
+        throw Hermes::Exceptions::Exception("NULL MeshFunction in Func<Scalar>*::init_fn().");
+      if(fu->get_mesh() == NULL)
+        throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
+
+      if(u->nc == 1)
+      {
+        u->val = new Scalar[np];
+        u->dx  = new Scalar[np];
+        u->dy  = new Scalar[np];
+
+        Scalar* u_ext_val = new Scalar[u_ext_size];
+        Scalar* u_ext_dx = new Scalar[u_ext_size];
+        Scalar* u_ext_dy = new Scalar[u_ext_size];
+
+#ifndef H2D_USE_SECOND_DERIVATIVES
+
+        for(unsigned int i = 0; i < np; i++)
+        {
+          // Prepare
+          for(unsigned int u_ext_i = 0; u_ext_i < u_ext_size; u_ext_i++)
+          {
+            u_ext_val[u_ext_i] = u_ext[u_ext_i]->val[i];
+            u_ext_dx[u_ext_i] = u_ext[u_ext_i]->dx[i];
+            u_ext_dy[u_ext_i] = u_ext[u_ext_i]->dy[i];
+          }
+
+          // Calc
+          Scalar val[3];
+          fu->value(u_ext_val, u_ext_dx, u_ext_dy, val);
+
+          // Copy
+          u->val[i] = val[0];
+          u->dx[i] = val[1];
+          u->dy[i] = val[2];
+        }
+
+#else
+        u->laplace = new Scalar[np];
+
+        for(unsigned int i = 0; i < np; i++)
+        {
+          // Prepare
+          for(unsigned int u_ext_i = 0; u_ext_i < u_ext_size; u_ext_i++)
+          {
+            u_ext_val[u_ext_i] = u_ext[u_ext_i]->val[i];
+            u_ext_dx[u_ext_i] = u_ext[u_ext_i]->dx[i];
+            u_ext_dy[u_ext_i] = u_ext[u_ext_i]->dy[i];
+            u_ext_dxx[u_ext_i] = u_ext[u_ext_i]->dxx[i];
+            u_ext_dxy[u_ext_i] = u_ext[u_ext_i]->dxy[i];
+            u_ext_dyy[u_ext_i] = u_ext[u_ext_i]->dyy[i];
+          }
+
+          // Calc
+          Scalar[6] val;
+          fu->value(u_ext_val, u_ext_dx, u_ext_dy, u_ext_exx, u_ext_dxy, u_ext_dyy, val);
+
+          // Copy
+          u->val[i] = val[0];
+          u->dx[i] = val[1];
+          u->dy[i] = val[2];
+          u->laplace[i] = val[3] + val[5];
+        }
+#endif
+      }
+      else
+        throw Hermes::Exceptions::MethodNotImplementedException("init_fn(UExtFunction<Scalar>* fu, const int order) - nc == 2");
+
+      return u;
+    }
+
     template HERMES_API Func<double>* init_fn(MeshFunction<double>* fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(MeshFunction<std::complex<double> >* fu, const int order);
 
     template HERMES_API Func<double>* init_fn(Solution<double>* fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(Solution<std::complex<double> >* fu, const int order);
+
+    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** u_ext, int u_ext_size, const int order);
+    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** u_ext, int u_ext_size, const int order);
 
     template class HERMES_API Func<Hermes::Ord>;
     template class HERMES_API Func<double>;

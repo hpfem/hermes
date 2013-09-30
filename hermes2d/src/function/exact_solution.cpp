@@ -579,6 +579,13 @@ namespace Hermes
       return sln;
     }
 
+    template<typename Scalar>
+    UExtFunction<Scalar>::UExtFunction(MeshSharedPtr mesh) : MeshFunction<Scalar>(mesh)
+    {
+      this->num_components = 1;
+      this->set_quad_2d(&g_quad_2d_std);
+    }
+
     template HERMES_API class ExactSolutionScalar<double>;
     template HERMES_API class ExactSolutionScalar<std::complex<double> >;
 
@@ -598,5 +605,8 @@ namespace Hermes
     template HERMES_API class ZeroSolution<std::complex<double> >;
     template HERMES_API class ZeroSolutionVector<double>;
     template HERMES_API class ZeroSolutionVector<std::complex<double> >;
+
+    template HERMES_API class UExtFunction<double>;
+    template HERMES_API class UExtFunction<std::complex<double> >;
   }
 }
