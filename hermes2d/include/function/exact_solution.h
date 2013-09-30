@@ -254,7 +254,7 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API UExtFunction : public MeshFunction<Scalar>
     {
-    protected:
+    public:
       /// \param[in] polynomialOrder The polynomial order used for the space where the solution of the
       /// internal Laplace equation is sought.
       UExtFunction(MeshSharedPtr mesh);
