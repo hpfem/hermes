@@ -156,12 +156,6 @@ namespace Hermes
       DiscreteProblemCacheSettings::set_report_cache_hits_and_misses(to_set);
       this->dp->set_report_cache_hits_and_misses(to_set);
     }
-      
-    template<typename Scalar>
-    void Solver<Scalar>::keep_element_values(int marker, typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side)
-    {
-      this->dp->selectiveAssembler.state_reuse_kept[dimension][equation_side][marker] = true;
-    }
 
     template<typename Scalar>
     bool Solver<Scalar>::isOkay() const

@@ -28,14 +28,6 @@ namespace Hermes
       matrix_structure_reusable(false), 
       vector_structure_reusable(false)
     {
-      for(int i = 0; i < 2; i++)
-      {
-        for(int j = 0; j < 2; j++)
-        {
-          state_reuse_kept[i][j] = NULL;
-					markers_size[i][j] = 0;
-        }
-      }
     }
 
     template<typename Scalar>
@@ -43,15 +35,6 @@ namespace Hermes
     {
       if(sp_seq)
         delete [] sp_seq;
-
-      for(int i = 0; i < 2; i++)
-      {
-        for(int j = 0; j < 2; j++)
-        {
-          if(state_reuse_kept[i][j])
-            ::free(state_reuse_kept[i][j]);
-        }
-      }
     }
 
     template<typename Scalar>
@@ -60,55 +43,7 @@ namespace Hermes
       int ndof = Space<Scalar>::get_num_dofs(spaces);
 
       if(matrix_structure_reusable && mat)
-      {
-        Traverse::State** recalculated_states = (Traverse::State**)malloc(sizeof(Traverse::State*) * num_states);
-        int num_recalculated_states = 0;
-      
-        // First check if any marker is reused.
-        bool markers_to_reuse = false;
-        for(int i = 0; i < this->markers_size[WeakForm<Scalar>::FormVol][WeakForm<Scalar>::MatrixForm]; i++)
-          if(this->state_reuse_kept[WeakForm<Scalar>::FormVol][WeakForm<Scalar>::MatrixForm][i])
-            markers_to_reuse = true;
-
-        // Just zero the matrix if nothing can be reused.
-        // Or if we also have to assemble the right-hand-side, we can not change the states.
-        if(!markers_to_reuse || rhs)
-          mat->zero();
-        else
-        {
-          for(int state_i = 0; state_i < num_states; state_i++)
-          {
-            Traverse::State* current_state = states[state_i];
-            int marker = current_state->rep->marker;
-
-            if(this->state_reuse_kept[WeakForm<Scalar>::FormVol][WeakForm<Scalar>::MatrixForm][marker])
-              delete current_state;
-            else
-            {
-              recalculated_states[num_recalculated_states++] = current_state;
-
-              for (unsigned int m = 0; m < spaces_size; m++)
-              {
-                if(current_state->e[m])
-                {
-                  AsmList<Scalar> am;
-                  spaces[m]->get_element_assembly_list(current_state->e[m], &am);
-
-                  // Pretend assembling of the element stiffness matrix.
-                  for (unsigned int i = 0; i < am.cnt; i++)
-                    mat->set_row_zero(am.dof[i]);
-                }
-              } 
-            }
-          }
-        
-          free(states);
-          states = recalculated_states;
-          num_states = num_recalculated_states;
-          if(!num_states)
-            return false;
-        }
-      }
+        mat->zero();
 
       if(vector_structure_reusable && rhs)
       {
@@ -292,33 +227,6 @@ namespace Hermes
           sp_seq[i] = new_sp_seq;
         }
       }
-
-      int volume_markers_count = spacesToSet[0]->get_mesh()->get_element_markers_conversion().size();
-      int surface_markers_count = spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().size();
-
-      this->alloc_recalculation_tables_spaces_settings(WeakForm<Scalar>::FormVol, WeakForm<Scalar>::MatrixForm, volume_markers_count);
-      this->alloc_recalculation_tables_spaces_settings(WeakForm<Scalar>::FormVol, WeakForm<Scalar>::VectorForm, volume_markers_count);
-
-      this->alloc_recalculation_tables_spaces_settings(WeakForm<Scalar>::FormSurf, WeakForm<Scalar>::MatrixForm, surface_markers_count);
-      this->alloc_recalculation_tables_spaces_settings(WeakForm<Scalar>::FormSurf, WeakForm<Scalar>::VectorForm, surface_markers_count);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblemSelectiveAssembler<Scalar>::alloc_recalculation_tables_spaces_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side, int new_markers_count)
-    {
-      if(new_markers_count != this->markers_size[dimension][equation_side])
-      {
-        markers_size[dimension][equation_side] = new_markers_count;
-
-        if(this->state_reuse_kept[dimension][equation_side])
-          free(this->state_reuse_kept[dimension][equation_side]);
-        
-        this->state_reuse_kept[dimension][equation_side] = (bool*)calloc(markers_size[dimension][equation_side], sizeof(bool));
-      }
-      else
-      {
-        memset(this->state_reuse_kept[dimension][equation_side], 0, markers_size[dimension][equation_side] * sizeof(bool));
-      }
     }
 
     template<typename Scalar>
@@ -331,19 +239,6 @@ namespace Hermes
 
       if(spaces_size == 0)
         return;
-
-      this->alloc_recalculation_tables_weakform_settings(WeakForm<Scalar>::FormVol, WeakForm<Scalar>::MatrixForm);
-      this->alloc_recalculation_tables_weakform_settings(WeakForm<Scalar>::FormVol, WeakForm<Scalar>::VectorForm);
-
-      this->alloc_recalculation_tables_weakform_settings(WeakForm<Scalar>::FormSurf, WeakForm<Scalar>::MatrixForm);
-      this->alloc_recalculation_tables_weakform_settings(WeakForm<Scalar>::FormSurf, WeakForm<Scalar>::VectorForm);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblemSelectiveAssembler<Scalar>::alloc_recalculation_tables_weakform_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side)
-    {
-      if(this->state_reuse_kept[dimension][equation_side])
-        memset(this->state_reuse_kept[dimension][equation_side], 0, markers_size[dimension][equation_side] * sizeof(bool));
     }
 
     template<typename Scalar>

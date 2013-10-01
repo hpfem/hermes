@@ -68,16 +68,6 @@ namespace Hermes
       /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
       virtual void solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess);
 
-      /// Experimental
-      /// \todo delete this?
-      /// Method setting that the element values on an internal marker will be kept if reusable from a previous solution.
-      /// IMPORTANT: so far this method is implemented (works) only on the matrix and volumetric markers.
-      /// It is for a discussion if anything else is needed.
-      /// \param[in] marker The INTERNAL marker specifying the elements where matrix-vector entries will be reused.
-      /// \param[in] dimension Specifying either surface (1d), or volumetric (2d) integrals, thus determining the meaning of marker.
-      /// \param[in] equation_side Specifying either matrix or right-hand side.
-      void keep_element_values(int marker, typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side);
-
       /// See DiscreteProblemCacheSettings in mixins2d.h for details.
       virtual void free_cache();
 

@@ -79,18 +79,11 @@ namespace Hermes
       bool form_to_be_assembled(VectorFormDG<Scalar>* form, Traverse::State* current_state);
 
     protected:
-      /// Recalculation storages.
-      bool* state_reuse_kept[2][2];
-      int markers_size[2][2];
-
       /// Spaces.
       int spaces_size;
 
       /// Seq numbers of Space instances in spaces.
       int* sp_seq;
-
-      void alloc_recalculation_tables_weakform_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side);
-      void alloc_recalculation_tables_spaces_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side, int new_markers_count);
 
       /// Matrix structure can be reused.
       /// If other conditions apply.
