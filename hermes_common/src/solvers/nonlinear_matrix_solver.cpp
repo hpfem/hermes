@@ -63,6 +63,7 @@ namespace Hermes
         throw Exceptions::Exception("No tolerance set in NonlinearMatrixSolver.");
         return false;
       }
+      return true;
     }
 
     template<typename Scalar>
