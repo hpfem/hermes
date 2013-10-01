@@ -85,20 +85,18 @@ namespace Hermes
       /// Basic solve method - in linear solvers it serves only as an initial guess for iterative solvers.
       /// \param[in] coeff_vec initiall guess.
       virtual void solve(Scalar* coeff_vec);
+      
+      /// DiscreteProblemWeakForm helper.
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+
+      /// DiscreteProblemWeakForm helper.
+      virtual void set_weak_formulation(WeakForm<Scalar>* wf);
 
       void assemble_residual(Scalar* coeff_vec);
       void assemble_jacobian(Scalar* coeff_vec);
       void assemble(Scalar* coeff_vec);
-      int get_dimension();
 
-      Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_solver();
-
-      /// \return Whether or not should the processing continue.
-      virtual void on_damping_factor_updated();
-      /// \return Whether or not should the processing continue.
-      virtual void on_reused_jacobian_step_begin();
-      /// \return Whether or not should the processing continue.
-      virtual void on_reused_jacobian_step_end();
+      int get_problem_size();
 
       /// State querying helpers.
       virtual bool isOkay() const;
@@ -109,6 +107,13 @@ namespace Hermes
       virtual bool on_initialization();
 
       virtual bool on_initial_step_end();
+
+      /// \return Whether or not should the processing continue.
+      virtual void on_damping_factor_updated();
+      /// \return Whether or not should the processing continue.
+      virtual void on_reused_jacobian_step_begin();
+      /// \return Whether or not should the processing continue.
+      virtual void on_reused_jacobian_step_end();
     };
   }
 }

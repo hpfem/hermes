@@ -60,7 +60,7 @@ namespace Hermes
     ///&nbsp;return -1;<br>
     /// }<br>
     template <typename Scalar>
-    class LinearSolver : public Solver<Scalar>
+    class LinearSolver : public Solver<Scalar>, public Hermes::Solvers::MatrixSolver<Scalar>
     {
     public:
       LinearSolver(bool force_use_direct_solver = false);
@@ -76,21 +76,18 @@ namespace Hermes
       /// \param[in] coeff_vec initiall guess.
       virtual void solve(Scalar* coeff_vec);
 
-      /// Handle the jacobian re-calculation and re-usage of a previous one.
-      void conditionally_assemble(Scalar* coeff_vec = NULL, bool force_reuse_jacobian_values = false, bool assemble_residual = true);
-      
-      /// Get the Linear solver (thus influence its behavior).
-      Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_solver();
-      SparseMatrix<Scalar>* get_jacobian();
-      Vector<Scalar>* get_residual();
+     /// DiscreteProblemWeakForm helper.
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+
+      /// DiscreteProblemWeakForm helper.
+      virtual void set_weak_formulation(WeakForm<Scalar>* wf);
+
+      int get_problem_size();
 
     protected:
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "LinearSolver"; }
-
-      /// Linear solver.
-      Hermes::Solvers::LinearMatrixSolver<Scalar>* matrix_solver;
       
       void init_linear(bool force_use_direct_solver);
     };

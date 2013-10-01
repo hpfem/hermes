@@ -29,7 +29,7 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    NonlinearMatrixSolver<Scalar>::NonlinearMatrixSolver()
+    NonlinearMatrixSolver<Scalar>::NonlinearMatrixSolver() : MatrixSolver<Scalar>()
     {
       this->init_nonlinear();
     }
@@ -40,13 +40,15 @@ namespace Hermes
       this->handleMultipleTolerancesAnd = false;
       this->max_allowed_iterations = 20;
       this->max_allowed_residual_norm = 1E9;
+      this->num_iters = 0;
+      this->delete_coeff_vec = false;
+
       this->clear_tolerances();
     }
 
     template<typename Scalar>
     NonlinearMatrixSolver<Scalar>::~NonlinearMatrixSolver()
     {
-      delete matrix_solver;
     }
 
     template<typename Scalar>
@@ -69,18 +71,6 @@ namespace Hermes
       if(max_allowed_iterations_ < 1)
         throw Exceptions::ValueException("max_allowed_iterations", max_allowed_iterations_, 1);
       this->max_allowed_iterations = max_allowed_iterations_;
-    }
-
-    template<typename Scalar>
-    SparseMatrix<Scalar>* NonlinearMatrixSolver<Scalar>::get_jacobian()
-    {
-      return this->matrix_solver->get_matrix();
-    }
-
-    template<typename Scalar>
-    Vector<Scalar>* NonlinearMatrixSolver<Scalar>::get_residual()
-    {
-      return this->matrix_solver->get_rhs();
     }
 
     template<typename Scalar>
@@ -185,63 +175,6 @@ namespace Hermes
       for(int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
         this->tolerance[i] = std::numeric_limits<double>::max();
       memset(this->tolerance_set, 0, sizeof(bool)*NonlinearConvergenceMeasurementTypeCount);
-    }
-
-    template<typename Scalar>
-    void NonlinearMatrixSolver<Scalar>::set_iterative_method(const char* iterative_method_name)
-    {
-#ifdef HAVE_AZTECOO
-      if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType) != SOLVER_AZTECOO)
-      {
-        this->warn("Trying to set iterative method for a different solver than AztecOO.");
-        return;
-      }
-      else
-      {
-        this->iterative_method = (char*)iterative_method_name;
-        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(iterative_method_name);
-      }
-#else
-      this->warn("Trying to set iterative method without AztecOO present.");
-#endif
-    }
-
-    template<typename Scalar>
-    void NonlinearMatrixSolver<Scalar>::set_preconditioner(const char* preconditioner_name)
-    {
-#ifdef HAVE_AZTECOO
-      if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType) != SOLVER_AZTECOO)
-      {
-        this->warn("Trying to set iterative method for a different solver than AztecOO.");
-        return;
-      }
-      else
-      {
-        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(linear_solver)->set_precond(preconditioner_name);
-        this->preconditioner = (char*)preconditioner_name;
-      }
-#else
-      this->warn("Trying to set iterative method without AztecOO present.");
-#endif
-    }
-
-    template<typename Scalar>
-    void NonlinearMatrixSolver<Scalar>::set_preconditioner(Hermes::Preconditioners::Precond<Scalar>* pc)
-    {
-#ifdef HAVE_AZTECOO
-      if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType) != SOLVER_AZTECOO)
-      {
-        this->warn("Trying to set iterative method for a different solver than AztecOO.");
-        return;
-      }
-      else
-      {
-        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(this->matrix_solver)->set_precond(pc);
-        this->preconditioner = "Hermes::Preconditioners::Precond";
-      }
-#else
-      this->warn("Trying to set iterative method without AztecOO present.");
-#endif
     }
 
     template class HERMES_API NonlinearMatrixSolver<double>;

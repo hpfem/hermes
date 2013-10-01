@@ -36,6 +36,7 @@ project(hermes_common)
     src/util/c99_functions.cpp
     src/data_structures/range.cpp
     src/data_structures/table.cpp
+    src/solvers/matrix_solver.cpp
     src/solvers/linear_matrix_solver.cpp
     src/solvers/nonlinear_matrix_solver.cpp
     src/solvers/picard_matrix_solver.cpp
@@ -76,6 +77,7 @@ project(hermes_common)
     include/data_structures/range.h
     include/data_structures/table.h
     include/data_structures/hermes_vector.h
+    include/solvers/matrix_solver.h
     include/solvers/linear_matrix_solver.h
     include/solvers/nonlinear_matrix_solver.h
     include/solvers/picard_matrix_solver.h
@@ -96,6 +98,7 @@ project(hermes_common)
   
   SOURCE_GROUP(
     "Source Files\\Matrix Solvers" FILES 
+    src/solvers/matrix_solver.cpp
     src/solvers/linear_matrix_solver.cpp
     src/solvers/nonlinear_matrix_solver.cpp
     src/solvers/nonlinear_convergence_measurement.cpp
@@ -144,6 +147,7 @@ project(hermes_common)
   
   SOURCE_GROUP(
     "Header Files\\Matrix Solvers" FILES 
+    include/solvers/matrix_solver.h
     include/solvers/linear_matrix_solver.h
     include/solvers/nonlinear_matrix_solver.h
     include/solvers/picard_matrix_solver.h

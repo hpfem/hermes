@@ -36,19 +36,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(DiscreteProblem<Scalar>* dp, bool force_use_direct_solver) : dp(dp), own_dp(false)
+    Solver<Scalar>::Solver(DiscreteProblem<Scalar>* dp, bool force_use_direct_solver) :  dp(dp), own_dp(false)
     {
       this->init(force_use_direct_solver);
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver) : dp(new DiscreteProblem<Scalar>(wf, space)), own_dp(true)
+    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver) :  dp(new DiscreteProblem<Scalar>(wf, space)), own_dp(true)
     {
       this->init(force_use_direct_solver);
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver) : dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
+    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver) :  dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
     {
       this->init(force_use_direct_solver);
     }
@@ -68,15 +68,6 @@ namespace Hermes
     template<typename Scalar>
     void Solver<Scalar>::init(bool force_use_direct_solver)
     {
-      this->set_verbose_output(true);
-      this->sln_vector = NULL;
-
-      this->jacobian_reusable = false;
-      this->constant_jacobian = false;
-
-      this->do_UMFPACK_reporting = false;
-
-      this->ndof = -1;
     }
 
     template<typename Scalar>
@@ -106,65 +97,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Solver<Scalar>::get_UMFPACK_reporting_data(UMFPACK_reporting_data_value data_value)
-    {
-      return this->UMFPACK_reporting_data[data_value];
-    }
-
-    template<typename Scalar>
-     void Solver<Scalar>::set_UMFPACK_output(bool to_set, bool with_output)
-    {
-      if(!dynamic_cast<UMFPackLinearMatrixSolver<Scalar>*>(this->get_linear_solver()))
-      {
-        this->warn("A different solver than UMFPACK is used, ignoring the call to set_UMFPACK_reporting().");
-        return;
-      }
-
-      if(with_output)
-        ((UMFPackLinearMatrixSolver<Scalar>*)this->get_linear_solver())->set_output_level(2);
-      else
-        ((UMFPackLinearMatrixSolver<Scalar>*)this->get_linear_solver())->set_output_level(0);
-
-      this->do_UMFPACK_reporting = to_set;
-    }
-
-    template<typename Scalar>
-     void Solver<Scalar>::set_verbose_output(bool to_set)
-    {
-      Loggable::set_verbose_output(to_set);
-      this->get_linear_solver()->set_verbose_output(to_set);
-    }
-
-    template<typename Scalar>
-    void Solver<Scalar>::set_jacobian_constant(bool to_set)
-    {
-      this->constant_jacobian = to_set;
-      if(!to_set)
-        this->jacobian_reusable = false;
-    }
-
-    template<typename Scalar>
-    void Solver<Scalar>::set_do_not_use_cache(bool to_set)
-    {
-      DiscreteProblemCacheSettings::set_do_not_use_cache(to_set);
-      this->dp->set_do_not_use_cache(to_set);
-    }
-
-    template<typename Scalar>
-    void Solver<Scalar>::set_report_cache_hits_and_misses(bool to_set)
-    {
-      DiscreteProblemCacheSettings::set_report_cache_hits_and_misses(to_set);
-      this->dp->set_report_cache_hits_and_misses(to_set);
-    }
-
-    template<typename Scalar>
     bool Solver<Scalar>::isOkay() const
     {
-      if(this->dp->get_weak_formulation() == NULL)
-        return false;
-      if(this->dp->get_spaces().size() == 0)
-        return false;
-      return true;
+      return this->dp->isOkay();
     }
     
     template<typename Scalar>
@@ -178,7 +113,6 @@ namespace Hermes
     void Solver<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf)
     {
       this->dp->set_weak_formulation(wf);
-      this->jacobian_reusable = false;
     }
 
     template<typename Scalar>
@@ -191,7 +125,6 @@ namespace Hermes
     void Solver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
     {
       this->dp->set_spaces(spaces);
-      this->jacobian_reusable = false;
     }
     
     template<typename Scalar>
@@ -201,32 +134,23 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar *Solver<Scalar>::get_sln_vector()
+    void Solver<Scalar>::set_report_cache_hits_and_misses(bool to_set)
     {
-      return sln_vector;
+      DiscreteProblemCacheSettings::set_report_cache_hits_and_misses(to_set);
+      this->dp->set_report_cache_hits_and_misses(to_set);
+    }
+
+    template<typename Scalar>
+    void Solver<Scalar>::set_do_not_use_cache(bool to_set)
+    {
+      DiscreteProblemCacheSettings::set_do_not_use_cache(to_set);
+      this->dp->set_do_not_use_cache(to_set);
     }
 
     template<typename Scalar>
     void Solver<Scalar>::free_cache()
     {
       this->dp->cache.free();
-    }
-
-    template<typename Scalar>
-    void Solver<Scalar>::handle_UMFPACK_reports()
-    {
-      if(this->do_UMFPACK_reporting)
-      {
-        UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->get_linear_solver();
-        if(this->get_linear_solver()->get_used_reuse_scheme() != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
-        {
-          this->UMFPACK_reporting_data[this->FactorizationSize] = umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
-          this->UMFPACK_reporting_data[this->PeakMemoryUsage] = umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
-          this->UMFPACK_reporting_data[this->Flops] = umfpack_matrix_solver->Info[UMFPACK_FLOPS];
-        }
-        else
-          memset(this->UMFPACK_reporting_data, 0, 3 * sizeof(double));
-      }
     }
 
     template class HERMES_API Solver<double>;

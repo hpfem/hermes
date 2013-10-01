@@ -54,57 +54,38 @@ namespace Hermes
     template<typename Scalar>
     LinearSolver<Scalar>::~LinearSolver()
     {
-      delete matrix_solver;
     }
 
     template<typename Scalar>
     void LinearSolver<Scalar>::init_linear(bool force_use_direct_solver)
     {
       this->dp->set_linear();
-
-      SparseMatrix<Scalar>* jacobian = create_matrix<Scalar>(force_use_direct_solver);
-      Vector<Scalar>* residual = create_vector<Scalar>(force_use_direct_solver);
-      this->matrix_solver = create_linear_solver<Scalar>(jacobian, residual, force_use_direct_solver);
     }
 
     template<typename Scalar>
     bool LinearSolver<Scalar>::isOkay() const
     {
-      return this->dp->isOkay();
+      return Solver<Scalar>::isOkay();
     }
 
     template<typename Scalar>
-    void LinearSolver<Scalar>::conditionally_assemble(Scalar* coeff_vec, bool force_reuse_jacobian_values, bool assemble_residual)
+    void LinearSolver<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf)
     {
-      if(this->jacobian_reusable)
-      {
-        if(this->constant_jacobian || force_reuse_jacobian_values)
-        {
-          this->info("\tSolver: reusing Jacobian.");
-          if(assemble_residual)
-            this->dp->assemble(coeff_vec, this->get_residual());
-          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
-        }
-        else
-        {
-          this->info("\tSolver: recalculating a reusable Jacobian.");
-          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING);
-          if(assemble_residual)
-            this->dp->assemble(coeff_vec, this->get_jacobian(), this->get_residual());
-          else
-            this->dp->assemble(coeff_vec, this->get_jacobian());
-        }
-      }
-      else
-      {
-        this->info("\tSolver: Calculating Jacobian.");
-        if(assemble_residual)
-          this->dp->assemble(coeff_vec, this->get_jacobian(), this->get_residual());
-        else
-          this->dp->assemble(coeff_vec, this->get_jacobian());
-        this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
-        this->jacobian_reusable = true;
-      }
+      Solver<Scalar>::set_weak_formulation(wf);
+      this->jacobian_reusable = false;
+    }
+
+    template<typename Scalar>
+    int LinearSolver<Scalar>::get_problem_size()
+    {
+      return Space<Scalar>::get_num_dofs(this->dp->spaces);
+    }
+
+    template<typename Scalar>
+    void LinearSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
+    {
+      Solver<Scalar>::set_spaces(spaces);
+      this->jacobian_reusable = false;
     }
 
     template<typename Scalar>
@@ -116,52 +97,41 @@ namespace Hermes
 
       this->on_initialization();
 
-      // Optionally zero cache hits and misses.
-      if(this->report_cache_hits_and_misses)
-        this->zero_cache_hits_and_misses();
-
-      this->info("\tLinear: assembling...");
+      this->info("\tLinearSolver: assembling...");
       Space<Scalar>::assign_dofs(this->dp->get_spaces());
 
-      // Assemble the residual always and the jacobian when necessary (nonconstant jacobian, not reusable, ...).
-      this->conditionally_assemble();
-      if(this->report_cache_hits_and_misses)
-        this->add_cache_hits_and_misses(this->dp);
+      // Assemble the residual always and the Matrix when necessary (nonconstant jacobian, not reusable, ...).
+      if(this->jacobian_reusable && this->constant_jacobian)
+      {
+        this->info("\tLinearSolver: reusing Matrix, assembling RHS.");
+        this->dp->assemble(coeff_vec, this->get_residual());
+        this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
+      }
+      else
+      {
+        if(this->jacobian_reusable)
+          this->info("\tLinearSolver: recalculating a reusable Matrix.");
+        else
+          this->info("\tLinearSolver: calculating the Matrix.");
+        this->dp->assemble(coeff_vec, this->get_jacobian(), this->get_residual());
+        this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+      }
 
       this->process_matrix_output(this->get_jacobian(), 1);
       this->process_vector_output(this->get_residual(), 1);
 
-      this->info("\tLinear: assembling done. Solving...");
+      this->info("\tLinearSolver: assembling done. Solving...");
 
       // Solve, if the solver is iterative, give him the initial guess.
-      this->matrix_solver->solve(coeff_vec);
-      this->handle_UMFPACK_reports();
+      this->linear_matrix_solver->solve(coeff_vec);
 
-      this->sln_vector = this->matrix_solver->get_sln_vector();
+      this->sln_vector = this->linear_matrix_solver->get_sln_vector();
 
       this->on_finish();
 
       this->tick();
-      this->info("\tLinear: done.");
-      this->info("\tLinear: solution duration: %f s.", this->last());
-    }
-
-    template<typename Scalar>
-    LinearMatrixSolver<Scalar>* LinearSolver<Scalar>::get_linear_solver()
-    {
-      return this->matrix_solver;
-    }
-
-    template<typename Scalar>
-    SparseMatrix<Scalar>* LinearSolver<Scalar>::get_jacobian()
-    {
-      return this->matrix_solver->get_matrix();
-    }
-
-    template<typename Scalar>
-    Vector<Scalar>* LinearSolver<Scalar>::get_residual()
-    {
-      return this->matrix_solver->get_rhs();
+      this->info("\tLinearSolver: done.");
+      this->info("\tLinearSolver: solution duration: %f s.", this->last());
     }
 
     template class HERMES_API LinearSolver<double>;

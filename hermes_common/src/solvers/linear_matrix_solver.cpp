@@ -50,11 +50,6 @@ namespace Hermes
     {
       if(sln != NULL)
         delete [] sln;
-
-      if(this->general_matrix)
-        delete this->general_matrix;
-      if(this->general_rhs)
-        delete this->general_rhs;
     }
 
     template<typename Scalar>

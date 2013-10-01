@@ -120,9 +120,9 @@ namespace Hermes
       {
         previous_vectors = new Scalar*[num_last_vectors_used];
         for (int i = 0; i < num_last_vectors_used; i++)
-          previous_vectors[i] = new Scalar[this->dimension];
+          previous_vectors[i] = new Scalar[this->problem_size];
         anderson_coeffs = new Scalar[num_last_vectors_used-1];
-        memcpy(previous_vectors[0], this->sln_vector, this->dimension*sizeof(Scalar));
+        memcpy(previous_vectors[0], this->sln_vector, this->problem_size*sizeof(Scalar));
       }
     }
 
@@ -146,7 +146,7 @@ namespace Hermes
       {
         // If memory not full, just add the vector.
         if (vec_in_memory < num_last_vectors_used)
-          memcpy(previous_vectors[vec_in_memory++], this->sln_vector, this->dimension * sizeof(Scalar));
+          memcpy(previous_vectors[vec_in_memory++], this->sln_vector, this->problem_size * sizeof(Scalar));
         else
         {
           // If memory full, shift all vectors back, forgetting the oldest one.
@@ -158,7 +158,7 @@ namespace Hermes
 
           previous_vectors[num_last_vectors_used-1] = oldest_vec;
 
-          memcpy(oldest_vec, this->sln_vector, this->dimension*sizeof(Scalar));
+          memcpy(oldest_vec, this->sln_vector, this->problem_size*sizeof(Scalar));
         }
 
         if (vec_in_memory >= num_last_vectors_used)
@@ -167,7 +167,7 @@ namespace Hermes
           this->calculate_anderson_coeffs();
 
           // Calculate new vector and store it in this->sln_vector[].
-          for (int i = 0; i < this->dimension; i++)
+          for (int i = 0; i < this->problem_size; i++)
           {
             this->sln_vector[i] = 0.;
             for (int j = 1; j < num_last_vectors_used; j++)
@@ -188,7 +188,7 @@ namespace Hermes
       }
 
       // In the following, num_last_vectors_used is at least three.
-      // Thematrix problem will have dimension num_last_vectors_used - 2.
+      // Thematrix problem will have problem_size num_last_vectors_used - 2.
       int n = num_last_vectors_used - 2;
 
       // Allocate the matrix system for the Anderson coefficients.
@@ -200,7 +200,7 @@ namespace Hermes
       {
         // Calculate i-th entry of the rhs vector.
         rhs[i] = 0;
-        for (int k = 0; k < this->dimension; k++)
+        for (int k = 0; k < this->problem_size; k++)
         {
           Scalar residual_n_k = previous_vectors[n + 1][k] - previous_vectors[n][k];
           Scalar residual_i_k = previous_vectors[i + 1][k] - previous_vectors[i][k];
@@ -209,7 +209,7 @@ namespace Hermes
         for (int j = 0; j < n; j++)
         {
           Scalar val = 0;
-          for (int k = 0; k < this->dimension; k++)
+          for (int k = 0; k < this->problem_size; k++)
           {
             Scalar residual_n_k = previous_vectors[n + 1][k] - previous_vectors[n][k];
             Scalar residual_i_k = previous_vectors[i + 1][k] - previous_vectors[i][k];
@@ -257,21 +257,21 @@ namespace Hermes
     void PicardMatrixSolver<Scalar>::calculate_error(Scalar* coeff_vec)
     {
       // This is the new sln_vector.
-      Scalar* new_sln_vector = this->matrix_solver->get_sln_vector();
+      Scalar* new_sln_vector = this->linear_matrix_solver->get_sln_vector();
 
-      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(new_sln_vector, this->dimension));
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(new_sln_vector, this->problem_size));
 
       // sln_vector still stores the old solution.
       // !!!! coeff_vec stores the Anderson-generated previous solution.
       double abs_error = 0.;
-      for (int i = 0; i < this->dimension; i++)
+      for (int i = 0; i < this->problem_size; i++)
         abs_error += std::abs((this->sln_vector[i] - new_sln_vector[i]) * (this->sln_vector[i] - new_sln_vector[i]));
       abs_error = std::sqrt(abs_error);
 
       this->get_parameter_value(this->p_solution_change_norms).push_back(abs_error);
 
       // only now we can update the sln_vector.
-      memcpy(this->sln_vector, new_sln_vector, sizeof(Scalar)*this->dimension);
+      memcpy(this->sln_vector, new_sln_vector, sizeof(Scalar)*this->problem_size);
     }
 
     template<typename Scalar>
@@ -281,7 +281,7 @@ namespace Hermes
       this->tick();
 
       // Number of DOFs.
-      this->dimension = this->get_dimension();
+      this->problem_size = this->get_problem_size();
 
       if(this->sln_vector != NULL)
       {
@@ -289,17 +289,17 @@ namespace Hermes
         this->sln_vector = NULL;
       }
 
-      this->sln_vector = new Scalar[this->dimension];
+      this->sln_vector = new Scalar[this->problem_size];
 
       if(coeff_vec == NULL)
-        memset(this->sln_vector, 0, this->dimension*sizeof(Scalar));
+        memset(this->sln_vector, 0, this->problem_size*sizeof(Scalar));
       else
-        memcpy(this->sln_vector, coeff_vec, this->dimension*sizeof(Scalar));
+        memcpy(this->sln_vector, coeff_vec, this->problem_size*sizeof(Scalar));
 
       this->delete_coeff_vec = false;
       if(coeff_vec == NULL)
       {
-        coeff_vec = (Scalar*)calloc(this->dimension, sizeof(Scalar));
+        coeff_vec = (Scalar*)calloc(this->problem_size, sizeof(Scalar));
         this->delete_coeff_vec = true;
       }
 
@@ -310,7 +310,7 @@ namespace Hermes
     bool PicardMatrixSolver<Scalar>::do_initial_step_return_finished(Scalar* coeff_vec)
     {
       // Store the initial norm.
-      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->dimension));
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->problem_size));
 
       // Solve the linear system.
       this->solve_linear_system(coeff_vec);
@@ -325,7 +325,7 @@ namespace Hermes
       this->step_info();
 
       // coeff_vec stores the previous iteration - after this, for the first ordinary step, it will hold the initial step solution.
-      memcpy(coeff_vec, this->sln_vector, sizeof(Scalar)*this->dimension);
+      memcpy(coeff_vec, this->sln_vector, sizeof(Scalar)*this->problem_size);
 
       // Test convergence - if the first iteration is already a solution.
       if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
@@ -340,18 +340,18 @@ namespace Hermes
       // Assemble the residual and also jacobian when necessary (nonconstant jacobian, not reusable, ...).
       if(this->jacobian_reusable && this->constant_jacobian)
       {
-        this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
+        this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
         this->assemble_residual(coeff_vec);
       }
       else
       {
-        this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+        this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
         this->assemble(coeff_vec);
         this->jacobian_reusable = true;
       }
 
       // Solve, if the solver is iterative, give him the initial guess.
-      this->matrix_solver->solve(coeff_vec);
+      this->linear_matrix_solver->solve(coeff_vec);
       this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
     }
 
@@ -427,7 +427,7 @@ namespace Hermes
         it++;
 
         // Renew the last iteration vector.
-        memcpy(coeff_vec, this->sln_vector, this->dimension*sizeof(Scalar));
+        memcpy(coeff_vec, this->sln_vector, this->problem_size*sizeof(Scalar));
       }
     }
 

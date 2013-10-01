@@ -79,7 +79,7 @@ namespace Hermes
       /// Act upon the convergence state.
       /// \return If the main loop in solve() should finalize after this.
       bool handle_convergence_state_return_finished(NonlinearConvergenceState state, Scalar* coeff_vec);
-
+      
       void solve_linear_system(Scalar* coeff_vec);
 
       /// Shortcut method for getting the current iteration.

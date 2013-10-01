@@ -87,13 +87,18 @@ namespace Hermes
       /// Basic solve method - in linear solvers it serves only as an initial guess for iterative solvers.
       /// \param[in] coeff_vec initiall guess.
       virtual void solve(Scalar* coeff_vec);
+      
+      /// DiscreteProblemWeakForm helper.
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+
+      /// DiscreteProblemWeakForm helper.
+      virtual void set_weak_formulation(WeakForm<Scalar>* wf);
 
       void assemble_residual(Scalar* coeff_vec);
       void assemble_jacobian(Scalar* coeff_vec);
       void assemble(Scalar* coeff_vec);
-      int get_dimension();
-
-      Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_solver();
+      
+      int get_problem_size();
 
       /// State querying helpers.
       virtual bool isOkay() const;

@@ -29,7 +29,7 @@
 #include "mixins.h"
 #include "algebra/algebra_mixins.h"
 #include "solvers/nonlinear_convergence_measurement.h"
-#include "solvers/linear_matrix_solver.h"
+#include "solvers/matrix_solver.h"
 
 namespace Hermes
 {
@@ -67,10 +67,11 @@ namespace Hermes
     /// \brief Base class for defining interface for nonlinear solvers.
     ///
     template <typename Scalar>
-    class NonlinearMatrixSolver : public Hermes::Mixins::Loggable,
+    class NonlinearMatrixSolver : 
+      public virtual Hermes::Solvers::MatrixSolver<Scalar>,
       public virtual Hermes::Mixins::OutputAttachable,
-      public Hermes::Mixins::StateQueryable, 
-      public Hermes::Mixins::TimeMeasurable
+      public virtual Hermes::Mixins::StateQueryable, 
+      public virtual Hermes::Mixins::TimeMeasurable
     {
     public:
       NonlinearMatrixSolver();
@@ -80,21 +81,6 @@ namespace Hermes
       virtual void assemble_jacobian(Scalar* coeff_vec) = 0;
       virtual void assemble(Scalar* coeff_vec) = 0;
       
-      /// Set the name of the iterative method employed by AztecOO (ignored
-      /// by the other solvers).
-      /// \param[in] preconditioner_name See the attribute preconditioner.
-      void set_iterative_method(const char* iterative_method_name);
-
-      /// Set the name of the preconditioner employed by AztecOO (ignored by
-      /// the other solvers).
-      /// \param[in] preconditioner_name See the attribute preconditioner.
-      void set_preconditioner(const char* preconditioner_name);
-
-      /// Set the preconditioner object of Epetra_Operator type employed by AztecOO (ignored by
-      /// the other solvers).
-      /// \param[in] pc Pointer to a wrapper around Epetra_Operator based preconditioners (see precond.h).
-      void set_preconditioner(Hermes::Preconditioners::Precond<Scalar> *pc);
-
       /// Set the maximum number of iterations, thus co-determine when to stop iterations.
       void set_max_allowed_iterations(int max_allowed_iterations);
 
@@ -117,16 +103,6 @@ namespace Hermes
       /// \param[in] handleMultipleTolerancesAnd If true, multiple tolerances defined will have to be all fulfilled in order to proclaim
       /// solution as a correct one. If false, only one will be enough.
       void set_tolerance(double newton_tol, NonlinearConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd = false);
-
-      /// Jacobian can be reused if possible.
-      bool constant_jacobian;
-
-      /// Jacobian is ready to be reused if desirable.
-      bool jacobian_reusable;
-
-      /// Get the Linear solver (thus influence its behavior).
-      SparseMatrix<Scalar>* get_jacobian();
-      Vector<Scalar>* get_residual();
       
       /// Get the number of iterations.
       int get_num_iters() const;
@@ -157,20 +133,6 @@ namespace Hermes
       /// and this serves as the identificator according to which it will be deleted.
       bool delete_coeff_vec;
 
-      /// Preconditioned solver.
-      bool precond_yes;
-
-      /// Name of the iterative method employed by AztecOO (ignored
-      /// by the other solvers).
-      /// Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
-      char* iterative_method;
-
-      /// Name of the preconditioner employed by AztecOO (ignored by
-      /// the other solvers).
-      /// Possibilities: none, jacobi, neumann, least-squares, or a
-      ///  preconditioner from IFPACK (see solver/aztecoo.h).
-      char* preconditioner;
-
       /// Tolerances for all NonlinearConvergenceMeasurementType numbered sequentially as the enum NonlinearConvergenceMeasurementType is.
       double tolerance[NonlinearConvergenceMeasurementTypeCount];
 
@@ -181,17 +143,8 @@ namespace Hermes
       /// solution as a correct one. If false, only one will be enough.
       bool handleMultipleTolerancesAnd;
 
-      /// The solution vector.
-      Scalar* sln_vector;
-
-      /// Linear solver.
-      Hermes::Solvers::LinearMatrixSolver<Scalar>* matrix_solver;
-      
-      /// Matrix size.
-      int dimension;
-      virtual int get_dimension() = 0;
-
       int num_iters;
+
 #pragma region OutputAttachable
       // For derived classes - read-only access.
       const OutputParameterDoubleVector& residual_norms() const { return this->p_residual_norms; };

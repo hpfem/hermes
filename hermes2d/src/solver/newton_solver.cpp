@@ -50,7 +50,6 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::init()
     {
-      assert(this->matrix_solver);
     }
 
     template<typename Scalar>
@@ -70,6 +69,9 @@ namespace Hermes
       this->dp->assemble(coeff_vec, this->get_residual());
       this->process_vector_output(this->get_residual(), this->get_current_iteration_number());
       this->get_residual()->change_sign();
+
+      // Current residual norm.
+      this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
     }
 
     template<typename Scalar>
@@ -88,19 +90,6 @@ namespace Hermes
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number());
     }
 
-
-    template<typename Scalar>
-    int NewtonSolver<Scalar>::get_dimension()
-    {
-      return this->get_jacobian()->get_size();
-    }
-
-    template<typename Scalar>
-    LinearMatrixSolver<Scalar>* NewtonSolver<Scalar>::get_linear_solver()
-    {
-      return this->matrix_solver;
-    }
-
     template<typename Scalar>
     bool NewtonSolver<Scalar>::isOkay() const
     {
@@ -108,24 +97,34 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NewtonSolver<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf)
+    {
+      Solver<Scalar>::set_weak_formulation(wf);
+      this->jacobian_reusable = false;
+    }
+
+    template<typename Scalar>
+    int NewtonSolver<Scalar>::get_problem_size()
+    {
+      return Space<Scalar>::get_num_dofs(this->dp->spaces);
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
+    {
+      Solver<Scalar>::set_spaces(spaces);
+      this->jacobian_reusable = false;
+    }
+
+    template<typename Scalar>
     bool NewtonSolver<Scalar>::on_step_end()
     {
-      if(this->report_cache_hits_and_misses)
-        this->add_cache_hits_and_misses(this->dp);
-      this->handle_UMFPACK_reports();
       return true;
     }
 
     template<typename Scalar>
     bool NewtonSolver<Scalar>::on_initialization()
     {
-      // Optionally zero cache hits and misses.
-      if(this->report_cache_hits_and_misses)
-        this->zero_cache_hits_and_misses();
-
-      // UMFPACK reporting.
-      if(this->do_UMFPACK_reporting)
-        memset(this->UMFPACK_reporting_data, 0, 3 * sizeof(double));
       return true;
     }
 

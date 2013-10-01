@@ -233,22 +233,22 @@ namespace Hermes
       this->tick();
 
       // Number of DOFs.
-      this->dimension = this->get_dimension();
+      this->problem_size = this->get_problem_size();
 
       // coeff_vec
       this->delete_coeff_vec = false;
       if(coeff_vec == NULL)
       {
-        coeff_vec = (Scalar*)calloc(this->dimension, sizeof(Scalar));
+        coeff_vec = (Scalar*)calloc(this->problem_size, sizeof(Scalar));
         this->delete_coeff_vec = true;
       }
 
       // coeff_vec_back
-      this->coeff_vec_back = (Scalar*)calloc(this->dimension, sizeof(Scalar));
+      this->coeff_vec_back = (Scalar*)calloc(this->problem_size, sizeof(Scalar));
 
       // Backup vector for unsuccessful reuse of Jacobian.
       residual_back = create_vector<Scalar>();
-      residual_back->alloc(this->dimension);
+      residual_back->alloc(this->problem_size);
 
       // sln_vector
       if(this->sln_vector != NULL)
@@ -256,7 +256,7 @@ namespace Hermes
         delete [] this->sln_vector;
         this->sln_vector = NULL;
       }
-      this->sln_vector = new Scalar[this->dimension];
+      this->sln_vector = new Scalar[this->problem_size];
 
       this->on_initialization();
     }
@@ -277,7 +277,7 @@ namespace Hermes
     template<typename Scalar>
     void NewtonMatrixSolver<Scalar>::finalize_solving(Scalar* coeff_vec)
     {
-      memcpy(this->sln_vector, coeff_vec, this->dimension * sizeof(Scalar));
+      memcpy(this->sln_vector, coeff_vec, this->problem_size * sizeof(Scalar));
       this->tick();
       this->num_iters = this->get_current_iteration_number();
       this->info("\tNewton: solution duration: %f s.\n", this->last());
@@ -301,18 +301,18 @@ namespace Hermes
     bool NewtonMatrixSolver<Scalar>::do_initial_step_return_finished(Scalar* coeff_vec)
     {
       // Store the initial norm.
-      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->dimension));
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->problem_size));
 
       // Assemble the system.
       if(this->jacobian_reusable && this->constant_jacobian)
       {
-        this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
+        this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
         this->assemble_residual(coeff_vec);
         this->get_parameter_value(this->p_iterations_with_recalculated_jacobian).push_back(false);
       }
       else
       {
-        this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+        this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
         this->assemble(coeff_vec);
         this->jacobian_reusable = true;
         this->get_parameter_value(this->p_iterations_with_recalculated_jacobian).push_back(true);
@@ -350,27 +350,27 @@ namespace Hermes
     void NewtonMatrixSolver<Scalar>::solve_linear_system(Scalar* coeff_vec)
     {
       // store the previous coeff_vec to coeff_vec_back.
-      memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*this->dimension);
+      memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*this->problem_size);
 
       // Solve, if the solver is iterative, give him the initial guess.
-      this->matrix_solver->solve(coeff_vec);
+      this->linear_matrix_solver->solve(coeff_vec);
 
       // Get current damping factor.
       double current_damping_factor = this->get_parameter_value(this->p_damping_factors).back();
 
       // store the solution norm change.
       // obtain the solution increment.
-      Scalar* sln_vector_local = this->matrix_solver->get_sln_vector();
+      Scalar* sln_vector_local = this->linear_matrix_solver->get_sln_vector();
 
       // 1. store the solution.
-      for (int i = 0; i < this->dimension; i++)
+      for (int i = 0; i < this->problem_size; i++)
         coeff_vec[i] += current_damping_factor * sln_vector_local[i];
 
       // 2. store the solution change.
-      this->get_parameter_value(this->p_solution_change_norms).push_back(current_damping_factor * get_l2_norm(sln_vector_local, this->dimension));
+      this->get_parameter_value(this->p_solution_change_norms).push_back(current_damping_factor * get_l2_norm(sln_vector_local, this->problem_size));
 
       // 3. store the solution norm.
-      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->dimension));
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->problem_size));
     }
 
     template<typename Scalar>
@@ -463,11 +463,11 @@ namespace Hermes
             // Try with the different damping factor.
             // Important thing here is the factor used that must be calculated from the current one and the previous one.
             // This results in the following relation (since the damping factor is only updated one way).
-            for (int i = 0; i < this->dimension; i++)
+            for (int i = 0; i < this->problem_size; i++)
               coeff_vec[i] = coeff_vec_back[i] + (coeff_vec[i] - coeff_vec_back[i]) / this->auto_damping_ratio;
 
             // Add new solution norm.
-            solution_norms.push_back(get_l2_norm(coeff_vec, this->dimension));
+            solution_norms.push_back(get_l2_norm(coeff_vec, this->problem_size));
           }
         }
         while (!residual_norm_drop);
@@ -489,7 +489,7 @@ namespace Hermes
           this->on_reused_jacobian_step_begin();
 
           // Solve the system.
-          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
+          this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
           this->solve_linear_system(coeff_vec);
           // Assemble next residual for both reusage and convergence test.
           this->assemble_residual(coeff_vec);
@@ -500,7 +500,7 @@ namespace Hermes
             this->get_parameter_value(this->p_residual_norms).pop_back();
             this->get_parameter_value(this->p_solution_norms).pop_back();
             this->get_parameter_value(this->p_solution_change_norms).pop_back();
-            memcpy(coeff_vec, coeff_vec_back, sizeof(Scalar)*this->dimension);
+            memcpy(coeff_vec, coeff_vec_back, sizeof(Scalar)*this->problem_size);
             this->get_residual()->set_vector(residual_back);
             break;
           }
@@ -532,9 +532,9 @@ namespace Hermes
 
         // Set factorization schemes.
         if(this->jacobian_reusable)
-          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING);
+          this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING);
         else
-          this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+          this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
 
         // Solve the system, state that the jacobian is reusable should it be desirable.
         this->solve_linear_system(coeff_vec);

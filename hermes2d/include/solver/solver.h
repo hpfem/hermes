@@ -35,14 +35,13 @@ namespace Hermes
 
     template <typename Scalar>
     class Solver: 
-      public Hermes::Mixins::Loggable, 
-      public Hermes::Mixins::TimeMeasurable, 
+      public virtual Hermes::Mixins::TimeMeasurable, 
       public Hermes::Mixins::SettableComputationTime, 
       public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
       public virtual Hermes::Mixins::OutputAttachable,
       public Hermes::Algebra::Mixins::MatrixRhsOutput<Scalar>, 
       public Hermes::Mixins::IntegrableWithGlobalOrder, 
-      public Hermes::Mixins::StateQueryable, 
+      public virtual Hermes::Mixins::StateQueryable, 
       public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings,
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>
     {
@@ -71,15 +70,9 @@ namespace Hermes
       /// See DiscreteProblemCacheSettings in mixins2d.h for details.
       virtual void free_cache();
 
-      /// Return the solution vector.
-      virtual Scalar *get_sln_vector();
-      
       /// set time information for time-dependent problems.
       virtual void set_time(double time);
       virtual void set_time_step(double time_step);
-
-      // Verbose output.
-      virtual void set_verbose_output(bool to_set);
 
       /// SettableSpaces helper.
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
@@ -88,59 +81,20 @@ namespace Hermes
       /// DiscreteProblemWeakForm helper.
       virtual void set_weak_formulation(WeakForm<Scalar>* wf);
 
-      /// Sets the jacobian to be constant, i.e. reused whenever possible.
-      void set_jacobian_constant(bool to_set = true);
-
       /// If the cache should not be used for any reason.
       virtual void set_do_not_use_cache(bool to_set = true);
       
+      /// \TODO This is not used now.
       /// Report cache hits and misses.
       virtual void set_report_cache_hits_and_misses(bool to_set = true);
-
-      /// Set Reporting of UMFPACK numerical factorization data provided the used matrix solver is UMFPACK.
-      virtual void set_UMFPACK_output(bool to_set = true, bool with_output = false);
-      
-      /// Data values (types) for UMFPACK reporting.
-      enum UMFPACK_reporting_data_value
-      {
-        FactorizationSize = 0,
-        PeakMemoryUsage = 1,
-        Flops = 2
-      };
-      
-      /// Get UMFPACK numerical factorization data provided the used matrix solver is UMFPACK
-      virtual double get_UMFPACK_reporting_data(UMFPACK_reporting_data_value data_value);
-
-      virtual Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_solver() = 0;
-
     protected:
-      /// Internal checking.
       virtual bool isOkay() const;
-      
-      /// Jacobian can be reused if possible.
-      bool constant_jacobian;
-
-      /// Jacobian is ready to be reused if desirable.
-      bool jacobian_reusable;
       
       ///< FE problem being solved.
       DiscreteProblem<Scalar>* dp;
 
-      /// The solution vector.
-      Scalar* sln_vector;
-
       /// This instance owns its DP.
       const bool own_dp;
-
-      /// Number of degrees of freedom.
-      int ndof;
-
-      /// Switch for UMFPACK reporting.
-      bool do_UMFPACK_reporting;
-      void handle_UMFPACK_reports();
-
-      /// Data for UMFPACK reporting.
-      double UMFPACK_reporting_data[3];
       
     private:
       void init(bool force_use_direct_solver);
