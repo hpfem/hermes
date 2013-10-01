@@ -111,6 +111,7 @@ namespace Hermes
       anderson_beta = 1.0;
       anderson_is_on = false;
       this->set_tolerance(1e-3, SolutionChangeRelative);
+      this->set_damping_coefficient(1.);
     }
 
     template<typename Scalar>
@@ -243,6 +244,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::set_damping_coefficient(double gamma_)
+    {
+      if(gamma_ < Hermes::epsilon || gamma_ > (1. + Hermes::epsilon))
+        throw Exceptions::ValueException("Picard damping coefficient", gamma_, 0., 1.);
+      else
+        this->gamma = gamma_;
+    }
+
+    template<typename Scalar>
     void PicardMatrixSolver<Scalar>::step_info()
     {
       // Output.
@@ -271,7 +281,8 @@ namespace Hermes
       this->get_parameter_value(this->p_solution_change_norms).push_back(abs_error);
 
       // only now we can update the sln_vector.
-      memcpy(this->sln_vector, new_sln_vector, sizeof(Scalar)*this->problem_size);
+      for (unsigned int i = 0; i < this->problem_size; i++)
+        this->sln_vector[i] = this->sln_vector[i] + this->gamma * (new_sln_vector[i] - this->sln_vector[i]);
     }
 
     template<typename Scalar>

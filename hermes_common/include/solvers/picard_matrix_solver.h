@@ -53,6 +53,12 @@ namespace Hermes
       void set_anderson_beta(double beta);
 #pragma endregion
 
+#pragma region damping-public
+      /// Set the damping coefficient Gamma.
+      /// Default value = 1.0.
+      void set_damping_coefficient(double gamma);
+#pragma endregion
+
     protected:
       /// Common constructors code.
       /// Internal setting of default values (see individual set methods).
@@ -108,6 +114,12 @@ namespace Hermes
       /// Calcualte the coefficients.
       void calculate_anderson_coeffs();
 
+#pragma endregion
+
+#pragma region damping-private
+      /// Damping coefficient Gamma.
+      /// Default value = 1.0.
+      double gamma;
 #pragma endregion
 
 #pragma region OutputAttachable
