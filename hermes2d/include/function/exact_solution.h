@@ -278,8 +278,6 @@ namespace Hermes
       virtual void precalculate(int order, int mask) {};
 
       MeshFunction<Scalar>* clone() const = 0;
-
-      template<typename Scalar> friend Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order);
     };
   }
 }
