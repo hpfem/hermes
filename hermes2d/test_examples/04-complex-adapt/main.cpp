@@ -131,7 +131,6 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     errorCalculator.calculate_errors(sln, ref_sln);
-
     std::cout << (std::string)"Relative error: " << errorCalculator.get_total_error_squared() * 100. << '%' << std::endl;
 
     // Add entry to DOF and CPU convergence graphs.

@@ -19,8 +19,8 @@
 /*! \file linear_solver.h
 \brief General linear/iterative solver functionality.
 */
-#ifndef __HERMES_COMMON_SOLVER_H_
-#define __HERMES_COMMON_SOLVER_H_
+#ifndef __HERMES_COMMON_LINEAR_MATRIX_SOLVER_H_
+#define __HERMES_COMMON_LINEAR_MATRIX_SOLVER_H_
 
 #include "precond.h"
 #include "exceptions.h"

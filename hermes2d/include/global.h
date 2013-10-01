@@ -99,30 +99,6 @@ namespace Hermes
 #define H2D_MAKE_QUAD_ORDER(h_encoded_order, v_encoded_order) (((v_encoded_order) << H2D_ORDER_BITS) + (h_encoded_order))
 #define H2D_MAKE_EDGE_ORDER(mode, edge, order) ((mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2) ? H2D_GET_H_ORDER(order) : H2D_GET_V_ORDER(order))
 
-    template<typename Scalar>
-    double get_l2_norm(Vector<Scalar>* vec)
-    {
-      Scalar val = 0;
-      for (unsigned int i = 0; i < vec->get_size(); i++)
-      {
-        Scalar inc = vec->get(i);
-        val = val + inc*conj(inc);
-      }
-      return sqrt(std::abs(val));
-    };
-
-    template<typename Scalar>
-    double get_l2_norm(Scalar* vec, int count)
-    {
-      Scalar val = 0;
-      for (unsigned int i = 0; i < count; i++)
-      {
-        Scalar inc = vec[i];
-        val = val + inc*conj(inc);
-      }
-      return sqrt(std::abs(val));
-    }
-
 #define H2DRS_DEFAULT_ORDER -1 ///< A default order. Used to indicate an unkonwn order or a maximum support order.  \ingroup g_selectors
 #define H2DRS_MAX_ORDER 10 ///< A maximum order suported by refinement selectors. \ingroup g_selectors
 #define H2D_NUM_SHAPES_SIZE 12 ///< A maximum order suported by refinement selectors. \ingroup g_selectors

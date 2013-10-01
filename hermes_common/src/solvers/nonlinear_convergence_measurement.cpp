@@ -20,15 +20,15 @@
 \brief nonlinear_convergence_measurement.
 */
 
-#include "solver/nonlinear_convergence_measurement.h"
-#include "solver/newton_solver.h"
+#include "solvers/nonlinear_convergence_measurement.h"
+#include "solvers/newton_matrix_solver.h"
 
 namespace Hermes
 {
-  namespace Hermes2D
+  namespace Solvers
   {
     template<typename Scalar>
-    bool NonlinearConvergenceMeasurement<Scalar>::converged(NonlinearSolver<Scalar>* nonlinear_solver)
+    bool NonlinearConvergenceMeasurement<Scalar>::converged(NonlinearMatrixSolver<Scalar>* nonlinear_solver)
     {
       // get iteration.
       unsigned int iteration = nonlinear_solver->get_current_iteration_number();
@@ -51,7 +51,7 @@ namespace Hermes
       double initial_solution_norm = solution_norms[0];
       double previous_solution_norm = solution_norms[iteration - 2];
       double current_solution_norm = solution_norms[iteration - 1];
-      bool newton = (dynamic_cast<NewtonSolver<Scalar>*>(nonlinear_solver) != NULL);
+      bool newton = (dynamic_cast<NewtonMatrixSolver<Scalar>*>(nonlinear_solver) != NULL);
       double current_solution_change_norm = solution_change_norms[newton ? iteration - 2 : iteration - 1];
 
       bool converged;

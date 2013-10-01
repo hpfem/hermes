@@ -125,7 +125,7 @@ namespace Hermes
       virtual Vector<Scalar>* add_vector(Scalar* vec);
       virtual Vector<Scalar>* set_vector(Vector<Scalar>* vec);
       virtual Vector<Scalar>* set_vector(Scalar* vec);
-      
+
       using Vector<Scalar>::export_to_file;
       using Vector<Scalar>::import_from_file;
       virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
@@ -139,6 +139,30 @@ namespace Hermes
     /// @return created vector
     template<typename Scalar> HERMES_API
       Vector<Scalar>* create_vector(bool use_direct_solver = false);
+  }
+
+  template<typename Scalar>
+  double get_l2_norm(Algebra::Vector<Scalar>* vec)
+  {
+    Scalar val = 0;
+    for (unsigned int i = 0; i < vec->get_size(); i++)
+    {
+      Scalar inc = vec->get(i);
+      val = val + inc*conj(inc);
+    }
+    return sqrt(std::abs(val));
+  };
+
+  template<typename Scalar>
+  double get_l2_norm(Scalar* vec, int count)
+  {
+    Scalar val = 0;
+    for (unsigned int i = 0; i < count; i++)
+    {
+      Scalar inc = vec[i];
+      val = val + inc*conj(inc);
+    }
+    return sqrt(std::abs(val));
   }
 }
 #endif

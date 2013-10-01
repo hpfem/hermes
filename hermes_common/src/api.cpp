@@ -24,7 +24,7 @@
 #include "common.h"
 #include "exceptions.h"
 #include "matrix.h"
-#include "solvers/paralution_solver.h"
+#include "solvers/interfaces/paralution_solver.h"
 
 namespace Hermes
 {

@@ -56,98 +56,6 @@ namespace Hermes
     {
     }
 
-    template<typename Scalar>
-    void PicardSolver<Scalar>::init_picard()
-    {
-      num_last_vectors_used = 3;
-      anderson_beta = 1.0;
-      anderson_is_on = false;
-      this->dp->set_linear(false, false);
-      this->set_tolerance(1e-3, SolutionChangeRelative);
-    }
-
-    template<typename Scalar>
-    bool PicardSolver<Scalar>::isOkay() const
-    {
-      if(num_last_vectors_used <= 1)
-      {
-        throw Hermes::Exceptions::Exception("Picard: Bad number of last iterations to be used (must be at least one).");
-        return false;
-      }
-
-      return NonlinearSolver<Scalar>::isOkay();
-    }
-
-    template<typename Scalar>
-    void PicardSolver<Scalar>::calculate_anderson_coeffs()
-    {
-      // If num_last_vectors_used is 2, then there is only one residual, and thus only one alpha coeff which is 1.0.
-      if(num_last_vectors_used == 2)
-      {
-        anderson_coeffs[0] = 1.0;
-        return;
-      }
-
-      // In the following, num_last_vectors_used is at least three.
-      // Thematrix problem will have dimension num_last_vectors_used - 2.
-      int n = num_last_vectors_used - 2;
-
-      // Allocate the matrix system for the Anderson coefficients.
-      Scalar** mat = new_matrix<Scalar>(n, n);
-      Scalar* rhs = new Scalar[n];
-
-      // Set up the matrix and rhs vector.
-      for (int i = 0; i < n; i++)
-      {
-        // Calculate i-th entry of the rhs vector.
-        rhs[i] = 0;
-        for (int k = 0; k < this->ndof; k++)
-        {
-          Scalar residual_n_k = previous_vectors[n + 1][k] - previous_vectors[n][k];
-          Scalar residual_i_k = previous_vectors[i + 1][k] - previous_vectors[i][k];
-          rhs[i] += residual_n_k * (residual_n_k - residual_i_k);
-        }
-        for (int j = 0; j < n; j++)
-        {
-          Scalar val = 0;
-          for (int k = 0; k < this->ndof; k++)
-          {
-            Scalar residual_n_k = previous_vectors[n + 1][k] - previous_vectors[n][k];
-            Scalar residual_i_k = previous_vectors[i + 1][k] - previous_vectors[i][k];
-            Scalar residual_j_k = previous_vectors[j + 1][k] - previous_vectors[j][k];
-            val += (residual_n_k - residual_i_k) * (residual_n_k - residual_j_k);
-          }
-
-          mat[i][j] = val;
-        }
-      }
-
-      // Solve the matrix system.
-      double d;
-      int* perm = new int[n];
-      ludcmp(mat, n, perm, &d);
-      lubksb<Scalar>(mat, n, perm, rhs);
-
-      // Use the result to define the Anderson coefficients. Remember that
-      // n were computed and the last one is 1.0 minus the sum of the 'n' numbers.
-      Scalar sum = 0;
-      for (int i = 0; i < n; i++)
-      {
-        anderson_coeffs[i] = rhs[i];
-        sum += rhs[i];
-      }
-      anderson_coeffs[n] = 1.0 - sum;
-
-      // Clean up.
-      delete [] mat;
-      delete [] rhs;
-    }
-
-    template<typename Scalar>
-    void PicardSolver<Scalar>::set_num_last_vector_used(int num)
-    {
-      this->num_last_vectors_used = num;
-    }
 
     template<typename Scalar>
     void PicardSolver<Scalar>::set_anderson_beta(double beta)
@@ -168,27 +76,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PicardSolver<Scalar>::handle_convergence_state_return_finished(NonlinearConvergenceState state, Scalar* coeff_vec)
+    void PicardSolver<Scalar>::assemble_residual(Scalar* coeff_vec)
     {
-      // If we have not converged and everything else is ok, we finish.
-      if(state == NotConverged)
-        return false;
+    }
 
-      // And now the finishing states (both good and bad).
-      this->finalize_solving(coeff_vec);
-
-      // Act upon the state.
-      switch(state)
+    template<typename Scalar>
+      void PicardSolver<Scalar>::assemble_jacobian(Scalar* coeff_vec)
       {
-      case Converged:
-        this->info("\tPicard: done.\n");
-        break;
-      case AboveMaxIterations:
-        throw Exceptions::NonlinearException(AboveMaxIterations);
-        break;
-      case Error:
-        throw Exceptions::Exception("Unknown exception in PicardSolver.");
-        break;
+      }
       default:
         throw Exceptions::Exception("Unknown ConvergenceState in PicardSolver.");
         break;
