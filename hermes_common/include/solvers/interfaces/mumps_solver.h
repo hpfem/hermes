@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_MUMPS_SOLVER_H_
 #include "config.h"
 #ifdef WITH_MUMPS
-#include "linear_matrix_solver.h"
+#include "solvers/linear_matrix_solver.h"
 #include "algebra/matrix.h"
 
 extern "C"

@@ -25,7 +25,7 @@
 #include "config.h"
 #ifdef WITH_SUPERLU
 typedef int int_t;
-#include "linear_matrix_solver.h"
+#include "solvers/linear_matrix_solver.h"
 #include "algebra/cs_matrix.h"
 
 #include <supermatrix.h>

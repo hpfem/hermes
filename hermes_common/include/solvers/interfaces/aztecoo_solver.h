@@ -24,7 +24,7 @@
 #include "../../config.h"
 #ifdef HAVE_AZTECOO
 #include "epetra.h"
-#include "linear_matrix_solver.h"
+#include "solvers/linear_matrix_solver.h"
 #include "precond_ifpack.h"
 #include "precond_ml.h"
 #include <AztecOO.h>
