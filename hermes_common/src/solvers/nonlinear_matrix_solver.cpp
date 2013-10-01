@@ -80,6 +80,38 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NonlinearMatrixSolver<Scalar>::init_solving(Scalar*& coeff_vec)
+    {
+      this->check();
+      this->tick();
+
+      // Number of DOFs.
+      assert(this->problem_size > 0);
+
+      if(this->sln_vector != NULL)
+      {
+        delete [] this->sln_vector;
+        this->sln_vector = NULL;
+      }
+
+      this->sln_vector = new Scalar[this->problem_size];
+
+      if(coeff_vec == NULL)
+        memset(this->sln_vector, 0, this->problem_size*sizeof(Scalar));
+      else
+        memcpy(this->sln_vector, coeff_vec, this->problem_size*sizeof(Scalar));
+
+      this->delete_coeff_vec = false;
+      if(coeff_vec == NULL)
+      {
+        coeff_vec = (Scalar*)calloc(this->problem_size, sizeof(Scalar));
+        this->delete_coeff_vec = true;
+      }
+
+      this->on_initialization();
+    }
+
+    template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_tolerance(double tolerance_, NonlinearConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd)
     {
       this->handleMultipleTolerancesAnd = handleMultipleTolerancesAnd;

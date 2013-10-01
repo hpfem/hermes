@@ -98,7 +98,8 @@ namespace Hermes
       void assemble_jacobian(Scalar* coeff_vec);
       void assemble(Scalar* coeff_vec);
       
-      int get_problem_size();
+      /// Initialization - called at the beginning of solving.
+      virtual void init_solving(Scalar*& coeff_vec);
 
       /// State querying helpers.
       virtual bool isOkay() const;

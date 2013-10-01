@@ -277,33 +277,7 @@ namespace Hermes
     template<typename Scalar>
     void PicardMatrixSolver<Scalar>::init_solving(Scalar*& coeff_vec)
     {
-      this->check();
-      this->tick();
-
-      // Number of DOFs.
-      this->problem_size = this->get_problem_size();
-
-      if(this->sln_vector != NULL)
-      {
-        delete [] this->sln_vector;
-        this->sln_vector = NULL;
-      }
-
-      this->sln_vector = new Scalar[this->problem_size];
-
-      if(coeff_vec == NULL)
-        memset(this->sln_vector, 0, this->problem_size*sizeof(Scalar));
-      else
-        memcpy(this->sln_vector, coeff_vec, this->problem_size*sizeof(Scalar));
-
-      this->delete_coeff_vec = false;
-      if(coeff_vec == NULL)
-      {
-        coeff_vec = (Scalar*)calloc(this->problem_size, sizeof(Scalar));
-        this->delete_coeff_vec = true;
-      }
-
-      this->on_initialization();
+      NonlinearMatrixSolver<Scalar>::init_solving(coeff_vec);
     }
 
     template<typename Scalar>
@@ -449,6 +423,7 @@ namespace Hermes
         ::free(coeff_vec);
         this->delete_coeff_vec = false;
       }
+      this->problem_size = -1;
     }
 
     template class HERMES_API PicardMatrixSolver<double>;

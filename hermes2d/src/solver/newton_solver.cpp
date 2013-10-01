@@ -50,6 +50,7 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::init()
     {
+      this->dp->set_linear(false);
     }
 
     template<typename Scalar>
@@ -69,9 +70,6 @@ namespace Hermes
       this->dp->assemble(coeff_vec, this->get_residual());
       this->process_vector_output(this->get_residual(), this->get_current_iteration_number());
       this->get_residual()->change_sign();
-
-      // Current residual norm.
-      this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
     }
 
     template<typename Scalar>
@@ -104,9 +102,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int NewtonSolver<Scalar>::get_problem_size()
+    void NewtonSolver<Scalar>::init_solving(Scalar*& coeff_vec)
     {
-      return Space<Scalar>::get_num_dofs(this->dp->spaces);
+      this->problem_size = Space<Scalar>::assign_dofs(this->get_spaces());
+      NewtonMatrixSolver<Scalar>::init_solving(coeff_vec);
     }
 
     template<typename Scalar>

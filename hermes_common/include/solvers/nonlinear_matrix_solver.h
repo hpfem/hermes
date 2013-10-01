@@ -98,6 +98,10 @@ namespace Hermes
       /// \return If the main loop in solve() should finalize after this.
       virtual bool handle_convergence_state_return_finished(NonlinearConvergenceState state, Scalar* coeff_vec) = 0;
 
+      /// Initialization - called at the beginning of solving.
+      /// Very important e.g. for assigning DOFs before assembling.
+      virtual void init_solving(Scalar*& coeff_vec);
+
       /// Set the residual norm tolerance for ending the Newton's loop.
       /// Default: this->set_tolerance(1e-8, ResidualNormAbsolute);
       /// \param[in] handleMultipleTolerancesAnd If true, multiple tolerances defined will have to be all fulfilled in order to proclaim

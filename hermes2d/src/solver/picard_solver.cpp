@@ -104,9 +104,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int PicardSolver<Scalar>::get_problem_size()
+    void PicardSolver<Scalar>::init_solving(Scalar*& coeff_vec)
     {
-      return Space<Scalar>::get_num_dofs(this->dp->spaces);
+      this->problem_size = Space<Scalar>::assign_dofs(this->get_spaces());
+      PicardMatrixSolver<Scalar>::init_solving(coeff_vec);
     }
 
     template<typename Scalar>

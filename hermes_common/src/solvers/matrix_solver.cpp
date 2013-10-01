@@ -35,7 +35,7 @@ namespace Hermes
 
       this->jacobian_reusable = false;
 
-      this->problem_size = 0;
+      this->problem_size = -1;
 
       this->do_UMFPACK_reporting = false;
 

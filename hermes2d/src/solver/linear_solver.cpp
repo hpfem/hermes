@@ -76,12 +76,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int LinearSolver<Scalar>::get_problem_size()
-    {
-      return Space<Scalar>::get_num_dofs(this->dp->spaces);
-    }
-
-    template<typename Scalar>
     void LinearSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
     {
       Solver<Scalar>::set_spaces(spaces);
@@ -98,6 +92,8 @@ namespace Hermes
       this->on_initialization();
 
       this->info("\tLinearSolver: assembling...");
+
+      // Extremely important.
       Space<Scalar>::assign_dofs(this->dp->get_spaces());
 
       // Assemble the residual always and the Matrix when necessary (nonconstant jacobian, not reusable, ...).

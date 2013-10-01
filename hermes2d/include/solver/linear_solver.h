@@ -82,8 +82,6 @@ namespace Hermes
       /// DiscreteProblemWeakForm helper.
       virtual void set_weak_formulation(WeakForm<Scalar>* wf);
 
-      int get_problem_size();
-
     protected:
       /// State querying helpers.
       virtual bool isOkay() const;

@@ -22,8 +22,9 @@
 #ifndef __HERMES_COMMON_MATRIX_SOLVER_H_
 #define __HERMES_COMMON_MATRIX_SOLVER_H_
 
-#include "umfpack_solver.h"
+#include "interfaces/umfpack_solver.h"
 #include "mixins.h"
+#include "util/compat.h"
 
 namespace Hermes
 {
@@ -68,9 +69,6 @@ namespace Hermes
 
       /// Verbose output.
       virtual void set_verbose_output(bool to_set);
-      
-      /// How big is the equation system.
-      virtual int get_problem_size() = 0;
 
     protected:
       /// Linear solver.
@@ -82,7 +80,7 @@ namespace Hermes
       /// Jacobian is ready to be reused if desirable.
       bool jacobian_reusable;
       
-      /// Number of degrees of freedom.
+      /// Number of equations.
       int problem_size;
 
       /// \TODO This is not used now.

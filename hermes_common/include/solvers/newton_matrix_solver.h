@@ -106,7 +106,7 @@ namespace Hermes
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "NewtonMatrixSolver"; }
 
-      void init_solving(Scalar*& coeff_vec);
+      virtual void init_solving(Scalar*& coeff_vec);
 
       bool do_initial_step_return_finished(Scalar* coeff_vec);
       void solve_linear_system(Scalar* coeff_vec);

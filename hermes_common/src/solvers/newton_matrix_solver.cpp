@@ -229,19 +229,7 @@ namespace Hermes
     template<typename Scalar>
     void NewtonMatrixSolver<Scalar>::init_solving(Scalar*& coeff_vec)
     {
-      this->check();
-      this->tick();
-
-      // Number of DOFs.
-      this->problem_size = this->get_problem_size();
-
-      // coeff_vec
-      this->delete_coeff_vec = false;
-      if(coeff_vec == NULL)
-      {
-        coeff_vec = (Scalar*)calloc(this->problem_size, sizeof(Scalar));
-        this->delete_coeff_vec = true;
-      }
+      NonlinearMatrixSolver<Scalar>::init_solving(coeff_vec);
 
       // coeff_vec_back
       this->coeff_vec_back = (Scalar*)calloc(this->problem_size, sizeof(Scalar));
@@ -249,16 +237,6 @@ namespace Hermes
       // Backup vector for unsuccessful reuse of Jacobian.
       residual_back = create_vector<Scalar>();
       residual_back->alloc(this->problem_size);
-
-      // sln_vector
-      if(this->sln_vector != NULL)
-      {
-        delete [] this->sln_vector;
-        this->sln_vector = NULL;
-      }
-      this->sln_vector = new Scalar[this->problem_size];
-
-      this->on_initialization();
     }
 
     template<typename Scalar>
@@ -272,6 +250,7 @@ namespace Hermes
 
       ::free(coeff_vec_back);
       delete residual_back;
+      this->problem_size = -1;
     }
 
     template<typename Scalar>
@@ -341,9 +320,13 @@ namespace Hermes
       // Output.
       this->info("\n\tNewton: iteration %d,", this->get_current_iteration_number());
       this->info("\t\tresidual norm: %g,", this->get_parameter_value(this->p_residual_norms).back());
-      this->info("\t\tsolution norm: %g,", this->get_parameter_value(this->p_solution_norms).back());
-      this->info("\t\tsolution change norm: %g.", this->get_parameter_value(this->p_solution_change_norms).back());
-      this->info("\t\trelative solution change: %g.", this->get_parameter_value(this->p_solution_change_norms).back() / this->get_parameter_value(this->p_solution_norms)[this->get_parameter_value(this->p_solution_norms).size() - 2]);
+      
+      double solution_norm = this->get_parameter_value(this->p_solution_norms).back();
+      double previous_solution_norm = this->get_parameter_value(this->p_solution_norms)[this->get_parameter_value(this->p_solution_norms).size() - 2];
+      double solution_change_norm = this->get_parameter_value(this->p_solution_change_norms).back();
+      this->info("\t\tsolution norm: %g,", solution_norm);
+      this->info("\t\tsolution change norm: %g.", solution_change_norm);
+      this->info("\t\trelative solution change: %g.", solution_change_norm / previous_solution_norm);
     }
 
     template<typename Scalar>
@@ -429,6 +412,8 @@ namespace Hermes
         {
           // Assemble just the residual.
           this->assemble_residual(coeff_vec);
+          // Current residual norm.
+          this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
 
           // Test convergence - if in this loop we found a solution.
           this->info("\t\ttest convergence...");
@@ -493,6 +478,9 @@ namespace Hermes
           this->solve_linear_system(coeff_vec);
           // Assemble next residual for both reusage and convergence test.
           this->assemble_residual(coeff_vec);
+          // Current residual norm.
+          this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
+
           // Test whether it was okay to reuse the jacobian.
           if(!this->jacobian_reused_okay(successful_steps_jacobian))
           {
@@ -528,7 +516,7 @@ namespace Hermes
 
         // Reassemble the jacobian once not reusable anymore.
         this->info("\t\tre-calculating Jacobian.");
-        this->assemble(coeff_vec);
+        this->assemble_jacobian(coeff_vec);
 
         // Set factorization schemes.
         if(this->jacobian_reusable)
