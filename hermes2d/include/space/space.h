@@ -492,7 +492,6 @@ namespace Hermes
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
       friend class DiscreteProblemThreadAssembler<Scalar>;
-      template<typename T> friend class CalculationContinuity;
     };
   }
 }

@@ -271,7 +271,6 @@ namespace Hermes
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class Views::BaseView;
       template<typename T> friend class Views::VectorBaseView;
-      template<typename T> friend class CalculationContinuity;
       template<typename T> friend class OGProjection;
       template<typename T> friend class OGProjectionNOX;
       template<typename T> friend class Adapt;

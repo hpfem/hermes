@@ -71,9 +71,6 @@ int main(int argc, char* argv[])
 	// Choose a Butcher's table or define your own.
 	ButcherTable bt(butcher_table_type);
 
-	// Class for progressive saving of solutions and all necessary classes for the computation.
-	CalculationContinuity<double> continuity(CalculationContinuity<double>::onlyTime);
-
 	// Initialize the time.
 	double current_time = 0;
 
@@ -100,28 +97,7 @@ int main(int argc, char* argv[])
 	// Solution pointer.
 	MeshFunctionSharedPtr<double> sln_time_prev = new ConstantSolution<double>(mesh, TEMP_INIT);
 
-	if(REUSE_SOLUTION && continuity.have_record_available())
-	{
-		try
-		{
-			continuity.get_last_record()->load_mesh(mesh);
-			space = continuity.get_last_record()->load_space(mesh, &bcs);
-			continuity.get_last_record()->load_solution(sln_time_prev, space);
-			Views::ScalarView s;
-			s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_VAL_0);
-			s.wait_for_close();
-			current_time = continuity.get_last_record()->get_time();
-		}
-		catch(Hermes2D::CalculationContinuityException& e)
-		{
-			e.print_msg();
-		}
-	}
-	else
-	{
-		space = new H1Space<double>(mesh, &bcs, P_INIT);
-	}
-
+space = new H1Space<double>(mesh, &bcs, P_INIT);
 
 	CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
 		&current_time, TEMP_INIT, T_FINAL);
@@ -167,9 +143,6 @@ int main(int argc, char* argv[])
 		sprintf(title, "Time %3.2f s", current_time);
 		Tview.set_title(title);
 		Tview.show(sln_time_new);
-
-		// Save the progress.
-		continuity.add_record(current_time, mesh, space, sln_time_prev);
 
 		// Copy solution for the new time step.
 		sln_time_prev->copy(sln_time_new);
