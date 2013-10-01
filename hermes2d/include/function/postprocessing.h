@@ -31,7 +31,7 @@ namespace Hermes
         : public Hermes::Mixins::TimeMeasurable,
         public Hermes::Mixins::Loggable,
         public Hermes::Hermes2D::Mixins::Parallel,
-        public Hermes::Hermes2D::Mixins::StateQueryable
+        public Hermes::Mixins::StateQueryable
       {
       public:
         Limiter(SpaceSharedPtr<Scalar> space, Scalar* solution_vector);

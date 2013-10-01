@@ -31,7 +31,7 @@
 namespace Hermes
 {
   namespace Preconditioners
-{
+  {
     template<typename Scalar>
     IfpackPrecond<Scalar>::IfpackPrecond(const char *cls, const char *type)
     {

@@ -13,26 +13,8 @@ namespace Hermes
     *
     */
 
-    /// \ingroup g_mixins2d
-    /// \brief Namespace for mixin classes.
-    /// These classes always serve one particular purpose that multiple classes of the Hermes2D library
-    /// could use - setting of spaces, output of linear algebraic structures, ...
     namespace Mixins
     {
-      /// \ingroup g_mixins2d
-      /// Mixin that allows for asking about the instance state (ok / not ok).
-      class HERMES_API StateQueryable
-      {
-      public:
-        /// Ask if the instance is fine.
-        virtual bool isOkay() const = 0;
-
-        /// Get class name, for the purpose of messaging.
-        virtual std::string getClassName() const = 0;
-
-        /// Method to handle the state.
-        void check() const;
-      };
 
       /// \ingroup g_mixins2d
       /// Any XML parsing class should inherit from this mixin.

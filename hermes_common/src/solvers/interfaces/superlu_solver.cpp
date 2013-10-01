@@ -114,7 +114,7 @@ namespace Hermes
 
     template<typename Scalar>
     SuperLUSolver<Scalar>::SuperLUSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs)
-      : DirectSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
+      : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
       , local_Ax(NULL), local_rhs(NULL)
     {
       R = NULL;

@@ -21,11 +21,11 @@
 */
 #ifndef __HERMES_COMMON_PRECOND_IFPACK_H_
 #define __HERMES_COMMON_PRECOND_IFPACK_H_
-#include "../config.h"
+#include "../../config.h"
 #ifdef HAVE_IFPACK
 
 #include "precond.h"
-#include "epetra.h"
+#include "interfaces/epetra.h"
 #include <Ifpack_Preconditioner.h>
 
 namespace Hermes

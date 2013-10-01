@@ -71,16 +71,28 @@ namespace Hermes
 
       // See the base class for details, the following serves only for avoiding C++ name-hiding.
       using Solver<Scalar>::solve;
+      
       /// Basic solve method - in linear solvers it serves only as an initial guess for iterative solvers.
       /// \param[in] coeff_vec initiall guess.
       virtual void solve(Scalar* coeff_vec);
+
+      /// Handle the jacobian re-calculation and re-usage of a previous one.
+      void conditionally_assemble(Scalar* coeff_vec = NULL, bool force_reuse_jacobian_values = false, bool assemble_residual = true);
+      
+      /// Get the Linear solver (thus influence its behavior).
+      Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_solver();
+      SparseMatrix<Scalar>* get_jacobian();
+      Vector<Scalar>* get_residual();
 
     protected:
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "LinearSolver"; }
 
-      void init_linear();
+      /// Linear solver.
+      Hermes::Solvers::LinearMatrixSolver<Scalar>* matrix_solver;
+      
+      void init_linear(bool force_use_direct_solver);
     };
   }
 }

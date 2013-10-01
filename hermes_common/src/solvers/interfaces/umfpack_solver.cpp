@@ -44,7 +44,7 @@ namespace Hermes
 
     template<typename Scalar>
     UMFPackLinearMatrixSolver<Scalar>::UMFPackLinearMatrixSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs)
-      : DirectSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
+      : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
     {
       umfpack_di_defaults(Control);
     }

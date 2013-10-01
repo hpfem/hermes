@@ -16,13 +16,23 @@
 #include "common.h"
 #include "matrix.h"
 #ifdef WIN32
-  #include <Windows.h>
+#include <Windows.h>
 #endif
 
 namespace Hermes
 {
   namespace Mixins
   {
+    void StateQueryable::check() const
+    {
+      if(!this->isOkay())
+      {
+        std::stringstream ss;
+        ss << "The instance of " << this->getClassName() << " is not OK.";
+        throw Hermes::Exceptions::Exception(ss.str().c_str());
+      }
+    }
+
     Loggable::LoggerMonitor Loggable::logger_monitor;
     char* Loggable::staticLogFileName = NULL;
 
@@ -509,7 +519,7 @@ namespace Hermes
       this->verbose_callback = callback;
     }
 
-    
+
 
     TimeMeasurable::TimeMeasurable(const char *name) : period_name(name == NULL ? "unnamed" : name)
     {

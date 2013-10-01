@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_PETSC_SOLVER_H_
 
 #include "algebra/matrix.h"
-#include "linear_matrix_solver.h"
+#include "solvers/linear_matrix_solver.h"
 
 #ifdef WITH_PETSC
 #include <petsc.h>

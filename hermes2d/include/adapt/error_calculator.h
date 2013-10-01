@@ -42,7 +42,7 @@ namespace Hermes
       public Hermes::Mixins::TimeMeasurable,
       public Hermes::Mixins::Loggable,
       public Hermes::Hermes2D::Mixins::Parallel,
-      public Hermes::Hermes2D::Mixins::StateQueryable
+      public Hermes::Mixins::StateQueryable
     {
     public:
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,

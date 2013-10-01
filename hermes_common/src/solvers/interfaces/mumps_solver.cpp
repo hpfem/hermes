@@ -526,7 +526,7 @@ namespace Hermes
 
     template<typename Scalar>
     MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) :
-      DirectSolver<Scalar>(), m(m), rhs(rhs)
+      DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs)
     {
       inited = false;
 

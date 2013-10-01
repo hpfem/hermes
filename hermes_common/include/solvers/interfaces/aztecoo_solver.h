@@ -21,7 +21,7 @@
 */
 #ifndef __HERMES_COMMON_AZTECOO_SOLVER_H_
 #define __HERMES_COMMON_AZTECOO_SOLVER_H_
-#include "../config.h"
+#include "../../config.h"
 #ifdef HAVE_AZTECOO
 #include "epetra.h"
 #include "linear_matrix_solver.h"

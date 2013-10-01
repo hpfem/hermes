@@ -97,9 +97,9 @@ namespace Hermes
     {
       free();
       /*
-         Temporarily suspended - introduced a memory leak
-         Reason: heap corruption upon/after execution in Agros.
-         Temporarily suspended - so far attempts to replicate in Hermes failed.
+      Temporarily suspended - introduced a memory leak
+      Reason: heap corruption upon/after execution in Agros.
+      Temporarily suspended - so far attempts to replicate in Hermes failed.
       */
       // delete this->paralutionVector;
     }
@@ -130,14 +130,14 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    AbstractParalutionLinearMatrixSolver<Scalar>::AbstractParalutionLinearMatrixSolver() : LoopSolver<Scalar>(), matrix(NULL), rhs(NULL), paralutionSolver(NULL)
+    AbstractParalutionLinearMatrixSolver<Scalar>::AbstractParalutionLinearMatrixSolver() : LoopSolver<Scalar>(NULL, NULL), matrix(NULL), rhs(NULL), paralutionSolver(NULL)
     {
       this->set_max_iters(1000);
       this->set_tolerance(1e-8, AbsoluteTolerance);
     }
 
     template<typename Scalar>
-    AbstractParalutionLinearMatrixSolver<Scalar>::AbstractParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : LoopSolver<Scalar>(), matrix(matrix), rhs(rhs), paralutionSolver(NULL)
+    AbstractParalutionLinearMatrixSolver<Scalar>::AbstractParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : LoopSolver<Scalar>(matrix, rhs), matrix(matrix), rhs(rhs), paralutionSolver(NULL)
     {
       this->set_max_iters(1000);
       this->set_tolerance(1e-8, AbsoluteTolerance);
@@ -164,7 +164,7 @@ namespace Hermes
       this->solve(NULL);
     }
 
-    
+
     template<typename Scalar>
     void AbstractParalutionLinearMatrixSolver<Scalar>::presolve_init()
     {
@@ -172,7 +172,7 @@ namespace Hermes
       if(this->reuse_scheme != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
         this->reset_internal_solver();
       this->init_internal_solver();
-      
+
       // Set verbose_level.
       if(this->get_verbose_output())
         this->paralutionSolver->Verbose(10);
@@ -268,13 +268,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver() : AbstractParalutionLinearMatrixSolver<Scalar>(), IterSolver<Scalar>(), preconditioner(NULL)
+    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver() : AbstractParalutionLinearMatrixSolver<Scalar>(), IterSolver<Scalar>(NULL, NULL), LoopSolver<Scalar>(NULL, NULL), preconditioner(NULL)
     {
       this->set_precond(new Preconditioners::ParalutionPrecond<Scalar>(ILU));
     }
 
     template<typename Scalar>
-    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : AbstractParalutionLinearMatrixSolver<Scalar>(matrix, rhs), IterSolver<Scalar>(), preconditioner(NULL)
+    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : AbstractParalutionLinearMatrixSolver<Scalar>(matrix, rhs), IterSolver<Scalar>(matrix, rhs), LoopSolver<Scalar>(matrix, rhs), preconditioner(NULL)
     {
       this->set_precond(new Preconditioners::ParalutionPrecond<Scalar>(ILU));
     }
@@ -350,7 +350,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    AMGParalutionLinearMatrixSolver<Scalar>::AMGParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : AbstractParalutionLinearMatrixSolver<Scalar>(matrix, rhs), AMGSolver<Scalar>()
+    AMGParalutionLinearMatrixSolver<Scalar>::AMGParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : AbstractParalutionLinearMatrixSolver<Scalar>(matrix, rhs), AMGSolver<Scalar>(matrix, rhs), LoopSolver<Scalar>(matrix, rhs)
     {
     }
 

@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_UMFPACK_SOLVER_H_
 #include "config.h"
 #ifdef WITH_UMFPACK
-#include "linear_matrix_solver.h"
+#include "solvers/linear_matrix_solver.h"
 #include "algebra/cs_matrix.h"
 
 extern "C"

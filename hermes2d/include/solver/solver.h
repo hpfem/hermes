@@ -39,10 +39,10 @@ namespace Hermes
       public Hermes::Mixins::TimeMeasurable, 
       public Hermes::Mixins::SettableComputationTime, 
       public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
-      public Hermes::Mixins::OutputAttachable,
+      public virtual Hermes::Mixins::OutputAttachable,
       public Hermes::Algebra::Mixins::MatrixRhsOutput<Scalar>, 
       public Hermes::Mixins::IntegrableWithGlobalOrder, 
-      public Hermes::Hermes2D::Mixins::StateQueryable, 
+      public Hermes::Mixins::StateQueryable, 
       public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings,
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>
     {
@@ -101,15 +101,6 @@ namespace Hermes
       /// Sets the jacobian to be constant, i.e. reused whenever possible.
       void set_jacobian_constant(bool to_set = true);
 
-      /// Get the Jacobian.
-      Hermes::Algebra::SparseMatrix<Scalar>* get_jacobian();
-
-      /// Get the Residual.
-      Hermes::Algebra::Vector<Scalar>* get_residual();
-
-      /// Get the Linear solver (thus influence its behavior).
-      Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_solver();
-
       /// If the cache should not be used for any reason.
       virtual void set_do_not_use_cache(bool to_set = true);
       
@@ -130,10 +121,9 @@ namespace Hermes
       /// Get UMFPACK numerical factorization data provided the used matrix solver is UMFPACK
       virtual double get_UMFPACK_reporting_data(UMFPACK_reporting_data_value data_value);
 
-    protected:
-      /// Handle the jacobian re-calculation and re-usage of a previous one.
-      void conditionally_assemble(Scalar* coeff_vec = NULL, bool force_reuse_jacobian_values = false, bool assemble_residual = true);
+      virtual Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_solver() = 0;
 
+    protected:
       /// Internal checking.
       virtual bool isOkay() const;
       
@@ -149,23 +139,11 @@ namespace Hermes
       /// The solution vector.
       Scalar* sln_vector;
 
-      /// Jacobian.
-      Hermes::Algebra::SparseMatrix<Scalar>* jacobian;
-
-      /// Residual.
-      Vector<Scalar>* residual;
-
-      /// Linear solver.
-      Hermes::Solvers::LinearMatrixSolver<Scalar>* matrix_solver;
-      
       /// This instance owns its DP.
       const bool own_dp;
 
       /// Number of degrees of freedom.
       int ndof;
-
-      /// For deciding if the jacobian is constant at this point.
-      virtual bool reuse_jacobian_values();
 
       /// Switch for UMFPACK reporting.
       bool do_UMFPACK_reporting;

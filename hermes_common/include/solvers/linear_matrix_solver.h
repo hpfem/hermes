@@ -100,7 +100,7 @@ namespace Hermes
     class HERMES_API LinearMatrixSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable
     {
     public:
-      LinearMatrixSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+      LinearMatrixSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs);
       DirectSolver<Scalar>* as_DirectSolver() const;
       LoopSolver<Scalar>* as_LoopSolver() const;
       IterSolver<Scalar>* as_IterSolver() const;
@@ -144,9 +144,15 @@ namespace Hermes
       /// Dummy methods that are implemented in the appropriate classes.
       virtual double get_residual_norm();
 
+      SparseMatrix<Scalar>* get_matrix();
+      Vector<Scalar>* get_rhs();
+
     protected:
       /// Factorization scheme
       MatrixStructureReuseScheme reuse_scheme;
+
+      SparseMatrix<Scalar>* general_matrix;
+      Vector<Scalar>* general_rhs;
 
       /// Solution vector.
       Scalar *sln;
@@ -209,7 +215,7 @@ namespace Hermes
     class HERMES_API DirectSolver : public LinearMatrixSolver<Scalar>
     {
     public:
-      DirectSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+      DirectSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs);
       virtual void solve() = 0;
       virtual void solve(Scalar* initial_guess);
 
@@ -232,7 +238,7 @@ namespace Hermes
     class HERMES_API LoopSolver : public LinearMatrixSolver<Scalar>
     {
     public:
-      LoopSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+      LoopSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs);
 
       /// Get the number of iterations performed.
       virtual int get_num_iters() = 0;
@@ -278,7 +284,7 @@ namespace Hermes
     class HERMES_API IterSolver : public virtual LoopSolver<Scalar>
     {
     public:
-      IterSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+      IterSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs);
 
       /// Set preconditioner.
       virtual void set_precond(Precond<Scalar> *pc) = 0;
@@ -301,7 +307,7 @@ namespace Hermes
     class HERMES_API AMGSolver : public virtual LoopSolver<Scalar>
     {
     public:
-      AMGSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+      AMGSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs);
 
       /// Set smoother (an iterative linear matrix solver).
       virtual void set_smoother(IterSolverType solverType, PreconditionerType preconditionerType);

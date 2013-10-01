@@ -16,461 +16,442 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file linear_solver.cpp
-\brief General linear solver functionality.
-*/
-#include "linear_matrix_solver.h"
-#include "solvers/interfaces/umfpack_solver.h"
-#include "solvers/interfaces/superlu_solver.h"
-#include "solvers/interfaces/amesos_solver.h"
-#include "solvers/interfaces/petsc_solver.h"
-#include "solvers/interfaces/mumps_solver.h"
-#include "solvers/interfaces/aztecoo_solver.h"
-#include "solvers/interfaces/paralution_solver.h"
-#include "api.h"
-#include "exceptions.h"
+
+#include "picard_matrix_solver.h"
+#include "dense_matrix_operations.h"
 
 using namespace Hermes::Algebra;
+using namespace Hermes::Algebra::DenseMatrixOperations;
 
 namespace Hermes
 {
   namespace Solvers
   {
     template<typename Scalar>
-    LinearMatrixSolver<Scalar>::LinearMatrixSolver(MatrixStructureReuseScheme reuse_scheme) : reuse_scheme(reuse_scheme)
+    PicardMatrixSolver<Scalar>::PicardMatrixSolver() : NonlinearMatrixSolver<Scalar>()
     {
-      sln = NULL;
-      time = -1.0;
-      n_eq = 1;
-      node_wise_ordering = false;
+      init_picard();
     }
 
     template<typename Scalar>
-    LinearMatrixSolver<Scalar>::~LinearMatrixSolver()
+    PicardMatrixSolver<Scalar>::~PicardMatrixSolver()
     {
-      if(sln != NULL)
-        delete [] sln;
     }
 
     template<typename Scalar>
-    Scalar *LinearMatrixSolver<Scalar>::get_sln_vector()
+    bool PicardMatrixSolver<Scalar>::isOkay() const
     {
-      return sln;
-    }
-
-    template<typename Scalar>
-    double LinearMatrixSolver<Scalar>::get_time()
-    {
-      return time;
-    }
-
-    template<typename Scalar>
-    void LinearMatrixSolver<Scalar>::set_reuse_scheme()
-    {
-      set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
-    }
-
-    template<typename Scalar>
-    MatrixStructureReuseScheme LinearMatrixSolver<Scalar>::get_used_reuse_scheme() const 
-    { 
-      return reuse_scheme; 
-    }
-
-    template<typename Scalar>
-    void LinearMatrixSolver<Scalar>::set_reuse_scheme(MatrixStructureReuseScheme reuse_scheme) 
-    {
-      this->reuse_scheme = reuse_scheme; 
-    }
-
-    template<typename Scalar>
-    void LinearMatrixSolver<Scalar>::use_node_wise_ordering(unsigned int num_pdes)
-    {
-      this->reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
-      this->n_eq = num_pdes;
-      this->node_wise_ordering = true;
-    }
-
-    template<typename Scalar>
-    void LinearMatrixSolver<Scalar>::use_equations_wise_ordering()
-    {
-      this->reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH; 
-      this->node_wise_ordering = false;
-    }
-
-    template<typename Scalar>
-    double LinearMatrixSolver<Scalar>::get_residual_norm()
-    {
-      throw Exceptions::MethodNotOverridenException("LinearMatrixSolver<Scalar>::get_residual_norm");
-      return 0.;
-    }
-
-    template<typename Scalar>
-    DirectSolver<Scalar>* LinearMatrixSolver<Scalar>::as_DirectSolver() const
-    {
-      DirectSolver<Scalar>* solver = dynamic_cast<DirectSolver<Scalar>*>(const_cast<LinearMatrixSolver<Scalar>*>(this));
-      if(solver)
-        return solver;
-      else
+      if(num_last_vectors_used <= 1)
       {
-        throw Hermes::Exceptions::LinearMatrixSolverException("Can not cast to DirectSolver.");
+        throw Hermes::Exceptions::Exception("Picard: Bad number of last iterations to be used (must be at least one).");
+        return false;
       }
+
+      return NonlinearMatrixSolver<Scalar>::isOkay();
     }
 
     template<typename Scalar>
-    LoopSolver<Scalar>* LinearMatrixSolver<Scalar>::as_LoopSolver() const
+    bool PicardMatrixSolver<Scalar>::handle_convergence_state_return_finished(NonlinearConvergenceState state, Scalar* coeff_vec)
     {
-      LoopSolver<Scalar>* solver = dynamic_cast<LoopSolver<Scalar>*>(const_cast<LinearMatrixSolver<Scalar>*>(this));
-      if(solver)
-        return solver;
-      else
+      // If we have not converged and everything else is ok, we finish.
+      if(state == NotConverged)
+        return false;
+      // And now the finishing states (both good and bad).
+      this->finalize_solving(coeff_vec);
+
+      // Act upon the state.
+      switch(state)
       {
-        throw Hermes::Exceptions::LinearMatrixSolverException("Can not cast to LoopSolver.");
-      }
-    }
-
-    template<typename Scalar>
-    IterSolver<Scalar>* LinearMatrixSolver<Scalar>::as_IterSolver() const
-    {
-      IterSolver<Scalar>* solver = dynamic_cast<IterSolver<Scalar>*>(const_cast<LinearMatrixSolver<Scalar>*>(this));
-      if(solver)
-        return solver;
-      else
-      {
-        throw Hermes::Exceptions::LinearMatrixSolverException("Can not cast to IterSolver.");
-      }
-    }
-
-    template<typename Scalar>
-    AMGSolver<Scalar>* LinearMatrixSolver<Scalar>::as_AMGSolver() const
-    {
-      AMGSolver<Scalar>* solver = dynamic_cast<AMGSolver<Scalar>*>(const_cast<LinearMatrixSolver<Scalar>*>(this));
-      if(solver)
-        return solver;
-      else
-      {
-        throw Hermes::Exceptions::LinearMatrixSolverException("Can not cast to AMGSolver.");
-      }
-    }
-
-
-    template<typename Scalar>
-    ExternalSolver<Scalar>* static_create_external_solver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs)
-    {
-      throw Exceptions::MethodNotOverridenException("ExternalSolver<Scalar>::create_external_solver");
-      return NULL;
-    }
-
-    template<>
-    ExternalSolver<double>::creation ExternalSolver<double>::create_external_solver = static_create_external_solver<double>;
-    template<>
-    ExternalSolver<std::complex<double> >::creation ExternalSolver<std::complex<double> >::create_external_solver = static_create_external_solver<std::complex<double> >;
-
-    template<>
-    HERMES_API LinearMatrixSolver<double>* create_linear_solver(Matrix<double>* matrix, Vector<double>* rhs, bool use_direct_solver)
-    {
-      Vector<double>* rhs_dummy = NULL;
-      switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
-      {
-      case Hermes::SOLVER_EXTERNAL:
-        {
-          if(rhs != NULL)
-            return ExternalSolver<double>::create_external_solver(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-          else
-            return ExternalSolver<double>::create_external_solver(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
-        }
-      case Hermes::SOLVER_AZTECOO:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
-#if defined HAVE_AZTECOO && defined HAVE_EPETRA
-          if(rhs != NULL) return new AztecOOSolver<double>(static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs));
-          else return new AztecOOSolver<double>(static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("AztecOO not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_AMESOS:
-        {
-#if defined HAVE_AMESOS && defined HAVE_EPETRA
-          if(rhs != NULL) return new AmesosSolver<double>("Amesos_Klu", static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs));
-          else return new AmesosSolver<double>("Amesos_Klu", static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("Amesos not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_MUMPS:
-        {
-#ifdef WITH_MUMPS
-          if(rhs != NULL) return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-          else return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("MUMPS was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_PETSC:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
-#ifdef WITH_PETSC
-          if(rhs != NULL) return new PetscLinearMatrixSolver<double>(static_cast<PetscMatrix<double>*>(matrix), static_cast<PetscVector<double>*>(rhs));
-          else return new PetscLinearMatrixSolver<double>(static_cast<PetscMatrix<double>*>(matrix), static_cast<PetscVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("PETSc not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_UMFPACK:
-        {
-#ifdef WITH_UMFPACK
-          if(rhs != NULL) return new UMFPackLinearMatrixSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-          else return new UMFPackLinearMatrixSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_PARALUTION_ITERATIVE:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
-#ifdef WITH_PARALUTION
-          return new IterativeParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
-#else
-          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_PARALUTION_AMG:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The AMG solver PARALUTION selected as a direct solver.");
-#ifdef WITH_PARALUTION
-          return new AMGParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
-#else
-          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_SUPERLU:
-        {
-#ifdef WITH_SUPERLU
-          if(rhs != NULL) return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-          else return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("SuperLU was not installed.");
-#endif
-          break;
-        }
+      case Converged:
+        this->info("\tPicard: done.\n");
+        break;
+      case AboveMaxIterations:
+        throw Exceptions::NonlinearException(AboveMaxIterations);
+        break;
+      case Error:
+        throw Exceptions::Exception("Unknown exception in PicardSolver.");
+        break;
       default:
-        throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_linear_solver().");
+        throw Exceptions::Exception("Unknown ConvergenceState in PicardSolver.");
+        break;
       }
-      return NULL;
+
+      // Return that we should finish.
+      return true;
     }
 
-    template<>
-    HERMES_API LinearMatrixSolver<std::complex<double> >* create_linear_solver(Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs, bool use_direct_solver)
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::set_num_last_vector_used(int num)
     {
-      Vector<std::complex<double> >* rhs_dummy = NULL;
-      switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
+      this->num_last_vectors_used = num;
+    }
+
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::set_anderson_beta(double beta)
+    {
+      this->anderson_beta = beta;
+    }
+
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::use_Anderson_acceleration(bool to_set)
+    {
+      anderson_is_on = to_set;
+    }
+
+    template<typename Scalar>
+    int PicardMatrixSolver<Scalar>::get_current_iteration_number()
+    {
+      return this->get_parameter_value(this->p_iteration);
+    }
+
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::init_picard()
+    {
+      num_last_vectors_used = 3;
+      anderson_beta = 1.0;
+      anderson_is_on = false;
+      this->set_tolerance(1e-3, SolutionChangeRelative);
+    }
+
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::init_anderson()
+    {
+      if (anderson_is_on) 
       {
-      case Hermes::SOLVER_EXTERNAL:
-        {
-          if(rhs != NULL)
-            return ExternalSolver<std::complex<double> >::create_external_solver(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-          else
-            return ExternalSolver<std::complex<double> >::create_external_solver(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
-        }
-      case Hermes::SOLVER_AZTECOO:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
-#if defined HAVE_AZTECOO && defined HAVE_EPETRA
-          if(rhs != NULL) return new AztecOOSolver<std::complex<double> >(static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs));
-          else return new AztecOOSolver<std::complex<double> >(static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("AztecOO not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_AMESOS:
-        {
-#if defined HAVE_AMESOS && defined HAVE_EPETRA
-          if(rhs != NULL) return new AmesosSolver<std::complex<double> >("Amesos_Klu", static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs));
-          else return new AmesosSolver<std::complex<double> >("Amesos_Klu", static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("Amesos not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_MUMPS:
-        {
-#ifdef WITH_MUMPS
-          if(rhs != NULL) return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-          else return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("MUMPS was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_PETSC:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
-#ifdef WITH_PETSC
-          if(rhs != NULL) return new PetscLinearMatrixSolver<std::complex<double> >(static_cast<PetscMatrix<std::complex<double> >*>(matrix), static_cast<PetscVector<std::complex<double> >*>(rhs));
-          else return new PetscLinearMatrixSolver<std::complex<double> >(static_cast<PetscMatrix<std::complex<double> >*>(matrix), static_cast<PetscVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("PETSc not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_UMFPACK:
-        {
-#ifdef WITH_UMFPACK
-          if(rhs != NULL) return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-          else return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_PARALUTION_ITERATIVE:
-      case Hermes::SOLVER_PARALUTION_AMG:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
-#ifdef WITH_PARALUTION
-          throw Hermes::Exceptions::Exception("PARALUTION only works for real problems.");
-#else
-          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_SUPERLU:
-        {
-#ifdef WITH_SUPERLU
-          if(rhs != NULL) return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-          else return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("SuperLU was not installed.");
-#endif
-          break;
-        }
-      default:
-        throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_linear_solver().");
+        previous_vectors = new Scalar*[num_last_vectors_used];
+        for (int i = 0; i < num_last_vectors_used; i++)
+          previous_vectors[i] = new Scalar[this->dimension];
+        anderson_coeffs = new Scalar[num_last_vectors_used-1];
+        memcpy(previous_vectors[0], this->sln_vector, this->dimension*sizeof(Scalar));
       }
-      return NULL;
     }
 
-    template <typename Scalar>
-    ExternalSolver<Scalar>::ExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) : LinearMatrixSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs)
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::deinit_anderson()
     {
+      if (anderson_is_on)
+      {
+        for (int i = 0; i < num_last_vectors_used; i++)
+          delete [] previous_vectors[i];
+        delete [] previous_vectors;
+        delete [] anderson_coeffs;
+      }
     }
 
-    template <typename Scalar>
-    SimpleExternalSolver<Scalar>::SimpleExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) : ExternalSolver<Scalar>(m, rhs)
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::handle_previous_vectors(unsigned int& vec_in_memory)
     {
+      // If Anderson is used, store the new vector in the memory.
+      if (anderson_is_on)
+      {
+        // If memory not full, just add the vector.
+        if (vec_in_memory < num_last_vectors_used)
+          memcpy(previous_vectors[vec_in_memory++], this->sln_vector, this->dimension * sizeof(Scalar));
+        else
+        {
+          // If memory full, shift all vectors back, forgetting the oldest one.
+          // Save this->sln_vector[] as the newest one.
+          Scalar* oldest_vec = previous_vectors[0];
+
+          for (int i = 0; i < num_last_vectors_used-1; i++)
+            previous_vectors[i] = previous_vectors[i + 1];
+
+          previous_vectors[num_last_vectors_used-1] = oldest_vec;
+
+          memcpy(oldest_vec, this->sln_vector, this->dimension*sizeof(Scalar));
+        }
+
+        if (vec_in_memory >= num_last_vectors_used)
+        {
+          // Calculate Anderson coefficients.
+          this->calculate_anderson_coeffs();
+
+          // Calculate new vector and store it in this->sln_vector[].
+          for (int i = 0; i < this->dimension; i++)
+          {
+            this->sln_vector[i] = 0.;
+            for (int j = 1; j < num_last_vectors_used; j++)
+              this->sln_vector[i] += anderson_coeffs[j-1] * previous_vectors[j][i] - (1.0 - anderson_beta) * anderson_coeffs[j - 1] * (previous_vectors[j][i] - previous_vectors[j - 1][i]);
+          }
+        }
+      }
     }
 
-    template <typename Scalar>
-    void SimpleExternalSolver<Scalar>::solve()
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::calculate_anderson_coeffs()
     {
-      solve(NULL);
+      // If num_last_vectors_used is 2, then there is only one residual, and thus only one alpha coeff which is 1.0.
+      if(num_last_vectors_used == 2)
+      {
+        anderson_coeffs[0] = 1.0;
+        return;
+      }
+
+      // In the following, num_last_vectors_used is at least three.
+      // Thematrix problem will have dimension num_last_vectors_used - 2.
+      int n = num_last_vectors_used - 2;
+
+      // Allocate the matrix system for the Anderson coefficients.
+      Scalar** mat = new_matrix<Scalar>(n, n);
+      Scalar* rhs = new Scalar[n];
+
+      // Set up the matrix and rhs vector.
+      for (int i = 0; i < n; i++)
+      {
+        // Calculate i-th entry of the rhs vector.
+        rhs[i] = 0;
+        for (int k = 0; k < this->dimension; k++)
+        {
+          Scalar residual_n_k = previous_vectors[n + 1][k] - previous_vectors[n][k];
+          Scalar residual_i_k = previous_vectors[i + 1][k] - previous_vectors[i][k];
+          rhs[i] += residual_n_k * (residual_n_k - residual_i_k);
+        }
+        for (int j = 0; j < n; j++)
+        {
+          Scalar val = 0;
+          for (int k = 0; k < this->dimension; k++)
+          {
+            Scalar residual_n_k = previous_vectors[n + 1][k] - previous_vectors[n][k];
+            Scalar residual_i_k = previous_vectors[i + 1][k] - previous_vectors[i][k];
+            Scalar residual_j_k = previous_vectors[j + 1][k] - previous_vectors[j][k];
+            val += (residual_n_k - residual_i_k) * (residual_n_k - residual_j_k);
+          }
+
+          mat[i][j] = val;
+        }
+      }
+
+      // Solve the matrix system.
+      double d;
+      int* perm = new int[n];
+      ludcmp(mat, n, perm, &d);
+      lubksb<Scalar>(mat, n, perm, rhs);
+
+      // Use the result to define the Anderson coefficients. Remember that
+      // n were computed and the last one is 1.0 minus the sum of the 'n' numbers.
+      Scalar sum = 0;
+      for (int i = 0; i < n; i++)
+      {
+        anderson_coeffs[i] = rhs[i];
+        sum += rhs[i];
+      }
+      anderson_coeffs[n] = 1.0 - sum;
+
+      // Clean up.
+      delete [] mat;
+      delete [] rhs;
     }
 
-    template <typename Scalar>
-    void SimpleExternalSolver<Scalar>::solve(Scalar* initial_guess)
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::step_info()
     {
       // Output.
-      this->process_matrix_output(this->m);
-      this->process_vector_output(this->rhs);
+      this->info("\n\tPicard: iteration %d,", this->get_current_iteration_number());
+      double sln_change_norm = this->get_parameter_value(this->p_solution_change_norms).back();
+      double sln_norm = this->get_parameter_value(this->p_solution_norms).back();
 
-      // External process.
-      std::string resultFileName = this->command();
-
-      // Handling of the result file.
-      this->sln = new Scalar[this->m->get_size()];
-      SimpleVector<Scalar> temp;
-      temp.alloc(this->m->get_size());
-      temp.import_from_file((char*)resultFileName.c_str(), "x", EXPORT_FORMAT_PLAIN_ASCII );
-      memcpy(this->sln, temp.v, this->m->get_size() * sizeof(Scalar));
-    }
-
-    template <typename Scalar>
-    DirectSolver<Scalar>::DirectSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme)
-    {
-    }
-
-    template <typename Scalar>
-    void DirectSolver<Scalar>::solve(Scalar* initial_guess)
-    {
-      this->solve();
-    }
-
-    template <typename Scalar>
-    LoopSolver<Scalar>::LoopSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme), max_iters(10000), tolerance(1e-8)
-    {
+      this->info("\n\tPicard: solution change (L2 norm): %g (%g%%).", sln_change_norm, 100. * (sln_change_norm / sln_norm));
     }
 
     template<typename Scalar>
-    void LoopSolver<Scalar>::set_tolerance(double tol)
+    void PicardMatrixSolver<Scalar>::calculate_error(Scalar* coeff_vec)
     {
-      this->tolerance = tol;
-      this->toleranceType = AbsoluteTolerance;
+      // This is the new sln_vector.
+      Scalar* new_sln_vector = this->matrix_solver->get_sln_vector();
+
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(new_sln_vector, this->dimension));
+
+      // sln_vector still stores the old solution.
+      // !!!! coeff_vec stores the Anderson-generated previous solution.
+      double abs_error = 0.;
+      for (int i = 0; i < this->dimension; i++)
+        abs_error += std::abs((this->sln_vector[i] - new_sln_vector[i]) * (this->sln_vector[i] - new_sln_vector[i]));
+      abs_error = std::sqrt(abs_error);
+
+      this->get_parameter_value(this->p_solution_change_norms).push_back(abs_error);
+
+      // only now we can update the sln_vector.
+      memcpy(this->sln_vector, new_sln_vector, sizeof(Scalar)*this->dimension);
     }
 
     template<typename Scalar>
-    void LoopSolver<Scalar>::set_tolerance(double tol, LoopSolverToleranceType toleranceType)
+    void PicardMatrixSolver<Scalar>::init_solving(Scalar*& coeff_vec)
     {
-      this->tolerance = tol;
-      this->toleranceType = toleranceType;
+      this->check();
+      this->tick();
+
+      // Number of DOFs.
+      this->dimension = this->get_dimension();
+
+      if(this->sln_vector != NULL)
+      {
+        delete [] this->sln_vector;
+        this->sln_vector = NULL;
+      }
+
+      this->sln_vector = new Scalar[this->dimension];
+
+      if(coeff_vec == NULL)
+        memset(this->sln_vector, 0, this->dimension*sizeof(Scalar));
+      else
+        memcpy(this->sln_vector, coeff_vec, this->dimension*sizeof(Scalar));
+
+      this->delete_coeff_vec = false;
+      if(coeff_vec == NULL)
+      {
+        coeff_vec = (Scalar*)calloc(this->dimension, sizeof(Scalar));
+        this->delete_coeff_vec = true;
+      }
+
+      this->on_initialization();
     }
 
     template<typename Scalar>
-    void LoopSolver<Scalar>::set_max_iters(int iters)
+    bool PicardMatrixSolver<Scalar>::do_initial_step_return_finished(Scalar* coeff_vec)
     {
-      this->max_iters = iters;
-    }
+      // Store the initial norm.
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->dimension));
 
-    template <typename Scalar>
-    IterSolver<Scalar>::IterSolver(MatrixStructureReuseScheme reuse_scheme) : LoopSolver<Scalar>(reuse_scheme), precond_yes(false), iterSolverType(CG)
-    {
+      // Solve the linear system.
+      this->solve_linear_system(coeff_vec);
+
+      // Calculate errors.
+      this->calculate_error(coeff_vec);
+
+      // Use the solution vector for Anderson.
+      this->handle_previous_vectors(this->get_parameter_value(this->p_vec_in_memory));
+
+      // Info.
+      this->step_info();
+
+      // coeff_vec stores the previous iteration - after this, for the first ordinary step, it will hold the initial step solution.
+      memcpy(coeff_vec, this->sln_vector, sizeof(Scalar)*this->dimension);
+
+      // Test convergence - if the first iteration is already a solution.
+      if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
+        return true;
+
+      return (this->on_initial_step_end() == false);
     }
 
     template<typename Scalar>
-    void IterSolver<Scalar>::set_solver_type(IterSolverType iterSolverType)
+    void PicardMatrixSolver<Scalar>::solve_linear_system(Scalar* coeff_vec)
     {
-      this->iterSolverType = iterSolverType;
-    }
+      // Assemble the residual and also jacobian when necessary (nonconstant jacobian, not reusable, ...).
+      if(this->jacobian_reusable && this->constant_jacobian)
+      {
+        this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
+        this->assemble_residual(coeff_vec);
+      }
+      else
+      {
+        this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+        this->assemble(coeff_vec);
+        this->jacobian_reusable = true;
+      }
 
-    template <typename Scalar>
-    AMGSolver<Scalar>::AMGSolver(MatrixStructureReuseScheme reuse_scheme) : LoopSolver<Scalar>(reuse_scheme), smootherSolverType(CG), smootherPreconditionerType(MultiColoredSGS)
-    {
+      // Solve, if the solver is iterative, give him the initial guess.
+      this->matrix_solver->solve(coeff_vec);
+      this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
     }
 
     template<typename Scalar>
-    void AMGSolver<Scalar>::set_smoother(IterSolverType solverType_, PreconditionerType preconditionerType_)
+    void PicardMatrixSolver<Scalar>::solve(Scalar* coeff_vec)
     {
-      this->smootherPreconditionerType = preconditionerType_;
-      this->smootherSolverType = solverType_;
+      this->init_solving(coeff_vec);
+
+      this->init_anderson();
+
+#pragma region parameter_setup
+      // Initialize parameters.
+      unsigned int vec_in_memory = 1; ///< There is already one vector in the memory.
+      unsigned int it = 1;
+      Hermes::vector<double> solution_norms;
+      Hermes::vector<double> solution_change_norms;
+      Hermes::vector<double> residual_norms;
+
+      // Link parameters.
+      this->set_parameter_value(this->p_iteration, &it);
+      this->set_parameter_value(this->p_vec_in_memory, &vec_in_memory);
+      this->set_parameter_value(this->p_residual_norms, &residual_norms);
+      this->set_parameter_value(this->p_solution_norms, &solution_norms);
+      this->set_parameter_value(this->p_solution_change_norms, &solution_change_norms);
+#pragma endregion
+
+      /// Initial iteratios is handled separately (though it is completely identical - this is just to reflect Newton solver).
+      if(this->do_initial_step_return_finished(coeff_vec))
+      {
+        this->info("\tPicard: aborted.");
+        // No vector passed, sln_vector in this case contains the solution.
+        this->finalize_solving(coeff_vec);
+        return;
+      }
+      else
+        it++; 
+
+      while (true)
+      {
+        // Handle the event of step beginning.
+        if(!this->on_step_begin())
+        {
+          this->info("\tPicard: aborted.");
+          this->finalize_solving(coeff_vec);
+          return;
+        }
+
+        // Solve.
+        this->solve_linear_system(coeff_vec);
+
+        // Calculate error.
+        this->calculate_error(coeff_vec);
+
+        // Use the solution vector for Anderson.
+        this->handle_previous_vectors(this->get_parameter_value(this->p_vec_in_memory));
+
+        // Output for the user.
+        this->step_info();
+
+        // Test convergence - if in this iteration we found a solution.
+        if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
+          return;
+
+        // Handle the event of end of a step.
+        if(!this->on_step_end())
+        {
+          this->info("Aborted");
+          this->finalize_solving(coeff_vec);
+          return;
+        }
+
+        // Increase counter of iterations.
+        it++;
+
+        // Renew the last iteration vector.
+        memcpy(coeff_vec, this->sln_vector, this->dimension*sizeof(Scalar));
+      }
     }
 
-    template class HERMES_API LinearMatrixSolver<double>;
-    template class HERMES_API LinearMatrixSolver<std::complex<double> >;
-    template class HERMES_API SimpleExternalSolver<double>;
-    template class HERMES_API SimpleExternalSolver<std::complex<double> >;
-    template class HERMES_API ExternalSolver<double>;
-    template class HERMES_API ExternalSolver<std::complex<double> >;
-    template class HERMES_API DirectSolver<double>;
-    template class HERMES_API DirectSolver<std::complex<double> >;
-    template class HERMES_API LoopSolver<double>;
-    template class HERMES_API LoopSolver<std::complex<double> >;
-    template class HERMES_API IterSolver<double>;
-    template class HERMES_API IterSolver<std::complex<double> >;
-    template class HERMES_API AMGSolver<double>;
-    template class HERMES_API AMGSolver<std::complex<double> >;
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::finalize_solving(Scalar* coeff_vec)
+    {
+      this->tick();
+      this->num_iters = this->get_current_iteration_number();
+      this->info("\tPicard: solution duration: %f s.\n", this->last());
+      this->on_finish();
+      this->deinit_solving(coeff_vec);
+    }
+
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::deinit_solving(Scalar* coeff_vec)
+    {
+      if(this->delete_coeff_vec)
+      {
+        ::free(coeff_vec);
+        this->delete_coeff_vec = false;
+      }
+    }
+
+    template class HERMES_API PicardMatrixSolver<double>;
+    template class HERMES_API PicardMatrixSolver<std::complex<double> >;
   }
 }

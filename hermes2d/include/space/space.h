@@ -146,7 +146,7 @@ namespace Hermes
     /// The handling of irregular meshes is desribed in H1Space and HcurlSpace.<br>
     ///
     template<typename Scalar>
-    class HERMES_API Space : public Hermes::Mixins::Loggable, public Hermes::Hermes2D::Mixins::StateQueryable, public Hermes::Hermes2D::Mixins::XMLParsing
+    class HERMES_API Space : public Hermes::Mixins::Loggable, public Hermes::Mixins::StateQueryable, public Hermes::Hermes2D::Mixins::XMLParsing
     {
     public:
       Space();

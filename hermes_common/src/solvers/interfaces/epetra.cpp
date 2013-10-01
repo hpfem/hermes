@@ -52,7 +52,7 @@ namespace Hermes
         this->mat_im = new Epetra_CrsMatrix(*op.mat_im);
       else
         this->mat_im = NULL;
-      
+
       assert(mat != NULL);
       this->grph = new Epetra_CrsGraph( this->mat->Graph() );
       this->std_map = new Epetra_BlockMap( this->grph->Map() );
@@ -61,13 +61,13 @@ namespace Hermes
       this->row_storage = true;
       this->col_storage = false;
     }
-    
+
     template<>
     EpetraMatrix<double>::EpetraMatrix(Epetra_RowMatrix &op)
     {
       this->mat = dynamic_cast<Epetra_CrsMatrix*>(&op);
       assert(mat != NULL);
-      
+
       this->size = this->mat->NumGlobalRows();
       this->grph = const_cast<Epetra_CrsGraph*>(&this->mat->Graph());
       this->std_map = const_cast<Epetra_BlockMap*>(&this->grph->Map());
@@ -76,7 +76,7 @@ namespace Hermes
       this->row_storage = true;
       this->col_storage = false;
     }
-    
+
     template<>
     EpetraMatrix< std::complex<double> >::EpetraMatrix(Epetra_RowMatrix &op)
     {
@@ -233,15 +233,15 @@ namespace Hermes
     {
       SparseMatrix<std::complex<double> >::multiply_with_vector(vector_in, vector_out, vector_out_initialized);
     }
-   
-   template<>
-   void EpetraMatrix<double>::multiply_with_vector(double* vector_in, double* vector_out, bool vector_out_initialized) const
-   {
+
+    template<>
+    void EpetraMatrix<double>::multiply_with_vector(double* vector_in, double* vector_out, bool vector_out_initialized) const
+    {
       Epetra_Vector x(View, mat->OperatorDomainMap(), vector_in);
       Epetra_Vector y(mat->OperatorRangeMap());
       mat->Multiply(false, x, y);
       y.ExtractCopy(vector_out); 
-   }
+    }
 
     template<typename Scalar>
     void EpetraMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
@@ -251,7 +251,7 @@ namespace Hermes
           if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
             add(rows[i], cols[j], mat[i][j]);
     }
-    
+
     template<>
     void EpetraMatrix<double>::multiply_with_Scalar(double value)
     {
@@ -263,18 +263,18 @@ namespace Hermes
     {
       // TODO
     }
-    
+
     template<typename Scalar>
     void EpetraMatrix<Scalar>::add_sparse_matrix(SparseMatrix<Scalar>* mat)
     {
       EpetraMatrix<Scalar>* ep_mat = dynamic_cast<EpetraMatrix<Scalar>*>(mat);
       assert(ep_mat);
-      
+
       EpetraExt::MatrixMatrix::Add(*ep_mat->mat, false, 1.0, *this->mat, 1.0);
       if (this->mat_im && ep_mat->mat_im)
         EpetraExt::MatrixMatrix::Add(*ep_mat->mat_im, false, 1.0, *this->mat_im, 1.0);
     }
-   
+
     template<>
     void EpetraMatrix<double>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
@@ -284,11 +284,11 @@ namespace Hermes
       {
       case DF_MATLAB_SPARSE:
       case EXPORT_FORMAT_PLAIN_ASCII:
-        EpetraExt::RowMatrixToHandle(file, *this->mat);
+      EpetraExt::RowMatrixToHandle(file, *this->mat);
       }
       */
     }
-    
+
     template<>
     void EpetraMatrix<std::complex<double> >::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
@@ -424,7 +424,7 @@ namespace Hermes
     {
       vec->ExtractCopy((double *)v); ///< \todo this can't be used with complex numbers
     }
-    
+
     template<>
     bool EpetraVector<double>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
@@ -435,10 +435,10 @@ namespace Hermes
         EpetraExt::VectorToHandle(file, *this->vec);
         return true;
       }
-      
+
       return false;
     }
-    
+
     template<>
     bool EpetraVector<std::complex<double> >::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {

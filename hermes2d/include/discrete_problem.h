@@ -39,7 +39,7 @@ namespace Hermes
     class HERMES_API DiscreteProblem : 
       public Hermes::Mixins::TimeMeasurable, 
       public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
-      public Hermes::Hermes2D::Mixins::StateQueryable,
+      public Hermes::Mixins::StateQueryable,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings,

@@ -19,8 +19,8 @@
 /*! \file vector.h
 \brief Base class for representations of vectors for different solvers.
 */
-#ifndef __HERMES_COMMON_TUPLE_H
-#define __HERMES_COMMON_TUPLE_H
+#ifndef __HERMES_COMMON_HERMES_VECTOR_H
+#define __HERMES_COMMON_HERMES_VECTOR_H
 
 #include "common.h"
 #include "exceptions.h"

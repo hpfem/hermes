@@ -37,7 +37,7 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    LinearMatrixSolver<Scalar>::LinearMatrixSolver(MatrixStructureReuseScheme reuse_scheme) : reuse_scheme(reuse_scheme)
+    LinearMatrixSolver<Scalar>::LinearMatrixSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs) : reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), general_matrix(matrix), general_rhs(rhs)
     {
       sln = NULL;
       time = -1.0;
@@ -50,12 +50,29 @@ namespace Hermes
     {
       if(sln != NULL)
         delete [] sln;
+
+      if(this->general_matrix)
+        delete this->general_matrix;
+      if(this->general_rhs)
+        delete this->general_rhs;
     }
 
     template<typename Scalar>
     Scalar *LinearMatrixSolver<Scalar>::get_sln_vector()
     {
       return sln;
+    }
+
+    template<typename Scalar>
+    SparseMatrix<Scalar>* LinearMatrixSolver<Scalar>::get_matrix()
+    {
+      return this->general_matrix;
+    }
+
+    template<typename Scalar>
+    Vector<Scalar>* LinearMatrixSolver<Scalar>::get_rhs()
+    {
+      return this->general_rhs;
     }
 
     template<typename Scalar>
@@ -366,7 +383,7 @@ namespace Hermes
     }
 
     template <typename Scalar>
-    ExternalSolver<Scalar>::ExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) : LinearMatrixSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs)
+    ExternalSolver<Scalar>::ExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) : LinearMatrixSolver<Scalar>(m, rhs), m(m), rhs(rhs)
     {
     }
 
@@ -400,7 +417,7 @@ namespace Hermes
     }
 
     template <typename Scalar>
-    DirectSolver<Scalar>::DirectSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme)
+    DirectSolver<Scalar>::DirectSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs) : LinearMatrixSolver<Scalar>(matrix, rhs)
     {
     }
 
@@ -411,7 +428,7 @@ namespace Hermes
     }
 
     template <typename Scalar>
-    LoopSolver<Scalar>::LoopSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme), max_iters(10000), tolerance(1e-8)
+    LoopSolver<Scalar>::LoopSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs) : LinearMatrixSolver<Scalar>(matrix, rhs), max_iters(10000), tolerance(1e-8)
     {
     }
 
@@ -436,7 +453,7 @@ namespace Hermes
     }
 
     template <typename Scalar>
-    IterSolver<Scalar>::IterSolver(MatrixStructureReuseScheme reuse_scheme) : LoopSolver<Scalar>(reuse_scheme), precond_yes(false), iterSolverType(CG)
+    IterSolver<Scalar>::IterSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs) : LoopSolver<Scalar>(matrix, rhs), precond_yes(false), iterSolverType(CG)
     {
     }
 
@@ -447,7 +464,7 @@ namespace Hermes
     }
 
     template <typename Scalar>
-    AMGSolver<Scalar>::AMGSolver(MatrixStructureReuseScheme reuse_scheme) : LoopSolver<Scalar>(reuse_scheme), smootherSolverType(CG), smootherPreconditionerType(MultiColoredSGS)
+    AMGSolver<Scalar>::AMGSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs) : LoopSolver<Scalar>(matrix, rhs), smootherSolverType(CG), smootherPreconditionerType(MultiColoredSGS)
     {
     }
 

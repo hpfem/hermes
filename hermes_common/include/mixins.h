@@ -42,6 +42,21 @@ namespace Hermes
   /// could use - logging, time measurement, ...
   namespace Mixins
   {
+    /// \ingroup g_mixins
+    /// Mixin that allows for asking about the instance state (ok / not ok).
+    class HERMES_API StateQueryable
+    {
+    public:
+      /// Ask if the instance is fine.
+      virtual bool isOkay() const = 0;
+
+      /// Get class name, for the purpose of messaging.
+      virtual std::string getClassName() const = 0;
+
+      /// Method to handle the state.
+      void check() const;
+    };
+
     /// \brief Class the output of which is loggable, i.e. that uses functionality of info(), warn()
     /// Contains the class Static with the following usage:
     /// Anywhere in your program you can write Hermes::Mixins::Loggable::Static::info("whatever you want to output").

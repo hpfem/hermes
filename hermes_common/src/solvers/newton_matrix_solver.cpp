@@ -16,19 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file linear_solver.cpp
-\brief General linear solver functionality.
-*/
-#include "linear_matrix_solver.h"
-#include "solvers/interfaces/umfpack_solver.h"
-#include "solvers/interfaces/superlu_solver.h"
-#include "solvers/interfaces/amesos_solver.h"
-#include "solvers/interfaces/petsc_solver.h"
-#include "solvers/interfaces/mumps_solver.h"
-#include "solvers/interfaces/aztecoo_solver.h"
-#include "solvers/interfaces/paralution_solver.h"
-#include "api.h"
-#include "exceptions.h"
+
+#include "newton_matrix_solver.h"
 
 using namespace Hermes::Algebra;
 
@@ -37,440 +26,572 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    LinearMatrixSolver<Scalar>::LinearMatrixSolver(MatrixStructureReuseScheme reuse_scheme) : reuse_scheme(reuse_scheme)
+    NewtonMatrixSolver<Scalar>::NewtonMatrixSolver() : NonlinearMatrixSolver<Scalar>()
     {
-      sln = NULL;
-      time = -1.0;
-      n_eq = 1;
-      node_wise_ordering = false;
+      init_newton();
     }
 
     template<typename Scalar>
-    LinearMatrixSolver<Scalar>::~LinearMatrixSolver()
+    bool NewtonMatrixSolver<Scalar>::isOkay() const
     {
-      if(sln != NULL)
-        delete [] sln;
+      return NonlinearMatrixSolver<Scalar>::isOkay();
     }
 
     template<typename Scalar>
-    Scalar *LinearMatrixSolver<Scalar>::get_sln_vector()
+    void NewtonMatrixSolver<Scalar>::init_newton()
     {
-      return sln;
+      this->min_allowed_damping_coeff = 1E-4;
+      this->manual_damping = false;
+      this->auto_damping_ratio = 2.0;
+      this->initial_auto_damping_factor = 1.0;
+      this->sufficient_improvement_factor = 0.95;
+      this->necessary_successful_steps_to_increase = 3;
+
+      this->sufficient_improvement_factor_jacobian = 1e-1;
+      this->max_steps_with_reused_jacobian = 3;
+
+      this->coeff_vec_back = NULL;
+
+      this->set_tolerance(1e-8, ResidualNormAbsolute);
     }
 
     template<typename Scalar>
-    double LinearMatrixSolver<Scalar>::get_time()
+    void NewtonMatrixSolver<Scalar>::set_sufficient_improvement_factor_jacobian(double ratio)
     {
-      return time;
+      if(ratio < 0.0)
+        throw Exceptions::ValueException("sufficient_improvement_factor_jacobian", sufficient_improvement_factor_jacobian, 0.0);
+      this->sufficient_improvement_factor_jacobian = ratio;
     }
 
     template<typename Scalar>
-    void LinearMatrixSolver<Scalar>::set_reuse_scheme()
+    void NewtonMatrixSolver<Scalar>::set_max_steps_with_reused_jacobian(unsigned int steps)
     {
-      set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+      this->max_steps_with_reused_jacobian = steps;
     }
 
     template<typename Scalar>
-    MatrixStructureReuseScheme LinearMatrixSolver<Scalar>::get_used_reuse_scheme() const 
-    { 
-      return reuse_scheme; 
+    void NewtonMatrixSolver<Scalar>::set_min_allowed_damping_coeff(double min_allowed_damping_coeff_to_set)
+    {
+      if(min_allowed_damping_coeff_to_set < 0.0)
+        throw Exceptions::ValueException("min_allowed_damping_coeff_to_set", min_allowed_damping_coeff_to_set, 0.0);
+      this->min_allowed_damping_coeff = min_allowed_damping_coeff_to_set;
     }
 
     template<typename Scalar>
-    void LinearMatrixSolver<Scalar>::set_reuse_scheme(MatrixStructureReuseScheme reuse_scheme) 
+    NewtonMatrixSolver<Scalar>::~NewtonMatrixSolver()
     {
-      this->reuse_scheme = reuse_scheme; 
     }
 
     template<typename Scalar>
-    void LinearMatrixSolver<Scalar>::use_node_wise_ordering(unsigned int num_pdes)
+    void NewtonMatrixSolver<Scalar>::set_manual_damping_coeff(bool onOff, double coeff)
     {
-      this->reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
-      this->n_eq = num_pdes;
-      this->node_wise_ordering = true;
-    }
-
-    template<typename Scalar>
-    void LinearMatrixSolver<Scalar>::use_equations_wise_ordering()
-    {
-      this->reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH; 
-      this->node_wise_ordering = false;
-    }
-
-    template<typename Scalar>
-    double LinearMatrixSolver<Scalar>::get_residual_norm()
-    {
-      throw Exceptions::MethodNotOverridenException("LinearMatrixSolver<Scalar>::get_residual_norm");
-      return 0.;
-    }
-
-    template<typename Scalar>
-    DirectSolver<Scalar>* LinearMatrixSolver<Scalar>::as_DirectSolver() const
-    {
-      DirectSolver<Scalar>* solver = dynamic_cast<DirectSolver<Scalar>*>(const_cast<LinearMatrixSolver<Scalar>*>(this));
-      if(solver)
-        return solver;
-      else
+      if(coeff <= 0.0 || coeff > 1.0)
+        throw Exceptions::ValueException("coeff", coeff, 0.0, 1.0);
+      if(onOff)
       {
-        throw Hermes::Exceptions::LinearMatrixSolverException("Can not cast to DirectSolver.");
+        this->manual_damping = true;
+        this->manual_damping_factor = coeff;
       }
-    }
-
-    template<typename Scalar>
-    LoopSolver<Scalar>* LinearMatrixSolver<Scalar>::as_LoopSolver() const
-    {
-      LoopSolver<Scalar>* solver = dynamic_cast<LoopSolver<Scalar>*>(const_cast<LinearMatrixSolver<Scalar>*>(this));
-      if(solver)
-        return solver;
       else
-      {
-        throw Hermes::Exceptions::LinearMatrixSolverException("Can not cast to LoopSolver.");
-      }
+        this->manual_damping = false;
     }
 
     template<typename Scalar>
-    IterSolver<Scalar>* LinearMatrixSolver<Scalar>::as_IterSolver() const
+    void NewtonMatrixSolver<Scalar>::set_initial_auto_damping_coeff(double coeff)
     {
-      IterSolver<Scalar>* solver = dynamic_cast<IterSolver<Scalar>*>(const_cast<LinearMatrixSolver<Scalar>*>(this));
-      if(solver)
-        return solver;
+      if(coeff <= 0.0 || coeff > 1.0)
+        throw Exceptions::ValueException("coeff", coeff, 0.0, 1.0);
+      if(this->manual_damping)
+        this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
       else
-      {
-        throw Hermes::Exceptions::LinearMatrixSolverException("Can not cast to IterSolver.");
-      }
+        this->initial_auto_damping_factor = coeff;
     }
 
     template<typename Scalar>
-    AMGSolver<Scalar>* LinearMatrixSolver<Scalar>::as_AMGSolver() const
+    void NewtonMatrixSolver<Scalar>::set_auto_damping_ratio(double ratio)
     {
-      AMGSolver<Scalar>* solver = dynamic_cast<AMGSolver<Scalar>*>(const_cast<LinearMatrixSolver<Scalar>*>(this));
-      if(solver)
-        return solver;
-      else
-      {
-        throw Hermes::Exceptions::LinearMatrixSolverException("Can not cast to AMGSolver.");
-      }
+      if(ratio <= 1.0)
+        throw Exceptions::ValueException("ratio", ratio, 1.0);
+      if(this->manual_damping)
+        this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
+      this->auto_damping_ratio = ratio;
     }
-
 
     template<typename Scalar>
-    ExternalSolver<Scalar>* static_create_external_solver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs)
+    void NewtonMatrixSolver<Scalar>::set_sufficient_improvement_factor(double ratio)
     {
-      throw Exceptions::MethodNotOverridenException("ExternalSolver<Scalar>::create_external_solver");
-      return NULL;
+      if(ratio <= 0.0)
+        throw Exceptions::ValueException("ratio", ratio, 0.0);
+      if(this->manual_damping)
+        this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
+      this->sufficient_improvement_factor = ratio;
     }
 
-    template<>
-    ExternalSolver<double>::creation ExternalSolver<double>::create_external_solver = static_create_external_solver<double>;
-    template<>
-    ExternalSolver<std::complex<double> >::creation ExternalSolver<std::complex<double> >::create_external_solver = static_create_external_solver<std::complex<double> >;
-
-    template<>
-    HERMES_API LinearMatrixSolver<double>* create_linear_solver(Matrix<double>* matrix, Vector<double>* rhs, bool use_direct_solver)
+    template<typename Scalar>
+    void NewtonMatrixSolver<Scalar>::set_necessary_successful_steps_to_increase(unsigned int steps)
     {
-      Vector<double>* rhs_dummy = NULL;
-      switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
+      if(steps < 1)
+        throw Exceptions::ValueException("necessary_successful_steps_to_increase", steps, 0.0);
+      if(this->manual_damping)
+        this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
+      this->necessary_successful_steps_to_increase = steps;
+    }
+
+    template<typename Scalar>
+    bool NewtonMatrixSolver<Scalar>::handle_convergence_state_return_finished(NonlinearConvergenceState state, Scalar* coeff_vec)
+    {
+      // If we have not converged and everything else is ok, we finish.
+      if(state == NotConverged)
+        return false;
+
+      // And now the finishing states (both good and bad).
+      this->finalize_solving(coeff_vec);
+
+      // Act upon the state.
+      switch(state)
       {
-      case Hermes::SOLVER_EXTERNAL:
-        {
-          if(rhs != NULL)
-            return ExternalSolver<double>::create_external_solver(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-          else
-            return ExternalSolver<double>::create_external_solver(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
-        }
-      case Hermes::SOLVER_AZTECOO:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
-#if defined HAVE_AZTECOO && defined HAVE_EPETRA
-          if(rhs != NULL) return new AztecOOSolver<double>(static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs));
-          else return new AztecOOSolver<double>(static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("AztecOO not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_AMESOS:
-        {
-#if defined HAVE_AMESOS && defined HAVE_EPETRA
-          if(rhs != NULL) return new AmesosSolver<double>("Amesos_Klu", static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs));
-          else return new AmesosSolver<double>("Amesos_Klu", static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("Amesos not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_MUMPS:
-        {
-#ifdef WITH_MUMPS
-          if(rhs != NULL) return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-          else return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("MUMPS was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_PETSC:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
-#ifdef WITH_PETSC
-          if(rhs != NULL) return new PetscLinearMatrixSolver<double>(static_cast<PetscMatrix<double>*>(matrix), static_cast<PetscVector<double>*>(rhs));
-          else return new PetscLinearMatrixSolver<double>(static_cast<PetscMatrix<double>*>(matrix), static_cast<PetscVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("PETSc not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_UMFPACK:
-        {
-#ifdef WITH_UMFPACK
-          if(rhs != NULL) return new UMFPackLinearMatrixSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-          else return new UMFPackLinearMatrixSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_PARALUTION_ITERATIVE:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
-#ifdef WITH_PARALUTION
-          return new IterativeParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
-#else
-          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_PARALUTION_AMG:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The AMG solver PARALUTION selected as a direct solver.");
-#ifdef WITH_PARALUTION
-          return new AMGParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
-#else
-          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_SUPERLU:
-        {
-#ifdef WITH_SUPERLU
-          if(rhs != NULL) return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-          else return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("SuperLU was not installed.");
-#endif
-          break;
-        }
+      case Converged:
+        this->info("\tNewton: done.\n");
+        break;
+      case AboveMaxIterations:
+        throw Exceptions::NonlinearException(AboveMaxIterations);
+        break;
+      case BelowMinDampingCoeff:
+        throw Exceptions::NonlinearException(BelowMinDampingCoeff);
+        break;
+      case AboveMaxAllowedResidualNorm:
+        throw Exceptions::NonlinearException(AboveMaxAllowedResidualNorm);
+        break;
+      case Error:
+        throw Exceptions::Exception("Unknown exception in NewtonMatrixSolver.");
+        break;
       default:
-        throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_linear_solver().");
+        throw Exceptions::Exception("Unknown ConvergenceState in NewtonMatrixSolver.");
+        break;
       }
-      return NULL;
+
+      // Return that we should finish.
+      return true;
     }
 
-    template<>
-    HERMES_API LinearMatrixSolver<std::complex<double> >* create_linear_solver(Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs, bool use_direct_solver)
+    template<typename Scalar>
+    bool NewtonMatrixSolver<Scalar>::calculate_damping_factor(unsigned int& successful_steps)
     {
-      Vector<std::complex<double> >* rhs_dummy = NULL;
-      switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
+      Hermes::vector<double>& damping_factors = this->get_parameter_value(p_damping_factors);
+
+      if(this->manual_damping)
       {
-      case Hermes::SOLVER_EXTERNAL:
-        {
-          if(rhs != NULL)
-            return ExternalSolver<std::complex<double> >::create_external_solver(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-          else
-            return ExternalSolver<std::complex<double> >::create_external_solver(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
-        }
-      case Hermes::SOLVER_AZTECOO:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
-#if defined HAVE_AZTECOO && defined HAVE_EPETRA
-          if(rhs != NULL) return new AztecOOSolver<std::complex<double> >(static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs));
-          else return new AztecOOSolver<std::complex<double> >(static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("AztecOO not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_AMESOS:
-        {
-#if defined HAVE_AMESOS && defined HAVE_EPETRA
-          if(rhs != NULL) return new AmesosSolver<std::complex<double> >("Amesos_Klu", static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs));
-          else return new AmesosSolver<std::complex<double> >("Amesos_Klu", static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("Amesos not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_MUMPS:
-        {
-#ifdef WITH_MUMPS
-          if(rhs != NULL) return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-          else return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("MUMPS was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_PETSC:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
-#ifdef WITH_PETSC
-          if(rhs != NULL) return new PetscLinearMatrixSolver<std::complex<double> >(static_cast<PetscMatrix<std::complex<double> >*>(matrix), static_cast<PetscVector<std::complex<double> >*>(rhs));
-          else return new PetscLinearMatrixSolver<std::complex<double> >(static_cast<PetscMatrix<std::complex<double> >*>(matrix), static_cast<PetscVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("PETSc not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_UMFPACK:
-        {
-#ifdef WITH_UMFPACK
-          if(rhs != NULL) return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-          else return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_PARALUTION_ITERATIVE:
-      case Hermes::SOLVER_PARALUTION_AMG:
-        {
-          if(use_direct_solver)
-            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
-#ifdef WITH_PARALUTION
-          throw Hermes::Exceptions::Exception("PARALUTION only works for real problems.");
-#else
-          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
-#endif
-          break;
-        }
-      case Hermes::SOLVER_SUPERLU:
-        {
-#ifdef WITH_SUPERLU
-          if(rhs != NULL) return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-          else return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
-#else
-          throw Hermes::Exceptions::Exception("SuperLU was not installed.");
-#endif
-          break;
-        }
-      default:
-        throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_linear_solver().");
+        damping_factors.push_back(this->manual_damping_factor);
+        return true;
       }
-      return NULL;
+
+      double residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 1);
+      double previous_residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 2);
+
+      if(residual_norm < previous_residual_norm * this->sufficient_improvement_factor)
+      {
+        if(++successful_steps >= this->necessary_successful_steps_to_increase)
+        {
+          double new_damping_factor = std::min(this->initial_auto_damping_factor, this->auto_damping_ratio * damping_factors.back());
+          this->info("\t\tstep successful, new damping factor: %g.", new_damping_factor);
+          damping_factors.push_back(new_damping_factor);
+        }
+        else
+        {
+          this->info("\t\tstep successful, keep damping factor: %g.", damping_factors.back());
+          damping_factors.push_back(damping_factors.back());
+        }
+
+        return true;
+      }
+      else
+      {
+        double current_damping_factor = damping_factors.back();
+        damping_factors.pop_back();
+        successful_steps = 0;
+        if(current_damping_factor <= this->min_allowed_damping_coeff)
+        {
+          this->warn("\t\tNOT improved, damping factor at minimum level: %g.", min_allowed_damping_coeff);
+          this->info("\t To decrease the minimum level, use set_min_allowed_damping_coeff()");
+          throw Exceptions::NonlinearException(BelowMinDampingCoeff);
+        }
+        else
+        {
+          double new_damping_factor = (1. / this->auto_damping_ratio) * current_damping_factor;
+          this->warn("\t\tNOT improved, step restarted with factor: %g.", new_damping_factor);
+          damping_factors.push_back(new_damping_factor);
+        }
+
+        return false;
+      }
     }
 
-    template <typename Scalar>
-    ExternalSolver<Scalar>::ExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) : LinearMatrixSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs)
+    template<typename Scalar>
+    void NewtonMatrixSolver<Scalar>::init_solving(Scalar*& coeff_vec)
     {
+      this->check();
+      this->tick();
+
+      // Number of DOFs.
+      this->dimension = this->get_dimension();
+
+      // coeff_vec
+      this->delete_coeff_vec = false;
+      if(coeff_vec == NULL)
+      {
+        coeff_vec = (Scalar*)calloc(this->dimension, sizeof(Scalar));
+        this->delete_coeff_vec = true;
+      }
+
+      // coeff_vec_back
+      this->coeff_vec_back = (Scalar*)calloc(this->dimension, sizeof(Scalar));
+
+      // Backup vector for unsuccessful reuse of Jacobian.
+      residual_back = create_vector<Scalar>();
+      residual_back->alloc(this->dimension);
+
+      // sln_vector
+      if(this->sln_vector != NULL)
+      {
+        delete [] this->sln_vector;
+        this->sln_vector = NULL;
+      }
+      this->sln_vector = new Scalar[this->dimension];
+
+      this->on_initialization();
     }
 
-    template <typename Scalar>
-    SimpleExternalSolver<Scalar>::SimpleExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) : ExternalSolver<Scalar>(m, rhs)
+    template<typename Scalar>
+    void NewtonMatrixSolver<Scalar>::deinit_solving(Scalar* coeff_vec)
     {
+      if(this->delete_coeff_vec)
+      {
+        ::free(coeff_vec);
+        this->delete_coeff_vec = false;
+      }
+
+      ::free(coeff_vec_back);
+      delete residual_back;
     }
 
-    template <typename Scalar>
-    void SimpleExternalSolver<Scalar>::solve()
+    template<typename Scalar>
+    void NewtonMatrixSolver<Scalar>::finalize_solving(Scalar* coeff_vec)
     {
-      solve(NULL);
+      memcpy(this->sln_vector, coeff_vec, this->dimension * sizeof(Scalar));
+      this->tick();
+      this->num_iters = this->get_current_iteration_number();
+      this->info("\tNewton: solution duration: %f s.\n", this->last());
+      this->on_finish();
+      this->deinit_solving(coeff_vec);
     }
 
-    template <typename Scalar>
-    void SimpleExternalSolver<Scalar>::solve(Scalar* initial_guess)
+    template<typename Scalar>
+    bool NewtonMatrixSolver<Scalar>::force_reuse_jacobian_values(unsigned int& successful_steps_with_reused_jacobian)
+    {
+      if(successful_steps_with_reused_jacobian >= this->max_steps_with_reused_jacobian)
+      {
+        successful_steps_with_reused_jacobian = 0;
+        return false;
+      }
+      successful_steps_with_reused_jacobian++;
+      return true;
+    }
+
+    template<typename Scalar>
+    bool NewtonMatrixSolver<Scalar>::do_initial_step_return_finished(Scalar* coeff_vec)
+    {
+      // Store the initial norm.
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->dimension));
+
+      // Assemble the system.
+      if(this->jacobian_reusable && this->constant_jacobian)
+      {
+        this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
+        this->assemble_residual(coeff_vec);
+        this->get_parameter_value(this->p_iterations_with_recalculated_jacobian).push_back(false);
+      }
+      else
+      {
+        this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+        this->assemble(coeff_vec);
+        this->jacobian_reusable = true;
+        this->get_parameter_value(this->p_iterations_with_recalculated_jacobian).push_back(true);
+      }
+
+      // Get the residual norm and act upon it.
+      double residual_norm = this->calculate_residual_norm();
+      this->info("\n\tNewton: initial residual norm: %g", residual_norm);
+      if(residual_norm > this->max_allowed_residual_norm)
+      {
+        this->finalize_solving(coeff_vec);
+        throw Exceptions::NonlinearException(AboveMaxAllowedResidualNorm);
+        return true;
+      }
+      else
+        this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
+
+      this->solve_linear_system(coeff_vec);
+
+      return (this->on_initial_step_end() == false);
+    }
+
+    template<typename Scalar>
+    void NewtonMatrixSolver<Scalar>::step_info()
     {
       // Output.
-      this->process_matrix_output(this->m);
-      this->process_vector_output(this->rhs);
-
-      // External process.
-      std::string resultFileName = this->command();
-
-      // Handling of the result file.
-      this->sln = new Scalar[this->m->get_size()];
-      SimpleVector<Scalar> temp;
-      temp.alloc(this->m->get_size());
-      temp.import_from_file((char*)resultFileName.c_str(), "x", EXPORT_FORMAT_PLAIN_ASCII );
-      memcpy(this->sln, temp.v, this->m->get_size() * sizeof(Scalar));
+      this->info("\n\tNewton: iteration %d,", this->get_current_iteration_number());
+      this->info("\t\tresidual norm: %g,", this->get_parameter_value(this->p_residual_norms).back());
+      this->info("\t\tsolution norm: %g,", this->get_parameter_value(this->p_solution_norms).back());
+      this->info("\t\tsolution change norm: %g.", this->get_parameter_value(this->p_solution_change_norms).back());
+      this->info("\t\trelative solution change: %g.", this->get_parameter_value(this->p_solution_change_norms).back() / this->get_parameter_value(this->p_solution_norms)[this->get_parameter_value(this->p_solution_norms).size() - 2]);
     }
 
-    template <typename Scalar>
-    DirectSolver<Scalar>::DirectSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme)
+    template<typename Scalar>
+    void NewtonMatrixSolver<Scalar>::solve_linear_system(Scalar* coeff_vec)
     {
+      // store the previous coeff_vec to coeff_vec_back.
+      memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*this->dimension);
+
+      // Solve, if the solver is iterative, give him the initial guess.
+      this->matrix_solver->solve(coeff_vec);
+
+      // Get current damping factor.
+      double current_damping_factor = this->get_parameter_value(this->p_damping_factors).back();
+
+      // store the solution norm change.
+      // obtain the solution increment.
+      Scalar* sln_vector_local = this->matrix_solver->get_sln_vector();
+
+      // 1. store the solution.
+      for (int i = 0; i < this->dimension; i++)
+        coeff_vec[i] += current_damping_factor * sln_vector_local[i];
+
+      // 2. store the solution change.
+      this->get_parameter_value(this->p_solution_change_norms).push_back(current_damping_factor * get_l2_norm(sln_vector_local, this->dimension));
+
+      // 3. store the solution norm.
+      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->dimension));
     }
 
-    template <typename Scalar>
-    void DirectSolver<Scalar>::solve(Scalar* initial_guess)
+    template<typename Scalar>
+    void NewtonMatrixSolver<Scalar>::solve(Scalar* coeff_vec)
     {
-      this->solve();
+      // Initialization.
+      this->init_solving(coeff_vec);
+
+#pragma region parameter_setup
+      // Initialize parameters.
+      unsigned int successful_steps_damping = 0;
+      unsigned int successful_steps_jacobian = 0;
+      Hermes::vector<bool> iterations_with_recalculated_jacobian;
+      Hermes::vector<double> residual_norms;
+      Hermes::vector<double> solution_norms;
+      Hermes::vector<double> solution_change_norms;
+      Hermes::vector<double> damping_factors;
+      bool residual_norm_drop;
+
+      // Initial damping factor.
+      damping_factors.push_back(this->manual_damping ? manual_damping_factor : initial_auto_damping_factor);
+
+      // Link parameters.
+      this->set_parameter_value(this->p_residual_norms, &residual_norms);
+      this->set_parameter_value(this->p_solution_norms, &solution_norms);
+      this->set_parameter_value(this->p_solution_change_norms, &solution_change_norms);
+      this->set_parameter_value(this->p_successful_steps_damping, &successful_steps_damping);
+      this->set_parameter_value(this->p_successful_steps_jacobian, &successful_steps_jacobian);
+      this->set_parameter_value(this->p_residual_norm_drop, &residual_norm_drop);
+      this->set_parameter_value(this->p_damping_factors, &damping_factors);
+      this->set_parameter_value(this->p_iterations_with_recalculated_jacobian, &iterations_with_recalculated_jacobian);
+#pragma endregion
+
+      if(this->do_initial_step_return_finished(coeff_vec))
+      {
+        this->info("\tNewton: aborted.");
+        this->finalize_solving(coeff_vec);
+        return;
+      }
+
+      // Main Newton loop 
+      while (true)
+      {
+        // Handle the event of step beginning.
+        if(!this->on_step_begin())
+        {
+          this->info("\tNewton: aborted.");
+          this->finalize_solving(coeff_vec);
+          return;
+        }
+
+#pragma region damping_factor_loop
+        this->info("\n\tNewton: Damping factor handling:");
+        // Loop searching for the damping factor.
+        do
+        {
+          // Assemble just the residual.
+          this->assemble_residual(coeff_vec);
+
+          // Test convergence - if in this loop we found a solution.
+          this->info("\t\ttest convergence...");
+          this->step_info();
+          if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
+            return;
+          else
+            this->info("\t\thas not converged.");
+
+          // Inspect the damping factor.
+          try
+          {
+            // Calculate damping factor, and return whether or not was this a successful step.
+            residual_norm_drop = this->calculate_damping_factor(successful_steps_damping);
+          }
+          catch (Exceptions::NonlinearException& e)
+          {
+            this->finalize_solving(coeff_vec);
+            throw;
+            return;
+          }
+
+          if(!residual_norm_drop)
+          {
+            // Delete the previous residual and solution norm.
+            residual_norms.pop_back();
+            solution_norms.pop_back();
+
+            // Adjust the previous solution change norm.
+            solution_change_norms.back() /= this->auto_damping_ratio;
+
+            // Try with the different damping factor.
+            // Important thing here is the factor used that must be calculated from the current one and the previous one.
+            // This results in the following relation (since the damping factor is only updated one way).
+            for (int i = 0; i < this->dimension; i++)
+              coeff_vec[i] = coeff_vec_back[i] + (coeff_vec[i] - coeff_vec_back[i]) / this->auto_damping_ratio;
+
+            // Add new solution norm.
+            solution_norms.push_back(get_l2_norm(coeff_vec, this->dimension));
+          }
+        }
+        while (!residual_norm_drop);
+#pragma endregion
+
+        // Damping factor was updated, handle the event.
+        this->on_damping_factor_updated();
+
+#pragma region jacobian_reusage_loop
+        this->info("\n\tNewton: Jacobian handling:");
+        // Loop until jacobian is not reusable anymore.
+        // The whole loop is skipped if the jacobian is not suitable for being reused at all.
+        while(this->jacobian_reusable && (this->constant_jacobian || force_reuse_jacobian_values(successful_steps_jacobian)))
+        {
+          this->residual_back->set_vector(this->get_residual());
+
+          // Info & handle the situation as necessary.
+          this->info("\t\treusing Jacobian.");
+          this->on_reused_jacobian_step_begin();
+
+          // Solve the system.
+          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
+          this->solve_linear_system(coeff_vec);
+          // Assemble next residual for both reusage and convergence test.
+          this->assemble_residual(coeff_vec);
+          // Test whether it was okay to reuse the jacobian.
+          if(!this->jacobian_reused_okay(successful_steps_jacobian))
+          {
+            this->warn("\t\treused Jacobian disapproved.");
+            this->get_parameter_value(this->p_residual_norms).pop_back();
+            this->get_parameter_value(this->p_solution_norms).pop_back();
+            this->get_parameter_value(this->p_solution_change_norms).pop_back();
+            memcpy(coeff_vec, coeff_vec_back, sizeof(Scalar)*this->dimension);
+            this->get_residual()->set_vector(residual_back);
+            break;
+          }
+
+          // Increase the iteration count.
+          this->get_parameter_value(this->p_iterations_with_recalculated_jacobian).push_back(false);
+
+          // Output successful reuse info.
+          this->step_info();
+
+          // Handle the event of end of a step.
+          this->on_reused_jacobian_step_end();
+          if(!this->on_step_end())
+          {
+            this->info("\tNewton: aborted.");
+            this->finalize_solving(coeff_vec);
+            return;
+          }
+
+          // Test convergence - if in this iteration we found a solution.
+          if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
+            return;
+        }
+#pragma endregion
+
+        // Reassemble the jacobian once not reusable anymore.
+        this->info("\t\tre-calculating Jacobian.");
+        this->assemble(coeff_vec);
+
+        // Set factorization schemes.
+        if(this->jacobian_reusable)
+          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING);
+        else
+          this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+
+        // Solve the system, state that the jacobian is reusable should it be desirable.
+        this->solve_linear_system(coeff_vec);
+        this->jacobian_reusable = true;
+
+        // Handle the event of end of a step.
+        if(!this->on_step_end())
+        {
+          this->info("\tNewton: aborted.");
+          this->finalize_solving(coeff_vec);
+          return;
+        }
+
+        // Increase the iteration count.
+        this->get_parameter_value(this->p_iterations_with_recalculated_jacobian).push_back(true);
+        // Output info.
+        this->step_info();
+      }
     }
 
-    template <typename Scalar>
-    LoopSolver<Scalar>::LoopSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme), max_iters(10000), tolerance(1e-8)
+    template<typename Scalar>
+    int NewtonMatrixSolver<Scalar>::get_current_iteration_number()
+    {
+      return this->get_parameter_value(p_iterations_with_recalculated_jacobian).size() + 1;
+    }
+
+    template<typename Scalar>
+    bool NewtonMatrixSolver<Scalar>::jacobian_reused_okay(unsigned int& successful_steps_with_reused_jacobian)
+    {
+      double residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 1);
+      double previous_residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 2);
+
+      if((residual_norm / previous_residual_norm) > this->sufficient_improvement_factor_jacobian)
+      {
+        successful_steps_with_reused_jacobian = 0;
+        return false;
+      }
+      else
+        return true;
+    }
+
+    template<typename Scalar>
+    void NewtonMatrixSolver<Scalar>::on_damping_factor_updated()
     {
     }
 
     template<typename Scalar>
-    void LoopSolver<Scalar>::set_tolerance(double tol)
-    {
-      this->tolerance = tol;
-      this->toleranceType = AbsoluteTolerance;
-    }
-
-    template<typename Scalar>
-    void LoopSolver<Scalar>::set_tolerance(double tol, LoopSolverToleranceType toleranceType)
-    {
-      this->tolerance = tol;
-      this->toleranceType = toleranceType;
-    }
-
-    template<typename Scalar>
-    void LoopSolver<Scalar>::set_max_iters(int iters)
-    {
-      this->max_iters = iters;
-    }
-
-    template <typename Scalar>
-    IterSolver<Scalar>::IterSolver(MatrixStructureReuseScheme reuse_scheme) : LoopSolver<Scalar>(reuse_scheme), precond_yes(false), iterSolverType(CG)
+    void NewtonMatrixSolver<Scalar>::on_reused_jacobian_step_begin()
     {
     }
 
     template<typename Scalar>
-    void IterSolver<Scalar>::set_solver_type(IterSolverType iterSolverType)
-    {
-      this->iterSolverType = iterSolverType;
-    }
-
-    template <typename Scalar>
-    AMGSolver<Scalar>::AMGSolver(MatrixStructureReuseScheme reuse_scheme) : LoopSolver<Scalar>(reuse_scheme), smootherSolverType(CG), smootherPreconditionerType(MultiColoredSGS)
+    void NewtonMatrixSolver<Scalar>::on_reused_jacobian_step_end()
     {
     }
 
-    template<typename Scalar>
-    void AMGSolver<Scalar>::set_smoother(IterSolverType solverType_, PreconditionerType preconditionerType_)
-    {
-      this->smootherPreconditionerType = preconditionerType_;
-      this->smootherSolverType = solverType_;
-    }
-
-    template class HERMES_API LinearMatrixSolver<double>;
-    template class HERMES_API LinearMatrixSolver<std::complex<double> >;
-    template class HERMES_API SimpleExternalSolver<double>;
-    template class HERMES_API SimpleExternalSolver<std::complex<double> >;
-    template class HERMES_API ExternalSolver<double>;
-    template class HERMES_API ExternalSolver<std::complex<double> >;
-    template class HERMES_API DirectSolver<double>;
-    template class HERMES_API DirectSolver<std::complex<double> >;
-    template class HERMES_API LoopSolver<double>;
-    template class HERMES_API LoopSolver<std::complex<double> >;
-    template class HERMES_API IterSolver<double>;
-    template class HERMES_API IterSolver<std::complex<double> >;
-    template class HERMES_API AMGSolver<double>;
-    template class HERMES_API AMGSolver<std::complex<double> >;
+    template class HERMES_API NewtonMatrixSolver<double>;
+    template class HERMES_API NewtonMatrixSolver<std::complex<double> >;
   }
 }

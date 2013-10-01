@@ -20,16 +20,6 @@ namespace Hermes
   {
     namespace Mixins
     {
-      void StateQueryable::check() const
-      {
-        if(!this->isOkay())
-        {
-          std::stringstream ss;
-          ss << "The instance of " << this->getClassName() << " is not OK.";
-          throw Hermes::Exceptions::Exception(ss.str().c_str());
-        }
-      }
-
       XMLParsing::XMLParsing() : validate(false)
       {
       }

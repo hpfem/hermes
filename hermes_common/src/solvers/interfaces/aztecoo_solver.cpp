@@ -31,7 +31,7 @@ namespace Hermes
   {
     template<typename Scalar>
     AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
-      : IterSolver<Scalar>(), m(m), rhs(rhs), final_matrix(NULL), P(NULL), Q(NULL), row_perm(NULL), col_perm(NULL)
+      : IterSolver<Scalar>(m, rhs), m(m), rhs(rhs), final_matrix(NULL), P(NULL), Q(NULL), row_perm(NULL), col_perm(NULL)
     {
       pc = NULL;
     }
@@ -41,7 +41,7 @@ namespace Hermes
     {
       free_permutation_data();
     }
-    
+
     template<typename Scalar>
     void AztecOOSolver<Scalar>::free_permutation_data()
     {
@@ -50,7 +50,7 @@ namespace Hermes
         assert(col_perm);
         assert(Q);
         assert(final_matrix);
-      
+
         delete row_perm;
         delete col_perm;
         delete P;
@@ -98,7 +98,7 @@ namespace Hermes
       this->pc = dynamic_cast<EpetraPrecond<Scalar>*>(pc);
       if (this->pc)
         this->precond_yes = true;
-        // TODO: else warn that a wrong type of preconditioner has been used.
+      // TODO: else warn that a wrong type of preconditioner has been used.
     }
 
     template<typename Scalar>
@@ -136,18 +136,18 @@ namespace Hermes
     {
       aztec.SetAztecParam(param, value);
     }
-    
+
     template<typename Scalar>
     void AztecOOSolver<Scalar>::set_reuse_scheme(MatrixStructureReuseScheme reuse_scheme)
     {
       LinearMatrixSolver<Scalar>::set_reuse_scheme(reuse_scheme);
       /*
       if (reuse_scheme == HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY || reuse_scheme == HERMES_REUSE_MATRIX_REORDERING_AND_SCALING)
-        aztec.SetAztecOption(AZ_pre_calc, AZ_reuse);
+      aztec.SetAztecOption(AZ_pre_calc, AZ_reuse);
       else if (reuse_scheme == HERMES_REUSE_MATRIX_REORDERING)
-        aztec.SetAztecOption(AZ_pre_calc, AZ_recalc);
+      aztec.SetAztecOption(AZ_pre_calc, AZ_recalc);
       else 
-        aztec.SetAztecOption(AZ_pre_calc, AZ_calc);
+      aztec.SetAztecOption(AZ_pre_calc, AZ_calc);
       */
     }
 
@@ -156,21 +156,21 @@ namespace Hermes
     {
       return m->size;
     }
-    
+
     template<typename Scalar>
     void AztecOOSolver<Scalar>::use_node_wise_ordering(unsigned int num_pdes) 
     { 
       LinearMatrixSolver<Scalar>::use_node_wise_ordering(num_pdes);
       this->free_permutation_data();
     }
-    
+
     template<typename Scalar>
     void AztecOOSolver<Scalar>::use_equations_wise_ordering() 
     { 
       LinearMatrixSolver<Scalar>::use_equations_wise_ordering();
       this->free_permutation_data();
     }
-    
+
     template<typename Scalar>
     void AztecOOSolver<Scalar>::create_permutation_vectors()
     {
@@ -178,22 +178,22 @@ namespace Hermes
       int ndof_per_pde = ndof/this->n_eq;
       int j = 0, jc = 0;
       int k = 0, kc = 0;
-      
+
       this->row_perm = new int [ndof];
       this->col_perm = new int [ndof];
-      
+
       for (int i = 0; i < ndof; i++)
       {
         this->row_perm[i] = j%ndof + jc;
         this->col_perm[i] = k%ndof + kc;
-        
+
         j += ndof_per_pde;
         if (j == ndof)
         {
           jc++;
           j = 0;
         }
-        
+
         k += this->n_eq;
         if (k == ndof)
         {
@@ -202,7 +202,7 @@ namespace Hermes
         }
       }
     }
-    
+
     template<>
     void AztecOOSolver<double>::solve()
     {
@@ -215,21 +215,21 @@ namespace Hermes
 
       // setup the problem
       if (reuse_scheme == HERMES_CREATE_STRUCTURE_FROM_SCRATCH)
-      //if (aztec.GetAztecOption(AZ_pre_calc) == AZ_calc)
+        //if (aztec.GetAztecOption(AZ_pre_calc) == AZ_calc)
       {
         if (node_wise_ordering)
         {
           if (row_perm)
             free_permutation_data();
-          
+
           create_permutation_vectors();
-          
+
           // NOTE: RowMap() == RangeMap() == ColMap() == DomainMap()
           P = new EpetraExt::Permutation<Epetra_CrsMatrix>(Copy, m->mat->RowMap(), row_perm);
           Q = new EpetraExt::Permutation<Epetra_CrsMatrix>(Copy, m->mat->ColMap(), col_perm);          
-          
+
           final_matrix = new EpetraMatrix<double>((*P)((*Q)(*m->mat,true)));
-          
+
           // NOTE: According to Trilinos docs, final_matrix should be fill_completed by now. However, when row permutation is performed, 
           // the input matrix is not finalized (unlike the case of column permutation) - this may possibly be a bug in Trilinos.
           // Also, when doing a row permutation, all maps of the source matrix are set to a temporary permutation
@@ -244,10 +244,10 @@ namespace Hermes
         }
         else
           final_matrix = m;
-        
+
         aztec.SetUserMatrix(final_matrix->mat);
       }
-            
+
       EpetraExt::Permutation<Epetra_MultiVector> Pv(Copy, rhs->vec->Map(), row_perm);
       Epetra_Vector *final_rhs; 
       if (row_perm)
@@ -263,14 +263,14 @@ namespace Hermes
       if(pc != NULL)
       {
         if(reuse_scheme == HERMES_CREATE_STRUCTURE_FROM_SCRATCH)
-        //if(aztec.GetAztecOption(AZ_pre_calc) == AZ_calc)
+          //if(aztec.GetAztecOption(AZ_pre_calc) == AZ_calc)
         {
           pc->create(final_matrix); 
           pc->compute();
           aztec.SetPrecOperator(pc->get_obj());
         }
         else if (reuse_scheme == HERMES_REUSE_MATRIX_REORDERING || reuse_scheme == HERMES_REUSE_MATRIX_REORDERING_AND_SCALING)
-        //else if (aztec.GetAztecOption(AZ_pre_calc) == AZ_recalc)
+          //else if (aztec.GetAztecOption(AZ_pre_calc) == AZ_recalc)
         {
           pc->recompute();
         }
@@ -283,7 +283,7 @@ namespace Hermes
 #endif            
         }
       }
-      
+
       // solve it
       aztec.Iterate(this->max_iters, this->tolerance);
 
@@ -311,27 +311,27 @@ namespace Hermes
 
       // no output
       aztec.SetAztecOption(AZ_output, AZ_summary);  // AZ_all | AZ_warnings | AZ_last | AZ_summary
-      
+
       if (this->get_verbose_output())
         aztec.SetAztecOption(AZ_output, AZ_all);
 
       // setup the problem
       if (reuse_scheme == HERMES_CREATE_STRUCTURE_FROM_SCRATCH)
-      //if (aztec.GetAztecOption(AZ_pre_calc) == AZ_calc)
+        //if (aztec.GetAztecOption(AZ_pre_calc) == AZ_calc)
       {
         if (node_wise_ordering)
         {
           if (row_perm)
             free_permutation_data();
-          
+
           create_permutation_vectors();
-          
+
           // NOTE: RowMap() == RangeMap() == ColMap() == DomainMap()
           P = new EpetraExt::Permutation<Epetra_CrsMatrix>(Copy, m->mat->RowMap(), row_perm);
           Q = new EpetraExt::Permutation<Epetra_CrsMatrix>(Copy, m->mat->ColMap(), col_perm);          
-          
+
           final_matrix = new EpetraMatrix<double>((*P)((*Q)(*m->mat,true)));
-          
+
           // NOTE: According to Trilinos docs, final_matrix should be fill_completed by now. However, when row permutation is performed, 
           // the input matrix is not finalized (unlike the case of column permutation) - this may possibly be a bug in Trilinos.
           // Also, when doing a row permutation, all maps of the source matrix are set to a temporary permutation
@@ -346,10 +346,10 @@ namespace Hermes
         }
         else
           final_matrix = m;
-        
+
         aztec.SetUserMatrix(final_matrix->mat);
       }
-            
+
       EpetraExt::Permutation<Epetra_MultiVector> Pv(Copy, rhs->vec->Map(), row_perm);
       Epetra_Vector *final_rhs; 
       if (row_perm)
@@ -360,7 +360,7 @@ namespace Hermes
       aztec.SetRHS(final_rhs);
 
       Epetra_Vector x(final_matrix->mat->DomainMap());
-      
+
       if (initial_guess)
       {
         if (row_perm)
@@ -370,20 +370,20 @@ namespace Hermes
           for (unsigned int i = 0; i < m->size; i++)
             x[i] = initial_guess[i];
       }
-      
+
       aztec.SetLHS(&x);
-      
+
       if(pc != NULL)
       {
         if(reuse_scheme == HERMES_CREATE_STRUCTURE_FROM_SCRATCH)
-        //if(aztec.GetAztecOption(AZ_pre_calc) == AZ_calc)
+          //if(aztec.GetAztecOption(AZ_pre_calc) == AZ_calc)
         {
           pc->create(final_matrix); 
           pc->compute();
           aztec.SetPrecOperator(pc->get_obj());
         }
         else if (reuse_scheme == HERMES_REUSE_MATRIX_REORDERING || reuse_scheme == HERMES_REUSE_MATRIX_REORDERING_AND_SCALING)
-        //else if (aztec.GetAztecOption(AZ_pre_calc) == AZ_recalc)
+          //else if (aztec.GetAztecOption(AZ_pre_calc) == AZ_recalc)
         {
           pc->recompute();
         }
@@ -396,7 +396,7 @@ namespace Hermes
 #endif            
         }
       }
-      
+
       // solve it
       aztec.Iterate(this->max_iters, this->tolerance);
 
@@ -406,7 +406,7 @@ namespace Hermes
       delete [] this->sln;
       this->sln = new double[final_matrix->size];
       memset(this->sln, 0, final_matrix->size * sizeof(double));
-      
+
       // copy the solution into sln vector
       if (col_perm)
         for (unsigned int i = 0; i < final_matrix->size; i++) this->sln[i] = x[col_perm[i]];
@@ -447,7 +447,7 @@ namespace Hermes
       for (unsigned int i = 0; i < m->size; i++)
         this->sln[i] = std::complex<double>(xr[i], xi[i]);
     }
-    
+
     template<>
     void AztecOOSolver<std::complex<double> >::solve(std::complex<double>* initial_guess)
     {
@@ -463,7 +463,7 @@ namespace Hermes
 
       Epetra_Vector xr(*rhs->std_map);
       Epetra_Vector xi(*rhs->std_map);
-      
+
       if (initial_guess)
       {
         for (unsigned int i = 0; i < m->size; i++)

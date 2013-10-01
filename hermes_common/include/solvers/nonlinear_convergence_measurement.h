@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_NONLINEAR_CONVERGENCE_MEASUREMENT_H_
 
 #include "solvers/nonlinear_matrix_solver.h"
-#include "compat.h"
+#include "util/compat.h"
 
 namespace Hermes
 {

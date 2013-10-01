@@ -22,12 +22,6 @@
 #ifndef __HERMES_COMMON_NEWTON_MATRIX_SOLVER_H_
 #define __HERMES_COMMON_NEWTON_MATRIX_SOLVER_H_
 
-#include "precond.h"
-#include "exceptions.h"
-#include "algebra/cs_matrix.h"
-#include "algebra/vector.h"
-#include "mixins.h"
-#include "algebra/algebra_mixins.h"
 #include "solvers/nonlinear_matrix_solver.h"
 
 namespace Hermes

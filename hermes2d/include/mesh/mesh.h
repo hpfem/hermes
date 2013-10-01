@@ -64,7 +64,7 @@ namespace Hermes
     ///&nbsp;e.print_msg();
     ///&nbsp;return -1;
     /// }
-    class HERMES_API Mesh : public HashTable, public Hermes::Hermes2D::Mixins::StateQueryable
+    class HERMES_API Mesh : public HashTable, public Hermes::Mixins::StateQueryable
     {
     public:
       Mesh();

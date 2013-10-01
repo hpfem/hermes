@@ -33,7 +33,7 @@ namespace Hermes
 
     template<typename Scalar>
     AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
-      : DirectSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs)
+      : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs)
     {
       solver = factory.Create(solver_type, problem);
       assert(solver != NULL);

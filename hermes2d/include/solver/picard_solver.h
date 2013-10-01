@@ -22,8 +22,8 @@
 #ifndef __H2D_SOLVER_PICARD_H_
 #define __H2D_SOLVER_PICARD_H_
 
-#include "solver/nonlinear_solver.h"
-#include "solver/nonlinear_convergence_measurement.h"
+#include "solvers/picard_matrix_solver.h"
+#include "solver.h"
 
 namespace Hermes
 {
@@ -71,17 +71,39 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API PicardSolver : 
       public Hermes::Hermes2D::Solver<Scalar>,
-      Hermes::Solvers::PicardMatrixSolver<Scalar>
+      public Hermes::Solvers::PicardMatrixSolver<Scalar>
     {
     public:
       PicardSolver();
       PicardSolver(DiscreteProblem<Scalar>* dp);
       PicardSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
       PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      void init();
       virtual ~PicardSolver();
+
+      // See the base class for details, the following serves only for avoiding C++ name-hiding.
+      using Solver<Scalar>::solve;
+      
+      /// Basic solve method - in linear solvers it serves only as an initial guess for iterative solvers.
+      /// \param[in] coeff_vec initiall guess.
+      virtual void solve(Scalar* coeff_vec);
 
       void assemble_residual(Scalar* coeff_vec);
       void assemble_jacobian(Scalar* coeff_vec);
+      void assemble(Scalar* coeff_vec);
+      int get_dimension();
+
+      Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_solver();
+
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "PicardSolver"; }
+
+      virtual bool on_step_end();
+
+      virtual bool on_initialization();
+
+      virtual bool on_initial_step_end();
     };
   }
 }

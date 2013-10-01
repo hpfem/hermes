@@ -46,6 +46,7 @@ namespace Hermes
     template<typename Scalar>
     NonlinearMatrixSolver<Scalar>::~NonlinearMatrixSolver()
     {
+      delete matrix_solver;
     }
 
     template<typename Scalar>
@@ -68,6 +69,24 @@ namespace Hermes
       if(max_allowed_iterations_ < 1)
         throw Exceptions::ValueException("max_allowed_iterations", max_allowed_iterations_, 1);
       this->max_allowed_iterations = max_allowed_iterations_;
+    }
+
+    template<typename Scalar>
+    SparseMatrix<Scalar>* NonlinearMatrixSolver<Scalar>::get_jacobian()
+    {
+      return this->matrix_solver->get_matrix();
+    }
+
+    template<typename Scalar>
+    Vector<Scalar>* NonlinearMatrixSolver<Scalar>::get_residual()
+    {
+      return this->matrix_solver->get_rhs();
+    }
+
+    template<typename Scalar>
+    double NonlinearMatrixSolver<Scalar>::calculate_residual_norm()
+    {
+      return get_l2_norm(this->get_residual());
     }
 
     template<typename Scalar>
@@ -166,13 +185,6 @@ namespace Hermes
       for(int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
         this->tolerance[i] = std::numeric_limits<double>::max();
       memset(this->tolerance_set, 0, sizeof(bool)*NonlinearConvergenceMeasurementTypeCount);
-    }
-
-    template<typename Scalar>
-    double NonlinearMatrixSolver<Scalar>::calculate_residual_norm()
-    {
-      // Calculate the l2-norm of residual vector, this is the traditional way.
-      return get_l2_norm(this->residual);
     }
 
     template<typename Scalar>

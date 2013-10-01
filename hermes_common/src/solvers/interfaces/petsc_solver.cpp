@@ -52,7 +52,7 @@ namespace Hermes
       ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
       if(petsc_finalized == PETSC_TRUE || petsc_initialized == PETSC_FALSE)
         // This should never happen here.
-        return -1;
+          return -1;
 
       if(--num_petsc_objects == 0)
       {
@@ -183,8 +183,8 @@ namespace Hermes
     {
       if(v != 0.0)
       {    // ignore zero values.
-        #pragma omp critical (PetscMatrix_add)
-          MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
+#pragma omp critical (PetscMatrix_add)
+        MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
       }
     }
 
@@ -196,10 +196,10 @@ namespace Hermes
       switch (fmt)
       {
       case DF_MATLAB_SPARSE: //only to stdout
-        PetscViewer  viewer = PETSC_VIEWER_STDOUT_SELF;
-        PetscViewerSetFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
-        MatView(matrix, viewer);
-        return true;
+      PetscViewer  viewer = PETSC_VIEWER_STDOUT_SELF;
+      PetscViewerSetFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
+      MatView(matrix, viewer);
+      return true;
       }
       */
     }
@@ -394,10 +394,10 @@ namespace Hermes
       switch (fmt)
       {
       case DF_MATLAB_SPARSE: //only to stdout
-        PetscViewer  viewer = PETSC_VIEWER_STDOUT_SELF;
-        PetscViewerSetFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
-        VecView(vec, viewer);
-        return true;
+      PetscViewer  viewer = PETSC_VIEWER_STDOUT_SELF;
+      PetscViewerSetFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
+      VecView(vec, viewer);
+      return true;
       }
       */
     }
@@ -411,7 +411,7 @@ namespace Hermes
   {
     template<typename Scalar>
     PetscLinearMatrixSolver<Scalar>::PetscLinearMatrixSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs)
-      : DirectSolver<Scalar>(), m(mat), rhs(rhs)
+      : DirectSolver<Scalar>(mat, rhs), m(mat), rhs(rhs)
     {
       add_petsc_object();
     }

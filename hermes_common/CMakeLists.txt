@@ -14,6 +14,7 @@ project(hermes_common)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/data_structures)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/util)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/solvers)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/solvers/interfaces)
   
   #
   # Source files for the Hermes_common library.
@@ -100,6 +101,10 @@ project(hermes_common)
     src/solvers/nonlinear_convergence_measurement.cpp
     src/solvers/picard_matrix_solver.cpp
     src/solvers/newton_matrix_solver.cpp
+  )
+  
+  SOURCE_GROUP(
+    "Source Files\\Matrix Solvers\\Interfaces" FILES 
     src/solvers/interfaces/epetra.cpp
     src/solvers/interfaces/aztecoo_solver.cpp
     src/solvers/interfaces/amesos_solver.cpp
@@ -111,7 +116,7 @@ project(hermes_common)
     src/solvers/interfaces/petsc_solver.cpp
     src/solvers/interfaces/umfpack_solver.cpp
     src/solvers/interfaces/precond_ml.cpp
-    src/solversinterfaces/precond_ifpack.cpp
+    src/solvers/interfaces/precond_ifpack.cpp
   )
   
   SOURCE_GROUP(
@@ -144,6 +149,11 @@ project(hermes_common)
     include/solvers/picard_matrix_solver.h
     include/solvers/newton_matrix_solver.h
     include/solvers/nonlinear_convergence_measurement.h
+    include/solvers/precond.h
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Matrix Solvers\\Interfaces" FILES 
     include/solvers/interfaces/epetra.h
     include/solvers/interfaces/aztecoo_solver.h
     include/solvers/interfaces/amesos_solver.h
@@ -288,11 +298,13 @@ project(hermes_common)
 
   file(GLOB INC_COMMON    "include/*.h")
   file(GLOB INC_SOLVER    "include/solvers/*.h")
+  file(GLOB INC_SOLVER_INTERFACES    "include/solvers/interfaces/*.h")
   file(GLOB INC_STRUCTURES "include/data_structures/*.h")
   file(GLOB INC_ALGEBRA    "include/algebra/*.h")
   file(GLOB INC_UTIL    "include/util/*.h")
   install(FILES ${INC_COMMON}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common)
   install(FILES ${INC_SOLVER}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common/solvers)
+  install(FILES ${INC_SOLVER_INTERFACES}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common/solvers/interfaces)
   install(FILES ${INC_STRUCTURES}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common/data_structures)
   install(FILES ${INC_ALGEBRA}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common/algebra)
   install(FILES ${INC_UTIL}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common/util)

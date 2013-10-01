@@ -68,9 +68,9 @@ namespace Hermes
     ///
     template <typename Scalar>
     class NonlinearMatrixSolver : public Hermes::Mixins::Loggable,
-      public Hermes::Mixins::OutputAttachable,
-      public Hermes::Mixins::TimeMeasurable,
-      public Hermes::Algebra::Mixins::MatrixRhsOutput<Scalar>
+      public virtual Hermes::Mixins::OutputAttachable,
+      public Hermes::Mixins::StateQueryable, 
+      public Hermes::Mixins::TimeMeasurable
     {
     public:
       NonlinearMatrixSolver();
@@ -118,10 +118,23 @@ namespace Hermes
       /// solution as a correct one. If false, only one will be enough.
       void set_tolerance(double newton_tol, NonlinearConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd = false);
 
+      /// Jacobian can be reused if possible.
+      bool constant_jacobian;
+
+      /// Jacobian is ready to be reused if desirable.
+      bool jacobian_reusable;
+
+      /// Get the Linear solver (thus influence its behavior).
+      SparseMatrix<Scalar>* get_jacobian();
+      Vector<Scalar>* get_residual();
+      
       /// Get the number of iterations.
       int get_num_iters() const;
 
     protected:
+      /// Norm for convergence.
+      double calculate_residual_norm();
+
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "NonlinearMatrixSolver"; }
@@ -136,9 +149,6 @@ namespace Hermes
       /// By default set to 1E6.
       /// Possible to change via method set_max_allowed_residual_norm().
       double max_allowed_residual_norm;
-
-      /// Calculates the residual norm.
-      double calculate_residual_norm();
 
       /// Maximum number of iterations allowed.
       int max_allowed_iterations;
@@ -171,15 +181,16 @@ namespace Hermes
       /// solution as a correct one. If false, only one will be enough.
       bool handleMultipleTolerancesAnd;
 
-      /// Jacobian.
-      Hermes::Algebra::SparseMatrix<Scalar>* jacobian;
-
-      /// Residual.
-      Vector<Scalar>* residual;
+      /// The solution vector.
+      Scalar* sln_vector;
 
       /// Linear solver.
       Hermes::Solvers::LinearMatrixSolver<Scalar>* matrix_solver;
       
+      /// Matrix size.
+      int dimension;
+      virtual int get_dimension() = 0;
+
       int num_iters;
 #pragma region OutputAttachable
       // For derived classes - read-only access.

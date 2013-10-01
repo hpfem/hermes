@@ -89,6 +89,7 @@ project(hermes2d)
   include_directories(${PROJECT_SOURCE_DIR}/../hermes_common/include/data_structures)
   include_directories(${PROJECT_SOURCE_DIR}/../hermes_common/include/util)
   include_directories(${PROJECT_SOURCE_DIR}/../hermes_common/include/solvers)
+  include_directories(${PROJECT_SOURCE_DIR}/../hermes_common/include/solvers/interfaces)
   include_directories(${PROJECT_SOURCE_DIR})
   include_directories(${PROJECT_SOURCE_DIR}/include)
   include_directories(${PROJECT_SOURCE_DIR}/include/form)
@@ -205,8 +206,6 @@ project(hermes2d)
     
     src/solver/solver.cpp
     src/solver/linear_solver.cpp
-    src/solver/nonlinear_solver.cpp
-    
     src/solver/nox_solver.cpp
     src/solver/newton_solver.cpp
     src/solver/picard_solver.cpp
@@ -324,9 +323,7 @@ project(hermes2d)
   SOURCE_GROUP(
     "Source Files\\Solvers" FILES
     src/solver/solver.cpp
-    src/solver/linear_solver.cpp
-    src/solver/nonlinear_solver.cpp
-    
+    src/solver/linear_solver.cpp    
     src/solver/nox_solver.cpp
     src/solver/newton_solver.cpp
     src/solver/picard_solver.cpp
@@ -463,7 +460,6 @@ project(hermes2d)
     
     include/solver/solver.h
     include/solver/linear_solver.h
-    include/solver/nonlinear_solver.h
     include/solver/nox_solver.h
     include/solver/newton_solver.h
     include/solver/picard_solver.h
@@ -582,8 +578,6 @@ project(hermes2d)
     "Header Files\\Solvers" FILES 
     include/solver/solver.h
     include/solver/linear_solver.h
-    include/solver/nonlinear_solver.h
-    
     include/solver/nox_solver.h
     include/solver/newton_solver.h
     include/solver/picard_solver.h

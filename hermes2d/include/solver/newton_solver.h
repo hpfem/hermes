@@ -22,9 +22,8 @@
 #ifndef __H2D_SOLVER_NEWTON_H_
 #define __H2D_SOLVER_NEWTON_H_
 
-#include "global.h"
-#include "nonlinear_solver.h"
-#include "exceptions.h"
+#include "solvers/newton_matrix_solver.h"
+#include "solver.h"
 
 namespace Hermes
 {
@@ -69,15 +68,47 @@ namespace Hermes
     /// }<br>
     template<typename Scalar>
     class HERMES_API NewtonSolver : 
-      public Hermes::Hermes2D::NonlinearSolver<Scalar>,
-      Hermes::Solvers::NonlinearMatrixSolver<Scalar>
+      public Hermes::Hermes2D::Solver<Scalar>,
+      public Hermes::Solvers::NewtonMatrixSolver<Scalar>
     {
     public:
       NewtonSolver();
       NewtonSolver(DiscreteProblem<Scalar>* dp);
       NewtonSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
       NewtonSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      void init();
       virtual ~NewtonSolver();
+
+      // See the base class for details, the following serves only for avoiding C++ name-hiding.
+      using Solver<Scalar>::solve;
+      
+      /// Basic solve method - in linear solvers it serves only as an initial guess for iterative solvers.
+      /// \param[in] coeff_vec initiall guess.
+      virtual void solve(Scalar* coeff_vec);
+
+      void assemble_residual(Scalar* coeff_vec);
+      void assemble_jacobian(Scalar* coeff_vec);
+      void assemble(Scalar* coeff_vec);
+      int get_dimension();
+
+      Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_solver();
+
+      /// \return Whether or not should the processing continue.
+      virtual void on_damping_factor_updated();
+      /// \return Whether or not should the processing continue.
+      virtual void on_reused_jacobian_step_begin();
+      /// \return Whether or not should the processing continue.
+      virtual void on_reused_jacobian_step_end();
+
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "NewtonSolver"; }
+
+      virtual bool on_step_end();
+
+      virtual bool on_initialization();
+
+      virtual bool on_initial_step_end();
     };
   }
 }

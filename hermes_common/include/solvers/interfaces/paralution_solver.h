@@ -23,11 +23,11 @@
 #define __HERMES_COMMON_PARALUTION_SOLVER_H_
 #include "config.h"
 #ifdef WITH_PARALUTION
-#include "linear_matrix_solver.h"
+#include "solvers/linear_matrix_solver.h"
 #include "algebra/cs_matrix.h"
 
 #include "paralution.hpp"
-#include "precond.h"
+#include "solvers/precond.h"
 
 using namespace Hermes::Algebra;
 

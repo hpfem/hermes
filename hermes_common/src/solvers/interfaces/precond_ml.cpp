@@ -60,7 +60,7 @@ namespace Hermes
     {
       mlist.set(name, value);
     }
-    
+
     template<typename Scalar>
     void MlPrecond<Scalar>::set_param(const char *name, bool value)
     {
@@ -96,7 +96,7 @@ namespace Hermes
       assert(prec != NULL);
       prec->ComputePreconditioner();
     }
-    
+
     template<typename Scalar>
     void MlPrecond<Scalar>::recompute()
     {

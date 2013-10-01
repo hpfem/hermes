@@ -56,11 +56,6 @@ namespace Hermes
     template<typename Scalar>
     Solver<Scalar>::~Solver()
     {
-      delete matrix_solver;
-      if(jacobian)
-        delete jacobian;
-      if(residual)
-        delete residual;
       if(own_dp)
         delete this->dp;
       else
@@ -73,10 +68,6 @@ namespace Hermes
     template<typename Scalar>
     void Solver<Scalar>::init(bool force_use_direct_solver)
     {
-      this->jacobian = create_matrix<Scalar>(force_use_direct_solver);
-      this->residual = create_vector<Scalar>(force_use_direct_solver);
-      this->matrix_solver = create_linear_solver<Scalar>(this->jacobian, this->residual, force_use_direct_solver);
-
       this->set_verbose_output(true);
       this->sln_vector = NULL;
 
@@ -123,16 +114,16 @@ namespace Hermes
     template<typename Scalar>
      void Solver<Scalar>::set_UMFPACK_output(bool to_set, bool with_output)
     {
-      if(!dynamic_cast<UMFPackLinearMatrixSolver<Scalar>*>(this->matrix_solver))
+      if(!dynamic_cast<UMFPackLinearMatrixSolver<Scalar>*>(this->get_linear_solver()))
       {
         this->warn("A different solver than UMFPACK is used, ignoring the call to set_UMFPACK_reporting().");
         return;
       }
 
       if(with_output)
-        ((UMFPackLinearMatrixSolver<Scalar>*)this->matrix_solver)->set_output_level(2);
+        ((UMFPackLinearMatrixSolver<Scalar>*)this->get_linear_solver())->set_output_level(2);
       else
-        ((UMFPackLinearMatrixSolver<Scalar>*)this->matrix_solver)->set_output_level(0);
+        ((UMFPackLinearMatrixSolver<Scalar>*)this->get_linear_solver())->set_output_level(0);
 
       this->do_UMFPACK_reporting = to_set;
     }
@@ -141,7 +132,7 @@ namespace Hermes
      void Solver<Scalar>::set_verbose_output(bool to_set)
     {
       Loggable::set_verbose_output(to_set);
-      this->matrix_solver->set_verbose_output(to_set);
+      this->get_linear_solver()->set_verbose_output(to_set);
     }
 
     template<typename Scalar>
@@ -203,24 +194,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    SparseMatrix<Scalar>* Solver<Scalar>::get_jacobian()
-    {
-      return this->jacobian;
-    }
-
-    template<typename Scalar>
-    Vector<Scalar>* Solver<Scalar>::get_residual()
-    {
-      return this->residual;
-    }
-
-    template<typename Scalar>
-    Hermes::Solvers::LinearMatrixSolver<Scalar>* Solver<Scalar>::get_linear_solver()
-    {
-      return this->matrix_solver;
-    }
-
-    template<typename Scalar>
     void Solver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
     {
       this->dp->set_spaces(spaces);
@@ -246,55 +219,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool Solver<Scalar>::reuse_jacobian_values()
-    {
-      if(this->constant_jacobian)
-        return true;
-      else
-        return false;
-    }
-
-    template<typename Scalar>
-    void Solver<Scalar>::conditionally_assemble(Scalar* coeff_vec, bool force_reuse_jacobian_values, bool assemble_residual)
-    {
-      if(this->jacobian_reusable)
-      {
-        if(this->reuse_jacobian_values() || force_reuse_jacobian_values)
-        {
-          this->info("\tSolver: reusing Jacobian.");
-          if(assemble_residual)
-            this->dp->assemble(coeff_vec, this->residual);
-          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
-        }
-        else
-        {
-          this->info("\tSolver: recalculating a reusable Jacobian.");
-          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING);
-          if(assemble_residual)
-            this->dp->assemble(coeff_vec, this->jacobian, this->residual);
-          else
-            this->dp->assemble(coeff_vec, this->jacobian);
-        }
-      }
-      else
-      {
-        this->info("\tSolver: Calculating Jacobian.");
-        if(assemble_residual)
-          this->dp->assemble(coeff_vec, this->jacobian, this->residual);
-        else
-          this->dp->assemble(coeff_vec, this->jacobian);
-        this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
-        this->jacobian_reusable = true;
-      }
-    }
-
-    template<typename Scalar>
     void Solver<Scalar>::handle_UMFPACK_reports()
     {
       if(this->do_UMFPACK_reporting)
       {
-        UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->matrix_solver;
-        if(this->matrix_solver->get_used_reuse_scheme() != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
+        UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->get_linear_solver();
+        if(this->get_linear_solver()->get_used_reuse_scheme() != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
         {
           this->UMFPACK_reporting_data[this->FactorizationSize] = umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
           this->UMFPACK_reporting_data[this->PeakMemoryUsage] = umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
