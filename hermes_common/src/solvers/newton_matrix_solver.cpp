@@ -50,7 +50,7 @@ namespace Hermes
     template<typename Scalar>
     NonlinearConvergenceState NewtonMatrixSolver<Scalar>::get_convergence_state()
     {
-      double residual_norm = this->get_parameter_value(p_residual_norms).back();
+      double residual_norm = this->get_parameter_value(this->p_residual_norms).back();
 
       if(residual_norm > this->max_allowed_residual_norm)
         return AboveMaxAllowedResidualNorm;
