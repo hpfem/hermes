@@ -77,10 +77,10 @@ namespace Hermes
       NonlinearMatrixSolver();
       virtual ~NonlinearMatrixSolver();
 
-      virtual void assemble_residual(Scalar* coeff_vec) = 0;
-      virtual void assemble_jacobian(Scalar* coeff_vec) = 0;
-      virtual void assemble(Scalar* coeff_vec) = 0;
-      
+      /// Solve.
+      /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
+      virtual void solve(Scalar* coeff_vec);
+
       /// Set the maximum number of iterations, thus co-determine when to stop iterations.
       void set_max_allowed_iterations(int max_allowed_iterations);
 
@@ -91,17 +91,6 @@ namespace Hermes
       /// Default: 1E9
       void set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set);
 
-      /// Find out the convergence state.
-      NonlinearConvergenceState get_convergence_state();
-
-      /// Act upon the convergence state.
-      /// \return If the main loop in solve() should finalize after this.
-      virtual bool handle_convergence_state_return_finished(NonlinearConvergenceState state, Scalar* coeff_vec) = 0;
-
-      /// Initialization - called at the beginning of solving.
-      /// Very important e.g. for assigning DOFs before assembling.
-      virtual void init_solving(Scalar*& coeff_vec);
-
       /// Set the residual norm tolerance for ending the Newton's loop.
       /// Default: this->set_tolerance(1e-8, ResidualNormAbsolute);
       /// \param[in] handleMultipleTolerancesAnd If true, multiple tolerances defined will have to be all fulfilled in order to proclaim
@@ -110,8 +99,140 @@ namespace Hermes
       
       /// Get the number of iterations.
       int get_num_iters() const;
+      
+#pragma region damping-public
+      /// Sets minimum damping coefficient.
+      /// Default: 1E-4
+      void set_min_allowed_damping_coeff(double min_allowed_damping_coeff_to_set);
+
+      /// Turn on or off manual damping (default is the automatic) and optionally sets manual damping coefficient.
+      /// Default: default is the automatic damping, default coefficient if manual damping used is set by this method.
+      /// \param[in] onOff on(true)-manual damping, off(false)-automatic damping.
+      /// \param[in] coeff The (perpetual) damping coefficient in the case of manual damping. Ignored in the case of automatic damping.
+      void set_manual_damping_coeff(bool onOff, double coeff);
+      
+      /// Make the automatic damping start with this coefficient.
+      /// This will also be the top bound for the coefficient.
+      /// Default: 1.0
+      /// \param[in] coeff The initial damping coefficient. Must be > 0 and <= 1.0.
+      void set_initial_auto_damping_coeff(double coeff);
+      
+      /// Set the ratio to the automatic damping.
+      /// When the damping coefficient is decided to be descreased or increased, this is the ratio
+      /// how it will be changed (this is the bigger ( > 1.0 ) of the two possible values).
+      /// I.e. when the damping coefficient is shortened 3 times if deemed too big, make the parameter not 0.333333, but 3.0.
+      /// Default: 2.0
+      /// \param[in] ratio The ratio (again, it must be > 1.0, and it represents the inverse of the shortening factor).
+      void set_auto_damping_ratio(double ratio);
+
+      /// Set the ratio of the current residual norm and the previous residual norm necessary to deem a step 'successful'.
+      /// It can be either > 1.0, meaning that even if the norm increased, the step will be 'successful', or < 1.0, meaning
+      /// that even though the residual norm goes down, we will further decrease the damping coefficient.
+      /// Default: 0.95
+      /// param[in] ratio The ratio, must be positive.
+      void set_sufficient_improvement_factor(double ratio);
+
+      /// Set how many successful steps are necessary for the damping coefficient to be increased, by multiplication by the parameter
+      /// set by set_auto_damping_ratio().
+      /// The coefficient is then increased after each 'successful' step, if the sequence of such is not interrupted by an 'unsuccessful' step.
+      /// Default: 1
+      /// \param[in] steps Number of steps.
+      void set_necessary_successful_steps_to_increase(unsigned int steps);
+#pragma endregion
+
+#pragma region jacobian_recalculation-public
+      /// Set the ratio of the current residual norm and the previous residual norm necessary to deem a step 'successful'.
+      /// IMPORTANT: it is truly a FACTOR, i.e. the two successive residual norms are put in a fraction and this number is
+      /// then compared to the ratio set by this method.
+      void set_sufficient_improvement_factor_jacobian(double ratio);
+
+      /// Set maximum number of steps (Newton iterations) that a jacobian can be reused if it is deemed a 'successful' reusal
+      /// with respect to the improvement factor.
+      void set_max_steps_with_reused_jacobian(unsigned int steps);
+#pragma endregion
 
     protected:
+      
+#pragma region damping-private
+      /// Manual / auto.
+      bool manual_damping;
+
+      /// Manual.
+      double manual_damping_factor;
+
+      /// Auto.
+      /// The ratio between two damping coeffs when changing.
+      double auto_damping_ratio;
+      /// The initial (and maximum) damping coefficient
+      double initial_auto_damping_factor;
+      /// Sufficient improvement for continuing.
+      double sufficient_improvement_factor;
+      /// necessary number of steps to increase back the damping coeff.
+      unsigned int necessary_successful_steps_to_increase;
+      /// Minimum allowed damping coeff.
+      double min_allowed_damping_coeff;      
+#pragma endregion
+
+#pragma region jacobian_recalculation-private
+      /// For deciding if the jacobian is reused at this point.
+      bool force_reuse_jacobian_values(unsigned int& successful_steps_with_reused_jacobian);
+      /// For deciding if the reused jacobian did not bring residual increase at this point.
+      bool jacobian_reused_okay(unsigned int& successful_steps_with_reused_jacobian);
+
+      double sufficient_improvement_factor_jacobian;
+      unsigned int max_steps_with_reused_jacobian;
+      
+      /// Backup vector for unsuccessful reuse of Jacobian.
+      Vector<Scalar>* residual_back;
+#pragma endregion
+
+      virtual void assemble_residual() = 0;
+      virtual void assemble_jacobian() = 0;
+      virtual void assemble() = 0;
+      
+      /// \return Whether or not should the processing continue.
+      virtual void on_damping_factor_updated();
+      /// \return Whether or not should the processing continue.
+      virtual void on_reused_jacobian_step_begin();
+      /// \return Whether or not should the processing continue.
+      virtual void on_reused_jacobian_step_end();
+
+      /// Act upon the convergence state.
+      /// \return If the main loop in solve() should finalize after this.
+      virtual bool handle_convergence_state_return_finished(NonlinearConvergenceState state);
+
+      /// Initialization - called at the beginning of solving.
+      /// Very important e.g. for assigning DOFs before assembling.
+      virtual void init_solving(Scalar* coeff_vec);
+
+      /// Find out the convergence state.
+      virtual NonlinearConvergenceState get_convergence_state();
+
+      /// Initial step.
+      bool do_initial_step_return_finished();
+      
+      /// Solve the step's linear system.
+      virtual void solve_linear_system();
+
+      /// Update the solution.
+      /// This is a method that serves the purpose of distinguishing methods that solve for increment (Newton), or for solution (Picard).
+      virtual double update_solution_return_change_norm(Scalar* linear_system_solution) = 0;
+
+      /// Internal.
+      void finalize_solving();
+
+      /// Internal.
+      virtual void deinit_solving();
+      
+      /// Calculates the new damping coefficient.
+      bool calculate_damping_factor(unsigned int& successful_steps);
+
+      /// Shortcut method for getting the current iteration.
+      int get_current_iteration_number();
+
+      /// Output info about the step.
+      void step_info();
+      
       /// Norm for convergence.
       double calculate_residual_norm();
 
@@ -122,9 +243,6 @@ namespace Hermes
       /// Shared code for constructors.
       void init_nonlinear();
 
-      /// Shortcut method for getting the current iteration.
-      virtual int get_current_iteration_number() = 0;
-
       /// Maximum allowed residual norm. If this number is exceeded, the methods solve() return 'false'.
       /// By default set to 1E6.
       /// Possible to change via method set_max_allowed_residual_norm().
@@ -132,10 +250,6 @@ namespace Hermes
 
       /// Maximum number of iterations allowed.
       int max_allowed_iterations;
-
-      /// There was no initial coefficient vector passed, so this instance had to create one
-      /// and this serves as the identificator according to which it will be deleted.
-      bool delete_coeff_vec;
 
       /// Tolerances for all NonlinearConvergenceMeasurementType numbered sequentially as the enum NonlinearConvergenceMeasurementType is.
       double tolerance[NonlinearConvergenceMeasurementTypeCount];
@@ -151,15 +265,31 @@ namespace Hermes
 
 #pragma region OutputAttachable
       // For derived classes - read-only access.
+      const OutputParameterUnsignedInt& iteration() const { return this->p_iteration; };
       const OutputParameterDoubleVector& residual_norms() const { return this->p_residual_norms; };
       const OutputParameterDoubleVector& solution_norms() const { return this->p_solution_norms; };
       const OutputParameterDoubleVector& solution_change_norms() const { return this->p_solution_change_norms; };
-
-      // Parameters for OutputAttachable mixin.
+      const OutputParameterUnsignedInt& successful_steps_damping() const { return this->p_successful_steps_damping; };
+      const OutputParameterUnsignedInt& successful_steps_jacobian() const { return this->p_successful_steps_jacobian; };
+      const OutputParameterDoubleVector& damping_factors() const { return this->p_damping_factors; };
+      const OutputParameterBool& residual_norm_drop() const { return this->p_residual_norm_drop; };
+      const OutputParameterBoolVector& iterations_with_recalculated_jacobian() const { return this->p_iterations_with_recalculated_jacobian; };
+    
+      /// Parameters for OutputAttachable mixin.
+      /// Should be private, but then it does not work.
       OutputParameterDoubleVector p_residual_norms;
       OutputParameterDoubleVector p_solution_norms;
       OutputParameterDoubleVector p_solution_change_norms;
+      OutputParameterBoolVector p_iterations_with_recalculated_jacobian;
+      OutputParameterUnsignedInt p_successful_steps_damping;
+      OutputParameterUnsignedInt p_successful_steps_jacobian;
+      OutputParameterDoubleVector p_damping_factors;
+      OutputParameterBool p_residual_norm_drop;
+      OutputParameterUnsignedInt p_iteration;
 #pragma endregion
+
+			Scalar* previous_sln_vector;
+      bool use_initial_guess_for_iterative_solvers;
       friend class NonlinearConvergenceMeasurement<Scalar>;
     };
   }

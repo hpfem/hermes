@@ -1,6 +1,3 @@
-#define HERMES_REPORT_ALL
-#define HERMES_REPORT_FILE "application.log"
-
 #include "hermes2d.h"
 
 using namespace Hermes;
@@ -141,9 +138,9 @@ int main(int argc, char* argv[])
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;
-	newton.set_weak_formulation(&wf);
+  newton.set_weak_formulation(&wf);
   Hermes::vector<SpaceSharedPtr<double> > spaces(xvel_space, yvel_space, p_space);
-	newton.set_spaces(spaces);
+  newton.set_spaces(spaces);
 
   // Initialize views.
   Views::VectorView vview("velocity[m/s]", new Views::WinGeom(0, 0, 750, 240));
@@ -152,8 +149,8 @@ int main(int argc, char* argv[])
   vview.fix_scale_width(80);
   //pview.set_min_max_range(-0.9, 1.0);
   pview.fix_scale_width(80);
-if(HERMES_VISUALIZATION)
-  pview.show_mesh(true);
+  if(HERMES_VISUALIZATION)
+    pview.show_mesh(true);
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.

@@ -27,6 +27,7 @@ namespace Hermes
 {
   namespace Solvers
   {
+
     template<typename Scalar>
     PicardMatrixSolver<Scalar>::PicardMatrixSolver() : NonlinearMatrixSolver<Scalar>()
     {
@@ -34,50 +35,63 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    PicardMatrixSolver<Scalar>::~PicardMatrixSolver()
+    void PicardMatrixSolver<Scalar>::init_picard()
     {
+      this->min_allowed_damping_coeff = 1E-4;
+      this->manual_damping = true;
+      this->auto_damping_ratio = 2.0;
+      this->manual_damping_factor = 1.0;
+      this->initial_auto_damping_factor = 1.0;
+      this->sufficient_improvement_factor = 1.05;
+      this->necessary_successful_steps_to_increase = 3;
+
+      this->sufficient_improvement_factor_jacobian = 1e-1;
+      this->max_steps_with_reused_jacobian = 0;
+
+      this->set_tolerance(1e-3, SolutionChangeRelative);
+
+      this->num_last_vectors_used = 3;
+      this->anderson_beta = 1.0;
+      this->anderson_is_on = false;
+      this->vec_in_memory = 0;
+
+      this->use_initial_guess_for_iterative_solvers = true;
     }
 
     template<typename Scalar>
-    bool PicardMatrixSolver<Scalar>::isOkay() const
+    double PicardMatrixSolver<Scalar>::update_solution_return_change_norm(Scalar* linear_system_solution)
     {
-      if(num_last_vectors_used <= 1)
+      double current_damping_factor = this->get_parameter_value(this->p_damping_factors).back();
+
+      double solution_change_norm = 0.;
+      for (int i = 0; i < this->problem_size; i++)
       {
-        throw Hermes::Exceptions::Exception("Picard: Bad number of last iterations to be used (must be at least one).");
-        return false;
+        solution_change_norm += std::pow(std::abs(linear_system_solution[i] - this->sln_vector[i]), 2.);
+        this->sln_vector[i] += current_damping_factor * (linear_system_solution[i] - this->sln_vector[i]);
       }
 
-      return NonlinearMatrixSolver<Scalar>::isOkay();
+      return std::sqrt(solution_change_norm) * current_damping_factor;
     }
 
     template<typename Scalar>
-    bool PicardMatrixSolver<Scalar>::handle_convergence_state_return_finished(NonlinearConvergenceState state, Scalar* coeff_vec)
+    void PicardMatrixSolver<Scalar>::solve_linear_system()
     {
-      // If we have not converged and everything else is ok, we finish.
-      if(state == NotConverged)
-        return false;
-      // And now the finishing states (both good and bad).
-      this->finalize_solving(coeff_vec);
+      NonlinearMatrixSolver<Scalar>::solve_linear_system();
+      this->handle_previous_vectors();
+    }
 
-      // Act upon the state.
-      switch(state)
-      {
-      case Converged:
-        this->info("\tPicard: done.\n");
-        break;
-      case AboveMaxIterations:
-        throw Exceptions::NonlinearException(AboveMaxIterations);
-        break;
-      case Error:
-        throw Exceptions::Exception("Unknown exception in PicardSolver.");
-        break;
-      default:
-        throw Exceptions::Exception("Unknown ConvergenceState in PicardSolver.");
-        break;
-      }
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::init_solving(Scalar*& coeff_vec)
+    {
+      NonlinearMatrixSolver<Scalar>::init_solving(coeff_vec);
+      this->init_anderson();
+    }
 
-      // Return that we should finish.
-      return true;
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::deinit_solving()
+    {
+      this->deinit_anderson();
+      NonlinearMatrixSolver<Scalar>::deinit_solving();
     }
 
     template<typename Scalar>
@@ -99,31 +113,17 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int PicardMatrixSolver<Scalar>::get_current_iteration_number()
-    {
-      return this->get_parameter_value(this->p_iteration);
-    }
-
-    template<typename Scalar>
-    void PicardMatrixSolver<Scalar>::init_picard()
-    {
-      num_last_vectors_used = 3;
-      anderson_beta = 1.0;
-      anderson_is_on = false;
-      this->set_tolerance(1e-3, SolutionChangeRelative);
-      this->set_damping_coefficient(1.);
-    }
-
-    template<typename Scalar>
     void PicardMatrixSolver<Scalar>::init_anderson()
     {
       if (anderson_is_on) 
       {
+        previous_Anderson_sln_vector = new Scalar[this->problem_size];
         previous_vectors = new Scalar*[num_last_vectors_used];
         for (int i = 0; i < num_last_vectors_used; i++)
           previous_vectors[i] = new Scalar[this->problem_size];
         anderson_coeffs = new Scalar[num_last_vectors_used-1];
         memcpy(previous_vectors[0], this->sln_vector, this->problem_size*sizeof(Scalar));
+        this->vec_in_memory = 1;
       }
     }
 
@@ -132,6 +132,7 @@ namespace Hermes
     {
       if (anderson_is_on)
       {
+        delete [] previous_Anderson_sln_vector;
         for (int i = 0; i < num_last_vectors_used; i++)
           delete [] previous_vectors[i];
         delete [] previous_vectors;
@@ -140,14 +141,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardMatrixSolver<Scalar>::handle_previous_vectors(unsigned int& vec_in_memory)
+    void PicardMatrixSolver<Scalar>::handle_previous_vectors()
     {
       // If Anderson is used, store the new vector in the memory.
       if (anderson_is_on)
       {
         // If memory not full, just add the vector.
-        if (vec_in_memory < num_last_vectors_used)
-          memcpy(previous_vectors[vec_in_memory++], this->sln_vector, this->problem_size * sizeof(Scalar));
+        if (this->vec_in_memory < num_last_vectors_used)
+          memcpy(previous_vectors[this->vec_in_memory++], this->sln_vector, this->problem_size * sizeof(Scalar));
         else
         {
           // If memory full, shift all vectors back, forgetting the oldest one.
@@ -162,17 +163,17 @@ namespace Hermes
           memcpy(oldest_vec, this->sln_vector, this->problem_size*sizeof(Scalar));
         }
 
-        if (vec_in_memory >= num_last_vectors_used)
+        if (this->vec_in_memory >= num_last_vectors_used)
         {
           // Calculate Anderson coefficients.
           this->calculate_anderson_coeffs();
 
-          // Calculate new vector and store it in this->sln_vector[].
+          // Calculate new vector and store it in this->Picard.
           for (int i = 0; i < this->problem_size; i++)
           {
-            this->sln_vector[i] = 0.;
+            this->previous_Anderson_sln_vector[i] = 0.;
             for (int j = 1; j < num_last_vectors_used; j++)
-              this->sln_vector[i] += anderson_coeffs[j-1] * previous_vectors[j][i] - (1.0 - anderson_beta) * anderson_coeffs[j - 1] * (previous_vectors[j][i] - previous_vectors[j - 1][i]);
+              this->previous_Anderson_sln_vector[i] += anderson_coeffs[j-1] * previous_vectors[j][i] - (1.0 - anderson_beta) * anderson_coeffs[j - 1] * (previous_vectors[j][i] - previous_vectors[j - 1][i]);
           }
         }
       }
@@ -195,7 +196,6 @@ namespace Hermes
       // Allocate the matrix system for the Anderson coefficients.
       Scalar** mat = new_matrix<Scalar>(n, n);
       Scalar* rhs = new Scalar[n];
-
       // Set up the matrix and rhs vector.
       for (int i = 0; i < n; i++)
       {
@@ -221,13 +221,11 @@ namespace Hermes
           mat[i][j] = val;
         }
       }
-
       // Solve the matrix system.
       double d;
       int* perm = new int[n];
       ludcmp(mat, n, perm, &d);
       lubksb<Scalar>(mat, n, perm, rhs);
-
       // Use the result to define the Anderson coefficients. Remember that
       // n were computed and the last one is 1.0 minus the sum of the 'n' numbers.
       Scalar sum = 0;
@@ -241,200 +239,6 @@ namespace Hermes
       // Clean up.
       delete [] mat;
       delete [] rhs;
-    }
-
-    template<typename Scalar>
-    void PicardMatrixSolver<Scalar>::set_damping_coefficient(double gamma_)
-    {
-      if(gamma_ < Hermes::epsilon || gamma_ > (1. + Hermes::epsilon))
-        throw Exceptions::ValueException("Picard damping coefficient", gamma_, 0., 1.);
-      else
-        this->gamma = gamma_;
-    }
-
-    template<typename Scalar>
-    void PicardMatrixSolver<Scalar>::step_info()
-    {
-      // Output.
-      this->info("\n\tPicard: iteration %d,", this->get_current_iteration_number());
-      double sln_change_norm = this->get_parameter_value(this->p_solution_change_norms).back();
-      double sln_norm = this->get_parameter_value(this->p_solution_norms).back();
-
-      this->info("\n\tPicard: solution change (L2 norm): %g (%g%%).", sln_change_norm, 100. * (sln_change_norm / sln_norm));
-    }
-
-    template<typename Scalar>
-    void PicardMatrixSolver<Scalar>::calculate_error(Scalar* coeff_vec)
-    {
-      // This is the new sln_vector.
-      Scalar* new_sln_vector = this->linear_matrix_solver->get_sln_vector();
-
-      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(new_sln_vector, this->problem_size));
-
-      // sln_vector still stores the old solution.
-      // !!!! coeff_vec stores the Anderson-generated previous solution.
-      double abs_error = 0.;
-      for (int i = 0; i < this->problem_size; i++)
-        abs_error += std::abs((this->sln_vector[i] - new_sln_vector[i]) * (this->sln_vector[i] - new_sln_vector[i]));
-      abs_error = std::sqrt(abs_error);
-
-      this->get_parameter_value(this->p_solution_change_norms).push_back(abs_error);
-
-      // only now we can update the sln_vector.
-      for (unsigned int i = 0; i < this->problem_size; i++)
-        this->sln_vector[i] = this->sln_vector[i] + this->gamma * (new_sln_vector[i] - this->sln_vector[i]);
-    }
-
-    template<typename Scalar>
-    void PicardMatrixSolver<Scalar>::init_solving(Scalar*& coeff_vec)
-    {
-      NonlinearMatrixSolver<Scalar>::init_solving(coeff_vec);
-    }
-
-    template<typename Scalar>
-    bool PicardMatrixSolver<Scalar>::do_initial_step_return_finished(Scalar* coeff_vec)
-    {
-      // Store the initial norm.
-      this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(coeff_vec, this->problem_size));
-
-      // Solve the linear system.
-      this->solve_linear_system(coeff_vec);
-
-      // Calculate errors.
-      this->calculate_error(coeff_vec);
-
-      // Use the solution vector for Anderson.
-      this->handle_previous_vectors(this->get_parameter_value(this->p_vec_in_memory));
-
-      // Info.
-      this->step_info();
-
-      // coeff_vec stores the previous iteration - after this, for the first ordinary step, it will hold the initial step solution.
-      memcpy(coeff_vec, this->sln_vector, sizeof(Scalar)*this->problem_size);
-
-      // Test convergence - if the first iteration is already a solution.
-      if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
-        return true;
-
-      return (this->on_initial_step_end() == false);
-    }
-
-    template<typename Scalar>
-    void PicardMatrixSolver<Scalar>::solve_linear_system(Scalar* coeff_vec)
-    {
-      // Assemble the residual and also jacobian when necessary (nonconstant jacobian, not reusable, ...).
-      if(this->jacobian_reusable && this->constant_jacobian)
-      {
-        this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
-        this->assemble_residual(coeff_vec);
-      }
-      else
-      {
-        this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
-        this->assemble(coeff_vec);
-        this->jacobian_reusable = true;
-      }
-
-      // Solve, if the solver is iterative, give him the initial guess.
-      this->linear_matrix_solver->solve(coeff_vec);
-      this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
-    }
-
-    template<typename Scalar>
-    void PicardMatrixSolver<Scalar>::solve(Scalar* coeff_vec)
-    {
-      this->init_solving(coeff_vec);
-
-      this->init_anderson();
-
-#pragma region parameter_setup
-      // Initialize parameters.
-      unsigned int vec_in_memory = 1; ///< There is already one vector in the memory.
-      unsigned int it = 1;
-      Hermes::vector<double> solution_norms;
-      Hermes::vector<double> solution_change_norms;
-      Hermes::vector<double> residual_norms;
-
-      // Link parameters.
-      this->set_parameter_value(this->p_iteration, &it);
-      this->set_parameter_value(this->p_vec_in_memory, &vec_in_memory);
-      this->set_parameter_value(this->p_residual_norms, &residual_norms);
-      this->set_parameter_value(this->p_solution_norms, &solution_norms);
-      this->set_parameter_value(this->p_solution_change_norms, &solution_change_norms);
-#pragma endregion
-
-      /// Initial iteratios is handled separately (though it is completely identical - this is just to reflect Newton solver).
-      if(this->do_initial_step_return_finished(coeff_vec))
-      {
-        this->info("\tPicard: aborted.");
-        // No vector passed, sln_vector in this case contains the solution.
-        this->finalize_solving(coeff_vec);
-        return;
-      }
-      else
-        it++; 
-
-      while (true)
-      {
-        // Handle the event of step beginning.
-        if(!this->on_step_begin())
-        {
-          this->info("\tPicard: aborted.");
-          this->finalize_solving(coeff_vec);
-          return;
-        }
-
-        // Solve.
-        this->solve_linear_system(coeff_vec);
-
-        // Calculate error.
-        this->calculate_error(coeff_vec);
-
-        // Use the solution vector for Anderson.
-        this->handle_previous_vectors(this->get_parameter_value(this->p_vec_in_memory));
-
-        // Output for the user.
-        this->step_info();
-
-        // Test convergence - if in this iteration we found a solution.
-        if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
-          return;
-
-        // Handle the event of end of a step.
-        if(!this->on_step_end())
-        {
-          this->info("Aborted");
-          this->finalize_solving(coeff_vec);
-          return;
-        }
-
-        // Increase counter of iterations.
-        it++;
-
-        // Renew the last iteration vector.
-        memcpy(coeff_vec, this->sln_vector, this->problem_size*sizeof(Scalar));
-      }
-    }
-
-    template<typename Scalar>
-    void PicardMatrixSolver<Scalar>::finalize_solving(Scalar* coeff_vec)
-    {
-      this->tick();
-      this->num_iters = this->get_current_iteration_number();
-      this->info("\tPicard: solution duration: %f s.\n", this->last());
-      this->on_finish();
-      this->deinit_solving(coeff_vec);
-    }
-
-    template<typename Scalar>
-    void PicardMatrixSolver<Scalar>::deinit_solving(Scalar* coeff_vec)
-    {
-      if(this->delete_coeff_vec)
-      {
-        ::free(coeff_vec);
-        this->delete_coeff_vec = false;
-      }
-      this->problem_size = -1;
     }
 
     template class HERMES_API PicardMatrixSolver<double>;

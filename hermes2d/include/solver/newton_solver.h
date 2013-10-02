@@ -92,29 +92,16 @@ namespace Hermes
       /// DiscreteProblemWeakForm helper.
       virtual void set_weak_formulation(WeakForm<Scalar>* wf);
 
-      void assemble_residual(Scalar* coeff_vec);
-      void assemble_jacobian(Scalar* coeff_vec);
-      void assemble(Scalar* coeff_vec);
+      void assemble_residual();
+      void assemble_jacobian();
+      void assemble();
 
       /// Initialization - called at the beginning of solving.
-      virtual void init_solving(Scalar*& coeff_vec);
+      virtual void init_solving(Scalar* coeff_vec);
 
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "NewtonSolver"; }
-
-      virtual bool on_step_end();
-
-      virtual bool on_initialization();
-
-      virtual bool on_initial_step_end();
-
-      /// \return Whether or not should the processing continue.
-      virtual void on_damping_factor_updated();
-      /// \return Whether or not should the processing continue.
-      virtual void on_reused_jacobian_step_begin();
-      /// \return Whether or not should the processing continue.
-      virtual void on_reused_jacobian_step_end();
     };
   }
 }

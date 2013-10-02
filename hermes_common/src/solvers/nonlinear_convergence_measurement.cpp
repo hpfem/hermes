@@ -32,27 +32,22 @@ namespace Hermes
     {
       // get iteration.
       unsigned int iteration = nonlinear_solver->get_current_iteration_number();
-      if(iteration < 2)
-        return false;
 
       const Hermes::vector<double>& residual_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->residual_norms());
       const Hermes::vector<double>& solution_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->solution_norms());
       const Hermes::vector<double>& solution_change_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->solution_change_norms());
-
-#ifdef _DEBUG
-      assert(residual_norms.size() > 1);
-      assert(solution_norms.size() > 1);
-#endif
+      int residual_norms_count = residual_norms.size();
+      int solution_norms_count = solution_norms.size();
+      int solution_change_norms_count = solution_change_norms.size();
 
       double initial_residual_norm = residual_norms[0];
-      double previous_residual_norm = residual_norms[iteration - 2];
-      double current_residual_norm = residual_norms[iteration - 1];
+      double current_residual_norm = residual_norms.back();
+      double previous_residual_norm = iteration == 1 ? current_residual_norm : residual_norms[residual_norms_count - 2];
 
       double initial_solution_norm = solution_norms[0];
-      double previous_solution_norm = solution_norms[iteration - 2];
-      double current_solution_norm = solution_norms[iteration - 1];
-      bool newton = (dynamic_cast<NewtonMatrixSolver<Scalar>*>(nonlinear_solver) != NULL);
-      double current_solution_change_norm = solution_change_norms[newton ? iteration - 2 : iteration - 1];
+      double previous_solution_norm = solution_norms[solution_norms_count - 2];
+      double current_solution_norm = solution_norms.back();
+      double current_solution_change_norm = solution_change_norms.back();
 
       bool converged;
       if(nonlinear_solver->handleMultipleTolerancesAnd)
@@ -73,6 +68,15 @@ namespace Hermes
       {
         if(!nonlinear_solver->tolerance_set[i])
           continue;
+
+        if(i == 1 && iteration == 1)
+        {
+          if(nonlinear_solver->handleMultipleTolerancesAnd)
+            return false;
+          else
+            continue;
+        }
+
         bool converged_this_tolerance = (convergence_decision_value[i] < nonlinear_solver->tolerance[i]);
         if(nonlinear_solver->handleMultipleTolerancesAnd)
           converged = converged && converged_this_tolerance;

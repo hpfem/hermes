@@ -32,7 +32,7 @@ const int INIT_BDY_REF_NUM = 5;
 const double INIT_COND_CONST = 3.0;               
 // Matrix solver: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;
 
 // Picard's method.
 // Number of last iterations used. 
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 
   // Initialize the Picard solver.
   PicardSolver<double> picard(&dp);
-  picard.use_Anderson_acceleration(true);
+  picard.use_Anderson_acceleration(false);
 
   // Perform the Picard's iteration (Anderson acceleration on by default).
   picard.set_tolerance(1e-7, SolutionChangeRelative);

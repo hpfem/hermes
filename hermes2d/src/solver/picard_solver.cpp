@@ -69,23 +69,26 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::assemble_residual(Scalar* coeff_vec)
+    void PicardSolver<Scalar>::assemble_residual()
     {
-      this->dp->assemble(coeff_vec, this->get_residual());
+      bool use_Anderson = this->anderson_is_on && (this->vec_in_memory >= this->num_last_vectors_used);
+      this->dp->assemble(use_Anderson ? this->previous_Anderson_sln_vector : this->sln_vector, this->get_residual());
       this->process_vector_output(this->get_residual(), this->get_current_iteration_number());
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::assemble_jacobian(Scalar* coeff_vec)
+    void PicardSolver<Scalar>::assemble_jacobian()
     {
-      this->dp->assemble(coeff_vec, this->get_jacobian());
+      bool use_Anderson = this->anderson_is_on && (this->vec_in_memory >= this->num_last_vectors_used);
+      this->dp->assemble(use_Anderson ? this->previous_Anderson_sln_vector : this->sln_vector, this->get_jacobian());
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number()); 
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::assemble(Scalar* coeff_vec)
+    void PicardSolver<Scalar>::assemble()
     {
-      this->dp->assemble(coeff_vec, this->get_jacobian(), this->get_residual());
+      bool use_Anderson = this->anderson_is_on && (this->vec_in_memory >= this->num_last_vectors_used);
+      this->dp->assemble(use_Anderson ? this->previous_Anderson_sln_vector : this->sln_vector, this->get_jacobian(), this->get_residual());
       this->process_vector_output(this->get_residual(), this->get_current_iteration_number());
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number());
     }
@@ -104,7 +107,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::init_solving(Scalar*& coeff_vec)
+    void PicardSolver<Scalar>::init_solving(Scalar* coeff_vec)
     {
       this->problem_size = Space<Scalar>::assign_dofs(this->get_spaces());
       PicardMatrixSolver<Scalar>::init_solving(coeff_vec);
@@ -115,24 +118,6 @@ namespace Hermes
     {
       Solver<Scalar>::set_spaces(spaces);
       this->jacobian_reusable = false;
-    }
-
-    template<typename Scalar>
-    bool PicardSolver<Scalar>::on_step_end()
-    {
-      return true;
-    }
-
-    template<typename Scalar>
-    bool PicardSolver<Scalar>::on_initialization()
-    {
-      return true;
-    }
-
-    template<typename Scalar>
-    bool PicardSolver<Scalar>::on_initial_step_end()
-    {
-      return true;
     }
 
     template class HERMES_API PicardSolver<double>;
