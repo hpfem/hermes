@@ -193,15 +193,11 @@ namespace Hermes
       this->bubble_functions_count = 0;
       for_all_active_elements(e, this->mesh)
       {
-        int order = this->get_element_order(e->id);
-        if(order > 0)
-        {
-          typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
-          ed->bdof = this->next_dof;
-          ed->n = this->shapeset->get_num_bubbles(ed->order, e->get_mode());
-          this->next_dof += ed->n * this->stride;
-          this->bubble_functions_count += ed->n;
-        }
+        typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
+        ed->bdof = this->next_dof;
+        ed->n = this->shapeset->get_num_bubbles(ed->order, e->get_mode());
+        this->next_dof += ed->n * this->stride;
+        this->bubble_functions_count += ed->n;
       }
     }
 
@@ -211,7 +207,6 @@ namespace Hermes
       Node* vn = e->vn[iv];
       typename Space<Scalar>::NodeData* nd = &this->ndata[vn->id];
       int index = this->shapeset->get_vertex_index(iv, e->get_mode());
-      if(this->get_element_order(e->id) == 0) return;
 
       if(!vn->is_constrained_vertex()) // unconstrained
       {
@@ -219,7 +214,6 @@ namespace Hermes
       }
       else // constrained
       {
-        //debug_log("! B cause of the triplet\n");
         for (int j = 0; j < nd->ncomponents; j++)
           if(nd->baselist[j].coef != (Scalar) 0)
           {
@@ -233,8 +227,6 @@ namespace Hermes
     {
       Node* en = e->en[surf_num];
       typename Space<Scalar>::NodeData* nd = &this->ndata[en->id];
-      if(this->get_element_order(e->id) == 0)
-        return;
 
       if(nd->n >= 0) // unconstrained
       {

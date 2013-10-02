@@ -23,33 +23,15 @@ namespace Hermes
     AsmList<Scalar>::AsmList(const AsmList<Scalar> & other)
     {
       this->cnt = other.cnt;
-      this->cap = other.cap;
-      this->idx = (int*) malloc(sizeof(int) * cap);
-      this->dof = (int*) malloc(sizeof(int) * cap);
-      this->coef = (Scalar*) malloc(sizeof(Scalar) * cap);
-      for(unsigned int i = 0; i < cnt; i++) {
-        coef[i] = other.coef[i];
-        dof[i] = other.dof[i];
-        idx[i] = other.idx[i];
-      }
+      memcpy(this->idx, other.idx, sizeof(int) * ASMLIST_SIZE);
+      memcpy(this->dof, other.dof, sizeof(int) * ASMLIST_SIZE);
+      memcpy(this->coef, other.coef, sizeof(Scalar) * ASMLIST_SIZE);
     }
 
     template<typename Scalar>
     AsmList<Scalar>::AsmList()
     {
       cnt = 0;
-      cap = 128;
-      idx = (int*) malloc(sizeof(int) * cap);
-      dof = (int*) malloc(sizeof(int) * cap);
-      coef = (Scalar*) malloc(sizeof(Scalar) * cap);
-    }
-
-    template<typename Scalar>
-    AsmList<Scalar>::~AsmList()
-    {
-      free(idx);
-      free(dof);
-      free(coef);
     }
 
     template<typename Scalar>
@@ -79,20 +61,12 @@ namespace Hermes
     template<typename Scalar>
     void AsmList<Scalar>::add_triplet(int i, int d, Scalar c)
     {
-      if(cnt >= cap)
-        enlarge();
+#ifdef _DEBUG
+      assert(cnt < ASMLIST_SIZE - 1);
+#endif
       idx[cnt] = i;
       dof[cnt] = d;
       coef[cnt++] = c;
-    }
-
-    template<typename Scalar>
-    void AsmList<Scalar>::enlarge()
-    {
-      cap = !cap ? 128 : cap * 2;
-      idx = (int*) realloc(idx, sizeof(int) * cap);
-      dof = (int*) realloc(dof, sizeof(int) * cap);
-      coef = (Scalar*) realloc(coef, sizeof(Scalar) * cap);
     }
 
     template HERMES_API class AsmList<double>;

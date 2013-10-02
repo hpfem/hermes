@@ -118,12 +118,6 @@ namespace Hermes
     template<typename Scalar>
     void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
-      if(e->id >= this->esize || this->edata[e->id].order < 0)
-        throw Hermes::Exceptions::Exception("Uninitialized element order (id = #%d).", e->id);
-      if(!this->is_up_to_date())
-        throw Hermes::Exceptions::Exception("The space is out of date. You need to update it with assign_dofs()"
-        " any time the mesh changes.");
-
       // add bubble functions to the assembly list
       al->cnt = 0;
       get_bubble_assembly_list(e, al);
