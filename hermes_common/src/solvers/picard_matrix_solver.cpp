@@ -84,7 +84,7 @@ namespace Hermes
 
       double residual_norm = get_l2_norm(temp, this->problem_size);
       delete[] temp;
-
+      
       return residual_norm;
     }
 
@@ -98,6 +98,9 @@ namespace Hermes
     template<typename Scalar>
     bool PicardMatrixSolver<Scalar>::damping_factor_condition()
     {
+      if (this->get_parameter_value(this->solution_change_norms()).size() == 1)
+        return true;
+
       double sln_change_norm = *(this->get_parameter_value(this->solution_change_norms()).end() - 1);
       double previous_sln_change_norm = *(this->get_parameter_value(this->solution_change_norms()).end() - 2);
 
