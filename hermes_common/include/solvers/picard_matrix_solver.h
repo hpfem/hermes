@@ -62,6 +62,9 @@ namespace Hermes
       /// Overriden because of Anderson.
       virtual void solve_linear_system();
 
+      /// Norm for convergence.
+      virtual double calculate_residual_norm();
+
       virtual bool damping_factor_condition();
 
       /// Common constructors code.

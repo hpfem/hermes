@@ -237,7 +237,7 @@ namespace Hermes
       void step_info();
       
       /// Norm for convergence.
-      double calculate_residual_norm();
+      virtual double calculate_residual_norm();
 
       /// State querying helpers.
       virtual bool isOkay() const;
