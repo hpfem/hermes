@@ -323,37 +323,34 @@ namespace Hermes
     template<typename Scalar>
     bool NonlinearMatrixSolver<Scalar>::calculate_damping_factor(unsigned int& successful_steps)
     {
-      Hermes::vector<double>& damping_factors = this->get_parameter_value(p_damping_factors);
+      Hermes::vector<double>& damping_factors_vector = this->get_parameter_value(p_damping_factors);
 
       if(this->manual_damping)
       {
-        damping_factors.push_back(this->manual_damping_factor);
+        damping_factors_vector.push_back(this->manual_damping_factor);
         return true;
       }
-
-      double residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 1);
-      double previous_residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 2);
-
-      if(residual_norm < previous_residual_norm * this->sufficient_improvement_factor)
+      
+      if(this->damping_factor_condition())
       {
         if(++successful_steps >= this->necessary_successful_steps_to_increase)
         {
-          double new_damping_factor = std::min(this->initial_auto_damping_factor, this->auto_damping_ratio * damping_factors.back());
+          double new_damping_factor = std::min(this->initial_auto_damping_factor, this->auto_damping_ratio * damping_factors_vector.back());
           this->info("\t\tstep successful, new damping factor: %g.", new_damping_factor);
-          damping_factors.push_back(new_damping_factor);
+          damping_factors_vector.push_back(new_damping_factor);
         }
         else
         {
-          this->info("\t\tstep successful, keep damping factor: %g.", damping_factors.back());
-          damping_factors.push_back(damping_factors.back());
+          this->info("\t\tstep successful, keep damping factor: %g.", damping_factors_vector.back());
+          damping_factors_vector.push_back(damping_factors_vector.back());
         }
 
         return true;
       }
       else
       {
-        double current_damping_factor = damping_factors.back();
-        damping_factors.pop_back();
+        double current_damping_factor = damping_factors_vector.back();
+        damping_factors_vector.pop_back();
         successful_steps = 0;
         if(current_damping_factor <= this->min_allowed_damping_coeff)
         {
@@ -365,7 +362,7 @@ namespace Hermes
         {
           double new_damping_factor = (1. / this->auto_damping_ratio) * current_damping_factor;
           this->warn("\t\tNOT improved, step restarted with factor: %g.", new_damping_factor);
-          damping_factors.push_back(new_damping_factor);
+          damping_factors_vector.push_back(new_damping_factor);
         }
 
         return false;

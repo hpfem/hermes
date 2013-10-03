@@ -62,6 +62,8 @@ namespace Hermes
       /// Overriden because of Anderson.
       virtual void solve_linear_system();
 
+      virtual bool damping_factor_condition();
+
       /// Common constructors code.
       /// Internal setting of default values (see individual set methods).
       void init_picard();

@@ -59,6 +59,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    bool NewtonMatrixSolver<Scalar>::damping_factor_condition()
+    {
+      double residual_norm = *(this->get_parameter_value(this->residual_norms()).end() - 1);
+      double previous_residual_norm = *(this->get_parameter_value(this->residual_norms()).end() - 2);
+
+      return (residual_norm < previous_residual_norm * this->sufficient_improvement_factor);
+    }
+
+    template<typename Scalar>
     double NewtonMatrixSolver<Scalar>::update_solution_return_change_norm(Scalar* linear_system_solution)
     {
       double current_damping_factor = this->get_parameter_value(this->p_damping_factors).back();

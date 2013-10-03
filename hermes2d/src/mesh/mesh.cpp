@@ -192,7 +192,7 @@ namespace Hermes
         throw Exceptions::Exception("Marker not valid in target_mesh::get_egg_shell.");
 
       // Initial allocation
-      int n_elements_alloc = n_element_guess == -1 ? (int)std::sqrt(target_mesh->get_num_active_elements()) : n_element_guess;
+      int n_elements_alloc = n_element_guess == -1 ? (int)std::sqrt((double)target_mesh->get_num_active_elements()) : n_element_guess;
       elements = (Element**)malloc(n_elements_alloc * sizeof(Element*));
       n_elements = 0;
 

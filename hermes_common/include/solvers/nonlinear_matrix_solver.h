@@ -227,6 +227,9 @@ namespace Hermes
       /// Calculates the new damping coefficient.
       bool calculate_damping_factor(unsigned int& successful_steps);
 
+      /// Returns iff the damping factor condition is fulfilled.
+      virtual bool damping_factor_condition() = 0;
+
       /// Shortcut method for getting the current iteration.
       int get_current_iteration_number();
 
