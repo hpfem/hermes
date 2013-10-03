@@ -34,8 +34,8 @@ namespace Hermes
   /// {
   ///&nbsp;/// Constructor.
   ///&nbsp;MyRealSinSquared() : Hermes1DFunction<double>() {}
-  ///&nbsp;double value(double x) const { return std::sin(x) * std::sin(x); }
-  ///&nbsp;Ord ord(Hermes::Ord x) const { return std::sin(x) * std::sin(x); // Hermes::Ord arithmetics will take care of everything, the resulting order will be as high as possible, see other examples in this file for another possibility how to go about it. }
+  ///&nbsp;double value(double x) const { return sin(x) * sin(x); }
+  ///&nbsp;Ord ord(Hermes::Ord x) const { return sin(x) * sin(x); // Hermes::Ord arithmetics will take care of everything, the resulting order will be as high as possible, see other examples in this file for another possibility how to go about it. }
   ///&nbsp;....
   /// }
   template<typename Scalar>

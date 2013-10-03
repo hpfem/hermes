@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 
   // Initialize Newton solver.
   NewtonSolver<double> newton(&dp);
-  newton.set_tolerance(NEWTON_TOL, ResidualNormAbsolute);
+  newton.set_tolerance(NEWTON_TOL, Hermes::Solvers::ResidualNormAbsolute);
   newton.set_max_allowed_residual_norm(1e99);
   newton.set_max_allowed_iterations(NEWTON_MAX_ITER);
   
@@ -89,22 +89,6 @@ int main(int argc, char* argv[])
   {
     newton.solve(coeff_vec);
   }
-  catch(Hermes::Exceptions::NonlinearException& e)
-  {
-    switch(e.get_exception_state())
-    {
-       case AboveMaxIterations:
-         std::cout << std::endl << "\t\t\tAboveMaxIterations" << std::endl;
-         break;
-      case BelowMinDampingCoeff:
-        std::cout << std::endl << "\t\t\tBelowMinDampingCoeff" << std::endl;
-         break;
-      case AboveMaxAllowedResidualNorm:
-        std::cout << std::endl << "\t\t\tAboveMaxAllowedResidualNorm" << std::endl;
-         break;
-    }
-  }
-  
   catch(std::exception& e)
   {
     std::cout << e.what();

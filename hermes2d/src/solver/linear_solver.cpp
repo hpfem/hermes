@@ -101,7 +101,7 @@ namespace Hermes
       {
         this->info("\tLinearSolver: reusing Matrix, assembling RHS.");
         this->dp->assemble(coeff_vec, this->get_residual());
-        this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
+        this->linear_matrix_solver->set_reuse_scheme(Hermes::Solvers::HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
       }
       else
       {
@@ -110,7 +110,7 @@ namespace Hermes
         else
           this->info("\tLinearSolver: calculating the Matrix.");
         this->dp->assemble(coeff_vec, this->get_jacobian(), this->get_residual());
-        this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+        this->linear_matrix_solver->set_reuse_scheme(Hermes::Solvers::HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
       }
 
       this->process_matrix_output(this->get_jacobian(), 1);

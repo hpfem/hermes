@@ -33,7 +33,6 @@ project(hermes_common)
     src/algebra/cs_matrix.cpp
     src/util/callstack.cpp
     src/util/qsort.cpp
-    src/util/c99_functions.cpp
     src/data_structures/range.cpp
     src/data_structures/table.cpp
     src/solvers/matrix_solver.cpp
@@ -63,7 +62,6 @@ project(hermes_common)
     include/ord.h
     include/hermes_function.h
     include/exceptions.h
-    include/util/c99_functions.h
     include/util/compat.h
     include/util/callstack.h
     include/util/qsort.h
@@ -142,7 +140,6 @@ project(hermes_common)
     "Source Files\\Utilities" FILES 
     src/util/callstack.cpp
     src/util/qsort.cpp
-    src/util/c99_functions.cpp
   )
   
   SOURCE_GROUP(
@@ -191,7 +188,6 @@ project(hermes_common)
   
   SOURCE_GROUP(
     "Header Files\\Utilities" FILES 
-    include/util/c99_functions.h
     include/util/compat.h
     include/util/callstack.h
     include/util/qsort.h
