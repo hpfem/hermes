@@ -219,25 +219,25 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
-      assemble((Solution<Scalar>**)NULL, mat, rhs);
+      assemble((Solution<Scalar>**)nullptr, mat, rhs);
     }
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, Vector<Scalar>* rhs)
     {
-      assemble(coeff_vec, NULL, rhs);
+      assemble(coeff_vec, nullptr, rhs);
     }
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble(Vector<Scalar>* rhs)
     {
-      assemble((Solution<Scalar>**)NULL, NULL, rhs);
+      assemble((Solution<Scalar>**)nullptr, nullptr, rhs);
     }
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
-      Solution<Scalar>** u_ext_sln = NULL;
+      Solution<Scalar>** u_ext_sln = nullptr;
 
       if(this->nonlinear && coeff_vec)
       {

@@ -128,9 +128,9 @@ namespace Hermes
     public:
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
       /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
-      Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = NULL);
-			Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = NULL);
-			Adapt(ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = NULL);
+      Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
+			Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
+			Adapt(ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
       /// Refines elements based on results from the ErrorCalculator class.

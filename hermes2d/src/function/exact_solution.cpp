@@ -66,7 +66,7 @@ namespace Hermes
     MeshFunction<Scalar>* ExactSolution<Scalar>::clone() const
     {
       throw Hermes::Exceptions::Exception("Solution<Scalar>::clone() must be overridden in the case of exact solutions.");
-      return NULL;
+      return nullptr;
     }
 
     template<typename Scalar>

@@ -23,7 +23,7 @@ namespace Hermes
   {
     PrecalcShapeset::PrecalcShapeset(Shapeset* shapeset) : Function<double>(), tables(6, 64)
     {
-      if(shapeset == NULL)
+      if(shapeset == nullptr)
         throw Exceptions::NullException(0);
       this->shapeset = shapeset;
       num_components = shapeset->get_num_components();
@@ -73,7 +73,7 @@ namespace Hermes
       int np = quad->get_num_points(order, this->element->get_mode());
       double3* pt = quad->get_points(order, this->element->get_mode());
 
-      int oldmask = (cur_node != NULL) ? cur_node->mask : 0;
+      int oldmask = (cur_node != nullptr) ? cur_node->mask : 0;
       int newmask = mask | oldmask;
       Node* node = new_node(newmask, np);
 
@@ -124,14 +124,14 @@ namespace Hermes
     void PrecalcShapeset::push_transform(int son)
     {
       Transformable::push_transform(son);
-      if(sub_tables != NULL)
+      if(sub_tables != nullptr)
         update_nodes_ptr();
     }
 
     void PrecalcShapeset::pop_transform()
     {
       Transformable::pop_transform();
-      if(sub_tables != NULL)
+      if(sub_tables != nullptr)
         update_nodes_ptr();
     }
 

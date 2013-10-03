@@ -43,7 +43,7 @@ namespace Hermes
         tables = cheb_tab;
         np = cheb_np;
 
-        tables[0][0] = tables[1][0] = NULL;
+        tables[0][0] = tables[1][0] = nullptr;
         np[0][0] = np[1][0] = 0;
 
         int i, j, k, n, m;
@@ -92,12 +92,12 @@ namespace Hermes
       transform = true;
       sln_type = HERMES_UNDEF;
       this->num_components = 0;
-      e_last = NULL;
+      e_last = nullptr;
 
-      mono_coeffs = NULL;
-      elem_coeffs[0] = elem_coeffs[1] = NULL;
-      elem_orders = NULL;
-      dxdy_buffer = NULL;
+      mono_coeffs = nullptr;
+      elem_coeffs[0] = elem_coeffs[1] = nullptr;
+      elem_orders = nullptr;
+      dxdy_buffer = nullptr;
       num_coeffs = num_elems = 0;
       num_dofs = -1;
 
@@ -176,7 +176,7 @@ namespace Hermes
     void Solution<Scalar>::copy(const MeshFunction<Scalar>* sln)
     {
       const Solution<Scalar>* solution = dynamic_cast<const Solution<Scalar>*>(sln);
-      if(solution == NULL)
+      if(solution == nullptr)
         throw Exceptions::Exception("The instance is in fact not a Solution instance in copy().");
 
       if(solution->sln_type == HERMES_UNDEF) 
@@ -212,7 +212,7 @@ namespace Hermes
       else // Const, exact handled differently.
         throw Hermes::Exceptions::Exception("Undefined or exact solutions cannot be copied into an instance of Solution already coming from computation.");
 
-      this->element = NULL;
+      this->element = nullptr;
     }
 
     template<typename Scalar>
@@ -231,22 +231,22 @@ namespace Hermes
         {
           tables[i][j].run_for_all(Function<Scalar>::Node::DeallocationFunction);
           tables[i][j].clear();
-          elems[i][j] = NULL;
+          elems[i][j] = nullptr;
         }
     }
 
     template<typename Scalar>
     void Solution<Scalar>::free()
     {
-      if(mono_coeffs  != NULL) { delete [] mono_coeffs;   mono_coeffs = NULL;  }
-      if(elem_orders != NULL) { delete [] elem_orders;  elem_orders = NULL; }
-      if(dxdy_buffer != NULL) { delete [] dxdy_buffer;  dxdy_buffer = NULL; }
+      if(mono_coeffs  != nullptr) { delete [] mono_coeffs;   mono_coeffs = nullptr;  }
+      if(elem_orders != nullptr) { delete [] elem_orders;  elem_orders = nullptr; }
+      if(dxdy_buffer != nullptr) { delete [] dxdy_buffer;  dxdy_buffer = nullptr; }
 
       for (int i = 0; i < this->num_components; i++)
-        if(elem_coeffs[i] != NULL)
-        { delete [] elem_coeffs[i];  elem_coeffs[i] = NULL; }
+        if(elem_coeffs[i] != nullptr)
+        { delete [] elem_coeffs[i];  elem_coeffs[i] = nullptr; }
 
-        e_last = NULL;
+        e_last = nullptr;
 
         free_tables();
     }
@@ -275,7 +275,7 @@ namespace Hermes
       {
         for (int m = 0; m <= 1; m++)
           for (int i = 0; i <= 10; i++)
-            if(mat[m][i] != NULL) {
+            if(mat[m][i] != nullptr) {
               delete [] mat[m][i];
               delete [] perm[m][i];
             }
@@ -317,7 +317,7 @@ namespace Hermes
       bool add_dir_lift, int start_index)
     {
       // Sanity check.
-      if(vec == NULL) throw Exceptions::NullException(2);
+      if(vec == nullptr) throw Exceptions::NullException(2);
 
       space_type = space->get_type();
       Scalar* coeffs = new Scalar[vec->get_size()];
@@ -332,10 +332,10 @@ namespace Hermes
     {
       // Initialize precalc shapeset using the space's shapeset.
       Shapeset *shapeset = space->shapeset;
-      if(space->shapeset == NULL)
-        throw Exceptions::Exception("Space->shapeset == NULL in Solution<Scalar>::set_coeff_vector().");
+      if(space->shapeset == nullptr)
+        throw Exceptions::Exception("Space->shapeset == nullptr in Solution<Scalar>::set_coeff_vector().");
       PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
-      if(pss == NULL) throw Exceptions::Exception("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
+      if(pss == nullptr) throw Exceptions::Exception("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
       set_coeff_vector(space, pss, coeffs, add_dir_lift, start_index);
       delete pss;
     }
@@ -348,11 +348,11 @@ namespace Hermes
       if(Solution<Scalar>::static_verbose_output)
         Hermes::Mixins::Loggable::Static::info("Solution: set_coeff_vector called.");
       // Sanity checks.
-      if(space->get_mesh() == NULL)
-        throw Exceptions::Exception("Mesh == NULL in Solution<Scalar>::set_coeff_vector().");
-      if(pss == NULL) throw Exceptions::NullException(2);
-      if(coeff_vec == NULL) throw Exceptions::NullException(3);
-      if(coeff_vec == NULL) throw Exceptions::Exception("Coefficient vector == NULL in Solution<Scalar>::set_coeff_vector().");
+      if(space->get_mesh() == nullptr)
+        throw Exceptions::Exception("Mesh == nullptr in Solution<Scalar>::set_coeff_vector().");
+      if(pss == nullptr) throw Exceptions::NullException(2);
+      if(coeff_vec == nullptr) throw Exceptions::NullException(3);
+      if(coeff_vec == nullptr) throw Exceptions::Exception("Coefficient vector == nullptr in Solution<Scalar>::set_coeff_vector().");
       if(!space->is_up_to_date())
         throw Exceptions::Exception("Provided 'space' is not up to date.");
       if(space->shapeset != pss->shapeset)
@@ -373,13 +373,13 @@ namespace Hermes
 
       // Allocate the coefficient arrays.
       num_elems = this->mesh->get_max_element_id();
-      if(elem_orders != NULL)
+      if(elem_orders != nullptr)
         delete [] elem_orders;
       elem_orders = new int[num_elems];
       memset(elem_orders, 0, sizeof(int) * num_elems);
       for (int l = 0; l < this->num_components; l++)
       {
-        if(elem_coeffs[l] != NULL)
+        if(elem_coeffs[l] != nullptr)
           delete [] elem_coeffs[l];
         elem_coeffs[l] = new int[num_elems];
         memset(elem_coeffs[l], 0, sizeof(int) * num_elems);
@@ -406,7 +406,7 @@ namespace Hermes
         elem_orders[e->id] = o;
       }
       num_coeffs *= this->num_components;
-      if(mono_coeffs != NULL)
+      if(mono_coeffs != nullptr)
         delete [] mono_coeffs;
       mono_coeffs = new Scalar[num_coeffs];
 
@@ -447,15 +447,15 @@ namespace Hermes
           mono += np;
 
           // solve for the monomial coefficients
-          if(mono_lu.mat[this->mode][o] == NULL)
+          if(mono_lu.mat[this->mode][o] == nullptr)
             mono_lu.mat[this->mode][o] = calc_mono_matrix(o, mono_lu.perm[this->mode][o]);
           lubksb<double, Scalar>(mono_lu.mat[this->mode][o], np, mono_lu.perm[this->mode][o], val);
         }
       }
 
-      if(this->mesh == NULL) throw Hermes::Exceptions::Exception("mesh == NULL");
+      if(this->mesh == nullptr) throw Hermes::Exceptions::Exception("mesh == nullptr");
       init_dxdy_buffer();
-      this->element = NULL;
+      this->element = nullptr;
       if(Solution<Scalar>::static_verbose_output)
         Hermes::Mixins::Loggable::Static::info("Solution: set_coeff_vector - done.");
     }
@@ -465,7 +465,7 @@ namespace Hermes
       Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
       Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
-      if(solution_vector == NULL) 
+      if(solution_vector == nullptr) 
         throw Exceptions::NullException(1);
       if(spaces.size() != solutions.size()) 
         throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
@@ -507,7 +507,7 @@ namespace Hermes
       Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
       // Sanity checks.
-      if(solution_vector == NULL) 
+      if(solution_vector == nullptr) 
         throw Exceptions::NullException(1);
 
       solution->set_coeff_vector(space, solution_vector, add_dir_lift, start_index);
@@ -518,11 +518,11 @@ namespace Hermes
       MeshFunctionSharedPtr<Scalar> solution, bool add_dir_lift, int start_index)
     {
       // Sanity checks.
-      if(solution_vector == NULL) 
+      if(solution_vector == nullptr) 
         throw Exceptions::NullException(1);
 
       Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(solution.get());
-      if(sln == NULL)
+      if(sln == nullptr)
         throw Exceptions::Exception("Passed solution is in fact not a Solution instance in vector_to_solution().");
 
       sln->set_coeff_vector(space, solution_vector, add_dir_lift, start_index);
@@ -532,7 +532,7 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
-      if(solution_vector == NULL) 
+      if(solution_vector == nullptr) 
         throw Exceptions::NullException(1);
       if(spaces.size() != solutions.size()) 
         throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
@@ -573,7 +573,7 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Vector<Scalar>* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, bool add_dir_lift)
     {
-      if(solution_vector == NULL) 
+      if(solution_vector == nullptr) 
         throw Exceptions::NullException(1);
       if(spaces.size() != solutions.size()) 
         throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
@@ -600,7 +600,7 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, bool add_dir_lift)
     {
-      if(solution_vector == NULL) 
+      if(solution_vector == nullptr) 
         throw Exceptions::NullException(1);
       if(spaces.size() != solutions.size()) 
         throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
@@ -628,11 +628,11 @@ namespace Hermes
       MeshFunctionSharedPtr<Scalar> solution, bool add_dir_lift, int start_index)
     {
       // Sanity checks.
-      if(solution_vector == NULL) 
+      if(solution_vector == nullptr) 
         throw Exceptions::NullException(1);
 
       Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(solution.get());
-      if(sln == NULL)
+      if(sln == nullptr)
         throw Exceptions::Exception("Passed solution is in fact not a Solution instance in vector_to_solution().");
 
       sln->set_coeff_vector(space, solution_vector, add_dir_lift, start_index);
@@ -643,7 +643,7 @@ namespace Hermes
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<PrecalcShapeset *> pss,
       Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
-      if(solution_vector==NULL) 
+      if(solution_vector==nullptr) 
         throw Exceptions::NullException(1);
       if(spaces.size() != solutions.size()) 
         throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
@@ -685,13 +685,13 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
       PrecalcShapeset* pss, bool add_dir_lift, int start_index)
     {
-      if(solution_vector == NULL) 
+      if(solution_vector == nullptr) 
         throw Exceptions::NullException(1);
-      if(pss == NULL) 
+      if(pss == nullptr) 
         throw Exceptions::NullException(4);
 
       Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(solution.get());
-      if(sln == NULL)
+      if(sln == nullptr)
         throw Exceptions::Exception("Passed solution is in fact not a Solution instance in vector_to_solution().");
 
       sln->set_coeff_vector(space, pss, solution_vector, add_dir_lift, start_index);
@@ -785,10 +785,10 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::init_dxdy_buffer()
     {
-      if(dxdy_buffer != NULL)
+      if(dxdy_buffer != nullptr)
       {
         delete [] dxdy_buffer;
-        dxdy_buffer = NULL;
+        dxdy_buffer = nullptr;
       }
       dxdy_buffer = new Scalar[this->num_components * 5 * 121];
     }
@@ -814,7 +814,7 @@ namespace Hermes
       {
         tables[this->cur_quad][oldest[this->cur_quad]].run_for_all(Function<Scalar>::Node::DeallocationFunction);
         tables[this->cur_quad][oldest[this->cur_quad]].clear();
-        elems[this->cur_quad][oldest[this->cur_quad]] = NULL;
+        elems[this->cur_quad][oldest[this->cur_quad]] = nullptr;
 
         cur_elem = oldest[this->cur_quad];
         if(++oldest[this->cur_quad] >= H2D_SOLUTION_ELEMENT_CACHE_SIZE)
@@ -985,7 +985,7 @@ namespace Hermes
     void Solution<Scalar>::precalculate(int order, int mask)
     {
       int i, j, k, l;
-      struct Function<Scalar>::Node* node = NULL;
+      struct Function<Scalar>::Node* node = nullptr;
       Quad2D* quad = this->quads[this->cur_quad];
       int np = quad->get_num_points(order, this->mode);
 
@@ -1009,7 +1009,7 @@ namespace Hermes
           { if((mask & H2D_FN_VAL_0) || (mask & H2D_FN_VAL_1)) mask |= H2D_FN_VAL; }
         }
 
-        int oldmask = (this->cur_node != NULL) ? this->cur_node->mask : 0;
+        int oldmask = (this->cur_node != nullptr) ? this->cur_node->mask : 0;
         int newmask = mask | oldmask;
         node = this->new_node(newmask, np);
 
@@ -1835,7 +1835,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int component, int item)
     {
-      if(e==NULL) 
+      if(e==nullptr) 
         throw Exceptions::NullException(1);
 
       set_active_element(e);
@@ -1857,7 +1857,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b)
     {
-      if(e == NULL) 
+      if(e == nullptr) 
         throw Exceptions::NullException(1);
 
       if(this->sln_type != HERMES_SLN)
@@ -2032,16 +2032,16 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Cannot obtain values -- uninitialized solution. The solution was either "
           "not calculated yet or you used the assignment operator which destroys "
           "the solution on its right-hand side.");
-        return NULL;
+        return nullptr;
       }
       else // HERMES_SLN
       {
-        if(e == NULL)
+        if(e == nullptr)
           e = RefMap::element_on_physical_coordinates(use_MeshHashGrid, this->mesh, x, y, &xi1, &xi2);
         else
           RefMap::untransform(e, x, y, xi1, xi2);
 
-        if(e != NULL)
+        if(e != nullptr)
         {
           if(this->num_components == 1)
           {
@@ -2093,7 +2093,7 @@ namespace Hermes
         }
 
         this->warn("Point (%g, %g) does not lie in any element.", x, y);
-        return NULL;
+        return nullptr;
       }
     }
 

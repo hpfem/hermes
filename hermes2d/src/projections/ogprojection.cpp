@@ -26,9 +26,9 @@ namespace Hermes
       Scalar* target_vec)
     {
       // Sanity check.
-      if(wf == NULL)
+      if(wf == nullptr)
         throw Hermes::Exceptions::NullException(1);
-      if(target_vec == NULL)
+      if(target_vec == nullptr)
         throw Exceptions::NullException(2);
 
       // Initialize DiscreteProblem.
@@ -91,7 +91,7 @@ namespace Hermes
       int n = spaces.size();
 
       // Sanity checks.
-      if(target_vec == NULL) throw Exceptions::NullException(3);
+      if(target_vec == nullptr) throw Exceptions::NullException(3);
       if (n != custom_projection_jacobians.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
       if (n != custom_projection_residuals.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
 
@@ -144,7 +144,7 @@ namespace Hermes
       NormType proj_norm)
     {
       // Sanity checks.
-      if(target_vec == NULL) 
+      if(target_vec == nullptr) 
         throw Exceptions::NullException(3);
 
       // If projection norm is not provided, set it
@@ -220,7 +220,7 @@ namespace Hermes
       // Sanity checks.
       if(n != source_slns.size()) 
         throw Exceptions::LengthException(1, 2, n, source_slns.size());
-      if(target_vec == NULL) 
+      if(target_vec == nullptr) 
         throw Exceptions::NullException(3);
       if(!proj_norms.empty() && n != proj_norms.size()) 
         throw Exceptions::LengthException(1, 5, n, proj_norms.size());

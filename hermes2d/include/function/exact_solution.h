@@ -269,10 +269,10 @@ namespace Hermes
       virtual Hermes::Ord ord(Hermes::Ord* values, Hermes::Ord* dx, Hermes::Ord* dy, Hermes::Ord* dxx, Hermes::Ord* dxy, Hermes::Ord* dyy, Hermes::Ord result[6]) const = 0;
 #endif
 
-      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = NULL)
+      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr)
       {
         throw Exceptions::Exception("UExtFunction is only usable in assembling, not for getting point values.");
-        return NULL;
+        return nullptr;
       }
 
       virtual void precalculate(int order, int mask) {};

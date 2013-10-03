@@ -23,7 +23,7 @@ namespace Hermes
 
     template<typename Scalar>
     DiscreteProblemSelectiveAssembler<Scalar>::DiscreteProblemSelectiveAssembler()
-    : sp_seq(NULL), 
+    : sp_seq(nullptr), 
       spaces_size(0),
       matrix_structure_reusable(false), 
       vector_structure_reusable(false)

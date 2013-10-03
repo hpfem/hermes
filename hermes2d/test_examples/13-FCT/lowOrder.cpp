@@ -6,19 +6,19 @@ Low_Order::Low_Order(double theta): theta(theta)
 {
 	lowmat_rhs = new CSCMatrix<double> ; 
 	low_matrix = new CSCMatrix<double> ; 
-	u_L =NULL;
-	rhs = NULL;
-	u_new = NULL;
+	u_L =nullptr;
+	rhs = nullptr;
+	u_new = nullptr;
 }
 
 
 Low_Order::~Low_Order()
 {
-	if(low_matrix!=NULL) delete low_matrix;
-	if(lowmat_rhs!=NULL) delete lowmat_rhs;
-	if(u_L!=NULL) delete [] u_L;
-	if(rhs!=NULL) delete [] rhs;
-	if(u_new!=NULL) delete [] u_new;
+	if(low_matrix!=nullptr) delete low_matrix;
+	if(lowmat_rhs!=nullptr) delete lowmat_rhs;
+	if(u_L!=nullptr) delete [] u_L;
+	if(rhs!=nullptr) delete [] rhs;
+	if(u_new!=nullptr) delete [] u_new;
 }
 
 
@@ -26,8 +26,8 @@ Low_Order::~Low_Order()
 //lowmat_rhs = (M_L/tau - theta (K+D)) u_n; low_matrix: (M_L/tau - theta (K+D)) ; M_L/tau = lumped_matrix; K = conv_matrix, D = diffusion
 void Low_Order::assemble_Low_Order(CSCMatrix<double> * conv_matrix,CSCMatrix<double>* diffusion, CSCMatrix<double> * lumped_matrix)
 {
-	if(low_matrix!=NULL) low_matrix->free();	 		
-	if(lowmat_rhs!=NULL) lowmat_rhs->free();
+	if(low_matrix!=nullptr) low_matrix->free();	 		
+	if(lowmat_rhs!=nullptr) lowmat_rhs->free();
 
 	lowmat_rhs->create(conv_matrix->get_size(),conv_matrix->get_nnz(), conv_matrix->get_Ap(), conv_matrix->get_Ai(),conv_matrix->get_Ax());
 	lowmat_rhs->add_sparse_matrix(diffusion); 
@@ -49,12 +49,12 @@ void Low_Order::assemble_Low_Order(CSCMatrix<double> * conv_matrix,CSCMatrix<dou
 //lumped_matrix = M_L !!!!!
 double* Low_Order::solve_Low_Order(CSCMatrix<double> * lumped_matrix, double* u_n, double time_step  )
 {
-			if((low_matrix==NULL)||(lowmat_rhs==NULL) )
+			if((low_matrix==nullptr)||(lowmat_rhs==nullptr) )
 				throw Exceptions::Exception("matrices have to be calculated first, call  Low_Order::assemble_Low_Order.");
 			int ndof = low_matrix->get_size();
-			if(u_L!=NULL) delete [] u_L;
+			if(u_L!=nullptr) delete [] u_L;
 			u_L = new double[ndof];
-			if(rhs!=NULL) delete [] rhs;
+			if(rhs!=nullptr) delete [] rhs;
 			rhs = new double[ndof];
 			SimpleVector<double>* vec_rhs = new SimpleVector<double> (ndof); 
 			
@@ -85,11 +85,11 @@ double* Low_Order::solve_Low_Order(CSCMatrix<double> * lumped_matrix, double* u_
 //(M_L/tau - theta (K+D)) u_new = (M_L/tau - theta (K+D)) u_n + flux_correction
 double* Low_Order::explicit_Correction(double* flux_correction )
 {
-			if((low_matrix==NULL)||(lowmat_rhs==NULL) )
+			if((low_matrix==nullptr)||(lowmat_rhs==nullptr) )
 				throw Exceptions::Exception("matrices have to be calculated first, call  Low_Order::assemble_Low_Order.");
-			if(rhs ==NULL) 
+			if(rhs ==nullptr) 
 				throw Exceptions::Exception("rhs have to be calculated first, call Low_Order::solve_Low_Order() ");
-			if(u_new!=NULL) delete [] u_new;
+			if(u_new!=nullptr) delete [] u_new;
 			int ndof = low_matrix->get_size();
 			u_new = new double[ndof];
 			SimpleVector<double>* vec_rhs = new SimpleVector<double> (ndof); 

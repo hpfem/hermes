@@ -44,11 +44,11 @@ namespace Hermes
 
       template<typename Scalar>
       VectorBaseView<Scalar>::VectorBaseView(const char* title, WinGeom* wg)
-        : VectorView(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
+        : VectorView(title, wg) { pss = nullptr; sln = nullptr; this->lines = false; basic_title.assign(title); }
 
       template<typename Scalar>
       VectorBaseView<Scalar>::VectorBaseView(char* title, WinGeom* wg)
-        : VectorView(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
+        : VectorView(title, wg) { pss = nullptr; sln = nullptr; this->lines = false; basic_title.assign(title); }
 
       template<typename Scalar>
       VectorBaseView<Scalar>::~VectorBaseView()
@@ -59,7 +59,7 @@ namespace Hermes
       template<typename Scalar>
       void VectorBaseView<Scalar>::free()
       {
-        if(pss != NULL) { delete pss; pss = NULL; }
+        if(pss != nullptr) { delete pss; pss = nullptr; }
       }
 
       template<>

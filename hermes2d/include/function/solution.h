@@ -91,7 +91,7 @@ namespace Hermes
       virtual void copy(const MeshFunction<Scalar>* sln);
 
       /// Sets solution equal to Dirichlet lift only, solution vector = 0.
-      void set_dirichlet_lift(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss = NULL);
+      void set_dirichlet_lift(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss = nullptr);
 
       /// Saves the complete solution (i.e., including the internal copy of the mesh and
       /// element orders) to an XML file.
@@ -131,7 +131,7 @@ namespace Hermes
       /// NOTE: This function should be used for postprocessing only, it is not effective
       /// enough for calculations. Since it searches for an element sequentinally, it is extremelly
       /// slow. Prefer Solution::get_ref_value if possible.
-      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = NULL);
+      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
 
       /// Adds another mesh function on the given space.
       /// See method of parent class.

@@ -31759,21 +31759,21 @@ eigen_quad_0_0y,   eigen_quad_0_1y,   eigen_quad_0_2y,   eigen_quad_0_3y_0, eige
 
 
 
-#define NULL16 NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,  NULL, NULL, NULL, NULL, NULL
+#define nullptr16 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,  nullptr, nullptr, nullptr, nullptr, nullptr
 
 int* eigen_quad_bubble_indices[] =
 {
-  NULL, NULL, NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,     NULL, NULL, NULL, NULL, NULL, NULL16,
-  NULL, NULL, NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,     NULL, NULL, NULL, NULL, NULL, NULL16,
-  NULL, NULL, qb_2_2,  qb_2_3,  qb_2_4,  qb_2_5,  qb_2_6,  qb_2_7,  qb_2_8,  qb_2_9,  qb_2_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-  NULL, NULL, qb_3_2,  qb_3_3,  qb_3_4,  qb_3_5,  qb_3_6,  qb_3_7,  qb_3_8,  qb_3_9,  qb_3_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-  NULL, NULL, qb_4_2,  qb_4_3,  qb_4_4,  qb_4_5,  qb_4_6,  qb_4_7,  qb_4_8,  qb_4_9,  qb_4_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-  NULL, NULL, qb_5_2,  qb_5_3,  qb_5_4,  qb_5_5,  qb_5_6,  qb_5_7,  qb_5_8,  qb_5_9,  qb_5_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-  NULL, NULL, qb_6_2,  qb_6_3,  qb_6_4,  qb_6_5,  qb_6_6,  qb_6_7,  qb_6_8,  qb_6_9,  qb_6_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-  NULL, NULL, qb_7_2,  qb_7_3,  qb_7_4,  qb_7_5,  qb_7_6,  qb_7_7,  qb_7_8,  qb_7_9,  qb_7_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-  NULL, NULL, qb_8_2,  qb_8_3,  qb_8_4,  qb_8_5,  qb_8_6,  qb_8_7,  qb_8_8,  qb_8_9,  qb_8_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-  NULL, NULL, qb_9_2,  qb_9_3,  qb_9_4,  qb_9_5,  qb_9_6,  qb_9_7,  qb_9_8,  qb_9_9,  qb_9_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-  NULL, NULL, qb_10_2, qb_10_3, qb_10_4, qb_10_5, qb_10_6, qb_10_7, qb_10_8, qb_10_9, qb_10_10, NULL, NULL, NULL, NULL, NULL, NULL16
+  nullptr, nullptr, nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+  nullptr, nullptr, nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+  nullptr, nullptr, qb_2_2,  qb_2_3,  qb_2_4,  qb_2_5,  qb_2_6,  qb_2_7,  qb_2_8,  qb_2_9,  qb_2_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+  nullptr, nullptr, qb_3_2,  qb_3_3,  qb_3_4,  qb_3_5,  qb_3_6,  qb_3_7,  qb_3_8,  qb_3_9,  qb_3_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+  nullptr, nullptr, qb_4_2,  qb_4_3,  qb_4_4,  qb_4_5,  qb_4_6,  qb_4_7,  qb_4_8,  qb_4_9,  qb_4_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+  nullptr, nullptr, qb_5_2,  qb_5_3,  qb_5_4,  qb_5_5,  qb_5_6,  qb_5_7,  qb_5_8,  qb_5_9,  qb_5_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+  nullptr, nullptr, qb_6_2,  qb_6_3,  qb_6_4,  qb_6_5,  qb_6_6,  qb_6_7,  qb_6_8,  qb_6_9,  qb_6_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+  nullptr, nullptr, qb_7_2,  qb_7_3,  qb_7_4,  qb_7_5,  qb_7_6,  qb_7_7,  qb_7_8,  qb_7_9,  qb_7_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+  nullptr, nullptr, qb_8_2,  qb_8_3,  qb_8_4,  qb_8_5,  qb_8_6,  qb_8_7,  qb_8_8,  qb_8_9,  qb_8_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+  nullptr, nullptr, qb_9_2,  qb_9_3,  qb_9_4,  qb_9_5,  qb_9_6,  qb_9_7,  qb_9_8,  qb_9_9,  qb_9_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+  nullptr, nullptr, qb_10_2, qb_10_3, qb_10_4, qb_10_5, qb_10_6, qb_10_7, qb_10_8, qb_10_9, qb_10_10, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16
 };
 
 
@@ -31859,19 +31859,19 @@ static Shapeset::shape_fn_t** eigen_shape_fn_table[2] =
 
 static Shapeset::shape_fn_t** eigen_shape_fn_table_x[2] =
 {
-  NULL,
+  nullptr,
   eigen_quad_shape_fn_table_x
 };
 
 static Shapeset::shape_fn_t** eigen_shape_fn_table_y[2] =
 {
-  NULL,
+  nullptr,
   eigen_quad_shape_fn_table_y
 };
 
 static int* eigen_vertex_indices[2] =
 {
-  NULL,
+  nullptr,
   eigen_quad_vertex_indices
 };
 
@@ -31884,28 +31884,28 @@ static int** eigen_edge_indices[2] =
 
 /*static int* eigen_edge_count[2] =
 {
-  NULL,
+  nullptr,
   eigen_quad_edge_count
 };
 */
 
 static int** eigen_bubble_indices[2] =
 {
-  NULL,
+  nullptr,
   eigen_quad_bubble_indices
 };
 
 
 static int* eigen_bubble_count[2] =
 {
-  NULL,
+  nullptr,
   eigen_quad_bubble_count
 };
 
 
 static int* eigen_index_to_order[2] =
 {
-  NULL,
+  nullptr,
   eigen_quad_index_to_order
 };
 
@@ -31915,9 +31915,9 @@ H1ShapesetEigen::H1ShapesetEigen()
   shape_table[0] = eigen_shape_fn_table;
   shape_table[1] = eigen_shape_fn_table_x;
   shape_table[2] = eigen_shape_fn_table_y;
-  shape_table[3] = NULL;
-  shape_table[4] = NULL;
-  shape_table[5] = NULL;
+  shape_table[3] = nullptr;
+  shape_table[4] = nullptr;
+  shape_table[5] = nullptr;
 
   vertex_indices = eigen_vertex_indices;
   edge_indices = eigen_edge_indices;
@@ -31951,7 +31951,7 @@ H1ShapesetEigen::H1ShapesetEigen()
   cei[1] = 3;
   cei[2] = -2;
 
-  comb_table = NULL;
+  comb_table = nullptr;
 
   set_mode(HERMES_MODE_TRIANGLE);
 }

@@ -33,7 +33,7 @@ namespace Hermes
         DiscreteProblemRungeKutta();
 
         /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
-        virtual void set_RK(int original_spaces_count, bool force_diagonal_blocks = NULL, Table* block_weights = NULL);
+        virtual void set_RK(int original_spaces_count, bool force_diagonal_blocks = nullptr, Table* block_weights = nullptr);
 
         /// Turn on Runge-Kutta specific handling of external functions.
         bool rungeKutta;
@@ -57,7 +57,7 @@ namespace Hermes
         WeakForm<Scalar>* get_weak_formulation() const;
 
       protected:
-        DiscreteProblemWeakForm(WeakForm<Scalar>* wf = NULL);
+        DiscreteProblemWeakForm(WeakForm<Scalar>* wf = nullptr);
 
         virtual void set_weak_formulation(WeakForm<Scalar>* wf);
         

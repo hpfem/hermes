@@ -114,14 +114,14 @@ namespace Hermes
 
     template<typename Scalar>
     SuperLUSolver<Scalar>::SuperLUSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs)
-      : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
-      , local_Ax(NULL), local_rhs(NULL)
+      : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs), local_Ai(nullptr), local_Ap(nullptr)
+      , local_Ax(nullptr), local_rhs(nullptr)
     {
-      R = NULL;
-      C = NULL;
-      perm_r = NULL;
-      perm_c = NULL;
-      etree = NULL;
+      R = nullptr;
+      C = nullptr;
+      perm_r = nullptr;
+      perm_c = nullptr;
+      etree = nullptr;
 #ifndef SLU_MT
       *equed = '\0';
 #endif
@@ -203,8 +203,8 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUSolver<Scalar>::solve()
     {
-      assert(m != NULL);
-      assert(rhs != NULL);
+      assert(m != nullptr);
+      assert(rhs != nullptr);
 
       this->tick();
 
@@ -214,7 +214,7 @@ namespace Hermes
 
       // Prepare data structures serving as input for the solver driver
       // (according to the chosen factorization reuse strategy).
-      void *work = NULL;        // Explicit pointer to the factorization workspace
+      void *work = nullptr;        // Explicit pointer to the factorization workspace
       // (unused, see below).
       int lwork = 0;            // Space for the factorization will be allocated
       // internally by system malloc.
@@ -315,8 +315,8 @@ namespace Hermes
       // will be set to A->ncol + 1.
       //
       slu_mt_solver_driver( &options, &A, perm_c, perm_r, &AC, &equed, R, C,
-        &L, &U, &B, &X, NULL, &rcond, NULL, NULL,
-        &stat, NULL, &info );
+        &L, &U, &B, &X, nullptr, &rcond, nullptr, nullptr,
+        &stat, nullptr, &info );
 
       // ... OR ...
 
@@ -324,8 +324,8 @@ namespace Hermes
       // Do not check the regularity of A and just solve the system.
       //
       slu_mt_solver_driver( &options, &A, perm_c, perm_r, &AC, &equed, R, C,
-      &L, &U, &B, &X, NULL, NULL, NULL, NULL,
-      &stat, NULL, &info );
+      &L, &U, &B, &X, nullptr, nullptr, nullptr, nullptr,
+      &stat, nullptr, &info );
       */
 #else
       solver_driver(&options, &A, perm_c, perm_r, etree, equed, R, C, &L, &U,
@@ -534,7 +534,7 @@ namespace Hermes
     //
     // See the correspondingly named attributes of SuperLUSolver class for brief description
     // of most parameters or the library source code for pdgssvx for more details. You may pass
-    // NULL for
+    // nullptr for
     //  * recip_pivot_growth  - reciprocal pivot growth factor will then not be computed;
     //                          reip_pivot_growth much less than one may indicate poor
     //                          stability of the factorization;

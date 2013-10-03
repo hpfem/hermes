@@ -138,9 +138,9 @@ int main(int argc, char* argv[])
   //Initialize
   CSCMatrix<double> * mass_matrix = new CSCMatrix<double> ;   //M_c/tau
   CSCMatrix<double> * conv_matrix = new CSCMatrix<double> ;   //K
-  double* u_L = NULL; 
-  double* u_H =NULL;
-  double* ref_sln_double =NULL;
+  double* u_L = nullptr; 
+  double* u_H =nullptr;
+  double* ref_sln_double =nullptr;
 
   int ref_ndof, ndof; double err_est_rel_total;
   DefaultErrorCalculator<double, HERMES_L2_NORM> error_calculator(RelativeErrorToGlobalNorm, 1);
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
 
 
       dp_mass.assemble(mass_matrix); 										//M_c/tau
-      dp_convection.assemble(conv_matrix, NULL);		//K
+      dp_convection.assemble(conv_matrix, nullptr);		//K
 
       //----------------------MassLumping  & Artificial Diffusion --------------------------------------------------------------------	
       CSCMatrix<double>* lumped_matrix = fluxCorrection.massLumping(mass_matrix); // M_L/tau

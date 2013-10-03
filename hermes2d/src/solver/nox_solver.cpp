@@ -43,7 +43,7 @@ namespace Hermes
 
       Scalar* coeff_vec = new Scalar[xx.length()];
       xx.extract(coeff_vec);
-      this->dp->assemble(coeff_vec, NULL, &rhs); // NULL is for the global matrix.
+      this->dp->assemble(coeff_vec, nullptr, &rhs); // nullptr is for the global matrix.
       delete [] coeff_vec;
 
       return true;
@@ -53,7 +53,7 @@ namespace Hermes
     bool DiscreteProblemNOX<Scalar>::computeJacobian(const Epetra_Vector &x, Epetra_Operator &op)
     {
       Epetra_RowMatrix *jac = dynamic_cast<Epetra_RowMatrix *>(&op);
-      assert(jac != NULL);
+      assert(jac != nullptr);
 
       EpetraVector<Scalar> xx(x);      // wrap our structures around core Epetra objects
       EpetraMatrix<Scalar> jacob(*jac);
@@ -62,7 +62,7 @@ namespace Hermes
 
       Scalar* coeff_vec = new Scalar[xx.length()];
       xx.extract(coeff_vec);
-      this->dp->assemble(coeff_vec, &jacob, NULL); // NULL is for the right-hand side.
+      this->dp->assemble(coeff_vec, &jacob, nullptr); // nullptr is for the right-hand side.
       delete [] coeff_vec;
       //jacob.finish();
 
@@ -80,7 +80,7 @@ namespace Hermes
 
       Scalar* coeff_vec = new Scalar[xx.length()];
       xx.extract(coeff_vec);
-      this->dp->assemble(coeff_vec, &jacobian, NULL);  // NULL is for the right-hand side.
+      this->dp->assemble(coeff_vec, &jacobian, nullptr);  // nullptr is for the right-hand side.
       delete [] coeff_vec;
       //jacobian.finish();
 

@@ -126,7 +126,7 @@ namespace Hermes
     void DiscreteProblemFormAssembler<Scalar>::assemble_matrix_form(MatrixForm<double, Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
       AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
-      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
+      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == nullptr);
 
       double block_scaling_coefficient = this->block_scaling_coeff(form);
 
@@ -144,9 +144,9 @@ namespace Hermes
         local_ext = new Func<Scalar>*[local_ext_count];
         for(int ext_i = 0; ext_i < local_ext_count; ext_i++)
           if(form->ext[ext_i])
-            local_ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(form->ext[ext_i].get(), order);
+            local_ext[ext_i] = current_state->e[ext_i] == nullptr ? nullptr : init_fn(form->ext[ext_i].get(), order);
           else
-            local_ext[ext_i] = NULL;
+            local_ext[ext_i] = nullptr;
       }
 
       // Account for the previous time level solution previously inserted at the back of ext.
@@ -242,7 +242,7 @@ namespace Hermes
     void DiscreteProblemFormAssembler<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
       AsmList<Scalar>* current_als_i, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
-      bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == NULL);
+      bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == nullptr);
 
       Func<Scalar>** local_ext = ext;
 
@@ -255,7 +255,7 @@ namespace Hermes
           if(form->ext[ext_i])
             local_ext[ext_i] = init_fn(form->ext[ext_i].get(), order);
           else
-            local_ext[ext_i] = NULL;
+            local_ext[ext_i] = nullptr;
       }
 
       // Account for the previous time level solution previously inserted at the back of ext.

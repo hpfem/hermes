@@ -27,9 +27,9 @@ namespace Hermes
     namespace Views
     {
       MeshView::MeshView(const char* title, WinGeom* wg)
-        : View(title, wg), lin(NULL)
+        : View(title, wg), lin(nullptr)
       {
-        nodes = elems = NULL;
+        nodes = elems = nullptr;
         b_scale = false;
         b_ids = false;
         b_markers = true;
@@ -37,9 +37,9 @@ namespace Hermes
       }
 
       MeshView::MeshView(char* title, WinGeom* wg)
-        : View(title, wg), lin(NULL)
+        : View(title, wg), lin(nullptr)
       {
-        nodes = elems = NULL;
+        nodes = elems = nullptr;
         b_scale = false;
         b_ids = false;
         b_markers = true;
@@ -48,21 +48,21 @@ namespace Hermes
 
       MeshView::~MeshView()
       {
-        if(nodes != NULL) delete [] nodes;
-        if(elems != NULL) delete [] elems;
-        if(lin != NULL)
+        if(nodes != nullptr) delete [] nodes;
+        if(elems != nullptr) delete [] elems;
+        if(lin != nullptr)
           delete this->lin;
       }
 
       void MeshView::show(MeshSharedPtr mesh)
       {
         MeshFunctionSharedPtr<double> sln(new ZeroSolution<double>(mesh));
-        if(mesh == NULL) throw Hermes::Exceptions::Exception("mesh == NULL in MeshView::show().");
+        if(mesh == nullptr) throw Hermes::Exceptions::Exception("mesh == nullptr in MeshView::show().");
         if(mesh->get_max_element_id() == 0) throw Hermes::Exceptions::Exception("Attempt to visualize empty mesh in MeshView::show().");
 
         this->mesh = mesh;
 
-        if(lin == NULL)
+        if(lin == nullptr)
           lin = new Linearizer();
 
         lin->process_solution(sln);
@@ -72,7 +72,7 @@ namespace Hermes
 
         int i;
 
-        if(elems != NULL) delete [] elems;
+        if(elems != nullptr) delete [] elems;
         ne = mesh->get_max_element_id() + 1;
         elems = new ObjInfo[ne];
         for (i = 0; i < ne; i++)

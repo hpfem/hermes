@@ -32,7 +32,7 @@ namespace Hermes
       BaseView<Scalar>::BaseView(const char* title, WinGeom* wg)
         : ScalarView((char*) title, wg), sln(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>())), complex_filter(MeshFunctionSharedPtr<double>())
       {
-        pss = NULL;
+        pss = nullptr;
         this->show_edges = true;
         basic_title.assign(title);
       }
@@ -41,7 +41,7 @@ namespace Hermes
       BaseView<Scalar>::BaseView(char* title, WinGeom* wg)
         : ScalarView(title, wg), sln(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>())), complex_filter(MeshFunctionSharedPtr<double>())
       {
-        pss = NULL;
+        pss = nullptr;
         this->show_edges = true;
         basic_title.assign(title);
       }
@@ -62,7 +62,7 @@ namespace Hermes
       template<typename Scalar>
       void BaseView<Scalar>::free()
       {
-        if(pss != NULL) { delete pss; pss = NULL; }
+        if(pss != nullptr) { delete pss; pss = nullptr; }
       }
 
       template<>

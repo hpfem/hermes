@@ -33,9 +33,9 @@ namespace Hermes
     {
     public:
 
-      Graph(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL);
+      Graph(const char* title = nullptr, const char* x_axis_name = nullptr, const char* y_axis_name = nullptr);
 
-      void set_captions(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL);
+      void set_captions(const char* title = nullptr, const char* x_axis_name = nullptr, const char* y_axis_name = nullptr);
 
       void set_log_x(bool log = true);
       void set_log_y(bool log = true);
@@ -43,7 +43,7 @@ namespace Hermes
       void show_legend(bool show = true);
       void show_grid(bool show = true);
 
-      int  add_row(const char* name = NULL, const char* color = "k", const char* line = "-", const char* marker = "");
+      int  add_row(const char* name = nullptr, const char* color = "k", const char* line = "-", const char* marker = "");
       void set_row_style(int row, const char* color = "k", const char* line = "-", const char* marker = "");
 
       void add_values(int row, double x, double y);
@@ -79,7 +79,7 @@ namespace Hermes
     {
     public:
 
-      SimpleGraph(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL)
+      SimpleGraph(const char* title = nullptr, const char* x_axis_name = nullptr, const char* y_axis_name = nullptr)
         : Graph(title, x_axis_name, y_axis_name) {}
 
       virtual void save(const char* filename);
@@ -91,7 +91,7 @@ namespace Hermes
     {
     public:
 
-      MatlabGraph(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL)
+      MatlabGraph(const char* title = nullptr, const char* x_axis_name = nullptr, const char* y_axis_name = nullptr)
         : Graph(title, x_axis_name, y_axis_name) {}
 
       virtual void save(const char* filename);
@@ -106,8 +106,8 @@ namespace Hermes
     {
     public:
 
-      GnuplotGraph(const char* title = NULL, const char* x_axis_name = NULL, const
-        char* y_axis_name = NULL, double lines_width = 1.0, const
+      GnuplotGraph(const char* title = nullptr, const char* x_axis_name = nullptr, const
+        char* y_axis_name = nullptr, double lines_width = 1.0, const
         std::string& terminal_str = default_terminal) :
       Graph(title, x_axis_name, y_axis_name),
         legend_pos(),
@@ -142,7 +142,7 @@ namespace Hermes
     {
     public:
 
-      PNGGraph(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL,
+      PNGGraph(const char* title = nullptr, const char* x_axis_name = nullptr, const char* y_axis_name = nullptr,
         double lines_width = 1.0, double plot_width = 800, double plot_height = 600);
     };
   }

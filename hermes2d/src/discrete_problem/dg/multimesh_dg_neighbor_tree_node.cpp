@@ -22,19 +22,19 @@ namespace Hermes
   {
     MultimeshDGNeighborTreeNode::MultimeshDGNeighborTreeNode(MultimeshDGNeighborTreeNode* parent, unsigned int transformation) : parent(parent), transformation(transformation)
     {
-      left_son = right_son = NULL;
+      left_son = right_son = nullptr;
     }
     MultimeshDGNeighborTreeNode::~MultimeshDGNeighborTreeNode()
     {
       if(left_son)
       {
         delete left_son;
-        left_son = NULL;
+        left_son = nullptr;
       }
       if(right_son)
       {
         delete right_son;
-        right_son = NULL;
+        right_son = nullptr;
       }
     }
     void MultimeshDGNeighborTreeNode::set_left_son(MultimeshDGNeighborTreeNode* left_son)

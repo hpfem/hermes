@@ -45,8 +45,8 @@ namespace Hermes
       Nurbs()
       {
         ref = 0; twin = false;
-        pt = NULL;
-        kv = NULL;
+        pt = nullptr;
+        kv = nullptr;
       };
 
       ~Nurbs()
@@ -78,7 +78,7 @@ namespace Hermes
     public:
       CurvMap()
       {
-        coeffs = NULL;};
+        coeffs = nullptr;};
         CurvMap(CurvMap* cm);
         ~CurvMap();
     private:
@@ -110,7 +110,7 @@ namespace Hermes
       /// this is called for every curvilinear element when it is created
       /// or when it is necessary to re-calculate coefficients for another
       /// order: 'e' is a pointer to the element to which this CurvMap
-      /// belongs to. First, old "coeffs" are removed if they are not NULL,
+      /// belongs to. First, old "coeffs" are removed if they are not nullptr,
       /// then new coefficients are projected.
       void update_refmap_coeffs(Element* e);
 

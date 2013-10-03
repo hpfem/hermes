@@ -66,14 +66,14 @@ namespace Hermes
       void set_linear(bool to_set = true, bool dirichlet_lift_accordingly = true);
 
       /// Assembling.
-      void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
+      void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = nullptr);
       /// Assembling.
       /// Without the matrix.
-      void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL);
-      /// Light version passing NULL for the coefficient vector. External solutions
+      void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = nullptr);
+      /// Light version passing nullptr for the coefficient vector. External solutions
       /// are initialized with zeros.
-      void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
-      /// Light version passing NULL for the coefficient vector. External solutions
+      void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = nullptr);
+      /// Light version passing nullptr for the coefficient vector. External solutions
       /// are initialized with zeros.
       /// Without the matrix.
       void assemble(Vector<Scalar>* rhs);
@@ -106,7 +106,7 @@ namespace Hermes
       void deinit_assembling(Traverse::State** states, int num_states);
 
       /// RungeKutta helpers.
-      void set_RK(int original_spaces_count, bool force_diagonal_blocks = NULL, Table* block_weights = NULL);
+      void set_RK(int original_spaces_count, bool force_diagonal_blocks = nullptr, Table* block_weights = nullptr);
 
       /// State querying helpers.
       bool isOkay() const;

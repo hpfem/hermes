@@ -78,7 +78,7 @@ namespace Hermes
         output_id(-1),
         gl_pallete_tex_id(0)
       {
-        if(wg == NULL)
+        if(wg == nullptr)
         {
           output_x = H2D_DEFAULT_X_POS;
           output_y = H2D_DEFAULT_Y_POS;
@@ -106,7 +106,7 @@ namespace Hermes
         output_id(-1),
         gl_pallete_tex_id(0)
       {
-        if(wg == NULL)
+        if(wg == nullptr)
         {
           output_x = H2D_DEFAULT_X_POS;
           output_y = H2D_DEFAULT_Y_POS;
@@ -153,7 +153,7 @@ namespace Hermes
       {
         //prepare message
         std::stringstream str;
-        if(text != NULL)
+        if(text != nullptr)
           str << text;
         else
         {
@@ -453,7 +453,7 @@ namespace Hermes
 
       void View::on_key_down(unsigned char key, int x, int y)
       {
-        const char *file_name = NULL;
+        const char *file_name = nullptr;
 
         switch (key)
         {
@@ -542,7 +542,7 @@ namespace Hermes
         return (1000.0 * (double)ticks.QuadPart) / (double)freq.QuadPart;
 #else
         struct timeval tv;
-        gettimeofday(&tv, NULL);
+        gettimeofday(&tv, nullptr);
         return (double) tv.tv_sec * 1000 + (double) tv.tv_usec / 1000;
 #endif
       }
@@ -786,7 +786,7 @@ namespace Hermes
         {
           sprintf(file_name, "screen%03d.bmp", screenshot_no);
           FILE *f = fopen(file_name, "r");
-          if(f == NULL)
+          if(f == nullptr)
             got_file_name = true;
           else
             fclose(f);
@@ -833,8 +833,8 @@ namespace Hermes
         BitmapInfoHeader info_header;
 
         // alloc memory for pixel data (4 bytes per pixel)
-        char* pixels = NULL;
-        if((pixels = (char*) malloc(4 * output_width * output_height)) == NULL)
+        char* pixels = nullptr;
+        if((pixels = (char*) malloc(4 * output_width * output_height)) == nullptr)
           throw Hermes::Exceptions::Exception("Could not allocate memory for pixel data");
 
         // get pixels from framebuffer
@@ -846,7 +846,7 @@ namespace Hermes
 #endif
         // opening file for binary writing
         FILE* file = fopen(file_name, "wb");
-        if(file == NULL)
+        if(file == nullptr)
           throw Hermes::Exceptions::Exception("Could not open '%s' for writing", file_name);
 
         // fill in bitmap header
@@ -1086,7 +1086,7 @@ namespace Hermes
 
       void View::scale_dispatch()
       {
-        draw_continuous_scale(NULL, !pos_horz);
+        draw_continuous_scale(nullptr, !pos_horz);
       }
 
       void View::update_layout()

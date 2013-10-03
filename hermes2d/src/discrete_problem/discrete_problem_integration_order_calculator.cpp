@@ -109,8 +109,8 @@ namespace Hermes
       int order;
 
       // order of solutions from the previous Newton iteration etc..
-      Func<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
-      Func<Hermes::Ord>** ext_ord = NULL;
+      Func<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
+      Func<Hermes::Ord>** ext_ord = nullptr;
       int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
       if(ext_size > 0)
         ext_ord = new Func<Hermes::Ord>*[ext_size];
@@ -165,8 +165,8 @@ namespace Hermes
       int order;
 
       // order of solutions from the previous Newton iteration etc..
-      Func<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
-      Func<Hermes::Ord>** ext_ord = NULL;
+      Func<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
+      Func<Hermes::Ord>** ext_ord = nullptr;
       
       int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
       if(ext_size > 0)
@@ -311,7 +311,7 @@ namespace Hermes
       // Order to return.
       int order = 0;
 
-      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset];
+      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset];
 
       if(current_u_ext)
         for(int i = 0; i < prev_size; i++)
@@ -321,7 +321,7 @@ namespace Hermes
             u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
 
       // Order of additional external functions.
-      DiscontinuousFunc<Ord>** ext_ord = NULL;
+      DiscontinuousFunc<Ord>** ext_ord = nullptr;
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = mfDG->ext.size() ? mfDG->ext.size() : mfDG->wf->ext.size();
       if(ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
@@ -372,7 +372,7 @@ namespace Hermes
       // Order to return.
       int order = 0;
 
-      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset];
+      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset];
 
       if(current_u_ext)
         for(int i = 0; i < prev_size; i++)
@@ -382,7 +382,7 @@ namespace Hermes
             u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
 
       // Order of additional external functions.
-      DiscontinuousFunc<Ord>** ext_ord = NULL;
+      DiscontinuousFunc<Ord>** ext_ord = nullptr;
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = vfDG->ext.size() ? vfDG->ext.size() : vfDG->wf->ext.size();
       if(ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);

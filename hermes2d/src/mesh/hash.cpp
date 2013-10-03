@@ -23,7 +23,7 @@ namespace Hermes
   {
     HashTable::HashTable()
     {
-      v_table = NULL; e_table = NULL;
+      v_table = nullptr; e_table = nullptr;
     }
 
     HashTable::~HashTable()
@@ -33,7 +33,7 @@ namespace Hermes
 
     void HashTable::init(int size)
     {
-      v_table = e_table = NULL;
+      v_table = e_table = nullptr;
 
       mask = size-1;
       if(size & mask) throw Hermes::Exceptions::Exception("Parameter 'size' must be a power of two.");
@@ -48,13 +48,13 @@ namespace Hermes
 
     void HashTable::copy_list(Node** ptr, Node* node)
     {
-      while (node != NULL)
+      while (node != nullptr)
       {
         *ptr = &nodes[node->id];
         ptr = &((*ptr)->next_hash);
         node = node->next_hash;
       }
-      *ptr = NULL;
+      *ptr = nullptr;
     }
 
     Node* HashTable::get_node(int id) const
@@ -117,27 +117,27 @@ namespace Hermes
     void HashTable::free()
     {
       nodes.free();
-      if(v_table != NULL)
+      if(v_table != nullptr)
       {
         delete [] v_table;
-        v_table = NULL;
+        v_table = nullptr;
       }
-      if(e_table != NULL)
+      if(e_table != nullptr)
       {
         delete [] e_table;
-        e_table = NULL;
+        e_table = nullptr;
       }
     }
 
     inline Node* HashTable::search_list(Node* node, int p1, int p2) const
     {
-      while (node != NULL)
+      while (node != nullptr)
       {
         if(node->p1 == p1 && node->p2 == p2)
           return node;
         node = node->next_hash;
       }
-      return NULL;
+      return nullptr;
     }
 
     Node* HashTable::get_vertex_node(int p1, int p2)
@@ -146,7 +146,7 @@ namespace Hermes
       if(p1 > p2) std::swap(p1, p2);
       int i = hash(p1, p2);
       Node* node = search_list(v_table[i], p1, p2);
-      if(node != NULL) 
+      if(node != nullptr) 
         return node;
 
       // not found - create a new one
@@ -175,7 +175,7 @@ namespace Hermes
       if(p1 > p2) std::swap(p1, p2);
       int i = hash(p1, p2);
       Node* node = search_list(e_table[i], p1, p2);
-      if(node != NULL) return node;
+      if(node != nullptr) return node;
 
       // not found - create a new one
       Node* newnode = nodes.add();
@@ -187,7 +187,7 @@ namespace Hermes
       newnode->p1 = p1;
       newnode->p2 = p2;
       newnode->marker = 0;
-      newnode->elem[0] = newnode->elem[1] = NULL;
+      newnode->elem[0] = newnode->elem[1] = nullptr;
 
       // insert into hashtable
       newnode->next_hash = e_table[i];
@@ -214,7 +214,7 @@ namespace Hermes
       int i = hash(nodes[id].p1, nodes[id].p2);
       Node** ptr = v_table + i;
       Node* node = *ptr;
-      while (node != NULL)
+      while (node != nullptr)
       {
         if(node->id == id)
         {
@@ -235,7 +235,7 @@ namespace Hermes
       int i = hash(nodes[id].p1, nodes[id].p2);
       Node** ptr = e_table + i;
       Node* node = *ptr;
-      while (node != NULL)
+      while (node != nullptr)
       {
         if(node->id == id)
         {

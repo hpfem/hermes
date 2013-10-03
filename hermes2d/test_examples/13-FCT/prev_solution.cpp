@@ -25,16 +25,16 @@
   
     void PrevSolution::free()
     {
-      if(mono_coeffs  != NULL) { delete [] mono_coeffs;   mono_coeffs = NULL;  }
-      if(elem_orders != NULL) { delete [] elem_orders;  elem_orders = NULL; }
-      if(dxdy_buffer != NULL) { delete [] dxdy_buffer;  dxdy_buffer = NULL; }
+      if(mono_coeffs  != nullptr) { delete [] mono_coeffs;   mono_coeffs = nullptr;  }
+      if(elem_orders != nullptr) { delete [] elem_orders;  elem_orders = nullptr; }
+      if(dxdy_buffer != nullptr) { delete [] dxdy_buffer;  dxdy_buffer = nullptr; }
 
       for (int i = 0; i < this->num_components; i++)
-        if(elem_coeffs[i] != NULL)
-        { delete [] elem_coeffs[i];  elem_coeffs[i] = NULL; }
+        if(elem_coeffs[i] != nullptr)
+        { delete [] elem_coeffs[i];  elem_coeffs[i] = nullptr; }
         
  				
-        e_last = NULL;
+        e_last = nullptr;
 
         free_tables();
     }

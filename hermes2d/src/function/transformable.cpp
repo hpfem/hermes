@@ -51,7 +51,7 @@ namespace Hermes
     {
       memset(stack, 0, sizeof(stack));
       reset_transform();
-      element = NULL;
+      element = nullptr;
     }
 
     Transformable::~Transformable() {}
@@ -77,7 +77,7 @@ namespace Hermes
 
     void Transformable::set_active_element(Element* e)
     {
-      if(e==NULL) throw Exceptions::NullException(1);
+      if(e==nullptr) throw Exceptions::NullException(1);
       element = e;
       this->reset_transform();
     }
@@ -98,7 +98,7 @@ namespace Hermes
 
     void Transformable::push_transform(int son)
     {
-      assert(element != NULL);
+      assert(element != nullptr);
       if(top >= H2D_MAX_TRN_LEVEL)
         throw Hermes::Exceptions::Exception("Too deep transform.");
 
@@ -117,13 +117,13 @@ namespace Hermes
     void Transformable::push_transforms(std::set<Transformable *>& transformables, int son)
     {
       for(std::set<Transformable *>::iterator it = transformables.begin(); it != transformables.end(); ++it)
-        if(*it != NULL)
+        if(*it != nullptr)
           (*it)->push_transform(son);
     }
     void Transformable::pop_transforms(std::set<Transformable *>& transformables)
     {
       for(std::set<Transformable *>::iterator it = transformables.begin(); it != transformables.end(); ++it)
-        if(*it != NULL)
+        if(*it != nullptr)
           (*it)->pop_transform();
     }
   }

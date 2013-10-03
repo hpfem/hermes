@@ -25,7 +25,7 @@ namespace Hermes
       this->elements = new Element*[MAX_ELEMENTS];
       for(int i = 0; i < 2; i++)
         for(int j = 0; j < 2; j++)
-          m_sons[i][j] = NULL;
+          m_sons[i][j] = nullptr;
     }
 
     MeshHashGridElement::~MeshHashGridElement()
@@ -65,7 +65,7 @@ namespace Hermes
               double y0 = yy[j];
               double y1 = yy[j+1];
 
-              assert(m_sons[i][j] == NULL);
+              assert(m_sons[i][j] == nullptr);
 
               m_sons[i][j] = new MeshHashGridElement(x0, y0, x1, y1, m_depth + 1);
 
@@ -78,7 +78,7 @@ namespace Hermes
           }
 
           delete [] elements;
-          elements = NULL;
+          elements = nullptr;
         }
       }
       else
@@ -108,7 +108,7 @@ namespace Hermes
           if(RefMap::is_element_on_physical_coordinates(elements[elem_i], x, y))
             return elements[elem_i];
 
-        return NULL;
+        return nullptr;
       }
       else
       {
@@ -122,7 +122,7 @@ namespace Hermes
               return element;
           }
         }
-        return NULL;
+        return nullptr;
       }
     }
 
@@ -246,7 +246,7 @@ namespace Hermes
 
       // this means that x or y is outside mesh, but it can hapen
       if((i >= GRID_SIZE) || (j >= GRID_SIZE))
-        return NULL;
+        return nullptr;
       else
         return m_grid[i][j]->getElement(x,y);
     }

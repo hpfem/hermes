@@ -95,8 +95,8 @@ namespace Hermes
           /// Assignment operator. Prevent unauthorized copying of the pointer.
           const TrfShapeExp& operator = (const TrfShapeExp& other)
           {
-            delete [] values; values = NULL;
-            if(other.values == NULL)
+            delete [] values; values = nullptr;
+            if(other.values == nullptr)
               throw Exceptions::Exception("Unable to assign a non-empty values. Use references instead.");
             return *this;
           }
@@ -168,7 +168,7 @@ namespace Hermes
         /** Intializes attributes, projection matrix cache (ProjBasedSelector::proj_matrix_cache), and allocates rhs cache (ProjBasedSelector::rhs_cache).
         *  \param[in] cand_list A predefined list of candidates.
         *  \param[in] max_order A maximum order which considered. If ::H2DRS_DEFAULT_ORDER, a maximum order supported by the selector is used.
-        *  \param[in] shapeset A shapeset. It cannot be NULL.
+        *  \param[in] shapeset A shapeset. It cannot be nullptr.
         *  \param[in] vertex_order A range of orders for vertex functions. Use an empty range (i.e. Range()) to skip vertex functions.
         *  \param[in] edge_bubble_order A range of orders for edge and bubble functions. Use an empty range (i.e. Range()) to skip edge and bubble functions. */
         ProjBasedSelector(CandList cand_list, int max_order, Shapeset* shapeset, const Range& vertex_order, const Range& edge_bubble_order);
@@ -223,7 +223,7 @@ namespace Hermes
         *  is the horizontal and the vertical order respectively.
         *
         *  All matrices are square dense matrices and they have to be created through the function new_matrix().
-        *  If record is NULL, the corresponding matrix has to be calculated. */
+        *  If record is nullptr, the corresponding matrix has to be calculated. */
         ProjMatrixCache proj_matrix_cache[H2D_NUM_MODES];
 
         double error_weight_h; ///< A coefficient that multiplies error of H-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_H.

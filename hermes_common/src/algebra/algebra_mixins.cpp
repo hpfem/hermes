@@ -39,7 +39,7 @@ namespace Hermes
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::process_matrix_output(Hermes::Algebra::SparseMatrix<Scalar>* matrix, int iteration)
       {
-        if (matrix == NULL)
+        if (matrix == nullptr)
           return;
 
         char* fileName = new char[this->matrixFilename.length() + 5];
@@ -64,7 +64,7 @@ namespace Hermes
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::process_matrix_output(Hermes::Algebra::SparseMatrix<Scalar>* matrix)
       {
-        if (matrix == NULL)
+        if (matrix == nullptr)
           return;
 
         if(this->output_matrixOn)
@@ -79,7 +79,7 @@ namespace Hermes
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::process_vector_output(Hermes::Algebra::Vector<Scalar>* rhs, int iteration)
       {
-        if (rhs == NULL)
+        if (rhs == nullptr)
           return;
 
         char* fileName = new char[this->RhsFilename.length() + 5];
@@ -104,7 +104,7 @@ namespace Hermes
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::process_vector_output(Hermes::Algebra::Vector<Scalar>* rhs)
       {
-        if (rhs == NULL)
+        if (rhs == nullptr)
           return;
 
         if(this->output_rhsOn)

@@ -39,7 +39,7 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
         this->spaces_mutable.push_back(spaces.at(i));
 
-      if(bt==NULL)
+      if(bt==nullptr)
         throw Exceptions::NullException(2);
 
       matrix_right = create_matrix<Scalar>();
@@ -58,8 +58,8 @@ namespace Hermes
       // Vector for the left part of the residual.
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
 
-      this->stage_dp_left = NULL;
-      this->stage_dp_right = NULL;
+      this->stage_dp_left = nullptr;
+      this->stage_dp_right = nullptr;
     }
 
     template<typename Scalar>
@@ -72,7 +72,7 @@ namespace Hermes
       this->spaces_seqs.push_back(space->get_seq());
       this->spaces_mutable.push_back(space);
 
-      if(bt==NULL) throw Exceptions::NullException(2);
+      if(bt==nullptr) throw Exceptions::NullException(2);
 
       matrix_right = create_matrix<Scalar>();
       matrix_left = create_matrix<Scalar>();
@@ -90,8 +90,8 @@ namespace Hermes
       // Vector for the left part of the residual.
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(spaces)];
 
-      this->stage_dp_left = NULL;
-      this->stage_dp_right = NULL;
+      this->stage_dp_left = nullptr;
+      this->stage_dp_right = nullptr;
     }
 
     template<typename Scalar>
@@ -124,7 +124,7 @@ namespace Hermes
       delete [] vector_left;
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
 
-      if(this->stage_dp_left != NULL)
+      if(this->stage_dp_left != nullptr)
         this->stage_dp_left->set_spaces(this->spaces);
     }
 
@@ -154,7 +154,7 @@ namespace Hermes
       delete [] vector_left;
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
 
-      if(this->stage_dp_left != NULL)
+      if(this->stage_dp_left != nullptr)
         this->stage_dp_left->set_space(space);
     }
 
@@ -254,9 +254,9 @@ namespace Hermes
     template<typename Scalar>
     RungeKutta<Scalar>::~RungeKutta()
     {
-      if(stage_dp_left != NULL)
+      if(stage_dp_left != nullptr)
         delete stage_dp_left;
-      if(stage_dp_right != NULL)
+      if(stage_dp_right != nullptr)
         delete stage_dp_right;
       delete solver;
       delete matrix_right;
@@ -303,7 +303,7 @@ namespace Hermes
 
       int ndof = Space<Scalar>::get_num_dofs(spaces);
 
-      if(this->stage_dp_left == NULL)
+      if(this->stage_dp_left == nullptr)
         this->init();
 
       // Creates the stage weak formulation.
@@ -370,7 +370,7 @@ namespace Hermes
         // Diagonal blocks are created even if empty, so that matrix_left can be added later.
         bool force_diagonal_blocks = true;
         stage_dp_right->set_RK(spaces.size(), force_diagonal_blocks, this->bt);
-        stage_dp_right->assemble(u_ext_vec, NULL, vector_right);
+        stage_dp_right->assemble(u_ext_vec, nullptr, vector_right);
 
         // Finalizing the residual vector.
         vector_right->add_vector(vector_left);
@@ -429,7 +429,7 @@ namespace Hermes
           // Diagonal blocks are created even if empty, so that matrix_left
           // can be added later.
           stage_dp_right->set_RK(spaces.size(), force_diagonal_blocks);
-          stage_dp_right->assemble(u_ext_vec, matrix_right, NULL);
+          stage_dp_right->assemble(u_ext_vec, matrix_right, nullptr);
 
           // Adding the block mass matrix M to matrix_right. This completes the
           // resulting tensor Jacobian.
@@ -481,7 +481,7 @@ namespace Hermes
 
       Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, slns_time_new);
 
-      // If error_fn is not NULL, use the B2-row in the Butcher's
+      // If error_fn is not nullptr, use the B2-row in the Butcher's
       // table to calculate the temporal error estimate.
       if(error_fns != Hermes::vector<MeshFunctionSharedPtr<Scalar> >())
       {

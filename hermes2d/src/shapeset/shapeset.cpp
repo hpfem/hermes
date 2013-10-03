@@ -104,7 +104,7 @@ namespace Hermes
       int index = 2*((max_order + 1 - ebias)*part + (order - ebias)) + ori;
 
       // allocate/reallocate the array if necessary
-      if(comb_table == NULL)
+      if(comb_table == nullptr)
       {
         table_size = 1024;
         while (table_size <= index) table_size *= 2;
@@ -123,7 +123,7 @@ namespace Hermes
       }
 
       // do we have the required linear combination yet?
-      if(comb_table[index] == NULL)
+      if(comb_table[index] == nullptr)
       {
         // no, calculate it
         comb_table[index] = calculate_constrained_edge_combination(order, part, ori, mode);
@@ -135,14 +135,14 @@ namespace Hermes
 
     void Shapeset::free_constrained_edge_combinations()
     {
-      if(comb_table != NULL)
+      if(comb_table != nullptr)
       {
         for (int i = 0; i < table_size; i++)
-          if(comb_table[i] != NULL)
+          if(comb_table[i] != nullptr)
             delete [] comb_table[i];
 
         free(comb_table);
-        comb_table = NULL;
+        comb_table = nullptr;
       }
     }
 
@@ -242,7 +242,7 @@ namespace Hermes
       if(index >= 0)
       {
         Shapeset::shape_fn_t** shape_expansion = shape_table[n][mode];
-        if(shape_expansion == NULL)
+        if(shape_expansion == nullptr)
         { // requested exansion (f, df/dx, df/dy, ddf/dxdx, ...) is not defined.
           //just to keep the number of warnings low: warn just once about a given combinations of n, mode, and index.
           static int warned_mode = -1, warned_index = -1, warned_n = 1;

@@ -35,8 +35,8 @@ namespace Hermes
       Scalar* target_vec, double newton_tol, int newton_max_iter)
     {
         // Sanity check.
-        if(space == NULL)
-          throw Hermes::Exceptions::Exception("this->space == NULL in project_internal().");
+        if(space == nullptr)
+          throw Hermes::Exceptions::Exception("this->space == nullptr in project_internal().");
 
       // Get dimension of the space.
       int ndof = space->get_num_dofs();
@@ -86,7 +86,7 @@ namespace Hermes
 
       delete [] coeff_vec;
 
-      if(target_vec != NULL)
+      if(target_vec != nullptr)
         for (int i = 0; i < ndof; i++)
           target_vec[i] = newton_nox.get_sln_vector()[i];
     }
@@ -117,7 +117,7 @@ namespace Hermes
       double newton_tol, int newton_max_iter)
     {
       // Sanity checks.
-      if(target_vec == NULL) throw Exceptions::NullException(3);
+      if(target_vec == nullptr) throw Exceptions::NullException(3);
 
       // If projection norm is not provided, set it
       // to match the type of the space.
@@ -203,7 +203,7 @@ namespace Hermes
 
       // Sanity checks.
       if(n != source_meshfns.size()) throw Exceptions::LengthException(1, 2, n, source_meshfns.size());
-      if(target_vec == NULL) throw Exceptions::NullException(3);
+      if(target_vec == nullptr) throw Exceptions::NullException(3);
       if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
@@ -227,7 +227,7 @@ namespace Hermes
 
       // Sanity checks.
       if(n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
-      if(target_vec == NULL) throw Exceptions::NullException(3);
+      if(target_vec == nullptr) throw Exceptions::NullException(3);
       if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;

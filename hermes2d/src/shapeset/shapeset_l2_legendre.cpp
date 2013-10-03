@@ -3949,21 +3949,21 @@ namespace Hermes
     static int qb_10_9[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, };
     static int qb_10_10[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, };
 
-    #define NULL16 NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,  NULL, NULL, NULL, NULL, NULL
+    #define nullptr16 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,  nullptr, nullptr, nullptr, nullptr, nullptr
 
     int* leg_quad_bubble_indices[] =
     {
-      qb_0_0,  qb_0_1,  qb_0_2,  qb_0_3,  qb_0_4,  qb_0_5,  qb_0_6,  qb_0_7,  qb_0_8,  qb_0_9,  qb_0_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
-      qb_1_0,  qb_1_1,  qb_1_2,  qb_1_3,  qb_1_4,  qb_1_5,  qb_1_6,  qb_1_7,  qb_1_8,  qb_1_9,  qb_1_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
-      qb_2_0,  qb_2_1,  qb_2_2,  qb_2_3,  qb_2_4,  qb_2_5,  qb_2_6,  qb_2_7,  qb_2_8,  qb_2_9,  qb_2_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
-      qb_3_0,  qb_3_1,  qb_3_2,  qb_3_3,  qb_3_4,  qb_3_5,  qb_3_6,  qb_3_7,  qb_3_8,  qb_3_9,  qb_3_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
-      qb_4_0,  qb_4_1,  qb_4_2,  qb_4_3,  qb_4_4,  qb_4_5,  qb_4_6,  qb_4_7,  qb_4_8,  qb_4_9,  qb_4_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
-      qb_5_0,  qb_5_1,  qb_5_2,  qb_5_3,  qb_5_4,  qb_5_5,  qb_5_6,  qb_5_7,  qb_5_8,  qb_5_9,  qb_5_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
-      qb_6_0,  qb_6_1,  qb_6_2,  qb_6_3,  qb_6_4,  qb_6_5,  qb_6_6,  qb_6_7,  qb_6_8,  qb_6_9,  qb_6_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
-      qb_7_0,  qb_7_1,  qb_7_2,  qb_7_3,  qb_7_4,  qb_7_5,  qb_7_6,  qb_7_7,  qb_7_8,  qb_7_9,  qb_7_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
-      qb_8_0,  qb_8_1,  qb_8_2,  qb_8_3,  qb_8_4,  qb_8_5,  qb_8_6,  qb_8_7,  qb_8_8,  qb_8_9,  qb_8_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
-      qb_9_0,  qb_9_1,  qb_9_2,  qb_9_3,  qb_9_4,  qb_9_5,  qb_9_6,  qb_9_7,  qb_9_8,  qb_9_9,  qb_9_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
-      qb_10_0,  qb_10_1,  qb_10_2,  qb_10_3,  qb_10_4,  qb_10_5,  qb_10_6,  qb_10_7,  qb_10_8,  qb_10_9,  qb_10_10,   NULL, NULL, NULL, NULL, NULL, NULL16,
+      qb_0_0,  qb_0_1,  qb_0_2,  qb_0_3,  qb_0_4,  qb_0_5,  qb_0_6,  qb_0_7,  qb_0_8,  qb_0_9,  qb_0_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      qb_1_0,  qb_1_1,  qb_1_2,  qb_1_3,  qb_1_4,  qb_1_5,  qb_1_6,  qb_1_7,  qb_1_8,  qb_1_9,  qb_1_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      qb_2_0,  qb_2_1,  qb_2_2,  qb_2_3,  qb_2_4,  qb_2_5,  qb_2_6,  qb_2_7,  qb_2_8,  qb_2_9,  qb_2_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      qb_3_0,  qb_3_1,  qb_3_2,  qb_3_3,  qb_3_4,  qb_3_5,  qb_3_6,  qb_3_7,  qb_3_8,  qb_3_9,  qb_3_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      qb_4_0,  qb_4_1,  qb_4_2,  qb_4_3,  qb_4_4,  qb_4_5,  qb_4_6,  qb_4_7,  qb_4_8,  qb_4_9,  qb_4_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      qb_5_0,  qb_5_1,  qb_5_2,  qb_5_3,  qb_5_4,  qb_5_5,  qb_5_6,  qb_5_7,  qb_5_8,  qb_5_9,  qb_5_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      qb_6_0,  qb_6_1,  qb_6_2,  qb_6_3,  qb_6_4,  qb_6_5,  qb_6_6,  qb_6_7,  qb_6_8,  qb_6_9,  qb_6_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      qb_7_0,  qb_7_1,  qb_7_2,  qb_7_3,  qb_7_4,  qb_7_5,  qb_7_6,  qb_7_7,  qb_7_8,  qb_7_9,  qb_7_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      qb_8_0,  qb_8_1,  qb_8_2,  qb_8_3,  qb_8_4,  qb_8_5,  qb_8_6,  qb_8_7,  qb_8_8,  qb_8_9,  qb_8_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      qb_9_0,  qb_9_1,  qb_9_2,  qb_9_3,  qb_9_4,  qb_9_5,  qb_9_6,  qb_9_7,  qb_9_8,  qb_9_9,  qb_9_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      qb_10_0,  qb_10_1,  qb_10_2,  qb_10_3,  qb_10_4,  qb_10_5,  qb_10_6,  qb_10_7,  qb_10_8,  qb_10_9,  qb_10_10,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
     };
 
     #define zero16  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -8144,19 +8144,19 @@ namespace Hermes
 
     static Shapeset::shape_fn_t** leg_shape_fn_table_dxx[2] =
     {
-      NULL,
+      nullptr,
       leg_quad_shape_fn_table_dxx
     };
 
     static Shapeset::shape_fn_t** leg_shape_fn_table_dyy[2] =
     {
-      NULL,
+      nullptr,
       leg_quad_shape_fn_table_dyy
     };
 
     static Shapeset::shape_fn_t** leg_shape_fn_table_dxy[2] =
     {
-      NULL,
+      nullptr,
       leg_quad_shape_fn_table_dxy
     };
 
@@ -8229,7 +8229,7 @@ namespace Hermes
 
       ebias = 2;
 
-      comb_table = NULL;
+      comb_table = nullptr;
     }
     
     const int L2ShapesetLegendre::max_index[2] = { 66, 120 };

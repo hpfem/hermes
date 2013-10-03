@@ -116,8 +116,8 @@ public:
   ~Regularity_Estimator();
   void free();
 
-  int* get_smooth_elems(SpaceSharedPtr<double> new_space,double* coeff_vec,CSCMatrix<double> * mass_matrix=NULL);
-  int* get_smooth_dofs(SpaceSharedPtr<double> new_space,double* coeff_vec,CSCMatrix<double> * mass_matrix=NULL);
+  int* get_smooth_elems(SpaceSharedPtr<double> new_space,double* coeff_vec,CSCMatrix<double> * mass_matrix=nullptr);
+  int* get_smooth_dofs(SpaceSharedPtr<double> new_space,double* coeff_vec,CSCMatrix<double> * mass_matrix=nullptr);
 
 
 protected:
@@ -125,7 +125,7 @@ protected:
   double linear_approx_dx(Element* e, double x_i, double y_i,double x_c, double y_c, MeshFunctionSharedPtr<double> sln);
   double linear_approx_dy(Element* e, double x_i, double y_i,double x_c, double y_c, MeshFunctionSharedPtr<double> sln);
 
-  void smoothness_indicator(CSCMatrix<double> * mass_matrix = NULL);
+  void smoothness_indicator(CSCMatrix<double> * mass_matrix = nullptr);
 
   void set_space(SpaceSharedPtr<double> new_space);
 

@@ -32,12 +32,12 @@ namespace Hermes
     template<typename Scalar>
     void L2Space<Scalar>::init(Shapeset* shapeset, int p_init)
     {
-      if(shapeset == NULL)
+      if(shapeset == nullptr)
       {
         this->shapeset = new L2Shapeset;
         this->own_shapeset = true;
       }
-      ldata = NULL;
+      ldata = nullptr;
       lsize = 0;
 
       // set uniform poly order in elements
@@ -50,7 +50,7 @@ namespace Hermes
 
     template<typename Scalar>
     L2Space<Scalar>::L2Space(MeshSharedPtr mesh, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, NULL)
+      : Space<Scalar>(mesh, shapeset, nullptr)
     {
       init(shapeset, p_init);
     }
@@ -68,7 +68,7 @@ namespace Hermes
     {
       Space<Scalar>::copy(space, new_mesh);
 
-      ldata = NULL;
+      ldata = nullptr;
       lsize = 0;
     }
 
@@ -147,7 +147,7 @@ namespace Hermes
     Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc)
     {
       throw Hermes::Exceptions::Exception("Method get_bc_projection() called from an L2Space.");
-      return NULL;
+      return nullptr;
     }
 
     template<typename Scalar>

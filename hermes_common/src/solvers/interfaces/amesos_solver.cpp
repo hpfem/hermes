@@ -36,7 +36,7 @@ namespace Hermes
       : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs)
     {
       solver = factory.Create(solver_type, problem);
-      assert(solver != NULL);
+      assert(solver != nullptr);
       // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver,
       //          so don't forget to delete it!
       //          ( Amesos.cpp, line 88, called from factory.Create():
@@ -76,8 +76,8 @@ namespace Hermes
     template<>
     void AmesosSolver<double>::solve()
     {
-      assert(m != NULL);
-      assert(rhs != NULL);
+      assert(m != nullptr);
+      assert(rhs != nullptr);
 
       assert(m->size == rhs->size);
 
@@ -108,8 +108,8 @@ namespace Hermes
     template<>
     void AmesosSolver<std::complex<double> >::solve()
     {
-      assert(m != NULL);
-      assert(rhs != NULL);
+      assert(m != nullptr);
+      assert(rhs != nullptr);
 
       assert(m->size == rhs->size);
 

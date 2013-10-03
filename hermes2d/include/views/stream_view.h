@@ -35,8 +35,8 @@ namespace Hermes
       {
       public:
 
-        StreamView(const char* title = "StreamView", WinGeom* wg = NULL);
-        StreamView(char* title, WinGeom* wg = NULL);
+        StreamView(const char* title = "StreamView", WinGeom* wg = nullptr);
+        StreamView(char* title, WinGeom* wg = nullptr);
         ~StreamView();
 
         /// Using velocity components (xsln, ysln) it creates streamlines that begin at the boundary with "marker"
@@ -117,8 +117,8 @@ namespace Hermes
       class HERMES_API StreamView : public View
       {
       public:
-        StreamView(const char* title = "StreamView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        StreamView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        StreamView(const char* title = "StreamView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        StreamView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         /// Using velocity components (xsln, ysln) it creates streamlines that begin at the boundary with "marker"
         /// and the distance between starting points is "step"

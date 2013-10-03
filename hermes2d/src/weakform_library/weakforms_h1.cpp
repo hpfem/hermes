@@ -1086,7 +1086,7 @@ namespace Hermes
       DefaultWeakFormLaplaceLinear<Scalar>::DefaultWeakFormLaplaceLinear(std::string area, GeomType gt) : WeakForm<Scalar>()
       {
         // Jacobian.
-        this->add_matrix_form(new DefaultMatrixFormDiffusion<Scalar>(0, 0, area, NULL, HERMES_SYM, gt));
+        this->add_matrix_form(new DefaultMatrixFormDiffusion<Scalar>(0, 0, area, nullptr, HERMES_SYM, gt));
       };
 
       template<typename Scalar>
@@ -1115,7 +1115,7 @@ namespace Hermes
         GeomType gt) : WeakForm<Scalar>()
       {
         // Jacobian.
-        this->add_matrix_form(new DefaultMatrixFormDiffusion<Scalar>(0, 0, area, NULL, HERMES_SYM));
+        this->add_matrix_form(new DefaultMatrixFormDiffusion<Scalar>(0, 0, area, nullptr, HERMES_SYM));
 
         // Residual.
         this->add_vector_form(new DefaultVectorFormVol<Scalar>(0, area, f));

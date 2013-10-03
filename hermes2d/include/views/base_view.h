@@ -40,8 +40,8 @@ namespace Hermes
       {
       public:
 
-        BaseView(const char* title = "BaseView", WinGeom* wg = NULL);
-        BaseView(char* title, WinGeom* wg = NULL);
+        BaseView(const char* title = "BaseView", WinGeom* wg = nullptr);
+        BaseView(char* title, WinGeom* wg = nullptr);
 
         void show(SpaceSharedPtr<Scalar> space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0);
 
@@ -72,8 +72,8 @@ namespace Hermes
       class HERMES_API BaseView : public ScalarView
       {
       public:
-        BaseView(const char* title = "BaseView", WinGeom* wg = NULL) : ScalarView(title, wg) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        BaseView(char* title, WinGeom* wg = NULL) : ScalarView(title, wg) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        BaseView(const char* title = "BaseView", WinGeom* wg = nullptr) : ScalarView(title, wg) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        BaseView(char* title, WinGeom* wg = nullptr) : ScalarView(title, wg) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void show(SpaceSharedPtr<Scalar> space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };

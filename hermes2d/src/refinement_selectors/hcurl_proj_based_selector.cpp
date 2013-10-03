@@ -12,9 +12,9 @@ namespace Hermes
 
       template<typename Scalar>
       HcurlProjBasedSelector<Scalar>::HcurlProjBasedSelector(CandList cand_list, int max_order, HcurlShapeset* user_shapeset)
-        : ProjBasedSelector<Scalar>(cand_list, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, Range(), Range(0, H2DRS_MAX_HCURL_ORDER))
+        : ProjBasedSelector<Scalar>(cand_list, max_order, user_shapeset == nullptr ? new HcurlShapeset() : user_shapeset, Range(), Range(0, H2DRS_MAX_HCURL_ORDER))
       {
-        if(user_shapeset != NULL)
+        if(user_shapeset != nullptr)
         {
           this->warn("Warning: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
           this->warn("Warning: The functionality for cloning user shapeset is to be implemented yet.");

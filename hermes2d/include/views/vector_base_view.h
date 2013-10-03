@@ -32,9 +32,9 @@ namespace Hermes
       {
       public:
 
-        VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL);
+        VectorBaseView(const char* title = "BaseView", WinGeom* wg = nullptr);
 
-        VectorBaseView(char* title, WinGeom* wg = NULL);
+        VectorBaseView(char* title, WinGeom* wg = nullptr);
 
         void show(SpaceSharedPtr<Scalar> space);
 
@@ -63,9 +63,9 @@ namespace Hermes
       class HERMES_API VectorBaseView : public VectorView
       {
       public:
-        VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        VectorBaseView(const char* title = "BaseView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        VectorBaseView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        VectorBaseView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void show(SpaceSharedPtr<Scalar> space) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };

@@ -148,8 +148,8 @@ namespace Hermes
             throw Exceptions::Exception("VertexBasedLimiter designed for L2ShapesetTaylor. Ignore this exception for unforeseen problems.");
         }
 
-        vertex_min_values = NULL;
-        vertex_max_values = NULL;
+        vertex_min_values = nullptr;
+        vertex_max_values = nullptr;
 
         // This is what is the key aspect of the necessity to use L2ShapesetTaylor (or any other one that uses P_{} also for quads).
         this->mixed_derivatives_count = (maximum_polynomial_order)*(maximum_polynomial_order + 1) / 2;

@@ -45,7 +45,7 @@ namespace Hermes
         /** \note Parameters \a vertex_order and \a edge_bubble_order fixes the fact that a shapeset returns a valid index even though a given shape is not invalid in the space.
         *  \param[in] cand_list A predefined list of candidates.
         *  \param[in] max_order A maximum order which considered. If ::H2DRS_DEFAULT_ORDER, a maximum order supported by the selector is used.
-        *  \param[in] shapeset A shapeset. It cannot be NULL.
+        *  \param[in] shapeset A shapeset. It cannot be nullptr.
         *  \param[in] vertex_order A range of orders for vertex functions. Use an empty range (i.e. Range()) to skip vertex functions.
         *  \param[in] edge_bubble_order A range of orders for edge and bubble functions. Use an empty range (i.e. Range()) to skip edge and bubble functions. */
         OptimumSelector(CandList cand_list, int max_order, Shapeset* shapeset, const Range& vertex_order, const Range& edge_bubble_order);
@@ -98,8 +98,8 @@ namespace Hermes
         /// Calculates error, dofs, and score of candidates.
         /** \param[in] e An element that is being refined.
         *  \param[in] rsln A reference solution which is used to calculate the error.
-        *  \param[out] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL.
-        *  \param[out] dev_error A deviation of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL. */
+        *  \param[out] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be nullptr.
+        *  \param[out] dev_error A deviation of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be nullptr. */
         void evaluate_candidates(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln);
 
         /// Sorts and selects the best candidate and the best H-candidate according to the score.

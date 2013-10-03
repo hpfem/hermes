@@ -44,15 +44,15 @@ namespace Hermes
         int end_order_h; ///< The ending horizontal order.
         int end_order_v; ///< The ending vertical order.
         bool iso_p; ///< True if orders is incresed in both the horizontal order and the vertical order are increased simultaneously.
-        int* tgt_quad_order; ///< A pointer to which a current order is stored in encoded form. Ignored if NULL.
+        int* tgt_quad_order; ///< A pointer to which a current order is stored in encoded form. Ignored if nullptr.
 
       public:
         /// Constructor.
         /** \param[in] start_quad_order The starting order in an encoded form.
         *  \param[in] end_quad_order The ending order in an encoded form.
         *  \param[in] iso_p True if both orders (i.e. horizontal and vertical) should be increased simultaneously.
-        *  \param[in] tgt_quad_order A point to a location to which a current orders (i.e. horizontal and vertical) are stored in an encoded form. Ignored if NULL. */
-        OrderPermutator (int start_quad_order = 0, int end_quad_order = 0, bool iso_p = false, int* tgt_quad_order = NULL);
+        *  \param[in] tgt_quad_order A point to a location to which a current orders (i.e. horizontal and vertical) are stored in an encoded form. Ignored if nullptr. */
+        OrderPermutator (int start_quad_order = 0, int end_quad_order = 0, bool iso_p = false, int* tgt_quad_order = nullptr);
 
         /// Moves to the next permutation of orders.
         /** \return True if there is a next permutation of orders. */

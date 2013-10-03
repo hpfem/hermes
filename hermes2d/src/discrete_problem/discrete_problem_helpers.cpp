@@ -24,7 +24,7 @@ namespace Hermes
     {
 
       template<typename Scalar>
-      DiscreteProblemRungeKutta<Scalar>::DiscreteProblemRungeKutta() : rungeKutta(false), RK_original_spaces_count(0), force_diagonal_blocks(false), block_weights(NULL)
+      DiscreteProblemRungeKutta<Scalar>::DiscreteProblemRungeKutta() : rungeKutta(false), RK_original_spaces_count(0), force_diagonal_blocks(false), block_weights(nullptr)
       {
 
       }
@@ -122,7 +122,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DiscreteProblemMatrixVector<Scalar>::DiscreteProblemMatrixVector() : current_mat(NULL), current_rhs(NULL)
+      DiscreteProblemMatrixVector<Scalar>::DiscreteProblemMatrixVector() : current_mat(nullptr), current_rhs(nullptr)
       {
       }
 
@@ -151,7 +151,7 @@ namespace Hermes
     int init_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
       int i = 0;
-      RefMap* rep_reference_mapping = NULL;
+      RefMap* rep_reference_mapping = nullptr;
       for(int i = 0; i < reference_mapping_count; i++)
       {
         if(reference_mapping[i])
@@ -176,7 +176,7 @@ namespace Hermes
             geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
           }
 
-      double* jac = NULL;
+      double* jac = nullptr;
       if(!rep_reference_mapping->is_jacobian_const())
         jac = rep_reference_mapping->get_jacobian(order);
       jacobian_x_weights = new double[np];

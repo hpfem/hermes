@@ -38,10 +38,10 @@ namespace Hermes
     public:
       H1Space();
       H1Space(MeshSharedPtr mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
-        Shapeset* shapeset = NULL);
+        Shapeset* shapeset = nullptr);
 
       H1Space(MeshSharedPtr mesh, int p_init = 1,
-        Shapeset* shapeset = NULL);
+        Shapeset* shapeset = nullptr);
 
       virtual ~H1Space();
 
@@ -109,7 +109,7 @@ namespace Hermes
     class HERMES_API H1SpaceEggShell : public H1Space<double>
     {
     private:
-      H1SpaceEggShell(MeshSharedPtr mesh, int p_init = 1, Shapeset* shapeset = NULL);
+      H1SpaceEggShell(MeshSharedPtr mesh, int p_init = 1, Shapeset* shapeset = nullptr);
       virtual ~H1SpaceEggShell();
       virtual void post_assign();
     friend class ExactSolutionEggShell;

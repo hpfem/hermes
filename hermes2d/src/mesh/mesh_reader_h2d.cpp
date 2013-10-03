@@ -45,7 +45,7 @@ namespace Hermes
       p2 = m->curv_second[id];
 
       *en = mesh->peek_edge_node(p1, p2);
-      if(*en == NULL)
+      if(*en == nullptr)
         throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
 
       // degree of curved edge
@@ -188,7 +188,7 @@ namespace Hermes
         node->type = HERMES_TYPE_VERTEX;
         node->bnd = 0;
         node->p1 = node->p2 = -1;
-        node->next_hash = NULL;
+        node->next_hash = nullptr;
         node->x = m.x_vertex[i];
         node->y = m.y_vertex[i];
       }
@@ -255,12 +255,12 @@ namespace Hermes
 
           if(nv == 4) {
             Mesh::check_triangle(i, v0, v1, v2);
-            mesh->create_triangle(marker, v0, v1, v2, NULL);
+            mesh->create_triangle(marker, v0, v1, v2, nullptr);
           }
           else {
             Node *v3 = &mesh->nodes[idx[3]];
             Mesh::check_quad(i, v0, v1, v2, v3);
-            mesh->create_quad(marker, v0, v1, v2, v3, NULL);
+            mesh->create_quad(marker, v0, v1, v2, v3, nullptr);
           }
 
           mesh->nactive++;
@@ -282,7 +282,7 @@ namespace Hermes
           v2 = m.bdy_second[i];
 
           en = mesh->peek_edge_node(v1, v2);
-          if(en == NULL)
+          if(en == nullptr)
             throw Hermes::Exceptions::MeshLoadFailureException("File %s: boundary data #%d: edge %d-%d does not exist", filename, i, v1, v2);
 
           std::string bnd_marker;
@@ -325,9 +325,9 @@ namespace Hermes
           for (k = 0; k < 2; k++)
           {
             Element* e = en->elem[k];
-            if(e == NULL) continue;
+            if(e == nullptr) continue;
 
-            if(e->cm == NULL)
+            if(e->cm == nullptr)
             {
               e->cm = new CurvMap;
               memset(e->cm, 0, sizeof(CurvMap));
@@ -360,7 +360,7 @@ namespace Hermes
       // update refmap coeffs of curvilinear elements
       Element* e;
       for_all_used_elements(e, mesh)
-        if(e->cm != NULL)
+        if(e->cm != nullptr)
           e->cm->update_refmap_coeffs(e);
 
       //// refinements /////////////////////////////////////////////////////////////
@@ -443,7 +443,7 @@ namespace Hermes
 
       // open output file
       FILE* f = fopen(filename, "w");
-      if(f == NULL) throw Hermes::Exceptions::MeshLoadFailureException("Could not create mesh file.");
+      if(f == nullptr) throw Hermes::Exceptions::MeshLoadFailureException("Could not create mesh file.");
       //fprintf(f, "# hermes2d saved mesh\n\n");
 
       // save vertices
@@ -487,7 +487,7 @@ namespace Hermes
         if(e->is_curved())
         {
           for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
+            if(e->cm->nurbs[i] != nullptr && !is_twin_nurbs(e, i))
             {
               fprintf(f, first ? "curves =\n[\n" : ",\n");  first = false;
               save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);

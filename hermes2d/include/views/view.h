@@ -80,8 +80,8 @@ namespace Hermes
       public:
 
         void init();
-        View(const char* title, WinGeom* wg = NULL);
-        View(char* title, WinGeom* wg = NULL);
+        View(const char* title, WinGeom* wg = nullptr);
+        View(char* title, WinGeom* wg = nullptr);
         ~View();
 
         int  create();
@@ -114,12 +114,12 @@ namespace Hermes
         void set_num_palette_steps(int num);
         void set_palette_filter(bool linear);
 
-        static void wait_for_keypress(const char* text = NULL); ///< Waits for keypress. Deprecated.
+        static void wait_for_keypress(const char* text = nullptr); ///< Waits for keypress. Deprecated.
         void wait_for_close();
         void wait_for_draw();
 
         static void wait(const char* text); ///< Closes all views at once.
-        static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = NULL); ///< Waits for an event.
+        static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = nullptr); ///< Waits for an event.
         void draw_help();
         virtual void reset_view(bool force_reset); ///< Resets view based on the axis-aligned bounding box of the mesh. Assumes that the bounding box is set up. Does not reset if view_not_reset is false.
 
@@ -241,8 +241,8 @@ namespace Hermes
 
         void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         View() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        View(const char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        View(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        View(const char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        View(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         int  create() { throw Hermes::Exceptions::Exception("GLUT disabled."); return -1; }
         void close() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
@@ -272,12 +272,12 @@ namespace Hermes
         void set_num_palette_steps(int num) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_palette_filter(bool linear) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        static void wait_for_keypress(const char* text = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        static void wait_for_keypress(const char* text = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void wait_for_close() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void wait_for_draw() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         static void wait(const char* text) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

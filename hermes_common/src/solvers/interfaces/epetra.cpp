@@ -34,10 +34,10 @@ namespace Hermes
     template<typename Scalar>
     EpetraMatrix<Scalar>::EpetraMatrix()
     {
-      this->mat = NULL;
-      this->mat_im = NULL;
-      this->grph = NULL;
-      this->std_map = NULL;
+      this->mat = nullptr;
+      this->mat_im = nullptr;
+      this->grph = nullptr;
+      this->std_map = nullptr;
       this->owner = true;
 
       this->row_storage = true;
@@ -51,9 +51,9 @@ namespace Hermes
       if (op.mat_im)
         this->mat_im = new Epetra_CrsMatrix(*op.mat_im);
       else
-        this->mat_im = NULL;
+        this->mat_im = nullptr;
 
-      assert(mat != NULL);
+      assert(mat != nullptr);
       this->grph = new Epetra_CrsGraph( this->mat->Graph() );
       this->std_map = new Epetra_BlockMap( this->grph->Map() );
       this->owner = true;
@@ -66,7 +66,7 @@ namespace Hermes
     EpetraMatrix<double>::EpetraMatrix(Epetra_RowMatrix &op)
     {
       this->mat = dynamic_cast<Epetra_CrsMatrix*>(&op);
-      assert(mat != NULL);
+      assert(mat != nullptr);
 
       this->size = this->mat->NumGlobalRows();
       this->grph = const_cast<Epetra_CrsGraph*>(&this->mat->Graph());
@@ -140,9 +140,9 @@ namespace Hermes
     {
       if(owner)
       {
-        delete mat; mat = NULL;
-        delete grph; grph = NULL;
-        delete std_map; std_map = NULL;
+        delete mat; mat = nullptr;
+        delete grph; grph = nullptr;
+        delete std_map; std_map = nullptr;
       }
     }
 
@@ -151,10 +151,10 @@ namespace Hermes
     {
       if(owner)
       {
-        delete mat; mat = NULL;
-        delete mat_im; mat_im = NULL;
-        delete grph; grph = NULL;
-        delete std_map; std_map = NULL;
+        delete mat; mat = nullptr;
+        delete mat_im; mat_im = nullptr;
+        delete grph; grph = nullptr;
+        delete std_map; std_map = nullptr;
       }
     }
 
@@ -316,9 +316,9 @@ namespace Hermes
     template<typename Scalar>
     EpetraVector<Scalar>::EpetraVector()
     {
-      this->std_map = NULL;
-      this->vec = NULL;
-      this->vec_im = NULL;
+      this->std_map = nullptr;
+      this->vec = nullptr;
+      this->vec_im = nullptr;
       this->size = 0;
       this->owner = true;
     }
@@ -327,7 +327,7 @@ namespace Hermes
     EpetraVector<Scalar>::EpetraVector(const Epetra_Vector &v)
     {
       this->vec = (Epetra_Vector *) &v;
-      this->vec_im = NULL;
+      this->vec_im = nullptr;
       this->std_map = (Epetra_BlockMap *) &v.Map();
       this->size = v.MyLength();
       this->owner = false;
@@ -373,9 +373,9 @@ namespace Hermes
     {
       if(this->owner)
       {
-        delete std_map; std_map = NULL;
-        delete vec; vec = NULL;
-        delete vec_im; vec_im = NULL;
+        delete std_map; std_map = nullptr;
+        delete vec; vec = nullptr;
+        delete vec_im; vec_im = nullptr;
         this->size = 0;
       }
     }

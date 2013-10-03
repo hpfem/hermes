@@ -143,18 +143,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    EssentialBCs<Scalar>::EssentialBCs() : HermesAnyBC(NULL)
+    EssentialBCs<Scalar>::EssentialBCs() : HermesAnyBC(nullptr)
     {
     }
 
     template<typename Scalar>
-    EssentialBCs<Scalar>::EssentialBCs(Hermes::vector<EssentialBoundaryCondition<Scalar> *> essential_bcs) : HermesAnyBC(NULL)
+    EssentialBCs<Scalar>::EssentialBCs(Hermes::vector<EssentialBoundaryCondition<Scalar> *> essential_bcs) : HermesAnyBC(nullptr)
     {
       add_boundary_conditions(essential_bcs);
     }
 
     template<typename Scalar>
-    EssentialBCs<Scalar>::EssentialBCs(EssentialBoundaryCondition<Scalar> * boundary_condition) : HermesAnyBC(NULL)
+    EssentialBCs<Scalar>::EssentialBCs(EssentialBoundaryCondition<Scalar> * boundary_condition) : HermesAnyBC(nullptr)
     {
       Hermes::vector<EssentialBoundaryCondition<Scalar> *> boundary_conditions;
       boundary_conditions.push_back(boundary_condition);
@@ -202,7 +202,7 @@ namespace Hermes
       bool hermes_any_set = false;
       this->markers.clear();
       this->BCs.clear();
-      EssentialBoundaryCondition<Scalar>* any_set = NULL;
+      EssentialBoundaryCondition<Scalar>* any_set = nullptr;
       for(this->iterator = begin(); iterator != end(); iterator++)
         for(Hermes::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); it++)
         {
@@ -210,7 +210,7 @@ namespace Hermes
             throw Hermes::Exceptions::Exception("Attempt to define a BC on HERMES_ANY together with a BC on a specific part: '%s'.", it->c_str());
           if((*it) == HERMES_ANY)
           {
-            if(any_set != NULL)
+            if(any_set != nullptr)
               throw Hermes::Exceptions::Exception("Attempt to define a BC on HERMES_ANY together with a BC on a specific part: '%s'.", any_set->markers.begin()->c_str());
             hermes_any_set = true;
             this->HermesAnyBC = *iterator;
@@ -230,12 +230,12 @@ namespace Hermes
     template<typename Scalar>
     EssentialBoundaryCondition<Scalar>* EssentialBCs<Scalar>::get_boundary_condition(std::string marker)
     {
-      if(this->HermesAnyBC != NULL)
+      if(this->HermesAnyBC != nullptr)
         return this->HermesAnyBC;
       for(int i = 0; i < this->markers.size(); i++)
         if(this->markers[i] == marker)
           return this->BCs[i];
-      return NULL;
+      return nullptr;
     }
 
     template<typename Scalar>

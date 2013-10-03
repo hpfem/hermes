@@ -38,9 +38,9 @@
 #define H2D_MAX_SOLUTION_COMPONENTS 2
 static const std::string H2D_DG_INNER_EDGE = "-1234567";
 
-#define HERMES_ONE NULL
-#define HERMES_DEFAULT_FUNCTION NULL
-#define HERMES_DEFAULT_SPLINE NULL
+#define HERMES_ONE nullptr
+#define HERMES_DEFAULT_FUNCTION nullptr
+#define HERMES_DEFAULT_SPLINE nullptr
 
 #define CENTROID_QUAD_X 0.
 #define CENTROID_QUAD_Y 0.

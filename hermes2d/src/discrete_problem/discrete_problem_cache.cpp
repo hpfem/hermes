@@ -30,7 +30,7 @@ namespace Hermes
     {
       this->spaceCnt = current_wf->get_neq();
       this->fns = new Func<double>**[spaceCnt];
-      this->fnsSurface = NULL;
+      this->fnsSurface = nullptr;
       this->asmlistCnt = new int[spaceCnt];
       this->asmlistIdx = new int*[spaceCnt];
 
@@ -41,9 +41,9 @@ namespace Hermes
 
       for(unsigned int space_i = 0; space_i < spaceCnt; space_i++)
       {
-        if(current_state->e[space_i] == NULL)
+        if(current_state->e[space_i] == nullptr)
         {
-          this->fns[space_i] = NULL;
+          this->fns[space_i] = nullptr;
           continue;
         }
         else
@@ -75,7 +75,7 @@ namespace Hermes
         int order = this->order;
 
         this->fnsSurface = new Func<double>***[this->nvert];
-        memset(this->fnsSurface, NULL, sizeof(Func<double>***) * this->nvert);
+        memset(this->fnsSurface, 0, sizeof(Func<double>***) * this->nvert);
         this->asmlistSurfaceCnt = new int*[this->nvert];
 
         for (current_state->isurf = 0; current_state->isurf < this->nvert; current_state->isurf++)
@@ -88,7 +88,7 @@ namespace Hermes
           order = this->order;
 
           this->fnsSurface[current_state->isurf] = new Func<double>**[spaceCnt];
-          memset(this->fnsSurface[current_state->isurf], NULL, sizeof(Func<double>**) * spaceCnt);
+          memset(this->fnsSurface[current_state->isurf], 0, sizeof(Func<double>**) * spaceCnt);
 
           this->asmlistSurfaceCnt[current_state->isurf] = new int[spaceCnt];
 
@@ -185,7 +185,7 @@ namespace Hermes
         delete [] this->orderSurface;
         delete [] this->asmlistSurfaceCnt;
 
-        this->fnsSurface = NULL;
+        this->fnsSurface = nullptr;
       }
     }
 
@@ -220,9 +220,9 @@ namespace Hermes
         if(!this->hashTableUsed[i] && this->hashTable[i])
         {
           delete this->recordTable[this->hashTable[i]->cache_record_index];
-          this->recordTable[this->hashTable[i]->cache_record_index] = NULL;
+          this->recordTable[this->hashTable[i]->cache_record_index] = nullptr;
           delete this->hashTable[i];
-          this->hashTable[i] = NULL;
+          this->hashTable[i] = nullptr;
         }
       }
     }
@@ -240,7 +240,7 @@ namespace Hermes
     int DiscreteProblemCache<Scalar>::get_hash_record(int rep_id, int parent_son, int rep_sub_idx, int rep_i)
     {
       int hash = this->hashFunction(rep_id, parent_son, rep_sub_idx, rep_i);
-      while (hashTable[hash] && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->parent_son != parent_son || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i || this->recordTable[hashTable[hash]->cache_record_index] == NULL))
+      while (hashTable[hash] && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->parent_son != parent_son || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i || this->recordTable[hashTable[hash]->cache_record_index] == nullptr))
         hash = (hash + 1) % hash_table_size;
       hashTableUsed[hash] = true;
       return hash;
@@ -264,7 +264,7 @@ namespace Hermes
 #endif
 
       int hash = this->get_hash_record(rep->parent->id, parent_son, rep_sub_idx, rep_i);
-      if (this->hashTable[hash] == NULL)
+      if (this->hashTable[hash] == nullptr)
       {
         if(recordCount > 0.9 * size)
         {
@@ -297,7 +297,7 @@ namespace Hermes
       else
       {
         int hash = this->get_hash_record(rep->id, -1, rep_sub_idx, rep_i);
-        if (this->hashTable[hash] == NULL)
+        if (this->hashTable[hash] == nullptr)
         {
           if(recordCount > 0.9 * size)
           {

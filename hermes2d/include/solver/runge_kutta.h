@@ -96,7 +96,7 @@ namespace Hermes
       ~RungeKutta();
 
       // Perform one explicit or implicit time step using the Runge-Kutta method
-      // corresponding to a given Butcher's table. If err_vec != NULL then it will be
+      // corresponding to a given Butcher's table. If err_vec != nullptr then it will be
       // filled with an error vector calculated using the second B-row of the Butcher's
       // table (the second B-row B2 must be nonzero in that case). The negative default
       // values for newton_tol and newton_max_iter are for linear problems.

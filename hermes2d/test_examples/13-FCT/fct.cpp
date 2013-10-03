@@ -3,10 +3,10 @@
 Flux_Correction::Flux_Correction(double theta)
 {
   this->theta = theta;
-  fct = NULL; 
-  space =NULL;			
+  fct = nullptr; 
+  space =nullptr;			
   al = new AsmList<double>;	 
-  P_plus= NULL;  P_minus= NULL;  Q_plus= NULL;  Q_minus= NULL;   R_plus= NULL;  R_minus= NULL;
+  P_plus= nullptr;  P_minus= nullptr;  Q_plus= nullptr;  Q_minus= nullptr;   R_plus= nullptr;  R_minus= nullptr;
 };
 Flux_Correction::~Flux_Correction()
 {
@@ -17,13 +17,13 @@ Flux_Correction::~Flux_Correction()
 
 void Flux_Correction::free()
 {
-  if(P_plus!=NULL)  delete [] P_plus;
-  if(P_minus!=NULL) delete [] P_minus;
-  if(Q_plus!=NULL)  delete [] Q_plus;
-  if(Q_minus!=NULL) delete [] Q_minus;
-  if(R_plus!=NULL)  delete [] R_plus;
-  if(R_minus!=NULL) delete [] R_minus;
-  if(fct!=NULL) delete [] fct; 
+  if(P_plus!=nullptr)  delete [] P_plus;
+  if(P_minus!=nullptr) delete [] P_minus;
+  if(Q_plus!=nullptr)  delete [] Q_plus;
+  if(Q_minus!=nullptr) delete [] Q_minus;
+  if(R_plus!=nullptr)  delete [] R_plus;
+  if(R_minus!=nullptr) delete [] R_minus;
+  if(fct!=nullptr) delete [] fct; 
 
 };
 
@@ -40,8 +40,8 @@ void Flux_Correction::init(SpaceSharedPtr<double> new_space)
   R_plus = new double[ndof]; R_minus = new double[ndof];
   for(int i=0; i<ndof;i++)
     fct[i]=false;	
-  Element* e =NULL;
-  Element* elem_neigh=NULL;
+  Element* e =nullptr;
+  Element* elem_neigh=nullptr;
   bool more = false;
   bool  p2_neighbor =false;
   int elem_id,id;
@@ -109,8 +109,8 @@ void Flux_Correction::init(SpaceSharedPtr<double> new_space)
 
 CSCMatrix<double>* Flux_Correction::artificialDiffusion(CSCMatrix<double>* conv_matrix)
 {
-  if(fct==NULL) 
-    throw Exceptions::Exception("fct-list=NULL");
+  if(fct==nullptr) 
+    throw Exceptions::Exception("fct-list=nullptr");
   int size = conv_matrix->get_size();
   int nnz = conv_matrix->get_nnz();
   double a,b;
@@ -159,8 +159,8 @@ CSCMatrix<double>* Flux_Correction::artificialDiffusion(CSCMatrix<double>* conv_
 
 CSCMatrix<double>* Flux_Correction::massLumping(CSCMatrix<double>* mass_matrix)
 {  
-  if(fct==NULL)
-    throw Exceptions::Exception("fct-list=NULL");
+  if(fct==nullptr)
+    throw Exceptions::Exception("fct-list=nullptr");
   CSCMatrix<double>* lumped_matrix = new CSCMatrix<double>;   //M_L
   int size = mass_matrix->get_size();
   int nnz = mass_matrix->get_nnz();
@@ -198,10 +198,10 @@ CSCMatrix<double>* Flux_Correction::massLumping(CSCMatrix<double>* mass_matrix)
 //Assemble antidiffusive fluxes & limit these
 void Flux_Correction::antidiffusiveFlux(CSCMatrix<double>* mass_matrix,CSCMatrix<double>* lumped_matrix,CSCMatrix<double>* conv_matrix,CSCMatrix<double>* diffusion,double* u_high, double* u_L, double* u_old,double* flux_scalar,double time_step,Regularity_Estimator* regEst)
 { 
-  if(fct==NULL) throw Exceptions::Exception("fct-list=NULL");
+  if(fct==nullptr) throw Exceptions::Exception("fct-list=nullptr");
 
-  int* smooth_dof =NULL;
-  if(regEst!=NULL) smooth_dof = regEst->get_smooth_dofs(space,u_L,mass_matrix);		
+  int* smooth_dof =nullptr;
+  if(regEst!=nullptr) smooth_dof = regEst->get_smooth_dofs(space,u_L,mass_matrix);		
 
   int ndof = conv_matrix->get_size();
   double alpha,f, plus, minus,mass, diff;
@@ -256,7 +256,7 @@ void Flux_Correction::antidiffusiveFlux(CSCMatrix<double>* mass_matrix,CSCMatrix
     else 	     R_plus[i]= plus;
     if(minus>=1.0) R_minus[i]= 1.0;
     else 	     R_minus[i]= minus;
-    if(smooth_dof!=NULL)
+    if(smooth_dof!=nullptr)
     {
       if(smooth_dof[i]==1){ R_plus[i]= 1.0;R_minus[i]= 1.0;}
     }	
@@ -299,8 +299,8 @@ void Flux_Correction::antidiffusiveFlux(CSCMatrix<double>* mass_matrix,CSCMatrix
 //FCT for projection 
 void Flux_Correction::lumped_flux_limiter(CSCMatrix<double>* mass_matrix,CSCMatrix<double>* lumped_matrix, double* u_L, double* u_H, double time_step, int* smooth_dof)
 {	
-  if(fct==NULL) 
-    throw Exceptions::Exception("fct-list=NULL");
+  if(fct==nullptr) 
+    throw Exceptions::Exception("fct-list=nullptr");
   int ndof = mass_matrix->get_size();
   double* rhs = new double[ndof];
   lumped_matrix->multiply_with_vector(u_L, rhs, true); 
@@ -357,7 +357,7 @@ void Flux_Correction::lumped_flux_limiter(CSCMatrix<double>* mass_matrix,CSCMatr
     else 	     R_plus[i]= plus;
     if(minus>=1.0) R_minus[i]= 1.0;
     else 	     R_minus[i]= minus;	
-    if(smooth_dof!=NULL)
+    if(smooth_dof!=nullptr)
     {
       if(smooth_dof[i]==1){ R_plus[i]= 1.0;R_minus[i]= 1.0;}
     }		
@@ -397,7 +397,7 @@ void Flux_Correction::lumped_flux_limiter(CSCMatrix<double>* mass_matrix,CSCMatr
 
   SimpleVector<double>* vec_rhs = new SimpleVector<double>(ndof);	
   vec_rhs->zero(); vec_rhs->add_vector(rhs);
-  double* sol =NULL;
+  double* sol =nullptr;
   UMFPackLinearMatrixSolver<double>* lowOrd = new UMFPackLinearMatrixSolver<double>(lumped_matrix,vec_rhs);	
   try
   {
@@ -417,12 +417,12 @@ void Flux_Correction::lumped_flux_limiter(CSCMatrix<double>* mass_matrix,CSCMatr
 
 void Flux_Correction::project_FCT(MeshFunctionSharedPtr<double> sln,double* coeff_vec, double* coeff_vec_2,CSCMatrix<double>* mass_matrix,CSCMatrix<double>* lumped_matrix, double time_step,OGProjection<double>* ogProjection,	Lumped_Projection* lumpedProjection, Regularity_Estimator* regEst)
 {
-  if(sln==NULL)
-    throw Exceptions::Exception("project_FCT: sln=NULL");
-  int* smooth_dof =NULL;
+  if(sln==nullptr)
+    throw Exceptions::Exception("project_FCT: sln=nullptr");
+  int* smooth_dof =nullptr;
   //low-order projection
   lumpedProjection->project_lumped(space, sln, coeff_vec, lumped_matrix);			
-  if(regEst!=NULL)
+  if(regEst!=nullptr)
     smooth_dof = regEst->get_smooth_dofs(space,coeff_vec,mass_matrix);			//=>in smooth elements no FCT needs to be applied
   //high-order projection		
   ogProjection->project_global(space, sln, coeff_vec_2, HERMES_L2_NORM);	

@@ -33,7 +33,7 @@ namespace Hermes
     const std::string Mesh::eggShell1Marker = "Eggshell-1";
     const std::string Mesh::eggShell0Marker = "Eggshell-0";
 
-    Mesh::Mesh() : HashTable(), meshHashGrid(NULL), nbase(0), nactive(0), ntopvert(0), ninitial(0), seq(g_mesh_seq++),
+    Mesh::Mesh() : HashTable(), meshHashGrid(nullptr), nbase(0), nactive(0), ntopvert(0), ninitial(0), seq(g_mesh_seq++),
       bounding_box_calculated(0)
     {
     }
@@ -124,7 +124,7 @@ namespace Hermes
         node->type = HERMES_TYPE_VERTEX;
         node->bnd = 0;
         node->p1 = node->p2 = -1;
-        node->next_hash = NULL;
+        node->next_hash = nullptr;
         node->x = verts[i][0];
         node->y = verts[i][1];
       }
@@ -135,21 +135,21 @@ namespace Hermes
       for (int i = 0; i < nt; i++)
       {
         e = create_triangle(this->element_markers_conversion.insert_marker(tri_markers[i]), &nodes[tris[i][0]], &nodes[tris[i][1]],
-          &nodes[tris[i][2]], NULL);
+          &nodes[tris[i][2]], nullptr);
       }
 
       // create quads
       for (int i = 0; i < nq; i++)
       {
         e = create_quad(this->element_markers_conversion.insert_marker(quad_markers[i]), &nodes[quads[i][0]], &nodes[quads[i][1]],
-          &nodes[quads[i][2]], &nodes[quads[i][3]], NULL);
+          &nodes[quads[i][2]], &nodes[quads[i][3]], nullptr);
       }
 
       // set boundary markers
       for (int i = 0; i < nm; i++)
       {
         Node* en = peek_edge_node(mark[i][0], mark[i][1]);
-        if(en == NULL)
+        if(en == nullptr)
           throw Hermes::Exceptions::Exception("Boundary data error (edge does not exist)");
 
         en->marker = this->boundary_markers_conversion.insert_marker(boundary_markers[i]);
@@ -168,7 +168,7 @@ namespace Hermes
       MeshSharedPtr target_mesh(new Mesh);
       target_mesh->copy(mesh);
 
-      Element** elements = NULL;
+      Element** elements = nullptr;
       int n_elements;
 
       get_egg_shell_structures(target_mesh, elements, n_elements, marker, levels, n_element_guess);
@@ -303,10 +303,10 @@ namespace Hermes
             elem->vn[(edge+1)%elem->get_nvert()]->bnd = true;
             if(elem->en[edge]->elem[0])
               if(elem->en[edge]->elem[0]->id != elem->id)
-                elem->en[edge]->elem[0] = NULL;
+                elem->en[edge]->elem[0] = nullptr;
             if(elem->en[edge]->elem[1])
               if(elem->en[edge]->elem[1]->id != elem->id)
-                elem->en[edge]->elem[1] = NULL;
+                elem->en[edge]->elem[1] = nullptr;
           }
         }
       }
@@ -314,7 +314,7 @@ namespace Hermes
 
     int Mesh::get_num_elements() const
     {
-      if(this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_elements().");
+      if(this == nullptr) throw Hermes::Exceptions::Exception("this == nullptr in Mesh::get_num_elements().");
       if(this->seq < 0)
         return -1;
       else
@@ -324,7 +324,7 @@ namespace Hermes
     /// Returns the number of coarse mesh elements.
     int Mesh::get_num_base_elements() const
     {
-      if(this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_base_elements().");
+      if(this == nullptr) throw Hermes::Exceptions::Exception("this == nullptr in Mesh::get_num_base_elements().");
 
       if(this->seq < 0)
         return -1;
@@ -336,8 +336,8 @@ namespace Hermes
     int Mesh::get_num_used_base_elements() const
     {
       int toReturn = 0;
-      if(this == NULL)
-        throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_base_elements().");
+      if(this == nullptr)
+        throw Hermes::Exceptions::Exception("this == nullptr in Mesh::get_num_base_elements().");
 
       if(this->seq < 0)
         return -1;
@@ -353,8 +353,8 @@ namespace Hermes
     /// Returns the current number of active elements in the mesh.
     int Mesh::get_num_active_elements() const
     {
-      if(this == NULL) 
-        throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_active_elements().");
+      if(this == nullptr) 
+        throw Hermes::Exceptions::Exception("this == nullptr in Mesh::get_num_active_elements().");
       if(this->seq < 0)
         return -1;
       else
@@ -364,8 +364,8 @@ namespace Hermes
     /// Returns the maximum node id number plus one.
     int Mesh::get_max_element_id() const
     {
-      if(this == NULL) 
-        throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_max_element_id().");
+      if(this == nullptr) 
+        throw Hermes::Exceptions::Exception("this == nullptr in Mesh::get_max_element_id().");
       if(this->seq < 0)
         return -1;
       else
@@ -374,8 +374,8 @@ namespace Hermes
 
     int Mesh::get_num_vertex_nodes() const
     {
-      if(this == NULL) 
-        throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_vertex_nodes().");
+      if(this == nullptr) 
+        throw Hermes::Exceptions::Exception("this == nullptr in Mesh::get_num_vertex_nodes().");
       if(this->seq < 0)
         return -1;
       else
@@ -392,8 +392,8 @@ namespace Hermes
 
     int Mesh::get_num_edge_nodes() const
     {
-      if(this == NULL) 
-        throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_vertex_nodes().");
+      if(this == nullptr) 
+        throw Hermes::Exceptions::Exception("this == nullptr in Mesh::get_num_vertex_nodes().");
       if(this->seq < 0)
         return -1;
       else
@@ -476,13 +476,13 @@ namespace Hermes
 
       if(!e->is_triangle())
       {
-        if(e->sons[2] == NULL) // horz quad
+        if(e->sons[2] == nullptr) // horz quad
         {
           if(edge == 0 || edge == 2) { son1 = edge >> 1;   return 1; }
           else if(edge == 1) { son1 = 0; son2 = 1; return 2; }
           else { son1 = 1; son2 = 0; return 2; }
         }
-        else if(e->sons[0] == NULL) // vert quad
+        else if(e->sons[0] == nullptr) // vert quad
         {
           if(edge == 1 || edge == 3) { son1 = (edge == 1) ? 3 : 2; return 1; }
           else if(edge == 0) { son1 = 2; son2 = 3; return 2; }
@@ -510,7 +510,7 @@ namespace Hermes
       e->nvert = 3;
       e->iro_cache = -1;
       e->cm = cm;
-      e->parent = NULL;
+      e->parent = nullptr;
       e->visited = false;
 
       // set vertex and edge node pointers
@@ -545,7 +545,7 @@ namespace Hermes
       e->nvert = 4;
       e->iro_cache = -1;
       e->cm = cm;
-      e->parent = NULL;
+      e->parent = nullptr;
       e->visited = false;
 
       // set vertex and edge node pointers
@@ -572,12 +572,12 @@ namespace Hermes
       // if the top three bits of part are nonzero, we would overflow
       // -- make the element non-curvilinear
       if(e->cm->part & 0xe000000000000000ULL)
-        return NULL;
+        return nullptr;
 
       // if the parent element is already almost straight-edged,
       // the son will be even more straight-edged
       if(e->iro_cache == 0)
-        return NULL;
+        return nullptr;
 
       CurvMap* cm = new CurvMap;
       if(e->cm->toplevel == false)
@@ -657,14 +657,14 @@ namespace Hermes
       //set pointers to parent element for sons
       for(int i = 0; i < 4; i++)
       {
-        if(sons[i] != NULL) sons[i]->parent = e;
+        if(sons[i] != nullptr) sons[i]->parent = e;
       }
 
       // copy son pointers (could not have been done earlier because of the union)
       memcpy(e->sons, sons, 4 * sizeof(Element*));
 
-      // If sons_out != NULL, copy son pointers there.
-      if(sons_out != NULL)
+      // If sons_out != nullptr, copy son pointers there.
+      if(sons_out != nullptr)
       {
         for(int i = 0; i < 3; i++) sons_out[i] = sons[i];
       }
@@ -695,7 +695,7 @@ namespace Hermes
       newnode->p1 = -9999;
       newnode->p2 = -9999;
       newnode->marker = 0;
-      newnode->elem[0] = newnode->elem[1] = NULL;
+      newnode->elem[0] = newnode->elem[1] = nullptr;
 
       return newnode;
     }
@@ -703,7 +703,7 @@ namespace Hermes
     void Mesh::refine_quad(Element* e, int refinement, Element** sons_out)
     {
       int i, j;
-      Element* sons[H2D_MAX_ELEMENT_SONS] = {NULL, NULL, NULL, NULL};
+      Element* sons[H2D_MAX_ELEMENT_SONS] = {nullptr, nullptr, nullptr, nullptr};
 
       // remember the markers of the edge nodes
       int bnd[H2D_MAX_NUMBER_EDGES] = { e->en[0]->bnd, e->en[1]->bnd, e->en[2]->bnd, e->en[3]->bnd };
@@ -786,7 +786,7 @@ namespace Hermes
 
         sons[0] = create_quad(e->marker, e->vn[0], e->vn[1], x1, x3, cm[0]);
         sons[1] = create_quad(e->marker, x3, x1, e->vn[2], e->vn[3], cm[1]);
-        sons[2] = sons[3] = NULL;
+        sons[2] = sons[3] = nullptr;
 
         this->nactive += 2;
 
@@ -820,7 +820,7 @@ namespace Hermes
             cm[i] = create_son_curv_map(e, i + 6);
         }
 
-        sons[0] = sons[1] = NULL;
+        sons[0] = sons[1] = nullptr;
         sons[2] = create_quad(e->marker, e->vn[0], x0, x2, e->vn[3], cm[0]);
         sons[3] = create_quad(e->marker, x0, e->vn[1], e->vn[2], x2, cm[1]);
 
@@ -839,24 +839,24 @@ namespace Hermes
 
       // update coefficients of curved reference mapping
       for (i = 0; i < 4; i++)
-        if(sons[i] != NULL && sons[i]->cm != NULL)
+        if(sons[i] != nullptr && sons[i]->cm != nullptr)
           sons[i]->cm->update_refmap_coeffs(sons[i]);
 
       // optimization: iro never gets worse
       if(e->iro_cache == 0)
         for (i = 0; i < 4; i++)
-          if(sons[i] != NULL)
+          if(sons[i] != nullptr)
             sons[i]->iro_cache = 0;
 
       // set pointers to parent element for sons
       for(int i = 0; i < 4; i++)
-        if(sons[i] != NULL) sons[i]->parent = e;
+        if(sons[i] != nullptr) sons[i]->parent = e;
 
       // copy son pointers (could not have been done earlier because of the union)
       memcpy(e->sons, sons, sizeof(sons));
 
-      // If sons_out != NULL, copy son pointers there.
-      if(sons_out != NULL)
+      // If sons_out != nullptr, copy son pointers there.
+      if(sons_out != nullptr)
       {
         for(int i = 0; i < 4; i++) sons_out[i] = sons[i];
       }
@@ -883,10 +883,10 @@ namespace Hermes
       for (i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
       {
         Element* son = e->sons[i];
-        if(son != NULL)
+        if(son != nullptr)
         {
           son->unref_all_nodes(this);
-          if(son->cm != NULL) delete son->cm;
+          if(son->cm != nullptr) delete son->cm;
           elements.remove(son->id);
           this->nactive--;
         }
@@ -1174,7 +1174,7 @@ namespace Hermes
       if(e->active) return;
 
       for (int i = 0; i < 4; i++)
-        if(e->sons[i] != NULL)
+        if(e->sons[i] != nullptr)
           unrefine_element_id(e->sons[i]->id);
 
       unrefine_element_internal(e);
@@ -1190,7 +1190,7 @@ namespace Hermes
       {
         bool found = true;
         for (unsigned int i = 0; i < 4; i++)
-          if(e->sons[i] != NULL &&
+          if(e->sons[i] != nullptr &&
             (!e->sons[i]->active || (keep_initial_refinements && e->sons[i]->id < ninitial))
             )
           { found = false; break; }
@@ -1327,7 +1327,7 @@ namespace Hermes
       // If curvilinear, throw an exception.
       Element* e;
       for_all_used_elements(e, this)
-        if(e->cm != NULL)
+        if(e->cm != nullptr)
         {
           throw CurvedException(e->id);
           return false;
@@ -1364,12 +1364,12 @@ namespace Hermes
         {
           // update son pointers
           for (i = 0; i < 4; i++)
-            if(e->sons[i] != NULL)
+            if(e->sons[i] != nullptr)
               e->sons[i] = &elements[e->sons[i]->id];
         }
 
         // copy CurvMap, update its parent
-        if(e->cm != NULL)
+        if(e->cm != nullptr)
         {
           e->cm = new CurvMap(e->cm);
           if(!e->cm->toplevel)
@@ -1377,7 +1377,7 @@ namespace Hermes
         }
 
         //update parent pointer
-        if(e->parent != NULL)
+        if(e->parent != nullptr)
           e->parent = &elements[e->parent->id];
       }
 
@@ -1385,7 +1385,7 @@ namespace Hermes
       Node* node;
       for_all_edge_nodes(node, this)
         for (i = 0; i < 2; i++)
-          if(node->elem[i] != NULL)
+          if(node->elem[i] != nullptr)
             node->elem[i] = &elements[node->elem[i]->id];
 
       nbase = mesh->nbase;
@@ -1444,9 +1444,9 @@ namespace Hermes
         Element* enew;
         Node *v0 = &nodes[e->vn[0]->id], *v1 = &nodes[e->vn[1]->id], *v2 = &nodes[e->vn[2]->id];
         if(e->is_triangle())
-          enew = this->create_triangle(e->marker, v0, v1, v2, NULL);
+          enew = this->create_triangle(e->marker, v0, v1, v2, nullptr);
         else
-          enew = this->create_quad(e->marker, v0, v1, v2, &nodes[e->vn[3]->id], NULL);
+          enew = this->create_quad(e->marker, v0, v1, v2, &nodes[e->vn[3]->id], nullptr);
 
         // copy edge markers
         for (unsigned int j = 0; j < e->get_nvert(); j++)
@@ -1473,10 +1473,10 @@ namespace Hermes
       Element* e;
       for_all_used_elements(e, this)
       {
-        if(e->cm != NULL)
+        if(e->cm != nullptr)
         {
           delete e->cm;
-          e->cm = NULL; // fixme!!!
+          e->cm = nullptr; // fixme!!!
         }
       }
       elements.free();
@@ -1548,7 +1548,7 @@ namespace Hermes
         Node& node = nodes[i];
         if(node.type == HERMES_TYPE_EDGE) { //process only edge nodes
           for(int k = 0; k < 2; k++)
-            node.elem[k] = NULL;
+            node.elem[k] = nullptr;
         }
       }
 
@@ -1589,7 +1589,7 @@ namespace Hermes
           enew->nvert = 4;
           enew->iro_cache = -1;
           enew->cm = e->cm;
-          enew->parent = NULL;
+          enew->parent = nullptr;
           enew->visited = false;
 
           // set vertex and edge node pointers
@@ -1640,8 +1640,8 @@ namespace Hermes
         }
       }
       MeshReaderH2D loader_mesh_tmp_for_convert;
-      char* mesh_file_tmp = NULL;
-      mesh_file_tmp = tmpnam(NULL);
+      char* mesh_file_tmp = nullptr;
+      mesh_file_tmp = tmpnam(nullptr);
       loader_mesh_tmp_for_convert.save(mesh_file_tmp, mesh_tmp_for_convert);
       loader_mesh_tmp_for_convert.load(mesh_file_tmp, mesh_tmp_for_convert);
       remove(mesh_file_tmp);
@@ -1667,8 +1667,8 @@ namespace Hermes
         }
       }
       MeshReaderH2D loader_mesh_tmp_for_convert;
-      char* mesh_file_tmp = NULL;
-      mesh_file_tmp = tmpnam(NULL);
+      char* mesh_file_tmp = nullptr;
+      mesh_file_tmp = tmpnam(nullptr);
       loader_mesh_tmp_for_convert.save(mesh_file_tmp, mesh_tmp_for_convert);
       loader_mesh_tmp_for_convert.load(mesh_file_tmp, mesh_tmp_for_convert);
       remove(mesh_file_tmp);
@@ -1724,7 +1724,7 @@ namespace Hermes
         {
           for (unsigned int n = 0; n < e->get_nvert(); n++)
           {
-            if(e->cm->nurbs[n] != NULL)
+            if(e->cm->nurbs[n] != nullptr)
             {
               //this->info("angle = %f", e->cm->nurbs[n]->angle);
               refinement_angle[n] = e->cm->nurbs[n]->angle;
@@ -1737,7 +1737,7 @@ namespace Hermes
           {
             for (unsigned int n = 0; n < e->get_nvert(); n++)
             {
-              if(e->parent->cm->nurbs[n] != NULL)
+              if(e->parent->cm->nurbs[n] != nullptr)
               {
                 //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
                 refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
@@ -1750,7 +1750,7 @@ namespace Hermes
             {
               for (unsigned int n = 0; n < e->get_nvert(); n++)
               {
-                if(e->parent->parent->cm->nurbs[n] != NULL)
+                if(e->parent->parent->cm->nurbs[n] != nullptr)
                 {
                   //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
                   refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
@@ -1763,7 +1763,7 @@ namespace Hermes
               {
                 for (unsigned int n = 0; n < e->get_nvert(); n++)
                 {
-                  if(e->parent->parent->parent->cm->nurbs[n] != NULL)
+                  if(e->parent->parent->parent->cm->nurbs[n] != nullptr)
                   {
                     //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
                     refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
@@ -1776,7 +1776,7 @@ namespace Hermes
                 {
                   for (unsigned int n = 0; n < e->get_nvert(); n++)
                   {
-                    if(e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
+                    if(e->parent->parent->parent->parent->cm->nurbs[n] != nullptr)
                     {
                       //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
                       refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
@@ -1792,7 +1792,7 @@ namespace Hermes
       {
         for (idx = 0; idx < 2; idx++)
         {
-          if(e->cm->nurbs[idx] != NULL)
+          if(e->cm->nurbs[idx] != nullptr)
           {
             cm[idx] = new CurvMap;
             memset(cm[idx], 0, sizeof(CurvMap));
@@ -1802,7 +1802,7 @@ namespace Hermes
         }
 
         idx = 0;
-        if(e->cm->nurbs[idx] != NULL)
+        if(e->cm->nurbs[idx] != nullptr)
         {
           angle2 = refinement_angle[0] / 2;
           Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx + 1)%3]->id);
@@ -1880,7 +1880,7 @@ namespace Hermes
         }
 
         idx = 1;
-        if(e->cm->nurbs[idx] != NULL)
+        if(e->cm->nurbs[idx] != nullptr)
         {
           angle2 = refinement_angle[1] / 2;
           Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx + 1)%3]->id);
@@ -1967,7 +1967,7 @@ namespace Hermes
 
       // deactivate this element and unregister from its nodes
       e->active = 0;
-      if(this != NULL)
+      if(this != nullptr)
       {
         this->nactive += 2;
         e->unref_all_nodes(this);
@@ -1985,14 +1985,14 @@ namespace Hermes
       //set pointers to parent element for sons
       for(int i = 0; i < 3; i++)
       {
-        if(sons[i] != NULL) sons[i]->parent = e;
+        if(sons[i] != nullptr) sons[i]->parent = e;
       }
 
       // copy son pointers (could not have been done earlier because of the union)
       memcpy(e->sons, sons, 3 * sizeof(Element*));
 
-      // If sons_out != NULL, copy son pointers there.
-      if(sons_out != NULL)
+      // If sons_out != nullptr, copy son pointers there.
+      if(sons_out != nullptr)
       {
         for(int i = 0; i < 3; i++) sons_out[i] = sons[i];
       }
@@ -2047,12 +2047,12 @@ namespace Hermes
         int i_case2 = 0;
         if(bcheck == true)
         {
-          if((e->cm->nurbs[0] != NULL) || (e->cm->nurbs[1] != NULL))
+          if((e->cm->nurbs[0] != nullptr) || (e->cm->nurbs[1] != nullptr))
           {
             cm[0] = new CurvMap;
             memset(cm[0], 0, sizeof(CurvMap));
           }
-          if((e->cm->nurbs[2] != NULL) || (e->cm->nurbs[3] != NULL))
+          if((e->cm->nurbs[2] != nullptr) || (e->cm->nurbs[3] != nullptr))
           {
             cm[1] = new CurvMap;
             memset(cm[1], 0, sizeof(CurvMap));
@@ -2060,12 +2060,12 @@ namespace Hermes
         }
         else if(bcheck == false)
         {
-          if((e->cm->nurbs[1] != NULL) || (e->cm->nurbs[2] != NULL))
+          if((e->cm->nurbs[1] != nullptr) || (e->cm->nurbs[2] != nullptr))
           {
             cm[0] = new CurvMap;
             memset(cm[0], 0, sizeof(CurvMap));
           }
-          if((e->cm->nurbs[3] != NULL) || (e->cm->nurbs[0] != NULL))
+          if((e->cm->nurbs[3] != nullptr) || (e->cm->nurbs[0] != nullptr))
           {
             cm[1] = new CurvMap;
             memset(cm[1], 0, sizeof(CurvMap));
@@ -2077,7 +2077,7 @@ namespace Hermes
         {
           for (idx = 0 + 2*k; idx < 2 + 2*k; idx++)
           {
-            if(e->cm->nurbs[(idx + i_case2)%4] != NULL)
+            if(e->cm->nurbs[(idx + i_case2)%4] != nullptr)
             {
               angle2 = e->cm->nurbs[(idx + i_case2)%4]->angle;
 
@@ -2144,15 +2144,15 @@ namespace Hermes
       {
         sons[0] = this->create_triangle(e->marker, e->vn[0], e->vn[1], e->vn[2], cm[0]);
         sons[1] = this->create_triangle(e->marker, e->vn[2], e->vn[3], e->vn[0], cm[1]);
-        sons[2] = NULL;
-        sons[3] = NULL;
+        sons[2] = nullptr;
+        sons[3] = nullptr;
       }
       else
       {
         sons[0] = this->create_triangle(e->marker, e->vn[1], e->vn[2], e->vn[3], cm[0]);
         sons[1] = this->create_triangle(e->marker, e->vn[3], e->vn[0], e->vn[1], cm[1]);
-        sons[2] = NULL;
-        sons[3] = NULL;
+        sons[2] = nullptr;
+        sons[3] = nullptr;
       }
 
       // update coefficients of curved reference mapping
@@ -2189,7 +2189,7 @@ namespace Hermes
 
       //set pointers to parent element for sons
       for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
-        if(sons[i] != NULL)
+        if(sons[i] != nullptr)
           sons[i]->parent = e;
 
       // copy son pointers (could not have been done earlier because of the union)
@@ -2365,7 +2365,7 @@ namespace Hermes
         {
           for (unsigned int n = 0; n < e->get_nvert(); n++)
           {
-            if(e->cm->nurbs[n] != NULL)
+            if(e->cm->nurbs[n] != nullptr)
             {
               //this->info("angle = %f", e->cm->nurbs[n]->angle);
               refinement_angle[n] = e->cm->nurbs[n]->angle;
@@ -2378,7 +2378,7 @@ namespace Hermes
           {
             for (unsigned int n = 0; n < e->get_nvert(); n++)
             {
-              if(e->parent->cm->nurbs[n] != NULL)
+              if(e->parent->cm->nurbs[n] != nullptr)
               {
                 //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
                 refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
@@ -2391,7 +2391,7 @@ namespace Hermes
             {
               for (unsigned int n = 0; n < e->get_nvert(); n++)
               {
-                if(e->parent->parent->cm->nurbs[n] != NULL)
+                if(e->parent->parent->cm->nurbs[n] != nullptr)
                 {
                   //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
                   refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
@@ -2404,7 +2404,7 @@ namespace Hermes
               {
                 for (unsigned int n = 0; n < e->get_nvert(); n++)
                 {
-                  if(e->parent->parent->parent->cm->nurbs[n] != NULL)
+                  if(e->parent->parent->parent->cm->nurbs[n] != nullptr)
                   {
                     //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
                     refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
@@ -2417,7 +2417,7 @@ namespace Hermes
                 {
                   for (unsigned int n = 0; n < e->get_nvert(); n++)
                   {
-                    if(e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
+                    if(e->parent->parent->parent->parent->cm->nurbs[n] != nullptr)
                     {
                       //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
                       refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
@@ -2442,7 +2442,7 @@ namespace Hermes
         memset(cm, 0, sizeof(CurvMap));
 
         for (idx = 0; idx < 3; idx++)
-          if((e->cm->nurbs[idx] != NULL) && (bnd[idx] == 1))
+          if((e->cm->nurbs[idx] != nullptr) && (bnd[idx] == 1))
           {
             angle2 = refinement_angle[idx];
             int p1, p2;
@@ -2543,7 +2543,7 @@ namespace Hermes
         {
           for (unsigned int n = 0; n < e->get_nvert(); n++)
           {
-            if((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+            if((e->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
             {
               //this->info("angle = %f", e->cm->nurbs[n]->angle);
               refinement_angle[n] = e->cm->nurbs[n]->angle;
@@ -2556,7 +2556,7 @@ namespace Hermes
           {
             for (unsigned int n = 0; n < e->get_nvert(); n++)
             {
-              if((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+              if((e->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
               {
                 //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
                 refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
@@ -2569,7 +2569,7 @@ namespace Hermes
             {
               for (unsigned int n = 0; n < e->get_nvert(); n++)
               {
-                if((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+                if((e->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
                 {
                   //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
                   refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
@@ -2582,7 +2582,7 @@ namespace Hermes
               {
                 for (unsigned int n = 0; n < e->get_nvert(); n++)
                 {
-                  if((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+                  if((e->parent->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
                   {
                     //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
                     refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
@@ -2595,7 +2595,7 @@ namespace Hermes
                 {
                   for (unsigned int n = 0; n < e->get_nvert(); n++)
                   {
-                    if((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+                    if((e->parent->parent->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
                     {
                       //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
                       refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
@@ -2741,7 +2741,7 @@ namespace Hermes
         {
           for (unsigned int n = 0; n < e->get_nvert(); n++)
           {
-            if((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+            if((e->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
             {
               //this->info("angle = %f", e->cm->nurbs[n]->angle);
               refinement_angle[n] = e->cm->nurbs[n]->angle;
@@ -2754,7 +2754,7 @@ namespace Hermes
           {
             for (unsigned int n = 0; n < e->get_nvert(); n++)
             {
-              if((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+              if((e->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
               {
                 //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
                 refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
@@ -2767,7 +2767,7 @@ namespace Hermes
             {
               for (unsigned int n = 0; n < e->get_nvert(); n++)
               {
-                if((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+                if((e->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
                 {
                   //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
                   refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
@@ -2780,7 +2780,7 @@ namespace Hermes
               {
                 for (unsigned int n = 0; n < e->get_nvert(); n++)
                 {
-                  if((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+                  if((e->parent->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
                   {
                     //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
                     refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
@@ -2793,7 +2793,7 @@ namespace Hermes
                 {
                   for (unsigned int n = 0; n < e->get_nvert(); n++)
                   {
-                    if((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
+                    if((e->parent->parent->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
                     {
                       //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
                       refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
@@ -2810,7 +2810,7 @@ namespace Hermes
       double angle2 = 0.0;
       int i, j;
       int idx = 0;
-      Element* sons[H2D_MAX_ELEMENT_SONS] = {NULL, NULL, NULL, NULL};
+      Element* sons[H2D_MAX_ELEMENT_SONS] = {nullptr, nullptr, nullptr, nullptr};
       CurvMap* cm[H2D_MAX_ELEMENT_SONS];
       memset(cm, 0, sizeof(cm));
 
@@ -2852,7 +2852,7 @@ namespace Hermes
           }
 
           for (idx = 0; idx < 4; idx++)
-            if(cm[idx] != NULL)
+            if(cm[idx] != nullptr)
             {
               if((fabs(refinement_angle[idx%4] - 0.0) > 1e-4))
               {
@@ -2992,12 +2992,12 @@ namespace Hermes
 
       // update coefficients of curved reference mapping
       for (i = 0; i < 4; i++)
-        if(sons[i] != NULL && sons[i]->cm != NULL)
+        if(sons[i] != nullptr && sons[i]->cm != nullptr)
           sons[i]->cm->update_refmap_coeffs(sons[i]);
 
       //set pointers to parent element for sons
       for(int i = 0; i < 4; i++)
-        if(sons[i] != NULL)
+        if(sons[i] != nullptr)
           sons[i]->parent = e;
 
       // copy son pointers (could not have been done earlier because of the union)
@@ -3008,7 +3008,7 @@ namespace Hermes
     {
       int degree = 0;
       Node* v3 = peek_vertex_node(v1->id, v2->id);
-      if(v3 != NULL)
+      if(v3 != nullptr)
       {
         degree = 1 + std::max(get_edge_degree(v1, v3), get_edge_degree(v3, v2));
       }
@@ -3049,8 +3049,8 @@ namespace Hermes
           nactive += 1;
           e->unref_all_nodes(this);
 
-          t[0] = this->create_triangle(e->marker, e->vn[k], v4, e->vn[k2], NULL);
-          t[1] = this->create_triangle(e->marker, v4, e->vn[k1], e->vn[k2], NULL);
+          t[0] = this->create_triangle(e->marker, e->vn[k], v4, e->vn[k2], nullptr);
+          t[1] = this->create_triangle(e->marker, v4, e->vn[k1], e->vn[k2], nullptr);
 
           // set correct boundary status and markers for the new nodes
           t[0]->en[2]->bnd = bnd[k2];
@@ -3060,8 +3060,8 @@ namespace Hermes
 
           e->sons[0] = t[0];
           e->sons[1] = t[1];
-          e->sons[2] = NULL;
-          e->sons[3] = NULL;
+          e->sons[2] = nullptr;
+          e->sons[3] = nullptr;
         }
         else if(sum == 2)
         {
@@ -3077,9 +3077,9 @@ namespace Hermes
           nactive += 2;
           e->unref_all_nodes(this);
 
-          t[0] = this->create_triangle(e->marker, e->vn[k], e->vn[k1], v4,  NULL);
-          t[1] = this->create_triangle(e->marker, v4, v5, e->vn[k], NULL);
-          t[2] = this->create_triangle(e->marker, v4, e->vn[k2], v5, NULL);
+          t[0] = this->create_triangle(e->marker, e->vn[k], e->vn[k1], v4,  nullptr);
+          t[1] = this->create_triangle(e->marker, v4, v5, e->vn[k], nullptr);
+          t[2] = this->create_triangle(e->marker, v4, e->vn[k2], v5, nullptr);
 
           // set correct boundary status and markers for the new nodes
           t[0]->en[0]->bnd = bnd[k];
@@ -3088,7 +3088,7 @@ namespace Hermes
           e->sons[0] = t[0];
           e->sons[1] = t[1];
           e->sons[2] = t[2];
-          e->sons[3] = NULL;
+          e->sons[3] = nullptr;
         }
       }
 
@@ -3135,9 +3135,9 @@ namespace Hermes
           nactive += 2;
           e->unref_all_nodes(this);
 
-          t[0] = this->create_triangle(e->marker, e->vn[k], v4, e->vn[k3], NULL);
-          t[1] = this->create_triangle(e->marker, v4, e->vn[k1], e->vn[k2], NULL);
-          t[2] = this->create_triangle(e->marker, v4, e->vn[k2], e->vn[k3], NULL);
+          t[0] = this->create_triangle(e->marker, e->vn[k], v4, e->vn[k3], nullptr);
+          t[1] = this->create_triangle(e->marker, v4, e->vn[k1], e->vn[k2], nullptr);
+          t[2] = this->create_triangle(e->marker, v4, e->vn[k2], e->vn[k3], nullptr);
 
           // set correct boundary status and markers for the new nodes
           t[0]->en[2]->bnd = bnd[k3];
@@ -3150,7 +3150,7 @@ namespace Hermes
           e->sons[0] = t[0];
           e->sons[1] = t[1];
           e->sons[2] = t[2];
-          e->sons[3] = NULL;
+          e->sons[3] = nullptr;
         }
         else if(sum == 2)
         {
@@ -3171,10 +3171,10 @@ namespace Hermes
             nactive += 3;
             e->unref_all_nodes(this);
 
-            t[0] = this->create_triangle(e->marker, e->vn[k1], v5, v4, NULL);
-            t[1] = this->create_triangle(e->marker, v5, e->vn[k2], e->vn[k3], NULL);
-            t[2] = this->create_triangle(e->marker, v4, v5, e->vn[k3], NULL);
-            t[3] = this->create_triangle(e->marker, v4, e->vn[k3], e->vn[k], NULL);
+            t[0] = this->create_triangle(e->marker, e->vn[k1], v5, v4, nullptr);
+            t[1] = this->create_triangle(e->marker, v5, e->vn[k2], e->vn[k3], nullptr);
+            t[2] = this->create_triangle(e->marker, v4, v5, e->vn[k3], nullptr);
+            t[3] = this->create_triangle(e->marker, v4, e->vn[k3], e->vn[k], nullptr);
 
             t[1]->en[1]->bnd = bnd[k2];
             t[3]->en[1]->bnd = bnd[k3];
@@ -3222,8 +3222,8 @@ namespace Hermes
       Node* node;
       for_all_edge_nodes(node, this)
       {
-        if(node->elem[0] != NULL) node->elem[0] = (Element*) (node->elem[0]->id + 1);
-        if(node->elem[1] != NULL) node->elem[1] = (Element*) (node->elem[1]->id + 1);
+        if(node->elem[0] != nullptr) node->elem[0] = (Element*) (node->elem[0]->id + 1);
+        if(node->elem[1] != nullptr) node->elem[1] = (Element*) (node->elem[1]->id + 1);
       }
 
       int* idx = new int[elements.get_size() + 1];
@@ -3244,8 +3244,8 @@ namespace Hermes
 
       for_all_edge_nodes(node, this)
       {
-        if(node->elem[0] != NULL) node->elem[0] = &(elements[idx[((int) (long) node->elem[0]) - 1]]);
-        if(node->elem[1] != NULL) node->elem[1] = &(elements[idx[((int) (long) node->elem[1]) - 1]]);
+        if(node->elem[0] != nullptr) node->elem[0] = &(elements[idx[((int) (long) node->elem[0]) - 1]]);
+        if(node->elem[1] != nullptr) node->elem[1] = &(elements[idx[((int) (long) node->elem[1]) - 1]]);
       }
 
       delete [] idx;
@@ -3253,7 +3253,7 @@ namespace Hermes
 
     void Mesh::assign_parent(Element* e, int i)
     {
-      if(e->sons[i] != NULL)
+      if(e->sons[i] != nullptr)
       {
         if(e->sons[i]->id >= parents_size)
         {

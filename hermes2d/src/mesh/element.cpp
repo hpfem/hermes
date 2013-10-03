@@ -33,11 +33,11 @@ namespace Hermes
       if(type == HERMES_TYPE_EDGE)
       {
         // store the element pointer in a free slot of 'elem'
-        if(elem[0] == NULL)
+        if(elem[0] == nullptr)
           elem[0] = e;
         else
         {
-          if(elem[1] == NULL)
+          if(elem[1] == nullptr)
             elem[1] = e;
           else
             throw Hermes::Exceptions::Exception(false, "No free slot 'elem'");
@@ -55,8 +55,8 @@ namespace Hermes
       else
       {
         // remove the element from the array 'elem'
-        if(elem[0] == e) elem[0] = NULL;
-        else if(elem[1] == e) elem[1] = NULL;
+        if(elem[0] == e) elem[0] = nullptr;
+        else if(elem[1] == e) elem[1] = nullptr;
 
         if(!--ref) ht->remove_edge_node(id);
       }
@@ -105,7 +105,7 @@ namespace Hermes
 
     bool Element::is_curved() const
     {
-      return cm != NULL;
+      return cm != nullptr;
     }
 
     int Element::get_nvert() const
@@ -132,21 +132,21 @@ namespace Hermes
     {
       if(active)
         return false;
-      return sons[0] != NULL;
+      return sons[0] != nullptr;
     }
 
     bool Element::vsplit() const
     {
       if(active)
         return false;
-      return sons[2] != NULL;
+      return sons[2] != nullptr;
     }
 
     bool Element::bsplit() const
     {
       if(active)
         return false;
-      return sons[0] != NULL && sons[2] != NULL;
+      return sons[0] != nullptr && sons[2] != nullptr;
     }
 
     Element* Element::get_neighbor(int ie) const
@@ -157,7 +157,7 @@ namespace Hermes
       if(elem[1] == this)
         return elem[0];
       assert(0);
-      return NULL;
+      return nullptr;
     }
 
     double Element::get_area(bool precise_for_curvature)
@@ -214,7 +214,7 @@ namespace Hermes
 
             // 2. - act if there was no curvature
             CurvMap* cm_temp = this->cm;
-            this->cm = NULL;
+            this->cm = nullptr;
             refmap_straight.set_active_element(this);
             geometry = init_geom_surf(&refmap_straight, isurf, this->en[isurf]->marker, eo, tan);
             memcpy(x_straight, geometry->x, np*sizeof(double));
@@ -351,7 +351,7 @@ namespace Hermes
       newnode->p1 = -9999;
       newnode->p2 = -9999;
       newnode->marker = 0;
-      newnode->elem[0] = newnode->elem[1] = NULL;
+      newnode->elem[0] = newnode->elem[1] = nullptr;
 
       return newnode;
     }

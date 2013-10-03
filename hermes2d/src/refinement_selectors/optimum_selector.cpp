@@ -16,7 +16,7 @@ namespace Hermes
         max_order, Shapeset* shapeset, const Range& vertex_order, const
         Range& edge_bubble_order) : Selector<Scalar>(shapeset->get_min_order(), max_order), cand_list(cand_list), shapeset(shapeset), dof_score_exponent(1.0)
       {
-        if(shapeset == NULL)
+        if(shapeset == nullptr)
           throw Exceptions::NullException(3);
 
         num_shapes = new int***[2];
@@ -437,7 +437,7 @@ namespace Hermes
         typename Hermes::vector<Cand>::const_iterator cand = candidates.begin();
         while (cand != candidates.end())
         {
-          CandsInfo* info = NULL;
+          CandsInfo* info = nullptr;
           if(cand->split == H2D_REFINEMENT_H) info = &info_h;
           else if(cand->split == H2D_REFINEMENT_P) info = &info_p;
           else if(cand->split == H2D_REFINEMENT_ANISO_H || cand->split == H2D_REFINEMENT_ANISO_V) info = &info_aniso;
@@ -678,7 +678,7 @@ namespace Hermes
         refinement.split = best_candidate->split;
         ElementToRefine::copy_orders(refinement.refinement_polynomial_order, best_candidate->p);
         for(int i = 1; i < 4; i++)
-          if(best_candidates_specific_type[i] != NULL)
+          if(best_candidates_specific_type[i] != nullptr)
             ElementToRefine::copy_orders(refinement.best_refinement_polynomial_order_type[i], best_candidates_specific_type[i]->p);
 
         ElementToRefine::copy_errors(refinement.errors, best_candidate->errors);

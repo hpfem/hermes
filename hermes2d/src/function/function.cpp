@@ -24,7 +24,7 @@ namespace Hermes
     {
       if(component < 0 || component > num_components)
         throw Hermes::Exceptions::Exception("Invalid component. You are probably using Scalar-valued shapeset for an Hcurl / Hdiv problem.");
-      if(cur_node == NULL)
+      if(cur_node == nullptr)
         throw Hermes::Exceptions::Exception("Invalid node. Did you call set_quad_order()?");
     }
 
@@ -32,7 +32,7 @@ namespace Hermes
     template<typename Scalar>
     void Function<Scalar>::check_table(int component, typename Function<Scalar>::Node* cur_node, int n, const char* msg)
     {
-      if(cur_node->values[component][n] == NULL)
+      if(cur_node->values[component][n] == nullptr)
         throw Hermes::Exceptions::Exception("%s not precalculated for component %d. Did you call set_quad_order() with correct mask?", msg, component);
     }
 
@@ -41,9 +41,9 @@ namespace Hermes
       : Transformable()
     {
       order = 0;
-      cur_node = NULL;
-      sub_tables = NULL;
-      nodes = NULL;
+      cur_node = nullptr;
+      sub_tables = nullptr;
+      nodes = nullptr;
       memset(quads, 0, sizeof(quads));
     }
 
@@ -83,7 +83,7 @@ namespace Hermes
       }
       else {
         // The value had not existed.
-        cur_node = NULL;
+        cur_node = nullptr;
         precalculate(order, mask);
         nodes->add(cur_node, order);
       }
@@ -160,7 +160,7 @@ namespace Hermes
 
         // if not, add the quadrature to a free slot
         for (i = 0; i < 4; i++)
-          if(quads[i] == NULL)
+          if(quads[i] == nullptr)
           {
             quads[i] = quad_2d;
             cur_quad = i;

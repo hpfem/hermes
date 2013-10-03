@@ -83,7 +83,7 @@ namespace Hermes
       virtual int Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const { return 0; }
       virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const { return 0; }
       virtual double NormInf() const { return 0.0; }
-      virtual const char *Label() const { return NULL; }
+      virtual const char *Label() const { return nullptr; }
       virtual bool UseTranspose() const { return false; }
       virtual bool HasNormInf() const { return false; }
       virtual const Epetra_Comm &Comm() const = 0;

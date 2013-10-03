@@ -37,8 +37,8 @@ namespace Hermes
       {
       public:
 
-        MeshView(const char* title = "MeshView", WinGeom* wg = NULL);
-        MeshView(char* title, WinGeom* wg = NULL);
+        MeshView(const char* title = "MeshView", WinGeom* wg = nullptr);
+        MeshView(char* title, WinGeom* wg = nullptr);
         ~MeshView();
 
         void show (MeshSharedPtr mesh);
@@ -74,8 +74,8 @@ namespace Hermes
       class HERMES_API MeshView : public View
       {
       public:
-        MeshView(const char* title = "MeshView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        MeshView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        MeshView(const char* title = "MeshView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        MeshView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void show(MeshSharedPtr mesh) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_b_elem_mrk(bool set) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };

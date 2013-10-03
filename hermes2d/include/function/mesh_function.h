@@ -37,7 +37,7 @@ class HERMES_API MeshFunctionSharedPtr : public std::tr1::shared_ptr<Hermes::Her
 #endif
 {
 public:
-  MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = NULL);
+  MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = nullptr);
 
   MeshFunctionSharedPtr(const MeshFunctionSharedPtr<Scalar>& other);
 
@@ -92,14 +92,14 @@ namespace Hermes
       RefMap* get_refmap(bool update = true);
 
       /// Return the value at the coordinates x,y.
-      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = NULL) = 0;
+      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr) = 0;
 
       /// Cloning function - for parallel OpenMP blocks.
       /// Designed to return an identical clone of this instance.
       virtual MeshFunction<Scalar>* clone() const
       {
         throw Hermes::Exceptions::Exception("You need to implement MeshFunctionSharedPtr::clone() to be able to use paralellization");
-        return NULL;
+        return nullptr;
       }
       
       /// Multiplies the function represented by this class by the given coefficient.

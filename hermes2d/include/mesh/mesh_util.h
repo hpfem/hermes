@@ -189,7 +189,7 @@ namespace Hermes
     /// Helper macros for easy iteration through all elements, nodes etc. in a Mesh.
 #define for_all_elements(e, mesh) \
   for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-    if(((e) = (mesh)->get_element_fast(_id)) != NULL)
+    if(((e) = (mesh)->get_element_fast(_id)) != nullptr)
 
 #define for_all_used_elements(e, mesh) \
   for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \

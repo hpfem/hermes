@@ -56,7 +56,7 @@ namespace Hermes
     int Graph::add_row(const char* name, const char* color, const char* line, const char* marker)
     {
       Row row;
-      if(name == NULL) name = "";
+      if(name == nullptr) name = "";
       row.name = name;
       row.color = "k";
       row.line = "-";
@@ -69,7 +69,7 @@ namespace Hermes
 
     void Graph::set_row_style(int row, const char* color, const char* line, const char* marker)
     {
-      if(!rows.size()) add_row(NULL);
+      if(!rows.size()) add_row(nullptr);
       rows[row].color  = color;
       rows[row].line   = line;
       rows[row].marker = marker;
@@ -77,7 +77,7 @@ namespace Hermes
 
     void Graph::add_values(int row, double x, double y)
     {
-      if(!rows.size()) add_row(NULL);
+      if(!rows.size()) add_row(nullptr);
       if(fabs(x) < Hermes::epsilon) return;  // this is to avoid problems with plotting in log-log scale
       // (sometimes the CPU time was zero and plotting crashed)
       if(row < 0 || row >= (int)rows.size()) throw Hermes::Exceptions::Exception("Invalid row number.");
@@ -88,7 +88,7 @@ namespace Hermes
     void Graph::add_values(double x, double y)
     {
       int row = 0;
-      if(!rows.size()) add_row(NULL);
+      if(!rows.size()) add_row(nullptr);
       if(fabs(x) < Hermes::epsilon ) return;  // this is to avoid problems with plotting in log-log scale
       // (sometimes the CPU time was zero and plotting crashed)
       Values xy = { x, y };
@@ -119,7 +119,7 @@ namespace Hermes
       if(!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if(f == NULL) throw Hermes::Exceptions::Exception("Error writing to %s.", filename);
+      if(f == nullptr) throw Hermes::Exceptions::Exception("Error writing to %s.", filename);
 
       for (unsigned int i = 0; i < rows.size(); i++)
       {
@@ -140,7 +140,7 @@ namespace Hermes
       if(!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if(f == NULL) throw Hermes::Exceptions::Exception("Error writing to %s", filename);
+      if(f == nullptr) throw Hermes::Exceptions::Exception("Error writing to %s", filename);
 
       if(!logx && !logy)
         fprintf(f, "plot(");
@@ -249,7 +249,7 @@ namespace Hermes
       if(!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if(f == NULL) throw Hermes::Exceptions::Exception("Error writing to %s", filename);
+      if(f == nullptr) throw Hermes::Exceptions::Exception("Error writing to %s", filename);
 
       fprintf(f, "%s", terminal_str.c_str());
 
@@ -257,9 +257,9 @@ namespace Hermes
       char* outname = new char[len + 10];
       strcpy(outname, filename);
       char* slash = strrchr(outname, '/');
-      if(slash != NULL) strcpy(outname, ++slash);
+      if(slash != nullptr) strcpy(outname, ++slash);
       char* dot = strrchr(outname, '.');
-      if(dot != NULL && dot > outname) *dot = 0;
+      if(dot != nullptr && dot > outname) *dot = 0;
       strcat(outname, ".eps");
 
       fprintf(f, "set output '%s'\n", (char*)outname);

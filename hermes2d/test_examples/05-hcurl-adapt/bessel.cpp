@@ -2349,7 +2349,6 @@ extern double fabs ( double );
 // extern double j0 ( double );
 // extern double j1 ( double );
 extern double sqrt ( double );
-extern double cbrt ( double );
 extern double exp ( double );
 extern double log ( double );
 extern double sin ( double );
@@ -2364,7 +2363,7 @@ static double jnx(double, double);
 static double jnt(double, double);
 #else
 int airy();
-double fabs(), floor(), frexp(), polevl(), j0(), j1(), sqrt(), cbrt();
+double fabs(), floor(), frexp(), polevl(), j0(), j1(), sqrt(), 
 double exp(), log(), sin(), cos(), acos(), pow(), gamma(), lgam();
 static double recur(), jvs(), hankel(), jnx(), jnt();
 #endif
@@ -2932,7 +2931,7 @@ static double jnx(double n, double x)
   /* Test for x very close to n.
   * Use expansion for transition region if so.
   */
-  cbn = cbrt(n);
+  cbn = std::pow(n, 1./3.);
   z = (x - n)/cbn;
   if( fabs(z) <= 0.7 )
     return( jnt(n,x) );
@@ -2946,21 +2945,21 @@ static double jnx(double n, double x)
   {
     sz = std::sqrt( zz );
     t = 1.5 * (std::log( (1.0+sz)/z ) - sz );	/* zeta ** 3/2		*/
-    zeta = cbrt( t * t );
+    zeta = std::pow(( t * t ), 1./3.);
     nflg = 1;
   }
   else
   {
     sz = std::sqrt(-zz);
     t = 1.5 * (sz - acos(1.0/z));
-    zeta = -cbrt( t * t );
+    zeta = -std::pow(( t * t ), 1./3.);
     nflg = -1;
   }
   z32i = fabs(1.0/t);
-  sqz = cbrt(t);
+  sqz = std::pow((t), 1./3.);
 
   /* Airy function */
-  n23 = cbrt( n * n );
+  n23 = std::pow(( n * n ), 1./3.);
   t = n23 * zeta;
 
 #if DEBUG
@@ -3063,7 +3062,7 @@ static double jnx(double n, double x)
   t = 4.0 * zeta/zz;
   t = std::sqrt( std::sqrt(t) );
 
-  t *= ai*pp/cbrt(n)  +  aip*qq/(n23*n);
+  t *= ai*pp/std::pow((n), 1./3.)  +  aip*qq/(n23*n);
   return(t);
 }
 
@@ -3112,9 +3111,9 @@ static double jnt(double n, double x)
   double F[5], G[4];
   int k;
 
-  cbn = cbrt(n);
+  cbn = std::pow((n), 1./3.);
   z = (x - n)/cbn;
-  cbtwo = cbrt( 2.0 );
+  cbtwo = std::pow(( 2.0 ), 1./3.);
 
   /* Airy function */
   zz = -cbtwo * z;
@@ -3141,7 +3140,7 @@ static double jnt(double n, double x)
   pp = 0.0;
   qq = 0.0;
   nk = 1.0;
-  n23 = cbrt( n * n );
+  n23 = std::pow(( n * n ), 1./3.);
 
   for( k=0; k<=4; k++ )
   {
@@ -3158,7 +3157,7 @@ static double jnt(double n, double x)
     nk /= n23;
   }
 
-  fk = cbtwo * ai * pp/cbn  +  cbrt(4.0) * aip * qq/n;
+  fk = cbtwo * ai * pp/cbn  +  std::pow((4.0), 1./3.) * aip * qq/n;
   return(fk);
 }
 

@@ -35,9 +35,9 @@ namespace Hermes
     template<typename Scalar>
     IfpackPrecond<Scalar>::IfpackPrecond(const char *cls, const char *type)
     {
-      this->prec = NULL;
+      this->prec = nullptr;
       this->owner = true;
-      this->mat = NULL;
+      this->mat = nullptr;
 
       this->cls = cls;
       this->type = type;
@@ -46,9 +46,9 @@ namespace Hermes
     template<typename Scalar>
     IfpackPrecond<Scalar>::IfpackPrecond(const char *cls, const char *type, int overlap)
     {
-      this->prec = NULL;
+      this->prec = nullptr;
       this->owner = true;
-      this->mat = NULL;
+      this->mat = nullptr;
 
       this->cls = cls;
       this->type = type;
@@ -60,7 +60,7 @@ namespace Hermes
     {
       this->prec = ipc;
       this->owner = false;
-      this->mat = NULL;    // FIXME: take the matrix from ipc
+      this->mat = nullptr;    // FIXME: take the matrix from ipc
     }
 
     template<typename Scalar>
@@ -91,7 +91,7 @@ namespace Hermes
     void IfpackPrecond<Scalar>::create(Matrix<Scalar> *m)
     {
       EpetraMatrix<Scalar> *mt = static_cast<EpetraMatrix<Scalar> *>(m);
-      assert(mt != NULL);
+      assert(mt != nullptr);
       mat = mt;
       if(strcmp(cls, "point-relax") == 0)
       {
@@ -158,20 +158,20 @@ namespace Hermes
         prec = new Ifpack_AdditiveSchwarz<Ifpack_ICT>(a->mat, overlap);
       }
       else
-        prec = NULL;
+        prec = nullptr;
     }
 
     template<typename Scalar>
     int IfpackPrecond<Scalar>::initialize()
     {
-      assert(prec != NULL);
+      assert(prec != nullptr);
       return prec->Initialize();
     }
 
     template<typename Scalar>
     void IfpackPrecond<Scalar>::compute()
     {
-      assert(prec != NULL);
+      assert(prec != nullptr);
       prec->Compute();
     }
 
@@ -184,7 +184,7 @@ namespace Hermes
     template<typename Scalar>
     int IfpackPrecond<Scalar>::ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const
     {
-      assert(prec != NULL);
+      assert(prec != nullptr);
       return prec->ApplyInverse(r, z);
     }
 

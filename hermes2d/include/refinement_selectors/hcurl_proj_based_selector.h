@@ -34,8 +34,8 @@ namespace Hermes
         /// Constructor.
         /** \param[in] cand_list A predefined list of candidates.
         *  \param[in] max_order A maximum order which considered. If ::H2DRS_DEFAULT_ORDER, a maximum order supported by the selector is used, see HcurlProjBasedSelector::H2DRS_MAX_HCURL_ORDER.
-        *  \param[in] user_shapeset A shapeset. If NULL, it will use internal instance of the class HcurlShapeset. */
-        HcurlProjBasedSelector(CandList cand_list = H2D_HP_ANISO, int max_order = H2DRS_DEFAULT_ORDER, HcurlShapeset* user_shapeset = NULL);
+        *  \param[in] user_shapeset A shapeset. If nullptr, it will use internal instance of the class HcurlShapeset. */
+        HcurlProjBasedSelector(CandList cand_list = H2D_HP_ANISO, int max_order = H2DRS_DEFAULT_ORDER, HcurlShapeset* user_shapeset = nullptr);
 
         /// Destructor.
         virtual ~HcurlProjBasedSelector();

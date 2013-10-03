@@ -163,7 +163,7 @@ namespace Hermes
     void CubicSpline::plot(const char* filename, double extension, bool plot_derivative, int subdiv) const
     {
       FILE *f = fopen(filename, "wb");
-      if(f == NULL) 
+      if(f == nullptr) 
         throw Hermes::Exceptions::Exception("Could not open a spline file for writing.");
 
       if(coeffs.size() == 0)

@@ -27,7 +27,7 @@ namespace Hermes
   {
     static int find_position(int *Ai, int Alen, int idx)
     {
-      assert(Ai != NULL);
+      assert(Ai != nullptr);
       assert(Alen > 0);
       assert(idx >= 0);
 
@@ -56,9 +56,9 @@ namespace Hermes
     CSMatrix<Scalar>::CSMatrix()
     {
       this->size = 0; nnz = 0;
-      Ap = NULL;
-      Ai = NULL;
-      Ax = NULL;
+      Ap = nullptr;
+      Ai = nullptr;
+      Ax = nullptr;
     }
 
     template<typename Scalar>
@@ -84,7 +84,7 @@ namespace Hermes
     template<typename Scalar>
     void CSMatrix<Scalar>::alloc()
     {
-      assert(this->pages != NULL);
+      assert(this->pages != nullptr);
 
       // initialize the arrays Ap and Ai
       Ap = new int[this->size + 1];
@@ -102,7 +102,7 @@ namespace Hermes
       Ap[i] = pos;
 
       delete [] this->pages;
-      this->pages = NULL;
+      this->pages = nullptr;
 
       nnz = Ap[this->size];
 
@@ -117,17 +117,17 @@ namespace Hermes
       if(Ap)
       {
         delete [] Ap;
-        Ap = NULL;
+        Ap = nullptr;
       }
       if(Ai)
       {
         delete [] Ai;
-        Ai = NULL;
+        Ai = nullptr;
       }
       if(Ax)
       {
         delete [] Ax;
-        Ax = NULL;
+        Ax = nullptr;
       }
     }
 
@@ -417,8 +417,8 @@ namespace Hermes
           matvar_t *matvar;
 
           // For complex. No allocation here.
-          double* Ax_re = NULL;
-          double* Ax_im = NULL;
+          double* Ax_re = nullptr;
+          double* Ax_im = nullptr;
 
           // For real.
           if(Hermes::Helpers::TypeIsReal<Scalar>::value)
@@ -531,7 +531,7 @@ namespace Hermes
             this->size = sparse->njc - 1;
             this->Ap = new int[this->size + 1];
 
-            void* data = NULL;
+            void* data = nullptr;
             if(Hermes::Helpers::TypeIsReal<Scalar>::value)
               data = sparse->data;
             else
@@ -625,7 +625,7 @@ namespace Hermes
     template<typename Scalar>
     void CSRMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
     {
-      if(this->pages[row] == NULL || this->pages[row]->count >= SparseMatrix<Scalar>::PAGE_SIZE)
+      if(this->pages[row] == nullptr || this->pages[row]->count >= SparseMatrix<Scalar>::PAGE_SIZE)
       {
         typename SparseMatrix<Scalar>::Page *new_page = new typename SparseMatrix<Scalar>::Page;
         new_page->count = 0;

@@ -22,7 +22,7 @@ namespace Hermes
     template<typename Scalar>
     void MultimeshDGNeighborTree<Scalar>::process_edge(NeighborSearch<Scalar>** neighbor_searches, int num_neighbor_searches, int& num_neighbors, bool*& processed)
     {
-      MultimeshDGNeighborTreeNode root(NULL, 0);
+      MultimeshDGNeighborTreeNode root(nullptr, 0);
 
       build_multimesh_tree(&root, neighbor_searches, num_neighbor_searches);
 
@@ -84,7 +84,7 @@ namespace Hermes
       if(transformation_count == 0)
         return;
       // Both sons are null. We have to add a new Node. Let us do it for the left sone of node.
-      if(node->get_left_son() == NULL && node->get_right_son() == NULL)
+      if(node->get_left_son() == nullptr && node->get_right_son() == nullptr)
       {
         node->set_left_son(new MultimeshDGNeighborTreeNode(node, transformations[0]));
         insert_into_multimesh_tree(node->get_left_son(), transformations + 1, transformation_count - 1);
@@ -142,7 +142,7 @@ namespace Hermes
         return;
       }
       // If we are in a leaf.
-      if(node->get_left_son() == NULL && node->get_right_son() == NULL)
+      if(node->get_left_son() == nullptr && node->get_right_son() == nullptr)
       {
         // Create a vector for the new neighbor.
         Hermes::vector<unsigned int>* new_neighbor_transformations = new Hermes::vector<unsigned int>;
@@ -217,7 +217,7 @@ namespace Hermes
       // We always should be able to empty the transformations array.
       throw
         Hermes::Exceptions::Exception("Transformation of a central element not found in the multimesh tree.");
-      return NULL;
+      return nullptr;
     }
 
     template<typename Scalar>
@@ -228,7 +228,7 @@ namespace Hermes
 
       // No subtree => no work.
       // Also check the assertion that if one son is null, then the other too.
-      if(node->get_left_son() == NULL)
+      if(node->get_left_son() == nullptr)
       {
         if(node->get_right_son())
           throw Hermes::Exceptions::Exception("Only one son (right) not null in MultimeshDGNeighborTree<Scalar>::update_ns_subtree.");
@@ -307,7 +307,7 @@ namespace Hermes
       const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode)
     {
       // If we are in a leaf.
-      if(node->get_left_son() == NULL && node->get_right_son() == NULL)
+      if(node->get_left_son() == nullptr && node->get_right_son() == nullptr)
       {
         // Create vectors for the new neighbor.
         Hermes::vector<unsigned int>* new_neighbor_central_transformations = new Hermes::vector<unsigned int>;

@@ -52,7 +52,7 @@ namespace Hermes
           }
         }
 
-        if(tgt_quad_order != NULL)
+        if(tgt_quad_order != nullptr)
           *tgt_quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
         return true;
       }
@@ -61,7 +61,7 @@ namespace Hermes
       {
         order_h = start_order_h;
         order_v = start_order_v;
-        if(tgt_quad_order != NULL)
+        if(tgt_quad_order != nullptr)
           *tgt_quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
       }
 

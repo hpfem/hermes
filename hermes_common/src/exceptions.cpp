@@ -65,13 +65,13 @@ namespace Hermes
     }
 
 
-    IOException::IOException(ReadWrite readWrite, const char* filename_) : Exception(), readWrite(readWrite), filename(NULL)
+    IOException::IOException(ReadWrite readWrite, const char* filename_) : Exception(), readWrite(readWrite), filename(nullptr)
     {
       this->filename = (char*)malloc(sizeof(char*) * strlen(filename_));
       ::strcpy(this->filename, filename_);
     }
 
-    IOException::IOException(ReadWrite readWrite, std::string filename_) : Exception(), readWrite(readWrite), filename(NULL)
+    IOException::IOException(ReadWrite readWrite, std::string filename_) : Exception(), readWrite(readWrite), filename(nullptr)
     {
       this->filename = (char*)malloc(sizeof(char*) * filename_.length());
       ::strcpy(this->filename, filename_.c_str());
@@ -101,7 +101,7 @@ namespace Hermes
       this->param_idx = param_idx;
       this->item_idx = -1;
       char * msg = new char[27];
-      sprintf(msg, "Parameter number %d is NULL", param_idx);
+      sprintf(msg, "Parameter number %d is nullptr", param_idx);
       message = msg;
     }
 
@@ -110,7 +110,7 @@ namespace Hermes
       this->param_idx = param_idx;
       this->item_idx = item_idx;
       char * msg = new char[55];
-      sprintf(msg, "Element number %d of parameter number %d is NULL", item_idx, param_idx);
+      sprintf(msg, "Element number %d of parameter number %d is nullptr", item_idx, param_idx);
       message = msg;
     }
 

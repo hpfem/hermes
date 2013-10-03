@@ -56,7 +56,7 @@ namespace Hermes
         case H2D_HP_ANISO: return "HP_ANISO";
         default:
           throw Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list);
-          return NULL;
+          return nullptr;
         }
       }
 

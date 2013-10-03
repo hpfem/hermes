@@ -6,23 +6,23 @@ High_Order::High_Order(double theta): theta(theta)
 {
   highmat_rhs =new CSCMatrix<double> ;;
   high_matrix =new CSCMatrix<double> ;;
-  u_H =NULL;
+  u_H =nullptr;
 }
 
 High_Order::~High_Order()
 {
-  if(high_matrix!=NULL) delete high_matrix;
-  if(highmat_rhs!=NULL) delete highmat_rhs;
-  if(u_H!=NULL) delete [] u_H;
+  if(high_matrix!=nullptr) delete high_matrix;
+  if(highmat_rhs!=nullptr) delete highmat_rhs;
+  if(u_H!=nullptr) delete [] u_H;
 }
 
 //high-order scheme:  (M\tau -theta K) u_H   = (M\tau + (1-theta) K) u_n 
 // high_matrix = (M\tau -theta K); highmat_rhs = (M\tau + (1-theta) K); M/tau = mass_matrix; K = conv_matrix
 void High_Order::assemble_High_Order(CSCMatrix<double> * conv_matrix, CSCMatrix<double> * mass_matrix)
 {
-  if(high_matrix!=NULL) 
+  if(high_matrix!=nullptr) 
     high_matrix->free();
-  if(highmat_rhs!=NULL) 
+  if(highmat_rhs!=nullptr) 
     highmat_rhs->free();
   high_matrix->create(conv_matrix->get_size(),conv_matrix->get_nnz(), conv_matrix->get_Ap(), conv_matrix->get_Ai(),conv_matrix->get_Ax());
   high_matrix->multiply_with_Scalar(-theta);
@@ -37,9 +37,9 @@ void High_Order::assemble_High_Order(CSCMatrix<double> * conv_matrix, CSCMatrix<
 double* High_Order::solve_High_Order(double* u_n)
 {
   int ndof = high_matrix->get_size();
-  if((high_matrix==NULL)||(highmat_rhs==NULL) )
+  if((high_matrix==nullptr)||(highmat_rhs==nullptr) )
     throw Exceptions::Exception("matrices have to be calculated first, call High_Order::assemble_High_Order().");
-  if(u_H!=NULL) delete [] u_H;
+  if(u_H!=nullptr) delete [] u_H;
   u_H = new double[ndof];			
   double* coeff_vec_2 = new double[ndof];
   SimpleVector<double> * vec_rhs = new SimpleVector<double> (ndof);	

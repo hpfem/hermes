@@ -4407,21 +4407,21 @@ namespace Hermes
     static int qb_10_9[] = { 32, 33, 34, 35, 36, 37, 38, 39, 45, 46, 47, 48, 49, 50, 51, 52, 56, 57, 58, 59, 60, 61, 62, 63, 69, 70, 71, 72, 73, 74, 75, 76, 80, 81, 82, 83, 84, 85, 86, 87, 93, 94, 95, 96, 97, 98, 99, 100, 104, 105, 106, 107, 108, 109, 110, 111, 117, 118, 119, 120, 121, 122, 123, 124, 128, 129, 130, 131, 132, 133, 134, 135, };
     static int qb_10_10[] = { 32, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 56, 57, 58, 59, 60, 61, 62, 63, 64, 69, 70, 71, 72, 73, 74, 75, 76, 77, 80, 81, 82, 83, 84, 85, 86, 87, 88, 93, 94, 95, 96, 97, 98, 99, 100, 101, 104, 105, 106, 107, 108, 109, 110, 111, 112, 117, 118, 119, 120, 121, 122, 123, 124, 125, 128, 129, 130, 131, 132, 133, 134, 135, 136, };
 
-#define NULL16 NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,  NULL, NULL, NULL, NULL, NULL
+#define nullptr16 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,  nullptr, nullptr, nullptr, nullptr, nullptr
 
     int* simple_quad_bubble_indices[] =
     {
-      NULL, NULL, NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,     NULL, NULL, NULL, NULL, NULL, NULL16,
-      NULL, NULL, NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,    NULL,     NULL, NULL, NULL, NULL, NULL, NULL16,
-      NULL, NULL, qb_2_2,  qb_2_3,  qb_2_4,  qb_2_5,  qb_2_6,  qb_2_7,  qb_2_8,  qb_2_9,  qb_2_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-      NULL, NULL, qb_3_2,  qb_3_3,  qb_3_4,  qb_3_5,  qb_3_6,  qb_3_7,  qb_3_8,  qb_3_9,  qb_3_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-      NULL, NULL, qb_4_2,  qb_4_3,  qb_4_4,  qb_4_5,  qb_4_6,  qb_4_7,  qb_4_8,  qb_4_9,  qb_4_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-      NULL, NULL, qb_5_2,  qb_5_3,  qb_5_4,  qb_5_5,  qb_5_6,  qb_5_7,  qb_5_8,  qb_5_9,  qb_5_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-      NULL, NULL, qb_6_2,  qb_6_3,  qb_6_4,  qb_6_5,  qb_6_6,  qb_6_7,  qb_6_8,  qb_6_9,  qb_6_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-      NULL, NULL, qb_7_2,  qb_7_3,  qb_7_4,  qb_7_5,  qb_7_6,  qb_7_7,  qb_7_8,  qb_7_9,  qb_7_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-      NULL, NULL, qb_8_2,  qb_8_3,  qb_8_4,  qb_8_5,  qb_8_6,  qb_8_7,  qb_8_8,  qb_8_9,  qb_8_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-      NULL, NULL, qb_9_2,  qb_9_3,  qb_9_4,  qb_9_5,  qb_9_6,  qb_9_7,  qb_9_8,  qb_9_9,  qb_9_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
-      NULL, NULL, qb_10_2, qb_10_3, qb_10_4, qb_10_5, qb_10_6, qb_10_7, qb_10_8, qb_10_9, qb_10_10,  NULL, NULL, NULL, NULL, NULL, NULL16,
+      nullptr, nullptr, nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      nullptr, nullptr, nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,    nullptr,     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      nullptr, nullptr, qb_2_2,  qb_2_3,  qb_2_4,  qb_2_5,  qb_2_6,  qb_2_7,  qb_2_8,  qb_2_9,  qb_2_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      nullptr, nullptr, qb_3_2,  qb_3_3,  qb_3_4,  qb_3_5,  qb_3_6,  qb_3_7,  qb_3_8,  qb_3_9,  qb_3_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      nullptr, nullptr, qb_4_2,  qb_4_3,  qb_4_4,  qb_4_5,  qb_4_6,  qb_4_7,  qb_4_8,  qb_4_9,  qb_4_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      nullptr, nullptr, qb_5_2,  qb_5_3,  qb_5_4,  qb_5_5,  qb_5_6,  qb_5_7,  qb_5_8,  qb_5_9,  qb_5_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      nullptr, nullptr, qb_6_2,  qb_6_3,  qb_6_4,  qb_6_5,  qb_6_6,  qb_6_7,  qb_6_8,  qb_6_9,  qb_6_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      nullptr, nullptr, qb_7_2,  qb_7_3,  qb_7_4,  qb_7_5,  qb_7_6,  qb_7_7,  qb_7_8,  qb_7_9,  qb_7_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      nullptr, nullptr, qb_8_2,  qb_8_3,  qb_8_4,  qb_8_5,  qb_8_6,  qb_8_7,  qb_8_8,  qb_8_9,  qb_8_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      nullptr, nullptr, qb_9_2,  qb_9_3,  qb_9_4,  qb_9_5,  qb_9_6,  qb_9_7,  qb_9_8,  qb_9_9,  qb_9_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
+      nullptr, nullptr, qb_10_2, qb_10_3, qb_10_4, qb_10_5, qb_10_6, qb_10_7, qb_10_8, qb_10_9, qb_10_10,  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr16,
     };
 
 #define zero16  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0

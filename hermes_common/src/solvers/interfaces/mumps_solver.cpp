@@ -74,11 +74,11 @@ namespace Hermes
     {
       nnz = 0;
       this->size = 0;
-      irn = NULL;
-      jcn = NULL;
-      Ax = NULL;
-      Ap = NULL;
-      Ai = NULL;
+      irn = nullptr;
+      jcn = nullptr;
+      Ax = nullptr;
+      Ap = nullptr;
+      Ai = nullptr;
     }
 
     template<typename Scalar>
@@ -90,7 +90,7 @@ namespace Hermes
     template<typename Scalar>
     void MumpsMatrix<Scalar>::alloc()
     {
-      assert(this->pages != NULL);
+      assert(this->pages != nullptr);
 
       // initialize the arrays Ap and Ai
       Ap = new int[this->size + 1];
@@ -107,7 +107,7 @@ namespace Hermes
       Ap[i] = pos;
 
       delete [] this->pages;
-      this->pages = NULL;
+      this->pages = nullptr;
 
       nnz = Ap[this->size];
 
@@ -127,11 +127,11 @@ namespace Hermes
     void MumpsMatrix<Scalar>::free()
     {
       nnz = 0;
-      delete [] Ap; Ap = NULL;
-      delete [] Ai; Ai = NULL;
-      delete [] Ax; Ax = NULL;
-      delete [] irn; irn = NULL;
-      delete [] jcn; jcn = NULL;
+      delete [] Ap; Ap = nullptr;
+      delete [] Ai; Ai = nullptr;
+      delete [] Ax; Ax = nullptr;
+      delete [] irn; irn = nullptr;
+      delete [] jcn; jcn = nullptr;
     }
 
     inline double mumps_to_Scalar(double x)
@@ -229,8 +229,8 @@ namespace Hermes
           sparse.nzmax = this->nnz;
 
           // For complex.
-          double* Ax_re = NULL;
-          double* Ax_im = NULL;
+          double* Ax_re = nullptr;
+          double* Ax_im = nullptr;
 
           sparse.nir = this->nnz;
           sparse.ir = Ai;
@@ -395,11 +395,11 @@ namespace Hermes
     {
       this->nnz = nnz;
       this->size = size;
-      this->Ap = new int[this->size + 1]; assert(this->Ap != NULL);
-      this->Ai = new int[nnz];    assert(this->Ai != NULL);
-      this->Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz]; assert(this->Ax != NULL);
-      irn = new int[nnz];           assert(this->irn !=NULL);     // Row indices.
-      jcn = new int[nnz];           assert(this->jcn !=NULL);     // Column indices.
+      this->Ap = new int[this->size + 1]; assert(this->Ap != nullptr);
+      this->Ai = new int[nnz];    assert(this->Ai != nullptr);
+      this->Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz]; assert(this->Ax != nullptr);
+      irn = new int[nnz];           assert(this->irn !=nullptr);     // Row indices.
+      jcn = new int[nnz];           assert(this->jcn !=nullptr);     // Column indices.
 
       for (unsigned int i = 0; i < this->size; i++)
       {
@@ -422,11 +422,11 @@ namespace Hermes
 
       nmat->nnz = nnz;
       nmat->size = this->size;
-      nmat->Ap = new int[this->size + 1]; assert(nmat->Ap != NULL);
-      nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
-      nmat->Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz]; assert(nmat->Ax != NULL);
-      nmat->irn = new int[nnz];           assert(nmat->irn !=NULL);     // Row indices.
-      nmat->jcn = new int[nnz];           assert(nmat->jcn !=NULL);     // Column indices.
+      nmat->Ap = new int[this->size + 1]; assert(nmat->Ap != nullptr);
+      nmat->Ai = new int[nnz];    assert(nmat->Ai != nullptr);
+      nmat->Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz]; assert(nmat->Ax != nullptr);
+      nmat->irn = new int[nnz];           assert(nmat->irn !=nullptr);     // Row indices.
+      nmat->jcn = new int[nnz];           assert(nmat->jcn !=nullptr);     // Column indices.
       for (unsigned int i = 0;i<nnz;i++)
       {
         nmat->Ai[i] = Ai[i];
@@ -532,7 +532,7 @@ namespace Hermes
 
       // Initial values for some fields of the MUMPS_STRUC structure that may be accessed
       // before MUMPS has been initialized.
-      param.rhs = NULL;
+      param.rhs = nullptr;
       param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
       // in setup_factorization()
     }
@@ -547,7 +547,7 @@ namespace Hermes
         mumps_c(&param);
       }
 
-      if(param.rhs != NULL)
+      if(param.rhs != nullptr)
         delete [] param.rhs;
     }
 
@@ -561,8 +561,8 @@ namespace Hermes
     void MumpsSolver<Scalar>::solve()
     {
       bool ret = false;
-      assert(m != NULL);
-      assert(rhs != NULL);
+      assert(m != nullptr);
+      assert(rhs != nullptr);
 
       this->tick();
 
@@ -595,7 +595,7 @@ namespace Hermes
       this->time = this->accumulated();
 
       delete [] param.rhs;
-      param.rhs = NULL;
+      param.rhs = nullptr;
     }
 
     template<typename Scalar>

@@ -33,7 +33,7 @@ namespace Hermes
 
     template<typename Scalar>
     DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) : 
-      pss(NULL), refmaps(NULL), u_ext(NULL), als(NULL), alsSurface(NULL), 
+      pss(nullptr), refmaps(nullptr), u_ext(nullptr), als(nullptr), alsSurface(nullptr), 
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler)
     {
     }
@@ -204,7 +204,7 @@ namespace Hermes
       if(this->report_cache_hits_and_misses)
         cache_searches++;
 
-      this->current_cache_record = NULL;
+      this->current_cache_record = nullptr;
       if(cache->get(current_state->rep, current_state->rep_subidx, current_state->rep_i, this->current_cache_record))
       {
         if(this->report_cache_hits_and_misses)
@@ -263,7 +263,7 @@ namespace Hermes
     template<typename Scalar>
     Func<Scalar>** DiscreteProblemThreadAssembler<Scalar>::init_u_ext_values(int order)
     {
-      Func<Scalar>** u_ext_func = NULL;
+      Func<Scalar>** u_ext_func = nullptr;
       if(this->nonlinear)
       {
 #ifdef _DEBUG
@@ -279,7 +279,7 @@ namespace Hermes
           if(u_ext[i]->get_active_element())
             u_ext_func[i] = init_fn(u_ext[i], order);
           else
-            u_ext_func[i] = NULL;
+            u_ext_func[i] = nullptr;
         }
       }
 
@@ -306,7 +306,7 @@ namespace Hermes
     template<typename Scalar>
     Func<Scalar>** DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, int order, Func<Scalar>** u_ext_func)
     {
-      Func<Scalar>** ext_func = NULL;
+      Func<Scalar>** ext_func = nullptr;
       if(ext.size() > 0)
       {
         ext_func = new Func<Scalar>*[ext.size()];
@@ -321,9 +321,9 @@ namespace Hermes
                 ext_func[ext_i] = init_fn(ext[ext_i].get(), order);
             }
             else
-              ext_func[ext_i] = NULL;
+              ext_func[ext_i] = nullptr;
           else
-            ext_func[ext_i] = NULL;
+            ext_func[ext_i] = nullptr;
       }
 
       if(this->rungeKutta)
@@ -479,7 +479,7 @@ namespace Hermes
     void DiscreteProblemThreadAssembler<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
       AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
-      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
+      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == nullptr);
 
       double block_scaling_coefficient = this->block_scaling_coeff(form);
 
@@ -580,7 +580,7 @@ namespace Hermes
     void DiscreteProblemThreadAssembler<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
       AsmList<Scalar>* current_als_i, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
-      bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == NULL);
+      bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == nullptr);
 
       Func<Scalar>** local_ext = ext;
       if(form->ext.size() > 0)
@@ -647,7 +647,7 @@ namespace Hermes
       for (unsigned int j = 0; j < spaces_size; j++)
         delete pss[j];
       delete [] pss;
-      pss = NULL;
+      pss = nullptr;
 
       for (unsigned int j = 0; j < spaces_size; j++)
         delete refmaps[j];
@@ -673,7 +673,7 @@ namespace Hermes
       {
         this->wf->free_ext();
         delete this->wf;
-        this->wf = NULL;
+        this->wf = nullptr;
       }
     }
 

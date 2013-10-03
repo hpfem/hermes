@@ -3,13 +3,13 @@
 Regularity_Estimator::Regularity_Estimator(double epsilon): epsilon(epsilon), R_h_1(MeshFunctionSharedPtr<double>(new Solution<double>)), 
   R_h_2(MeshFunctionSharedPtr<double>(new Solution<double>)), sln(MeshFunctionSharedPtr<double>(new Solution<double>))
 {
-  space =NULL;
+  space =nullptr;
   
-  smooth_elem_patch= NULL;
-  smooth_dof = NULL;
+  smooth_elem_patch= nullptr;
+  smooth_dof = nullptr;
   al = new 	AsmList<double>;
-  rhs_1 =NULL;
-  rhs_2=NULL;
+  rhs_1 =nullptr;
+  rhs_2=nullptr;
   grad_1= new GradientReconstruction_1(sln);
   grad_2= new GradientReconstruction_2(sln);
 };
@@ -23,19 +23,19 @@ Regularity_Estimator::~Regularity_Estimator()
 
 void Regularity_Estimator::free()
 {
-  if(smooth_dof!=NULL) delete [] smooth_dof;
-  if(smooth_elem_patch!=NULL) delete [] smooth_elem_patch;
-  if(rhs_1 !=NULL) delete rhs_1;
-  if(rhs_2 !=NULL) delete rhs_2;
-  smooth_elem_patch= NULL;
-  smooth_dof = NULL;
-  rhs_1 =NULL;
-  rhs_2=NULL;
+  if(smooth_dof!=nullptr) delete [] smooth_dof;
+  if(smooth_elem_patch!=nullptr) delete [] smooth_elem_patch;
+  if(rhs_1 !=nullptr) delete rhs_1;
+  if(rhs_2 !=nullptr) delete rhs_2;
+  smooth_elem_patch= nullptr;
+  smooth_dof = nullptr;
+  rhs_1 =nullptr;
+  rhs_2=nullptr;
 }
 
 void Regularity_Estimator::set_space(SpaceSharedPtr<double> new_space)
 {
-  if(new_space == NULL)
+  if(new_space == nullptr)
     throw Hermes::Exceptions::Exception("smoothness_indicator: set_space");
   free();
   space = new_space;
@@ -48,8 +48,8 @@ void Regularity_Estimator::set_space(SpaceSharedPtr<double> new_space)
 
 int* Regularity_Estimator::get_smooth_elems(SpaceSharedPtr<double> new_space,double* coeff_vec,CSCMatrix<double> * mass_matrix)
 {
-  if(new_space == NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: space =NULL");
-  if(coeff_vec==NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: coeff_vec=NULL");
+  if(new_space == nullptr) throw Hermes::Exceptions::Exception("smoothness_indicator: space =nullptr");
+  if(coeff_vec==nullptr) throw Hermes::Exceptions::Exception("smoothness_indicator: coeff_vec=nullptr");
   if(space!=new_space) 
     set_space(new_space);
   Solution<double>::vector_to_solution(coeff_vec, space, sln);
@@ -59,8 +59,8 @@ int* Regularity_Estimator::get_smooth_elems(SpaceSharedPtr<double> new_space,dou
 
 int* Regularity_Estimator::get_smooth_dofs(SpaceSharedPtr<double> new_space,double* coeff_vec,CSCMatrix<double> * mass_matrix)
 {
-  if(new_space == NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: space =NULL");
-  if(coeff_vec==NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: coeff_vec=NULL");
+  if(new_space == nullptr) throw Hermes::Exceptions::Exception("smoothness_indicator: space =nullptr");
+  if(coeff_vec==nullptr) throw Hermes::Exceptions::Exception("smoothness_indicator: coeff_vec=nullptr");
   if(space!=new_space) 
     set_space(new_space);
   Solution<double>::vector_to_solution(coeff_vec, space, sln);		
@@ -121,7 +121,7 @@ double Regularity_Estimator::linear_approx_dy(Element* e, double x_i, double y_i
 void Regularity_Estimator::smoothness_indicator(CSCMatrix<double> * mass_matrix)
 {
   int ndof = space->get_num_dofs(); 
-  if((mass_matrix!=NULL)&&(mass_matrix->get_size() != ndof)) 
+  if((mass_matrix!=nullptr)&&(mass_matrix->get_size() != ndof)) 
     throw Hermes::Exceptions::Exception("smoothness_indicator: mass_matrix size unequal ndof");
 
 
@@ -130,7 +130,7 @@ void Regularity_Estimator::smoothness_indicator(CSCMatrix<double> * mass_matrix)
   DiscreteProblem<double> * dp_1 = new DiscreteProblem<double> (grad_1, space);
   DiscreteProblem<double> * dp_2 = new DiscreteProblem<double> (grad_2, space);
   bool own_mass_matrix = false;
-  if(mass_matrix ==NULL) 
+  if(mass_matrix ==nullptr) 
   {
     mass_matrix = new CSCMatrix<double> ; 	
     dp_1->assemble(mass_matrix,rhs_1);
@@ -173,7 +173,7 @@ void Regularity_Estimator::smoothness_indicator(CSCMatrix<double> * mass_matrix)
   //center of reference element
   double x_c_ref = 0.;
   double y_c_ref = 0.; 
-  Element* e =NULL; 
+  Element* e =nullptr; 
   int* index = new int[H2D_MAX_NUMBER_VERTICES];
   for(int i =0;i<H2D_MAX_NUMBER_VERTICES;i++)
     index[i] =  space->get_shapeset()->get_vertex_index(i,HERMES_MODE_QUAD);
@@ -200,7 +200,7 @@ void Regularity_Estimator::smoothness_indicator(CSCMatrix<double> * mass_matrix)
 
   //------------------------------------------------
 
-  Node* vn=NULL;
+  Node* vn=nullptr;
   double x_c =0.; double y_c =0.; double u_h_x_c =0.;
   double* x = new double[H2D_MAX_NUMBER_VERTICES]; double* y = new double[H2D_MAX_NUMBER_VERTICES];
   double u_i; double u_dx ,u_dy;

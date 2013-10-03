@@ -39,15 +39,15 @@ namespace Hermes
 
         void init();
 #ifndef _MSC_VER
-        ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL);
+        ScalarView(const char* title = "ScalarView", WinGeom* wg = nullptr);
 #else
-        ScalarView(WinGeom* wg = NULL);
+        ScalarView(WinGeom* wg = nullptr);
 #endif
-        ScalarView(char* title, WinGeom* wg = NULL);
+        ScalarView(char* title, WinGeom* wg = nullptr);
         ~ScalarView();
 
         void show(MeshFunctionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
-          MeshFunctionSharedPtr<double> xdisp = NULL, MeshFunctionSharedPtr<double> ydisp = NULL, double dmult = 1.0);
+          MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0);
 
         void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0);
 
@@ -78,7 +78,7 @@ namespace Hermes
           VertexNodeInfo(int id, float x, float y) : x(x), y(y), id(id), selected(false) {};
         };
         Hermes::vector<VertexNodeInfo> vertex_nodes; ///< Vertex nodes. Sorted accordin to the X-axis.
-        VertexNodeInfo* pointed_vertex_node; ///< A vertex node that is under the mouse cursor. NULL if none.
+        VertexNodeInfo* pointed_vertex_node; ///< A vertex node that is under the mouse cursor. nullptr if none.
 
         bool allow_node_selection; ///> True if node selection is allowed
         unsigned int pointed_node_widget; ///> A GL display-list denoting a pointed vertex node. The geometry assumes the size of a pixel is 1x1.
@@ -138,7 +138,7 @@ namespace Hermes
 
         bool show_values; ///< true to show values
 
-        void prepare_gl_geometry(); ///< prepares geometry in a form compatible with GL arrays; Data are updated if lin is updated. In a case of a failure (out of memory), gl_verts is NULL and an old OpenGL rendering method has to be used.
+        void prepare_gl_geometry(); ///< prepares geometry in a form compatible with GL arrays; Data are updated if lin is updated. In a case of a failure (out of memory), gl_verts is nullptr and an old OpenGL rendering method has to be used.
         void draw_values_2d(); ///< draws values
         void draw_edges_2d(); ///< draws edges
 
@@ -212,11 +212,11 @@ class HERMES_API ScalarView : public View
       {
       public:
 				void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        ScalarView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        ScalarView(const char* title = "ScalarView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        ScalarView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void show(MeshFunctionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
-          MeshFunctionSharedPtr<double> xdisp = NULL, MeshFunctionSharedPtr<double> ydisp = NULL, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+          MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 

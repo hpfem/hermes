@@ -132,9 +132,9 @@ namespace Hermes
     void Traverse::State::operator=(const State * other)
     {
     // Delete part.
-    if(e != NULL)
+    if(e != nullptr)
     delete [] e;
-    if(sub_idx != NULL)
+    if(sub_idx != nullptr)
     delete [] sub_idx;
 
     this->num = other->num;
@@ -175,9 +175,9 @@ namespace Hermes
 
     Traverse::State::~State()
     {
-      if(e != NULL)
+      if(e != nullptr)
         delete [] e;
-      if(sub_idx != NULL)
+      if(sub_idx != nullptr)
         delete [] sub_idx;
     }
 
@@ -221,12 +221,12 @@ namespace Hermes
 
     Traverse::State* Traverse::push_state(int* top_by_ref)
     {
-      int* top_f = (top_by_ref == NULL) ? &this->top : top_by_ref;
+      int* top_f = (top_by_ref == nullptr) ? &this->top : top_by_ref;
 
       if(*top_f >= size)
         throw Hermes::Exceptions::Exception("Stack overflow. Increase stack size.");
 
-      if(stack[*top_f].e == NULL)
+      if(stack[*top_f].e == nullptr)
       {
         stack[*top_f].e = new Element*[num];
         stack[*top_f].er = new Rect[num];
@@ -245,9 +245,9 @@ namespace Hermes
 
     void Traverse::set_boundary_info(State* s)
     {
-      Element* e = NULL;
+      Element* e = nullptr;
       for (int i = 0; i < num; i++)
-        if((e = s->e[i]) != NULL) break;
+        if((e = s->e[i]) != nullptr) break;
 
       if(e->is_triangle())
       {
@@ -270,7 +270,7 @@ namespace Hermes
       bool is_triangle = false;
       for(int j = 0; j < this->num; j++)
       {
-        if(this->e[j] != NULL)
+        if(this->e[j] != nullptr)
         {
           if(this->e[j]->is_triangle())
             is_triangle = true;
@@ -332,7 +332,7 @@ namespace Hermes
               s->e[i] = meshes[i]->get_element(id);
               if(!s->e[i]->used)
               {
-                s->e[i] = NULL;
+                s->e[i] = nullptr;
                 continue;
               }
               else
@@ -363,7 +363,7 @@ namespace Hermes
         for (i = 0; i < num; i++)
         {
           // ..where the element is used ..
-          if(s->e[i] != NULL && s->e[i]->used)
+          if(s->e[i] != nullptr && s->e[i]->used)
             if(s->sub_idx[i] == 0 && s->e[i]->active)
               if(!s->e[i]->is_triangle())
                 init_transforms(s, i);
@@ -373,7 +373,7 @@ namespace Hermes
         bool leaf = true;
         for (i = 0; i < num; i++)
         {
-          if(s->e[i] != NULL && s->e[i]->used)
+          if(s->e[i] != nullptr && s->e[i]->used)
             if(!s->e[i]->active)
             {
               leaf = false;
@@ -391,14 +391,14 @@ namespace Hermes
           }
 
           set_boundary_info(s);
-          s->rep = NULL;
+          s->rep = nullptr;
           // EXTREMELY IMPORTANT.
           // The for loop here is NOT through all meshes, but only
           // through the spaces.
           // The reason is not to include states that only have elements
           // on meshes that are not a part of the weak form.
           for(int j = 0; j < this->spaces_size; j++)
-            if(s->e[j] != NULL && s->e[j]->used)
+            if(s->e[j] != nullptr && s->e[j]->used)
             {
               s->rep = s->e[j];
               s->rep_subidx = s->sub_idx[j];
@@ -420,9 +420,9 @@ namespace Hermes
             for (i = 0; i < num; i++)
             {
               // ..if the element is not used.
-              if(s->e[i] == NULL || !s->e[i]->used)
+              if(s->e[i] == nullptr || !s->e[i]->used)
               {
-                ns->e[i] = NULL;
+                ns->e[i] = nullptr;
               }
               else if(s->e[i]->active)
               {
@@ -465,7 +465,7 @@ namespace Hermes
           int4* current_sons = new int4[num];
           int split = 0;
           for (i = 0; i < num; i++)
-            if(s->e[i] != NULL && !s->e[i]->active)
+            if(s->e[i] != nullptr && !s->e[i]->active)
               split |= get_split_and_sons(s->e[i], &s->cr, s->er + i, current_sons[i]);
 
           // Both splits: recur to four sons, similar to triangles.
@@ -479,9 +479,9 @@ namespace Hermes
 
               for (i = 0; i < num; i++)
               {
-                if(s->e[i] == NULL || !s->e[i]->used)
+                if(s->e[i] == nullptr || !s->e[i]->used)
                 {
-                  ns->e[i] = NULL;
+                  ns->e[i] = nullptr;
                 }
                 else
                 {
@@ -517,9 +517,9 @@ namespace Hermes
               int j = (son == 4 || son == 6) ? 0 : 2;
               for (i = 0; i < num; i++)
               {
-                if(s->e[i] == NULL || !s->e[i]->used)
+                if(s->e[i] == nullptr || !s->e[i]->used)
                 {
-                  ns->e[i] = NULL;
+                  ns->e[i] = nullptr;
                 }
                 else
                 {
@@ -549,9 +549,9 @@ namespace Hermes
 
             for (i = 0; i < num; i++)
             {
-              if(s->e[i] == NULL || !s->e[i]->used)
+              if(s->e[i] == nullptr || !s->e[i]->used)
               {
-                ns->e[i] = NULL;
+                ns->e[i] = nullptr;
               }
               else if(s->e[i]->active)
               {
@@ -648,15 +648,15 @@ namespace Hermes
 
     void Traverse::finish()
     {
-      if(stack == NULL)
+      if(stack == nullptr)
         return;
 
       for (int i = 0; i < size; i++)
-        if(stack[i].e != NULL)
+        if(stack[i].e != nullptr)
           free_state(stack + i);
 
       delete [] stack;
-      stack = NULL;
+      stack = nullptr;
     }
 
     uint64_t Traverse::init_idx(Rect* cr, Rect* er)
@@ -741,7 +741,7 @@ namespace Hermes
               } else
                 e_new[i] = e[i]->sons[son];
             }
-            union_recurrent(NULL, e_new, NULL, idx_new, uni->sons[son]);
+            union_recurrent(nullptr, e_new, nullptr, idx_new, uni->sons[son]);
           }
         }
         else

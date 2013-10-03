@@ -366,7 +366,7 @@ namespace Hermes
       ///
       /// Central element is neccessarily a descendant of one or more inactive elements in this case. We go up
       /// through these parents and check their edge with the same local number as the active edge. For each
-      /// inactive intermediate parent, this edge will not be used on the mesh (\c peek_edge_node return NULL).
+      /// inactive intermediate parent, this edge will not be used on the mesh (\c peek_edge_node return nullptr).
       /// Once a used edge is found, its actual owner is the active neighbor element, but it shares it with the
       /// parent of the central element we were looking for. Transformation of the central element to this parent
       /// is determined from the sequence of middle vertices of the intermediate parent edges. However, we actually use

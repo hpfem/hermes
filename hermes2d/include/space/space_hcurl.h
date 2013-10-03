@@ -37,10 +37,10 @@ namespace Hermes
 		public:
 			HcurlSpace();
 			HcurlSpace(MeshSharedPtr mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
-				Shapeset* shapeset = NULL);
+				Shapeset* shapeset = nullptr);
 
 			HcurlSpace(MeshSharedPtr mesh, int p_init = 1,
-				Shapeset* shapeset = NULL);
+				Shapeset* shapeset = nullptr);
 
 			virtual ~HcurlSpace();
 

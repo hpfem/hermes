@@ -69,7 +69,7 @@ namespace Hermes
       // load coordinates
       double *x = new double[n_nodes];
       double *y = new double[n_nodes];
-      err = ex_get_coord(exoid, x, y, NULL);
+      err = ex_get_coord(exoid, x, y, nullptr);
 
       // remove duplicate vertices and build renumbering map
       std::map<Vertex, int, VCompare> vtx_list;        // map for eliminating duplicities
@@ -126,14 +126,14 @@ namespace Hermes
           throw Hermes::Exceptions::Exception("Unknown type of element");
         }
       }
-      int3 *tri = n_tri > 0 ? new int3[n_tri] : NULL;    // triangles
-      std::string *tri_markers = n_tri > 0 ? new std::string[n_tri] : NULL;
-      int4 *quad = n_quad > 0 ? new int4[n_quad] : NULL;    // quads
-      std::string *quad_markers = n_quad > 0 ? new std::string[n_quad] : NULL;
+      int3 *tri = n_tri > 0 ? new int3[n_tri] : nullptr;    // triangles
+      std::string *tri_markers = n_tri > 0 ? new std::string[n_tri] : nullptr;
+      int4 *quad = n_quad > 0 ? new int4[n_quad] : nullptr;    // quads
+      std::string *quad_markers = n_quad > 0 ? new std::string[n_quad] : nullptr;
 
       int n_els = n_tri + n_quad;                // total number of elements
-      int **els = n_els > 0 ? new int *[n_els] : NULL;    // elements
-      int *el_nv = n_els > 0 ? new int[n_els] : NULL;    // number of vertices for each element
+      int **els = n_els > 0 ? new int *[n_els] : nullptr;    // elements
+      int *el_nv = n_els > 0 ? new int[n_els] : nullptr;    // number of vertices for each element
 
       int it = 0, iq = 0, iel = 0;
       for (int i = 0; i < n_eblocks; i++)

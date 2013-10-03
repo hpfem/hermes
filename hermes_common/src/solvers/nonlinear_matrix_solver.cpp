@@ -41,7 +41,7 @@ namespace Hermes
       this->max_allowed_iterations = 20;
       this->max_allowed_residual_norm = 1E9;
       this->num_iters = 0;
-      this->previous_sln_vector = NULL;
+      this->previous_sln_vector = nullptr;
       this->use_initial_guess_for_iterative_solvers = false;
 
       this->clear_tolerances();
@@ -90,15 +90,15 @@ namespace Hermes
       // Number of DOFs.
       assert(this->problem_size > 0);
 
-      if(this->sln_vector != NULL)
+      if(this->sln_vector != nullptr)
       {
         delete [] this->sln_vector;
-        this->sln_vector = NULL;
+        this->sln_vector = nullptr;
       }
 
       this->sln_vector = new Scalar[this->problem_size];
 
-      if(coeff_vec == NULL)
+      if(coeff_vec == nullptr)
         memset(this->sln_vector, 0, this->problem_size*sizeof(Scalar));
       else
         memcpy(this->sln_vector, coeff_vec, this->problem_size*sizeof(Scalar));
@@ -450,7 +450,7 @@ namespace Hermes
       memcpy(this->previous_sln_vector, this->sln_vector, sizeof(Scalar)*this->problem_size);
 
       // Solve, if the solver is iterative, give him the initial guess.
-      this->linear_matrix_solver->solve(this->use_initial_guess_for_iterative_solvers ? this->sln_vector : NULL);
+      this->linear_matrix_solver->solve(this->use_initial_guess_for_iterative_solvers ? this->sln_vector : nullptr);
 
       // 1. store the solution.
       double solution_change_norm = this->update_solution_return_change_norm(this->linear_matrix_solver->get_sln_vector());

@@ -26,19 +26,19 @@ namespace Hermes
     template<typename T>
     Func<T>::Func(int num_gip, int num_comps) : num_gip(num_gip), nc(num_comps)
     {
-      val = NULL;
-      dx = NULL;
-      dy = NULL;
+      val = nullptr;
+      dx = nullptr;
+      dy = nullptr;
 #ifdef H2D_USE_SECOND_DERIVATIVES
-      laplace = NULL;
+      laplace = nullptr;
 #endif
       if(this->nc > 1)
       {
-        val0 = val1 = NULL;
-        dx0 = dx1 = NULL;
-        dy0 = dy1 = NULL;
-        curl = NULL;
-        div = NULL;
+        val0 = val1 = nullptr;
+        dx0 = dx1 = nullptr;
+        dy0 = dy1 = nullptr;
+        curl = nullptr;
+        div = nullptr;
       }
     }
 
@@ -74,7 +74,7 @@ namespace Hermes
     template<typename T>
     void Func<T>::subtract(T* attribute, T* other_attribute)
     {
-      if(attribute != NULL && other_attribute != NULL)
+      if(attribute != nullptr && other_attribute != nullptr)
       {
         for(int i = 0; i < num_gip; i++)
           attribute[i] -= other_attribute[i];
@@ -113,7 +113,7 @@ namespace Hermes
     template<typename T>
     void Func<T>::add(T* attribute, T* other_attribute)
     {
-      if(attribute != NULL && other_attribute != NULL)
+      if(attribute != nullptr && other_attribute != nullptr)
       {
         for(int i = 0; i < num_gip; i++)
           attribute[i] += other_attribute[i];
@@ -125,54 +125,54 @@ namespace Hermes
     {
       delete val;
       delete dx;
-      val = NULL;
-      dx = NULL;
-      dy = NULL;
+      val = nullptr;
+      dx = nullptr;
+      dy = nullptr;
       
       if(this->nc > 1)
       {
-        val0 = val1 = NULL;
-        dx0 = dx1 = NULL;
-        dy0 = dy1 = NULL;
-        curl = NULL;
-        div = NULL;
+        val0 = val1 = nullptr;
+        dx0 = dx1 = nullptr;
+        dy0 = dy1 = nullptr;
+        curl = nullptr;
+        div = nullptr;
       }
 
 #ifdef H2D_USE_SECOND_DERIVATIVES
-      laplace = NULL;
+      laplace = nullptr;
 #endif
     }
 
     template<typename T>
     void Func<T>::free_fn()
     {
-      delete [] val; val = NULL;
-      delete [] dx; dx = NULL;
-      delete [] dy; dy = NULL;
+      delete [] val; val = nullptr;
+      delete [] dx; dx = nullptr;
+      delete [] dy; dy = nullptr;
 
 #ifdef H2D_USE_SECOND_DERIVATIVES
       delete [] laplace; 
-      laplace = NULL;
+      laplace = nullptr;
 #endif
 
       if(this->nc > 1)
       {
-        delete [] val0; delete [] val1; val0 = val1 = NULL;
-        delete [] dx0;  delete [] dx1; dx0 = dx1 = NULL;
-        delete [] dy0;  delete [] dy1; dy0 = dy1 = NULL;
-        delete [] curl; curl = NULL;
-        delete [] div; div = NULL;
+        delete [] val0; delete [] val1; val0 = val1 = nullptr;
+        delete [] dx0;  delete [] dx1; dx0 = dx1 = nullptr;
+        delete [] dy0;  delete [] dy1; dy0 = dy1 = nullptr;
+        delete [] curl; curl = nullptr;
+        delete [] div; div = nullptr;
       }
     }
 
     template<typename T>
     DiscontinuousFunc<T>::DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor, bool reverse) :
     Func<T>(fn->num_gip, fn->nc),
-      fn_central(NULL),
-      fn_neighbor(NULL),
+      fn_central(nullptr),
+      fn_neighbor(nullptr),
       reverse_neighbor_side(reverse)
     {
-      if(fn == NULL)
+      if(fn == nullptr)
         throw Hermes::Exceptions::Exception("Invalid arguments to DiscontinuousFunc constructor.");
       if(support_on_neighbor)
       {
@@ -196,7 +196,7 @@ namespace Hermes
           this->dy_neighbor = fn->dy;
         }
 
-        this->val = this->dx = this->dy = NULL;
+        this->val = this->dx = this->dy = nullptr;
       }
       else
       {
@@ -204,7 +204,7 @@ namespace Hermes
         this->val = fn->val;
         this->dx = fn->dx;
         this->dy = fn->dy;
-        this->val_neighbor = this->dx_neighbor = this->dy_neighbor = NULL;
+        this->val_neighbor = this->dx_neighbor = this->dy_neighbor = nullptr;
       }
     }
 
@@ -241,9 +241,9 @@ namespace Hermes
     template<typename T>
     void DiscontinuousFunc<T>::subtract(const DiscontinuousFunc<T>& func)
     {
-      if(fn_central != NULL && func.fn_central != NULL)
+      if(fn_central != nullptr && func.fn_central != nullptr)
         fn_central->subtract(func.fn_central);
-      if(fn_neighbor != NULL && func.fn_neighbor != NULL)
+      if(fn_neighbor != nullptr && func.fn_neighbor != nullptr)
       {
         fn_neighbor->subtract(func.fn_neighbor);
         if(reverse_neighbor_side)
@@ -258,13 +258,13 @@ namespace Hermes
     template<typename T>
     void DiscontinuousFunc<T>::free_fn()
     {
-      if(fn_central != NULL)
+      if(fn_central != nullptr)
       {
         fn_central->free_fn();
         delete fn_central;
-        fn_central = NULL;
+        fn_central = nullptr;
       }
-      if(fn_neighbor != NULL)
+      if(fn_neighbor != nullptr)
       {
         if(reverse_neighbor_side)
         {
@@ -274,24 +274,24 @@ namespace Hermes
         }
         fn_neighbor->free_fn();
         delete fn_neighbor;
-        fn_neighbor = NULL;
+        fn_neighbor = nullptr;
       }
     }
 
     template<typename T>
     void DiscontinuousFunc<T>::free_ord()
     {
-      if(fn_central != NULL)
+      if(fn_central != nullptr)
       {
         fn_central->free_ord();
         delete fn_central;
-        fn_central = NULL;
+        fn_central = nullptr;
       }
-      if(fn_neighbor != NULL)
+      if(fn_neighbor != nullptr)
       {
         fn_neighbor->free_ord();
         delete fn_neighbor;
-        fn_neighbor = NULL;
+        fn_neighbor = nullptr;
       }
     }
 
@@ -302,9 +302,9 @@ namespace Hermes
       edge_marker = -1;
       id = 0;
       isurf = 4;
-      x = y = NULL;
-      nx = ny = NULL;
-      tx = ty = NULL;
+      x = y = nullptr;
+      nx = ny = nullptr;
+      tx = ty = nullptr;
     }
 
     template<typename T>
@@ -648,8 +648,8 @@ namespace Hermes
     Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order)
     {
       // Sanity checks.
-      if(fu == NULL) throw Hermes::Exceptions::Exception("NULL MeshFunction in Func<Scalar>*::init_fn().");
-      if(fu->get_mesh() == NULL) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
+      if(fu == nullptr) throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
+      if(fu->get_mesh() == nullptr) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
 
       int nc = fu->get_num_components();
       Quad2D* quad = fu->get_quad_2d();
@@ -692,8 +692,8 @@ namespace Hermes
     Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order)
     {
       // Sanity checks.
-      if(fu == NULL) throw Hermes::Exceptions::Exception("NULL MeshFunction in Func<Scalar>*::init_fn().");
-      if(fu->get_mesh() == NULL) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
+      if(fu == nullptr) throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
+      if(fu->get_mesh() == nullptr) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
 
       SpaceType space_type = fu->get_space_type();
       SolutionType sln_type = fu->get_type();
@@ -771,9 +771,9 @@ namespace Hermes
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
       // Sanity checks.
-      if(fu == NULL)
-        throw Hermes::Exceptions::Exception("NULL MeshFunction in Func<Scalar>*::init_fn().");
-      if(fu->get_mesh() == NULL)
+      if(fu == nullptr)
+        throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
+      if(fu->get_mesh() == nullptr)
         throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
 
       if(u->nc == 1)

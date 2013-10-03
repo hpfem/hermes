@@ -22,17 +22,17 @@ namespace Hermes
   {
     template<typename Scalar>
     NeighborSearch<Scalar>::NeighborSearch(Element* el, MeshSharedPtr mesh) :
-      supported_shapes(NULL),
+      supported_shapes(nullptr),
       mesh(mesh),
       central_el(el),
-      neighb_el(NULL),
+      neighb_el(nullptr),
       quad(&g_quad_2d_std),
       central_transformations_size(0),
       neighbor_transformations_size(0),
       central_transformations_alloc_size(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS),
       neighbor_transformations_alloc_size(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS)
     {
-      if(central_el == NULL || central_el->active != 1)
+      if(central_el == nullptr || central_el->active != 1)
         throw Exceptions::Exception("You must pass an active element to the NeighborSearch constructor.");
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
@@ -48,10 +48,10 @@ namespace Hermes
 
     template<typename Scalar>
     NeighborSearch<Scalar>::NeighborSearch(const NeighborSearch& ns) :
-      supported_shapes(NULL),
+      supported_shapes(nullptr),
       mesh(ns.mesh),
       central_el(ns.central_el),
-      neighb_el(NULL),
+      neighb_el(nullptr),
       neighbor_edge(ns.neighbor_edge),
       active_segment(ns.active_segment)
     {
@@ -79,7 +79,7 @@ namespace Hermes
       this->neighbor_transformations_size = ns.neighbor_transformations_size;
       this->neighbor_transformations_alloc_size = ns.neighbor_transformations_alloc_size;
 
-      if(central_el == NULL || central_el->active != 1)
+      if(central_el == nullptr || central_el->active != 1)
         throw Exceptions::Exception("You must pass an active element to the NeighborSearch constructor.");
 
       for(unsigned int i = 0; i < ns.neighbors.size(); i++)
@@ -127,9 +127,9 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::clear_supported_shapes()
     {
-      if(supported_shapes != NULL)
+      if(supported_shapes != nullptr)
         delete supported_shapes;
-      supported_shapes = NULL;
+      supported_shapes = nullptr;
     }
 
     template<typename Scalar>
@@ -156,7 +156,7 @@ namespace Hermes
       // Reset information about the neighborhood's active state.
       active_segment = 0;
       active_edge = 0;
-      neighb_el = NULL;
+      neighb_el = nullptr;
       neighbor_edge.local_num_of_edge = 0;
 
       // Clear vectors with neighbor elements and their edge info for the active edge.
@@ -179,7 +179,7 @@ namespace Hermes
         neighb_el = central_el->get_neighbor(active_edge);
 
         // First case : The neighboring element is of the same size as the central one.
-        if(neighb_el != NULL)
+        if(neighb_el != nullptr)
         {
           //std::cout << "\t active neighbor el: " << neighb_el->id << std::endl;
 
@@ -212,7 +212,7 @@ namespace Hermes
         }
         else
         {
-          // Peek the vertex in the middle of the active edge (if there is none, vertex will be NULL).
+          // Peek the vertex in the middle of the active edge (if there is none, vertex will be nullptr).
           Node* vertex = mesh->peek_vertex_node(central_el->en[active_edge]->p1,  central_el->en[active_edge]->p2);
 
           // Endpoints of the active edge.
@@ -220,7 +220,7 @@ namespace Hermes
           orig_vertex_id[0] = central_el->vn[active_edge]->id;
           orig_vertex_id[1]  = central_el->vn[(active_edge + 1) % central_el->get_nvert()]->id;
 
-          if(vertex == NULL)
+          if(vertex == nullptr)
           {
             neighborhood_type = H2D_DG_GO_UP;
 
@@ -232,7 +232,7 @@ namespace Hermes
             int n_parents = 0;
 
             for (unsigned int j = 0; j < (unsigned) Transformations::max_level; j++)
-              par_mid_vertices[j] = NULL;
+              par_mid_vertices[j] = nullptr;
 
             find_act_elem_up(parent, orig_vertex_id, par_mid_vertices, n_parents);
 
@@ -676,8 +676,8 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::find_act_elem_up( Element* elem, int* orig_vertex_id, Node** par_mid_vertices, int n_parents)
     {
-      Node* edge = NULL;
-      Node* vertex = NULL;
+      Node* edge = nullptr;
+      Node* vertex = nullptr;
 
       assert(n_parents <= (int)Transformations::max_level);
 
@@ -694,7 +694,7 @@ namespace Hermes
       // Add the vertex in the middle of the parent edge to the array of intermediate parent vertices. This is for
       // consequent transformation of functions on neighbor element.
       vertex = mesh->peek_vertex_node(p1, p2);
-      if(vertex != NULL)
+      if(vertex != nullptr)
       {
         if(n_parents == 0)
           par_mid_vertices[n_parents++] = vertex;
@@ -706,7 +706,7 @@ namespace Hermes
               par_mid_vertices[n_parents++] = vertex;
       }
 
-      if((edge == NULL) || (central_el->en[active_edge]->id == edge->id))
+      if((edge == nullptr) || (central_el->en[active_edge]->id == edge->id))
       {
         // We have not yet found the parent of the central element completely adjacent to the neighbor.
         find_act_elem_up(elem->parent, orig_vertex_id, par_mid_vertices, n_parents);
@@ -716,7 +716,7 @@ namespace Hermes
         for (int i = 0; i < 2; i++)
         {
           // Get a pointer to the active neighbor element.
-          if((edge->elem[i] != NULL) && (edge->elem[i]->active == 1))
+          if((edge->elem[i] != nullptr) && (edge->elem[i]->active == 1))
           {
             neighb_el = edge->elem[i];  //debug_log("way up neighbor: %d", neighb_el->id);
 
@@ -730,7 +730,7 @@ namespace Hermes
               }
               if(neighbor_edge.local_num_of_edge == -1) throw Hermes::Exceptions::Exception("Neighbor edge wasn't found");
 
-              Node* n = NULL;
+              Node* n = nullptr;
 
               // Add to the array of neighbor_transformations one that transforms central el. to its parent completely
               // adjacent to the single big neighbor.
@@ -748,7 +748,7 @@ namespace Hermes
               for(int j = n_parents - 1; j > 0; j-- )
               {
                 n = mesh->peek_vertex_node(par_mid_vertices[j]->id, p1);
-                if(n == NULL)
+                if(n == nullptr)
                 {
                   neighbor_transforms->transf[n_parents - j - 1] = neighbor_edge.local_num_of_edge;
                   p1 = par_mid_vertices[j]->id;
@@ -810,11 +810,11 @@ namespace Hermes
         // tested segment.
         Node* edge = mesh->peek_edge_node(mid_vert, bnd_verts[i]);
 
-        if(edge == NULL) // The edge is not used, i.e. there is no active element on either side.
+        if(edge == nullptr) // The edge is not used, i.e. there is no active element on either side.
         {
           // Get the middle vertex of this edge and try again on the segments into which this vertex splits the edge.
           Node * n = mesh->peek_vertex_node(mid_vert, bnd_verts[i]);
-          if(n == NULL)
+          if(n == nullptr)
             throw Hermes::Exceptions::Exception("wasn't able to find middle vertex");
           else
           {
@@ -834,7 +834,7 @@ namespace Hermes
         {
           for (int j = 0; j < 2; j++)
           {
-            if((edge->elem[j] != NULL) && (edge->elem[j]->active == 1))
+            if((edge->elem[j] != nullptr) && (edge->elem[j]->active == 1))
             {
               neighb_el = mesh->get_element(edge->elem[j]->id);  //debug_log("way down neighbor: %d", edge->elem[j]->id);
 
@@ -914,7 +914,7 @@ namespace Hermes
     template<typename Scalar>
     typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist_multicomponent(SpaceSharedPtr<Scalar> space, AsmList<Scalar>* al)
     {
-      if(supported_shapes != NULL)
+      if(supported_shapes != nullptr)
         delete supported_shapes;
 
       supported_shapes = new ExtendedShapeset(this, al, space);
@@ -970,7 +970,7 @@ namespace Hermes
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_central_n_trans(unsigned int index) const
     {
-      if(central_transformations[index] != NULL)
+      if(central_transformations[index] != nullptr)
         return this->central_transformations[index]->num_levels;
       else
         return 0;
@@ -979,7 +979,7 @@ namespace Hermes
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_central_transformations(unsigned int index_1, unsigned int index_2) const
     {
-      if(central_transformations[index_1] == NULL)
+      if(central_transformations[index_1] == nullptr)
         throw Hermes::Exceptions::Exception("Out of bounds of central_transformations.");
       if(index_2 >= (unsigned) Transformations::max_level)
         throw Hermes::Exceptions::Exception("Trying to access transformation deeper than allowed.");
@@ -989,7 +989,7 @@ namespace Hermes
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_neighbor_n_trans(unsigned int index) const
     {
-      if(neighbor_transformations[index] != NULL)
+      if(neighbor_transformations[index] != nullptr)
         return this->neighbor_transformations[index]->num_levels;
       else
         return 0;
@@ -998,7 +998,7 @@ namespace Hermes
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_neighbor_transformations(unsigned int index_1, unsigned int index_2) const
     {
-      if(neighbor_transformations[index_1] == NULL)
+      if(neighbor_transformations[index_1] == nullptr)
         throw Hermes::Exceptions::Exception("Out of bounds of neighbor_transformations.");
       if(index_2 >= (unsigned) Transformations::max_level)
         throw Hermes::Exceptions::Exception("Trying to access transformation deeper than allowed.");
@@ -1049,7 +1049,7 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::ExtendedShapeset::combine_assembly_lists()
     {
-      assert(central_al != NULL && neighbor_al != NULL);
+      assert(central_al != nullptr && neighbor_al != nullptr);
       cnt = central_al->cnt + neighbor_al->cnt;
       dof = new int[cnt];
       memcpy(dof, central_al->dof, sizeof(int)*central_al->cnt);

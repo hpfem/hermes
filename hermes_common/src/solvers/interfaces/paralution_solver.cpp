@@ -37,18 +37,18 @@ namespace Hermes
     ParalutionMatrix<Scalar>::~ParalutionMatrix()
     {
       this->paralutionMatrix.Clear();
-      this->Ap = NULL;
-      this->Ai = NULL;
-      this->Ax = NULL;
+      this->Ap = nullptr;
+      this->Ai = nullptr;
+      this->Ax = nullptr;
     }
 
     template<typename Scalar>
     void ParalutionMatrix<Scalar>::free()
     {
       this->paralutionMatrix.Clear();
-      this->Ap = NULL;
-      this->Ai = NULL;
-      this->Ax = NULL;
+      this->Ap = nullptr;
+      this->Ai = nullptr;
+      this->Ax = nullptr;
       CSRMatrix<Scalar>::free();
     }
 
@@ -108,7 +108,7 @@ namespace Hermes
     void ParalutionVector<Scalar>::free()
     {
       this->paralutionVector->Clear();
-      this->v = NULL;
+      this->v = nullptr;
       SimpleVector<Scalar>::free();
     }
 
@@ -130,14 +130,14 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    AbstractParalutionLinearMatrixSolver<Scalar>::AbstractParalutionLinearMatrixSolver() : LoopSolver<Scalar>(NULL, NULL), matrix(NULL), rhs(NULL), paralutionSolver(NULL)
+    AbstractParalutionLinearMatrixSolver<Scalar>::AbstractParalutionLinearMatrixSolver() : LoopSolver<Scalar>(nullptr, nullptr), matrix(nullptr), rhs(nullptr), paralutionSolver(nullptr)
     {
       this->set_max_iters(1000);
       this->set_tolerance(1e-8, AbsoluteTolerance);
     }
 
     template<typename Scalar>
-    AbstractParalutionLinearMatrixSolver<Scalar>::AbstractParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : LoopSolver<Scalar>(matrix, rhs), matrix(matrix), rhs(rhs), paralutionSolver(NULL)
+    AbstractParalutionLinearMatrixSolver<Scalar>::AbstractParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : LoopSolver<Scalar>(matrix, rhs), matrix(matrix), rhs(rhs), paralutionSolver(nullptr)
     {
       this->set_max_iters(1000);
       this->set_tolerance(1e-8, AbsoluteTolerance);
@@ -147,7 +147,7 @@ namespace Hermes
     AbstractParalutionLinearMatrixSolver<Scalar>::~AbstractParalutionLinearMatrixSolver()
     {
       delete this->paralutionSolver;
-      this->sln = NULL;
+      this->sln = nullptr;
     }
 
     template<typename Scalar>
@@ -155,13 +155,13 @@ namespace Hermes
     {
       if(this->paralutionSolver)
         delete this->paralutionSolver;
-      this->paralutionSolver = NULL;
+      this->paralutionSolver = nullptr;
     }
 
     template<typename Scalar>
     void AbstractParalutionLinearMatrixSolver<Scalar>::solve()
     {
-      this->solve(NULL);
+      this->solve(nullptr);
     }
 
 
@@ -268,13 +268,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver() : AbstractParalutionLinearMatrixSolver<Scalar>(), IterSolver<Scalar>(NULL, NULL), LoopSolver<Scalar>(NULL, NULL), preconditioner(NULL)
+    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver() : AbstractParalutionLinearMatrixSolver<Scalar>(), IterSolver<Scalar>(nullptr, nullptr), LoopSolver<Scalar>(nullptr, nullptr), preconditioner(nullptr)
     {
       this->set_precond(new Preconditioners::ParalutionPrecond<Scalar>(ILU));
     }
 
     template<typename Scalar>
-    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : AbstractParalutionLinearMatrixSolver<Scalar>(matrix, rhs), IterSolver<Scalar>(matrix, rhs), LoopSolver<Scalar>(matrix, rhs), preconditioner(NULL)
+    IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : AbstractParalutionLinearMatrixSolver<Scalar>(matrix, rhs), IterSolver<Scalar>(matrix, rhs), LoopSolver<Scalar>(matrix, rhs), preconditioner(nullptr)
     {
       this->set_precond(new Preconditioners::ParalutionPrecond<Scalar>(ILU));
     }
@@ -316,7 +316,7 @@ namespace Hermes
         break;
       default:
         throw Hermes::Exceptions::Exception("A wrong solver type detected in PARALUTION.");
-        return NULL;
+        return nullptr;
       }
     }
 
@@ -491,7 +491,7 @@ namespace Hermes
         break;
       default:
         throw Hermes::Exceptions::Exception("A wrong preconditioner type passed to ParalutionPrecond constructor.");
-        return NULL;
+        return nullptr;
       }
     }
 

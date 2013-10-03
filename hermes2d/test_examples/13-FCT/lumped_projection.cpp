@@ -4,18 +4,18 @@
 void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakForm<double>* wf, double* target_vec, CSCMatrix<double>*  mat)
 {
 
-  if(space == NULL) printf("this->space == NULL in Lumped_Projection::project_internal().");
+  if(space == nullptr) printf("this->space == nullptr in Lumped_Projection::project_internal().");
   // Get dimension of the space.
   int ndof = space->get_num_dofs();
 
-  if(mat!=NULL) if(mat->get_size()!=ndof) printf("matrix=%i, ndof=%i", mat->get_size(),ndof);
+  if(mat!=nullptr) if(mat->get_size()!=ndof) printf("matrix=%i, ndof=%i", mat->get_size(),ndof);
 
   // Initialize DiscreteProblem.
   DiscreteProblem<double>* dp = new DiscreteProblem<double>(wf, space);
   CSCMatrix<double>* matrix = new CSCMatrix<double>;	
   SimpleVector<double>* rhs = new SimpleVector<double>(ndof);
-  double* coeff_vec =NULL; 
-  if(mat==NULL) 		//=> masslumping	
+  double* coeff_vec =nullptr; 
+  if(mat==nullptr) 		//=> masslumping	
   {
     CSCMatrix<double>* lumped_matrix = new CSCMatrix<double>;   //M_L 
     dp->assemble(matrix, rhs);  		 
@@ -46,7 +46,7 @@ void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakForm<
     }
     coeff_vec = solver->get_sln_vector();	
 
-    if (target_vec != NULL)
+    if (target_vec != nullptr)
       for (int i=0; i < ndof; i++) 
         target_vec[i] = coeff_vec[i];
     delete solver;
@@ -71,7 +71,7 @@ void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakForm<
 
     coeff_vec = solver->get_sln_vector();			
 
-    if (target_vec != NULL)
+    if (target_vec != nullptr)
       for (int i=0; i < ndof; i++) target_vec[i] = coeff_vec[i];
     delete solver;
   }
@@ -88,7 +88,7 @@ void Lumped_Projection::project_lumped( const  SpaceSharedPtr<double> space, Mes
   double* target_vec, CSCMatrix<double>*  mat )
 {
   // Sanity checks.
-  if (target_vec == NULL) throw Exceptions::NullException(3);
+  if (target_vec == nullptr) throw Exceptions::NullException(3);
   // Define temporary projection weak form.
   WeakForm<double>* proj_wf = new WeakForm<double>(1);
   proj_wf->set_ext(source_meshfn);

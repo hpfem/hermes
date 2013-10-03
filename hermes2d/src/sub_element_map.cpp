@@ -20,7 +20,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename T>
-    SubElementMap<T>::SubElementMap() : root(NULL)
+    SubElementMap<T>::SubElementMap() : root(nullptr)
     {
     }
 
@@ -47,11 +47,11 @@ namespace Hermes
       {
         int current_son = (sub_idx - 1) & 7;
         Node* child_node = node->children[current_son];
-        if(child_node == NULL)
+        if(child_node == nullptr)
           if(to_add)
-            node->children[current_son] = new Node(NULL);
+            node->children[current_son] = new Node(nullptr);
           else
-            return NULL;
+            return nullptr;
         sub_idx = (sub_idx - 1) >> 3;
         node = child_node;
       }
@@ -68,9 +68,9 @@ namespace Hermes
       {
         int current_son = (sub_idx - 1) & 7;
         Node* child_node = node->children[current_son];
-        if(child_node == NULL)
+        if(child_node == nullptr)
         {
-          node->children[current_son] = new Node(NULL);
+          node->children[current_son] = new Node(nullptr);
         }
         sub_idx = (sub_idx - 1) >> 3;
         node = child_node;
@@ -89,7 +89,7 @@ namespace Hermes
     {
       for(int i = 0; i < 8; i++)
       {
-        if(this->children[i] != NULL)
+        if(this->children[i] != nullptr)
         {
           this->children[i]->clear_subtree;
           delete this->children[i];

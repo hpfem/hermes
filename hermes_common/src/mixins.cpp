@@ -34,11 +34,11 @@ namespace Hermes
     }
 
     Loggable::LoggerMonitor Loggable::logger_monitor;
-    char* Loggable::staticLogFileName = NULL;
+    char* Loggable::staticLogFileName = nullptr;
 
     std::map<std::string, bool> Loggable::logger_written;
 
-    Loggable::Loggable(bool verbose_output, callbackFn verbose_callback) : verbose_output(verbose_output), verbose_callback(verbose_callback), logFileName(NULL)
+    Loggable::Loggable(bool verbose_output, callbackFn verbose_callback) : verbose_output(verbose_output), verbose_callback(verbose_callback), logFileName(nullptr)
     {
     }
 
@@ -110,7 +110,7 @@ namespace Hermes
 
       //write text
       DWORD num_written;
-      BOOL write_success = WriteConsoleA(h_console, text_contents, strlen(text_contents), &num_written, NULL);
+      BOOL write_success = WriteConsoleA(h_console, text_contents, strlen(text_contents), &num_written, nullptr);
       std::cout << std::endl;
 
       //Linux platform
@@ -164,7 +164,7 @@ namespace Hermes
 
       //write text
       DWORD num_written;
-      BOOL write_success = WriteConsoleA(h_console, text_contents, strlen(text_contents), &num_written, NULL);
+      BOOL write_success = WriteConsoleA(h_console, text_contents, strlen(text_contents), &num_written, nullptr);
       std::cout << std::endl;
       //Linux platform
 #else
@@ -218,7 +218,7 @@ namespace Hermes
 
       //write text
       DWORD num_written;
-      BOOL write_success = WriteConsoleA(h_console, text_contents, strlen(text_contents), &num_written, NULL);
+      BOOL write_success = WriteConsoleA(h_console, text_contents, strlen(text_contents), &num_written, nullptr);
       std::cout << std::endl;
       //Linux platform
 #else
@@ -399,7 +399,7 @@ namespace Hermes
 
       //write text
       DWORD num_written;
-      BOOL write_success = WriteConsoleA(h_console, text, strlen(text), &num_written, NULL);
+      BOOL write_success = WriteConsoleA(h_console, text, strlen(text), &num_written, nullptr);
 
       //return previous settings
       SetConsoleTextAttribute(h_console, console_info.wAttributes);
@@ -476,7 +476,7 @@ namespace Hermes
       if(log_file_name)
       {
         FILE* file = fopen(log_file_name, "at");
-        if(file != NULL)
+        if(file != nullptr)
         {
           //check whether log file was already written
           std::map<std::string, bool>::const_iterator found = logger_written.find(log_file_name);
@@ -499,7 +499,7 @@ namespace Hermes
           fprintf(file, "%s\t%s\n", time_buf, msg);
           fclose(file);
 
-          if(this->verbose_callback != NULL)
+          if(this->verbose_callback != nullptr)
             this->verbose_callback(msg);
         }
       }
@@ -521,7 +521,7 @@ namespace Hermes
 
 
 
-    TimeMeasurable::TimeMeasurable(const char *name) : period_name(name == NULL ? "unnamed" : name)
+    TimeMeasurable::TimeMeasurable(const char *name) : period_name(name == nullptr ? "unnamed" : name)
     {
       //initialization
 #ifdef _WINDOWS  //Windows

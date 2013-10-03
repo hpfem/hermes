@@ -31,9 +31,9 @@ namespace Hermes
   {
     template<typename Scalar>
     AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
-      : IterSolver<Scalar>(m, rhs), m(m), rhs(rhs), final_matrix(NULL), P(NULL), Q(NULL), row_perm(NULL), col_perm(NULL)
+      : IterSolver<Scalar>(m, rhs), m(m), rhs(rhs), final_matrix(nullptr), P(nullptr), Q(nullptr), row_perm(nullptr), col_perm(nullptr)
     {
-      pc = NULL;
+      pc = nullptr;
     }
 
     template<typename Scalar>
@@ -206,8 +206,8 @@ namespace Hermes
     template<>
     void AztecOOSolver<double>::solve()
     {
-      assert(m != NULL);
-      assert(rhs != NULL);
+      assert(m != nullptr);
+      assert(rhs != nullptr);
       assert(m->size == rhs->size);
 
       // no output
@@ -260,7 +260,7 @@ namespace Hermes
       Epetra_Vector x(final_matrix->mat->DomainMap());
       aztec.SetLHS(&x);
 
-      if(pc != NULL)
+      if(pc != nullptr)
       {
         if(reuse_scheme == HERMES_CREATE_STRUCTURE_FROM_SCRATCH)
           //if(aztec.GetAztecOption(AZ_pre_calc) == AZ_calc)
@@ -305,8 +305,8 @@ namespace Hermes
     template<>
     void AztecOOSolver<double>::solve(double *initial_guess)
     {
-      assert(m != NULL);
-      assert(rhs != NULL);
+      assert(m != nullptr);
+      assert(rhs != nullptr);
       assert(m->size == rhs->size);
 
       // no output
@@ -373,7 +373,7 @@ namespace Hermes
 
       aztec.SetLHS(&x);
 
-      if(pc != NULL)
+      if(pc != nullptr)
       {
         if(reuse_scheme == HERMES_CREATE_STRUCTURE_FROM_SCRATCH)
           //if(aztec.GetAztecOption(AZ_pre_calc) == AZ_calc)
@@ -417,8 +417,8 @@ namespace Hermes
     template<>
     void AztecOOSolver<std::complex<double> >::solve()
     {
-      assert(m != NULL);
-      assert(rhs != NULL);
+      assert(m != nullptr);
+      assert(rhs != nullptr);
       assert(m->size == rhs->size);
 
       // no output
@@ -451,8 +451,8 @@ namespace Hermes
     template<>
     void AztecOOSolver<std::complex<double> >::solve(std::complex<double>* initial_guess)
     {
-      assert(m != NULL);
-      assert(rhs != NULL);
+      assert(m != nullptr);
+      assert(rhs != nullptr);
       assert(m->size == rhs->size);
 
       // no output

@@ -73,7 +73,7 @@ const int P_INIT = 1;
 #else
   NewtonSolver<double> solver;
 #endif
-  double* Newton_initial_guess = NULL;
+  double* Newton_initial_guess = nullptr;
 
   // Error calculation.
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);

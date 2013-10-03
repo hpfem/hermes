@@ -56,10 +56,10 @@ namespace Hermes
       /// Returns the total number of nodes stored.
       int get_num_nodes() const;
 
-      /// Returns a vertex node with parent id's p1 and p2 if it exists, NULL otherwise.
+      /// Returns a vertex node with parent id's p1 and p2 if it exists, nullptr otherwise.
       Node* peek_vertex_node(int p1, int p2) const;
 
-      /// Returns an edge node with parent id's p1 and p2 if it exists, NULL otherwise.
+      /// Returns an edge node with parent id's p1 and p2 if it exists, nullptr otherwise.
       Node* peek_edge_node(int p1, int p2) const;
 
       /// Central function: obtains a vertex node pointer given the id

@@ -63,8 +63,8 @@ namespace Hermes
       }
       else
       {
-        this->pages = NULL;
-        this->unused = NULL;
+        this->pages = nullptr;
+        this->unused = nullptr;
       }
       append_only = false;
     }

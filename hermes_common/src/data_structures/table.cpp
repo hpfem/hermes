@@ -26,7 +26,7 @@ namespace Hermes
   Table::Table()
   {
     this->size = 0;
-    this->A = NULL;
+    this->A = nullptr;
   }
 
   Table::Table(unsigned int size)
@@ -72,9 +72,9 @@ namespace Hermes
 
   ButcherTable::ButcherTable() : Table()
   {
-    this->B = NULL;
-    this->B2 = NULL;
-    this->C = NULL;
+    this->B = nullptr;
+    this->B2 = nullptr;
+    this->C = nullptr;
   }
 
   ButcherTable::ButcherTable(unsigned int size) : Table(size)

@@ -32,7 +32,7 @@
     class MyStackWalker : public StackWalker
     {
     public:
-      MyStackWalker() : StackWalker(StackWalker::RetrieveSymbol & StackWalker::RetrieveLine, NULL, GetCurrentProcessId(), GetCurrentProcess())
+      MyStackWalker() : StackWalker(StackWalker::RetrieveSymbol & StackWalker::RetrieveLine, nullptr, GetCurrentProcessId(), GetCurrentProcess())
       {
         int a = 1;
       }
