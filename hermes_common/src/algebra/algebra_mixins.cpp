@@ -42,10 +42,9 @@ namespace Hermes
         if (matrix == nullptr)
           return;
 
-        char* fileName = new char[this->matrixFilename.length() + 5];
-
         if(this->output_matrixOn)
         {
+          char* fileName = new char[this->matrixFilename.length() + 5];
           if(this->only_lastMatrixIteration)
             sprintf(fileName, "%s", this->matrixFilename.c_str());
           else if(this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration)
@@ -82,10 +81,10 @@ namespace Hermes
         if (rhs == nullptr)
           return;
 
-        char* fileName = new char[this->RhsFilename.length() + 5];
 
         if(this->output_rhsOn)
         {
+          char* fileName = new char[this->RhsFilename.length() + 5];
           if(this->only_lastRhsIteration)
             sprintf(fileName, "%s", this->RhsFilename.c_str());
           else if(this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration)
