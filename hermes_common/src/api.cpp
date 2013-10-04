@@ -58,9 +58,10 @@ namespace Hermes
     
     // Set handlers.
 #ifdef WITH_PARALUTION
-    this->setter_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_ITERATIVE), &ParalutionInitialization::init_paralution));
-    this->setter_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_AMG), &ParalutionInitialization::init_paralution));
-    this->setter_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_ITERATIVE), &ParalutionInitialization::deinit_paralution));
+    this->setter_handlers.insert(std::pair<HermesCommonApiParam, typename Api::SetterHandler>(Hermes::numThreads, &ParalutionInitialization::set_threads_paralution));
+    this->value_setter_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_ITERATIVE), &ParalutionInitialization::init_paralution));
+    this->value_setter_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_AMG), &ParalutionInitialization::init_paralution));
+    this->change_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_ITERATIVE), &ParalutionInitialization::deinit_paralution));
     this->change_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_AMG), &ParalutionInitialization::deinit_paralution));
 #endif
 
@@ -111,10 +112,18 @@ namespace Hermes
     this->parameters.find(param)->second->user_val = value;
 
     // And now we might have to call some handler of the new value setting.
-    std::map<std::pair<HermesCommonApiParam, int>, SetterHandler>::iterator setter_handler_iterator = this->setter_handlers.find(std::pair<HermesCommonApiParam, int>(param, this->parameters.find(param)->second->user_val));
+    // First - generic.
+    std::map<HermesCommonApiParam, SetterHandler>::iterator setter_handler_iterator = this->setter_handlers.find(param);
     if(setter_handler_iterator != this->setter_handlers.end())
     {
       setter_handler_iterator->second();
+    }
+
+    // Second - specific.
+    std::map<std::pair<HermesCommonApiParam, int>, SetterHandler>::iterator value_setter_handler_iterator = this->value_setter_handlers.find(std::pair<HermesCommonApiParam, int>(param, this->parameters.find(param)->second->user_val));
+    if(value_setter_handler_iterator != this->value_setter_handlers.end())
+    {
+      value_setter_handler_iterator->second();
     }
   }
 

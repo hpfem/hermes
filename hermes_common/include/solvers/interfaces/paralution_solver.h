@@ -130,6 +130,12 @@ namespace Hermes
         paralution::info_paralution();
       }
 
+      static void set_threads_paralution()
+      {
+        paralution::set_omp_threads_paralution(HermesCommonApi.get_integral_param_value(numThreads));
+        paralution::info_paralution();
+      }
+
       static void deinit_paralution()
       {
         paralution::stop_paralution();

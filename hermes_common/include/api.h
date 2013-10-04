@@ -72,10 +72,15 @@ namespace Hermes
     std::map<HermesCommonApiParam, Parameter*> parameters;
 
     /// Internal.
-    /// Setter handlers.
+    /// Setter handlers without value.
     /// Purpose: when a parameter is set (such as the linear solver), some action might have to be taken to
     /// serve the event.
-    std::map<std::pair<HermesCommonApiParam, int>, SetterHandler> setter_handlers;
+    std::map<HermesCommonApiParam, SetterHandler> setter_handlers;
+
+    /// Setter handlers with specific value.
+    /// Purpose: when a parameter is set (such as the linear solver), some action might have to be taken to
+    /// serve the event.
+    std::map<std::pair<HermesCommonApiParam, int>, SetterHandler> value_setter_handlers;
 
     /// Internal.
     /// Change handlers.
