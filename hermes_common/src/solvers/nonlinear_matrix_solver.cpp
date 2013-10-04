@@ -43,7 +43,6 @@ namespace Hermes
       this->num_iters = 0;
       this->previous_sln_vector = nullptr;
       this->use_initial_guess_for_iterative_solvers = false;
-
       this->clear_tolerances();
     }
 
@@ -109,6 +108,9 @@ namespace Hermes
       // Backup vector for unsuccessful reuse of Jacobian.
       residual_back = create_vector<Scalar>();
       residual_back->alloc(this->problem_size);
+
+      this->previous_jacobian = nullptr;
+      this->previous_residual = nullptr;
 
       this->on_initialization();
     }
@@ -375,6 +377,10 @@ namespace Hermes
       ::free(this->previous_sln_vector);
       delete residual_back;
       this->problem_size = -1;
+      if (this->previous_jacobian)
+        delete this->previous_jacobian;
+      if (this->previous_residual)
+        delete this->previous_residual;
     }
 
     template<typename Scalar>
@@ -409,13 +415,13 @@ namespace Hermes
       if(this->jacobian_reusable && this->constant_jacobian)
       {
         this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
-        this->assemble_residual();
+        this->assemble_residual(false);
         this->get_parameter_value(this->p_iterations_with_recalculated_jacobian).push_back(false);
       }
       else
       {
         this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
-        this->assemble();
+        this->assemble(false, false);
         this->jacobian_reusable = true;
         this->get_parameter_value(this->p_iterations_with_recalculated_jacobian).push_back(true);
       }
@@ -528,7 +534,7 @@ namespace Hermes
         do
         {
           // Assemble just the residual.
-          this->assemble_residual();
+          this->assemble_residual(false);
           // Current residual norm.
           this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
 
@@ -595,7 +601,7 @@ namespace Hermes
           this->solve_linear_system();
 
           // Assemble next residual for both reusage and convergence test.
-          this->assemble_residual();
+          this->assemble_residual(false);
           // Current residual norm.
           this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
 
@@ -635,7 +641,7 @@ namespace Hermes
 
         // Reassemble the jacobian once not reusable anymore.
         this->info("\t\tre-calculating Jacobian.");
-        this->assemble_jacobian();
+        this->assemble_jacobian(true);
 
         // Set factorization schemes.
         if(this->jacobian_reusable)
@@ -666,6 +672,15 @@ namespace Hermes
         if(this->handle_convergence_state_return_finished(this->get_convergence_state()))
           return;
       }
+    }
+
+    template<typename Scalar>
+    bool NonlinearMatrixSolver<Scalar>::damping_factor_condition()
+    {
+      double residual_norm = *(this->get_parameter_value(this->residual_norms()).end() - 1);
+      double previous_residual_norm = *(this->get_parameter_value(this->residual_norms()).end() - 2);
+
+      return (residual_norm < previous_residual_norm * this->sufficient_improvement_factor);
     }
 
     template<typename Scalar>

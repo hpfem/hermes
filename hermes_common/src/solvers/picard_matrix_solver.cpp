@@ -38,12 +38,13 @@ namespace Hermes
     void PicardMatrixSolver<Scalar>::init_picard()
     {
       this->min_allowed_damping_coeff = 1E-4;
-      this->manual_damping = true;
+      this->manual_damping = false;
       this->auto_damping_ratio = 2.0;
       this->manual_damping_factor = 1.0;
       this->initial_auto_damping_factor = 1.0;
       this->sufficient_improvement_factor = 1.05;
       this->necessary_successful_steps_to_increase = 3;
+      this->damping_factor_condition_overloaded = true;
 
       this->sufficient_improvement_factor_jacobian = 1e-1;
       this->max_steps_with_reused_jacobian = 0;
@@ -56,6 +57,12 @@ namespace Hermes
       this->vec_in_memory = 0;
 
       this->use_initial_guess_for_iterative_solvers = true;
+    }
+
+    template<typename Scalar>
+    void PicardMatrixSolver<Scalar>::use_overloaded_damping_factor_condition(bool onOff)
+    {
+      this->damping_factor_condition_overloaded = onOff;
     }
 
     template<typename Scalar>
@@ -77,14 +84,17 @@ namespace Hermes
     double PicardMatrixSolver<Scalar>::calculate_residual_norm()
     {
       Scalar* temp = new Scalar[this->problem_size];
-      this->get_jacobian()->multiply_with_vector(this->sln_vector, temp, true);
+      if (this->previous_jacobian)
+        this->previous_jacobian->multiply_with_vector(this->sln_vector, temp, true);
+      else
+        this->get_jacobian()->multiply_with_vector(this->sln_vector, temp, true);
       Vector<Scalar>* residual = this->get_residual();
       for (int i = 0; i < this->problem_size; i++)
         temp[i] = temp[i] - residual->get(i);
 
       double residual_norm = get_l2_norm(temp, this->problem_size);
       delete[] temp;
-      
+
       return residual_norm;
     }
 
@@ -98,13 +108,17 @@ namespace Hermes
     template<typename Scalar>
     bool PicardMatrixSolver<Scalar>::damping_factor_condition()
     {
-      if (this->get_parameter_value(this->solution_change_norms()).size() == 1)
-        return true;
+      if (damping_factor_condition_overloaded)
+      {
+        if (this->get_parameter_value(this->solution_change_norms()).size() == 1)
+          return true;
 
-      double sln_change_norm = *(this->get_parameter_value(this->solution_change_norms()).end() - 1);
-      double previous_sln_change_norm = *(this->get_parameter_value(this->solution_change_norms()).end() - 2);
-
-      return (sln_change_norm < previous_sln_change_norm);
+        double sln_change_norm = *(this->get_parameter_value(this->solution_change_norms()).end() - 1);
+        double previous_sln_change_norm = *(this->get_parameter_value(this->solution_change_norms()).end() - 2);
+        return (sln_change_norm < previous_sln_change_norm * this->sufficient_improvement_factor);
+      }
+      else
+        return NonlinearMatrixSolver<Scalar>::damping_factor_condition();
     }
 
     template<typename Scalar>
@@ -142,13 +156,13 @@ namespace Hermes
     template<typename Scalar>
     void PicardMatrixSolver<Scalar>::init_anderson()
     {
-      if (anderson_is_on) 
+      if (anderson_is_on)
       {
         previous_Anderson_sln_vector = new Scalar[this->problem_size];
         previous_vectors = new Scalar*[num_last_vectors_used];
         for (int i = 0; i < num_last_vectors_used; i++)
           previous_vectors[i] = new Scalar[this->problem_size];
-        anderson_coeffs = new Scalar[num_last_vectors_used-1];
+        anderson_coeffs = new Scalar[num_last_vectors_used - 1];
         memcpy(previous_vectors[0], this->sln_vector, this->problem_size*sizeof(Scalar));
         this->vec_in_memory = 1;
       }
@@ -159,11 +173,11 @@ namespace Hermes
     {
       if (anderson_is_on)
       {
-        delete [] previous_Anderson_sln_vector;
+        delete[] previous_Anderson_sln_vector;
         for (int i = 0; i < num_last_vectors_used; i++)
-          delete [] previous_vectors[i];
-        delete [] previous_vectors;
-        delete [] anderson_coeffs;
+          delete[] previous_vectors[i];
+        delete[] previous_vectors;
+        delete[] anderson_coeffs;
       }
     }
 
@@ -182,10 +196,10 @@ namespace Hermes
           // Save this->sln_vector[] as the newest one.
           Scalar* oldest_vec = previous_vectors[0];
 
-          for (int i = 0; i < num_last_vectors_used-1; i++)
+          for (int i = 0; i < num_last_vectors_used - 1; i++)
             previous_vectors[i] = previous_vectors[i + 1];
 
-          previous_vectors[num_last_vectors_used-1] = oldest_vec;
+          previous_vectors[num_last_vectors_used - 1] = oldest_vec;
 
           memcpy(oldest_vec, this->sln_vector, this->problem_size*sizeof(Scalar));
         }
@@ -200,7 +214,7 @@ namespace Hermes
           {
             this->previous_Anderson_sln_vector[i] = 0.;
             for (int j = 1; j < num_last_vectors_used; j++)
-              this->previous_Anderson_sln_vector[i] += anderson_coeffs[j-1] * previous_vectors[j][i] - (1.0 - anderson_beta) * anderson_coeffs[j - 1] * (previous_vectors[j][i] - previous_vectors[j - 1][i]);
+              this->previous_Anderson_sln_vector[i] += anderson_coeffs[j - 1] * previous_vectors[j][i] - (1.0 - anderson_beta) * anderson_coeffs[j - 1] * (previous_vectors[j][i] - previous_vectors[j - 1][i]);
           }
         }
       }
@@ -210,7 +224,7 @@ namespace Hermes
     void PicardMatrixSolver<Scalar>::calculate_anderson_coeffs()
     {
       // If num_last_vectors_used is 2, then there is only one residual, and thus only one alpha coeff which is 1.0.
-      if(num_last_vectors_used == 2)
+      if (num_last_vectors_used == 2)
       {
         anderson_coeffs[0] = 1.0;
         return;
@@ -264,8 +278,8 @@ namespace Hermes
       anderson_coeffs[n] = 1.0 - sum;
 
       // Clean up.
-      delete [] mat;
-      delete [] rhs;
+      delete[] mat;
+      delete[] rhs;
     }
 
     template class HERMES_API PicardMatrixSolver<double>;

@@ -184,13 +184,9 @@ namespace Hermes
       this->Ap = new int[this->size + 1];
       this->Ai = new int[nnz];
       this->Ax = new Scalar[nnz];
-      for (unsigned int i = 0; i < this->size + 1; i++)
-        this->Ap[i] = ap[i];
-      for (unsigned int i = 0; i < nnz; i++)
-      {
-        this->Ax[i] = ax[i];
-        this->Ai[i] = ai[i];
-      }
+      memcpy(this->Ap, ap, (this->size + 1) * sizeof(int));
+      memcpy(this->Ai, ai, this->nnz * sizeof(int));
+      memcpy(this->Ax, ax, this->nnz * sizeof(Scalar));
     }
 
     template<typename Scalar>

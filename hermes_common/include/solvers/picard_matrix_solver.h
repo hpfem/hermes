@@ -36,6 +36,8 @@ namespace Hermes
       PicardMatrixSolver();
       virtual ~PicardMatrixSolver() {};
 
+      void use_overloaded_damping_factor_condition(bool onOff);
+
 #pragma region anderson-public
       /// Turn on / off the Anderson acceleration. By default it is off.
       void use_Anderson_acceleration(bool to_set);
@@ -74,6 +76,7 @@ namespace Hermes
       /// State querying helpers.
       inline std::string getClassName() const { return "PicardMatrixSolver"; }
 
+      bool damping_factor_condition_overloaded;
 #pragma region anderson-private
       // Anderson.
       int num_last_vectors_used;

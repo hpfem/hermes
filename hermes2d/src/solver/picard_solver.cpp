@@ -69,7 +69,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::assemble_residual()
+    void PicardSolver<Scalar>::assemble_residual(bool store_previous_residual)
     {
       bool use_Anderson = this->anderson_is_on && (this->vec_in_memory >= this->num_last_vectors_used);
       this->dp->assemble(use_Anderson ? this->previous_Anderson_sln_vector : this->sln_vector, this->get_residual());
@@ -77,16 +77,32 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::assemble_jacobian()
+    void PicardSolver<Scalar>::assemble_jacobian(bool store_previous_jacobian)
     {
+      if (store_previous_jacobian)
+      {
+        if (this->previous_jacobian)
+          delete this->previous_jacobian;
+        if (this->get_current_iteration_number() > 1)
+          this->previous_jacobian = this->get_jacobian()->duplicate();
+      }
+        
       bool use_Anderson = this->anderson_is_on && (this->vec_in_memory >= this->num_last_vectors_used);
       this->dp->assemble(use_Anderson ? this->previous_Anderson_sln_vector : this->sln_vector, this->get_jacobian());
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number()); 
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::assemble()
+    void PicardSolver<Scalar>::assemble(bool store_previous_jacobian, bool store_previous_residual)
     {
+      if (store_previous_jacobian)
+      {
+        if (this->previous_jacobian)
+          delete this->previous_jacobian;
+        if (this->get_current_iteration_number() > 1)
+          this->previous_jacobian = this->get_jacobian()->duplicate();
+      }
+
       bool use_Anderson = this->anderson_is_on && (this->vec_in_memory >= this->num_last_vectors_used);
       this->dp->assemble(use_Anderson ? this->previous_Anderson_sln_vector : this->sln_vector, this->get_jacobian(), this->get_residual());
       this->process_vector_output(this->get_residual(), this->get_current_iteration_number());

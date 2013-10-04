@@ -186,9 +186,9 @@ namespace Hermes
       Vector<Scalar>* residual_back;
 #pragma endregion
 
-      virtual void assemble_residual() = 0;
-      virtual void assemble_jacobian() = 0;
-      virtual void assemble() = 0;
+      virtual void assemble_residual(bool store_previous_residual) = 0;
+      virtual void assemble_jacobian(bool store_previous_jacobian) = 0;
+      virtual void assemble(bool store_previous_jacobian, bool store_previous_residual) = 0;
       
       /// \return Whether or not should the processing continue.
       virtual void on_damping_factor_updated();
@@ -228,7 +228,7 @@ namespace Hermes
       bool calculate_damping_factor(unsigned int& successful_steps);
 
       /// Returns iff the damping factor condition is fulfilled.
-      virtual bool damping_factor_condition() = 0;
+      virtual bool damping_factor_condition();
 
       /// Shortcut method for getting the current iteration.
       int get_current_iteration_number();
@@ -264,7 +264,12 @@ namespace Hermes
       /// solution as a correct one. If false, only one will be enough.
       bool handleMultipleTolerancesAnd;
 
+      /// To be filled and returned on demand.
       int num_iters;
+
+      /// Previous structures (e.g. in Picard's residual calculation)
+      SparseMatrix<Scalar>* previous_jacobian;
+      Vector<Scalar>* previous_residual;
 
 #pragma region OutputAttachable
       // For derived classes - read-only access.

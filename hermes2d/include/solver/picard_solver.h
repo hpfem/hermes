@@ -94,9 +94,9 @@ namespace Hermes
       /// DiscreteProblemWeakForm helper.
       virtual void set_weak_formulation(WeakForm<Scalar>* wf);
 
-      void assemble_residual();
-      void assemble_jacobian();
-      void assemble();
+      virtual void assemble_residual(bool store_previous_residual);
+      virtual void assemble_jacobian(bool store_previous_jacobian);
+      virtual void assemble(bool store_previous_jacobian, bool store_previous_residual);
       
       /// Initialization - called at the beginning of solving.
       virtual void init_solving(Scalar* coeff_vec);

@@ -41,8 +41,6 @@ namespace Hermes
       /// Find out the convergence state.
       virtual NonlinearConvergenceState get_convergence_state();
 
-      virtual bool damping_factor_condition();
-
       /// Common constructors code.
       /// Internal setting of default values (see individual set methods).
       void init_newton();
