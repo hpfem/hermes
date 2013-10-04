@@ -100,18 +100,14 @@ namespace Hermes
     {
       this->param_idx = param_idx;
       this->item_idx = -1;
-      char * msg = new char[27];
-      sprintf(msg, "Parameter number %d is nullptr", param_idx);
-      message = msg;
+      sprintf(this->message, "Parameter number %d is nullptr", param_idx);
     }
 
     NullException::NullException(int param_idx, int item_idx) : Exception()
     {
       this->param_idx = param_idx;
       this->item_idx = item_idx;
-      char * msg = new char[55];
-      sprintf(msg, "Element number %d of parameter number %d is nullptr", item_idx, param_idx);
-      message = msg;
+      sprintf(this->message, "Element number %d of parameter number %d is nullptr", item_idx, param_idx);
     }
 
     int NullException::get_param_idx() const
@@ -144,9 +140,7 @@ namespace Hermes
       this->wrong = wrong;
       this->right = right;
       this->snd_param_idx = -1;
-      char * msg = new char[60];
-      sprintf(msg, "Parameter number %d have length %d and should have %d", fst_param_idx, wrong, right);
-      message = msg;
+      sprintf(this->message, "Parameter number %d have length %d and should have %d", fst_param_idx, wrong, right);
     }
 
     LengthException::LengthException(int fst_param_idx, int snd_param_idx, int first, int second) : Exception()
@@ -155,10 +149,8 @@ namespace Hermes
       this->snd_param_idx = snd_param_idx;
       this->wrong = first;
       this->right = second;
-      char * msg = new char[110];
-      sprintf(msg, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same",
+      sprintf(this->message, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same",
         fst_param_idx, wrong, snd_param_idx, right);
-      message = msg;
     }
 
     int LengthException::get_first_param_idx() const
@@ -199,9 +191,7 @@ namespace Hermes
 
     LinearMatrixSolverException::LinearMatrixSolverException() : Exception()
     {
-      char * msg =  new char[22];
-      sprintf(msg, "Linear solver failed.");
-      message = msg;
+      sprintf(this->message, "Linear solver failed.");
     }
 
     LinearMatrixSolverException::LinearMatrixSolverException(const char * reason) : Exception()
@@ -213,9 +203,7 @@ namespace Hermes
 
     LinearMatrixSolverException::LinearMatrixSolverException(const LinearMatrixSolverException&e) : Exception()
     {
-      char * msg = new char[strlen(e.what())+1];
-      strcpy(msg, e.what());
-      message = msg;
+      strcpy(this->message, e.what());
     }
 
     Exception* LinearMatrixSolverException::clone()
@@ -225,21 +213,17 @@ namespace Hermes
 
     ValueException::ValueException(const char * name, double value, double allowed) : Exception()
     {
-      char * msg =  new char[55 + strlen(name)];
       if(value>allowed)
-        sprintf(msg, "Variable %s is %f but maximum allowed value is %f", name, value, allowed);
+        sprintf(this->message, "Variable %s is %f but maximum allowed value is %f", name, value, allowed);
       else
-        sprintf(msg, "Variable %s is %f but minimum allowed value is %f", name, value, allowed);
-      message = msg;
+        sprintf(this->message, "Variable %s is %f but minimum allowed value is %f", name, value, allowed);
       this->value = value;
       this->allowed = allowed;
     }
 
     ValueException::ValueException(const char * name, double value, double min, double max) : Exception()
     {
-      char * msg = new char[70+strlen(name)];
-      sprintf(msg, "Variable %s is %f allowed range is %f -- %f", name, value, min, max);
-      message = msg;
+      sprintf(this->message, "Variable %s is %f allowed range is %f -- %f", name, value, min, max);
       this->value = value;
       if(value>min)
         this->allowed = max;
@@ -249,9 +233,7 @@ namespace Hermes
 
     ValueException::ValueException(const char * name, std::string passed) : Exception()
     {
-      char * msg = new char[70+strlen(name)];
-      sprintf(msg, "Variable %s does not support value %s.", name, passed.c_str());
-      message = msg;
+      sprintf(this->message, "Variable %s does not support value %s.", name, passed.c_str());
     }
 
     double ValueException::get_value() const
@@ -266,9 +248,7 @@ namespace Hermes
 
     ValueException::ValueException(const ValueException&e)
     {
-      char * msg = new char[strlen(e.what())+1];
-      strcpy(msg, e.what());
-      message = msg;
+      strcpy(this->message, e.what());
       this->value = e.get_value();
       this->allowed = e.get_allowed();
     }
@@ -293,9 +273,7 @@ namespace Hermes
 
     MethodNotOverridenException::MethodNotOverridenException(const MethodNotOverridenException&e)
     {
-      char * msg = new char[strlen(e.what())+1];
-      strcpy(msg, e.what());
-      message = msg;
+      strcpy(this->message, e.what());
     }
 
     Exception* MethodNotOverridenException::clone()
@@ -318,9 +296,7 @@ namespace Hermes
 
     MethodNotImplementedException::MethodNotImplementedException(const MethodNotImplementedException&e)
     {
-      char * msg = new char[strlen(e.what())+1];
-      strcpy(msg, e.what());
-      message = msg;
+      strcpy(this->message, e.what());
     }
 
     Exception* MethodNotImplementedException::clone()
@@ -343,9 +319,7 @@ namespace Hermes
 
     MeshLoadFailureException::MeshLoadFailureException(const MeshLoadFailureException&e)
     {
-      char * msg = new char[strlen(e.what())+1];
-      strcpy(msg, e.what());
-      message = msg;
+      strcpy(this->message, e.what());
     }
 
     Exception* MeshLoadFailureException::clone()
@@ -368,9 +342,7 @@ namespace Hermes
 
     SpaceLoadFailureException::SpaceLoadFailureException(const SpaceLoadFailureException&e)
     {
-      char * msg = new char[strlen(e.what())+1];
-      strcpy(msg, e.what());
-      message = msg;
+      strcpy(this->message, e.what());
     }
 
     Exception* SpaceLoadFailureException::clone()
@@ -393,9 +365,7 @@ namespace Hermes
 
     SolutionSaveFailureException::SolutionSaveFailureException(const SolutionSaveFailureException&e)
     {
-      char * msg = new char[strlen(e.what())+1];
-      strcpy(msg, e.what());
-      message = msg;
+      strcpy(this->message, e.what());
     }
 
     Exception* SolutionSaveFailureException::clone()
@@ -418,9 +388,7 @@ namespace Hermes
 
     SolutionLoadFailureException::SolutionLoadFailureException(const SolutionLoadFailureException&e)
     {
-      char * msg = new char[strlen(e.what())+1];
-      strcpy(msg, e.what());
-      message = msg;
+      strcpy(this->message, e.what());
     }
 
     Exception* SolutionLoadFailureException::clone()
