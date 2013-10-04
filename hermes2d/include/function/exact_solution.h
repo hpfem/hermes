@@ -262,11 +262,11 @@ namespace Hermes
 
       /// Function returning the value.
 #ifndef H2D_USE_SECOND_DERIVATIVES
-      virtual void value (Scalar* values, Scalar* dx, Scalar* dy, Scalar result[3]) const = 0;
-      virtual void ord(Hermes::Ord* values, Hermes::Ord* dx, Hermes::Ord* dy, Hermes::Ord result[3]) const = 0;
+      virtual void value (Scalar* values, Scalar* dx, Scalar* dy, Scalar result[3], Geom<double>* geometry) const = 0;
+      virtual void ord(Hermes::Ord* values, Hermes::Ord* dx, Hermes::Ord* dy, Hermes::Ord result[3], Geom<Hermes::Ord>* geometry) const = 0;
 #else
-      virtual Scalar value (Scalar* values, Scalar* dx, Scalar* dy, Scalar* dxx, Scalar* dxy, Scalar* dyy, Scalar result[6]) const = 0;
-      virtual Hermes::Ord ord(Hermes::Ord* values, Hermes::Ord* dx, Hermes::Ord* dy, Hermes::Ord* dxx, Hermes::Ord* dxy, Hermes::Ord* dyy, Hermes::Ord result[6]) const = 0;
+      virtual Scalar value (Scalar* values, Scalar* dx, Scalar* dy, Scalar* dxx, Scalar* dxy, Scalar* dyy, Scalar result[6], Geom<double>* geometry) const = 0;
+      virtual Hermes::Ord ord(Hermes::Ord* values, Hermes::Ord* dx, Hermes::Ord* dy, Hermes::Ord* dxx, Hermes::Ord* dxy, Hermes::Ord* dyy, Hermes::Ord result[6], Geom<Hermes::Ord>* geometry) const = 0;
 #endif
 
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr)

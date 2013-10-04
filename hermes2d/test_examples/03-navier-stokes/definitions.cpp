@@ -12,14 +12,14 @@ public:
   {
   }
   
-  virtual void value (double* values, double* dx, double* dy, double result[3]) const
+  virtual void value (double* values, double* dx, double* dy, double result[3], Geom<double>* geometry) const
   {
     result[0] = values[index];
     result[1] = dx[index];
     result[2] = dy[index];
   };
 
-  virtual void ord(Hermes::Ord* values, Hermes::Ord* dx, Hermes::Ord* dy, Hermes::Ord result[3]) const
+  virtual void ord(Hermes::Ord* values, Hermes::Ord* dx, Hermes::Ord* dy, Hermes::Ord result[3], Geom<Hermes::Ord>* geometry) const
   {
     result[0] = values[index];
     result[1] = dx[index];

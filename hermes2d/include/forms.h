@@ -229,7 +229,7 @@ namespace Hermes
     HERMES_API Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order);
 
     template<typename Scalar>
-    HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order);
+    HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry);
   }
 }
 #endif

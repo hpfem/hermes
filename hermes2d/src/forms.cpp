@@ -761,7 +761,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order)
+    Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry)
     {
       int nc = fu->get_num_components();
       Quad2D* quad = fu->get_quad_2d();
@@ -800,7 +800,7 @@ namespace Hermes
 
           // Calc
           Scalar val[3];
-          fu->value(u_ext_val, u_ext_dx, u_ext_dy, val);
+          fu->value(u_ext_val, u_ext_dx, u_ext_dy, val, geometry);
 
           // Copy
           u->val[i] = val[0];
@@ -848,8 +848,8 @@ namespace Hermes
     template HERMES_API Func<double>* init_fn(Solution<double>* fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(Solution<std::complex<double> >* fu, const int order);
 
-    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** u_ext, int u_ext_size, const int order);
-    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** u_ext, int u_ext_size, const int order);
+    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** u_ext, int u_ext_size, const int order, Geom<double>* geometry);
+    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** u_ext, int u_ext_size, const int order, Geom<double>* geometry);
 
     template class HERMES_API Func<Hermes::Ord>;
     template class HERMES_API Func<double>;

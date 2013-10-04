@@ -304,7 +304,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>** DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, int order, Func<Scalar>** u_ext_func)
+    Func<Scalar>** DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry)
     {
       Func<Scalar>** ext_func = nullptr;
       if(ext.size() > 0)
@@ -316,7 +316,7 @@ namespace Hermes
             {
               UExtFunction<Scalar>* u_ext_fn = dynamic_cast<UExtFunction<Scalar>*>(ext[ext_i].get());
               if(u_ext_fn)
-                ext_func[ext_i] = init_fn(u_ext_fn, u_ext_func, this->spaces_size, order);
+                ext_func[ext_i] = init_fn(u_ext_fn, u_ext_func, this->spaces_size, order, geometry);
               else
                 ext_func[ext_i] = init_fn(ext[ext_i].get(), order);
             }
@@ -357,7 +357,7 @@ namespace Hermes
       Func<Scalar>** u_ext_func = this->init_u_ext_values(this->current_cache_record->order);
 
       // init - ext
-      Func<Scalar>** ext_func = this->init_ext_values(this->wf->ext, this->current_cache_record->order, u_ext_func);
+      Func<Scalar>** ext_func = this->init_ext_values(this->wf->ext, this->current_cache_record->order, u_ext_func, current_cache_record->geometry);
 
       if(this->current_mat || this->add_dirichlet_lift)
       {
@@ -426,7 +426,7 @@ namespace Hermes
           Func<Scalar>** u_ext_funcSurf = this->init_u_ext_values(orderSurf);
 
           // init - ext
-          Func<Scalar>** ext_funcSurf = this->init_ext_values(this->wf->ext, orderSurf, u_ext_funcSurf);
+          Func<Scalar>** ext_funcSurf = this->init_ext_values(this->wf->ext, orderSurf, u_ext_funcSurf, current_cache_record->geometry);
 
           if(this->current_mat || this->add_dirichlet_lift)
           {
@@ -492,7 +492,7 @@ namespace Hermes
       Func<Scalar>** local_ext = ext;
       // If the user supplied custom ext functions for this form.
       if(form->ext.size() > 0)
-        local_ext = this->init_ext_values(form->ext, order, u_ext);
+        local_ext = this->init_ext_values(form->ext, order, u_ext, geometry);
 
       // Account for the previous time level solution previously inserted at the back of ext.
       if(this->rungeKutta)
@@ -584,7 +584,7 @@ namespace Hermes
 
       Func<Scalar>** local_ext = ext;
       if(form->ext.size() > 0)
-        local_ext = this->init_ext_values(form->ext, order, u_ext);
+        local_ext = this->init_ext_values(form->ext, order, u_ext, geometry);
 
       // Account for the previous time level solution previously inserted at the back of ext.
       if(this->rungeKutta)
