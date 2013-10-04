@@ -356,14 +356,14 @@ namespace Hermes
         successful_steps = 0;
         if(current_damping_factor <= this->min_allowed_damping_coeff)
         {
-          this->warn("\t\tNOT improved, damping factor at minimum level: %g.", min_allowed_damping_coeff);
-          this->info("\t To decrease the minimum level, use set_min_allowed_damping_coeff()");
+          this->warn("\t\tNOT successful, damping factor at minimum level: %g.", min_allowed_damping_coeff);
+          this->info("\t\tto decrease the minimum level, use set_min_allowed_damping_coeff()");
           throw Exceptions::NonlinearException(BelowMinDampingCoeff);
         }
         else
         {
           double new_damping_factor = (1. / this->auto_damping_ratio) * current_damping_factor;
-          this->warn("\t\tNOT improved, step restarted with factor: %g.", new_damping_factor);
+          this->warn("\t\tNOT successful, step restarted with factor: %g.", new_damping_factor);
           damping_factors_vector.push_back(new_damping_factor);
         }
 
@@ -539,14 +539,12 @@ namespace Hermes
           this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
 
           // Test convergence - if in this loop we found a solution.
-          this->info("\t\ttest convergence...");
-          this->info("\t\tresidual norm: %g,", this->get_parameter_value(this->p_residual_norms).back());
+          this->info("\t\t\tconvergence test");
           if(this->handle_convergence_state_return_finished(this->get_convergence_state()))
             return;
-          else
-            this->info("\t\thas not converged.");
 
           // Inspect the damping factor.
+          this->info("\t\tprobing the damping factor...");
           try
           {
             // Calculate damping factor, and return whether or not was this a successful step.
