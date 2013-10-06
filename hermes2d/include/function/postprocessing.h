@@ -157,8 +157,8 @@ namespace Hermes
 
         /// Main method returning the value.
         /// Not designed to be overriden.
-				using IntegralCalculator::calculate;
         Scalar* calculate(Hermes::vector<std::string> markers);
+				using IntegralCalculator<Scalar>::calculate;
       };
 
       /// Surface integral calculator
@@ -172,7 +172,7 @@ namespace Hermes
         /// Main method returning the value.
         /// Not designed to be overriden.
         Scalar* calculate(Hermes::vector<std::string> markers);
-        using IntegralCalculator::calculate;
+        using IntegralCalculator<Scalar>::calculate;
       };
     }
   }

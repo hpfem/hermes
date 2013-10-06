@@ -622,7 +622,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VolumetricIntegralCalculator<Scalar>::VolumetricIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals) : IntegralCalculator(source_function, number_of_integrals)
+      VolumetricIntegralCalculator<Scalar>::VolumetricIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals) : IntegralCalculator<Scalar>(source_function, number_of_integrals)
       {
       }
 
@@ -746,7 +746,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      SurfaceIntegralCalculator<Scalar>::SurfaceIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals) : IntegralCalculator(source_function, number_of_integrals)
+      SurfaceIntegralCalculator<Scalar>::SurfaceIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals) : IntegralCalculator<Scalar>(source_function, number_of_integrals)
       {
       }
 
