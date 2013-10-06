@@ -842,13 +842,9 @@ namespace Hermes
       }
       else if(sln_type == HERMES_EXACT)
       {
-        this->order = Hermes2D::g_max_quad;
-        /// \todo
-        /*
         double x, y;
         e->get_center(x, y);
         this->order = (dynamic_cast<ExactSolution<double>*>(this))->ord(x, y).get_order();
-        */
       }
       else
         throw Hermes::Exceptions::Exception("Uninitialized solution.");
