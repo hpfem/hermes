@@ -642,13 +642,13 @@ namespace Hermes
             internal_markers.push_back(internalMarker.marker);
         }
 
-        int source_functions_size = source_functions.size();
+        int source_functions_size = this->source_functions.size();
         Traverse trav(source_functions_size);
         int num_states;
         Traverse::State** states = trav.get_states(this->source_functions, num_states);
 
         for (int i = 0; i < source_functions_size; i++)
-          source_functions[i]->set_quad_2d(&g_quad_2d_std);
+          this->source_functions[i]->set_quad_2d(&g_quad_2d_std);
 
         Scalar* result = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
 
@@ -668,7 +668,7 @@ namespace Hermes
 
           MeshFunction<Scalar>** source_fuctions_cloned = new MeshFunction<Scalar>*[source_functions_size];
           for (int i = 0; i < source_functions_size; i++)
-            source_fuctions_cloned[i] = source_functions[i]->clone();
+            source_fuctions_cloned[i] = this->source_functions[i]->clone();
           Func<Scalar>** func = (Func<Scalar>**)malloc(number_of_integrals * sizeof(Func<Scalar>*));
 
           Scalar* result_thread_local = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
@@ -702,7 +702,7 @@ namespace Hermes
               Hermes::Ord order = Hermes::Ord(refmap->get_inv_ref_order());
               memset(orders, 0, sizeof(nullptr) * this->number_of_integrals);
               for (int i = 0; i < source_functions_size; i++)
-                func_ord[i] = init_fn_ord(source_functions[i]->get_fn_order());
+                func_ord[i] = init_fn_ord(this->source_functions[i]->get_fn_order());
 
               this->order(func_ord, orders);
 
@@ -777,13 +777,13 @@ namespace Hermes
             internal_markers.push_back(internalMarker.marker);
         }
 
-        int source_functions_size = source_functions.size();
+        int source_functions_size = this->source_functions.size();
         Traverse trav(source_functions_size);
         int num_states;
         Traverse::State** states = trav.get_states(this->source_functions, num_states);
 
         for (int i = 0; i < source_functions_size; i++)
-          source_functions[i]->set_quad_2d(&g_quad_2d_std);
+          this->source_functions[i]->set_quad_2d(&g_quad_2d_std);
 
         Scalar* result = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
 
@@ -803,7 +803,7 @@ namespace Hermes
 
           MeshFunction<Scalar>** source_fuctions_cloned = new MeshFunction<Scalar>*[source_functions_size];
           for (int i = 0; i < source_functions_size; i++)
-            source_fuctions_cloned[i] = source_functions[i]->clone();
+            source_fuctions_cloned[i] = this->source_functions[i]->clone();
           Func<Scalar>** func = (Func<Scalar>**)malloc(number_of_integrals * sizeof(Func<Scalar>*));
 
           Scalar* result_thread_local = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
@@ -846,7 +846,7 @@ namespace Hermes
                 // Integration order.
                 memset(orders, 0, sizeof(nullptr) * this->number_of_integrals);
                 for (int i = 0; i < source_functions_size; i++)
-                  func_ord[i] = init_fn_ord(source_functions[i]->get_fn_order());
+                  func_ord[i] = init_fn_ord(this->source_functions[i]->get_fn_order());
 
                 this->order(func_ord, orders);
 
