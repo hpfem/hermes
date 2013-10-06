@@ -720,6 +720,7 @@ namespace Hermes
 
             this->integral(n, jacobian_x_weights, func, geometry, result_local);
 
+            geometry->free();
             delete geometry;
             delete[] jacobian_x_weights;
             for (int i = 0; i < this->number_of_integrals; i++)
@@ -845,7 +846,8 @@ namespace Hermes
               int order_int = order.get_order();
               limit_order(order_int, refmap->get_active_element()->get_mode());
 
-              Geom<double>* geometry = init_geom_vol(refmap, order_int);
+              double3* tan;
+              Geom<double>* geometry;
               int n = init_surface_geometry_points(&refmap, 1, order_int, edge, current_state->e[0]->en[edge]->marker, geometry, jacobian_x_weights);
 
               for (int i = 0; i < source_functions_size; i++)
@@ -853,6 +855,7 @@ namespace Hermes
 
               this->integral(n, jacobian_x_weights, func, geometry, result_local);
 
+              geometry->free();
               delete geometry;
               delete[] jacobian_x_weights;
               for (int i = 0; i < this->number_of_integrals; i++)
