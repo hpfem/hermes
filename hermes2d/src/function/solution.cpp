@@ -844,7 +844,7 @@ namespace Hermes
       {
         double x, y;
         e->get_center(x, y);
-        this->order = (dynamic_cast<ExactSolution<double>*>(this))->ord(x, y).get_order();
+        this->order = (dynamic_cast<ExactSolution<Scalar>*>(this))->ord(x, y).get_order();
       }
       else
         throw Hermes::Exceptions::Exception("Uninitialized solution.");
