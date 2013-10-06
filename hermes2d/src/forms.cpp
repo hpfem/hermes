@@ -782,59 +782,11 @@ namespace Hermes
         u->dx  = new Scalar[np];
         u->dy  = new Scalar[np];
 
-        Scalar* u_ext_val = new Scalar[u_ext_size];
-        Scalar* u_ext_dx = new Scalar[u_ext_size];
-        Scalar* u_ext_dy = new Scalar[u_ext_size];
-
-#ifndef H2D_USE_SECOND_DERIVATIVES
-
-        for(unsigned int i = 0; i < np; i++)
-        {
-          // Prepare
-          for(unsigned int u_ext_i = 0; u_ext_i < u_ext_size; u_ext_i++)
-          {
-            u_ext_val[u_ext_i] = u_ext[u_ext_i]->val[i];
-            u_ext_dx[u_ext_i] = u_ext[u_ext_i]->dx[i];
-            u_ext_dy[u_ext_i] = u_ext[u_ext_i]->dy[i];
-          }
-
-          // Calc
-          Scalar val[3];
-          fu->value(u_ext_val, u_ext_dx, u_ext_dy, val, geometry);
-
-          // Copy
-          u->val[i] = val[0];
-          u->dx[i] = val[1];
-          u->dy[i] = val[2];
-        }
-
-#else
+#ifdef H2D_USE_SECOND_DERIVATIVES
         u->laplace = new Scalar[np];
-
-        for(unsigned int i = 0; i < np; i++)
-        {
-          // Prepare
-          for(unsigned int u_ext_i = 0; u_ext_i < u_ext_size; u_ext_i++)
-          {
-            u_ext_val[u_ext_i] = u_ext[u_ext_i]->val[i];
-            u_ext_dx[u_ext_i] = u_ext[u_ext_i]->dx[i];
-            u_ext_dy[u_ext_i] = u_ext[u_ext_i]->dy[i];
-            u_ext_dxx[u_ext_i] = u_ext[u_ext_i]->dxx[i];
-            u_ext_dxy[u_ext_i] = u_ext[u_ext_i]->dxy[i];
-            u_ext_dyy[u_ext_i] = u_ext[u_ext_i]->dyy[i];
-          }
-
-          // Calc
-          Scalar[6] val;
-          fu->value(u_ext_val, u_ext_dx, u_ext_dy, u_ext_exx, u_ext_dxy, u_ext_dyy, val);
-
-          // Copy
-          u->val[i] = val[0];
-          u->dx[i] = val[1];
-          u->dy[i] = val[2];
-          u->laplace[i] = val[3] + val[5];
-        }
 #endif
+
+      fu->value(np, u_ext, u, geometry);
       }
       else
         throw Hermes::Exceptions::MethodNotImplementedException("init_fn(UExtFunction<Scalar>* fu, const int order) - nc == 2");

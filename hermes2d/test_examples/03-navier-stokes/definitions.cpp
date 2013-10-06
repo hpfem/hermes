@@ -12,18 +12,19 @@ public:
   {
   }
   
-  virtual void value (double* values, double* dx, double* dy, double result[3], Geom<double>* geometry) const
+  virtual void value (int n, Func<double>** u_ext, Func<double>* result, Geom<double>* geometry) const
   {
-    result[0] = values[index];
-    result[1] = dx[index];
-    result[2] = dy[index];
+    for(int i = 0; i < n; i++)
+    {
+      result->val[i] = u_ext[index]->val[i];
+      result->dx[i] = u_ext[index]->dx[i];
+      result->dy[i] = u_ext[index]->dy[i];
+    }
   };
 
-  virtual void ord(Hermes::Ord* values, Hermes::Ord* dx, Hermes::Ord* dy, Hermes::Ord result[3], Geom<Hermes::Ord>* geometry) const
+  virtual void ord(Func<Hermes::Ord>** u_ext, Func<Hermes::Ord>* result) const
   {
-    result[0] = values[index];
-    result[1] = dx[index];
-		result[2] = dy[index];
+    result->val[0] = u_ext[index]->val[0];
   };
   
   MeshFunction<double>* clone() const

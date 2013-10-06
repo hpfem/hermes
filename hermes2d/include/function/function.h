@@ -161,7 +161,7 @@ namespace Hermes
       Scalar* get_values(int a, int b);
 
       /// \brief Returns the polynomial degree of the function being represented by the class.
-      int get_fn_order() const;
+      virtual int get_fn_order() const;
 
     protected:
       /// \brief Selects the quadrature points in which the function will be evaluated.

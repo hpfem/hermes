@@ -223,12 +223,22 @@ namespace Hermes
       if(form->ext.size() > 0)
       {
         for (int i = 0; i < form->ext.size(); i++)
+        {
+          UExtFunction<Scalar>* u_ext_function = dynamic_cast<UExtFunction<Scalar>*>(form->ext[i].get());
+          if(u_ext_function)
+          {
+            oext[i] = new Func<Hermes::Ord>(1, 2);
+            u_ext_function->ord(oi, oext[i]);
+          }
+          else
+          {
           if(surface_form)
             oext[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
           else
             oext[i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+          }
+        }
       }
-
       else
       {
         for (int i = 0; i < form->wf->ext.size(); i++)
