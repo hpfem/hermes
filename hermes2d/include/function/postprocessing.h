@@ -110,6 +110,70 @@ namespace Hermes
         Hermes::vector<std::pair<int, double> > correction_factors;
         bool print_details;
       };
+
+      /// Integral calculator
+      /// Abstract base class
+      template<typename Scalar>
+      class HERMES_API IntegralCalculator :
+        public Hermes::Hermes2D::Mixins::Parallel
+      {
+      public:
+        /// \param[in] source_functions The functions forming the integral expression.
+        /// \param[in] number_of_integrals Number of results (expressions) evaluated. The method integral will get the array result allocated according to this parameter.
+        /// 
+        IntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);
+        IntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals);
+
+        /// Main method returning the value(s).
+        /// \return The values (more values at once for saving time with initialization etc.)
+        virtual Scalar* calculate(Hermes::vector<std::string> markers) = 0;
+
+        /// Main method returning the value(s).
+        /// One marker overload.
+        virtual Scalar* calculate(std::string marker);
+
+        /// The integral description.
+        /// \param[in] n - number of integration points.
+        /// \param[in] result - preallocated (see number_of_integrals in the constructor) and zeroed array for the results.
+        virtual void integral(int n, double* wt, Func<Scalar> **fns, Geom<double> *e, Scalar* result) = 0;
+
+        /// The integration order calculation.
+        virtual void order(Func<Hermes::Ord> **fns, Hermes::Ord* result) = 0;
+      
+      protected:
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions;
+        int number_of_integrals;
+
+        void add_results(Scalar* results_local, Scalar* results);
+      };
+
+      /// Volumetric integral calculator
+      template<typename Scalar>
+      class HERMES_API VolumetricIntegralCalculator : public IntegralCalculator<Scalar>
+      {
+      public:
+        VolumetricIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);
+        VolumetricIntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals);
+
+        /// Main method returning the value.
+        /// Not designed to be overriden.
+				using IntegralCalculator::calculate;
+        Scalar* calculate(Hermes::vector<std::string> markers);
+      };
+
+      /// Surface integral calculator
+      template<typename Scalar>
+      class HERMES_API SurfaceIntegralCalculator : public IntegralCalculator<Scalar>
+      {
+      public:
+        SurfaceIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);
+        SurfaceIntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals);
+
+        /// Main method returning the value.
+        /// Not designed to be overriden.
+        Scalar* calculate(Hermes::vector<std::string> markers);
+        using IntegralCalculator::calculate;
+      };
     }
   }
 }

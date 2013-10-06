@@ -15,6 +15,7 @@
 
 #include "mesh.h"
 #include "traverse.h"
+#include "mesh_function.h"
 
 namespace Hermes
 {
@@ -278,6 +279,15 @@ namespace Hermes
         }
       }
       return is_triangle;
+    }
+
+    template<typename Scalar>
+    Traverse::State** Traverse::get_states(Hermes::vector<MeshFunctionSharedPtr<Scalar> > mesh_functions, int& states_count)
+    {
+      Hermes::vector<MeshSharedPtr> meshes;
+      for (int i = 0; i < mesh_functions.size(); i++)
+        meshes.push_back(mesh_functions[i]->get_mesh());
+      return this->get_states(meshes, states_count);
     }
 
     Traverse::State** Traverse::get_states(Hermes::vector<MeshSharedPtr> meshes, int& states_count)
@@ -874,5 +884,8 @@ namespace Hermes
 
       return unidata;
     }
+
+    template HERMES_API Traverse::State** Traverse::get_states<double>(Hermes::vector<MeshFunctionSharedPtr<double> > mesh_functions, int& states_count);
+    template HERMES_API Traverse::State** Traverse::get_states<std::complex<double> >(Hermes::vector<MeshFunctionSharedPtr<std::complex<double> > > mesh_functions, int& states_count);
   }
 }

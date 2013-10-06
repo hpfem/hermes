@@ -38,6 +38,28 @@ const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatur
 const double VOLUME_HEAT_SRC = 5e2;        // Volume heat sources generated (for example) by electric current.
 const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
+class MyVolumetricIntegralCalculator : public PostProcessing::SurfaceIntegralCalculator<double>
+{
+public:
+  MyVolumetricIntegralCalculator(MeshFunctionSharedPtr<double> source_function, int number_of_integrals) : PostProcessing::SurfaceIntegralCalculator<double>(source_function, number_of_integrals)
+  {
+  }
+
+  MyVolumetricIntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<double> > source_functions, int number_of_integrals) : PostProcessing::SurfaceIntegralCalculator<double>(source_functions, number_of_integrals)
+  {
+  }
+
+  virtual void integral(int n, double* wt, Func<double> **fns, Geom<double> *e, double* result)
+  {
+    for (int i = 0; i < n; i++)
+      result[0] += wt[i] * fns[0]->val[i];
+  };
+
+  virtual void order(Func<Hermes::Ord> **fns, Hermes::Ord* result) {
+    result[0] = Hermes::Ord(21);
+  }
+};
+
 int main(int argc, char* argv[])
 {
   // Load the mesh.
@@ -79,6 +101,9 @@ int main(int argc, char* argv[])
 
     // Translate the solution vector into the previously initialized Solution.
     Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
+
+    MyVolumetricIntegralCalculator calc(sln, 1);
+    std::cout << calc.calculate(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"))[0];
 
     // VTK output.
     if(VTK_VISUALIZATION)
