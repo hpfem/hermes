@@ -663,13 +663,13 @@ namespace Hermes
           if (thread_number == this->num_threads_used - 1)
             end = num_states;
 
-          Hermes::Ord* orders = new Hermes::Ord[number_of_integrals];
-          Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(number_of_integrals * sizeof(Func<Hermes::Ord>*));
+          Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
+          Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(this->number_of_integrals * sizeof(Func<Hermes::Ord>*));
 
           MeshFunction<Scalar>** source_fuctions_cloned = new MeshFunction<Scalar>*[source_functions_size];
           for (int i = 0; i < source_functions_size; i++)
             source_fuctions_cloned[i] = this->source_functions[i]->clone();
-          Func<Scalar>** func = (Func<Scalar>**)malloc(number_of_integrals * sizeof(Func<Scalar>*));
+          Func<Scalar>** func = (Func<Scalar>**)malloc(this->number_of_integrals * sizeof(Func<Scalar>*));
 
           Scalar* result_thread_local = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
           Scalar* result_local = (Scalar*)malloc(this->number_of_integrals * sizeof(Scalar));
@@ -798,13 +798,13 @@ namespace Hermes
           if (thread_number == this->num_threads_used - 1)
             end = num_states;
 
-          Hermes::Ord* orders = new Hermes::Ord[number_of_integrals];
-          Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(number_of_integrals * sizeof(Func<Hermes::Ord>*));
+          Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
+          Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(this->number_of_integrals * sizeof(Func<Hermes::Ord>*));
 
           MeshFunction<Scalar>** source_fuctions_cloned = new MeshFunction<Scalar>*[source_functions_size];
           for (int i = 0; i < source_functions_size; i++)
             source_fuctions_cloned[i] = this->source_functions[i]->clone();
-          Func<Scalar>** func = (Func<Scalar>**)malloc(number_of_integrals * sizeof(Func<Scalar>*));
+          Func<Scalar>** func = (Func<Scalar>**)malloc(this->number_of_integrals * sizeof(Func<Scalar>*));
 
           Scalar* result_thread_local = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
           Scalar* result_local = (Scalar*)malloc(this->number_of_integrals * sizeof(Scalar));
