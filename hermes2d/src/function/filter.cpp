@@ -325,44 +325,6 @@ namespace Hermes
       return toReturn;
     }
 
-    template<typename Scalar>
-    DXFilter<Scalar>::DXFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions) : DXDYFilter<Scalar>(solutions)
-    {
-    }
-
-    template<typename Scalar>
-    DXFilter<Scalar>::~DXFilter()
-    {
-    }
-
-    template<typename Scalar>
-    void DXFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar *> values, Hermes::vector<Scalar *> dx, Hermes::vector<Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy)
-    {
-      for (int i = 0; i < n; i++)
-      {
-        rslt_dx[i] = 0;
-        rslt_dy[i] = 0;
-        for(unsigned int j = 0; j < values.size(); j++)
-        {
-          rslt_dx[i] += dx.at(j)[i];
-          rslt_dy[i] += dy.at(j)[i];
-        }
-      }
-    }
-
-    template<typename Scalar>
-    MeshFunction<Scalar>* DXFilter<Scalar>::clone() const
-    {
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns;
-      Hermes::vector<int> items;
-      for(int i = 0; i < this->num; i++)
-      {
-        slns.push_back(this->sln[i]->clone());
-      }
-      DXFilter<Scalar>* filter = new DXFilter<Scalar>(slns);
-      return filter;
-    }
-
     ComplexFilter::ComplexFilter() : Filter<double>()
     {
       this->num = 0;
@@ -524,7 +486,11 @@ namespace Hermes
       for (int j = 0; j < this->num_components; j++)
       {
         // obtain solution tables
+        double *x, *y;
         Scalar *val[H2D_MAX_COMPONENTS], *dx[H2D_MAX_COMPONENTS], *dy[H2D_MAX_COMPONENTS];
+        x = this->sln[0]->get_refmap()->get_phys_x(order);
+        y = this->sln[0]->get_refmap()->get_phys_y(order);
+          
         for (int i = 0; i < this->num; i++)
         {
           val[i] = this->sln[i]->get_fn_values(j);
@@ -544,7 +510,7 @@ namespace Hermes
         }
 
         // apply the filter
-        filter_fn(np, values_vector, dx_vector, dy_vector, node->values[j][0], node->values[j][1], node->values[j][2]);
+        filter_fn(np, x, y, values_vector, dx_vector, dy_vector, node->values[j][0], node->values[j][1], node->values[j][2]);
       }
 
       if(this->nodes->present(order))
@@ -1155,8 +1121,6 @@ namespace Hermes
     template class HERMES_API SimpleFilter<std::complex<double> >;
     template class HERMES_API DXDYFilter<double>;
     template class HERMES_API DXDYFilter<std::complex<double> >;
-    template class HERMES_API DXFilter<double>;
-    template class HERMES_API DXFilter<std::complex<double> >;
     template class HERMES_API MagFilter<double>;
     template class HERMES_API MagFilter<std::complex<double> >;
     template class HERMES_API DiffFilter<double>;

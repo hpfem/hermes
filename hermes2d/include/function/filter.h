@@ -182,28 +182,11 @@ namespace Hermes
 
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
 
-      virtual void filter_fn (int n, Hermes::vector<Scalar *> values, Hermes::vector<Scalar *> dx, Hermes::vector<Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
+      virtual void filter_fn (int n, double* x, double* y, Hermes::vector<Scalar *> values, Hermes::vector<Scalar *> dx, Hermes::vector<Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
 
       void init_components();
 
       virtual void precalculate(int order, int mask);
-    };
-
-    /// @ingroup meshFunctions
-    /// MagFilter takes two functions representing the components of a vector function and
-    /// calculates the vector magnitude, sqrt(x^2 + y^2).
-    /// \brief Calculates the magnitude of a vector function.
-    template<typename Scalar>
-    class HERMES_API DXFilter : public DXDYFilter<Scalar>
-    {
-    public:
-      DXFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions);
-      
-      virtual MeshFunction<Scalar>* clone() const;
-
-      virtual ~DXFilter();
-    protected:
-      virtual void filter_fn(int n, Hermes::vector<Scalar *> values, Hermes::vector<Scalar *> dx, Hermes::vector<Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy);
     };
 
     /// @ingroup meshFunctions
