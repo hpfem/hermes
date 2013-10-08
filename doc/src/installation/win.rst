@@ -28,28 +28,11 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
   
     - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
 
-  - PTHREAD(2.8.0)
+  - PTHREAD(2.9.1)
 
-    - Download pthread binaries version 2.8.0 (ftp://sourceware.org/pub/pthreads-win32/prebuilt-dll-2-8-0-release/).
-    - Copy 'lib\\pthreadVCE2.dll', 'include\\\*.h' and 'lib\\pthreadVCE2.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
+    - Download appropriate files (ftp://sourceware.org/pub/pthreads-win32/prebuilt-dll-2-9-1-release/).
+    - Copy 'dll\\x86\\pthreadVCE2.dll', 'include\\\*.h' and 'lib\\x86\\pthreadVCE2.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
     
-  - TCMalloc
-    - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
-    - Open gperftools.sln in your Visual Studio, build the appropriate version (default works fine - just select Debug/Release)
-    - Copy Win32\"Release/Debug"\libtcmalloc_minimal.dll to 'bin' dependency directory, Win32\"Release/Debug"\libtcmalloc_minimal.lib to 'lib' dependency directory
-    - Copy the contents of src/google to 'include' dependency directory
-    
-  - BSON
-  
-    - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
-    
-    - Download SCONS build tool from http://sourceforge.net/projects/scons/files/latest/download?source=files
-    - Install SCONS (you need to have PYTHON installed for that), run it (e.g. issuing C:\Python27\Scripts\scons.bat) in the BSON Mongo driver root directory
-    
-      - Use flags --m32 and --c99 ("C:\Python27\Scripts\scons.bat --c99 --m32")
-      
-    - Once compiled (should take seconds at most), copy src/bson.h to your 'include' dependency directory, bson.lib to 'lib', and bson.dll to 'bin' directories.
-
   - UMFPACK
 
     - MinGW used for compiling AMD and UMFPACK: `Download MinGW <http://sourceforge.net/projects/mingw/>`_.
@@ -70,20 +53,6 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
     - Copy UMFPACK\\Include\\* to 'include'
     - Copy UMFPACK\\Lib\\libumfpack.a to 'lib' directory and change its extension to Windows equivalent '.lib'.
 
-  - OpenGL support (optional)
-
-    - FREEGLUT 
-
-      - Download freeglut 2.4.0 (http://freeglut.sourceforge.net/) and unpack it.
-      - Open the your_freeglut_2.4.0_root\\freeglut.DSP file in Visual Studio and convert it to a newer format.
-      - Compile Debug or Release version. Debug version is recommended in a case of debugging.
-      - Copy 'freeglut.dll', 'freeglut.h', and 'freeglut.lib' to 'bin', 'include\\GL', and 'lib' dependency directories, respectively/.
-  
-    - GLEW
-
-      - Download glew Win32 precompiled binaries ver.1.5.4 (http://glew.sourceforge.net/) and unpack it.
-      - Copy 'my_glew_root\\bin\\glew32.dll', 'my_glew_root\\include\\GL\\\*.h', and 'my_glew_root\\lib\\glew32.lib' to 'bin', 'include\\GL', and 'lib' dependency directories respectively.
-  
   - XERCES
 
     - Download Xerces 3.1.1 source code from http://xerces.apache.org/xerces-c/download.cgi.
@@ -97,8 +66,53 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
     - Copy all bin files to 'bin' dependencies directory
     - Copy all header files to 'include' dependencies directory
 
-  - The rest is optional. If a directive WITH_EXODUSII is *not* used, this step including all sub-steps can be skipped and you can proceed to `build Hermes <win.html#building-hermes>`_.
+  - OpenGL support (optional)
+
+    - FREEGLUT 
+
+      - Download freeglut 2.4.0 (http://freeglut.sourceforge.net/) and unpack it.
+      - Open the your_freeglut_2.4.0_root\\freeglut.DSP file in Visual Studio and convert it to a newer format.
+      - Compile Debug or Release version. Debug version is recommended in a case of debugging.
+      - Copy 'freeglut.dll', 'freeglut.h', and 'freeglut.lib' to 'bin', 'include\\GL', and 'lib' dependency directories, respectively/.
+
+    - GLEW
+
+      - Download glew Win32 precompiled binaries ver.1.5.4 (http://glew.sourceforge.net/) and unpack it.
+      - Copy 'my_glew_root\\bin\\glew32.dll', 'my_glew_root\\include\\GL\\\*.h', and 'my_glew_root\\lib\\glew32.lib' to 'bin', 'include\\GL', and 'lib' dependency directories respectively.
+
+  - The rest is optional. If a directive WITH_BSON is *not* used, this step including all sub-steps can be skipped and you can proceed to `build Hermes <win.html#building-hermes>`_.
 	
+    - MATIO (1.5.2)
+      
+      - Download HDF5 <http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.7/obtain5187.html>`_.
+      - Install HDF5, note the path (you will need it for MATIO)
+      - Download MATIO from <http://sourceforge.net/projects/matio/>`_.
+      - Open the sln file in the folder visual_studio
+      - Add to the Include Directories under the libmatio project settings the directory where you installed HDF5's headers
+      - Add to the Libraries Directories under the libmatio project settings the directory where you installed HDF5's libs
+      - Add to the linker linking to "libszip.lib"
+      - (Fix MATIO error) Open the file zconf.h and on the line 287 change #if 1 to #if 0.
+      - build, copy visual_studio/*.h and src/*.h to 'include' folder, visual_studio/Release/libmatio.lib to 'lib', visual_studio/Release/libmatio.dll to 'bin' folders.
+      
+    - BSON
+    
+      - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
+      
+      - Download SCONS build tool from http://sourceforge.net/projects/scons/files/latest/download?source=files
+      - Install SCONS (you need to have PYTHON installed for that), run it (e.g. issuing C:\Python27\Scripts\scons.bat) in the BSON Mongo driver root directory
+      
+        - Use flags --m32 and --c99 ("C:\Python27\Scripts\scons.bat --c99 --m32")
+        
+      - Once compiled (should take seconds at most), copy src/bson.h to your 'include' dependency directory, bson.lib to 'lib', and bson.dll to 'bin' directories.
+
+    
+    - TCMalloc
+    
+      - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
+      - Open gperftools.sln in your Visual Studio, build the appropriate version (default works fine - just select Debug/Release)
+      - Copy Win32\"Release/Debug"\libtcmalloc_minimal.dll to 'bin' dependency directory, Win32\"Release/Debug"\libtcmalloc_minimal.lib to 'lib' dependency directory
+      - Copy the contents of src/google to 'include' dependency directory
+    
     - ExodusII
 
       - Download sources of version 4.9.3 (http://sourceforge.net/projects/exodusii/) and unpack 'exodusii'
@@ -145,47 +159,16 @@ Dependency check-list - 64-bit
 
     - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
 
-  - PTHREAD(2.8.0)
+  - PTHREAD(2.9.1)
 
-    - Download pthread from http://www.sourceware.org/pthreads-win32/, then navigate to mingw64\pthreads-w64.zip\
-    - Copy 'x86_64-w64-mingw32\\lib\\libpthread.a' to 'lib' and rename to 'pthreadVCE2.lib' , 'x86_64-w64-mingw32\\include\\\*.h' to 'include' and 'bin\\pthreadGC2-w64.dll' to 'bin' dependecy directories respectively.
+    - Download appropriate files (ftp://sourceware.org/pub/pthreads-win32/prebuilt-dll-2-9-1-release/).
+    - Copy 'dll\\x64\\pthreadVCE2.dll', 'include\\\*.h' and 'lib\\x64\\pthreadVCE2.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
 
-  - TCMalloc
-  
-    - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
-    - Open gperftools.sln in your Visual Studio, build the appropriate version (default works fine - just select Debug/Release)
-    - Copy x64\"Release/Debug"\libtcmalloc_minimal.dll to 'bin' dependency directory, x64\"Release/Debug"\libtcmalloc_minimal.lib to 'lib' dependency directory
-    - Copy the contents of src/google to 'include' dependency directory
-    
-  - BSON
-  
-    - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
-    - Download SCONS build tool from http://sourceforge.net/projects/scons/files/latest/download?source=files
-    - Install SCONS (you need to have PYTHON installed for that), run it (e.g. issuing C:\Python27\Scripts\scons.bat) in the BSON Mongo driver root directory
-    
-      - Use the flag --c99 ("C:\Python27\Scripts\scons.bat --c99")
-      
-    - Once compiled (should take seconds at most), copy src/bson.h to your 'include' dependency directory, bson.lib to 'lib', and bson.dll to 'bin' directories.
-  
   - UMFPACK
 
     - MinGW used for compiling AMD and UMFPACK: `Download MinGW <http://sourceforge.net/projects/mingw/>`_.
     - Just use 64-bit MinGW and provide the flag "-m64", otherwise it is the same as in Win32 version.
 
-  - OpenGL support (optional)
-
-    - FREEGLUT 
-
-      - Download freeglut 2.4.0 (http://freeglut.sourceforge.net/) and unpack it.
-      - Open the your_freeglut_2.4.0_root\\freeglut.DSP file in Visual Studio and convert it to a newer format.
-      - Compile Debug or Release version (x64 platform). Debug version is recommended in a case of debugging.
-      - Copy 'freeglut.dll', 'freeglut.h', and 'freeglut.lib' to 'bin', 'include\\GL', and 'lib' dependency directories, respectively/.
-  
-    - GLEW
-
-      - Download glew x64 precompiled binaries (http://glew.sourceforge.net/) and unpack it.
-      - Copy 'my_glew_root\\bin\\glew32.dll', 'my_glew_root\\include\\GL\\\*.h', and 'my_glew_root\\lib\\glew32.lib' to 'bin', 'include\\GL', and 'lib' dependency directories respectively.
- 	
   - XERCES
 
     - Download Xerces 3.1.1 source code from http://xerces.apache.org/xerces-c/download.cgi.
@@ -201,6 +184,43 @@ Dependency check-list - 64-bit
     - Copy all bin files to 'bin' dependencies directory
     - Copy all header files to 'include' dependencies directory
 
+  - OpenGL support (optional)
+
+    - FREEGLUT 
+
+      - Download freeglut 2.4.0 (http://freeglut.sourceforge.net/) and unpack it.
+      - Open the your_freeglut_2.4.0_root\\freeglut.DSP file in Visual Studio and convert it to a newer format.
+      - Compile Debug or Release version (x64 platform). Debug version is recommended in a case of debugging.
+      - Copy 'freeglut.dll', 'freeglut.h', and 'freeglut.lib' to 'bin', 'include\\GL', and 'lib' dependency directories, respectively/.
+
+    - GLEW
+
+      - Download glew x64 precompiled binaries (http://glew.sourceforge.net/) and unpack it.
+      - Copy 'my_glew_root\\bin\\glew32.dll', 'my_glew_root\\include\\GL\\\*.h', and 'my_glew_root\\lib\\glew32.lib' to 'bin', 'include\\GL', and 'lib' dependency directories respectively.
+ 	
+  - The rest is optional. If a directive WITH_BSON is *not* used, this step including all sub-steps can be skipped and you can proceed to `build Hermes <win.html#building-hermes>`_.
+  
+    - MATIO (1.5.2)
+      
+      - Just follow the 32-bit version instructions and download HDF5 for x64, and also when building MATIO, build the x64 version.
+      
+    - TCMalloc
+    
+      - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
+      - Open gperftools.sln in your Visual Studio, build the appropriate version (default works fine - just select Debug/Release)
+      - Copy x64\"Release/Debug"\libtcmalloc_minimal.dll to 'bin' dependency directory, x64\"Release/Debug"\libtcmalloc_minimal.lib to 'lib' dependency directory
+      - Copy the contents of src/google to 'include' dependency directory
+      
+    - BSON
+    
+      - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
+      - Download SCONS build tool from http://sourceforge.net/projects/scons/files/latest/download?source=files
+      - Install SCONS (you need to have PYTHON installed for that), run it (e.g. issuing C:\Python27\Scripts\scons.bat) in the BSON Mongo driver root directory
+      
+        - Use the flag --c99 ("C:\Python27\Scripts\scons.bat --c99")
+        
+      - Once compiled (should take seconds at most), copy src/bson.h to your 'include' dependency directory, bson.lib to 'lib', and bson.dll to 'bin' directories.
+    
 Building Hermes
 ~~~~~~~~~~~~~~~
 
@@ -243,8 +263,8 @@ In order to use Hermes in your project, you need to do the following steps. Step
   - Prepare Hermes to be buildable by MSVC, see 'Building Hermes'.
   - Create your project in MSVC. Set the project to be an empty Win32 console project.
   - Add directories 'dependencies\\lib' to additional library directories (<right click on your project>\\Properties\\Configuration Properties\\Linker\\Additional Library Directories).
-  - Add also the directory where you copied Hermes libraries to as an additional library directory. This would probably be the variable TARGET_ROOT in your CMake.vars file.
-  - Add 'include "hermes2d.h"', make sure that your TARGET_ROOT is among Include Directories settings in your compiler.
+  - Add also the directory where you copied Hermes libraries to as an additional library directory. This would probably be the variable CMAKE_INSTALL_PREFIX in your CMake.vars file.
+  - Add 'include "hermes2d.h"', make sure that your CMAKE_INSTALL_PREFIX is among Include Directories settings in your compiler.
   - Add the dependencies\\include directory (and possibly other directories where you copied dependency headers) using
   
     - Project -> Properties -> Configuration Properties -> VC++ Directories -> Include Directories

@@ -4,20 +4,17 @@ Linux
 Download and compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you are using a Debian-based system, install the required libraries first:
+If you are using a Debian-based system, install the (required) libraries first:
 
 .. sourcecode::
     .
 
-    apt-get install git git-core cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev libxerces-c-dev xsdcxx
+    apt-get install git git-core cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev libxerces-c-dev xsdcxx libmatio-dev
 
 .. latexcode::
     .
 
     apt-get install cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev 
-
-(Note: cmake has to be at least version 2.6 or later, matplotlib has to be at
-least 0.98.5.2 or higher.)
 
 If you want to use fast saving / loading of Hermes entities, install
 
@@ -25,6 +22,11 @@ If you want to use fast saving / loading of Hermes entities, install
   
     - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip: `Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
     - Compile and install using 'make install'
+    
+  - TCMalloc
+    
+      - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
+      - Make & install
   
 To obtain the source code, clone the Git repository from Github::
   
