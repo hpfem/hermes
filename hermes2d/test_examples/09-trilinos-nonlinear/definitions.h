@@ -12,7 +12,7 @@ public:
 
   virtual double value(double x, double y) const;
 
-  virtual Hermes::Ord ord(Ord x, Ord y) const;
+  virtual Hermes::Ord ord(double x, double y) const;
 
   template<typename Real>
   Real u(Real x, Real y) const;
@@ -41,14 +41,13 @@ public:
 class CustomExactSolution : public ExactSolutionScalar<double>
 {
 public:
-  CustomExactSolution(Mesh* mesh)
-             : ExactSolutionScalar<double>(mesh) {};
+  CustomExactSolution(MeshSharedPtr mesh) : ExactSolutionScalar<double>(mesh) {};
 
   double value(double x, double y) const;
 
   virtual void derivatives (double x, double y, double& dx, double& dy) const;
 
-  virtual Ord ord(Ord x, Ord y) const;
+  virtual Ord ord(double x, double y) const;
 };
 
 /* Weak form */

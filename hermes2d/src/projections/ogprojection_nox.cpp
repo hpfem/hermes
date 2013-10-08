@@ -42,7 +42,7 @@ namespace Hermes
       int ndof = space->get_num_dofs();
 
       // Initialize DiscreteProblem.
-      DiscreteProblem<Scalar> dp(wf, space);
+      DiscreteProblemNOX<Scalar> dp(wf, space);
 
       // Initial coefficient vector for the Newton's method.
       Scalar* coeff_vec = new Scalar[ndof];

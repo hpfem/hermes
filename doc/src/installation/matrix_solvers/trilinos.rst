@@ -31,11 +31,13 @@ Find more about :ref:`ref-usage-trilinos`.
 
 Windows
 ~~~~~~~
+First of all - to build Trilinos, one needs CLAPACK (see the optional package in the library installation documentation).
+
 | Download the sources for the latest version from the `Trilinos page <http://trilinos.sandia.gov/download/trilinos-10.6.html>`__ and unpack them in some temporary directory.
 | 
 | Go to the Trilinos source directory.
 | 
-| In the following, replace {CLAPACK_DIR} with the full path to your clapack-3.2.1-CMAKE directory (where you installed CLAPACK as a Hermes's dependency) without any quotes.
+| In the following, replace {CLAPACK_DIR}, {TPL_BLAS_LIBRARIES} with the full path to your clapack-3.2.1-CMAKE directory and blas.lib filepath without any quotes.
 | Also, replace {CMAKE_INSTALL_PREFIX} with either your dependency root, or any other folder where you want to install Trilinos packages.::
 
 
@@ -43,24 +45,43 @@ Windows
     cd build_dir
     cmake \
      -D CMAKE_BUILD_TYPE:STRING=DEBUG \
-     -D CLAPACK_DIR:STRING={CLAPACK_DIR} \
+     -D CLAPACK_DIR:STRING=d:\\hpfem\\hermes\\dependencies\\install\\clapack-3.2.1-CMAKE \
+     -D TPL_BLAS_LIBRARIES:FILEPATH=d:\\hpfem\\hermes\\dependencies\\lib\\blas.lib \
      -D CMAKE_Fortran_FLAGS:STRING="-fPIC" \
      -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF \
      -D Trilinos_ENABLE_Teuchos:BOOL=ON \
+     -D Teuchos_ENABLE_TESTS:STRING=OFF \
+     -D Teuchos_ENABLE_EXAMPLES:STRING=OFF \
      -D Trilinos_ENABLE_Epetra:BOOL=ON \
+     -D Epetra_ENABLE_TESTS:STRING=OFF \
+     -D Epetra_ENABLE_EXAMPLES:STRING=OFF \
      -D Trilinos_ENABLE_EpetraExt:BOOL=ON \
+     -D EpetraExt_ENABLE_TESTS:STRING=OFF \
+     -D EpetraExt_ENABLE_EXAMPLES:STRING=OFF \
      -D Trilinos_ENABLE_AztecOO:BOOL=ON \
+     -D AztecOO_ENABLE_TESTS:STRING=OFF \
+     -D AztecOO_ENABLE_EXAMPLES:STRING=OFF \
      -D Trilinos_ENABLE_Ifpack:BOOL=ON \
+     -D Ifpack_ENABLE_TESTS:STRING=OFF \
+     -D Ifpack_ENABLE_EXAMPLES:STRING=OFF \
      -D Trilinos_ENABLE_ML:BOOL=ON \
+     -D ML_ENABLE_TESTS:STRING=OFF \
+     -D ML_ENABLE_EXAMPLES:STRING=OFF \
      -D Trilinos_ENABLE_Amesos:BOOL=ON \
+     -D Amesos_ENABLE_TESTS:STRING=OFF \
+     -D Amesos_ENABLE_EXAMPLES:STRING=OFF \
      -D Trilinos_ENABLE_NOX:BOOL=ON \
+     -D NOX_ENABLE_TESTS:STRING=OFF \
+     -D NOX_ENABLE_EXAMPLES:STRING=OFF \
      -D Trilinos_ENABLE_Anasazi:BOOL=ON \
+     -D Anasazi_ENABLE_TESTS:STRING=OFF \
+     -D Anasazi_ENABLE_EXAMPLES:STRING=OFF \
      -D Trilinos_ENABLE_Komplex:BOOL=ON \
-     -D Trilinos_ENABLE_Claps:BOOL=ON \
-     -D Trilinos_ENABLE_TESTS:BOOL=ON \
-     -D Trilinos_ENABLE_MPI:BOOL=OFF \
+     -D Komplex_ENABLE_TESTS:STRING=OFF \
+     -D Komplex_ENABLE_EXAMPLES:STRING=OFF \
+     -D Trilinos_ENABLE_TESTS:BOOL=OFF \
      -D DART_TESTING_TIMEOUT:STRING=600 \
-     -D CMAKE_INSTALL_PREFIX:STRING={CMAKE_INSTALL_PREFIX} \	 
+     -D CMAKE_INSTALL_PREFIX:STRING=/d/hpfem/hermes/dependencies \	 
      ..
 	
 | Build the Trilinos solution.

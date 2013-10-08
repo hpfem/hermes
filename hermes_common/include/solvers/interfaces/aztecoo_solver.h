@@ -41,6 +41,8 @@ namespace Hermes
     class HERMES_API AztecOOSolver : public IterSolver<Scalar>
     {
     public:
+      AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
+      virtual ~AztecOOSolver();
 
       /// Set the type of the solver
       /// @param[in] solver - name of the solver[ gmres | cg | cgs | tfqmr | bicgstab ]
@@ -65,10 +67,7 @@ namespace Hermes
       virtual void use_node_wise_ordering(unsigned int num_pdes);
       virtual void use_equations_wise_ordering();
 
-      AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
-      virtual ~AztecOOSolver();
-
-      virtual void solve();
+     virtual void solve();
       virtual void solve(Scalar* initial_guess);
 
       virtual int get_matrix_size();
@@ -98,7 +97,7 @@ namespace Hermes
 
       EpetraPrecond<Scalar> *pc;
 
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver = false);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver);
     };
   }
 }

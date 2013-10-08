@@ -23,8 +23,10 @@
 #define __HERMES_COMMON_SOLVER_EPETRA_H_
 #include "config.h"
 #ifdef HAVE_EPETRA
+#undef interface
 #define EPETRA_NO_64BIT_GLOBAL_INDICES
 #include "algebra/matrix.h"
+#include "algebra/vector.h"
 #include <Epetra_SerialComm.h>
 #include <Epetra_Map.h>
 #include <Epetra_Vector.h>
@@ -86,11 +88,11 @@ namespace Hermes
       virtual unsigned int get_matrix_size() const;
       virtual unsigned int get_nnz() const;
       virtual double get_fill_in() const;
-      
+      Epetra_CrsMatrix *mat;
+
     protected:
       Epetra_BlockMap *std_map;
       Epetra_CrsGraph *grph;
-      Epetra_CrsMatrix *mat;
       /// \brief Imaginary part of the matrix, mat holds the real part.
       Epetra_CrsMatrix *mat_im;
             
@@ -98,7 +100,6 @@ namespace Hermes
 
       friend class Hermes::Solvers::AmesosSolver<Scalar>;
       friend class Hermes::Solvers::AztecOOSolver<Scalar>;
-      friend class Hermes::Solvers::NewtonSolverNOX<Scalar>;
       friend class Hermes::Preconditioners::IfpackPrecond<Scalar>;
       friend class Hermes::Preconditioners::MlPrecond<Scalar>;
     };
@@ -122,17 +123,16 @@ namespace Hermes
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
       using Vector<Scalar>::export_to_file;
       virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
+      Epetra_Vector *vec;
 
     protected:
       Epetra_BlockMap *std_map;
-      Epetra_Vector *vec;
       /// \brief Imaginary part of the vector, vec holds the real part.
       Epetra_Vector *vec_im;
       bool owner;
 
       friend class Hermes::Solvers::AmesosSolver<Scalar>;
       friend class Hermes::Solvers::AztecOOSolver<Scalar>;
-      friend class Hermes::Solvers::NewtonSolverNOX<Scalar>;
     };
   }
 }

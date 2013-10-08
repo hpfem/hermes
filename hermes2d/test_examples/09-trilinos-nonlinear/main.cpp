@@ -54,7 +54,7 @@ int max_iters = 100;                              // Max number of iterations.
 int main(int argc, char* argv[])
 {
   // Load the mesh.
-  Mesh mesh;
+  MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
   mloader.load("square.mesh", &mesh);
 

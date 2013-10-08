@@ -31,8 +31,8 @@ namespace Hermes
   {
     template<typename Scalar>
     AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
-      : IterSolver<Scalar>(m, rhs), m(m), rhs(rhs), final_matrix(nullptr), P(nullptr), Q(nullptr), row_perm(nullptr), col_perm(nullptr)
-    {
+      : IterSolver<Scalar>(m, rhs), LoopSolver<Scalar>(m, rhs), m(m), rhs(rhs), final_matrix(nullptr), P(nullptr), Q(nullptr), row_perm(nullptr), col_perm(nullptr)
+		{
       pc = nullptr;
     }
 

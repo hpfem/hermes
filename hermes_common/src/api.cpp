@@ -64,7 +64,7 @@ namespace Hermes
     this->change_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_ITERATIVE), &ParalutionInitialization::deinit_paralution));
     this->change_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_AMG), &ParalutionInitialization::deinit_paralution));
 #endif
-
+    
     // Initialize TCMalloc (this line also serves for TCMalloc not to be linker-optimized out).
 #ifdef WITH_TC_MALLOC
     ::tc_set_new_mode(1);

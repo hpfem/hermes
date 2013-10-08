@@ -21,16 +21,26 @@
 
 namespace Hermes
 {
-  namespace Solvers
+  namespace Hermes2D
   {
     static Epetra_SerialComm seq_comm;
 
     template<typename Scalar>
-    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(DiscreteProblemInterface<Scalar>* problem) : dp(problem)
+    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX() : DiscreteProblem<Scalar>()
     {
       this->precond = Teuchos::null;
-      if(!this->dp->is_matrix_free())
-        this->dp->create_sparse_structure(&jacobian);
+    }
+
+    template<typename Scalar>
+    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) : DiscreteProblem<Scalar>(wf, spaces)
+    {
+      this->precond = Teuchos::null;
+    }
+
+    template<typename Scalar>
+    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) : DiscreteProblem<Scalar>(wf, space)
+    {
+      this->precond = Teuchos::null;
     }
 
     template<typename Scalar>
@@ -41,9 +51,9 @@ namespace Hermes
 
       rhs.zero();
 
-      Scalar* coeff_vec = new Scalar[xx.length()];
+      Scalar* coeff_vec = new Scalar[xx.get_size()];
       xx.extract(coeff_vec);
-      this->dp->assemble(coeff_vec, nullptr, &rhs); // nullptr is for the global matrix.
+      this->assemble(coeff_vec, nullptr, &rhs); // nullptr is for the global matrix.
       delete [] coeff_vec;
 
       return true;
@@ -60,9 +70,9 @@ namespace Hermes
 
       jacob.zero();
 
-      Scalar* coeff_vec = new Scalar[xx.length()];
+      Scalar* coeff_vec = new Scalar[xx.get_size()];
       xx.extract(coeff_vec);
-      this->dp->assemble(coeff_vec, &jacob, nullptr); // nullptr is for the right-hand side.
+      this->assemble(coeff_vec, &jacob, nullptr); // nullptr is for the right-hand side.
       delete [] coeff_vec;
       //jacob.finish();
 
@@ -78,9 +88,9 @@ namespace Hermes
 
       jacobian.zero();
 
-      Scalar* coeff_vec = new Scalar[xx.length()];
+      Scalar* coeff_vec = new Scalar[xx.get_size()];
       xx.extract(coeff_vec);
-      this->dp->assemble(coeff_vec, &jacobian, nullptr);  // nullptr is for the right-hand side.
+      this->assemble(coeff_vec, &jacobian, nullptr);  // nullptr is for the right-hand side.
       delete [] coeff_vec;
       //jacobian.finish();
 
@@ -92,7 +102,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Teuchos::RCP<Precond<Scalar> > DiscreteProblemNOX<Scalar>::get_precond()
+    Teuchos::RCP<Hermes::Preconditioners::EpetraPrecond<Scalar> > DiscreteProblemNOX<Scalar>::get_precond()
     {
       return precond;
     }
@@ -104,7 +114,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NewtonSolverNOX<Scalar>::NewtonSolverNOX(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem), ndp(problem)
+    Scalar* NewtonSolverNOX<Scalar>::get_sln_vector()
+    {
+      return this->sln_vector;
+    }
+
+    template<typename Scalar>
+    NewtonSolverNOX<Scalar>::NewtonSolverNOX(DiscreteProblemNOX<Scalar>* problem) : dp(problem), sln_vector(nullptr)
     {
       // default values
       // convergence test
@@ -167,17 +183,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemNOX<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
+    void DiscreteProblemNOX<Scalar>::set_precond(Teuchos::RCP<Hermes::Preconditioners::EpetraPrecond<Scalar> > &pc)
     {
       precond = pc;
-      this->dp->create_sparse_structure(&jacobian);
     }
 
     template<typename Scalar>
-    void NewtonSolverNOX<Scalar>::set_precond(Precond<Scalar> &pc)
+    void NewtonSolverNOX<Scalar>::set_precond(Hermes::Preconditioners::EpetraPrecond<Scalar> &pc)
     {
-      Teuchos::RCP<Precond<Scalar> > tpc = Teuchos::rcpFromRef(pc);
-      ndp.set_precond(tpc);
+      Teuchos::RCP<Hermes::Preconditioners::EpetraPrecond<Scalar> > tpc = Teuchos::rcpFromRef(pc);
+      dp->set_precond(tpc);
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Preconditioner", "User Defined");
     }
 
@@ -233,9 +248,11 @@ namespace Hermes
     {
       // Put the initial coeff_vec into the inner structure for the initial guess.
       Hermes::Algebra::EpetraVector<Scalar> temp_init_sln;
-      temp_init_sln.alloc(this->dp->get_num_dofs());
-      for (int i = 0; i < this->dp->get_num_dofs(); i++)
+      int ndofs = Space<Scalar>::get_num_dofs(this->dp->get_spaces());
+      temp_init_sln.alloc(ndofs);
+      for (int i = 0; i < ndofs; i++)
         temp_init_sln.set(i, coeff_vec[i]);
+
       NOX::Epetra::Vector init_sln(*temp_init_sln.vec);
 
       // prepare variables
@@ -244,16 +261,16 @@ namespace Hermes
       // linear system settings
       Teuchos::ParameterList &ls_pars = nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver");
       // preconditioner
-      Teuchos::RCP<Precond<Scalar> > precond = ndp.get_precond();
+      Teuchos::RCP<Hermes::Preconditioners::EpetraPrecond<Scalar> > precond = dp->get_precond();
       //linear system
       Teuchos::RCP<NOX::Epetra::LinearSystemAztecOO> lin_sys;
       // problem
-      Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = Teuchos::rcpFromRef(ndp);
+      Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = Teuchos::rcpFromRef(*dp);
       // jacobian matrix
       Teuchos::RCP<Epetra_RowMatrix> jac_mat;
 
       // Create linear system
-      if(this->dp->is_matrix_free())
+      if(this->dp->get_weak_formulation()->is_matrix_free())
       {
         if(precond == Teuchos::null)
         { //Matrix free without preconditioner
@@ -261,15 +278,15 @@ namespace Hermes
         }
         else
         { //Matrix free with preconditioner
-          Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = Teuchos::rcpFromRef(ndp);
+          Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = Teuchos::rcpFromRef(*dp);
           lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
             i_prec, precond, init_sln));
         }
       }
       else
       {  // not matrix Free (with jacobian)
-        Teuchos::RCP<NOX::Epetra::Interface::Jacobian> i_jac = Teuchos::rcpFromRef(ndp);
-        jac_mat = Teuchos::rcp(ndp.get_jacobian()->mat);
+        Teuchos::RCP<NOX::Epetra::Interface::Jacobian> i_jac = Teuchos::rcpFromRef(*dp);
+        jac_mat = Teuchos::rcp(dp->get_jacobian()->mat);
         if(precond == Teuchos::null)
         { //Matrix  without preconditioner
           lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
@@ -277,7 +294,7 @@ namespace Hermes
         }
         else
         { //Matrix  with preconditioner
-          Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = Teuchos::rcpFromRef(ndp);
+          Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = Teuchos::rcpFromRef(*dp);
           lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars,
             i_jac, jac_mat, i_prec, precond, init_sln));
         }
@@ -341,7 +358,7 @@ namespace Hermes
       /// Solve.
       NOX::StatusTest::StatusType status = solver->solve();
 
-      if(!this->dp->is_matrix_free())
+      if(!this->dp->get_weak_formulation()->is_matrix_free())
         jac_mat.release();  // release the ownership (we take care of jac_mat by ourselves)
 
       if(status == NOX::StatusTest::Converged)
@@ -358,10 +375,10 @@ namespace Hermes
         const Epetra_Vector &f_sln =
           (dynamic_cast<const NOX::Epetra::Vector &>(f_grp.getX())).getEpetraVector();
         // extract solution
-        int n = this->dp->get_num_dofs();
-        delete [] this->sln_vector;
-        this->sln_vector = new double[n];
-        memset(this->sln_vector, 0, n * sizeof(double));
+        if(this->sln_vector)
+          delete [] this->sln_vector;
+        this->sln_vector = (Scalar*)calloc(ndofs, sizeof(Scalar));
+        
         f_sln.ExtractCopy(this->sln_vector);
       }
       else // not converged
