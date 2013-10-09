@@ -16,7 +16,7 @@
 #ifndef __H2D_WEAKFORM_H
 #define __H2D_WEAKFORM_H
 
-#include "../function/solution.h"
+#include "../function/exact_solution.h"
 
 namespace Hermes
 {
@@ -146,10 +146,12 @@ namespace Hermes
       /// External functions.
       /// Set one external function.
       void set_ext(MeshFunctionSharedPtr<Scalar> ext);
+      void set_u_ext_fn(UExtFunctionSharedPtr<Scalar> ext);
 
       /// External functions.
       /// Set more external functions.
       void set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext);
+      void set_u_ext_fn(Hermes::vector<UExtFunctionSharedPtr<Scalar> > ext);
 
       /// External functions.
       /// Get external functions.
@@ -176,6 +178,7 @@ namespace Hermes
     protected:
       /// External solutions.
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext;
+      Hermes::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
 
       double current_time;
       double current_time_step;
@@ -255,8 +258,15 @@ namespace Hermes
       /// external functions - dual functionality with the overall WeakForm.
       /// For Agros, this approach is better in some way, for e.g. Euler equations,
       /// the other one (for the whole WeakForm) is faster.
+      /// External functions.
+      /// Set one external function.
       void set_ext(MeshFunctionSharedPtr<Scalar> ext);
+      void set_u_ext_fn(UExtFunctionSharedPtr<Scalar> ext);
+
+      /// External functions.
+      /// Set more external functions.
       void set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext);
+      void set_u_ext_fn(Hermes::vector<UExtFunctionSharedPtr<Scalar> > ext);
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > get_ext() const;
 
       /// scaling factor
@@ -286,6 +296,7 @@ namespace Hermes
 
       /// External solutions.
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext;
+      Hermes::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
 
       /// For time-dependent right-hand side functions.
       /// E.g. for Runge-Kutta methods. Otherwise the one time for the whole WeakForm can be used.

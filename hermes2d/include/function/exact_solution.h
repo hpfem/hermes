@@ -40,7 +40,7 @@ namespace Hermes
 
       virtual MeshFunction<Scalar>* clone() const;
 
-      inline std::string getClassName() const { return "ExactSolution"; }
+      std::string getClassName() const;
 
       /// Saves the exact solution to an XML file.
       virtual void save(const char* filename) const;
@@ -51,7 +51,7 @@ namespace Hermes
       /// should be used when integrating the function.
       virtual Hermes::Ord ord(double x, double y) const = 0;
 
-      protected:
+    protected:
       /// For scaling of the solution.
       Scalar exact_multiplicator;
       template<typename T> friend class Solution;
@@ -118,7 +118,7 @@ namespace Hermes
 
       template<typename T> friend class Solution;
     };
-    
+
 
     /// @ingroup meshFunctions
     template<typename Scalar>
@@ -143,7 +143,7 @@ namespace Hermes
         return value (x, y);
       };
     };
-    
+
     /// @ingroup meshFunctions
     template<typename Scalar>
     class HERMES_API ConstantSolution : public ExactSolutionScalar<Scalar>
@@ -252,27 +252,32 @@ namespace Hermes
     /// @ingroup meshFunctions
     /// Function operating on previous nonlinear solutions in assembling (u_ext)
     template<typename Scalar>
-    class HERMES_API UExtFunction : public MeshFunction<Scalar>
+    class HERMES_API UExtFunction : public Function<Scalar>
     {
     public:
       /// \param[in] polynomialOrder The polynomial order used for the space where the solution of the
       /// internal Laplace equation is sought.
-      UExtFunction(MeshSharedPtr mesh);
+      UExtFunction();
       virtual ~UExtFunction() {};
 
       /// Function returning the value.
       virtual void value (int n, Func<Scalar>** u_ext , Func<Scalar>* result, Geom<double>* geometry) const = 0;
       virtual void ord(Func<Hermes::Ord>** u_ext, Func<Hermes::Ord>* result) const = 0;
 
-      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr)
-      {
-        throw Exceptions::Exception("UExtFunction is only usable in assembling, not for getting point values.");
-        return nullptr;
-      }
+      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
+      void free(void);
+      virtual void precalculate(int order, int mask);
+    };
 
-      virtual void precalculate(int order, int mask) {};
+    template<typename Scalar>
+    class HERMES_API UExtFunctionSharedPtr : public std::tr1::shared_ptr<UExtFunction<Scalar> >
+    {
+    public:
+      UExtFunctionSharedPtr(UExtFunction<Scalar>* ptr = nullptr);
 
-      MeshFunction<Scalar>* clone() const = 0;
+      UExtFunctionSharedPtr(const UExtFunctionSharedPtr<Scalar>& other);
+
+      void operator=(const UExtFunctionSharedPtr<Scalar>& other);
     };
   }
 }

@@ -142,9 +142,11 @@ namespace Hermes
       for(unsigned int i = 0; i < other_wf->forms.size(); i++)
       {
         this->cloneMemberExtFunctions(other_wf->forms[i]->ext, this->forms[i]->ext);
+        other_wf->forms[i]->u_ext_fn = this->forms[i]->u_ext_fn;
         this->forms[i]->wf = this;
       }
       this->cloneMemberExtFunctions(other_wf->ext, this->ext);
+      this->u_ext_fn = other_wf->u_ext_fn;
     }
 
     template<typename Scalar>
@@ -196,6 +198,19 @@ namespace Hermes
     void WeakForm<Scalar>::set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext)
     {
       this->ext = ext;
+    }
+
+    template<typename Scalar>
+    void WeakForm<Scalar>::set_u_ext_fn(UExtFunctionSharedPtr<Scalar> ext)
+    {
+      this->u_ext_fn.clear();
+      this->u_ext_fn.push_back(ext);
+    }
+
+    template<typename Scalar>
+    void WeakForm<Scalar>::set_u_ext_fn(Hermes::vector<UExtFunctionSharedPtr<Scalar> > ext)
+    {
+      this->u_ext_fn = ext;
     }
 
     template<typename Scalar>
@@ -317,6 +332,19 @@ namespace Hermes
     void Form<Scalar>::set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext)
     {
       this->ext = ext;
+    }
+
+    template<typename Scalar>
+    void Form<Scalar>::set_u_ext_fn(UExtFunctionSharedPtr<Scalar> ext)
+    {
+      this->u_ext_fn.clear();
+      this->u_ext_fn.push_back(ext);
+    }
+
+    template<typename Scalar>
+    void Form<Scalar>::set_u_ext_fn(Hermes::vector<UExtFunctionSharedPtr<Scalar> > ext)
+    {
+      this->u_ext_fn = ext;
     }
 
     template<typename Scalar>

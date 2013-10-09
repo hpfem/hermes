@@ -111,9 +111,6 @@ namespace Hermes
       // order of solutions from the previous Newton iteration etc..
       Func<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
       Func<Hermes::Ord>** ext_ord = nullptr;
-      int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
-      if(ext_size > 0)
-        ext_ord = new Func<Hermes::Ord>*[ext_size];
       init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
 
       // Order of shape functions.
@@ -167,10 +164,6 @@ namespace Hermes
       // order of solutions from the previous Newton iteration etc..
       Func<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
       Func<Hermes::Ord>** ext_ord = nullptr;
-      
-      int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
-      if(ext_size > 0)
-        ext_ord = new Func<Hermes::Ord>*[ext_size];
       init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
 
       // Order of shape functions.
@@ -205,8 +198,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
+    void DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>**& oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
+      int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
+      int u_ext_fn_size = form->u_ext_fn.size() ? form->u_ext_fn.size() : form->wf->u_ext_fn.size();
+      if(ext_size + u_ext_fn_size> 0)
+        oext = new Func<Hermes::Ord>*[ext_size + u_ext_fn_size];
+
       unsigned int prev_size = this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset;
       bool surface_form = (current_state->isurf > -1);
 
@@ -222,30 +220,38 @@ namespace Hermes
 
       if(form->ext.size() > 0)
       {
-        for (int i = 0; i < form->ext.size(); i++)
+        for (int i = 0; i < ext_size; i++)
         {
-          UExtFunction<Scalar>* u_ext_function = dynamic_cast<UExtFunction<Scalar>*>(form->ext[i].get());
-          if(u_ext_function)
-          {
-            oext[i] = new Func<Hermes::Ord>(1, 2);
-            u_ext_function->ord(oi, oext[i]);
-          }
-          else
-          {
           if(surface_form)
             oext[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
           else
             oext[i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
-          }
         }
       }
       else
       {
-        for (int i = 0; i < form->wf->ext.size(); i++)
+        for (int i = 0; i < ext_size; i++)
           if(surface_form)
             oext[i] = init_fn_ord(form->wf->ext[i]->get_edge_fn_order(current_state->isurf) + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
           else
             oext[i] = init_fn_ord(form->wf->ext[i]->get_fn_order() + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
+      }
+
+      if(form->u_ext_fn.size() > 0)
+      {
+        for (int i = 0; i < u_ext_fn_size; i++)
+        {
+          oext[ext_size + i] = init_fn_ord(0);
+          form->u_ext_fn[i]->ord(oi, oext[ext_size + i]);
+        }
+      }
+      else
+      {
+        for (int i = 0; i < u_ext_fn_size; i++)
+        {
+          oext[ext_size + i] = init_fn_ord(0);
+          form->wf->u_ext_fn[i]->ord(oi, oext[ext_size + i]);
+        }
       }
     }
 

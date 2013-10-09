@@ -24,49 +24,26 @@
 #include "space_h2d_xml.h"
 #include "api2d.h"
 
-#ifdef _WINDOWS
-template<typename Scalar>
-SpaceSharedPtr<Scalar>::SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar> * ptr) : std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
-{
-}
-
-template<typename Scalar>
-SpaceSharedPtr<Scalar>::SpaceSharedPtr(const SpaceSharedPtr& other) : std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(other)
-{
-}
-
-template<typename Scalar>
-void SpaceSharedPtr<Scalar>::operator=(const SpaceSharedPtr& other)
-{
-  std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >::operator=(other);
-}
-#else
-template<typename Scalar>
-SpaceSharedPtr<Scalar>::SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
-{
-}
-
-template<typename Scalar>
-SpaceSharedPtr<Scalar>::SpaceSharedPtr(const SpaceSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(other)
-{
-}
-
-template<typename Scalar>
-void SpaceSharedPtr<Scalar>::operator=(const SpaceSharedPtr& other)
-{
-  std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >::operator=(other);
-}
-#endif
-
-template<typename Scalar>
-SpaceSharedPtr<Scalar>::~SpaceSharedPtr()
-{
-}
-
 namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar>
+    SpaceSharedPtr<Scalar>::SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
+    {
+    }
+
+    template<typename Scalar>
+    SpaceSharedPtr<Scalar>::SpaceSharedPtr(const SpaceSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(other)
+    {
+    }
+
+    template<typename Scalar>
+    void SpaceSharedPtr<Scalar>::operator=(const SpaceSharedPtr& other)
+    {
+      std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >::operator=(other);
+    }
+
     const char* SpaceTypeString[5] = { "h1", "hcurl", "hdiv", "l2", "l2-markerwise" };
 
     unsigned g_space_seq = 0;
@@ -1710,8 +1687,8 @@ namespace Hermes
 
     template class HERMES_API Space<double>;
     template class HERMES_API Space<std::complex<double> >;
+
+    template class HERMES_API SpaceSharedPtr<double>;
+    template class HERMES_API SpaceSharedPtr<std::complex<double> >;
   }
 }
-
-template class HERMES_API SpaceSharedPtr<double>;
-template class HERMES_API SpaceSharedPtr<std::complex<double> >;

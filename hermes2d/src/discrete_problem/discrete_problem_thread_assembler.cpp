@@ -304,26 +304,32 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>** DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry)
+    Func<Scalar>** DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry)
     {
       Func<Scalar>** ext_func = nullptr;
-      if(ext.size() > 0)
+      if(ext.size() > 0 || u_ext_fns.size() > 0)
       {
-        ext_func = new Func<Scalar>*[ext.size()];
+        ext_func = new Func<Scalar>*[ext.size() + u_ext_fns.size()];
         for(int ext_i = 0; ext_i < ext.size(); ext_i++)
+        {
           if(ext[ext_i])
             if(ext[ext_i]->get_active_element())
-            {
-              UExtFunction<Scalar>* u_ext_fn = dynamic_cast<UExtFunction<Scalar>*>(ext[ext_i].get());
-              if(u_ext_fn)
-                ext_func[ext_i] = init_fn(u_ext_fn, u_ext_func, this->spaces_size, order, geometry);
-              else
-                ext_func[ext_i] = init_fn(ext[ext_i].get(), order);
-            }
+              ext_func[ext_i] = init_fn(ext[ext_i].get(), order);
             else
               ext_func[ext_i] = nullptr;
           else
             ext_func[ext_i] = nullptr;
+        }
+        for(int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
+        {
+          if(u_ext_fns[ext_i])
+          {
+            u_ext_fns[ext_i]->set_active_element(current_state->rep);
+            ext_func[ext.size() + ext_i] = init_fn(u_ext_fns[ext_i].get(), u_ext_func, this->spaces_size, order, geometry);
+          }
+          else
+            ext_func[ext.size() + ext_i] = nullptr;
+        }
       }
 
       if(this->rungeKutta)
@@ -336,7 +342,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::deinit_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Func<Scalar>** ext_func)
+    void DiscreteProblemThreadAssembler<Scalar>::deinit_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Scalar>** ext_func)
     {
       for(int ext_i = 0; ext_i < ext.size(); ext_i++)
       {
@@ -345,6 +351,11 @@ namespace Hermes
           ext_func[ext_i]->free_fn();
           delete ext_func[ext_i];
         }
+      }
+      for(int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
+      {
+        ext_func[ext.size() + ext_i]->free_fn();
+        delete ext_func[ext.size() + ext_i];
       }
       if(ext_func)
         delete [] ext_func;
@@ -357,7 +368,7 @@ namespace Hermes
       Func<Scalar>** u_ext_func = this->init_u_ext_values(this->current_cache_record->order);
 
       // init - ext
-      Func<Scalar>** ext_func = this->init_ext_values(this->wf->ext, this->current_cache_record->order, u_ext_func, current_cache_record->geometry);
+      Func<Scalar>** ext_func = this->init_ext_values(this->wf->ext, this->wf->u_ext_fn, this->current_cache_record->order, u_ext_func, current_cache_record->geometry);
 
       if(this->current_mat || this->add_dirichlet_lift)
       {
@@ -403,7 +414,7 @@ namespace Hermes
       this->deinit_u_ext_values(u_ext_func);
 
       // deinit - ext
-      this->deinit_ext_values(this->wf->ext, ext_func);
+      this->deinit_ext_values(this->wf->ext, this->wf->u_ext_fn, ext_func);
 
       // Assemble surface integrals now: loop through surfaces of the element.
       if(current_state->isBnd && (this->wf->mfsurf.size() > 0 || this->wf->vfsurf.size() > 0))
@@ -426,7 +437,7 @@ namespace Hermes
           Func<Scalar>** u_ext_funcSurf = this->init_u_ext_values(orderSurf);
 
           // init - ext
-          Func<Scalar>** ext_funcSurf = this->init_ext_values(this->wf->ext, orderSurf, u_ext_funcSurf, current_cache_record->geometry);
+          Func<Scalar>** ext_funcSurf = this->init_ext_values(this->wf->ext, this->wf->u_ext_fn, orderSurf, u_ext_funcSurf, current_cache_record->geometry);
 
           if(this->current_mat || this->add_dirichlet_lift)
           {
@@ -470,7 +481,7 @@ namespace Hermes
           this->deinit_u_ext_values(u_ext_funcSurf);
 
           // deinit - ext
-          this->deinit_ext_values(this->wf->ext, ext_funcSurf);
+          this->deinit_ext_values(this->wf->ext, this->wf->u_ext_fn, ext_funcSurf);
         }
       }
     }
@@ -492,7 +503,7 @@ namespace Hermes
       Func<Scalar>** local_ext = ext;
       // If the user supplied custom ext functions for this form.
       if(form->ext.size() > 0)
-        local_ext = this->init_ext_values(form->ext, order, u_ext, geometry);
+        local_ext = this->init_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), order, u_ext, geometry);
 
       // Account for the previous time level solution previously inserted at the back of ext.
       if(this->rungeKutta)
@@ -567,7 +578,7 @@ namespace Hermes
       }
 
       if(form->ext.size() > 0)
-        this->deinit_ext_values(form->ext, local_ext);
+        this->deinit_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), local_ext);
 
       if(this->rungeKutta)
         u_ext -= form->u_ext_offset;
@@ -584,7 +595,7 @@ namespace Hermes
 
       Func<Scalar>** local_ext = ext;
       if(form->ext.size() > 0)
-        local_ext = this->init_ext_values(form->ext, order, u_ext, geometry);
+        local_ext = this->init_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), order, u_ext, geometry);
 
       // Account for the previous time level solution previously inserted at the back of ext.
       if(this->rungeKutta)
@@ -612,7 +623,7 @@ namespace Hermes
       }
 
       if(form->ext.size() > 0)
-        this->deinit_ext_values(form->ext, local_ext);
+        this->deinit_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), local_ext);
 
       if(this->rungeKutta)
         u_ext -= form->u_ext_offset;

@@ -770,11 +770,9 @@ namespace Hermes
       int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
-      // Sanity checks.
+      // Sanity check.
       if(fu == nullptr)
-        throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
-      if(fu->get_mesh() == nullptr)
-        throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
+        throw Hermes::Exceptions::Exception("nullptr UExtFunction in Func<Scalar>*::init_fn().");
 
       if(u->nc == 1)
       {

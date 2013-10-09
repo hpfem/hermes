@@ -71,9 +71,6 @@ static const int H2D_TRF_IDENTITY = H2D_TRF_QUAD_NUM;
 # define H2DRS_DEFAULT_ERR_WEIGHT_P 1.0 ///< A default multiplicative coefficient of an error of a P-candidate. \ingroup g_selectors
 # define H2DRS_DEFAULT_ERR_WEIGHT_ANISO 1.414214 ///< A default multiplicative coefficient of an error of a ANISO-candidate. \ingroup g_selectors
 
-template<typename Scalar> class MeshFunctionSharedPtr;
-template<typename Scalar> class MeshFunctionSharedPtr;
-
 namespace Hermes
 {
   /// Namespace containing definitions specific for Hermes2D.
@@ -81,6 +78,7 @@ namespace Hermes
   {
     class RefMap;
     template<typename Scalar> class DiscreteProblem;
+    template<typename Scalar> class MeshFunctionSharedPtr;
     template<typename Scalar> class Space;
     template<typename Scalar> class WeakForm;
     template<typename Scalar> class MeshFunction;

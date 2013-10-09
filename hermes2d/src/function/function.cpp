@@ -18,7 +18,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    // Debug helpers.
     template<typename Scalar>
     void Function<Scalar>::check_params(int component, typename Function<Scalar>::Node* cur_node, int num_components)
     {
@@ -28,7 +27,6 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Invalid node. Did you call set_quad_order()?");
     }
 
-    // Debug helpers.
     template<typename Scalar>
     void Function<Scalar>::check_table(int component, typename Function<Scalar>::Node* cur_node, int n, const char* msg)
     {

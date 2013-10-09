@@ -8,7 +8,7 @@ class CustomUExtFunction : public UExtFunction<double>
 public:
   /// \param[in] polynomialOrder The polynomial order used for the space where the solution of the
   /// internal Laplace equation is sought.
-  CustomUExtFunction(MeshSharedPtr mesh, int index) : UExtFunction<double>(mesh), index(index)
+  CustomUExtFunction(int index) : UExtFunction<double>(), index(index)
   {
   }
   
@@ -25,11 +25,6 @@ public:
   virtual void ord(Func<Hermes::Ord>** u_ext, Func<Hermes::Ord>* result) const
   {
     result->val[0] = u_ext[index]->val[0];
-  };
-  
-  MeshFunction<double>* clone() const
-  {
-    return new CustomUExtFunction(this->mesh, this->index);
   };
 
   int index;

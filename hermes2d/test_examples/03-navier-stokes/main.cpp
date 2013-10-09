@@ -130,9 +130,10 @@ int main(int argc, char* argv[])
 
   // Initialize weak formulation.
   WeakFormNSNewton wf(STOKES, RE, TAU, xvel_prev_time, yvel_prev_time);
-  MeshFunctionSharedPtr<double> fn_0(new CustomUExtFunction(mesh, 0));
-  MeshFunctionSharedPtr<double> fn_1(new CustomUExtFunction(mesh, 1));
-  wf.set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time, fn_0, fn_1));
+  UExtFunctionSharedPtr<double> fn_0(new CustomUExtFunction(0));
+  UExtFunctionSharedPtr<double> fn_1(new CustomUExtFunction(1));
+  wf.set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time));
+  wf.set_u_ext_fn(Hermes::vector<UExtFunctionSharedPtr<double> >(fn_0, fn_1));
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;

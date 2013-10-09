@@ -70,6 +70,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    std::string ExactSolution<Scalar>::getClassName() const 
+    {
+      return "ExactSolution"; 
+    }
+
+    template<typename Scalar>
     ExactSolutionScalar<Scalar>::ExactSolutionScalar(MeshSharedPtr mesh) : ExactSolution<Scalar>(mesh)
     {
       this->num_components = 1;
@@ -580,11 +586,47 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    UExtFunction<Scalar>::UExtFunction(MeshSharedPtr mesh) : MeshFunction<Scalar>(mesh)
+    UExtFunction<Scalar>::UExtFunction() : Function<Scalar>()
     {
       this->num_components = 1;
       this->set_quad_2d(&g_quad_2d_std);
     }
+
+    template<typename Scalar>
+    Func<Scalar>* UExtFunction<Scalar>::get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr)
+    {
+      throw Exceptions::Exception("UExtFunction is only usable in assembling, not for getting point values.");
+      return nullptr;
+    }
+
+    template<typename Scalar>
+    void UExtFunction<Scalar>::precalculate(int order, int mask) 
+    {
+    }
+
+    template<typename Scalar>
+    void UExtFunction<Scalar>::free(void)
+    {
+    }
+
+    template<typename Scalar>
+    UExtFunctionSharedPtr<Scalar>::UExtFunctionSharedPtr(Hermes::Hermes2D::UExtFunction<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::UExtFunction<Scalar> >(ptr)
+    {
+    }
+
+    template<typename Scalar>
+    UExtFunctionSharedPtr<Scalar>::UExtFunctionSharedPtr(const UExtFunctionSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::UExtFunction<Scalar> >(other)
+    {
+    }
+
+    template<typename Scalar>
+    void UExtFunctionSharedPtr<Scalar>::operator=(const UExtFunctionSharedPtr& other)
+    {
+      std::tr1::shared_ptr<Hermes::Hermes2D::UExtFunction<Scalar> >::operator=(other);
+    }
+
+    template class HERMES_API UExtFunctionSharedPtr<double>;
+    template class HERMES_API UExtFunctionSharedPtr<std::complex<double> >;
 
     template HERMES_API class ExactSolutionScalar<double>;
     template HERMES_API class ExactSolutionScalar<std::complex<double> >;

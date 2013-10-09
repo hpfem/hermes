@@ -16,60 +16,35 @@
 #include "solution.h"
 #include "../views/linearizer_base.h"
 
-#ifdef _WINDOWS
-template<typename Scalar>
-MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar> * ptr) : std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
-{
-}
-
-template<typename Scalar>
-MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(const MeshFunctionSharedPtr& other) : std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(other)
-{
-}
-
-template<typename Scalar>
-void MeshFunctionSharedPtr<Scalar>::operator=(const MeshFunctionSharedPtr& other)
-{
-  std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >::operator=(other);
-}
-#else
-template<typename Scalar>
-MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
-{
-}
-
-template<typename Scalar>
-MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(const MeshFunctionSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(other)
-{
-}
-
-template<typename Scalar>
-void MeshFunctionSharedPtr<Scalar>::operator=(const MeshFunctionSharedPtr& other)
-{
-  std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >::operator=(other);
-}
-#endif
-
-
-template<typename Scalar>
-Hermes::Hermes2D::Solution<Scalar>* MeshFunctionSharedPtr<Scalar>::get_solution()
-{
-  return dynamic_cast<Hermes::Hermes2D::Solution<Scalar>*>(this->get());
-}
-
-
-template<typename Scalar>
-MeshFunctionSharedPtr<Scalar>::~MeshFunctionSharedPtr()
-{
-}
-
-template class HERMES_API MeshFunctionSharedPtr<double>;
-template class HERMES_API MeshFunctionSharedPtr<std::complex<double> >;
-
 namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar>
+    MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
+    {
+    }
+
+    template<typename Scalar>
+    MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(const MeshFunctionSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(other)
+    {
+    }
+
+    template<typename Scalar>
+    void MeshFunctionSharedPtr<Scalar>::operator=(const MeshFunctionSharedPtr& other)
+    {
+      std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >::operator=(other);
+    }
+
+    template<typename Scalar>
+    Hermes::Hermes2D::Solution<Scalar>* MeshFunctionSharedPtr<Scalar>::get_solution()
+    {
+      return dynamic_cast<Hermes::Hermes2D::Solution<Scalar>*>(this->get());
+    }
+
+    template class HERMES_API MeshFunctionSharedPtr<double>;
+    template class HERMES_API MeshFunctionSharedPtr<std::complex<double> >;
+
     template<typename Scalar>
     MeshFunction<Scalar>::MeshFunction()
       : Function<Scalar>()
@@ -91,6 +66,12 @@ namespace Hermes
     {
       delete refmap;
       free();
+    }
+
+    template<typename Scalar>
+    std::string MeshFunction<Scalar>::getClassName() const
+    {
+      return "MeshFunction"; 
     }
 
     template<typename Scalar>
@@ -141,7 +122,7 @@ namespace Hermes
       this->free();
       init();
     }
-    
+
     template<typename Scalar>
     void MeshFunction<Scalar>::add(MeshFunctionSharedPtr<Scalar> other_mesh_function, SpaceSharedPtr<Scalar> target_space)
     {

@@ -20,7 +20,6 @@
 #include "transformable.h"
 #include "../quadrature/quad.h"
 #include "exceptions.h"
-
 namespace Hermes
 {
   namespace Hermes2D

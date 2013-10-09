@@ -21,11 +21,7 @@
 #include "hash.h"
 #include "../mixins2d.h"
 
-#ifdef _WINDOWS
-typedef std::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
-#else
 typedef std::tr1::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
-#endif
 
 namespace Hermes
 {

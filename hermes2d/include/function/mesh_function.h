@@ -25,34 +25,19 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    template<typename Scalar> class MeshFunction;
-  }
-}
+    template<typename Scalar>
+    class HERMES_API MeshFunctionSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
+    {
+    public:
+      MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = nullptr);
 
-template<typename Scalar>
-#ifdef _WINDOWS
-class HERMES_API MeshFunctionSharedPtr : public std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
-#else
-class HERMES_API MeshFunctionSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
-#endif
-{
-public:
-  MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = nullptr);
+      MeshFunctionSharedPtr(const MeshFunctionSharedPtr<Scalar>& other);
 
-  MeshFunctionSharedPtr(const MeshFunctionSharedPtr<Scalar>& other);
+      void operator=(const MeshFunctionSharedPtr<Scalar>& other);
 
-  void operator=(const MeshFunctionSharedPtr<Scalar>& other);
+      Hermes::Hermes2D::Solution<Scalar>* get_solution();
+    };
 
-  Hermes::Hermes2D::Solution<Scalar>* get_solution();
-      
-  ~MeshFunctionSharedPtr();
-};
-
-
-namespace Hermes
-{
-  namespace Hermes2D
-  {
     /** \defgroup meshFunctions Mesh functions
     * \brief Collection of classes that represent various functions of the mesh coordinates, i.e. defined on the Mesh.
     * These comprise solutions, exact &amp; initial solutions, filters (functions of the solutions) etc.
@@ -96,12 +81,8 @@ namespace Hermes
 
       /// Cloning function - for parallel OpenMP blocks.
       /// Designed to return an identical clone of this instance.
-      virtual MeshFunction<Scalar>* clone() const
-      {
-        throw Hermes::Exceptions::Exception("You need to implement MeshFunctionSharedPtr::clone() to be able to use paralellization");
-        return nullptr;
-      }
-      
+      virtual MeshFunction<Scalar>* clone() const = 0;
+
       /// Multiplies the function represented by this class by the given coefficient.
       virtual void multiply(Scalar coef);
 
@@ -119,7 +100,7 @@ namespace Hermes
       virtual bool isOkay() const;
 
       /// Internal.
-      inline std::string getClassName() const { return "MeshFunction"; }
+      std::string getClassName() const;
 
       /// Internal.
       virtual void init();

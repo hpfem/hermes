@@ -29,31 +29,17 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    template<typename Scalar> class Space;
-  }
-}
+    template<typename Scalar>
+    class HERMES_API SpaceSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
+    {
+    public:
+      SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar>* ptr = nullptr);
 
-template<typename Scalar>
-#ifdef _WINDOWS
-class HERMES_API SpaceSharedPtr : public std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
-#else
-class HERMES_API SpaceSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
-#endif
-{
-public:
-  SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar>* ptr = nullptr);
+      SpaceSharedPtr(const SpaceSharedPtr<Scalar>& other);
 
-  SpaceSharedPtr(const SpaceSharedPtr<Scalar>& other);
+      void operator=(const SpaceSharedPtr<Scalar>& other);
+    };
 
-  void operator=(const SpaceSharedPtr<Scalar>& other);
-
-  ~SpaceSharedPtr();
-};
-
-namespace Hermes
-{
-  namespace Hermes2D
-  {
     namespace Mixins
     {
       /// \ingroup g_mixins2d
@@ -188,7 +174,7 @@ namespace Hermes
       /// \param[in] keep_initial_refinements Refinements in Mesh can be marked as initial (to prevent taking them back), 
       /// this parameter serves to prevent taking them back with this method.
       void unrefine_all_mesh_elements(bool keep_initial_refinements = true);
-      
+
       /// Recursively removes all son elements of the given element and
       /// Version for more spaces sharing the mesh
       static void unrefine_all_mesh_elements(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, bool keep_initial_refinements = true);
@@ -345,7 +331,7 @@ namespace Hermes
       int get_edge_functions_count();
       /// Returns the total (global) number of bubble functions.
       int get_bubble_functions_count();
-      
+
       /// Internal. Used by DiscreteProblem to detect changes in the space.
       int get_seq() const;
 
@@ -427,7 +413,7 @@ namespace Hermes
       /// \param[in] only_unrefine_space_data Useful when more spaces share the mesh if one wants to unrefine the underlying
       /// Mesh only once, but wants other spaces know about the change.
       void unrefine_all_mesh_elements_internal(bool keep_initial_refinements, bool only_unrefine_space_data);
-      
+
       /// \brief Updates internal node and element tables.
       /// \details Since meshes only contain geometric information, the Space class keeps two
       /// tables with FEM-related information. The first one, 'ndata', contains DOF numbers
