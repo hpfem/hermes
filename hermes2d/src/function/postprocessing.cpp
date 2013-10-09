@@ -772,7 +772,7 @@ namespace Hermes
         Hermes::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)
         {
-          Hermes::Hermes2D::Mesh::MarkersConversion::IntValid internalMarker = this->source_functions[0]->get_mesh()->get_element_markers_conversion().get_internal_marker(markers[i]);
+          Hermes::Hermes2D::Mesh::MarkersConversion::IntValid internalMarker = this->source_functions[0]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(markers[i]);
           if (internalMarker.valid)
             internal_markers.push_back(internalMarker.marker);
         }
