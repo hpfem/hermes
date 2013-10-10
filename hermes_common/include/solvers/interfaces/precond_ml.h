@@ -23,8 +23,8 @@
 #define __HERMES_COMMON_PRECOND_ML_H_
 #include "../../config.h"
 #ifdef HAVE_ML
-#include "precond.h"
-#include "interfaces/epetra.h"
+#include "solvers/precond.h"
+#include "solvers/interfaces/epetra.h"
 #include <ml_MultiLevelPreconditioner.h>
 
 namespace Hermes

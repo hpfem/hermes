@@ -24,8 +24,8 @@
 #include "../../config.h"
 #ifdef HAVE_IFPACK
 
-#include "precond.h"
-#include "interfaces/epetra.h"
+#include "solvers/precond.h"
+#include "solvers/interfaces/epetra.h"
 #include <Ifpack_Preconditioner.h>
 
 namespace Hermes
