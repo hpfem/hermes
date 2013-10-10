@@ -1,8 +1,7 @@
 #include "hermes2d.h"
 
-extern const std::string MatrixSolverNames[6];
-
 using namespace Hermes;
+using namespace Hermes::Preconditioners;
 using namespace Hermes::Hermes2D;
 
 class CustomRightHandSide : public Hermes2DFunction<double>
@@ -12,7 +11,7 @@ public:
 
   virtual double value(double x, double y) const;
 
-  virtual Hermes::Ord ord(double x, double y) const;
+  virtual Hermes::Ord ord(Ord x, Ord y) const;
 
   template<typename Real>
   Real u(Real x, Real y) const;

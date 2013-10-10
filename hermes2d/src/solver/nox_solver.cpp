@@ -83,16 +83,12 @@ namespace Hermes
     bool DiscreteProblemNOX<Scalar>::computePreconditioner(const Epetra_Vector &x, Epetra_Operator &m,
       Teuchos::ParameterList *precParams)
     {
-      assert(precond != Teuchos::null);
       EpetraVector<Scalar> xx(x);      // wrap our structures around core Epetra objects
-
-      jacobian.zero();
 
       Scalar* coeff_vec = new Scalar[xx.get_size()];
       xx.extract(coeff_vec);
-      this->assemble(coeff_vec, &jacobian, nullptr);  // nullptr is for the right-hand side.
-      delete [] coeff_vec;
-      //jacobian.finish();
+      this->assemble(coeff_vec, &jacobian);
+      delete[] coeff_vec;
 
       precond->create(&jacobian);
       precond->compute();
@@ -250,6 +246,9 @@ namespace Hermes
       Hermes::Algebra::EpetraVector<Scalar> temp_init_sln;
       int ndofs = Space<Scalar>::get_num_dofs(this->dp->get_spaces());
       temp_init_sln.alloc(ndofs);
+      if (!coeff_vec)
+        temp_init_sln.zero();
+      else
       for (int i = 0; i < ndofs; i++)
         temp_init_sln.set(i, coeff_vec[i]);
 

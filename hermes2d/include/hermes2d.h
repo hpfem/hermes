@@ -23,6 +23,7 @@
 #include "solver/newton_solver.h"
 #include "solver/picard_solver.h"
 #include "solver/linear_solver.h"
+#include "solver/nox_solver.h"
 
 #include "boundary_conditions/essential_boundary_conditions.h"
 

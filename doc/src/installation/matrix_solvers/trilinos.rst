@@ -67,6 +67,7 @@ First of all - to build Trilinos, one needs CLAPACK (see the optional package in
      -D Trilinos_ENABLE_ML:BOOL=ON \
      -D ML_ENABLE_TESTS:STRING=OFF \
      -D ML_ENABLE_EXAMPLES:STRING=OFF \
+     -D Trilinos_ENABLE_OpenMP:BOOL=ON \
      -D Trilinos_ENABLE_Amesos:BOOL=ON \
      -D Amesos_ENABLE_TESTS:STRING=OFF \
      -D Amesos_ENABLE_EXAMPLES:STRING=OFF \

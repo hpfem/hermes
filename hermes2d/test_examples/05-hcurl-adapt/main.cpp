@@ -36,11 +36,11 @@ const int P_INIT = 2;
 const int INIT_REF_NUM = 1;
 
 // Error calculation & adaptivity.
-DefaultErrorCalculator<complex, HERMES_HCURL_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
+DefaultErrorCalculator<::complex, HERMES_HCURL_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
 // Stopping criterion for an adaptivity step.
-AdaptStoppingCriterionSingleElement<complex> stoppingCriterion(0.75);
+AdaptStoppingCriterionSingleElement<::complex> stoppingCriterion(0.75);
 // Adaptivity processor class.
-Adapt<complex> adaptivity(&errorCalculator, &stoppingCriterion);
+Adapt<::complex> adaptivity(&errorCalculator, &stoppingCriterion);
 // Predefined list of element refinement candidates.
 const CandList CAND_LIST = H2D_HP_ANISO;
 // Stopping criterion for adaptivity.
@@ -66,26 +66,26 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++)  mesh->refine_all_elements();
 
   // Initialize boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<complex > bc_essential(Hermes::vector<std::string>("Corner_horizontal",
+  Hermes::Hermes2D::DefaultEssentialBCConst<::complex > bc_essential(Hermes::vector<std::string>("Corner_horizontal",
     "Corner_vertical"), 0);
-  EssentialBCs<complex > bcs(&bc_essential);
+  EssentialBCs<::complex > bcs(&bc_essential);
 
   // Create an Hcurl space with default shapeset.
-  SpaceSharedPtr<complex > space(new HcurlSpace<complex >(mesh, &bcs, P_INIT));
+  SpaceSharedPtr<::complex > space(new HcurlSpace<::complex >(mesh, &bcs, P_INIT));
   int ndof = space->get_num_dofs();
 
   // Initialize the weak formulation.
   CustomWeakForm wf(MU_R, KAPPA);
 
   // Initialize coarse and reference mesh solutions.
-  MeshFunctionSharedPtr<complex > sln(new Hermes::Hermes2D::Solution<complex >());
-  MeshFunctionSharedPtr<complex > ref_sln(new Hermes::Hermes2D::Solution<complex >());
+  MeshFunctionSharedPtr<::complex > sln(new Hermes::Hermes2D::Solution<::complex >());
+  MeshFunctionSharedPtr<::complex > ref_sln(new Hermes::Hermes2D::Solution<::complex >());
 
   // Initialize exact solution.
-  MeshFunctionSharedPtr<complex > sln_exact(new CustomExactSolution(mesh));
+  MeshFunctionSharedPtr<::complex > sln_exact(new CustomExactSolution(mesh));
 
   // Initialize refinement selector.
-  HcurlProjBasedSelector<complex > selector(CAND_LIST);
+  HcurlProjBasedSelector<::complex > selector(CAND_LIST);
 
   // Initialize views.
   Views::VectorView v_view("Solution (magnitude)", new Views::WinGeom(0, 0, 460, 350));
@@ -96,10 +96,10 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof_est, graph_cpu_est,
     graph_dof_exact, graph_cpu_exact;
 
-  DiscreteProblem<complex > dp(&wf, space);
+  DiscreteProblem<::complex > dp(&wf, space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-  Hermes::Hermes2D::NewtonSolver<complex > newton(&dp);
+  Hermes::Hermes2D::NewtonSolver<::complex > newton(&dp);
 
   Views::Linearizer lin;
   Views::Orderizer ord;
@@ -113,15 +113,15 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space->
     Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
     MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-    Space<complex >::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
-    SpaceSharedPtr<complex > ref_space = ref_space_creator.create_ref_space();
+    Space<::complex >::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
+    SpaceSharedPtr<::complex > ref_space = ref_space_creator.create_ref_space();
 
     newton.set_space(ref_space);
     int ndof_ref = ref_space->get_num_dofs();
 
     // Initial coefficient vector for the Newton's method.
-    complex* coeff_vec = new complex[ndof_ref];
-    memset(coeff_vec, 0, ndof_ref * sizeof(complex));
+    ::complex* coeff_vec = new ::complex[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(::complex));
     
     try
     {
@@ -131,10 +131,10 @@ int main(int argc, char* argv[])
     {
       e.print_msg();
     }
-    Hermes::Hermes2D::Solution<complex >::vector_to_solution(newton.get_sln_vector(), ref_space, ref_sln);
+    Hermes::Hermes2D::Solution<::complex >::vector_to_solution(newton.get_sln_vector(), ref_space, ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
-    OGProjection<complex > ogProjection;
+    OGProjection<::complex > ogProjection;
     ogProjection.project_global(space, ref_sln, sln);
 
     // View the coarse mesh solution and polynomial orders.

@@ -1,20 +1,11 @@
 #include "definitions.h"
 
-const std::string MatrixSolverNames[6] = {
-  "UMFPACK",
-  "PETSc",
-  "MUMPS",
-  "SuperLU",
-  "Trilinos/Amesos",
-  "Trilinos/AztecOO"
-};
-
 double CustomRightHandSide::value(double x, double y) const
 {
   return - kx(x, y) * dudx(x, y) - ky(x, y) * dudy(x, y) - k(x, y) * (dudxx(x, y) + dudyy(x, y));
 }
 
-Ord CustomRightHandSide::ord(double x, double y) const
+Ord CustomRightHandSide::ord(Ord x, Ord y) const
 {
   return - kx(x, y) * dudx(x, y) - ky(x, y) * dudy(x, y) - k(x, y) * (dudxx(x, y) + dudyy(x, y));
 }
@@ -88,7 +79,7 @@ void CustomExactSolution::derivatives (double x, double y, double& dx, double& d
 
 Ord CustomExactSolution::ord(double x, double y) const
 {
-  return (1- 2*x) * y * (1 - y);
+  return Hermes::Ord((1- 2*x) * y * (1 - y));
 }
 
 CustomWeakForm::CustomWeakForm(bool JFNK, bool precondition_jacobian, bool precondition_jacobian_approx) : WeakForm<double>(1, JFNK)

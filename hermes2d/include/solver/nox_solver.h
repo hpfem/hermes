@@ -22,9 +22,8 @@
 #ifndef __H2D_NEWTON_SOLVER_NOX_H_
 #define __H2D_NEWTON_SOLVER_NOX_H_
 
-#include "linear_matrix_solver.h"
-#include "nonlinear_solver.h"
-#include "epetra.h"
+#include "solvers/linear_matrix_solver.h"
+#include "solvers/interfaces/epetra.h"
 #if(defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 #include <NOX.H>
 #ifdef _POSIX_C_SOURCE

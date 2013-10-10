@@ -42,7 +42,6 @@ namespace Hermes
   {
     template <typename Scalar> class AmesosSolver;
     template <typename Scalar> class AztecOOSolver;
-    template <typename Scalar> class NewtonSolverNOX;
   }
   namespace Preconditioners
   {
