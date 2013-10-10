@@ -40,7 +40,6 @@ namespace Hermes
     template<typename T> class Geom;
 
     template<typename Scalar> class Form;
-    template<typename Scalar> class OGProjection;
     template<typename Scalar> class MatrixFormVol;
     template<typename Scalar> class VectorFormVol;
     template<typename Scalar> class MatrixFormSurf;
