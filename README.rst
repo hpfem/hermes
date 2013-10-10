@@ -30,7 +30,7 @@ devel
 ------------------------------
 
 
-Hermes 2D hp-FEM library, version 2.0
+Hermes 2D hp-FEM library, version 3.0 (in progress)
 =====================================
 
 This is a basic README file with generic information relevant for both Hermes Common and Hermes2D.
