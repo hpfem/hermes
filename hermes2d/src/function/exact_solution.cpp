@@ -593,7 +593,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* UExtFunction<Scalar>::get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr)
+    Func<Scalar>* UExtFunction<Scalar>::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)
     {
       throw Exceptions::Exception("UExtFunction is only usable in assembling, not for getting point values.");
       return nullptr;
