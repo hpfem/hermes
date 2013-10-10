@@ -34,8 +34,6 @@ namespace Hermes
       "Neighboring elements are not defined and so are not function traces on their interface. "
       "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
 
-    template<typename Scalar> class OGProjection;
-
     /// Calculated function values (from the class Function) on an element for assembling.
     /// @ingroup inner
     template<typename T>
