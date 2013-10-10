@@ -21,12 +21,12 @@
 #include "hash.h"
 #include "../mixins2d.h"
 
-typedef std::tr1::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
-
 namespace Hermes
 {
   namespace Hermes2D
   {
+    typedef std::tr1::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
+
     class Element;
     class HashTable;
 
@@ -131,7 +131,7 @@ namespace Hermes
 
       /// Returns the number of edge nodes.
       int get_num_edge_nodes() const;
-      
+
       /// Get the mesh bounding box.
       /// \param [out] bottom_left_x Bottom left corner - x coordinate.
       /// \param [out] bottom_left_y Bottom left corner - y coordinate.
@@ -148,7 +148,7 @@ namespace Hermes
       static const std::string eggShellInnerMarker;
       static const std::string eggShell1Marker;
       static const std::string eggShell0Marker;
-      
+
       /// Return the "Egg-shell".
       /// Finds all the elements that neighbor an area with a marker marker.
       /// \param[in] mesh The source mesh
@@ -323,8 +323,8 @@ namespace Hermes
       /// \param[in] marker The marker
       /// \param[in] n_element_guess(optional) Approximate number of elements that will be in this method. Used as an allocation hint. -1 for not-known.
       static void get_egg_shell_structures(MeshSharedPtr target_mesh, Element**& elements, int& n_elements, std::string marker, unsigned int levels, int n_element_guess = -1);
-      
-      
+
+
       /// Internal.
       /// Return the "Egg-shell" mesh.
       /// Finds all the elements that neighbor an area with a marker marker.
