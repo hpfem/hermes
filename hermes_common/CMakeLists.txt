@@ -25,7 +25,6 @@ project(hermes_common)
     src/hermes_function.cpp
     src/exceptions.cpp
     src/api.cpp
-    src/algebra/algebra_utilities.cpp
     src/algebra/matrix.cpp
     src/algebra/vector.cpp
     src/algebra/algebra_mixins.cpp
@@ -122,7 +121,6 @@ project(hermes_common)
   
   SOURCE_GROUP(
     "Source Files\\Algebra" FILES 
-    src/algebra/algebra_utilities.cpp
     src/algebra/matrix.cpp
     src/algebra/vector.cpp
     src/algebra/algebra_mixins.cpp
