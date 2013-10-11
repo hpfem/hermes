@@ -702,7 +702,8 @@ namespace Hermes
 
             // Integration order.
             Hermes::Ord order = Hermes::Ord(refmap->get_inv_ref_order());
-            memset(orders, 0, sizeof(nullptr) * this->number_of_integrals);
+            for(int i = 0; i < this->number_of_integrals; i++)
+              orders[i] = Hermes::Ord(0);
             for (int i = 0; i < source_functions_size; i++)
               func_ord[i] = init_fn_ord(this->source_functions[i]->get_fn_order());
 
@@ -848,7 +849,8 @@ namespace Hermes
               memset(result_local, 0, sizeof(Scalar)* this->number_of_integrals);
 
               // Integration order.
-              memset(orders, 0, sizeof(nullptr) * this->number_of_integrals);
+              for(int i = 0; i < this->number_of_integrals; i++)
+                orders[i] = Hermes::Ord(0);
               for (int i = 0; i < source_functions_size; i++)
                 func_ord[i] = init_fn_ord(this->source_functions[i]->get_fn_order());
 
