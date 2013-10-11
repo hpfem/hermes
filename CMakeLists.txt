@@ -105,9 +105,6 @@ project(hermes)
     # Enable support for Trilinos solvers.
     set(WITH_TRILINOS           NO)
     
-    # Experimental
-    set(WITH_ZOLTAN             NO)
-
   ### Mesh format ###
     set(WITH_EXODUSII           NO)
     set(WITH_HDF5               NO)
@@ -415,12 +412,6 @@ project(hermes)
       include_directories(${TRILINOS_INCLUDE_DIR})
     endif(WITH_TRILINOS)
     
-    # Experimental
-    if(WITH_ZOLTAN)
-      find_package(ZOLTAN REQUIRED)
-      include_directories(${ZOLTAN_INCLUDE_DIR})
-    endif(WITH_ZOLTAN)
-
     if(WITH_SUPERLU)
       find_package(SUPERLU REQUIRED)
       include_directories(${SUPERLU_INCLUDE_DIR})

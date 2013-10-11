@@ -12,14 +12,6 @@ set(WITH_TC_MALLOC YES)
 SET(WITH_PARALUTION YES)
 SET(WITH_MUMPS YES)
 
-# Trilinos
-SET(WITH_TRILINOS NO)
-if (WIN32) 
-  set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies/trilinos")
-else() 
-  set(TRILINOS_ROOT "~/solvers/trilinos")
-endif()
-
 # Debug / release
 set(HERMES_COMMON_RELEASE   NO)
 set(H2D_RELEASE             NO)
