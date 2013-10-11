@@ -43,57 +43,57 @@ namespace Hermes
     {
       // Order calculation.
       int order = current_wf->global_integration_order_set ? current_wf->global_integration_order : 0;
-      if(order == 0)
+      if (order == 0)
       {
-        for(int current_mfvol_i = 0; current_mfvol_i < current_wf->mfvol.size(); current_mfvol_i++)
+        for (int current_mfvol_i = 0; current_mfvol_i < current_wf->mfvol.size(); current_mfvol_i++)
         {
           MatrixFormVol<Scalar>* current_mfvol = current_wf->mfvol[current_mfvol_i];
-          if(!selectiveAssembler->form_to_be_assembled(current_mfvol, current_state))
+          if (!selectiveAssembler->form_to_be_assembled(current_mfvol, current_state))
             continue;
           current_mfvol->wf = current_wf;
           int orderTemp = calc_order_matrix_form(spaces, current_mfvol, current_refmaps, current_u_ext, current_state);
-          if(order < orderTemp)
+          if (order < orderTemp)
             order = orderTemp;
         }
 
-        for(int current_vfvol_i = 0; current_vfvol_i < current_wf->vfvol.size(); current_vfvol_i++)
+        for (int current_vfvol_i = 0; current_vfvol_i < current_wf->vfvol.size(); current_vfvol_i++)
         {
           VectorFormVol<Scalar>* current_vfvol = current_wf->vfvol[current_vfvol_i];
-          if(!selectiveAssembler->form_to_be_assembled(current_vfvol, current_state))
+          if (!selectiveAssembler->form_to_be_assembled(current_vfvol, current_state))
             continue;
           current_vfvol->wf = current_wf;
           int orderTemp = calc_order_vector_form(spaces, current_vfvol, current_refmaps, current_u_ext, current_state);
-          if(order < orderTemp)
+          if (order < orderTemp)
             order = orderTemp;
         }
 
         // Surface forms.
-        if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
+        if (current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
         {
           for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
           {
-            if(!current_state->bnd[current_state->isurf])
+            if (!current_state->bnd[current_state->isurf])
               continue;
-            for(int current_mfsurf_i = 0; current_mfsurf_i < current_wf->mfsurf.size(); current_mfsurf_i++)
+            for (int current_mfsurf_i = 0; current_mfsurf_i < current_wf->mfsurf.size(); current_mfsurf_i++)
             {
               MatrixFormSurf<Scalar>* current_mfsurf = current_wf->mfsurf[current_mfsurf_i];
-              if(!selectiveAssembler->form_to_be_assembled(current_mfsurf, current_state))
+              if (!selectiveAssembler->form_to_be_assembled(current_mfsurf, current_state))
                 continue;
               current_mfsurf->wf = current_wf;
               int orderTemp = calc_order_matrix_form(spaces, current_mfsurf, current_refmaps, current_u_ext, current_state);
-              if(order < orderTemp)
+              if (order < orderTemp)
                 order = orderTemp;
             }
 
-            for(int current_vfsurf_i = 0; current_vfsurf_i < current_wf->vfsurf.size(); current_vfsurf_i++)
+            for (int current_vfsurf_i = 0; current_vfsurf_i < current_wf->vfsurf.size(); current_vfsurf_i++)
             {
               VectorFormSurf<Scalar>* current_vfsurf = current_wf->vfsurf[current_vfsurf_i];
-              if(!selectiveAssembler->form_to_be_assembled(current_vfsurf, current_state))
+              if (!selectiveAssembler->form_to_be_assembled(current_vfsurf, current_state))
                 continue;
 
               current_vfsurf->wf = current_wf;
               int orderTemp = calc_order_vector_form(spaces, current_vfsurf, current_refmaps, current_u_ext, current_state);
-              if(order < orderTemp)
+              if (order < orderTemp)
                 order = orderTemp;
             }
           }
@@ -101,7 +101,7 @@ namespace Hermes
       }
 
       return order;
-    } 
+    }
 
     template<typename Scalar>
     int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixForm<Scalar> *form, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
@@ -116,11 +116,11 @@ namespace Hermes
       // Order of shape functions.
       int max_order_j = spaces[form->j]->get_element_order(current_state->e[form->j]->id);
       int max_order_i = spaces[form->i]->get_element_order(current_state->e[form->i]->id);
-      if(H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
+      if (H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
         max_order_i = H2D_GET_V_ORDER(max_order_i);
       else
         max_order_i = H2D_GET_H_ORDER(max_order_i);
-      if(H2D_GET_V_ORDER(max_order_j) > H2D_GET_H_ORDER(max_order_j))
+      if (H2D_GET_V_ORDER(max_order_j) > H2D_GET_H_ORDER(max_order_j))
         max_order_j = H2D_GET_V_ORDER(max_order_j);
       else
         max_order_j = H2D_GET_H_ORDER(max_order_j);
@@ -128,10 +128,10 @@ namespace Hermes
       for (unsigned int k = 0; k < current_state->rep->nvert; k++)
       {
         int eo = spaces[form->i]->get_edge_order(current_state->e[form->i], k);
-        if(eo > max_order_i)
+        if (eo > max_order_i)
           max_order_i = eo;
         eo = spaces[form->j]->get_edge_order(current_state->e[form->j], k);
-        if(eo > max_order_j)
+        if (eo > max_order_j)
           max_order_j = eo;
       }
 
@@ -168,7 +168,7 @@ namespace Hermes
 
       // Order of shape functions.
       int max_order_i = spaces[form->i]->get_element_order(current_state->e[form->i]->id);
-      if(H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
+      if (H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
         max_order_i = H2D_GET_V_ORDER(max_order_i);
       else
         max_order_i = H2D_GET_H_ORDER(max_order_i);
@@ -176,7 +176,7 @@ namespace Hermes
       for (unsigned int k = 0; k < current_state->rep->nvert; k++)
       {
         int eo = spaces[form->i]->get_edge_order(current_state->e[form->i], k);
-        if(eo > max_order_i)
+        if (eo > max_order_i)
           max_order_i = eo;
       }
       Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
@@ -202,56 +202,58 @@ namespace Hermes
     {
       int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
       int u_ext_fn_size = form->u_ext_fn.size() ? form->u_ext_fn.size() : form->wf->u_ext_fn.size();
-      if(ext_size + u_ext_fn_size> 0)
+      if (ext_size + u_ext_fn_size > 0)
         oext = new Func<Hermes::Ord>*[ext_size + u_ext_fn_size];
 
       unsigned int prev_size = this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset;
       bool surface_form = (current_state->isurf > -1);
 
-      if(current_u_ext)
-        for(int i = 0; i < prev_size; i++)
-          if(current_u_ext[i + form->u_ext_offset])
-            if(surface_form)
-              oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_edge_fn_order(current_state->isurf) + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
-            else
-              oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order() + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
-          else
-            oi[i] = init_fn_ord(0);
-
-      if(form->ext.size() > 0)
+      if (current_u_ext)
       {
-        for (int i = 0; i < ext_size; i++)
-        {
-          if(surface_form)
-            oext[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
-          else
-            oext[i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
-        }
-      }
-      else
-      {
-        for (int i = 0; i < ext_size; i++)
-          if(surface_form)
-            oext[i] = init_fn_ord(form->wf->ext[i]->get_edge_fn_order(current_state->isurf) + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
-          else
-            oext[i] = init_fn_ord(form->wf->ext[i]->get_fn_order() + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
+        for (int i = 0; i < prev_size; i++)
+        if (current_u_ext[i + form->u_ext_offset])
+        if (surface_form)
+          oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_edge_fn_order(current_state->isurf) + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
+        else
+          oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order() + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
+        else
+          oi[i] = init_fn_ord(0);
       }
 
-      if(form->u_ext_fn.size() > 0)
+      if (form->u_ext_fn.size() > 0)
       {
         for (int i = 0; i < u_ext_fn_size; i++)
         {
-          oext[ext_size + i] = init_fn_ord(0);
-          form->u_ext_fn[i]->ord(oi, oext[ext_size + i]);
+          oext[i] = init_fn_ord(0);
+          form->u_ext_fn[i]->ord(oi, oext[i]);
         }
       }
       else
       {
         for (int i = 0; i < u_ext_fn_size; i++)
         {
-          oext[ext_size + i] = init_fn_ord(0);
-          form->wf->u_ext_fn[i]->ord(oi, oext[ext_size + i]);
+          oext[i] = init_fn_ord(0);
+          form->wf->u_ext_fn[i]->ord(oi, oext[i]);
         }
+      }
+
+      if (form->ext.size() > 0)
+      {
+        for (int i = 0; i < ext_size; i++)
+        {
+          if (surface_form)
+            oext[u_ext_fn_size + i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+          else
+            oext[u_ext_fn_size + i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+        }
+      }
+      else
+      {
+        for (int i = 0; i < ext_size; i++)
+        if (surface_form)
+          oext[u_ext_fn_size + i] = init_fn_ord(form->wf->ext[i]->get_edge_fn_order(current_state->isurf) + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
+        else
+          oext[u_ext_fn_size + i] = init_fn_ord(form->wf->ext[i]->get_fn_order() + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
       }
     }
 
@@ -260,30 +262,26 @@ namespace Hermes
     void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_orders(Form<Scalar> *form, FormType** oi, FormType** oext)
     {
       unsigned int prev_size = oi ? (this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset) : 0;
-      for(int i = 0; i < prev_size; i++)
+      if (oi)
       {
-        oi[i]->free_ord();
-        delete oi[i];
+        for (int i = 0; i < prev_size; i++)
+        {
+          oi[i]->free_ord();
+          delete oi[i];
+        }
+        delete[] oi;
       }
-      if(oi)
-        delete [] oi;
 
-      if(oext)
+      int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
+      int u_ext_fn_size = form->u_ext_fn.size() ? form->u_ext_fn.size() : form->wf->u_ext_fn.size();
+      if (oext)
       {
-        if(form->ext.size() > 0)
-          for (int i = 0; i < form->ext.size(); i++)
-          {
-            oext[i]->free_ord();
-            delete oext[i];
-          }
-        else
-          for (int i = 0; i < form->wf->ext.size(); i++)
-          {
-            oext[i]->free_ord();
-            delete oext[i];
-          }
-
-          delete [] oext;
+        for (int i = 0; i < ext_size + u_ext_fn_size; i++)
+        {
+          oext[i]->free_ord();
+          delete oext[i];
+        }
+        delete[] oext;
       }
     }
 
@@ -307,7 +305,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscontinuousFunc<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_fns_ord(Hermes::vector<MeshFunctionSharedPtr<Scalar> > &ext, 
+    DiscontinuousFunc<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_fns_ord(Hermes::vector<MeshFunctionSharedPtr<Scalar> > &ext,
       NeighborSearch<Scalar>** neighbor_searches)
     {
       DiscontinuousFunc<Ord>** fake_ext_fns = new DiscontinuousFunc<Ord>*[ext.size()];
@@ -329,27 +327,27 @@ namespace Hermes
 
       DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset];
 
-      if(current_u_ext)
-        for(int i = 0; i < prev_size; i++)
-          if(current_u_ext[i + mfDG->u_ext_offset])
-            u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + mfDG->u_ext_offset]);
-          else
-            u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
+      if (current_u_ext)
+      for (int i = 0; i < prev_size; i++)
+      if (current_u_ext[i + mfDG->u_ext_offset])
+        u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + mfDG->u_ext_offset]);
+      else
+        u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = mfDG->ext.size() ? mfDG->ext.size() : mfDG->wf->ext.size();
-      if(ext_ord_fns.size() > 0)
+      if (ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
 
       // Order of shape functions.
       int max_order_j = spaces[mfDG->j]->get_element_order(current_state->e[mfDG->j]->id);
       int max_order_i = spaces[mfDG->i]->get_element_order(current_state->e[mfDG->i]->id);
-      if(H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
+      if (H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
         max_order_i = H2D_GET_V_ORDER(max_order_i);
       else
         max_order_i = H2D_GET_H_ORDER(max_order_i);
-      if(H2D_GET_V_ORDER(max_order_j) > H2D_GET_H_ORDER(max_order_j))
+      if (H2D_GET_V_ORDER(max_order_j) > H2D_GET_H_ORDER(max_order_j))
         max_order_j = H2D_GET_V_ORDER(max_order_j);
       else
         max_order_j = H2D_GET_H_ORDER(max_order_j);
@@ -390,22 +388,22 @@ namespace Hermes
 
       DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset];
 
-      if(current_u_ext)
-        for(int i = 0; i < prev_size; i++)
-          if(current_u_ext[i + vfDG->u_ext_offset])
-            u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + vfDG->u_ext_offset]);
-          else
-            u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
+      if (current_u_ext)
+      for (int i = 0; i < prev_size; i++)
+      if (current_u_ext[i + vfDG->u_ext_offset])
+        u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + vfDG->u_ext_offset]);
+      else
+        u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = vfDG->ext.size() ? vfDG->ext.size() : vfDG->wf->ext.size();
-      if(ext_ord_fns.size() > 0)
+      if (ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
 
       // Order of shape functions.
       int max_order_i = spaces[vfDG->i]->get_element_order(current_state->e[vfDG->i]->id);
-      if(H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
+      if (H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
         max_order_i = H2D_GET_V_ORDER(max_order_i);
       else
         max_order_i = H2D_GET_H_ORDER(max_order_i);

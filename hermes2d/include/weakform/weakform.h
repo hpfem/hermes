@@ -144,14 +144,24 @@ namespace Hermes
       virtual double get_current_time_step() const;
 
       /// External functions.
-      /// Set one external function.
-      void set_ext(MeshFunctionSharedPtr<Scalar> ext);
+      /// Set one function acting on the u_ext functions in assembling (for fast assembling of nonlinear problems).
+      /// IMPORTANT: This function will appear at the beginning of the Func<Scalar>** ext array in the value(), and ord() methods of individual forms.
       void set_u_ext_fn(UExtFunctionSharedPtr<Scalar> ext);
+      
+      /// External functions.
+      /// Set one external function.
+      /// IMPORTANT: This function will appear at the END (after those functions coming via set_u_ext_fn) of the Func<Scalar>** ext array in the value(), and ord() methods of individual forms.
+      void set_ext(MeshFunctionSharedPtr<Scalar> ext);
 
       /// External functions.
-      /// Set more external functions.
-      void set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext);
+      /// Set functions acting on the u_ext functions in assembling (for fast assembling of nonlinear problems).
+      /// IMPORTANT: These functions will appear at the beginning of the Func<Scalar>** ext array in the value(), and ord() methods of individual forms.
       void set_u_ext_fn(Hermes::vector<UExtFunctionSharedPtr<Scalar> > ext);
+
+      /// External functions.
+      /// Set external functions.
+      /// IMPORTANT: These functions will appear at the END (after those functions coming via set_u_ext_fn) of the Func<Scalar>** ext array in the value(), and ord() methods of individual forms.
+      void set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext);
 
       /// External functions.
       /// Get external functions.

@@ -32,8 +32,8 @@ namespace Hermes
 #endif
 
     template<typename Scalar>
-    DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) : 
-      pss(nullptr), refmaps(nullptr), u_ext(nullptr), als(nullptr), alsSurface(nullptr), 
+    DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) :
+      pss(nullptr), refmaps(nullptr), u_ext(nullptr), als(nullptr), alsSurface(nullptr),
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler)
     {
     }
@@ -63,7 +63,7 @@ namespace Hermes
         refmaps[j]->set_quad_2d(&g_quad_2d_std);
         als[j] = new AsmList<Scalar>();
         alsSurface[j] = new AsmList<Scalar>*[H2D_MAX_NUMBER_EDGES];
-        for(unsigned int k = 0; k < H2D_MAX_NUMBER_EDGES; k++)
+        for (unsigned int k = 0; k < H2D_MAX_NUMBER_EDGES; k++)
           alsSurface[j][k] = new AsmList<Scalar>();
       }
     }
@@ -88,14 +88,14 @@ namespace Hermes
 
       for (unsigned int j = 0; j < spaces_size; j++)
       {
-        if(u_ext_sln)
+        if (u_ext_sln)
         {
           u_ext[j] = new Solution<Scalar>(spaces[j]->get_mesh());
           u_ext[j]->copy(u_ext_sln[j]);
         }
         else
         {
-          if(spaces[j]->get_shapeset()->get_num_components() == 1)
+          if (spaces[j]->get_shapeset()->get_num_components() == 1)
             u_ext[j] = new ZeroSolution<Scalar>(spaces[j]->get_mesh());
           else
             u_ext[j] = new ZeroSolutionVector<Scalar>(spaces[j]->get_mesh());
@@ -106,7 +106,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear_, bool add_dirichlet_lift_)
     {
-      if(this->report_cache_hits_and_misses)
+      if (this->report_cache_hits_and_misses)
         this->zero_cache_hits_and_misses();
 
       this->nonlinear = nonlinear_;
@@ -124,19 +124,19 @@ namespace Hermes
         this->wf->ext[j]->set_quad_2d(&g_quad_2d_std);
       }
 
-      for(unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
+      for (unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
       {
         Form<Scalar>* form = this->wf->get_forms()[form_i];
-        for(unsigned int ext_i = 0; ext_i < form->ext.size(); ext_i++)
+        for (unsigned int ext_i = 0; ext_i < form->ext.size(); ext_i++)
         {
-          if(form->ext[ext_i])
+          if (form->ext[ext_i])
           {
             fns.push_back(form->ext[ext_i].get());
             form->ext[ext_i]->set_quad_2d(&g_quad_2d_std);
           }
         }
       }
-      if(this->nonlinear)
+      if (this->nonlinear)
       {
         init_u_ext(spaces, u_ext_sln);
         for (unsigned j = 0; j < this->wf->get_neq(); j++)
@@ -154,18 +154,18 @@ namespace Hermes
     {
       current_state = current_state_;
 
-      for(int j = 0; j < fns.size(); j++)
+      for (int j = 0; j < fns.size(); j++)
       {
-        if(current_state->e[j])
+        if (current_state->e[j])
         {
           fns[j]->set_active_element(current_state->e[j]);
           fns[j]->set_transform(current_state->sub_idx[j]);
         }
       }
 
-      for(int j = 0; j < this->spaces_size; j++)
+      for (int j = 0; j < this->spaces_size; j++)
       {
-        if(current_state->e[j])
+        if (current_state->e[j])
         {
           spaces[j]->get_element_assembly_list(current_state->e[j], als[j]);
           refmaps[j]->set_active_element(current_state->e[j]);
@@ -173,15 +173,15 @@ namespace Hermes
         }
       }
 
-      if(current_state->isBnd && !(this->wf->mfsurf.empty() && this->wf->vfsurf.empty()))
+      if (current_state->isBnd && !(this->wf->mfsurf.empty() && this->wf->vfsurf.empty()))
       {
-        for(int j = 0; j < this->spaces_size; j++)
+        for (int j = 0; j < this->spaces_size; j++)
         {
-          if(current_state->e[j])
+          if (current_state->e[j])
           {
-            for(int k = 0; k < current_state->rep->nvert; k++)
+            for (int k = 0; k < current_state->rep->nvert; k++)
             {
-              if(current_state->bnd[k])
+              if (current_state->bnd[k])
                 spaces[j]->get_boundary_assembly_list(current_state->e[j], k, alsSurface[j][k]);
             }
           }
@@ -193,7 +193,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::handle_cache(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, DiscreteProblemCache<Scalar>* cache)
     {
-      if(this->do_not_use_cache)
+      if (this->do_not_use_cache)
       {
         this->current_cache_record = new typename DiscreteProblemCache<Scalar>::CacheRecord;
         int order = this->integrationOrderCalculator.calculate_order(spaces, current_state, refmaps, u_ext, this->wf);
@@ -201,49 +201,49 @@ namespace Hermes
         return;
       }
 
-      if(this->report_cache_hits_and_misses)
+      if (this->report_cache_hits_and_misses)
         cache_searches++;
 
       this->current_cache_record = nullptr;
-      if(cache->get(current_state->rep, current_state->rep_subidx, current_state->rep_i, this->current_cache_record))
+      if (cache->get(current_state->rep, current_state->rep_subidx, current_state->rep_i, this->current_cache_record))
       {
-        if(this->report_cache_hits_and_misses)
+        if (this->report_cache_hits_and_misses)
           cache_record_found++;
 
         bool reinit = false;
-        for(unsigned int i = 0; i < this->spaces_size; i++)
+        for (unsigned int i = 0; i < this->spaces_size; i++)
         {
-          if(!current_state->e[i])
+          if (!current_state->e[i])
             continue;
 
-          if(spaces[i]->edata[current_state->e[i]->id].changed_in_last_adaptation)
+          if (spaces[i]->edata[current_state->e[i]->id].changed_in_last_adaptation)
           {
             reinit = true;
             break;
           }
 
-          if(this->current_cache_record->asmlistCnt[i] != als[i]->cnt)
+          if (this->current_cache_record->asmlistCnt[i] != als[i]->cnt)
           {
             reinit = true;
             break;
           }
           else
           {
-            for(unsigned int idx_i = 0; idx_i < als[i]->cnt; idx_i++)
+            for (unsigned int idx_i = 0; idx_i < als[i]->cnt; idx_i++)
             {
-              if(als[i]->idx[idx_i] != this->current_cache_record->asmlistIdx[i][idx_i])
+              if (als[i]->idx[idx_i] != this->current_cache_record->asmlistIdx[i][idx_i])
               {
                 reinit = true;
                 break;
               }
             }
-            if(reinit)
+            if (reinit)
               break;
           }
         }
-        if(reinit)
+        if (reinit)
         {
-          if(this->report_cache_hits_and_misses)
+          if (this->report_cache_hits_and_misses)
             cache_record_found_reinit++;
 
           this->current_cache_record->free();
@@ -253,7 +253,7 @@ namespace Hermes
       }
       else
       {
-        if(this->report_cache_hits_and_misses)
+        if (this->report_cache_hits_and_misses)
           cache_record_not_found++;
         int order = this->integrationOrderCalculator.calculate_order(spaces, current_state, refmaps, u_ext, this->wf);
         this->current_cache_record->init(current_state, pss, refmaps, u_ext, als, alsSurface, this->wf, order);
@@ -264,19 +264,19 @@ namespace Hermes
     Func<Scalar>** DiscreteProblemThreadAssembler<Scalar>::init_u_ext_values(int order)
     {
       Func<Scalar>** u_ext_func = nullptr;
-      if(this->nonlinear)
+      if (this->nonlinear)
       {
 #ifdef _DEBUG
         assert(this->u_ext);
 #endif
         u_ext_func = new Func<Scalar>*[spaces_size];
 
-        for(int i = 0; i < spaces_size; i++)
+        for (int i = 0; i < spaces_size; i++)
         {
 #ifdef _DEBUG
           assert(u_ext[i]);
 #endif
-          if(u_ext[i]->get_active_element())
+          if (u_ext[i]->get_active_element())
             u_ext_func[i] = init_fn(u_ext[i], order);
           else
             u_ext_func[i] = nullptr;
@@ -289,17 +289,17 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_u_ext_values(Func<Scalar>** u_ext_func)
     {
-      if(u_ext_func)
+      if (u_ext_func)
       {
-        for(int i = 0; i < spaces_size; i++)
+        for (int i = 0; i < spaces_size; i++)
         {
-          if(u_ext_func[i])
+          if (u_ext_func[i])
           {
             u_ext_func[i]->free_fn();
             delete u_ext_func[i];
           }
         }
-        delete [] u_ext_func;
+        delete[] u_ext_func;
       }
     }
 
@@ -307,34 +307,35 @@ namespace Hermes
     Func<Scalar>** DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry)
     {
       Func<Scalar>** ext_func = nullptr;
-      if(ext.size() > 0 || u_ext_fns.size() > 0)
+      if (ext.size() > 0 || u_ext_fns.size() > 0)
       {
         ext_func = new Func<Scalar>*[ext.size() + u_ext_fns.size()];
-        for(int ext_i = 0; ext_i < ext.size(); ext_i++)
+        for (int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
         {
-          if(ext[ext_i])
-            if(ext[ext_i]->get_active_element())
-              ext_func[ext_i] = init_fn(ext[ext_i].get(), order);
-            else
-              ext_func[ext_i] = nullptr;
+          if (u_ext_fns[ext_i])
+          {
+            u_ext_fns[ext_i]->set_active_element(current_state->rep);
+            ext_func[ext_i] = init_fn(u_ext_fns[ext_i].get(), u_ext_func, this->spaces_size, order, geometry);
+          }
           else
             ext_func[ext_i] = nullptr;
         }
-        for(int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
+
+        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
         {
-          if(u_ext_fns[ext_i])
-          {
-            u_ext_fns[ext_i]->set_active_element(current_state->rep);
-            ext_func[ext.size() + ext_i] = init_fn(u_ext_fns[ext_i].get(), u_ext_func, this->spaces_size, order, geometry);
-          }
+          if (ext[ext_i])
+          if (ext[ext_i]->get_active_element())
+            ext_func[u_ext_fns.size() + ext_i] = init_fn(ext[ext_i].get(), order);
           else
-            ext_func[ext.size() + ext_i] = nullptr;
+            ext_func[u_ext_fns.size() + ext_i] = nullptr;
+          else
+            ext_func[u_ext_fns.size() + ext_i] = nullptr;
         }
       }
 
-      if(this->rungeKutta)
+      if (this->rungeKutta)
       {
-        for(int ext_i = 0; ext_i < ext.size(); ext_i++)
+        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
           u_ext_func[ext_i]->add(ext_func[ext.size() - this->RK_original_spaces_count + ext_i]);
       }
 
@@ -344,21 +345,25 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Scalar>** ext_func)
     {
-      for(int ext_i = 0; ext_i < ext.size(); ext_i++)
+      if (ext_func)
       {
-        if(ext[ext_i] && ext[ext_i]->get_active_element())
+        for (int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
         {
           ext_func[ext_i]->free_fn();
           delete ext_func[ext_i];
         }
+
+        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
+        {
+          if (ext[ext_i] && ext[ext_i]->get_active_element())
+          {
+            ext_func[u_ext_fns.size() + ext_i]->free_fn();
+            delete ext_func[u_ext_fns.size() + ext_i];
+          }
+        }
+
+        delete[] ext_func;
       }
-      for(int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
-      {
-        ext_func[ext.size() + ext_i]->free_fn();
-        delete ext_func[ext.size() + ext_i];
-      }
-      if(ext_func)
-        delete [] ext_func;
     }
 
     template<typename Scalar>
@@ -370,13 +375,13 @@ namespace Hermes
       // init - ext
       Func<Scalar>** ext_func = this->init_ext_values(this->wf->ext, this->wf->u_ext_fn, this->current_cache_record->order, u_ext_func, current_cache_record->geometry);
 
-      if(this->current_mat || this->add_dirichlet_lift)
+      if (this->current_mat || this->add_dirichlet_lift)
       {
-        for(int current_mfvol_i = 0; current_mfvol_i < this->wf->mfvol.size(); current_mfvol_i++)
+        for (int current_mfvol_i = 0; current_mfvol_i < this->wf->mfvol.size(); current_mfvol_i++)
         {
           MatrixFormVol<Scalar>* mfv = this->wf->mfvol[current_mfvol_i];
 
-          if(!selectiveAssembler->form_to_be_assembled(mfv, current_state))
+          if (!selectiveAssembler->form_to_be_assembled(mfv, current_state))
             continue;
 
           int form_i = mfv->i;
@@ -384,27 +389,27 @@ namespace Hermes
 
           this->assemble_matrix_form(mfv,
             this->current_cache_record->order,
-            current_cache_record->fns[form_j], current_cache_record->fns[form_i], 
+            current_cache_record->fns[form_j], current_cache_record->fns[form_i],
             ext_func, u_ext_func,
             als[form_i], als[form_j],
             current_cache_record->n_quadrature_points, current_cache_record->geometry, current_cache_record->jacobian_x_weights);
         }
       }
-      if(this->current_rhs)
+      if (this->current_rhs)
       {
-        for(int current_vfvol_i = 0; current_vfvol_i < this->wf->vfvol.size(); current_vfvol_i++)
+        for (int current_vfvol_i = 0; current_vfvol_i < this->wf->vfvol.size(); current_vfvol_i++)
         {
           VectorFormVol<Scalar>* vfv = this->wf->vfvol[current_vfvol_i];
 
-          if(!selectiveAssembler->form_to_be_assembled(vfv, current_state))
+          if (!selectiveAssembler->form_to_be_assembled(vfv, current_state))
             continue;
 
           int form_i = vfv->i;
 
-          this->assemble_vector_form(vfv, 
-            this->current_cache_record->order, 
-            current_cache_record->fns[form_i], 
-            ext_func, u_ext_func, 
+          this->assemble_vector_form(vfv,
+            this->current_cache_record->order,
+            current_cache_record->fns[form_i],
+            ext_func, u_ext_func,
             als[form_i],
             current_cache_record->n_quadrature_points, current_cache_record->geometry, current_cache_record->jacobian_x_weights);
         }
@@ -417,11 +422,11 @@ namespace Hermes
       this->deinit_ext_values(this->wf->ext, this->wf->u_ext_fn, ext_func);
 
       // Assemble surface integrals now: loop through surfaces of the element.
-      if(current_state->isBnd && (this->wf->mfsurf.size() > 0 || this->wf->vfsurf.size() > 0))
+      if (current_state->isBnd && (this->wf->mfsurf.size() > 0 || this->wf->vfsurf.size() > 0))
       {
         for (int isurf = 0; isurf < current_state->rep->nvert; isurf++)
         {
-          if(!current_state->bnd[isurf])
+          if (!current_state->bnd[isurf])
             continue;
 
           current_state->isurf = isurf;
@@ -439,40 +444,40 @@ namespace Hermes
           // init - ext
           Func<Scalar>** ext_funcSurf = this->init_ext_values(this->wf->ext, this->wf->u_ext_fn, orderSurf, u_ext_funcSurf, current_cache_record->geometry);
 
-          if(this->current_mat || this->add_dirichlet_lift)
+          if (this->current_mat || this->add_dirichlet_lift)
           {
-            for(int current_mfsurf_i = 0; current_mfsurf_i < this->wf->mfsurf.size(); current_mfsurf_i++)
+            for (int current_mfsurf_i = 0; current_mfsurf_i < this->wf->mfsurf.size(); current_mfsurf_i++)
             {
-              if(!selectiveAssembler->form_to_be_assembled(this->wf->mfsurf[current_mfsurf_i], current_state))
+              if (!selectiveAssembler->form_to_be_assembled(this->wf->mfsurf[current_mfsurf_i], current_state))
                 continue;
 
               int form_i = this->wf->mfsurf[current_mfsurf_i]->i;
               int form_j = this->wf->mfsurf[current_mfsurf_i]->j;
 
-              this->assemble_matrix_form(this->wf->mfsurf[current_mfsurf_i], 
-                current_cache_record->orderSurface[isurf], 
-                current_cache_record->fnsSurface[isurf][form_j], 
-                current_cache_record->fnsSurface[isurf][form_i], 
+              this->assemble_matrix_form(this->wf->mfsurf[current_mfsurf_i],
+                current_cache_record->orderSurface[isurf],
+                current_cache_record->fnsSurface[isurf][form_j],
+                current_cache_record->fnsSurface[isurf][form_i],
                 ext_funcSurf, u_ext_funcSurf,
-                alsSurface[form_i][isurf], alsSurface[form_j][isurf], 
+                alsSurface[form_i][isurf], alsSurface[form_j][isurf],
                 current_cache_record->n_quadrature_pointsSurface[isurf], current_cache_record->geometrySurface[isurf], current_cache_record->jacobian_x_weightsSurface[isurf]);
             }
           }
 
-          if(this->current_rhs)
+          if (this->current_rhs)
           {
-            for(int current_vfsurf_i = 0; current_vfsurf_i < this->wf->vfsurf.size(); current_vfsurf_i++)
+            for (int current_vfsurf_i = 0; current_vfsurf_i < this->wf->vfsurf.size(); current_vfsurf_i++)
             {
-              if(!selectiveAssembler->form_to_be_assembled(this->wf->vfsurf[current_vfsurf_i], current_state))
+              if (!selectiveAssembler->form_to_be_assembled(this->wf->vfsurf[current_vfsurf_i], current_state))
                 continue;
 
               int form_i = this->wf->vfsurf[current_vfsurf_i]->i;
 
-              this->assemble_vector_form(this->wf->vfsurf[current_vfsurf_i], 
-                current_cache_record->orderSurface[isurf], 
-                current_cache_record->fnsSurface[isurf][form_i], 
-                ext_funcSurf, u_ext_funcSurf, 
-                alsSurface[form_i][isurf], 
+              this->assemble_vector_form(this->wf->vfsurf[current_vfsurf_i],
+                current_cache_record->orderSurface[isurf],
+                current_cache_record->fnsSurface[isurf][form_i],
+                ext_funcSurf, u_ext_funcSurf,
+                alsSurface[form_i][isurf],
                 current_cache_record->n_quadrature_pointsSurface[isurf], current_cache_record->geometrySurface[isurf], current_cache_record->jacobian_x_weightsSurface[isurf]);
             }
           }
@@ -502,33 +507,33 @@ namespace Hermes
 
       Func<Scalar>** local_ext = ext;
       // If the user supplied custom ext functions for this form.
-      if(form->ext.size() > 0)
+      if (form->ext.size() > 0)
         local_ext = this->init_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), order, u_ext, geometry);
 
       // Account for the previous time level solution previously inserted at the back of ext.
-      if(this->rungeKutta)
+      if (this->rungeKutta)
         u_ext += form->u_ext_offset;
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
       {
-        if(current_als_i->dof[i] < 0 || std::abs(current_als_i->coef[i]) < Hermes::epsilon)
+        if (current_als_i->dof[i] < 0 || std::abs(current_als_i->coef[i]) < Hermes::epsilon)
           continue;
 
-        if((!tra || surface_form) && current_als_i->dof[i] < 0)
+        if ((!tra || surface_form) && current_als_i->dof[i] < 0)
           continue;
 
         for (unsigned int j = 0; j < current_als_j->cnt; j++)
         {
           // Skip symmetric values that do not contribute to Dirichlet lift.
-          if(sym && j < i && current_als_j->dof[j] >= 0)
+          if (sym && j < i && current_als_j->dof[j] >= 0)
             continue;
 
           // Skip anything that does not contribute to Dirichlet in the case of just rhs assembling.
-          if(current_als_j->dof[j] >= 0 && !this->current_mat)
+          if (current_als_j->dof[j] >= 0 && !this->current_mat)
             continue;
 
-          if(std::abs(current_als_j->coef[j]) < Hermes::epsilon)
+          if (std::abs(current_als_j->coef[j]) < Hermes::epsilon)
             continue;
 
           Func<double>* u = base_fns[j];
@@ -536,17 +541,17 @@ namespace Hermes
 
           Scalar val = block_scaling_coefficient * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
 
-          if(current_als_j->dof[j] >= 0)
+          if (current_als_j->dof[j] >= 0)
           {
-            if(surface_form)
+            if (surface_form)
               local_stiffness_matrix[i][j] = 0.5 * val;
             else
               local_stiffness_matrix[i][j] = val;
 
-            if(sym)
+            if (sym)
               local_stiffness_matrix[j][i] = local_stiffness_matrix[i][j];
           }
-          else if(this->add_dirichlet_lift && this->current_rhs)
+          else if (this->add_dirichlet_lift && this->current_rhs)
           {
             this->current_rhs->add(current_als_i->dof[i], -val);
           }
@@ -554,67 +559,67 @@ namespace Hermes
       }
 
       // Insert the local stiffness matrix into the global one.
-      if(this->current_mat)
+      if (this->current_mat)
         this->current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
-      if(tra)
+      if (tra)
       {
-        if(form->sym < 0)
+        if (form->sym < 0)
           chsgn(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
         transpose(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
 
-        if(this->current_mat)
+        if (this->current_mat)
           this->current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
 
-        if(this->add_dirichlet_lift && this->current_rhs)
+        if (this->add_dirichlet_lift && this->current_rhs)
         {
           for (unsigned int j = 0; j < current_als_i->cnt; j++)
-            if(current_als_i->dof[j] < 0)
-              for (unsigned int i = 0; i < current_als_j->cnt; i++)
-                if(current_als_j->dof[i] >= 0)
-                  this->current_rhs->add(current_als_j->dof[i], -local_stiffness_matrix[i][j]);
+          if (current_als_i->dof[j] < 0)
+          for (unsigned int i = 0; i < current_als_j->cnt; i++)
+          if (current_als_j->dof[i] >= 0)
+            this->current_rhs->add(current_als_j->dof[i], -local_stiffness_matrix[i][j]);
         }
       }
 
-      if(form->ext.size() > 0)
+      if (form->ext.size() > 0)
         this->deinit_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), local_ext);
 
-      if(this->rungeKutta)
+      if (this->rungeKutta)
         u_ext -= form->u_ext_offset;
 
       // Cleanup.
-      delete [] local_stiffness_matrix;
+      delete[] local_stiffness_matrix;
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
+    void DiscreteProblemThreadAssembler<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
       AsmList<Scalar>* current_als_i, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
       bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == nullptr);
 
       Func<Scalar>** local_ext = ext;
-      if(form->ext.size() > 0)
+      if (form->ext.size() > 0)
         local_ext = this->init_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), order, u_ext, geometry);
 
       // Account for the previous time level solution previously inserted at the back of ext.
-      if(this->rungeKutta)
+      if (this->rungeKutta)
         u_ext += form->u_ext_offset;
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
       {
-        if(current_als_i->dof[i] < 0)
+        if (current_als_i->dof[i] < 0)
           continue;
 
         // Is this necessary, i.e. is there a coefficient smaller than Hermes::epsilon?
-        if(std::abs(current_als_i->coef[i]) < Hermes::epsilon)
+        if (std::abs(current_als_i->coef[i]) < Hermes::epsilon)
           continue;
 
         Func<double>* v = test_fns[i];
 
         Scalar val;
-        if(surface_form)
+        if (surface_form)
           val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
         else
           val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
@@ -622,17 +627,17 @@ namespace Hermes
         this->current_rhs->add(current_als_i->dof[i], val);
       }
 
-      if(form->ext.size() > 0)
+      if (form->ext.size() > 0)
         this->deinit_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), local_ext);
 
-      if(this->rungeKutta)
+      if (this->rungeKutta)
         u_ext -= form->u_ext_offset;
     }
 
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_assembling_one_state()
     {
-      if(this->do_not_use_cache)
+      if (this->do_not_use_cache)
         delete this->current_cache_record;
     }
 
@@ -652,35 +657,35 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::free_spaces()
     {
-      if(!this->pss)
+      if (!this->pss)
         return;
 
       for (unsigned int j = 0; j < spaces_size; j++)
         delete pss[j];
-      delete [] pss;
+      delete[] pss;
       pss = nullptr;
 
       for (unsigned int j = 0; j < spaces_size; j++)
         delete refmaps[j];
-      delete [] refmaps;
+      delete[] refmaps;
 
       for (unsigned int j = 0; j < spaces_size; j++)
         delete als[j];
-      delete [] als;
+      delete[] als;
 
       for (unsigned int j = 0; j < spaces_size; j++)
       {
         for (unsigned int k = 0; k < H2D_MAX_NUMBER_EDGES; k++)
           delete alsSurface[j][k];
-        delete [] alsSurface[j];
+        delete[] alsSurface[j];
       }
-      delete [] alsSurface;
+      delete[] alsSurface;
     }
 
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::free_weak_formulation()
     {
-      if(this->wf)
+      if (this->wf)
       {
         this->wf->free_ext();
         delete this->wf;
@@ -691,11 +696,11 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::free_u_ext()
     {
-      if(u_ext)
+      if (u_ext)
       {
         for (unsigned int j = 0; j < spaces_size; j++)
           delete u_ext[j];
-        delete [] u_ext;
+        delete[] u_ext;
       }
     }
 
