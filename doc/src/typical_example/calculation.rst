@@ -46,8 +46,8 @@ Once we created the Space(s), and the WeakForm (always one!), we create (outside
 
 Then the following code inside the loops would do the trick::
 
-    solver.setTime(current_time);
-    solver.setTimeStep(current_time_step);
+    solver.set_time(current_time);
+    solver.set_time_tep(current_time_step);
     // Yes! You are right, these can be used outside of the adaptivity loop!
     
     // Set the new Space.
@@ -74,14 +74,14 @@ Then the following code inside the loops would do the trick::
     // Get the solution.
     // The Solution class is described in the developers (doxygen) documentation.
     // The method vector_to_solution(s) too.
-    Solution<double> ref_sln;
-    Solution<double>::vector_to_solution(solver.get_sln_vector(), ref_sln, &ref_sln);
+    MeshFunctionSharedPtr<double> ref_sln(new Solution<double>);
+    Solution<double>::vector_to_solution(solver.get_sln_vector(), ref_space, ref_sln);
     
 And that is it, we have the solution of the problem in that adaptivity step on that time level. What to do with it (visualize, do some calculations, projections, limiting, whatever) and how to do it is described in various points in the tutorial.
 But let us say that we would like to see it, the following will make us happy::
 
     ScalarView<double> view("My Solution");
-    view.show(&ref_sln);
+    view.show(ref_sln);
 
 2 - nonlinear example
 ~~~~~~~~~~~~~~~~~~~~~
@@ -98,12 +98,9 @@ There is one more thing, if you want your NewtonSolver not to start from a zero 
     
     // For example let us project the previous time level solution and
     // use it as an initial guess.
-    OGProjection<double> ogProjection;
-    ogProjection.project_global(ref_space, &previous_time_level_sln, coeff_vec);
-    
     // And now use it in the NewtonSolver<Scalar>::solve.
     // (solver is now NewtonSolver<double>) method.
-    solver.solve(coeff_vec);
+    solver.solve(previous_time_level_sln);
     
 One can also use the NOX solver from the Trilinos package (with analogic, but not exactly same methods). One needs Trilinos for that. And documentation for that is coming.
 
@@ -114,11 +111,11 @@ Again, pretty much the same as in the LinearSolver case, but the solve() method 
 
     // Initialize the solution(it can be outside of the loops,
     // the solution would always be rewritten when it is natural)
-    Solution<double> ref_sln;
+    MeshFunctionSharedPtr<double> ref_sln(new Solution<double>);
     
     // "solver" is now an instance of RungeKutta<double>.
-    solver.setTime(current_time);
-    solver.setTimeStep(current_time_step);
+    solver.set_time(current_time);
+    solver.set_time_tep(current_time_step);
     // Yes! You are right, these can be used outside of the adaptivity loop!
     
     // Set the new Space.
@@ -130,7 +127,7 @@ Again, pretty much the same as in the LinearSolver case, but the solve() method 
     try
     {
       // Do the usual magic, plus put the result in the ref_sln instance.
-      solver.solve(&previous_time_level_sln, &ref_sln);
+      solver.solve(previous_time_level_sln, ref_sln);
     }
     catch(std::exception& e)
     {
@@ -152,8 +149,8 @@ It shares some methods with the above 'calculation' classes, but of course does 
     Vector<double>* rhs = create_vector<double>();
     LinearMatrixSolver<double>* linear_matrix_solver = create_linear_solver<double>(matrix, rhs);
     
-    dp.setTime(current_time);
-    dp.setTimeStep(current_time_step);
+    dp.set_time(current_time);
+    dp.set_time_tep(current_time_step);
     
     // Set the new Space.
     dp.set_space(ref_space);
@@ -176,8 +173,8 @@ It shares some methods with the above 'calculation' classes, but of course does 
     // Get the solution.
     // The Solution class is described in the developers documentation.
     // The method vector_to_solution(s) too.
-    Solution<double> ref_sln;
-    Solution<double>::vector_to_solution(linear_matrix_solver.get_sln_vector(), ref_sln, &ref_sln);
+    MeshFunctionSharedPtr<double> ref_sln(new Solution<double>);
+    Solution<double>::vector_to_solution(linear_matrix_solver.get_sln_vector(), ref_space, ref_sln);
     
 And that is it. There is not much more to it. See the 'transient', and 'adaptivity' sections of the hermes-tutorial documentation and all will fall into place.
 

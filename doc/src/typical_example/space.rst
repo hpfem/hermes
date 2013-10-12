@@ -17,7 +17,7 @@ Secondly, the Finite Element space must be set on the computational mesh. One of
     EssentialBCs<double> bcs(&bc_essential);
     
     // Create an H1 space.
-    H1Space<double> space(&mesh, &bcs, POLYNOMIAL_ORDER);
+    SpaceSharedPtr<double> space(new H1Space<double>(mesh, &bcs, POLYNOMIAL_ORDER));
     
     // HCurl Space.
     // Polynomial order.
@@ -29,17 +29,17 @@ Secondly, the Finite Element space must be set on the computational mesh. One of
     EssentialBCs<std::complex<double> > bcs(&bc_essential);
     
     // Create an Hcurl space.
-    HcurlSpace<std::complex<double> > space(&mesh, &bcs, POLYNOMIAL_ORDER);
+    SpaceSharedPtr<std::complex<double> > space(new HcurlSpace<std::complex<double> >(mesh, &bcs, POLYNOMIAL_ORDER));
     
     // HDiv Space. This example does not use any Dirichlet boundary conditions.
     int POLYNOMIAL_ORDER = 2;
-    HdivSpace<double> space(&mesh, POLYNOMIAL_ORDER);
+    SpaceSharedPtr<double> space(new HdivSpace<double>(mesh, POLYNOMIAL_ORDER));
     
     // L2 Space. This Space does not take any boundary conditions which corresponds to the
     // fact that the FE space is a space of discontinuous functions.
     // If we for example use polynomial order = 0, we use just piecewise
     // constant basis functions.
-    L2Space<double> space(&mesh, 0);
+    SpaceSharedPtr<double> space(new L2Space<double>(mesh, 0));
     
 More about spaces can be found in the 'hermes-tutorial' documentation, section 'A-linear', chapter '02-space'.
 
