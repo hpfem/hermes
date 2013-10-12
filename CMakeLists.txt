@@ -130,7 +130,8 @@ project(hermes)
   
 	# Allow to override the default values in CMake.vars:
 	include(CMake.vars OPTIONAL)
-  
+    include(../CMakeHermes.cmake OPTIONAL)
+    
   ### END DEFAULT CONFIGURATION ###
     
   set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
