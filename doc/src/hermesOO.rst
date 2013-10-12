@@ -100,6 +100,10 @@ An example usage of the non-constant boundary condition with subclassing is in t
 
 Mesh functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Very important thing regarding the Mesh functions is the use of shared pointers, in this sense, the class template MeshFunctionSharedPtr, in this example the mesh function is a solution::
+
+  MeshFunctionSharedPtr<double> my_mesh_function(new Solution<double>(mesh));
+  
 An example of this is the following code from the test example 06::
 
   hermes2d\test_examples\06-system-adapt\definitions.cpp (.h)
@@ -109,13 +113,13 @@ The point here are the two classes ExactSolutionFitzHughNagumo1, ExactSolutionFi
   class ExactSolutionFitzHughNagumo1 : public ExactSolutionScalar<double>
   {
   public:
-    ExactSolutionFitzHughNagumo1(const Mesh* mesh);
+    ExactSolutionFitzHughNagumo1(MeshSharedPtr mesh);
 
     virtual double value(double x, double y) const;
 
     virtual void derivatives(double x, double y, double& dx, double& dy) const;
 
-    virtual Ord ord(Ord x, Ord y) const;
+    virtual Ord ord(double x, double y) const;
 
     ~ExactSolutionFitzHughNagumo1();
     
@@ -150,11 +154,11 @@ Then we can see the important methods are overriden in the source file definitio
         dy = cef1->val(x)*cef1->dx(y);
       }
     
-  * ord(Ord x, Ord y) const 
+  * ord(double x, double y) const 
 
     ::
     
-      Ord ExactSolutionFitzHughNagumo1::ord(Ord x, Ord y) const 
+      Ord ExactSolutionFitzHughNagumo1::ord(double x, double y) const 
       {
         return Ord(10);
       }
