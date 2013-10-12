@@ -642,15 +642,19 @@ namespace Hermes
             internal_markers.push_back(internalMarker.marker);
         }
 
+        Scalar* result = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
+        
+        if (internal_markers.size() == 0)
+          return result;
+
         int source_functions_size = this->source_functions.size();
+        
         Traverse trav(source_functions_size);
         int num_states;
         Traverse::State** states = trav.get_states(this->source_functions, num_states);
 
         for (int i = 0; i < source_functions_size; i++)
           this->source_functions[i]->set_quad_2d(&g_quad_2d_std);
-
-        Scalar* result = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
 
 #pragma omp parallel num_threads(this->num_threads_used)
         {
@@ -666,9 +670,9 @@ namespace Hermes
           Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
           Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(this->number_of_integrals * sizeof(Func<Hermes::Ord>*));
 
-          MeshFunction<Scalar>** source_fuctions_cloned = new MeshFunction<Scalar>*[source_functions_size];
+          MeshFunction<Scalar>** source_functions_cloned = new MeshFunction<Scalar>*[source_functions_size];
           for (int i = 0; i < source_functions_size; i++)
-            source_fuctions_cloned[i] = this->source_functions[i]->clone();
+            source_functions_cloned[i] = this->source_functions[i]->clone();
           Func<Scalar>** func = (Func<Scalar>**)malloc(this->number_of_integrals * sizeof(Func<Scalar>*));
 
           Scalar* result_thread_local = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
@@ -695,8 +699,8 @@ namespace Hermes
             // Set active element.
             for (int i = 0; i < source_functions_size; i++)
             {
-              source_fuctions_cloned[i]->set_active_element(current_state->e[i]);
-              source_fuctions_cloned[i]->set_transform(current_state->sub_idx[i]);
+              source_functions_cloned[i]->set_active_element(current_state->e[i]);
+              source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
               refmap->set_active_element(current_state->e[i]);
             }
 
@@ -705,7 +709,7 @@ namespace Hermes
             for(int i = 0; i < this->number_of_integrals; i++)
               orders[i] = Hermes::Ord(0);
             for (int i = 0; i < source_functions_size; i++)
-              func_ord[i] = init_fn_ord(this->source_functions[i]->get_fn_order());
+              func_ord[i] = init_fn_ord(source_functions_cloned[i]->get_fn_order());
 
             this->order(func_ord, orders);
 
@@ -716,7 +720,7 @@ namespace Hermes
             limit_order(order_int, refmap->get_active_element()->get_mode());
 
             for (int i = 0; i < source_functions_size; i++)
-              func[i] = init_fn(source_fuctions_cloned[i], order_int);
+              func[i] = init_fn(source_functions_cloned[i], order_int);
 
             Geom<double>* geometry = init_geom_vol(refmap, order_int);
             int n = init_geometry_points(&refmap, 1, order_int, geometry, jacobian_x_weights);
@@ -743,8 +747,8 @@ namespace Hermes
           ::free(result_thread_local);
 
           for (int i = 0; i < source_functions_size; i++)
-            delete source_fuctions_cloned[i];
-          delete[] source_fuctions_cloned;
+            delete source_functions_cloned[i];
+          delete[] source_functions_cloned;
           delete[] orders;
           ::free(func_ord);
           ::free(func);
@@ -780,6 +784,11 @@ namespace Hermes
             internal_markers.push_back(internalMarker.marker);
         }
 
+        Scalar* result = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
+        
+        if (internal_markers.size() == 0)
+          return result;
+
         int source_functions_size = this->source_functions.size();
         Traverse trav(source_functions_size);
         int num_states;
@@ -787,8 +796,6 @@ namespace Hermes
 
         for (int i = 0; i < source_functions_size; i++)
           this->source_functions[i]->set_quad_2d(&g_quad_2d_std);
-
-        Scalar* result = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
 
 #pragma omp parallel num_threads(this->num_threads_used)
         {
@@ -804,9 +811,9 @@ namespace Hermes
           Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
           Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(this->number_of_integrals * sizeof(Func<Hermes::Ord>*));
 
-          MeshFunction<Scalar>** source_fuctions_cloned = new MeshFunction<Scalar>*[source_functions_size];
+          MeshFunction<Scalar>** source_functions_cloned = new MeshFunction<Scalar>*[source_functions_size];
           for (int i = 0; i < source_functions_size; i++)
-            source_fuctions_cloned[i] = this->source_functions[i]->clone();
+            source_functions_cloned[i] = this->source_functions[i]->clone();
           Func<Scalar>** func = (Func<Scalar>**)malloc(this->number_of_integrals * sizeof(Func<Scalar>*));
 
           Scalar* result_thread_local = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
@@ -822,8 +829,8 @@ namespace Hermes
             // Set active element.
             for (int i = 0; i < source_functions_size; i++)
             {
-              source_fuctions_cloned[i]->set_active_element(current_state->e[i]);
-              source_fuctions_cloned[i]->set_transform(current_state->sub_idx[i]);
+              source_functions_cloned[i]->set_active_element(current_state->e[i]);
+              source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
               refmap->set_active_element(current_state->e[i]);
             }
 
@@ -852,7 +859,7 @@ namespace Hermes
               for(int i = 0; i < this->number_of_integrals; i++)
                 orders[i] = Hermes::Ord(0);
               for (int i = 0; i < source_functions_size; i++)
-                func_ord[i] = init_fn_ord(this->source_functions[i]->get_fn_order());
+                func_ord[i] = init_fn_ord(source_functions_cloned[i]->get_fn_order());
 
               this->order(func_ord, orders);
 
@@ -867,7 +874,7 @@ namespace Hermes
               int n = init_surface_geometry_points(&refmap, 1, order_int, edge, current_state->e[0]->en[edge]->marker, geometry, jacobian_x_weights);
 
               for (int i = 0; i < source_functions_size; i++)
-                func[i] = init_fn(source_fuctions_cloned[i], order_int);
+                func[i] = init_fn(source_functions_cloned[i], order_int);
 
               this->integral(n, jacobian_x_weights, func, geometry, result_local);
 
@@ -892,8 +899,8 @@ namespace Hermes
           ::free(result_thread_local);
 
           for (int i = 0; i < source_functions_size; i++)
-            delete source_fuctions_cloned[i];
-          delete[] source_fuctions_cloned;
+            delete source_functions_cloned[i];
+          delete[] source_functions_cloned;
           delete[] orders;
           ::free(func_ord);
           ::free(func);
