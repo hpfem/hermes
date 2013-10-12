@@ -722,7 +722,7 @@ namespace Hermes
             for (int i = 0; i < source_functions_size; i++)
               func[i] = init_fn(source_functions_cloned[i], order_int);
 
-            Geom<double>* geometry = init_geom_vol(refmap, order_int);
+            Geom<double>* geometry;
             int n = init_geometry_points(&refmap, 1, order_int, geometry, jacobian_x_weights);
 
             this->integral(n, jacobian_x_weights, func, geometry, result_local);
