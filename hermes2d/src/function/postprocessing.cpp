@@ -656,16 +656,16 @@ namespace Hermes
         for (int i = 0; i < source_functions_size; i++)
           this->source_functions[i]->set_quad_2d(&g_quad_2d_std);
 
-#pragma omp parallel num_threads(this->num_threads_used)
+//#pragma omp parallel num_threads(this->num_threads_used)
         {
           RefMap* refmap = new RefMap;
           refmap->set_quad_2d(&g_quad_2d_std);
 
-          int thread_number = omp_get_thread_num();
-          int start = (num_states / this->num_threads_used) * thread_number;
-          int end = (num_states / this->num_threads_used) * (thread_number + 1);
-          if (thread_number == this->num_threads_used - 1)
-            end = num_states;
+          //int thread_number = omp_get_thread_num();
+          int start = 0;//(num_states / this->num_threads_used) * thread_number;
+          int end = num_states;//(num_states / this->num_threads_used) * (thread_number + 1);
+          //if (thread_number == this->num_threads_used - 1)
+          //  end = num_states;
 
           Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
           Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(this->number_of_integrals * sizeof(Func<Hermes::Ord>*));
@@ -797,16 +797,16 @@ namespace Hermes
         for (int i = 0; i < source_functions_size; i++)
           this->source_functions[i]->set_quad_2d(&g_quad_2d_std);
 
-#pragma omp parallel num_threads(this->num_threads_used)
+//#pragma omp parallel num_threads(this->num_threads_used)
         {
           RefMap* refmap = new RefMap;
           refmap->set_quad_2d(&g_quad_2d_std);
 
-          int thread_number = omp_get_thread_num();
-          int start = (num_states / this->num_threads_used) * thread_number;
-          int end = (num_states / this->num_threads_used) * (thread_number + 1);
-          if (thread_number == this->num_threads_used - 1)
-            end = num_states;
+          //int thread_number = omp_get_thread_num();
+          int start = 0;//(num_states / this->num_threads_used) * thread_number;
+          int end = num_states;//(num_states / this->num_threads_used) * (thread_number + 1);
+          //if (thread_number == this->num_threads_used - 1)
+          //  end = num_states;
 
           Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
           Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(this->number_of_integrals * sizeof(Func<Hermes::Ord>*));
