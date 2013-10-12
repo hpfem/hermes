@@ -22,6 +22,8 @@ If you want to use fast saving / loading of Hermes entities, install
   
     - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip: `Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
     - Compile and install using 'make install'
+
+For thread caching memory allocator from Google, see
     
   - TCMalloc
     
