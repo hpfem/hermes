@@ -59,7 +59,7 @@ namespace Hermes
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
       virtual void solve(Scalar* coeff_vec) = 0;
 
-      /// Basic solve method.
+      /// Get sln vector.
       virtual Scalar* get_sln_vector() = 0;
 
       /// Solve.

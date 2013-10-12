@@ -69,6 +69,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Scalar* PicardSolver<Scalar>::get_sln_vector()
+    {
+      return this->sln_vector;
+    }
+
+    template<typename Scalar>
     void PicardSolver<Scalar>::assemble_residual(bool store_previous_residual)
     {
       bool use_Anderson = this->anderson_is_on && (this->vec_in_memory >= this->num_last_vectors_used);

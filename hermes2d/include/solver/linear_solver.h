@@ -76,6 +76,9 @@ namespace Hermes
       /// \param[in] coeff_vec initiall guess.
       virtual void solve(Scalar* coeff_vec);
 
+      /// Get sln vector.
+      Scalar* get_sln_vector();
+
      /// DiscreteProblemWeakForm helper.
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
 

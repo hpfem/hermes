@@ -65,6 +65,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Scalar* NewtonSolver<Scalar>::get_sln_vector()
+    {
+      return this->sln_vector;
+    }
+
+    template<typename Scalar>
     void NewtonSolver<Scalar>::assemble_residual(bool store_previous_residual)
     {
       this->dp->assemble(this->sln_vector, this->get_residual());

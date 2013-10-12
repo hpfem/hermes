@@ -63,6 +63,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Scalar* LinearSolver<Scalar>::get_sln_vector()
+    {
+      return this->sln_vector;
+    }
+
+    template<typename Scalar>
     bool LinearSolver<Scalar>::isOkay() const
     {
       return Solver<Scalar>::isOkay();
