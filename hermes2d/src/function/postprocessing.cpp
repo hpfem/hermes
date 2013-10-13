@@ -583,13 +583,13 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      IntegralCalculator<Scalar>::IntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals) : Hermes::Mixins::Loggable(true), number_of_integrals(number_of_integrals)
+      IntegralCalculator<Scalar>::IntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals) : Hermes::Mixins::Loggable(false), number_of_integrals(number_of_integrals)
       {
         source_functions.push_back(source_function);
       }
 
       template<typename Scalar>
-      IntegralCalculator<Scalar>::IntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals) : Hermes::Mixins::Loggable(true), source_functions(source_functions), number_of_integrals(number_of_integrals)
+      IntegralCalculator<Scalar>::IntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals) : Hermes::Mixins::Loggable(false), source_functions(source_functions), number_of_integrals(number_of_integrals)
       {
       }
 
