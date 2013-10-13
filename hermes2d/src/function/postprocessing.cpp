@@ -583,13 +583,13 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      IntegralCalculator<Scalar>::IntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals) : number_of_integrals(number_of_integrals)
+      IntegralCalculator<Scalar>::IntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals) : Hermes::Mixins::Loggable(true), number_of_integrals(number_of_integrals)
       {
         source_functions.push_back(source_function);
       }
 
       template<typename Scalar>
-      IntegralCalculator<Scalar>::IntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals) : source_functions(source_functions), number_of_integrals(number_of_integrals)
+      IntegralCalculator<Scalar>::IntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals) : Hermes::Mixins::Loggable(true), source_functions(source_functions), number_of_integrals(number_of_integrals)
       {
       }
 
@@ -634,6 +634,11 @@ namespace Hermes
       template<typename Scalar>
       Scalar* VolumetricIntegralCalculator<Scalar>::calculate(Hermes::vector<std::string> markers)
       {
+#ifdef _DEBUG
+        this->info("User markers");
+        for (int i = 0; i < markers.size(); i++)
+          this->info("\t%s", markers[i]);
+#endif
         Hermes::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)
         {
@@ -643,12 +648,18 @@ namespace Hermes
         }
 
         Scalar* result = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
-        
+
         if (internal_markers.size() == 0)
           return result;
 
+#ifdef _DEBUG
+        this->info("Internal markers");
+        for (int i = 0; i < internal_markers.size(); i++)
+          this->info("\t%s", internal_markers[i]);
+#endif
+
         int source_functions_size = this->source_functions.size();
-        
+
         Traverse trav(source_functions_size);
         int num_states;
         Traverse::State** states = trav.get_states(this->source_functions, num_states);
@@ -656,17 +667,20 @@ namespace Hermes
         for (int i = 0; i < source_functions_size; i++)
           this->source_functions[i]->set_quad_2d(&g_quad_2d_std);
 
-//#pragma omp parallel num_threads(this->num_threads_used)
+#pragma omp parallel num_threads(this->num_threads_used)
         {
           RefMap* refmap = new RefMap;
           refmap->set_quad_2d(&g_quad_2d_std);
 
-          //int thread_number = omp_get_thread_num();
-          int start = 0;//(num_states / this->num_threads_used) * thread_number;
-          int end = num_states;//(num_states / this->num_threads_used) * (thread_number + 1);
-          //if (thread_number == this->num_threads_used - 1)
-          //  end = num_states;
+          int thread_number = omp_get_thread_num();
+          int start = (num_states / this->num_threads_used) * thread_number;
+          int end = (num_states / this->num_threads_used) * (thread_number + 1);
+          if (thread_number == this->num_threads_used - 1)
+            end = num_states;
 
+#ifdef _DEBUG
+          this->info("Thread %i, states %i - %i", thread_number, start, end);
+#endif
           Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
           Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(this->number_of_integrals * sizeof(Func<Hermes::Ord>*));
 
@@ -776,6 +790,11 @@ namespace Hermes
       template<typename Scalar>
       Scalar* SurfaceIntegralCalculator<Scalar>::calculate(Hermes::vector<std::string> markers)
       {
+#ifdef _DEBUG
+        this->info("User markers");
+        for (int i = 0; i < markers.size(); i++)
+          this->info("\t%s", markers[i]);
+#endif
         Hermes::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)
         {
@@ -785,9 +804,15 @@ namespace Hermes
         }
 
         Scalar* result = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
-        
+
         if (internal_markers.size() == 0)
           return result;
+
+#ifdef _DEBUG
+        this->info("Internal markers");
+        for (int i = 0; i < internal_markers.size(); i++)
+          this->info("\t%s", internal_markers[i]);
+#endif
 
         int source_functions_size = this->source_functions.size();
         Traverse trav(source_functions_size);
@@ -797,16 +822,20 @@ namespace Hermes
         for (int i = 0; i < source_functions_size; i++)
           this->source_functions[i]->set_quad_2d(&g_quad_2d_std);
 
-//#pragma omp parallel num_threads(this->num_threads_used)
+#pragma omp parallel num_threads(this->num_threads_used)
         {
           RefMap* refmap = new RefMap;
           refmap->set_quad_2d(&g_quad_2d_std);
 
-          //int thread_number = omp_get_thread_num();
-          int start = 0;//(num_states / this->num_threads_used) * thread_number;
-          int end = num_states;//(num_states / this->num_threads_used) * (thread_number + 1);
-          //if (thread_number == this->num_threads_used - 1)
-          //  end = num_states;
+          int thread_number = omp_get_thread_num();
+          int start = (num_states / this->num_threads_used) * thread_number;
+          int end = (num_states / this->num_threads_used) * (thread_number + 1);
+          if (thread_number == this->num_threads_used - 1)
+            end = num_states;
+
+#ifdef _DEBUG
+          this->info("Thread %i, states %i - %i", thread_number, start, end);
+#endif
 
           Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
           Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(this->number_of_integrals * sizeof(Func<Hermes::Ord>*));

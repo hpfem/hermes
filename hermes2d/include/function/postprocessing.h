@@ -115,7 +115,8 @@ namespace Hermes
       /// Abstract base class
       template<typename Scalar>
       class HERMES_API IntegralCalculator :
-        public Hermes::Hermes2D::Mixins::Parallel
+        public Hermes::Hermes2D::Mixins::Parallel,
+        public Hermes::Mixins::Loggable
       {
       public:
         /// \param[in] source_functions The functions forming the integral expression.
