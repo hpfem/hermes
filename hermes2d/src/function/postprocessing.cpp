@@ -655,7 +655,7 @@ namespace Hermes
 #ifdef _DEBUG
         this->info("Internal markers");
         for (int i = 0; i < internal_markers.size(); i++)
-          this->info("\t%s", internal_markers[i]);
+          this->info("\t%i", internal_markers[i]);
 #endif
 
         int source_functions_size = this->source_functions.size();
@@ -811,7 +811,7 @@ namespace Hermes
 #ifdef _DEBUG
         this->info("Internal markers");
         for (int i = 0; i < internal_markers.size(); i++)
-          this->info("\t%s", internal_markers[i]);
+          this->info("\t%i", internal_markers[i]);
 #endif
 
         int source_functions_size = this->source_functions.size();
