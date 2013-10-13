@@ -695,6 +695,10 @@ namespace Hermes
 
           for (int state_i = start; state_i < end; state_i++)
           {
+#ifdef _DEBUG
+            this->info("Thread %i, state %i", thread_number, state_i);
+#endif
+
             Traverse::State* current_state = states[state_i];
             bool target_marker = false;
             for (int i = 0; i < internal_markers.size(); i++)
@@ -851,6 +855,10 @@ namespace Hermes
 
           for (int state_i = start; state_i < end; state_i++)
           {
+#ifdef _DEBUG
+            this->info("Thread %i, state %i", thread_number, state_i);
+#endif
+
             Traverse::State* current_state = states[state_i];
             if (!current_state->isBnd)
               continue;
@@ -869,6 +877,10 @@ namespace Hermes
             {
               if (!current_state->bnd[edge])
                 continue;
+
+#ifdef _DEBUG
+              this->info("Thread %i, state %i, edge %i", thread_number, state_i, edge);
+#endif
 
               bool target_marker = false;
               for (int i = 0; i < internal_markers.size(); i++)
