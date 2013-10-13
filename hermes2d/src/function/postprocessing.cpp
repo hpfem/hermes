@@ -637,7 +637,7 @@ namespace Hermes
 #ifdef _DEBUG
         this->info("User markers");
         for (int i = 0; i < markers.size(); i++)
-          this->info("\t%s", markers[i]);
+          this->info("\t%s", markers[i].c_str());
 #endif
         Hermes::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)
@@ -793,7 +793,7 @@ namespace Hermes
 #ifdef _DEBUG
         this->info("User markers");
         for (int i = 0; i < markers.size(); i++)
-          this->info("\t%s", markers[i]);
+          this->info("\t%s", markers[i].c_str());
 #endif
         Hermes::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)

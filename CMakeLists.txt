@@ -249,7 +249,7 @@ project(hermes)
     set(CMAKE_CXX_FLAGS "-Wuninitialized -Wvla -Wsign-compare ${CMAKE_CXX_FLAGS}")
 
     set(HERMES_RELEASE_FLAGS "${CMAKE_CXX_FLAGS} -DNDEBUG -O3")
-    set(HERMES_DEBUG_FLAGS   "${CMAKE_CXX_FLAGS} -g")
+    set(HERMES_DEBUG_FLAGS   "${CMAKE_CXX_FLAGS} -g -D_DEBUG")
   endif()
 
   # Enabling multiprocessor build on MSVC
