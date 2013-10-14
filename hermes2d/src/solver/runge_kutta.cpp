@@ -368,8 +368,7 @@ namespace Hermes
 
         // Assemble the block Jacobian matrix of the stationary residual F.
         // Diagonal blocks are created even if empty, so that matrix_left can be added later.
-        bool force_diagonal_blocks = true;
-        stage_dp_right->set_RK(spaces.size(), force_diagonal_blocks, this->bt);
+        stage_dp_right->set_RK(spaces.size(), true, this->bt);
         stage_dp_right->assemble(u_ext_vec, nullptr, vector_right);
 
         // Finalizing the residual vector.
@@ -428,7 +427,7 @@ namespace Hermes
           // Assemble the block Jacobian matrix of the stationary residual F
           // Diagonal blocks are created even if empty, so that matrix_left
           // can be added later.
-          stage_dp_right->set_RK(spaces.size(), force_diagonal_blocks);
+          stage_dp_right->set_RK(spaces.size(), true, this->bt);
           stage_dp_right->assemble(u_ext_vec, matrix_right, nullptr);
 
           // Adding the block mass matrix M to matrix_right. This completes the

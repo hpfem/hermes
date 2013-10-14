@@ -242,6 +242,30 @@ namespace Hermes
       return this->Ax;
     }
 
+    template<typename Scalar>
+    void CSMatrix<Scalar>::add_as_block(unsigned int offset_i, unsigned int offset_j, SparseMatrix<Scalar>* mat)
+    {
+      if((this->get_size() < offset_i + mat->get_size() )||(this->get_size() < offset_j + mat->get_size() ))
+        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in SparseMatrix<Scalar>::add_as_block()");
+      
+      CSMatrix<Scalar>* csMatrix = dynamic_cast<CSMatrix<Scalar>*>(mat);
+      if(!mat)
+      {
+        SparseMatrix<Scalar>::add_as_block(offset_i, offset_j, mat);
+      }
+      else
+      {
+        for(int i = 0; i < csMatrix->get_size(); i++)
+        {
+          int index = csMatrix->Ap[i];
+          for(int j = 0; j < csMatrix->Ap[i+1] - index; j++)
+          {
+            this->add(offset_i + csMatrix->Ai[index + j], offset_j + i, csMatrix->Ax[index + j]);
+          }
+        }
+      }
+    }
+
     template<>
     void CSMatrix<double>::add(unsigned int m, unsigned int n, double v)
     {

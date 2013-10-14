@@ -60,13 +60,15 @@ namespace Hermes
 
   double Table::get_A(unsigned int i, unsigned int j)
   {
-    if(i > size || j > size) throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
+    if((i >= this->size) || (j >= this->size))
+      throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
     return this->A[i][j];
   }
 
   void Table::set_A(unsigned int i, unsigned int j, double val)
   {
-    if(i > size || j > size) throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
+    if((i >= this->size) || (j >= this->size))
+      throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
     this->A[i][j] = val;
   }
 

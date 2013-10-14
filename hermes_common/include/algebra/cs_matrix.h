@@ -99,6 +99,13 @@ namespace Hermes
       /// @return pointer to #Ax
       Scalar *get_Ax() const;
 
+      /// Add matrix to specific position.
+      /// @param[in] i row in target matrix coresponding with top row of added matrix
+      /// @param[in] j column in target matrix coresponding with lef column of added matrix
+      /// @param[in] mat added matrix.
+      using SparseMatrix<Scalar>::add_as_block;
+      virtual void add_as_block(unsigned int i, unsigned int j, SparseMatrix<Scalar>* mat);
+
     protected:
       /// UMFPack specific data structures for storing the system matrix (CSC format).
       /// Matrix entries (column-wise).
