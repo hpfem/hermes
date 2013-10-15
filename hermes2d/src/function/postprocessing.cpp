@@ -606,7 +606,7 @@ namespace Hermes
       {
         for (int i = 0; i < this->number_of_integrals; i++)
         {
-#pragma openmp atomic
+#pragma omp atomic
           results[i] += results_local[i];
         }
       }
@@ -616,7 +616,7 @@ namespace Hermes
       {
         for (int i = 0; i < this->number_of_integrals; i++)
         {
-#pragma openmp critical integralAddition
+#pragma omp critical (integralAddition)
           results[i] += results_local[i];
         }
       }
