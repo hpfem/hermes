@@ -42,7 +42,7 @@ namespace Hermes
       double DiscreteProblemRungeKutta<Scalar>::block_scaling_coeff(MatrixForm<Scalar>* form) const
       {
         if(block_weights)
-          return block_weights->get_A(form->i, form->j);
+          return block_weights->get_A(form->i / this->RK_original_spaces_count, form->j / this->RK_original_spaces_count);
         return 1.0;
       }
 
@@ -50,7 +50,7 @@ namespace Hermes
       double DiscreteProblemRungeKutta<Scalar>::block_scaling_coeff(MatrixFormDG<Scalar>* form) const
       {
         if(block_weights)
-          return block_weights->get_A(form->i, form->j);
+          return block_weights->get_A(form->i / this->RK_original_spaces_count, form->j / this->RK_original_spaces_count);
         return 1.0;
       }
 

@@ -252,7 +252,7 @@ namespace Hermes
         // If a block scaling table is provided, and if the scaling coefficient
         // A_mn for this block is zero, then the form does not need to be assembled.
         if(this->block_weights)
-          if(fabs(this->block_weights->get_A(form->i, form->j)) < Hermes::epsilon)
+          if(fabs(this->block_weights->get_A(form->i / this->RK_original_spaces_count, form->j / this->RK_original_spaces_count)) < Hermes::epsilon)
             return false;
         return true;
       }

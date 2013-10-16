@@ -1,5 +1,3 @@
-#define HERMES_REPORT_ALL
-#define HERMES_REPORT_FILE "application.log"
 #include "definitions.h"
 
 //  This example is a continuation of the example "09-timedep-basic" and it shows how
@@ -92,19 +90,21 @@ int main(int argc, char* argv[])
 	Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
 	// space->
-	SpaceSharedPtr<double> space;
+	SpaceSharedPtr<double> space1(new H1Space<double>(mesh, &bcs, P_INIT));
+	SpaceSharedPtr<double> space2(new H1Space<double>(mesh, &bcs, P_INIT + 1));
+  Hermes::vector<SpaceSharedPtr<double> > spaces(space1, space2);
 
 	// Solution pointer.
-	MeshFunctionSharedPtr<double> sln_time_prev = new ConstantSolution<double>(mesh, TEMP_INIT);
+	MeshFunctionSharedPtr<double> sln_time_prev1(new ConstantSolution<double>(mesh, TEMP_INIT));
+	MeshFunctionSharedPtr<double> sln_time_prev2(new ConstantSolution<double>(mesh, TEMP_INIT));
+  Hermes::vector<MeshFunctionSharedPtr<double> > sln_time_prev(sln_time_prev1, sln_time_prev2);
 
-space = new H1Space<double>(mesh, &bcs, P_INIT);
+	MeshFunctionSharedPtr<double> sln_time_new1(new Solution<double>(mesh));
+	MeshFunctionSharedPtr<double> sln_time_new2(new Solution<double>(mesh));
+  Hermes::vector<MeshFunctionSharedPtr<double> > sln_time_new(sln_time_new1, sln_time_new2);
 
-	CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
+  CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
 		&current_time, TEMP_INIT, T_FINAL);
-
-	MeshFunctionSharedPtr<double> sln_time_new = new Solution<double>(mesh);
-
-	int ndof = space->get_num_dofs();
 
 	// Initialize views.
 	Hermes::Hermes2D::Views::ScalarView Tview("Temperature", new Hermes::Hermes2D::Views::WinGeom(0, 0, 450, 600));
@@ -112,12 +112,10 @@ space = new H1Space<double>(mesh, &bcs, P_INIT);
 	Tview.fix_scale_width(30);
 
 	// Initialize Runge-Kutta time stepping.
-	RungeKutta<double> runge_kutta(&wf, space, &bt);
+	RungeKutta<double> runge_kutta(&wf, spaces, &bt);
   runge_kutta.set_tolerance(NEWTON_TOL);
 	runge_kutta.set_verbose_output(true);
-	runge_kutta.output_matrix(1);
-	runge_kutta.set_matrix_number_format("%a");
-	runge_kutta.output_rhs(2);
+	runge_kutta.set_time_step(time_step);
 
 	// Iteration number.
 	int iteration = 0;
@@ -128,9 +126,7 @@ space = new H1Space<double>(mesh, &bcs, P_INIT);
 		// Perform one Runge-Kutta time step according to the selected Butcher's table.
 		try
 		{
-			runge_kutta.set_space(space);
 			runge_kutta.set_time(current_time);
-			runge_kutta.set_time_step(time_step);
 			runge_kutta.rk_time_step_newton(sln_time_prev, sln_time_new);
 		}
 		catch(Exceptions::Exception& e)
@@ -142,10 +138,11 @@ space = new H1Space<double>(mesh, &bcs, P_INIT);
 		char title[100];
 		sprintf(title, "Time %3.2f s", current_time);
 		Tview.set_title(title);
-		Tview.show(sln_time_new);
+		Tview.show(sln_time_new2);
 
 		// Copy solution for the new time step.
-		sln_time_prev->copy(sln_time_new);
+		sln_time_prev1->copy(sln_time_new1);
+		sln_time_prev2->copy(sln_time_new2);
 
 		// Increase current time and time step counter.
 		current_time += time_step;

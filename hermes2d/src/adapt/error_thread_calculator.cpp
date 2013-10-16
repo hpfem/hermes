@@ -393,7 +393,7 @@ namespace Hermes
         Func<Scalar>* norm_func[2];
 
         this->initialize_error_and_norm_functions(form, error_func, norm_func, order);
-        this->evaluate_volumetric_form(form, error_func[form->i], error_func[form->j], norm_func[form->i], norm_func[form->j], error, norm);
+        this->evaluate_volumetric_form(form, error_func[0], error_func[1], norm_func[0], norm_func[1], error, norm);
         this->deinitialize_error_and_norm_functions(form, error_func, norm_func);
       }
 
@@ -453,7 +453,7 @@ namespace Hermes
         Func<Scalar>* norm_func[2];
 
         this->initialize_error_and_norm_functions(form, error_func, norm_func, order);
-        this->evaluate_surface_form(form, error_func[form->i], error_func[form->j], norm_func[form->i], norm_func[form->j], error, norm);
+        this->evaluate_surface_form(form, error_func[0], error_func[0], norm_func[1], norm_func[1], error, norm);
         this->deinitialize_error_and_norm_functions(form, error_func, norm_func);
       }
 
