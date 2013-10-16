@@ -173,8 +173,13 @@ namespace Hermes
       reset_neighb_info();
       active_edge = edge;
 
-      //std::cout << std::endl << "central element: " << central_el->id << std::endl;
-      if(central_el->en[active_edge]->bnd == 0)
+
+      if(!this->ignore_errors && central_el->en[active_edge]->bnd == 1)
+      {
+        throw Hermes::Exceptions::Exception("The given edge isn't inner");
+        return;
+      }
+      else
       {
         neighb_el = central_el->get_neighbor(active_edge);
 
@@ -252,9 +257,6 @@ namespace Hermes
           }
         }
       }
-      else
-        if(!ignore_errors)
-          throw Hermes::Exceptions::Exception("The given edge isn't inner");
     }
 
     template<typename Scalar>

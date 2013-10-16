@@ -19,6 +19,7 @@
 #include "api2d.h"
 #include "mesh_reader_h2d.h"
 #include "neighbor_search.h"
+#include "mixins.h"
 #include "forms.h"
 
 namespace Hermes
@@ -209,18 +210,32 @@ namespace Hermes
       // And calculation.
       for(int level = 1; level <= levels; level++)
       {
+#ifdef _DEBUG
+        Hermes::Mixins::Loggable::Static::info("Level: %i.", level);
+#endif
         memcpy(neighbors_target, neighbors_target_local, target_mesh->get_max_element_id() * sizeof(int));
         for_all_active_elements(e, target_mesh)
         {
           if(neighbors_target[e->id] == level)
           {
+#ifdef _DEBUG
+        Hermes::Mixins::Loggable::Static::info("\tElement: %i.", e->id);
+#endif
             NeighborSearch<double> ns(e, target_mesh);
-            ns.set_ignore_errors(true);
             for(int edge = 0; edge < e->get_nvert(); edge++)
             {
+#ifdef _DEBUG
+              if(e->en[edge]->bnd)
+                Hermes::Mixins::Loggable::Static::info("\t\tEdge: %i (boundary).", edge);
+              else
+                Hermes::Mixins::Loggable::Static::info("\t\tEdge: %i.", edge);
+#endif
               ns.set_active_edge(edge);
               for(int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
               {
+ #ifdef _DEBUG
+                Hermes::Mixins::Loggable::Static::info("\t\t\tNeighbor: %i.", neighbor);
+#endif
                 ns.set_active_segment(neighbor);
                 Element* neighbor_el = ns.get_neighb_el();
                 if(neighbors_target_local[neighbor_el->id] > 0)

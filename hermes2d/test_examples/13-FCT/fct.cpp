@@ -53,11 +53,13 @@ void Flux_Correction::init(SpaceSharedPtr<double> new_space)
     {
       elem_id= e->id;
       for (unsigned int iv = 0; iv < e->get_nvert(); iv++)
-      {  
+      {
+        if(e->en[iv]->bnd)
+          continue;
+
         // Class for finding all neighbors of the element e on the mesh space->get_mesh().
         NeighborSearch<double> ns(e, space->get_mesh());
         // Set this to ignore errors of the edge iv being a boundary edge (which has no neighbors).
-        ns.set_ignore_errors(true);
         // Look for the neighbors over the edge iv.
         ns.set_active_edge(iv);
         // Iterate through the found neighbors.

@@ -94,11 +94,11 @@ namespace Hermes
             {
               NeighborSearch<Scalar> ns(current_state->e[el], spaces[el]->get_mesh());
 
-              // Ignoring errors (and doing nothing) in case the edge is a boundary one.
-              ns.set_ignore_errors(true);
-
               for(int ed = 0; ed < num_edges; ed++)
               {
+                if(current_state->e[el]->en[ed]->bnd)
+                  continue;
+
                 ns.set_active_edge(ed);
                 const Hermes::vector<Element *> *neighbors = ns.get_neighbors();
 
@@ -152,7 +152,10 @@ namespace Hermes
             for(unsigned int el = 0; el < spaces_size; el++)
             {
               for(int ed = 0; ed < num_edges; ed++)
-                delete [] neighbor_elems_arrays[el][ed];
+              {
+                if(!current_state->e[el]->en[ed]->bnd)
+                  delete [] neighbor_elems_arrays[el][ed];
+              }
               delete [] neighbor_elems_arrays[el];
             }
             delete [] neighbor_elems_arrays;
