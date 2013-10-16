@@ -173,7 +173,6 @@ namespace Hermes
       reset_neighb_info();
       active_edge = edge;
 
-
       if(!this->ignore_errors && central_el->en[active_edge]->bnd == 1)
       {
         throw Hermes::Exceptions::Exception("The given edge isn't inner");

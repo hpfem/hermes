@@ -222,6 +222,7 @@ namespace Hermes
         Hermes::Mixins::Loggable::Static::info("\tElement: %i.", e->id);
 #endif
             NeighborSearch<double> ns(e, target_mesh);
+            ns.set_ignore_errors(true);
             for(int edge = 0; edge < e->get_nvert(); edge++)
             {
 #ifdef _DEBUG
