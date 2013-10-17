@@ -157,6 +157,7 @@ namespace Hermes
       /// \param[in] marker The marker
       /// \param[in] n_element_guess(optional) Approximate number of elements that will be in this method. Used as an allocation hint. -1 for not-known.
       static MeshSharedPtr get_egg_shell(MeshSharedPtr mesh, std::string marker, unsigned int levels, int n_element_guess = -1);
+      static MeshSharedPtr get_egg_shell(MeshSharedPtr mesh, Hermes::vector<std::string> markers, unsigned int levels, int n_element_guess = -1);
 #pragma endregion
 
 #pragma region refinements
@@ -322,7 +323,7 @@ namespace Hermes
       /// \param[in/out] n_elements Size of the array.
       /// \param[in] marker The marker
       /// \param[in] n_element_guess(optional) Approximate number of elements that will be in this method. Used as an allocation hint. -1 for not-known.
-      static void get_egg_shell_structures(MeshSharedPtr target_mesh, Element**& elements, int& n_elements, std::string marker, unsigned int levels, int n_element_guess = -1);
+      static void get_egg_shell_structures(MeshSharedPtr target_mesh, Element**& elements, int& n_elements, Hermes::vector<std::string> markers, unsigned int levels, int n_element_guess = -1);
 
 
       /// Internal.

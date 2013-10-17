@@ -166,19 +166,26 @@ namespace Hermes
 
     MeshSharedPtr Mesh::get_egg_shell(MeshSharedPtr mesh, std::string marker, unsigned int levels, int n_element_guess)
     {
+      Hermes::vector<std::string> markers;
+      markers.push_back(marker);
+      return get_egg_shell(mesh, markers, levels, n_element_guess);
+    }
+
+    MeshSharedPtr Mesh::get_egg_shell(MeshSharedPtr mesh, Hermes::vector<std::string> markers, unsigned int levels, int n_element_guess)
+    {
       MeshSharedPtr target_mesh(new Mesh);
       target_mesh->copy(mesh);
 
       Element** elements = nullptr;
       int n_elements;
 
-      get_egg_shell_structures(target_mesh, elements, n_elements, marker, levels, n_element_guess);
+      get_egg_shell_structures(target_mesh, elements, n_elements, markers, levels, n_element_guess);
       make_egg_shell_mesh(target_mesh, elements, n_elements);
 
       return target_mesh;
     }
 
-    void Mesh::get_egg_shell_structures(MeshSharedPtr target_mesh, Element**& elements, int& n_elements, std::string marker, unsigned int levels, int n_element_guess)
+    void Mesh::get_egg_shell_structures(MeshSharedPtr target_mesh, Element**& elements, int& n_elements, Hermes::vector<std::string> markers, unsigned int levels, int n_element_guess)
     {
       int eggShell_marker_1 = target_mesh->get_boundary_markers_conversion().insert_marker(eggShell1Marker);
       int eggShell_marker_inner = target_mesh->get_boundary_markers_conversion().insert_marker(eggShellInnerMarker);
@@ -187,10 +194,15 @@ namespace Hermes
       if(levels < 1)
         throw Exceptions::ValueException("levels", levels, 1);
 
-      // Marker translation.
-      MarkersConversion::IntValid int_marker = target_mesh->element_markers_conversion.get_internal_marker(marker);
-      if(!int_marker.valid)
-        throw Exceptions::Exception("Marker not valid in target_mesh::get_egg_shell.");
+      Hermes::vector<int> internal_markers;
+      for (int i = 0; i < markers.size(); i++)
+      {
+        Hermes::Hermes2D::Mesh::MarkersConversion::IntValid internalMarker = target_mesh->get_element_markers_conversion().get_internal_marker(markers[i]);
+        if (internalMarker.valid)
+          internal_markers.push_back(internalMarker.marker);
+        else
+          throw Exceptions::Exception("Marker %s not valid in target_mesh::get_egg_shell.", markers[i].c_str());
+      }
 
       // Initial allocation
       int n_elements_alloc = n_element_guess == -1 ? (int)std::sqrt((double)target_mesh->get_num_active_elements()) : n_element_guess;
@@ -203,7 +215,16 @@ namespace Hermes
       Element* e;
       for_all_active_elements(e, target_mesh)
       {
-        if(e->marker == int_marker.marker)
+        bool target_marker = false;
+        for (int i = 0; i < internal_markers.size(); i++)
+        {
+          if (e->marker == internal_markers[i])
+          {
+            target_marker = true;
+            break;
+          }
+        }
+        if (target_marker)
           neighbors_target_local[e->id] = 1;
       }
 
