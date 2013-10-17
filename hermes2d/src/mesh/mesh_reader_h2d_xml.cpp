@@ -467,10 +467,17 @@ namespace Hermes
                 throw Hermes::Exceptions::MeshLoadFailureException("Boundary data error (edge %i does not exist).", boundary_edge_number_i);
 
               en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge->m()).marker;
+            }
 
-              meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(edge->v1())->second].bnd = 1;
-              meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(edge->v2())->second].bnd = 1;
-              en->bnd = 1;
+            Node* node;
+            for_all_edge_nodes(node, meshes[subdomains_i])
+            {
+              if (node->ref < 2)
+              {
+                meshes[subdomains_i]->nodes[node->p1].bnd = 1;
+                meshes[subdomains_i]->nodes[node->p2].bnd = 1;
+                node->bnd = 1;
+              }
             }
 
             // Inner Edge numbers //
@@ -495,7 +502,6 @@ namespace Hermes
                 throw Hermes::Exceptions::MeshLoadFailureException("Inner data error (edge %i does not exist).", inner_edge_number_i);
 
               en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge->m()).marker;
-              en->bnd = 0;
             }
 
             // Curves //
@@ -957,14 +963,16 @@ namespace Hermes
           mesh->boundary_markers_conversion.insert_marker(edge_marker);
 
           en->marker = mesh->boundary_markers_conversion.get_internal_marker(edge_marker).marker;
+        }
 
-          // This is extremely important, as in DG, it is assumed that negative boundary markers are reserved
-          // for the inner edges.
-          if(en->marker > 0)
+        Node* node;
+        for_all_edge_nodes(node, mesh)
+        {
+          if (node->ref < 2)
           {
-            mesh->nodes[v1].bnd = 1;
-            mesh->nodes[v2].bnd = 1;
-            en->bnd = 1;
+            mesh->nodes[node->p1].bnd = 1;
+            mesh->nodes[node->p2].bnd = 1;
+            node->bnd = 1;
           }
         }
 
@@ -1221,14 +1229,16 @@ namespace Hermes
           int marker = mesh->boundary_markers_conversion.get_internal_marker(edge_marker).marker;
 
           en->marker = marker;
+        }
 
-          // This is extremely important, as in DG, it is assumed that negative boundary markers are reserved
-          // for the inner edges.
-          if(marker > 0)
+        Node* node;
+        for_all_edge_nodes(node, mesh)
+        {
+          if (node->ref < 2)
           {
-            mesh->nodes[v1].bnd = 1;
-            mesh->nodes[v2].bnd = 1;
-            en->bnd = 1;
+            mesh->nodes[node->p1].bnd = 1;
+            mesh->nodes[node->p2].bnd = 1;
+            node->bnd = 1;
           }
         }
 
