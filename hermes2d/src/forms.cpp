@@ -689,6 +689,40 @@ namespace Hermes
     }
     
     template<typename Scalar>
+    Func<Scalar>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad, int nc)
+    {
+      if (quad == nullptr)
+        quad = &g_quad_2d_std;
+
+      double3* pt = quad->get_points(order, mode);
+      int np = quad->get_num_points(order, mode);
+      Func<Scalar>* u = new Func<Scalar>(np, nc);
+
+      if (nc == 1)
+      {
+        u->val = new Scalar[np];
+        u->dx = new Scalar[np];
+        u->dy = new Scalar[np];
+        memset(u->val, 0, np * sizeof(Scalar));
+        memset(u->dx, 0, np * sizeof(Scalar));
+        memset(u->dy, 0, np * sizeof(Scalar));
+      }
+      else if (nc == 2)
+      {
+        u->val0 = new Scalar[np];
+        u->val1 = new Scalar[np];
+        u->curl = new Scalar[np];
+        u->div = new Scalar[np];
+
+        memset(u->val0, 0, np * sizeof(Scalar));
+        memset(u->val1, 0, np * sizeof(Scalar));
+        memset(u->curl, 0, np * sizeof(Scalar));
+        memset(u->div, 0, np * sizeof(Scalar));
+      }
+      return u;
+    }
+
+    template<typename Scalar>
     Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order)
     {
       // Sanity checks.
@@ -797,6 +831,9 @@ namespace Hermes
 
     template HERMES_API Func<double>* init_fn(Solution<double>* fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(Solution<std::complex<double> >* fu, const int order);
+
+    template HERMES_API Func<double>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);
+    template HERMES_API Func<std::complex<double> >* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);
 
     template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** u_ext, int u_ext_size, const int order, Geom<double>* geometry);
     template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** u_ext, int u_ext_size, const int order, Geom<double>* geometry);

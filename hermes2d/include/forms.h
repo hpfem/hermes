@@ -226,6 +226,10 @@ namespace Hermes
     template<typename Scalar>
     HERMES_API Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order);
 
+    /// Init zero function
+    template<typename Scalar>
+    HERMES_API Func<Scalar>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d = nullptr, int nc = 1);
+
     template<typename Scalar>
     HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry);
   }

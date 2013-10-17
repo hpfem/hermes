@@ -127,13 +127,13 @@ namespace Hermes
         : Limiter<double>(space, solution_vector)
       {
         this->init(maximum_polynomial_order);
-      }
+        }
 
       VertexBasedLimiter::VertexBasedLimiter(Hermes::vector<SpaceSharedPtr<double> > spaces, double* solution_vector, int maximum_polynomial_order)
         : Limiter<double>(spaces, solution_vector)
       {
         this->init(maximum_polynomial_order);
-      }
+        }
 
       void VertexBasedLimiter::set_p_coarsening_only()
       {
@@ -287,20 +287,20 @@ namespace Hermes
 
           }
           else
-            if (vertex_value > centroid_value_multiplied)
-            {
-              fraction = std::min(1., (this->vertex_max_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-              if (this->get_verbose_output())
-                std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][0];
-            }
-            else
-            {
-              fraction = std::min(1., (this->vertex_min_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-              if (this->get_verbose_output())
-                std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][0];
-            }
+          if (vertex_value > centroid_value_multiplied)
+          {
+            fraction = std::min(1., (this->vertex_max_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+            if (this->get_verbose_output())
+              std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][0];
+          }
+          else
+          {
+            fraction = std::min(1., (this->vertex_min_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+            if (this->get_verbose_output())
+              std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][0];
+          }
 
-            correction_factor = std::min(correction_factor, fraction);
+          correction_factor = std::min(correction_factor, fraction);
         }
         if (this->get_verbose_output())
           std::cout << std::endl << "correction_factor " << correction_factor << std::endl;
@@ -365,21 +365,21 @@ namespace Hermes
               fraction = 1.;
             }
             else
-              if (vertex_value > centroid_value_multiplied)
-              {
-                fraction = std::min(1., (this->vertex_max_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-                if (this->get_verbose_output())
-                  std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][i_derivative];
+            if (vertex_value > centroid_value_multiplied)
+            {
+              fraction = std::min(1., (this->vertex_max_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+              if (this->get_verbose_output())
+                std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][i_derivative];
 
-              }
-              else
-              {
-                fraction = std::min(1., (this->vertex_min_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-                if (this->get_verbose_output())
-                  std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][i_derivative];
-              }
+            }
+            else
+            {
+              fraction = std::min(1., (this->vertex_min_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+              if (this->get_verbose_output())
+                std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][i_derivative];
+            }
 
-              correction_factor = std::min(correction_factor, fraction);
+            correction_factor = std::min(correction_factor, fraction);
           }
         }
 
@@ -682,12 +682,12 @@ namespace Hermes
           this->info("Thread %i, states %i - %i", thread_number, start, end);
 #endif
           Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
-          Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(this->number_of_integrals * sizeof(Func<Hermes::Ord>*));
+          Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(source_functions_size * sizeof(Func<Hermes::Ord>*));
 
           MeshFunction<Scalar>** source_functions_cloned = new MeshFunction<Scalar>*[source_functions_size];
           for (int i = 0; i < source_functions_size; i++)
             source_functions_cloned[i] = this->source_functions[i]->clone();
-          Func<Scalar>** func = (Func<Scalar>**)malloc(this->number_of_integrals * sizeof(Func<Scalar>*));
+          Func<Scalar>** func = (Func<Scalar>**)malloc(source_functions_size * sizeof(Func<Scalar>*));
 
           Scalar* result_thread_local = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
           Scalar* result_local = (Scalar*)malloc(this->number_of_integrals * sizeof(Scalar));
@@ -703,7 +703,7 @@ namespace Hermes
             bool target_marker = false;
             for (int i = 0; i < internal_markers.size(); i++)
             {
-              if (current_state->e[0]->marker == internal_markers[i])
+              if (current_state->rep->marker == internal_markers[i])
               {
                 target_marker = true;
                 break;
@@ -717,28 +717,54 @@ namespace Hermes
             // Set active element.
             for (int i = 0; i < source_functions_size; i++)
             {
-              source_functions_cloned[i]->set_active_element(current_state->e[i]);
-              source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
-              refmap->set_active_element(current_state->e[i]);
+              if (current_state->e[i])
+              if (current_state->e[i]->used)
+              {
+                source_functions_cloned[i]->set_active_element(current_state->e[i]);
+                source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
+              }
             }
+
+            refmap->set_active_element(current_state->rep);
 
             // Integration order.
             Hermes::Ord order = Hermes::Ord(refmap->get_inv_ref_order());
-            for(int i = 0; i < this->number_of_integrals; i++)
+            for (int i = 0; i < this->number_of_integrals; i++)
               orders[i] = Hermes::Ord(0);
+
             for (int i = 0; i < source_functions_size; i++)
-              func_ord[i] = init_fn_ord(source_functions_cloned[i]->get_fn_order());
+            {
+              if (current_state->e[i])
+              {
+                if (current_state->e[i]->used)
+                  func_ord[i] = init_fn_ord(source_functions_cloned[i]->get_fn_order());
+                else
+                  func_ord[i] = init_fn_ord(0);
+              }
+              else
+                func_ord[i] = init_fn_ord(0);
+            }
 
             this->order(func_ord, orders);
 
-            for (int i = 0; i < source_functions_size; i++)
+            for (int i = 0; i < this->number_of_integrals; i++)
               order += orders[i];
 
             int order_int = order.get_order();
             limit_order(order_int, refmap->get_active_element()->get_mode());
 
             for (int i = 0; i < source_functions_size; i++)
-              func[i] = init_fn(source_functions_cloned[i], order_int);
+            {
+              if (current_state->e[i])
+              {
+                if (current_state->e[i]->used)
+                  func[i] = init_fn(source_functions_cloned[i], order_int);
+                else
+                  func[i] = init_zero_fn<Scalar>(current_state->rep->get_mode(), order_int);
+              }
+              else
+                func[i] = init_zero_fn<Scalar>(current_state->rep->get_mode(), order_int);
+            }
 
             Geom<double>* geometry;
             int n = init_geometry_points(&refmap, 1, order_int, geometry, jacobian_x_weights);
@@ -750,7 +776,7 @@ namespace Hermes
             delete[] jacobian_x_weights;
 
             for (int i = 0; i < source_functions_size; i++)
-            {
+            { 
               func_ord[i]->free_ord();
               delete func_ord[i];
               func[i]->free_fn();
@@ -842,12 +868,12 @@ namespace Hermes
 #endif
 
           Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
-          Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(this->number_of_integrals * sizeof(Func<Hermes::Ord>*));
+          Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(source_functions_size * sizeof(Func<Hermes::Ord>*));
 
           MeshFunction<Scalar>** source_functions_cloned = new MeshFunction<Scalar>*[source_functions_size];
           for (int i = 0; i < source_functions_size; i++)
             source_functions_cloned[i] = this->source_functions[i]->clone();
-          Func<Scalar>** func = (Func<Scalar>**)malloc(this->number_of_integrals * sizeof(Func<Scalar>*));
+          Func<Scalar>** func = (Func<Scalar>**)malloc(source_functions_size * sizeof(Func<Scalar>*));
 
           Scalar* result_thread_local = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
           Scalar* result_local = (Scalar*)malloc(this->number_of_integrals * sizeof(Scalar));
@@ -866,10 +892,15 @@ namespace Hermes
             // Set active element.
             for (int i = 0; i < source_functions_size; i++)
             {
-              source_functions_cloned[i]->set_active_element(current_state->e[i]);
-              source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
-              refmap->set_active_element(current_state->e[i]);
+              if (current_state->e[i])
+              if (current_state->e[i]->used)
+              {
+                source_functions_cloned[i]->set_active_element(current_state->e[i]);
+                source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
+              }
             }
+
+            refmap->set_active_element(current_state->rep);
 
             Hermes::Ord order = Hermes::Ord(refmap->get_inv_ref_order());
 
@@ -897,14 +928,14 @@ namespace Hermes
               memset(result_local, 0, sizeof(Scalar)* this->number_of_integrals);
 
               // Integration order.
-              for(int i = 0; i < this->number_of_integrals; i++)
+              for (int i = 0; i < this->number_of_integrals; i++)
                 orders[i] = Hermes::Ord(0);
               for (int i = 0; i < source_functions_size; i++)
                 func_ord[i] = init_fn_ord(source_functions_cloned[i]->get_fn_order());
 
               this->order(func_ord, orders);
 
-              for (int i = 0; i < source_functions_size; i++)
+              for (int i = 0; i < this->number_of_integrals; i++)
                 order += orders[i];
 
               int order_int = order.get_order();
@@ -915,7 +946,17 @@ namespace Hermes
               int n = init_surface_geometry_points(&refmap, 1, order_int, edge, current_state->e[0]->en[edge]->marker, geometry, jacobian_x_weights);
 
               for (int i = 0; i < source_functions_size; i++)
-                func[i] = init_fn(source_functions_cloned[i], order_int);
+              {
+                if (current_state->e[i])
+                {
+                  if (current_state->e[i]->used)
+                    func[i] = init_fn(source_functions_cloned[i], order_int);
+                  else
+                    func[i] = init_zero_fn<Scalar>(current_state->rep->get_mode(), order_int);
+                }
+                else
+                  func[i] = init_zero_fn<Scalar>(current_state->rep->get_mode(), order_int);
+              }
 
               this->integral(n, jacobian_x_weights, func, geometry, result_local);
 
