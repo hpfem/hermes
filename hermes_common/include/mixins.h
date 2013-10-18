@@ -95,7 +95,7 @@ namespace Hermes
       /// Returns the current value of verbose_callback;
       callbackFn get_verbose_callback() const;
 
-      /// For static logging in user programs.
+      /// For static logging.
       class HERMES_API Static
       {
       public:

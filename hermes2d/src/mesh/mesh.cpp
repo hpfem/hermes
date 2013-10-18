@@ -33,6 +33,7 @@ namespace Hermes
     const std::string Mesh::eggShellInnerMarker = "Eggshell-inner";
     const std::string Mesh::eggShell1Marker = "Eggshell-1";
     const std::string Mesh::eggShell0Marker = "Eggshell-0";
+    bool Mesh::egg_shell_verbose = true;
 
     Mesh::Mesh() : HashTable(), meshHashGrid(nullptr), nbase(0), nactive(0), ntopvert(0), ninitial(0), seq(g_mesh_seq++),
       bounding_box_calculated(0)
@@ -232,7 +233,8 @@ namespace Hermes
       for(int level = 1; level <= levels; level++)
       {
 #ifdef _DEBUG
-        Hermes::Mixins::Loggable::Static::info("Level: %i.", level);
+        if(Mesh::egg_shell_verbose)
+          Hermes::Mixins::Loggable::Static::info("Level: %i.", level);
 #endif
         memcpy(neighbors_target, neighbors_target_local, target_mesh->get_max_element_id() * sizeof(int));
         for_all_active_elements(e, target_mesh)
@@ -240,7 +242,8 @@ namespace Hermes
           if(neighbors_target[e->id] == level)
           {
 #ifdef _DEBUG
-        Hermes::Mixins::Loggable::Static::info("\tElement: %i.", e->id);
+            if(Mesh::egg_shell_verbose)
+              Hermes::Mixins::Loggable::Static::info("\tElement: %i.", e->id);
 #endif
             NeighborSearch<double> ns(e, target_mesh);
             for(int edge = 0; edge < e->get_nvert(); edge++)
@@ -248,13 +251,15 @@ namespace Hermes
               if (e->en[edge]->bnd)
                 continue;
 #ifdef _DEBUG
-              Hermes::Mixins::Loggable::Static::info("\t\tEdge: %i.", edge);
+              if(Mesh::egg_shell_verbose)
+                Hermes::Mixins::Loggable::Static::info("\t\tEdge: %i.", edge);
 #endif
               ns.set_active_edge(edge);
               for(int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
               {
- #ifdef _DEBUG
-                Hermes::Mixins::Loggable::Static::info("\t\t\tNeighbor: %i.", neighbor);
+#ifdef _DEBUG
+                if(Mesh::egg_shell_verbose)
+                  Hermes::Mixins::Loggable::Static::info("\t\t\tNeighbor: %i.", neighbor);
 #endif
                 ns.set_active_segment(neighbor);
                 Element* neighbor_el = ns.get_neighb_el();
@@ -314,6 +319,7 @@ namespace Hermes
       {
         elem->used = false;
       }
+      target_mesh->nactive = 0;
 
       bool* info = new bool[target_mesh->get_max_element_id()];
       memset(info, 0, target_mesh->get_max_element_id());
@@ -321,6 +327,7 @@ namespace Hermes
       {
         info[elements[i]->id] = true;
         target_mesh->get_element(elements[i]->id)->used = true;
+        target_mesh->nactive++;
       }
 
       int marker_temp = target_mesh->get_boundary_markers_conversion().get_internal_marker(eggShellInnerMarker).marker;

@@ -60,7 +60,8 @@ namespace Hermes
     ///&nbsp;e.print_msg();
     ///&nbsp;return -1;
     /// }
-    class HERMES_API Mesh : public HashTable, public Hermes::Mixins::StateQueryable
+    class HERMES_API Mesh : public HashTable,
+      public Hermes::Mixins::StateQueryable
     {
     public:
       Mesh();
@@ -145,9 +146,14 @@ namespace Hermes
       /// For internal use.
       unsigned get_seq() const;
 
-      static const std::string eggShellInnerMarker;
+      /// The mesh returned from get_egg_shell has this marker on the "1" boundary.
       static const std::string eggShell1Marker;
+      /// The mesh returned from get_egg_shell has this marker on the "0" boundary.
       static const std::string eggShell0Marker;
+
+      /// Verboseness of the static egg shell creation.
+      /// Default: true.
+      static bool egg_shell_verbose;
 
       /// Return the "Egg-shell".
       /// Finds all the elements that neighbor an area with a marker marker.
@@ -288,7 +294,6 @@ namespace Hermes
         int size() const;
 
       protected:
-
         /// Info about the maximum marker used so far, used in determining
         /// of the internal marker for a user-supplied std::string identification for
         /// the purpose of disambiguity.
@@ -315,6 +320,9 @@ namespace Hermes
 
     private:
 
+      /// Util for eggShell.
+      static const std::string eggShellInnerMarker;
+        
       /// Internal.
       /// Return the "Egg-shell" internal structures.
       /// Finds all the elements that neighbor an area with a marker marker.

@@ -127,13 +127,13 @@ namespace Hermes
         : Limiter<double>(space, solution_vector)
       {
         this->init(maximum_polynomial_order);
-        }
+      }
 
       VertexBasedLimiter::VertexBasedLimiter(Hermes::vector<SpaceSharedPtr<double> > spaces, double* solution_vector, int maximum_polynomial_order)
         : Limiter<double>(spaces, solution_vector)
       {
         this->init(maximum_polynomial_order);
-        }
+      }
 
       void VertexBasedLimiter::set_p_coarsening_only()
       {
@@ -287,20 +287,20 @@ namespace Hermes
 
           }
           else
-          if (vertex_value > centroid_value_multiplied)
-          {
-            fraction = std::min(1., (this->vertex_max_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-            if (this->get_verbose_output())
-              std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][0];
-          }
-          else
-          {
-            fraction = std::min(1., (this->vertex_min_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-            if (this->get_verbose_output())
-              std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][0];
-          }
+            if (vertex_value > centroid_value_multiplied)
+            {
+              fraction = std::min(1., (this->vertex_max_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+              if (this->get_verbose_output())
+                std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][0];
+            }
+            else
+            {
+              fraction = std::min(1., (this->vertex_min_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+              if (this->get_verbose_output())
+                std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][0];
+            }
 
-          correction_factor = std::min(correction_factor, fraction);
+            correction_factor = std::min(correction_factor, fraction);
         }
         if (this->get_verbose_output())
           std::cout << std::endl << "correction_factor " << correction_factor << std::endl;
@@ -365,21 +365,21 @@ namespace Hermes
               fraction = 1.;
             }
             else
-            if (vertex_value > centroid_value_multiplied)
-            {
-              fraction = std::min(1., (this->vertex_max_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-              if (this->get_verbose_output())
-                std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][i_derivative];
+              if (vertex_value > centroid_value_multiplied)
+              {
+                fraction = std::min(1., (this->vertex_max_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+                if (this->get_verbose_output())
+                  std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][i_derivative];
 
-            }
-            else
-            {
-              fraction = std::min(1., (this->vertex_min_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-              if (this->get_verbose_output())
-                std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][i_derivative];
-            }
+              }
+              else
+              {
+                fraction = std::min(1., (this->vertex_min_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+                if (this->get_verbose_output())
+                  std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][i_derivative];
+              }
 
-            correction_factor = std::min(correction_factor, fraction);
+              correction_factor = std::min(correction_factor, fraction);
           }
         }
 
@@ -639,17 +639,29 @@ namespace Hermes
         for (int i = 0; i < markers.size(); i++)
           this->info("\t%s", markers[i].c_str());
 #endif
+        // This serves for assembling over the whole domain in the case a passed marker is HERMES_ANY.
+        bool assemble_everywhere = false;
+
         Hermes::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)
         {
-          Hermes::Hermes2D::Mesh::MarkersConversion::IntValid internalMarker = this->source_functions[0]->get_mesh()->get_element_markers_conversion().get_internal_marker(markers[i]);
-          if (internalMarker.valid)
-            internal_markers.push_back(internalMarker.marker);
+          if(markers[i] == HERMES_ANY)
+          {
+            assemble_everywhere = true;
+            break;
+          }
+          else
+          {
+
+            Hermes::Hermes2D::Mesh::MarkersConversion::IntValid internalMarker = this->source_functions[0]->get_mesh()->get_element_markers_conversion().get_internal_marker(markers[i]);
+            if (internalMarker.valid)
+              internal_markers.push_back(internalMarker.marker);
+          }
         }
 
         Scalar* result = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
 
-        if (internal_markers.size() == 0)
+        if (!assemble_everywhere && internal_markers.size() == 0)
           return result;
 
 #ifdef _DEBUG
@@ -700,17 +712,20 @@ namespace Hermes
 #endif
 
             Traverse::State* current_state = states[state_i];
-            bool target_marker = false;
-            for (int i = 0; i < internal_markers.size(); i++)
+            if(!assemble_everywhere)
             {
-              if (current_state->rep->marker == internal_markers[i])
+              bool target_marker = false;
+              for (int i = 0; i < internal_markers.size(); i++)
               {
-                target_marker = true;
-                break;
+                if (current_state->rep->marker == internal_markers[i])
+                {
+                  target_marker = true;
+                  break;
+                }
               }
+              if (!target_marker)
+                continue;
             }
-            if (!target_marker)
-              continue;
 
             memset(result_local, 0, sizeof(Scalar)* this->number_of_integrals);
 
@@ -718,11 +733,11 @@ namespace Hermes
             for (int i = 0; i < source_functions_size; i++)
             {
               if (current_state->e[i])
-              if (current_state->e[i]->used)
-              {
-                source_functions_cloned[i]->set_active_element(current_state->e[i]);
-                source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
-              }
+                if (current_state->e[i]->used)
+                {
+                  source_functions_cloned[i]->set_active_element(current_state->e[i]);
+                  source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
+                }
             }
 
             refmap->set_active_element(current_state->rep);
@@ -825,17 +840,28 @@ namespace Hermes
         for (int i = 0; i < markers.size(); i++)
           this->info("\t%s", markers[i].c_str());
 #endif
+        // This serves for assembling over the whole domain in the case a passed marker is HERMES_ANY.
+        bool assemble_everywhere = false;
+
         Hermes::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)
         {
-          Hermes::Hermes2D::Mesh::MarkersConversion::IntValid internalMarker = this->source_functions[0]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(markers[i]);
-          if (internalMarker.valid)
-            internal_markers.push_back(internalMarker.marker);
+          if(markers[i] == HERMES_ANY)
+          {
+            assemble_everywhere = true;
+            break;
+          }
+          else
+          {
+            Hermes::Hermes2D::Mesh::MarkersConversion::IntValid internalMarker = this->source_functions[0]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(markers[i]);
+            if (internalMarker.valid)
+              internal_markers.push_back(internalMarker.marker);
+          }
         }
 
         Scalar* result = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
 
-        if (internal_markers.size() == 0)
+        if (!assemble_everywhere && internal_markers.size() == 0)
           return result;
 
 #ifdef _DEBUG
@@ -893,11 +919,11 @@ namespace Hermes
             for (int i = 0; i < source_functions_size; i++)
             {
               if (current_state->e[i])
-              if (current_state->e[i]->used)
-              {
-                source_functions_cloned[i]->set_active_element(current_state->e[i]);
-                source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
-              }
+                if (current_state->e[i]->used)
+                {
+                  source_functions_cloned[i]->set_active_element(current_state->e[i]);
+                  source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
+                }
             }
 
             refmap->set_active_element(current_state->rep);
@@ -906,24 +932,23 @@ namespace Hermes
 
             for (int edge = 0; edge < current_state->e[0]->nvert; edge++)
             {
-              if (!current_state->bnd[edge])
-                continue;
-
 #ifdef _DEBUG
               this->info("Thread %i, state %i, edge %i", thread_number, state_i, edge);
 #endif
-
-              bool target_marker = false;
-              for (int i = 0; i < internal_markers.size(); i++)
+              if(!assemble_everywhere)
               {
-                if (current_state->e[0]->en[edge]->marker == internal_markers[i])
+                bool target_marker = false;
+                for (int i = 0; i < internal_markers.size(); i++)
                 {
-                  target_marker = true;
-                  break;
+                  if (current_state->e[0]->en[edge]->marker == internal_markers[i])
+                  {
+                    target_marker = true;
+                    break;
+                  }
                 }
+                if (!target_marker)
+                  continue;
               }
-              if (!target_marker)
-                continue;
 
               memset(result_local, 0, sizeof(Scalar)* this->number_of_integrals);
 
