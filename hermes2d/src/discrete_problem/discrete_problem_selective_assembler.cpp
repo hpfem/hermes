@@ -116,6 +116,9 @@ namespace Hermes
               {
                 for(int ed = 0; ed < num_edges; ed++)
                 {
+                  if(current_state->e[el]->en[ed]->bnd)
+                    continue;
+
                   for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++)
                   {
                     if((blocks[m][el] || blocks[el][m]) && current_state->e[m])
