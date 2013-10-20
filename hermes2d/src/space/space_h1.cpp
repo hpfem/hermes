@@ -37,8 +37,8 @@ namespace Hermes
       // set uniform poly order in elements
       if(p_init < 1) 
         throw Hermes::Exceptions::Exception("P_INIT must be >=  1 in an H1 space.");
-
-      else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
+      else
+        this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
       this->assign_dofs();
@@ -406,6 +406,8 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
     {
+      if(!e->used)
+        return;
       int j, k;
       EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
       typename Space<Scalar>::NodeData* nd;
@@ -479,7 +481,7 @@ namespace Hermes
             else // make up an artificial baselist
             {
               dummy_bl[k].dof = nd->dof;
-              dummy_bl[k].coef = (nd->dof >= 0) ? 1.0 : *nd->vertex_bc_coef;
+              dummy_bl[k].coef = (nd->dof >= 0) ? 1.0 : (nd->vertex_bc_coef ? *nd->vertex_bc_coef : 0.);
               bl[k] = &dummy_bl[k];
               nc[k] = 1;
             }

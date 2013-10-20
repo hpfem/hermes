@@ -1076,6 +1076,8 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::update_edge_bc(Element* e, SurfPos* surf_pos)
     {
+      if(!e->used)
+        return;
       if(e->active)
       {
         Node* en = e->en[surf_pos->surf_num];

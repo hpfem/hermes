@@ -318,15 +318,26 @@ namespace Hermes
       for_all_active_elements(elem, target_mesh)
       {
         elem->used = false;
+        elem->active = false;
+        while(elem->parent)
+        {
+          elem->parent->used = false;
+          elem = elem->parent;
+        }
       }
       target_mesh->nactive = 0;
 
-      bool* info = new bool[target_mesh->get_max_element_id()];
-      memset(info, 0, target_mesh->get_max_element_id());
       for(int i = 0; i < n_elements; i++)
       {
-        info[elements[i]->id] = true;
-        target_mesh->get_element(elements[i]->id)->used = true;
+        elem = elements[i];
+        elem->used = true;
+        elem->active = true;
+        while(elem->parent)
+        {
+          elem->parent->used = true;
+          elem = elem->parent;
+        }
+
         target_mesh->nactive++;
       }
 
