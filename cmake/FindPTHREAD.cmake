@@ -2,6 +2,9 @@
 # Pthread
 #
 
+
+FIND_PATH(PTHREAD_INCLUDE_DIR pthread.h ${PTHREAD_ROOT}/include)
+
 if(MSVC)
 	set(PTHREAD_LIBRARY_NAME pthreadVCE2)
 else(MSVC)
@@ -16,4 +19,4 @@ endif(WIN64)
 
 # Report the found libraries, quit with fatal error if any required library has not been found.
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(PTHREAD DEFAULT_MSG PTHREAD_LIBRARY)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PTHREAD DEFAULT_MSG PTHREAD_LIBRARY PTHREAD_INCLUDE_DIR)

@@ -289,6 +289,7 @@ project(hermes)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     find_package(PTHREAD REQUIRED)
+    include_directories(${PTHREAD_INCLUDE_DIR})
     
     if(WITH_TC_MALLOC)
       find_package(TCMALLOC REQUIRED)
