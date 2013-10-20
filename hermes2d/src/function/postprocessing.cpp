@@ -912,8 +912,6 @@ namespace Hermes
 #endif
 
             Traverse::State* current_state = states[state_i];
-            if (!current_state->isBnd)
-              continue;
 
             // Set active element.
             for (int i = 0; i < source_functions_size; i++)
@@ -930,7 +928,7 @@ namespace Hermes
 
             Hermes::Ord order = Hermes::Ord(refmap->get_inv_ref_order());
 
-            for (int edge = 0; edge < current_state->e[0]->nvert; edge++)
+            for (int edge = 0; edge < current_state->rep->nvert; edge++)
             {
 #ifdef _DEBUG
               this->info("Thread %i, state %i, edge %i", thread_number, state_i, edge);
@@ -940,7 +938,7 @@ namespace Hermes
                 bool target_marker = false;
                 for (int i = 0; i < internal_markers.size(); i++)
                 {
-                  if (current_state->e[0]->en[edge]->marker == internal_markers[i])
+                  if (current_state->rep->en[edge]->marker == internal_markers[i])
                   {
                     target_marker = true;
                     break;
@@ -968,7 +966,7 @@ namespace Hermes
 
               double3* tan;
               Geom<double>* geometry;
-              int n = init_surface_geometry_points(&refmap, 1, order_int, edge, current_state->e[0]->en[edge]->marker, geometry, jacobian_x_weights);
+              int n = init_surface_geometry_points(&refmap, 1, order_int, edge, current_state->rep->en[edge]->marker, geometry, jacobian_x_weights);
 
               for (int i = 0; i < source_functions_size; i++)
               {
