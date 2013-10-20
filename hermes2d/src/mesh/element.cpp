@@ -211,6 +211,7 @@ namespace Hermes
             Geom<double>* geometry = init_geom_surf(&refmap_curv, isurf, this->en[isurf]->marker, eo, tan);
             memcpy(x_curv, geometry->x, np*sizeof(double));
             memcpy(y_curv, geometry->y, np*sizeof(double));
+            delete geometry;
 
             // 2. - act if there was no curvature
             CurvMap* cm_temp = this->cm;
@@ -219,6 +220,7 @@ namespace Hermes
             geometry = init_geom_surf(&refmap_straight, isurf, this->en[isurf]->marker, eo, tan);
             memcpy(x_straight, geometry->x, np*sizeof(double));
             memcpy(y_straight, geometry->y, np*sizeof(double));
+            delete geometry;
 
             // 3. - compare the two, get the updated area.
             bool previous_add_or_subtract;
@@ -263,6 +265,12 @@ namespace Hermes
 
             // 4. - re-add the curvature.
             this->cm = cm_temp;
+
+            // clean up
+            delete [] x_curv;
+            delete [] y_curv;
+            delete [] x_straight;
+            delete [] y_straight;
           }
         }
       }

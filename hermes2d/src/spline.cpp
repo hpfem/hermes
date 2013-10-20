@@ -369,6 +369,7 @@ namespace Hermes
       int* perm = new int[n];
       ludcmp(matrix, n, perm, &d);
       lubksb<double>(matrix, n, perm, rhs);
+      delete [] perm;
 
       // Copy the solution into the coeffs array.
       coeffs.clear();
