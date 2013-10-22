@@ -406,8 +406,6 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
     {
-      if(!e->used)
-        return;
       int j, k;
       EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
       typename Space<Scalar>::NodeData* nd;
@@ -599,7 +597,7 @@ namespace Hermes
     H1SpaceEggShell::H1SpaceEggShell(MeshSharedPtr mesh, int p_init, Shapeset* shapeset) : H1Space<double>(mesh, nullptr, p_init, shapeset)
     {
       // Initialize essential boundary conditions.
-      this->essential_bcs = new EssentialBCs<double>(Hermes::vector<EssentialBoundaryCondition<double>*>(new DefaultEssentialBCConst<double>(Mesh::eggShell0Marker, 0.), new DefaultEssentialBCConst<double>(Mesh::eggShell1Marker, 1.)));
+      this->essential_bcs = new EssentialBCs<double>(Hermes::vector<EssentialBoundaryCondition<double>*>(new DefaultEssentialBCConst<double>(EggShell::eggShell0Marker, 0.), new DefaultEssentialBCConst<double>(EggShell::eggShell1Marker, 1.)));
       this->was_assigned = -1;
       this->assign_dofs();
     }
@@ -613,7 +611,7 @@ namespace Hermes
     {
       H1Space<double>::post_assign();
 
-      int marker_0 = this->mesh->get_boundary_markers_conversion().get_internal_marker(Mesh::eggShell0Marker).marker;
+      int marker_0 = this->mesh->get_boundary_markers_conversion().get_internal_marker(EggShell::eggShell0Marker).marker;
       Element* e;
       for_all_active_elements(e, this->mesh)
       {
@@ -631,7 +629,7 @@ namespace Hermes
             surf_pos.t = .5;
             surf_pos.lo = .1;
             surf_pos.hi = .9;
-            nd->edge_bc_proj = this->get_bc_projection(&surf_pos, 10, this->essential_bcs->get_boundary_condition(Mesh::eggShell0Marker));
+            nd->edge_bc_proj = this->get_bc_projection(&surf_pos, 10, this->essential_bcs->get_boundary_condition(EggShell::eggShell0Marker));
             this->bc_data.push_back(nd->edge_bc_proj);
             this->ndata[e->vn[edge]->id].vertex_bc_coef = nd->edge_bc_proj + 0;
             this->ndata[e->vn[(edge+1)%e->nvert]->id].vertex_bc_coef = nd->edge_bc_proj + 1;
