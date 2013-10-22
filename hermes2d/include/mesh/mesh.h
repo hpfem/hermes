@@ -301,10 +301,6 @@ namespace Hermes
 
     private:/// For internal use.
       void initial_single_check();
-      static void initial_multimesh_check(Hermes::vector<MeshSharedPtr > meshes);
-
-      /// For internal use.
-      int get_edge_sons(Element* e, int edge, int& son1, int& son2) const;
 
       /// Refines all quad elements to triangles.
       /// It refines a quadrilateral element into two triangles.
@@ -347,13 +343,6 @@ namespace Hermes
       int ninitial;
 
       void unrefine_element_internal(Element* e);
-
-      /// Returns a NURBS curve with reversed control points and inverted knot vector.
-      /// Used for curved edges inside a mesh, where two mirror Nurbs have to be created
-      /// for the adjacent elements
-      ///
-      Nurbs* reverse_nurbs(Nurbs* nurbs);
-      Node*  get_base_edge_node(Element* base, int edge);
 
       int* parents;
       int parents_size;

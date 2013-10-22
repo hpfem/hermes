@@ -20,6 +20,107 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    void MeshUtil::assign_nurbs(Node* en, Nurbs* nurbs, int p1, int p2)
+    {
+      // assign the arc to the elements sharing the edge node
+      for (unsigned int node_i = 0; node_i < 2; node_i++)
+      {
+        Element* e = en->elem[node_i];
+        if(e == nullptr) continue;
+
+        if(e->cm == nullptr)
+        {
+          e->cm = new CurvMap;
+          memset(e->cm, 0, sizeof(CurvMap));
+          e->cm->toplevel = 1;
+          e->cm->order = 4;
+        }
+
+        int idx = -1;
+        for (unsigned j = 0; j < e->get_nvert(); j++)
+          if(e->en[j] == en) { idx = j; break; }
+          assert(idx >= 0);
+
+          if(e->vn[idx]->id == p1)
+          {
+            e->cm->nurbs[idx] = nurbs;
+            nurbs->ref++;
+          }
+          else
+          {
+            Nurbs* nurbs_rev = MeshUtil::reverse_nurbs(nurbs);
+            e->cm->nurbs[idx] = nurbs_rev;
+            nurbs_rev->ref++;
+          }
+      }
+      if(!nurbs->ref) delete nurbs;
+    }
+
+    Nurbs* MeshUtil::reverse_nurbs(Nurbs* nurbs)
+    {
+      Nurbs* rev = new Nurbs;
+      *rev = *nurbs;
+      rev->twin = true;
+
+      rev->pt = new double3[nurbs->np];
+      for (int i = 0; i < nurbs->np; i++)
+      {
+        rev->pt[nurbs->np-1 - i][0] = nurbs->pt[i][0];
+        rev->pt[nurbs->np-1 - i][1] = nurbs->pt[i][1];
+        rev->pt[nurbs->np-1 - i][2] = nurbs->pt[i][2];
+      }
+
+      rev->kv = new double[nurbs->nk];
+      for (int i = 0; i < nurbs->nk; i++)
+        rev->kv[i] = nurbs->kv[i];
+      for (int i = nurbs->degree + 1; i < nurbs->nk - nurbs->degree - 1; i++)
+        rev->kv[nurbs->nk-1 - i] = 1.0 - nurbs->kv[i];
+
+      rev->arc = nurbs->arc;
+      rev->angle = -nurbs->angle;
+      return rev;
+    }
+
+    Node* MeshUtil::get_base_edge_node(Element* base, int edge)
+    {
+      while (!base->active) // we need to go down to an active element
+      {
+        int son1, son2;
+        get_edge_sons(base, edge, son1, son2);
+        base = base->sons[son1];
+      }
+      return base->en[edge];
+    }
+
+    int MeshUtil::get_edge_sons(Element* e, int edge, int& son1, int& son2)
+    {
+      assert(!e->active);
+
+      if(!e->is_triangle())
+      {
+        if(e->sons[2] == nullptr) // horz quad
+        {
+          if(edge == 0 || edge == 2) { son1 = edge >> 1;   return 1; }
+          else if(edge == 1) { son1 = 0; son2 = 1; return 2; }
+          else { son1 = 1; son2 = 0; return 2; }
+        }
+        else if(e->sons[0] == nullptr) // vert quad
+        {
+          if(edge == 1 || edge == 3) { son1 = (edge == 1) ? 3 : 2; return 1; }
+          else if(edge == 0) { son1 = 2; son2 = 3; return 2; }
+          else { son1 = 3; son2 = 2; return 2; }
+        }
+      }
+
+      // triangle or 4-son quad
+      son1 = edge;
+      son2 = e->next_vert(edge);
+      return 2;
+    }
+
+    
+    
+
     MeshHashGridElement::MeshHashGridElement(double lower_left_x, double lower_left_y, double upper_right_x, double upper_right_y, int depth) : lower_left_x(lower_left_x), lower_left_y(lower_left_y), upper_right_x(upper_right_x), upper_right_y(upper_right_y), m_depth(depth), m_active(true), element_count(0)
     {
       this->elements = new Element*[MAX_ELEMENTS];
@@ -259,15 +360,15 @@ namespace Hermes
 
     MarkerArea::MarkerArea(Mesh *mesh, int marker) : mesh_seq(mesh->get_seq())
     {
-        area = 0;
-        Element* elem;
-        for_all_active_elements(elem, mesh)
+      area = 0;
+      Element* elem;
+      for_all_active_elements(elem, mesh)
+      {
+        if(elem->marker == marker)
         {
-            if(elem->marker == marker)
-            {
-                area += elem->get_area(true);
-            }
+          area += elem->get_area(true);
         }
+      }
     }
 
     int MarkerArea::get_mesh_seq() const

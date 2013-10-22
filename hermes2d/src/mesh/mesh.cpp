@@ -98,10 +98,6 @@ namespace Hermes
       }
     }
 
-    void Mesh::initial_multimesh_check(Hermes::vector<MeshSharedPtr > meshes)
-    {
-    }
-
     void Mesh::create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,
       int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers)
     {
@@ -316,32 +312,6 @@ namespace Hermes
     Element* Mesh::get_element_fast(int id) const
     {
       return &(elements[id]);
-    }
-
-    int Mesh::get_edge_sons(Element* e, int edge, int& son1, int& son2) const
-    {
-      assert(!e->active);
-
-      if(!e->is_triangle())
-      {
-        if(e->sons[2] == nullptr) // horz quad
-        {
-          if(edge == 0 || edge == 2) { son1 = edge >> 1;   return 1; }
-          else if(edge == 1) { son1 = 0; son2 = 1; return 2; }
-          else { son1 = 1; son2 = 0; return 2; }
-        }
-        else if(e->sons[0] == nullptr) // vert quad
-        {
-          if(edge == 1 || edge == 3) { son1 = (edge == 1) ? 3 : 2; return 1; }
-          else if(edge == 0) { son1 = 2; son2 = 3; return 2; }
-          else { son1 = 3; son2 = 2; return 2; }
-        }
-      }
-
-      // triangle or 4-son quad
-      son1 = edge;
-      son2 = e->next_vert(edge);
-      return 2;
     }
 
     Element* Mesh::create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm, int id)
@@ -721,7 +691,7 @@ namespace Hermes
       int mrk[H2D_MAX_NUMBER_EDGES], bnd[H2D_MAX_NUMBER_EDGES];
       for (unsigned i = 0; i < e->get_nvert(); i++)
       {
-        get_edge_sons(e, i, s1, s2);
+        MeshUtil::get_edge_sons(e, i, s1, s2);
         assert(e->sons[s1]->active);
         mrk[i] = e->sons[s1]->en[i]->marker;
         bnd[i] = e->sons[s1]->en[i]->bnd;
@@ -1051,31 +1021,6 @@ namespace Hermes
         unrefine_element_id(list[i]);
     }
 
-    Nurbs* Mesh::reverse_nurbs(Nurbs* nurbs)
-    {
-      Nurbs* rev = new Nurbs;
-      *rev = *nurbs;
-      rev->twin = true;
-
-      rev->pt = new double3[nurbs->np];
-      for (int i = 0; i < nurbs->np; i++)
-      {
-        rev->pt[nurbs->np-1 - i][0] = nurbs->pt[i][0];
-        rev->pt[nurbs->np-1 - i][1] = nurbs->pt[i][1];
-        rev->pt[nurbs->np-1 - i][2] = nurbs->pt[i][2];
-      }
-
-      rev->kv = new double[nurbs->nk];
-      for (int i = 0; i < nurbs->nk; i++)
-        rev->kv[i] = nurbs->kv[i];
-      for (int i = nurbs->degree + 1; i < nurbs->nk - nurbs->degree - 1; i++)
-        rev->kv[nurbs->nk-1 - i] = 1.0 - nurbs->kv[i];
-
-      rev->arc = nurbs->arc;
-      rev->angle = -nurbs->angle;
-      return rev;
-    }
-
     double Mesh::vector_length(double a_1, double a_2)
     {
       return sqrt(sqr(a_1) + sqr(a_2));
@@ -1245,17 +1190,6 @@ namespace Hermes
       element_markers_conversion = mesh->element_markers_conversion;
     }
 
-    Node* Mesh::get_base_edge_node(Element* base, int edge)
-    {
-      while (!base->active) // we need to go down to an active element
-      {
-        int son1, son2;
-        get_edge_sons(base, edge, son1, son2);
-        base = base->sons[son1];
-      }
-      return base->en[edge];
-    }
-
     void Mesh::init(int size)
     {
       HashTable::init(size);
@@ -1299,7 +1233,7 @@ namespace Hermes
         // copy edge markers
         for (unsigned int j = 0; j < e->get_nvert(); j++)
         {
-          Node* en = get_base_edge_node(e, j);
+          Node* en = MeshUtil::get_base_edge_node(e, j);
           enew->en[j]->bnd = en->bnd; // copy bnd data from the active el.
           enew->en[j]->marker = en->marker;
         }
@@ -1324,7 +1258,7 @@ namespace Hermes
         if(e->cm != nullptr)
         {
           delete e->cm;
-          e->cm = nullptr; // fixme!!!
+          e->cm = nullptr;
         }
       }
       elements.free();
@@ -1454,7 +1388,7 @@ namespace Hermes
         // copy edge markers
         for (unsigned int j = 0; j < e->get_nvert(); j++)
         {
-          Node* en = get_base_edge_node(e, j);
+          Node* en = MeshUtil::get_base_edge_node(e, j);
           enew->en[j]->bnd = en->bnd;
           enew->en[j]->marker = en->marker;
         }
@@ -2855,7 +2789,7 @@ namespace Hermes
     int Mesh::get_edge_degree(Node* v1, Node* v2)
     {
       int degree = 0;
-      Node* v3 = peek_vertex_node(v1->id, v2->id);
+      Node* v3 = this->peek_vertex_node(v1->id, v2->id);
       if(v3 != nullptr)
       {
         degree = 1 + std::max(get_edge_degree(v1, v3), get_edge_degree(v3, v2));

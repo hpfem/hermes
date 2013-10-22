@@ -57,6 +57,25 @@ namespace Hermes
 
 #define GRID_SIZE 50
 
+    class MeshUtil
+    {
+    public:
+      /// For internal use.
+      static void assign_nurbs(Node* en, Nurbs* nurbs, int p1, int p2);
+
+      /// Returns a NURBS curve with reversed control points and inverted knot vector.
+      /// Used for curved edges inside a mesh, where two mirror Nurbs have to be created
+      /// for the adjacent elements
+      ///
+      static Nurbs* reverse_nurbs(Nurbs* nurbs);
+      
+      /// For internal use.
+      static Node* get_base_edge_node(Element* base, int edge);
+      
+      /// For internal use.
+      static int get_edge_sons(Element* e, int edge, int& son1, int& son2);
+    };
+
     class MeshHashGrid
     {
     public:

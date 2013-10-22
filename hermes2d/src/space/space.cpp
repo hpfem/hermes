@@ -1102,7 +1102,7 @@ namespace Hermes
       else
       {
         int son1, son2;
-        if(mesh->get_edge_sons(e, surf_pos->surf_num, son1, son2) == 2)
+        if(MeshUtil::get_edge_sons(e, surf_pos->surf_num, son1, son2) == 2)
         {
           double mid = (surf_pos->lo + surf_pos->hi) * 0.5, tmp = surf_pos->hi;
           surf_pos->hi = mid;

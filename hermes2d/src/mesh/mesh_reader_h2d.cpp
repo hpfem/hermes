@@ -323,39 +323,8 @@ namespace Hermes
 
           Nurbs* nurbs = load_nurbs(mesh, &m, i, &en, p1, p2);
 
-          // assign the nurbs to the elements sharing the edge node
-          for (k = 0; k < 2; k++)
-          {
-            Element* e = en->elem[k];
-            if(e == nullptr) continue;
-
-            if(e->cm == nullptr)
-            {
-              e->cm = new CurvMap;
-              memset(e->cm, 0, sizeof(CurvMap));
-              e->cm->toplevel = 1;
-              e->cm->order = 4;
-            }
-
-            int idx = -1;
-            for (unsigned j = 0; j < e->get_nvert(); j++)
-              if(e->en[j] == en) { idx = j; break; }
-              assert(idx >= 0);
-
-              if(e->vn[idx]->id == p1)
-              {
-                e->cm->nurbs[idx] = nurbs;
-                nurbs->ref++;
-              }
-              else
-              {
-                Nurbs* nurbs_rev = mesh->reverse_nurbs(nurbs);
-                e->cm->nurbs[idx] = nurbs_rev;
-                nurbs_rev->ref++;
-              }
-          }
-          if(!nurbs->ref)
-            delete nurbs;
+          // assign the arc to the elements sharing the edge node
+          MeshUtil::assign_nurbs(en, nurbs, p1, p2);
         }
       }
 
@@ -474,7 +443,7 @@ namespace Hermes
       for_all_base_elements(e, mesh)
       {
         for (unsigned i = 0; i < e->get_nvert(); i++)
-          if((mrk = mesh->get_base_edge_node(e, i)->marker))
+          if((mrk = MeshUtil::get_base_edge_node(e, i)->marker))
           {
             const char* nl = first ? "\n" : ",\n";  first = false;
             fprintf(f, "%s [ %d, %d, \"%s\" ]", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).marker.c_str());

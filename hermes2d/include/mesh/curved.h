@@ -81,7 +81,7 @@ namespace Hermes
         coeffs = nullptr;};
         CurvMap(CurvMap* cm);
         ~CurvMap();
-    private:
+
       /// this structure defines a curved mapping of an element; it has two
       /// modes, depending on the value of 'toplevel'
       bool toplevel;
@@ -102,6 +102,7 @@ namespace Hermes
       /// current polynomial degree of the refmap approximation
       int order;
 
+    private:
       /// finally here are the coefficients of the higher-order basis functions
       /// that constitute the projected reference mapping:
       int nc; ///< number of coefficients

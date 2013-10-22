@@ -301,37 +301,7 @@ namespace Hermes
         nurbs = load_arc(mesh, curves_i, &en, p1, p2, angle);
 
         // assign the arc to the elements sharing the edge node
-        for (unsigned int node_i = 0; node_i < 2; node_i++)
-        {
-          Element* e = en->elem[node_i];
-          if(e == nullptr) continue;
-
-          if(e->cm == nullptr)
-          {
-            e->cm = new CurvMap;
-            memset(e->cm, 0, sizeof(CurvMap));
-            e->cm->toplevel = 1;
-            e->cm->order = 4;
-          }
-
-          int idx = -1;
-          for (unsigned j = 0; j < e->get_nvert(); j++)
-            if(e->en[j] == en) { idx = j; break; }
-            assert(idx >= 0);
-
-            if(e->vn[idx]->id == p1)
-            {
-              e->cm->nurbs[idx] = nurbs;
-              nurbs->ref++;
-            }
-            else
-            {
-              Nurbs* nurbs_rev = mesh->reverse_nurbs(nurbs);
-              e->cm->nurbs[idx] = nurbs_rev;
-              nurbs_rev->ref++;
-            }
-        }
-        if(!nurbs->ref) delete nurbs;
+        MeshUtil::assign_nurbs(en, nurbs, p1, p2);
       }
 
       // update refmap coeffs of curvilinear elements
@@ -460,29 +430,29 @@ namespace Hermes
       int edge_count = 0;
       for_all_base_elements(e, mesh)
         for (unsigned i = 0; i < e->get_nvert(); i++)
-          if(mesh->get_base_edge_node(e, i)->marker)
+          if(MeshUtil::get_base_edge_node(e, i)->marker)
             edge_count++;
       bson_append_int(&bw, "edge-count", edge_count);
       // - ids 1
       bson_append_start_array(&bw, "edge-1");
       for_all_base_elements(e, mesh)
         for (unsigned i = 0; i < e->get_nvert(); i++)
-          if(mesh->get_base_edge_node(e, i)->marker)
+          if(MeshUtil::get_base_edge_node(e, i)->marker)
             bson_append_int(&bw, "c", e->vn[i]->id);
       bson_append_finish_array(&bw);
       // - ids 2
       bson_append_start_array(&bw, "edge-2");
       for_all_base_elements(e, mesh)
         for (unsigned i = 0; i < e->get_nvert(); i++)
-          if(mesh->get_base_edge_node(e, i)->marker)
+          if(MeshUtil::get_base_edge_node(e, i)->marker)
             bson_append_int(&bw, "c", e->vn[e->next_vert(i)]->id);
       bson_append_finish_array(&bw);
       // - markers
       bson_append_start_array(&bw, "edge-marker");
       for_all_base_elements(e, mesh)
         for (unsigned i = 0; i < e->get_nvert(); i++)
-          if(mesh->get_base_edge_node(e, i)->marker)
-            bson_append_string(&bw, "c", mesh->boundary_markers_conversion.get_user_marker(mesh->get_base_edge_node(e, i)->marker).marker.c_str());
+          if(MeshUtil::get_base_edge_node(e, i)->marker)
+            bson_append_string(&bw, "c", mesh->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker.c_str());
       bson_append_finish_array(&bw);
 
       // Save arcs.
@@ -655,13 +625,13 @@ namespace Hermes
         {
           for (unsigned i = 0; i < e->get_nvert(); i++)
           {
-            if(meshes[meshes_i]->get_base_edge_node(e, i)->bnd)
+            if(MeshUtil::get_base_edge_node(e, i)->bnd)
             {
               if(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_boundaries.end())
               {
                 unsigned int edge_i = edges.size();
                 vertices_to_boundaries.insert(std::pair<std::pair<unsigned int, unsigned int>, unsigned int>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), edge_i));
-                edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(meshes[meshes_i]->get_base_edge_node(e, i)->marker).marker, edge_i));
+                edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker, edge_i));
               }
               if(!hasAllElements)
                 subdomain.boundary_edges.push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
@@ -676,13 +646,13 @@ namespace Hermes
           for_all_base_elements(e, meshes[meshes_i])
             for (unsigned i = 0; i < e->get_nvert(); i++)
             {
-              if(!meshes[meshes_i]->get_base_edge_node(e, i)->bnd)
+              if(!MeshUtil::get_base_edge_node(e, i)->bnd)
               {
                 if(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_boundaries.end())
                 {
                   unsigned int edge_i = edges.size();
                   vertices_to_boundaries.insert(std::pair<std::pair<unsigned int, unsigned int>, unsigned int>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), edge_i));
-                  edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(meshes[meshes_i]->get_base_edge_node(e, i)->marker).marker, edge_i));
+                  edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker, edge_i));
                 }
                 if(!hasAllElements)
                   subdomain.inner_edges.push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
@@ -1055,37 +1025,7 @@ namespace Hermes
             }
 
             // assign the arc to the elements sharing the edge node
-            for (unsigned int node_i = 0; node_i < 2; node_i++)
-            {
-              Element* e = en->elem[node_i];
-              if(e == nullptr) continue;
-
-              if(e->cm == nullptr)
-              {
-                e->cm = new CurvMap;
-                memset(e->cm, 0, sizeof(CurvMap));
-                e->cm->toplevel = 1;
-                e->cm->order = 4;
-              }
-
-              int idx = -1;
-              for (unsigned j = 0; j < e->get_nvert(); j++)
-                if(e->en[j] == en) { idx = j; break; }
-                assert(idx >= 0);
-
-                if(e->vn[idx]->id == p1)
-                {
-                  e->cm->nurbs[idx] = nurbs;
-                  nurbs->ref++;
-                }
-                else
-                {
-                  Nurbs* nurbs_rev = meshes[subdomains_i]->reverse_nurbs(nurbs);
-                  e->cm->nurbs[idx] = nurbs_rev;
-                  nurbs_rev->ref++;
-                }
-            }
-            if(!nurbs->ref) delete nurbs;
+            MeshUtil::assign_nurbs(en, nurbs, p1, p2);
           }
 
           // update refmap coeffs of curvilinear elements
@@ -1312,45 +1252,13 @@ namespace Hermes
         nurbs = load_arc(mesh, curves_i, &en, p1, p2, arcs[curves_i].angle);
 
         // assign the arc to the elements sharing the edge node
-        for (unsigned int node_i = 0; node_i < 2; node_i++)
-        {
-          Element* e = en->elem[node_i];
-          if(e == nullptr) continue;
-
-          if(e->cm == nullptr)
-          {
-            e->cm = new CurvMap;
-            memset(e->cm, 0, sizeof(CurvMap));
-            e->cm->toplevel = 1;
-            e->cm->order = 4;
-          }
-
-          int idx = -1;
-          for (unsigned j = 0; j < e->get_nvert(); j++)
-            if(e->en[j] == en) { idx = j; break; }
-            assert(idx >= 0);
-
-            if(e->vn[idx]->id == p1)
-            {
-              e->cm->nurbs[idx] = nurbs;
-              nurbs->ref++;
-            }
-            else
-            {
-              Nurbs* nurbs_rev = mesh->reverse_nurbs(nurbs);
-              e->cm->nurbs[idx] = nurbs_rev;
-              nurbs_rev->ref++;
-            }
-        }
-        if(!nurbs->ref) delete nurbs;
+        MeshUtil::assign_nurbs(en, nurbs, p1, p2);
       }
 
       // update refmap coeffs of curvilinear elements
       for_all_used_elements(e, mesh)
         if(e->cm != nullptr)
           e->cm->update_refmap_coeffs(e);
-
-
     }
 
     Nurbs* MeshReaderH2DBSON::load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check)

@@ -893,13 +893,12 @@ namespace Hermes
 
     void Nurbs::unref()
     {
-      if(!--ref) // fixme: possible leak, we need ~Nurbs too
+      if(!--ref)
       {
         delete [] pt;
         pt = nullptr;
         delete [] kv;
         kv = nullptr;
-        delete this;
       }
     }
 
@@ -924,11 +923,15 @@ namespace Hermes
       }
 
       if(toplevel)
+      {
         for (int i = 0; i < 4; i++)
           if(nurbs[i] != nullptr)
           {
             nurbs[i]->unref();
+            if(nurbs[i]->ref <= 0)
+              delete nurbs[i];
           }
+      }
     }
   }
 }
