@@ -3415,6 +3415,9 @@ namespace Hermes
         for(int e = 0; e < elem->nvert; e++)
         {
           Node* edge = elem->en[e];
+          if(edge->bnd)
+            continue;
+
           // eliminate good elements.
           if(!(edge->elem[0] && edge->elem[1]))
           {
