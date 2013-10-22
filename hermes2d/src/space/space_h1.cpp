@@ -604,6 +604,8 @@ namespace Hermes
 
     H1SpaceEggShell::~H1SpaceEggShell()
     {
+      for(Hermes::vector<EssentialBoundaryCondition<double> *>::const_iterator it = this->essential_bcs->begin(); it != this->essential_bcs->end(); it++)
+        delete *it;
       delete this->essential_bcs;
     }
 
