@@ -3200,7 +3200,6 @@ namespace Hermes
 
     MeshSharedPtr EggShell::get_egg_shell(MeshSharedPtr mesh, std::string marker, unsigned int levels, int n_element_guess)
     {
-      Node* vn = mesh->get_element(2297)->vn[1];
       if(levels < 2)
       {
         throw Hermes::Exceptions::ValueException("levels", levels, 2);
