@@ -3204,7 +3204,7 @@ namespace Hermes
       if(levels < 2)
       {
         throw Hermes::Exceptions::ValueException("levels", levels, 2);
-        return MeshSharedPtr(nullptr);
+        return MeshSharedPtr(new Mesh());
       }
       Hermes::vector<std::string> markers;
       markers.push_back(marker);
@@ -3216,7 +3216,7 @@ namespace Hermes
       if(levels < 2)
       {
         throw Hermes::Exceptions::ValueException("levels", levels, 2);
-        return MeshSharedPtr(nullptr);
+        return MeshSharedPtr(new Mesh);
       }
       MeshSharedPtr target_mesh(new Mesh);
       target_mesh->copy(mesh);
