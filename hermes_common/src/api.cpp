@@ -81,7 +81,8 @@ namespace Hermes
         change_handler_iterator->second();
     }
 
-    this->parameters.clear();
+    for(std::map<HermesCommonApiParam, Parameter*>::const_iterator it = this->parameters.begin(); it != this->parameters.end(); ++it)
+        delete it->second;
   }
 
   int Api::get_integral_param_value(HermesCommonApiParam param)
