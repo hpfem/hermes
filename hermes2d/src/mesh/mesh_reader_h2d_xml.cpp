@@ -755,6 +755,7 @@ namespace Hermes
 
         // save curved edges
         for_all_base_elements(e, meshes[meshes_i])
+        {
           if(e->is_curved())
             for (unsigned i = 0; i < e->get_nvert(); i++)
               if(e->cm->nurbs[i] != nullptr && !is_twin_nurbs(e, i))
@@ -766,13 +767,14 @@ namespace Hermes
                     save_nurbs(meshes[meshes_i], vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, e->cm->nurbs[i], curves);
                   vertices_to_curves.insert(std::pair<std::pair<unsigned int, unsigned int>, bool>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), true));
                 }
+        }
 
-                // save refinements
-                for(unsigned int refinement_i = 0; refinement_i < meshes[meshes_i]->refinements.size(); refinement_i++)
-                  refinements.ref().push_back(XMLMesh::ref(meshes[meshes_i]->refinements[refinement_i].first, meshes[meshes_i]->refinements[refinement_i].second));
+        // save refinements
+        for(unsigned int refinement_i = 0; refinement_i < meshes[meshes_i]->refinements.size(); refinement_i++)
+          refinements.ref().push_back(XMLMesh::ref(meshes[meshes_i]->refinements[refinement_i].first, meshes[meshes_i]->refinements[refinement_i].second));
 
-                subdomain.refinements().set(refinements);
-                subdomains.subdomain().push_back(subdomain);
+        subdomain.refinements().set(refinements);
+        subdomains.subdomain().push_back(subdomain);
       }
 
       delete [] baseElementsSaved;
