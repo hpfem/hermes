@@ -258,10 +258,9 @@ namespace Hermes
       space_type = HERMES_INVALID_SPACE;
     }
 
-    static class mono_lu_init
+    class mono_lu_init
     {
     public:
-
       // this is a set of LU-decomposed matrices shared by all Solutions
       double** mat[2][11];
       int* perm[2][11];
@@ -275,7 +274,8 @@ namespace Hermes
       {
         for (int m = 0; m <= 1; m++)
           for (int i = 0; i <= 10; i++)
-            if(mat[m][i] != nullptr) {
+            if(mat[m][i] != nullptr)
+            {
               delete [] mat[m][i];
               delete [] perm[m][i];
             }
@@ -284,32 +284,36 @@ namespace Hermes
     mono_lu;
 
     template<typename Scalar>
-    double** Solution<Scalar>::calc_mono_matrix(int o, int*& perm)
+    double** Solution<Scalar>::calc_mono_matrix(int mode, int o)
     {
-      int i, j, k, l, m, row;
-      double x, y, xn, yn;
-      int n = this->mode ? sqr(o + 1) : (o + 1)*(o + 2)/2;
-
-      // loop through all chebyshev points
-      double** mat = new_matrix<double>(n, n);
-      for (k = o, row = 0; k >= 0; k--)
+      if(mono_lu.mat[mode][o] == nullptr)
       {
-        y = o ? cos(k * M_PI / o) : 1.0;
-        for (l = o; l >= (this->mode ? 0 : o-k); l--, row++)
-        {
-          x = o ? cos(l * M_PI / o) : 1.0;
+        int i, j, k, l, m, row;
+        double x, y, xn, yn;
+        int n = this->mode ? sqr(o + 1) : (o + 1)*(o + 2)/2;
 
-          // each row of the matrix contains all the monomials x^i*y^j
-          for (i = 0, yn = 1.0, m = n-1;  i <= o;  i++, yn *= y)
-            for (j = (this->mode ? 0 : i), xn = 1.0;  j <= o;  j++, xn *= x, m--)
-              mat[row][m] = xn * yn;
+        // loop through all chebyshev points
+        mono_lu.mat[mode][o] = new_matrix<double>(n, n);
+        for (k = o, row = 0; k >= 0; k--)
+        {
+          y = o ? cos(k * M_PI / o) : 1.0;
+          for (l = o; l >= (this->mode ? 0 : o-k); l--, row++)
+          {
+            x = o ? cos(l * M_PI / o) : 1.0;
+
+            // each row of the matrix contains all the monomials x^i*y^j
+            for (i = 0, yn = 1.0, m = n-1;  i <= o;  i++, yn *= y)
+              for (j = (this->mode ? 0 : i), xn = 1.0;  j <= o;  j++, xn *= x, m--)
+                mono_lu.mat[mode][o][row][m] = xn * yn;
+          }
         }
+
+        double d;
+        mono_lu.perm[mode][o] = new int[n];
+        ludcmp(mono_lu.mat[mode][o], n, mono_lu.perm[mode][o], &d);
       }
 
-      double d;
-      perm = new int[n];
-      ludcmp(mat, n, perm, &d);
-      return mat;
+      return mono_lu.mat[mode][o];
     }
 
     template<typename Scalar>
@@ -447,8 +451,7 @@ namespace Hermes
           mono += np;
 
           // solve for the monomial coefficients
-          if(mono_lu.mat[this->mode][o] == nullptr)
-            mono_lu.mat[this->mode][o] = calc_mono_matrix(o, mono_lu.perm[this->mode][o]);
+          calc_mono_matrix(this->mode, o);
           lubksb<double, Scalar>(mono_lu.mat[this->mode][o], np, mono_lu.perm[this->mode][o], val);
         }
       }
@@ -717,7 +720,7 @@ namespace Hermes
         free_tables();
       transform = enable;
     }
-    
+
     template<typename Scalar>
     void Solution<Scalar>::add(MeshFunctionSharedPtr<Scalar> other_mesh_function, SpaceSharedPtr<Scalar> target_space)
     {
@@ -725,7 +728,7 @@ namespace Hermes
       Scalar* added_vector = new Scalar[target_space->get_num_dofs()];
       OGProjection<Scalar>::project_global(target_space, this, base_vector);
       OGProjection<Scalar>::project_global(target_space, other_mesh_function, added_vector);
-      
+
       for(int i = 0; i < target_space->get_num_dofs(); i++)
         base_vector[i] += added_vector[i];
 

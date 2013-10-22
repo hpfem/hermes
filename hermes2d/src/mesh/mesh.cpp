@@ -3225,6 +3225,9 @@ namespace Hermes
 
       get_egg_shell_structures(target_mesh, elements, n_elements, markers, levels, n_element_guess);
       make_egg_shell_mesh(target_mesh, elements, n_elements);
+
+      ::free(elements);
+
       fix_markers(target_mesh, mesh);
 
       return target_mesh;

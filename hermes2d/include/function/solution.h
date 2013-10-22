@@ -252,7 +252,7 @@ namespace Hermes
 
       Scalar* dxdy_buffer;
 
-      double** calc_mono_matrix(int o, int*& perm);
+      double** calc_mono_matrix(int mode, int o);
 
       void init_dxdy_buffer();
 
