@@ -65,8 +65,8 @@ namespace Hermes
 			virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
 			virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const;
 
-			void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
-			virtual void update_constraints();
+      void update_constrained_nodes(Element* e, typename Space<Scalar>::EdgeInfo* ei0, typename Space<Scalar>::EdgeInfo* ei1, typename Space<Scalar>::EdgeInfo* ei2, typename Space<Scalar>::EdgeInfo* ei3);
+      virtual void update_constraints();
 		};
 	}
 }

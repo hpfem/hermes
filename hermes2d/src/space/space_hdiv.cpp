@@ -248,10 +248,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void HdivSpace<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
+    void HdivSpace<Scalar>::update_constrained_nodes(Element* e, typename Space<Scalar>::EdgeInfo* ei0, typename Space<Scalar>::EdgeInfo* ei1, typename Space<Scalar>::EdgeInfo* ei2, typename Space<Scalar>::EdgeInfo* ei3)
     {
       int j;
-      EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
+      typename Space<Scalar>::EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
       typename Space<Scalar>::NodeData* nd;
 
       // on non-refined elements all we have to do is update edge nodes lying on constrained edges
@@ -272,7 +272,7 @@ namespace Hermes
       else
       {
         // create new edge infos where we don't have them yet
-        EdgeInfo ei_data[4];
+        typename Space<Scalar>::EdgeInfo ei_data[4];
         for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
           if (ei[i] == nullptr)
@@ -296,8 +296,8 @@ namespace Hermes
         }
 
         // create edge infos for half-edges
-        EdgeInfo  half_ei_data[4][2];
-        EdgeInfo* half_ei[4][2];
+        typename Space<Scalar>::EdgeInfo  half_ei_data[4][2];
+        typename Space<Scalar>::EdgeInfo* half_ei[4][2];
         for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
           if (ei[i] == nullptr)
@@ -306,8 +306,8 @@ namespace Hermes
           }
           else
           {
-            EdgeInfo* h0 = half_ei[i][0] = half_ei_data[i];
-            EdgeInfo* h1 = half_ei[i][1] = half_ei_data[i] + 1;
+            typename Space<Scalar>::EdgeInfo* h0 = half_ei[i][0] = half_ei_data[i];
+            typename Space<Scalar>::EdgeInfo* h1 = half_ei[i][1] = half_ei_data[i] + 1;
 
             h0->node = h1->node = ei[i]->node;
             h0->part = (ei[i]->part + 1) * 2;
