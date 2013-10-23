@@ -18,6 +18,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "matrix_solver.h"
+#ifdef WITH_UMFPACK
+  #include "interfaces/umfpack_solver.h"
+#endif
 
 namespace Hermes
 {
