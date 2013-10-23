@@ -371,8 +371,10 @@ namespace Hermes
 
       /// Tracking changes.
       unsigned int seq;
+      /// Tracking changes - mark call to assign_dofs().
+      unsigned int seq_assigned;
+      /// Tracking changes - mesh.
       int mesh_seq;
-      bool seq_assigned;
 
       struct BaseComponent
       {

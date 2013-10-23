@@ -385,35 +385,6 @@ namespace Hermes
       return e;
     }
 
-    CurvMap* create_son_curv_map(Element* e, int son)
-    {
-      // if the top three bits of part are nonzero, we would overflow
-      // -- make the element non-curvilinear
-      if(e->cm->part & 0xe000000000000000ULL)
-        return nullptr;
-
-      // if the parent element is already almost straight-edged,
-      // the son will be even more straight-edged
-      if(e->iro_cache == 0)
-        return nullptr;
-
-      CurvMap* cm = new CurvMap;
-      if(e->cm->toplevel == false)
-      {
-        cm->parent = e->cm->parent;
-        cm->part = (e->cm->part << 3) + son + 1;
-      }
-      else
-      {
-        cm->parent = e;
-        cm->part = (son + 1);
-      }
-      cm->toplevel = false;
-      cm->order = 4;
-
-      return cm;
-    }
-
     void Mesh::refine_triangle_to_triangles(Element* e, Element** sons_out)
     {
       // remember the markers of the edge nodes
@@ -440,7 +411,7 @@ namespace Hermes
 
         // create CurvMaps for sons (pointer to parent element, part)
         for (int i = 0; i < 4; i++)
-          cm[i] = create_son_curv_map(e, i);
+          cm[i] = CurvMap::create_son_curv_map(e, i);
       }
 
       // create the four sons
@@ -560,7 +531,7 @@ namespace Hermes
 
           // create CurvMaps for sons (pointer to parent element, part)
           for (i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
-            cm[i] = create_son_curv_map(e, i);
+            cm[i] = CurvMap::create_son_curv_map(e, i);
         }
 
         // create the four sons
@@ -599,7 +570,7 @@ namespace Hermes
 
           // create CurvMaps for sons (pointer to parent element, part)
           for (i = 0; i < 2; i++)
-            cm[i] = create_son_curv_map(e, i + 4);
+            cm[i] = CurvMap::create_son_curv_map(e, i + 4);
         }
 
         sons[0] = create_quad(e->marker, e->vn[0], e->vn[1], x1, x3, cm[0]);
@@ -635,7 +606,7 @@ namespace Hermes
 
           // create CurvMaps for sons (pointer to parent element, part)
           for (i = 0; i < 2; i++)
-            cm[i] = create_son_curv_map(e, i + 6);
+            cm[i] = CurvMap::create_son_curv_map(e, i + 6);
         }
 
         sons[0] = sons[1] = nullptr;
@@ -676,7 +647,8 @@ namespace Hermes
       // If sons_out != nullptr, copy son pointers there.
       if(sons_out != nullptr)
       {
-        for(int i = 0; i < 4; i++) sons_out[i] = sons[i];
+        for(int i = 0; i < 4; i++)
+          sons_out[i] = sons[i];
       }
     }
 

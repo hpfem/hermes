@@ -30,6 +30,26 @@ namespace Hermes
     class Quad2DStd;
     struct Trf;
 
+    class HERMES_API Curve
+    {
+    public:
+      Curve();
+
+      /// Decrease the reference counter, deallocates what is necessary.
+      virtual void unref();
+
+      int ref;     ///< reference counter (the structure is deleted when this reaches zero)
+      bool twin;   ///< true on internal curved edges for the second (artificial) Nurbs
+    };
+
+    class HERMES_API Arc : public Curve
+    {
+    public:
+      Arc();
+
+      double angle; ///< arc angle
+    };
+
     /// \brief Represents one NURBS curve.
     ///
     /// The structure Nurbs defines one curved edge, or, more precisely,
@@ -39,32 +59,19 @@ namespace Hermes
     /// "http://devworld.apple.com/dev/techsupport/develop/issue25/schneider.html">
     /// here</a>.
     ///
-    class HERMES_API Nurbs
+    class HERMES_API Nurbs : public Curve
     {
     public:
-      Nurbs()
-      {
-        ref = 0; twin = false;
-        pt = nullptr;
-        kv = nullptr;
-      };
+      Nurbs();
+      ~Nurbs();
 
-      ~Nurbs()
-      {
-        if(pt)
-          delete [] pt;
-        if(kv)
-          delete [] kv;
-      };
-      void unref();
-
+      /// Decrease the reference counter, deallocates what is necessary.
+      virtual void unref();
       int degree;  ///< curve degree (2=quadratic, etc.)
       int np;      ///< number of control points
       double3* pt; ///< control points and their weights
       int nk;      ///< knot vector length
       double* kv;  ///< knot vector
-      int ref;     ///< reference counter (the structure is deleted when this reaches zero)
-      bool twin;   ///< true on internal curved edges for the second (artificial) Nurbs
       bool arc;     ///< true if this is in fact a circular arc
       double angle; ///< arc angle
     };
@@ -76,11 +83,9 @@ namespace Hermes
     class HERMES_API CurvMap
     {
     public:
-      CurvMap()
-      {
-        coeffs = nullptr;};
-        CurvMap(CurvMap* cm);
-        ~CurvMap();
+      CurvMap();
+      CurvMap(CurvMap* cm);
+      ~CurvMap();
 
       /// this structure defines a curved mapping of an element; it has two
       /// modes, depending on the value of 'toplevel'
@@ -95,7 +100,7 @@ namespace Hermes
           // if toplevel=false, this structure belongs to a refined element
           // and 'parent' points to the base mesh element CurvMap structure;
           Element* parent;
-          uint64_t part;
+          uint64_t sub_idx;
         };
       };
 
@@ -125,43 +130,50 @@ namespace Hermes
       static double* bubble_tri_p; ///<  diagonal vector in cholesky factorization
       static double* bubble_quad_p; ///<  diagonal vector in cholesky factorization
 
-      static Quad1DStd quad1d;
-      static Quad2DStd quad2d; ///<  fixme: g_quad_2d_std
-
-      static Trf ctm;
+      /// Transformation (2x2) matrix.
+      Trf* ctm;
 
       /// Recursive calculation of the basis function N_i,k(int i, int k, double t, double* knot).
       static double nurbs_basis_fn(int i, int k, double t, double* knot);
 
-      // Nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
-      // as well as the unit normal and unit tangential vectors. This is done using
-      // the Wikipedia page http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline.
+      /// Nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
+      /// as well as the unit normal and unit tangential vectors. This is done using
+      /// the Wikipedia page http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline.
       static void nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x,
         double& y, double& n_x, double& n_y, double& t_x, double& t_y);
 
+      //// non-polynomial reference map //////////////////////////////////////////////////////////////////////////////////
       static const double2 ref_vert[2][H2D_MAX_NUMBER_VERTICES];
 
       /// Subtraction of straight edge and nurbs curve.
       static void nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y);
+      /// Calculation of nonpolynomial reference mapping on curved element
       static void calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double& x, double& y);
       static void calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,
         double& x, double& y);
 
       static void calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f);
 
+      /// Projection based interpolation
+      /// Preparation of projection matrices, Cholesky factorization
       static void precalculate_cholesky_projection_matrix_edge(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
+      /// Calculate the H1 seminorm products (\phi_i, \phi_j) for all 0 <= i, j < n, n is the number of bubble functions
       static double** calculate_bubble_projection_matrix(int nb, int* indices, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss, ElementMode2D mode);
       static void precalculate_cholesky_projection_matrices_bubble(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
 
-      static void edge_coord(Element* e, int edge, double t, double2& x, double2& v);
-      static void calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
+      /// Edge part of projection based interpolation ///////////////////////////////////////////////////
+      /// Compute point (x, y) in reference element, edge vector (v1, v2)
+      void edge_coord(Element* e, int edge, double t, double2& x, double2& v) const;
+      void calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss) const;
 
-      static void old_projection(Element* e, int order, double2* proj, double* old[2], H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
-      static void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
-
-      static void ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
+      //// Bubble part of projection based interpolation /////////////////////////////////////////////////
+      void old_projection(Element* e, int order, double2* proj, double* old[2], H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss) const;
+      void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss) const;
 
       static bool warning_issued;
+
+      static CurvMap* create_son_curv_map(Element* e, int son);
+
       template<typename T> friend class Space;
       template<typename T> friend class H1Space;
       template<typename T> friend class L2Space;
@@ -176,7 +188,6 @@ namespace Hermes
       friend class MeshReaderH2D;
       friend class MeshReaderH2DXML;
       friend class MeshReaderH2DBSON;
-      friend CurvMap* create_son_curv_map(Element* e, int son);
     };
   }
 }
