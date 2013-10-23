@@ -37,7 +37,9 @@ namespace Hermes
 
       this->problem_size = -1;
 
+#ifdef WITH_UMFPACK
       this->do_UMFPACK_reporting = false;
+#endif
 
       this->sln_vector = nullptr;
     }
@@ -95,6 +97,7 @@ namespace Hermes
         this->jacobian_reusable = false;
     }
 
+#ifdef WITH_UMFPACK
     template<typename Scalar>
     double MatrixSolver<Scalar>::get_UMFPACK_reporting_data(UMFPACK_reporting_data_value data_value)
     {
@@ -134,7 +137,7 @@ namespace Hermes
           memset(this->UMFPACK_reporting_data, 0, 3 * sizeof(double));
       }
     }
-
+#endif
     template class HERMES_API MatrixSolver<double>;
     template class HERMES_API MatrixSolver<std::complex<double> >;
   }

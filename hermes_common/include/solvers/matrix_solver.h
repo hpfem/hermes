@@ -22,9 +22,9 @@
 #ifndef __HERMES_COMMON_MATRIX_SOLVER_H_
 #define __HERMES_COMMON_MATRIX_SOLVER_H_
 
-#include "interfaces/umfpack_solver.h"
 #include "mixins.h"
 #include "util/compat.h"
+#include "linear_matrix_solver.h"
 
 namespace Hermes
 {
@@ -52,8 +52,9 @@ namespace Hermes
       /// Sets the jacobian to be constant, i.e. reused whenever possible.
       void set_jacobian_constant(bool to_set = true);
 
-      virtual Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_matrix_solver();
+      virtual LinearMatrixSolver<Scalar>* get_linear_matrix_solver();
 
+#ifdef WITH_UMFPACK
       /// \TODO This is not used now.
       /// Set Reporting of UMFPACK numerical factorization data provided the used matrix solver is UMFPACK.
       virtual void set_UMFPACK_output(bool to_set = true, bool with_output = false);
@@ -61,6 +62,7 @@ namespace Hermes
       /// \TODO This is not used now.
       /// Get UMFPACK numerical factorization data provided the used matrix solver is UMFPACK
       virtual double get_UMFPACK_reporting_data(UMFPACK_reporting_data_value data_value);
+#endif
 
       /// Only a shortcut for algebraic solver (->) get_matrix().
       SparseMatrix<Scalar>* get_jacobian();
@@ -83,6 +85,7 @@ namespace Hermes
       /// Number of equations.
       int problem_size;
 
+#ifdef WITH_UMFPACK
       /// \TODO This is not used now.
       /// Switch for UMFPACK reporting.
       bool do_UMFPACK_reporting;
@@ -92,7 +95,7 @@ namespace Hermes
       /// \TODO This is not used now.
       /// Data for UMFPACK reporting.
       double UMFPACK_reporting_data[3];
-      
+#endif
       /// The solution vector.
       Scalar* sln_vector;
     };
