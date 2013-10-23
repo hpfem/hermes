@@ -47,14 +47,6 @@ namespace Hermes
 
       virtual void set_shapeset(Shapeset* shapeset);
 
-      /// Removes the degree of freedom from a vertex node with the given id (i.e., its number
-      /// in the mesh file) and makes it part of the Dirichlet lift with the given value.
-      /// This is a special-purpose function which normally should not be needed.
-      /// It is intended for fixing the solution of a system which would otherwise be singular
-      /// and for some reason a standard Dirichlet condition (with non-zero measure on the
-      /// boundary) is not suitable.
-      void fix_vertex(int id, Scalar value = 0.0);
-
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc);
 
       /// Copy from Space instance 'space'
@@ -65,7 +57,7 @@ namespace Hermes
       virtual SpaceType get_type() const { return HERMES_H1_SPACE; }
 
       /// Common code for the constructors.
-      void init(Shapeset* shapeset, int p_init);
+      void init(Shapeset* shapeset, int p_init, bool assign_dofs_init = true);
 
       virtual void assign_vertex_dofs();
       virtual void assign_edge_dofs();
@@ -73,14 +65,6 @@ namespace Hermes
 
       virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const;
       virtual void get_boundary_assembly_list_internal(Element* e, int ie, AsmList<Scalar>* al) const;
-
-      struct EdgeInfo
-      {
-        Node* node;
-        int part;
-        int ori;
-        double lo, hi;
-      };
 
       inline void output_component(typename Space<Scalar>::BaseComponent*& current, typename Space<Scalar>::BaseComponent*& last, typename Space<Scalar>::BaseComponent* min,
         Node*& edge, typename Space<Scalar>::BaseComponent*& edge_dofs);
@@ -91,19 +75,6 @@ namespace Hermes
       void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
 
       virtual void update_constraints();
-
-      struct FixedVertex
-      {
-        int id;
-        Scalar value;
-      };
-
-      Hermes::vector<FixedVertex> fixed_vertices;
-
-      inline bool is_fixed_vertex(int id) const;
-
-      virtual void post_assign();
-      friend class Space<Scalar>;
     };
 
     class HERMES_API H1SpaceEggShell : public H1Space<double>
@@ -112,7 +83,7 @@ namespace Hermes
       H1SpaceEggShell(MeshSharedPtr mesh, int p_init = 1, Shapeset* shapeset = nullptr);
       virtual ~H1SpaceEggShell();
       virtual void post_assign();
-    friend class ExactSolutionEggShell;
+      friend class ExactSolutionEggShell;
     };
   }
 }

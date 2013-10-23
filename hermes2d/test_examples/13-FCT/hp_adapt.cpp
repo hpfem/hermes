@@ -10,7 +10,7 @@ bool refine_elem(SpaceSharedPtr<double> space, Element* e, int ref)
   {
     space->get_mesh()->refine_element_id(e->id);				
     for (int j = 0; j < 4; j++)
-      space->set_element_order_internal(e->sons[j]->id, order);
+      space->set_element_order(e->sons[j]->id, order);
   }
   if(ref>1) 
   {
@@ -44,7 +44,7 @@ bool HPAdapt::adapt_smooth(int* smooth_elem, int max_p)
         order = space->get_element_order(e->id); 
         order++;
         if(order>max_p) order = max_p;
-        space->set_element_order_internal(e->id, order);
+        space->set_element_order(e->id, order);
       }
       else if(e->is_quad()==true)
       {
@@ -53,7 +53,7 @@ bool HPAdapt::adapt_smooth(int* smooth_elem, int max_p)
         h_ord++; if(h_ord>max_p) h_ord =max_p;
         v_ord++; if(v_ord>max_p) v_ord =max_p;
         order = H2D_MAKE_QUAD_ORDER(h_ord, v_ord);
-        space->set_element_order_internal(e->id, order);
+        space->set_element_order(e->id, order);
         changed = true;
       }					
     }

@@ -127,7 +127,8 @@ namespace Hermes
       HERMES_INVALID_SPACE = -9999
     };
 
-    extern const char* SpaceTypeString[5];
+    const char* spaceTypeToString(SpaceType spaceType);
+    SpaceType spaceTypeFromString(const char* spaceTypeString);
 
     /// Geometrical type of weak forms.
     enum GeomType

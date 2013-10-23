@@ -55,7 +55,7 @@ namespace Hermes
 			virtual SpaceType get_type() const { return HERMES_HCURL_SPACE; }
 
 			/// Common code for the constructors.
-			void init(Shapeset* shapeset, int p_init);
+      void init(Shapeset* shapeset, int p_init, bool assign_dofs_init = true);
 
 			virtual void assign_vertex_dofs() {}
 			virtual void assign_edge_dofs();
@@ -64,17 +64,8 @@ namespace Hermes
 			virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const {}
 			virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
 
-			struct EdgeInfo
-			{
-				Node* node;
-				int part;
-				int ori;
-				double lo, hi;
-			};
-
 			void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
 			virtual void update_constraints();
-			friend class Space<Scalar>;
 		};
 	}
 }

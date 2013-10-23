@@ -56,18 +56,7 @@ namespace Hermes
       virtual SpaceType get_type() const { return HERMES_L2_SPACE; }
 
       /// Common code for the constructors.
-      void init(Shapeset* shapeset, int p_init);
-
-      struct L2Data
-      {
-        int vdof[H2D_MAX_NUMBER_VERTICES];
-        int edof[H2D_MAX_NUMBER_EDGES];
-      };
-
-      L2Data* ldata;
-      int lsize;
-
-      virtual void resize_tables();
+      void init(Shapeset* shapeset, int p_init, bool assign_dofs_init = true);
 
       virtual void assign_vertex_dofs() {}
       virtual void assign_edge_dofs() {}
@@ -77,7 +66,6 @@ namespace Hermes
       virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
       virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const;
       template<typename T> friend class Space<T>::ReferenceSpaceCreator;
-      friend class Space<Scalar>;
     };
 
     /// @ingroup spaces

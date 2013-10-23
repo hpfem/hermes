@@ -141,49 +141,20 @@ namespace Hermes
       /// Common code for constructors.
       void init();
 
-      /// State querying helpers.
-      virtual bool isOkay() const;
-      inline std::string getClassName() const { return "Space"; }
+      /// Common code for constructors of subclasses.
+      virtual void init(Shapeset* shapeset, int p_init, bool assign_dofs_init = true) = 0;
 
       /// Destructor.
       virtual ~Space();
 
-      /// Sets element polynomial order. Can be called by the user. Should not be called
-      /// for many elements at once, since assign_dofs() is called at the end of this function.
-      virtual void set_element_order(int id, int order, int order_v = -1);
+      /// Freeing the data.
+      void free();
+      /// Free BC data.
+      void free_bc_data();
 
-      /// Sets polynomial order to all elements.
-      virtual void set_element_orders(int* elem_orders);
-
+#pragma region Getters
       /// Returns element polynomial order.
       int get_element_order(int id) const;
-
-      /// Sets the same polynomial order for all elements in the mesh. Intended for
-      /// the user and thus assign_dofs() is called at the end of this function.
-      void set_uniform_order(int order, std::string marker = HERMES_ANY);
-
-      /// Set the element order relative to the current order.
-      /// The parameter min_order prevents decreasing polynomial order below this threshold.
-      void adjust_element_order(int order_change, int min_order);
-
-      /// Version for quads.
-      void adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order);
-
-      /// Recursively removes all son elements of the given element and
-      /// makes it active. Also handles element orders.
-      /// \param[in] keep_initial_refinements Refinements in Mesh can be marked as initial (to prevent taking them back), 
-      /// this parameter serves to prevent taking them back with this method.
-      void unrefine_all_mesh_elements(bool keep_initial_refinements = true);
-
-      /// Recursively removes all son elements of the given element and
-      /// Version for more spaces sharing the mesh
-      static void unrefine_all_mesh_elements(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, bool keep_initial_refinements = true);
-
-      /// Updates element orders when the underlying mesh has been refined.
-      void update_element_orders_after_refinement();
-
-      /// Sets the shapeset.
-      virtual void set_shapeset(Shapeset* shapeset) = 0;
 
       /// \brief Returns the number of basis functions contained in the space.
       int get_num_dofs() const;
@@ -196,6 +167,42 @@ namespace Hermes
 
       MeshSharedPtr get_mesh() const;
 
+      /// Internal. Return type of this space. See enum SpaceType.
+      virtual SpaceType get_type() const = 0;
+
+      /// Returns the total (global) number of vertex functions.
+      /// The DOF ordering starts with vertex functions, so it it necessary to know how many of them there are.
+      int get_vertex_functions_count();
+      /// Returns the total (global) number of edge functions.
+      int get_edge_functions_count();
+      /// Returns the total (global) number of bubble functions.
+      int get_bubble_functions_count();
+
+      /// Internal. Used by DiscreteProblem to detect changes in the space.
+      int get_seq() const;
+
+      /// Obtains an boundary conditions
+      EssentialBCs<Scalar>* get_essential_bcs() const;
+
+      /// Obtains an assembly list for the given element.
+      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al) const;
+
+      /// Internal. Obtains the order of an edge, according to the minimum rule.
+      virtual int get_edge_order(Element* e, int edge) const;
+
+      /// \brief Returns the DOF number of the last basis function.
+      int get_max_dof() const;
+
+      /// Obtains an edge assembly list (contains shape functions that are nonzero on the specified edge).
+      void get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al) const;
+
+      Shapeset* get_shapeset() const;
+#pragma endregion
+
+#pragma region Setters
+      /// Sets the shapeset.
+      virtual void set_shapeset(Shapeset* shapeset) = 0;
+
       /// \brief Sets a (new) mesh and calls assign_dofs().
       void set_mesh(MeshSharedPtr mesh);
 
@@ -204,16 +211,65 @@ namespace Hermes
 
       /// Sets the boundary condition.
       void set_essential_bcs(EssentialBCs<Scalar>* essential_bcs);
+#pragma endregion
 
-      /// Obtains an boundary conditions
-      EssentialBCs<Scalar>* get_essential_bcs() const;
+#pragma region Order setting
+      /// Sets element polynomial order. Can be called by the user. Should not be called
+      /// for many elements at once, since assign_dofs() is called at the end of this function.
+      virtual void set_element_order(int id, int order, int order_v = -1);
+
+      /// Sets the same polynomial order for all elements in the mesh. Intended for
+      /// the user and thus assign_dofs() is called at the end of this function.
+      void set_uniform_order(int order, std::string marker = HERMES_ANY);
+
+      /// Set the element order relative to the current order.
+      /// The parameter min_order prevents decreasing polynomial order below this threshold.
+      void adjust_element_order(int order_change, int min_order);
+
+      /// Version for quads.
+      void adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order);
+
+      /// Sets the same polynomial order for all elements in the mesh. Does not
+      /// call assign_dofs(). For internal use.
+      void set_uniform_order_internal(int order, int marker);
+
+      /// \brief Builds basis functions and assigns DOF numbers to them.
+      /// \details This functions must be called \b after assigning element orders, and \b before
+      /// using the space in a computation, otherwise an error will occur.
+      /// \param first_dof[in] The DOF number of the first basis function.
+      /// \param stride[in] The difference between the DOF numbers of successive basis functions.
+      /// \return The number of basis functions contained in the space.
+      virtual int assign_dofs(int first_dof = 0);
+
+      /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
+      static int assign_dofs(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+#pragma endregion
+
+#pragma region Mesh handling
+      /// Recursively removes all son elements of the given element and
+      /// makes it active. Also handles element orders.
+      /// \param[in] keep_initial_refinements Refinements in Mesh can be marked as initial (to prevent taking them back), 
+      /// this parameter serves to prevent taking them back with this method.
+      void unrefine_all_mesh_elements(bool keep_initial_refinements = true);
+
+      /// Recursively removes all son elements of the given element and
+      /// Version for more spaces sharing the mesh
+      static void unrefine_all_mesh_elements(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, bool keep_initial_refinements = true);
+#pragma endregion
+
+#pragma region Boundary conditions
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc) = 0;
 
       /// Updates essential BC values. Typically used for time-dependent
-      /// essnetial boundary conditions.
+      /// essential boundary conditions.
       void update_essential_bc_values();
 
-      Shapeset* get_shapeset() const;
+      static void update_essential_bc_values(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, double time);
 
+      static void update_essential_bc_values(SpaceSharedPtr<Scalar>& space, double time);
+#pragma endregion
+
+#pragma region Save & Load
       /// Saves this space into a file.
       void save(const char *filename) const;
 #ifdef WITH_BSON
@@ -231,9 +287,7 @@ namespace Hermes
       /// This method is here for rapid re-loading.
       void load_bson(const char *filename);
 #endif
-
-      /// Obtains an assembly list for the given element.
-      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al) const;
+#pragma endregion
 
       /// Copy from Space instance 'space'
       /// \param[in] new_mesh Mesh where data will be copied to.
@@ -276,66 +330,24 @@ namespace Hermes
         unsigned int order_increase;
       };
 
+    protected:
+
       /// Sets element polynomial order. This version does not call assign_dofs() and is
       /// intended primarily for internal use.
       virtual void set_element_order_internal(int id, int order, int order_v = -1);
 
-      /// \brief Builds basis functions and assigns DOF numbers to them.
-      /// \details This functions must be called \b after assigning element orders, and \b before
-      /// using the space in a computation, otherwise an error will occur.
-      /// \param first_dof[in] The DOF number of the first basis function.
-      /// \param stride[in] The difference between the DOF numbers of successive basis functions.
-      /// \return The number of basis functions contained in the space.
-      virtual int assign_dofs(int first_dof = 0, int stride = 1);
-
-      /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
-      static int assign_dofs(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc) = 0;
-
-      static void update_essential_bc_values(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, double time);
-
-      static void update_essential_bc_values(SpaceSharedPtr<Scalar>& space, double time);
-
-      /// Internal. Return type of this space (H1 = HERMES_H1_SPACE, Hcurl = HERMES_HCURL_SPACE,
-      /// Hdiv = HERMES_HDIV_SPACE, L2 = HERMES_L2_SPACE)
-      virtual SpaceType get_type() const = 0;
-
-      static Node* get_mid_edge_vertex_node(Element* e, int i, int j);
-
       /// Sets polynomial orders to elements created by Mesh::regularize() using "parents".
       void distribute_orders(MeshSharedPtr mesh, int* parents);
-
-      /// Internal. Obtains the order of an edge, according to the minimum rule.
-      virtual int get_edge_order(Element* e, int edge) const;
-
-      /// \brief Returns the DOF number of the last basis function.
-      int get_max_dof() const;
 
       /// Returns true if the space is ready for computation, false otherwise.
       bool is_up_to_date() const;
 
-      /// Obtains an edge assembly list (contains shape functions that are nonzero on the specified edge).
-      void get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al) const;
+      static Node* get_mid_edge_vertex_node(Element* e, int i, int j);
 
-      /// Sets the same polynomial order for all elements in the mesh. Does not
-      /// call assign_dofs(). For internal use.
-      void set_uniform_order_internal(int order, int marker);
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "Space"; }
 
-      void free();
-
-      /// Returns the total (global) number of vertex functions.
-      /// The DOF ordering starts with vertex functions, so it it necessary to know how many of them there are.
-      int get_vertex_functions_count();
-      /// Returns the total (global) number of edge functions.
-      int get_edge_functions_count();
-      /// Returns the total (global) number of bubble functions.
-      int get_bubble_functions_count();
-
-      /// Internal. Used by DiscreteProblem to detect changes in the space.
-      int get_seq() const;
-
-    protected:
       /// Number of degrees of freedom (dimension of the space).
       int ndof;
 
@@ -343,7 +355,6 @@ namespace Hermes
       static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.
 
       Shapeset* shapeset;
-
       bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
 
       /// Boundary conditions.
@@ -352,12 +363,16 @@ namespace Hermes
       /// FE mesh.
       MeshSharedPtr mesh;
 
-      int default_tri_order, default_quad_order;
+      /// For statistics.
       int vertex_functions_count, edge_functions_count, bubble_functions_count;
+
+      /// For equation systems.
       int first_dof, next_dof;
-      int stride;
-      int seq, mesh_seq;
-      int was_assigned;
+
+      /// Tracking changes.
+      unsigned int seq;
+      int mesh_seq;
+      bool seq_assigned;
 
       struct BaseComponent
       {
@@ -399,11 +414,16 @@ namespace Hermes
         bool changed_in_last_adaptation;
       };
 
-      NodeData* ndata;    ///< node data table
-      ElementData* edata; ///< element data table
-      int nsize, ndata_allocated; ///< number of items in ndata, allocated space
+      /// node data table
+      NodeData* ndata;
+      /// node data table size
+      int nsize;
+      /// element data table
+      ElementData* edata;
+      /// element data table size
       int esize;
 
+      /// Internal.
       virtual int get_edge_order_internal(Node* en) const;
 
       /// Recursively removes all son elements of the given element and
@@ -452,12 +472,18 @@ namespace Hermes
       /// the DOFs have been assigned.
       virtual void post_assign();
 
-      void free_bc_data();
-
       /// Internal.
       /// Returns a new Space according to the type provided.
       /// Used in loading.
-      static SpaceSharedPtr<Scalar> init_empty_space(const char* spaceType, MeshSharedPtr mesh, Shapeset* shapeset);
+      static SpaceSharedPtr<Scalar> init_empty_space(SpaceType spaceType, MeshSharedPtr mesh, Shapeset* shapeset);
+
+      struct EdgeInfo
+      {
+        Node* node;
+        int part;
+        int ori;
+        double lo, hi;
+      };
 
       template<typename T> friend class OGProjection;
       template<typename T> friend class NewtonSolver;

@@ -1152,7 +1152,7 @@ namespace Hermes
         XMLSolution::solution xmlsolution(this->num_components, this->num_elems, this->num_coeffs, 0, 0);
 
         // Space type.
-        xmlsolution.space().set(SpaceTypeString[this->get_space_type()]);
+        xmlsolution.space().set(spaceTypeToString(this->get_space_type()));
 
         // Coefficients.
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
@@ -1197,7 +1197,7 @@ namespace Hermes
         XMLSolution::solution xmlsolution(this->num_components, this->num_elems, this->num_coeffs, 0, 0);
 
         // Space type.
-        xmlsolution.space().set(SpaceTypeString[this->get_space_type()]);
+        xmlsolution.space().set(spaceTypeToString(this->get_space_type()));
 
         // Coefficients - this is the only difference wrt. the real method.
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
@@ -1244,7 +1244,7 @@ namespace Hermes
       bson_init(&bw);
 
       // Space type.
-      bson_append_string(&bw, "space", SpaceTypeString[this->get_space_type()]);
+      bson_append_string(&bw, "space", spaceTypeToString(this->get_space_type()));
 
       // Exactness.
       bson_append_bool(&bw, "exact", false);
@@ -1304,7 +1304,7 @@ namespace Hermes
       bson_init(&bw);
 
       // Space type.
-      bson_append_string(&bw, "space", SpaceTypeString[this->get_space_type()]);
+      bson_append_string(&bw, "space", spaceTypeToString(this->get_space_type()));
 
       // Exactness.
       bson_append_bool(&bw, "exact", false);

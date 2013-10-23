@@ -30,22 +30,22 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void L2Space<Scalar>::init(Shapeset* shapeset, int p_init)
+    void L2Space<Scalar>::init(Shapeset* shapeset, int p_init, bool assign_dofs_init)
     {
-      if(shapeset == nullptr)
+      if (shapeset == nullptr)
       {
         this->shapeset = new L2Shapeset;
         this->own_shapeset = true;
       }
-      ldata = nullptr;
-      lsize = 0;
 
       // set uniform poly order in elements
-      if(p_init < 0) throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an L2 space.");
+      if (p_init < 0)
+        throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an L2 space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
-      this->assign_dofs();
+      if (assign_dofs_init)
+        this->assign_dofs();
     }
 
     template<typename Scalar>
@@ -53,47 +53,30 @@ namespace Hermes
       : Space<Scalar>(mesh, shapeset, nullptr)
     {
       init(shapeset, p_init);
-    }
+      }
 
     template<typename Scalar>
     L2Space<Scalar>::~L2Space()
     {
-      ::free(ldata);
-      if(this->own_shapeset)
-        delete this->shapeset;
+      
     }
 
     template<typename Scalar>
     void L2Space<Scalar>::copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh)
     {
       Space<Scalar>::copy(space, new_mesh);
-
-      ldata = nullptr;
-      lsize = 0;
     }
 
     template<typename Scalar>
     void L2Space<Scalar>::set_shapeset(Shapeset *shapeset)
     {
-      if(shapeset->get_id() < 40 && shapeset->get_id() > 29)
+      if (shapeset->get_id() < 40 && shapeset->get_id() > 29)
       {
         this->shapeset = shapeset;
         this->own_shapeset = false;
       }
       else
         throw Hermes::Exceptions::Exception("Wrong shapeset type in L2Space<Scalar>::set_shapeset()");
-    }
-
-    template<typename Scalar>
-    void L2Space<Scalar>::resize_tables()
-    {
-      if(lsize < this->mesh->get_max_element_id())
-      {
-        if(!lsize) lsize = 1000;
-        while (lsize < this->mesh->get_max_element_id()) lsize = lsize * 3 / 2;
-        ldata = (L2Data*) realloc(ldata, sizeof(L2Data) * lsize);
-      }
-      Space<Scalar>::resize_tables();
     }
 
     template<typename Scalar>
@@ -106,8 +89,8 @@ namespace Hermes
         typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
         ed->bdof = this->next_dof;
         ed->n = this->shapeset->get_num_bubbles(ed->order, e->get_mode()); //FIXME: this function might return invalid value because retrieved bubble functions for non-uniform orders might be invalid for the given order.
-        this->next_dof += ed->n * this->stride;
-          this->bubble_functions_count += ed->n;
+        this->next_dof += ed->n;
+        this->bubble_functions_count += ed->n;
       }
     }
 
@@ -127,10 +110,10 @@ namespace Hermes
     void L2Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
       typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
-      if(!ed->n) return;
+      if (!ed->n) return;
 
       int* indices = this->shapeset->get_bubble_indices(ed->order, e->get_mode());
-      for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof += this->stride)
+      for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof++)
       {
         //printf("triplet: %d, %d, %f\n", *indices, dof, 1.0);
         al->add_triplet(*indices++, dof, 1.0);
