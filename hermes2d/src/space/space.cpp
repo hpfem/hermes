@@ -1061,7 +1061,7 @@ namespace Hermes
             int order = get_edge_order_internal(en);
             surf_pos->marker = en->marker;
             nd->edge_bc_proj = get_bc_projection(surf_pos, order, bc);
-            bc_data.push_back(nd->edge_bc_proj);
+            bc_data_projections.push_back(nd->edge_bc_proj);
 
             int i = surf_pos->surf_num, j = e->next_vert(i);
             ndata[e->vn[i]->id].vertex_bc_coef = nd->edge_bc_proj + 0;
@@ -1106,9 +1106,12 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::free_bc_data()
     {
-      for (unsigned int i = 0; i < bc_data.size(); i++)
-        delete[] bc_data[i];
-      bc_data.clear();
+      for (unsigned int i = 0; i < bc_data_projections.size(); i++)
+        delete[] bc_data_projections[i];
+      for (unsigned int i = 0; i < bc_data_base_components.size(); i++)
+        delete[] bc_data_base_components[i];
+      bc_data_projections.clear();
+      bc_data_base_components.clear();
     }
 
     template<typename Scalar>

@@ -460,7 +460,8 @@ namespace Hermes
       double*  chol_p;
 
       /// Used for bc projection.
-      Hermes::vector<void*> bc_data;
+      Hermes::vector<Scalar*> bc_data_projections;
+      Hermes::vector<typename Space<Scalar>::BaseComponent*> bc_data_base_components;
 
       void precalculate_projection_matrix(int nv, double**& mat, double*& p);
       void update_edge_bc(Element* e, SurfPos* surf_pos);

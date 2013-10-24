@@ -488,7 +488,7 @@ namespace Hermes
           typename Space<Scalar>::BaseComponent* edge_dofs;
           nd = &this->ndata[mid_vn->id];
           nd->baselist = merge_baselists(bl[0], nc[0], bl[1], nc[1], en, edge_dofs, nd->ncomponents);
-          this->bc_data.push_back(nd->baselist);
+          this->bc_data_base_components.push_back(nd->baselist);
 
           // set edge node coeffs to function values of the edge functions
           double mid = (ei[i]->lo + ei[i]->hi) * 0.5;
@@ -597,7 +597,7 @@ namespace Hermes
             surf_pos.lo = .1;
             surf_pos.hi = .9;
             nd->edge_bc_proj = this->get_bc_projection(&surf_pos, 10, this->essential_bcs->get_boundary_condition(EggShell::eggShell0Marker));
-            this->bc_data.push_back(nd->edge_bc_proj);
+            this->bc_data_projections.push_back(nd->edge_bc_proj);
             this->ndata[e->vn[edge]->id].vertex_bc_coef = nd->edge_bc_proj + 0;
             this->ndata[e->vn[(edge + 1)%e->nvert]->id].vertex_bc_coef = nd->edge_bc_proj + 1;
           }
