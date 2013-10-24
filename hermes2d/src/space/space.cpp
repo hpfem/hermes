@@ -1327,6 +1327,7 @@ namespace Hermes
           throw Hermes::Exceptions::IOException(Exceptions::IOException::Read, filename);
 
         space->mesh = mesh;
+        space->mesh_seq = space->mesh->get_seq();
         space->init(shapeset, 1, false);
 
         // Element data //
