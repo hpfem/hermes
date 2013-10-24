@@ -230,7 +230,11 @@ namespace Hermes
           nsize = nsize * 3 / 2;
         ndata = (NodeData*)realloc(ndata, sizeof(NodeData)* nsize);
         for (int i = oldsize; i < nsize; i++)
+        {
           ndata[i].edge_bc_proj = nullptr;
+          ndata[i].baselist = nullptr;
+          ndata[i].base = nullptr;
+        }
       }
 
       if ((esize < mesh->get_max_element_id()) || (edata == nullptr))
@@ -1322,6 +1326,7 @@ namespace Hermes
         else
           throw Hermes::Exceptions::IOException(Exceptions::IOException::Read, filename);
 
+        space->mesh = mesh;
         space->init(shapeset, 1, false);
 
         // Element data //
