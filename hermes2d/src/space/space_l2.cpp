@@ -38,14 +38,17 @@ namespace Hermes
         this->own_shapeset = true;
       }
 
-      // set uniform poly order in elements
-      if (p_init < 0)
-        throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an L2 space.");
-      else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
-
       // enumerate basis functions
       if (assign_dofs_init)
+      {
+        // set uniform poly order in elements
+        if (p_init < 0)
+          throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an L2 space.");
+        else
+          this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
+
         this->assign_dofs();
+      }
     }
 
     template<typename Scalar>
@@ -53,12 +56,12 @@ namespace Hermes
       : Space<Scalar>(mesh, shapeset, nullptr)
     {
       init(shapeset, p_init);
-      }
+    }
 
     template<typename Scalar>
     L2Space<Scalar>::~L2Space()
     {
-      
+
     }
 
     template<typename Scalar>

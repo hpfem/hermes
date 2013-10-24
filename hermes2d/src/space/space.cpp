@@ -1330,6 +1330,17 @@ namespace Hermes
         space->mesh_seq = space->mesh->get_seq();
         space->init(shapeset, 1, false);
 
+        if(essential_bcs != nullptr && spaceTypeFromString(parsed_xml_space->spaceType().get().c_str()) != HERMES_L2_SPACE && spaceTypeFromString(parsed_xml_space->spaceType().get().c_str()) != HERMES_L2_MARKERWISE_CONST_SPACE)
+        {
+          space->essential_bcs = essential_bcs;
+          for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+            for(unsigned int i = 0; i < (*it)->markers.size(); i++)
+              if(space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.end())
+                throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
+        }
+
+        space->resize_tables();
+
         // Element data //
         unsigned int elem_data_count = parsed_xml_space->element_data().size();
         for (unsigned int elem_data_i = 0; elem_data_i < elem_data_count; elem_data_i++)

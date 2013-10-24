@@ -34,14 +34,14 @@ namespace Hermes
       : Space<Scalar>(mesh, shapeset, essential_bcs)
     {
       init(shapeset, p_init);
-      }
+    }
 
     template<typename Scalar>
     HcurlSpace<Scalar>::HcurlSpace(MeshSharedPtr mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, nullptr)
     {
       init(shapeset, p_init);
-      }
+    }
 
     template<typename Scalar>
     void HcurlSpace<Scalar>::init(Shapeset* shapeset, int p_init, bool assign_dofs_init)
@@ -55,13 +55,17 @@ namespace Hermes
 
       this->precalculate_projection_matrix(0, this->proj_mat, this->chol_p);
 
-      // set uniform poly order in elements
-      if (p_init < 0) throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an Hcurl space.");
-      else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
-
       // enumerate basis functions
       if (assign_dofs_init)
+      {
+        // set uniform poly order in elements
+        if (p_init < 0)
+          throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an Hcurl space.");
+        else
+          this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
+
         this->assign_dofs();
+      }
     }
 
     template<typename Scalar>
@@ -101,21 +105,21 @@ namespace Hermes
           int ndofs = this->get_edge_order_internal(en) + 1;
           this->ndata[en->id].n = ndofs;
           if (en->bnd)
-          if (this->essential_bcs != nullptr)
-          if (this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(en->marker).marker) != nullptr)
-            this->ndata[en->id].dof = this->H2D_CONSTRAINED_DOF;
-          else
-          {
-            this->ndata[en->id].dof = this->next_dof;
-            this->next_dof += ndofs;
-            this->edge_functions_count += ndofs;
-          }
-          else
-          {
-            this->ndata[en->id].dof = this->next_dof;
-            this->next_dof += ndofs;
-            this->edge_functions_count += ndofs;
-          }
+            if (this->essential_bcs != nullptr)
+              if (this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(en->marker).marker) != nullptr)
+                this->ndata[en->id].dof = this->H2D_CONSTRAINED_DOF;
+              else
+              {
+                this->ndata[en->id].dof = this->next_dof;
+                this->next_dof += ndofs;
+                this->edge_functions_count += ndofs;
+              }
+            else
+            {
+              this->ndata[en->id].dof = this->next_dof;
+              this->next_dof += ndofs;
+              this->edge_functions_count += ndofs;
+            }
           else
           {
             this->ndata[en->id].dof = this->next_dof;
