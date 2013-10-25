@@ -16,7 +16,8 @@
 #ifndef __H2D_MESH_UTIL_H
 #define __H2D_MESH_UTIL_H
 
-#include "mesh.h"
+#include "element.h"
+#include "curved.h"
 
 namespace Hermes
 {
