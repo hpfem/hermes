@@ -16,7 +16,7 @@
 #ifndef __H2D_MESH_UTIL_H
 #define __H2D_MESH_UTIL_H
 
-#include "element.h"
+#include "mesh.h"
 
 namespace Hermes
 {
@@ -24,13 +24,15 @@ namespace Hermes
   {
     class MeshHashGrid;
     class Mesh;
+    class Nurbs;
+    typedef std::tr1::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
 
     class MeshHashGridElement
     {
     public:
       MeshHashGridElement(double lower_left_x, double lower_left_y, double upper_right_x, double upper_right_y, int depth = 0);
       ~MeshHashGridElement();
-      
+
       /// Return the Element 
       Hermes::Hermes2D::Element* getElement(double x, double y);
 
@@ -68,12 +70,17 @@ namespace Hermes
       /// for the adjacent elements
       ///
       static Nurbs* reverse_nurbs(Nurbs* nurbs);
-      
+
       /// For internal use.
       static Node* get_base_edge_node(Element* base, int edge);
-      
+
       /// For internal use.
       static int get_edge_sons(Element* e, int edge, int& son1, int& son2);
+
+      /// Mesh loading.
+      /// Loads one circular arc.
+      /// \param[in] skip_check Skip check that the edge exists, in case of subdomains.
+      static Nurbs* load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check = false);
     };
 
     class MeshHashGrid
@@ -103,15 +110,15 @@ namespace Hermes
     class MarkerArea
     {
     public:
-        MarkerArea(Mesh* mesh, int marker);
-        double get_area() const;
-        int get_mesh_seq() const;
+      MarkerArea(Mesh* mesh, int marker);
+      double get_area() const;
+      int get_mesh_seq() const;
 
     private:
-        void calculate();
+      void calculate();
 
-        double area;
-        int mesh_seq;
+      double area;
+      int mesh_seq;
     };
 
     /*  node and son numbering on a triangle:
@@ -208,7 +215,7 @@ namespace Hermes
     /// Helper macros for easy iteration through all elements, nodes etc. in a Mesh.
 #define for_all_elements(e, mesh) \
   for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-    if(((e) = (mesh)->get_element_fast(_id)) != nullptr)
+  if(((e) = (mesh)->get_element_fast(_id)) != nullptr)
 
 #define for_all_used_elements(e, mesh) \
   for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \

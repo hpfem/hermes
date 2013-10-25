@@ -111,6 +111,7 @@ namespace Hermes
       void copy_list(Node** ptr, Node* node);
 
       friend struct Node;
+      friend class MeshUtil;
       friend class MeshReaderH2D;
       template<typename Scalar> friend class NeighborSearch;
       template<typename Scalar> friend class Space;

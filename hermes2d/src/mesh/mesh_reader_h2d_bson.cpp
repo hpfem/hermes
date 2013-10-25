@@ -298,7 +298,7 @@ namespace Hermes
         p2 = p2s[curves_i];
         angle = angles[curves_i];
 
-        nurbs = load_arc(mesh, curves_i, &en, p1, p2, angle);
+        nurbs = MeshUtil::load_arc(mesh, curves_i, &en, p1, p2, angle);
 
         // assign the arc to the elements sharing the edge node
         MeshUtil::assign_nurbs(en, nurbs, p1, p2);
@@ -1019,7 +1019,7 @@ namespace Hermes
               p1 = vertex_vertex_numbers.find(arcs.at(curves_i).p1)->second;
               p2 = vertex_vertex_numbers.find(arcs.at(curves_i).p2)->second;
 
-              nurbs = load_arc(meshes[subdomains_i], curves_i, &en, p1, p2, arcs.at(curves_i).angle, true);
+              nurbs = MeshUtil::load_arc(meshes[subdomains_i], curves_i, &en, p1, p2, arcs.at(curves_i).angle, true);
               if(nurbs == nullptr)
                 continue;
             }
@@ -1249,7 +1249,7 @@ namespace Hermes
         p1 = arcs[curves_i].p1;
         p2 = arcs[curves_i].p2;
 
-        nurbs = load_arc(mesh, curves_i, &en, p1, p2, arcs[curves_i].angle);
+        nurbs = MeshUtil::load_arc(mesh, curves_i, &en, p1, p2, arcs[curves_i].angle);
 
         // assign the arc to the elements sharing the edge node
         MeshUtil::assign_nurbs(en, nurbs, p1, p2);
@@ -1259,59 +1259,6 @@ namespace Hermes
       for_all_used_elements(e, mesh)
         if(e->cm != nullptr)
           e->cm->update_refmap_coeffs(e);
-    }
-
-    Nurbs* MeshReaderH2DBSON::load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check)
-    {
-      Nurbs* nurbs = new Nurbs;
-      nurbs->arc = true;
-
-      *en = mesh->peek_edge_node(p1, p2);
-
-      if(*en == nullptr)
-      {
-        if(!skip_check)
-          throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
-        else
-          return nullptr;
-      }
-
-      // degree of an arc == 2.
-      nurbs->degree = 2;
-      // there are three control points.
-      nurbs->np = 3;
-      // there are 6 knots: {0, 0, 0, 1, 1, 1}
-      nurbs->nk = 6;
-      nurbs->kv = new double[nurbs->nk];
-
-      for (int i = 0; i < 3; i++)
-        nurbs->kv[i] = 0.0;
-
-      for (int i = 3; i < nurbs->nk; i++)
-        nurbs->kv[i] = 1.0;
-
-      // edge endpoints control points.
-      nurbs->pt = new double3[3];
-      nurbs->pt[0][0] = mesh->nodes[p1].x;
-      nurbs->pt[0][1] = mesh->nodes[p1].y;
-      nurbs->pt[0][2] = 1.0;
-      nurbs->pt[2][0] = mesh->nodes[p2].x;
-      nurbs->pt[2][1] = mesh->nodes[p2].y;
-      nurbs->pt[2][2] = 1.0;
-
-      // read the arc angle
-      nurbs->angle = angle;
-      double a = (180.0 - nurbs->angle) / 180.0 * M_PI;
-
-      // generate one inner control point
-      double x = 1.0 / std::tan(a * 0.5);
-      nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-      nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-      nurbs->pt[1][2] = Hermes::cos((M_PI - a) * 0.5);
-
-      nurbs->ref = 0;
-
-      return nurbs;
     }
   }
 }

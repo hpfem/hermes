@@ -87,12 +87,6 @@ namespace Hermes
       /// Internal method loading contents of parsed_xml_domain's domain into mesh.
       void load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, MeshSharedPtr mesh, std::map<int, int>& vertex_is, std::map<int, int>& element_is, std::map<int, int>& edge_is);
 
-      /// Loads one circular arc.
-      /// \param[in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
-      /// \param[in] skip_check Skip check that the edge exists, in case of subdomains.
-      template<typename T>
-      Nurbs* load_arc(MeshSharedPtr mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check = false);
-
       /// Loads one general NURBS curve.
       /// \param[in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
       /// \param[in] skip_check Skip check that the edge exists, in case of subdomains.

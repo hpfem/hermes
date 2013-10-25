@@ -125,6 +125,59 @@ namespace Hermes
       return 2;
     }
 
+    Nurbs* MeshUtil::load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check)
+    {
+      Nurbs* nurbs = new Nurbs;
+      nurbs->arc = true;
+
+      *en = mesh->peek_edge_node(p1, p2);
+
+      if(*en == nullptr)
+      {
+        if(!skip_check)
+          throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
+        else
+          return nullptr;
+      }
+
+      // degree of an arc == 2.
+      nurbs->degree = 2;
+      // there are three control points.
+      nurbs->np = 3;
+      // there are 6 knots: {0, 0, 0, 1, 1, 1}
+      nurbs->nk = 6;
+      nurbs->kv = new double[nurbs->nk];
+
+      for (int i = 0; i < 3; i++)
+        nurbs->kv[i] = 0.0;
+
+      for (int i = 3; i < nurbs->nk; i++)
+        nurbs->kv[i] = 1.0;
+
+      // edge endpoints control points.
+      nurbs->pt = new double3[3];
+      nurbs->pt[0][0] = mesh->nodes[p1].x;
+      nurbs->pt[0][1] = mesh->nodes[p1].y;
+      nurbs->pt[0][2] = 1.0;
+      nurbs->pt[2][0] = mesh->nodes[p2].x;
+      nurbs->pt[2][1] = mesh->nodes[p2].y;
+      nurbs->pt[2][2] = 1.0;
+
+      // read the arc angle
+      nurbs->angle = angle;
+      double a = (180.0 - nurbs->angle) / 180.0 * M_PI;
+
+      // generate one inner control point
+      double x = 1.0 / std::tan(a * 0.5);
+      nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
+      nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
+      nurbs->pt[1][2] = Hermes::cos((M_PI - a) * 0.5);
+
+      nurbs->ref = 0;
+
+      return nurbs;
+    }
+
     MeshHashGrid::MeshHashGrid(Mesh* mesh) : mesh_seq(mesh->get_seq())
     {
       mesh->calc_bounding_box();

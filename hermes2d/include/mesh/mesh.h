@@ -25,8 +25,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    typedef std::tr1::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
-
     class Element;
     class HashTable;
 

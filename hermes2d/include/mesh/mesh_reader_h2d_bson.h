@@ -61,10 +61,6 @@ namespace Hermes
       void save(const char *filename, Hermes::vector<MeshSharedPtr > meshes);
 
     private:
-      /// Loads one circular arc.
-      /// \param[in] skip_check Skip check that the edge exists, in case of subdomains.
-      Nurbs* load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check = false);
-
       struct vertex_BSON
       {
         vertex_BSON(){}
