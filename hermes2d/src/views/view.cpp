@@ -920,7 +920,7 @@ namespace Hermes
         for (int i = 0; i <= scale_numticks + 1; i++)
         {
           double value = range_min + (double) i * (range_max - range_min) / (scale_numticks + 1);
-          if(fabs(value) < Hermes::Epsilon) value = 0.0;
+          if(fabs(value) < Hermes::HermesEpsilon) value = 0.0;
           char text[50];
           sprintf(text, scale_fmt, value);
           int w = get_text_width(text);
@@ -1009,7 +1009,7 @@ namespace Hermes
         for (i = 0; i <= scale_numticks + 1; i++)
         {
           double value = range_min + (double) i * (range_max - range_min) / (scale_numticks + 1);
-          if(fabs(value) < Hermes::Epsilon) value = 0.0;
+          if(fabs(value) < Hermes::HermesEpsilon) value = 0.0;
           char text[50];
           sprintf(text, scale_fmt, value);
           y0 = scale_y + scale_height - (double) i * scale_height / (scale_numticks + 1);

@@ -749,7 +749,7 @@ namespace Hermes
       for (unsigned int j = 0; j<size; j++)
       {
         double val_ij = get_A(i, j);
-        if(j >= i && fabs(val_ij) > Hermes::epsilon) result = false;
+        if(j >= i && fabs(val_ij) > Hermes::HermesSqrtEpsilon) result = false;
       }
     }
 
@@ -764,7 +764,7 @@ namespace Hermes
       for (unsigned int j = 0; j < size; j++)
       {
         double val_ij = get_A(i, j);
-        if(j > i && fabs(val_ij) > Hermes::epsilon) result = false;
+        if(j > i && fabs(val_ij) > Hermes::HermesSqrtEpsilon) result = false;
       }
     }
 
@@ -779,7 +779,7 @@ namespace Hermes
       for (unsigned int j = 0; j < size; j++)
       {
         double val_ij = get_A(i, j);
-        if(j > i && fabs(val_ij) > Hermes::epsilon) result = true;
+        if(j > i && fabs(val_ij) > Hermes::HermesSqrtEpsilon) result = true;
       }
     }
 
@@ -791,7 +791,7 @@ namespace Hermes
     // Test whether B2 row is not zero.
     double sum = 0;
     for (unsigned  int i = 0; i < size; i++) sum += fabs(B2[i]);
-    if(sum < Hermes::epsilon) return false;
+    if(sum < Hermes::HermesSqrtEpsilon) return false;
     else return true;
   }
 

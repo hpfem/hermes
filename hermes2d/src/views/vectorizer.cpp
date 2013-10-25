@@ -306,8 +306,8 @@ namespace Hermes
             }
 
             // This is just to make some sense.
-            if(fabs(max) < Hermes::epsilon)
-              max = Hermes::epsilon;
+            if(fabs(max) < Hermes::HermesSqrtEpsilon)
+              max = Hermes::HermesSqrtEpsilon;
 
             idx = quad_indices[0];
 

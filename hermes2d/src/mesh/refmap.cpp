@@ -497,8 +497,8 @@ namespace Hermes
           result1 += pt[i][2] * jac[i] * (sqr((*m)[0][0] + (*m)[0][1]) + sqr((*m)[1][0] + (*m)[1][1]));
           result2 += pt[i][2] / jac[i] ;
         }
-        if((fabs((exact1 - result1) / exact1) < Hermes::Epsilon) &&
-          (fabs((exact2 - result2) / exact2) < Hermes::Epsilon)) break;
+        if((fabs((exact1 - result1) / exact1) < Hermes::HermesEpsilon) &&
+          (fabs((exact2 - result2) / exact2) < Hermes::HermesEpsilon)) break;
       }
       if(o >= 10)
       {
@@ -584,7 +584,7 @@ namespace Hermes
 
     void RefMap::untransform(Element* e, double x, double y, double& xi1, double& xi2)
     {
-      const double TOL = Hermes::epsilon;
+      const double TOL = Hermes::HermesSqrtEpsilon;
 
       // Newton Method
       int local_nc;

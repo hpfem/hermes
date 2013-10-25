@@ -65,7 +65,7 @@ namespace Hermes
         for (int i = 0; i < n; i++)
         {
           Scalar B_i = sqrt(sqr(u_ext[idx_j]->dx[i]) + sqr(u_ext[idx_j]->dy[i]));
-          if(std::abs(B_i) > Hermes::epsilon)
+          if(std::abs(B_i) > Hermes::HermesSqrtEpsilon)
           {
             planar_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i
               * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])

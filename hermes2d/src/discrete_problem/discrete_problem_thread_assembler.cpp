@@ -517,7 +517,7 @@ namespace Hermes
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
       {
-        if (current_als_i->dof[i] < 0 || std::abs(current_als_i->coef[i]) < Hermes::epsilon)
+        if (current_als_i->dof[i] < 0 || std::abs(current_als_i->coef[i]) < Hermes::HermesSqrtEpsilon)
           continue;
 
         if ((!tra || surface_form) && current_als_i->dof[i] < 0)
@@ -533,7 +533,7 @@ namespace Hermes
           if (current_als_j->dof[j] >= 0 && !this->current_mat)
             continue;
 
-          if (std::abs(current_als_j->coef[j]) < Hermes::epsilon)
+          if (std::abs(current_als_j->coef[j]) < Hermes::HermesSqrtEpsilon)
             continue;
 
           Func<double>* u = base_fns[j];
@@ -612,8 +612,8 @@ namespace Hermes
         if (current_als_i->dof[i] < 0)
           continue;
 
-        // Is this necessary, i.e. is there a coefficient smaller than Hermes::epsilon?
-        if (std::abs(current_als_i->coef[i]) < Hermes::epsilon)
+        // Is this necessary, i.e. is there a coefficient smaller than Hermes::HermesSqrtEpsilon?
+        if (std::abs(current_als_i->coef[i]) < Hermes::HermesSqrtEpsilon)
           continue;
 
         Func<double>* v = test_fns[i];

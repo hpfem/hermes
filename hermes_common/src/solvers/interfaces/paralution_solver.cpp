@@ -215,7 +215,7 @@ namespace Hermes
       x.SetDataPtr(&this->sln, "Initial guess", matrix->get_size());
 
       // Handle the situation when rhs == 0(vector).
-      if(std::abs(rhs->get_paralutionVector()->Norm()) < Hermes::epsilon)
+      if(std::abs(rhs->get_paralutionVector()->Norm()) < Hermes::HermesSqrtEpsilon)
         x.LeaveDataPtr(&this->sln);
 
       // (Re-)init.

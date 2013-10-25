@@ -44,6 +44,4 @@
 // GLUT
 #cmakedefine NOGLUT
 
-#cmakedefine MALFUNCTIONING_LIMITS
-
 #endif

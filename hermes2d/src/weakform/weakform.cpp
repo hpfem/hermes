@@ -684,20 +684,20 @@ namespace Hermes
       }
       for (unsigned i = 0; i < mfvol.size(); i++)
       {
-        if(fabs(mfvol[i]->scaling_factor) > Hermes::epsilon)
+        if(fabs(mfvol[i]->scaling_factor) > Hermes::HermesSqrtEpsilon)
           blocks[mfvol[i]->i][mfvol[i]->j] = true;
         if(mfvol[i]->sym)
-          if(fabs(mfvol[i]->scaling_factor) > Hermes::epsilon)
+          if(fabs(mfvol[i]->scaling_factor) > Hermes::HermesSqrtEpsilon)
             blocks[mfvol[i]->j][mfvol[i]->i] = true;
       }
       for (unsigned i = 0; i < mfsurf.size(); i++)
       {
-        if(fabs(mfsurf[i]->scaling_factor) > Hermes::epsilon)
+        if(fabs(mfsurf[i]->scaling_factor) > Hermes::HermesSqrtEpsilon)
           blocks[mfsurf[i]->i][mfsurf[i]->j] = true;
       }
       for (unsigned i = 0; i < mfDG.size(); i++)
       {
-        if(fabs(mfDG[i]->scaling_factor) > Hermes::epsilon)
+        if(fabs(mfDG[i]->scaling_factor) > Hermes::HermesSqrtEpsilon)
           blocks[mfDG[i]->i][mfDG[i]->j] = true;
       }
 
