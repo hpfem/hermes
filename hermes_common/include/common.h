@@ -153,8 +153,8 @@ public:
 
 namespace Hermes
 {
-  const double HermesSqrtEpsilon = std::numeric_limits<double>::epsilon() * 1e3;
-  const double HermesEpsilon = std::sqrt(std::numeric_limits<double>::epsilon());
+  const double HermesEpsilon = std::numeric_limits<double>::epsilon() * 1e3;
+  const double HermesSqrtEpsilon = std::sqrt(std::numeric_limits<double>::epsilon());
   
   inline double sqr(int x) { return x*x; }
   inline double sqr(double x) { return x*x; }
