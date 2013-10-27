@@ -126,13 +126,13 @@ namespace Hermes
       int marker;        ///< element marker
 
       // returns the edge orientation. This works for the unconstrained edges.
-      inline int get_edge_orientation(int ie) const;
-      inline ElementMode2D  get_mode() const;
+      int get_edge_orientation(int ie) const;
+      ElementMode2D  get_mode() const;
 
-      inline bool is_triangle() const;
-      inline bool is_quad() const;
-      inline bool is_curved() const;
-      inline int get_nvert() const;
+      bool is_triangle() const;
+      bool is_quad() const;
+      bool is_curved() const;
+      int get_nvert() const;
 
       bool hsplit() const;
       bool vsplit() const;
