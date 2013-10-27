@@ -2428,7 +2428,7 @@ namespace Hermes
       // product of 1D quadrature points...
 
       np = sqr(std_np_1d[order]);
-      double3* result = new double3[np];
+      double3* result = (double3*)malloc(np * sizeof(double3));
       double2* table = std_tables_1d[order];
 
       for (int i = 0, n = 0; i < std_np_1d[order]; i++)
@@ -2447,7 +2447,7 @@ namespace Hermes
     static double3* make_edge_table(double2& v1, double2& v2, int& np, int order)
     {
       np = std_np_1d[order];
-      double3* result = new double3[np];
+      double3* result = (double3*)malloc(np * sizeof(double3));
       double2* table = std_tables_1d[order];
 
       for (int i = 0; i < np; i++)
@@ -2477,8 +2477,6 @@ namespace Hermes
       std_np_2d_quad
     };
 
-    static int quad_pt_ref = 0;
-
     Quad2DStd::Quad2DStd()
     {
       ref_vert[0][0][0] = -1.0;
@@ -2505,27 +2503,25 @@ namespace Hermes
 
       // create quad tables and edge tables
       int i, j, k, l;
-      if(!quad_pt_ref++)
-      {
-        for (i = 0; i <= max_order[0]; i++)
-        {
-          for (j = 0; j < 3; j++)
-          {
-            k = max_order[0] + 1 + 3*i + j;
-            l = j < 2 ? j + 1 : 0;
-            std_tables_2d_tri[k] = make_edge_table(ref_vert[0][j], ref_vert[0][l], std_np_2d_tri[k], i);
-          }
-        }
 
-        for (i = 0; i <= max_order[1]; i++)
+      for (i = 0; i <= max_order[0]; i++)
+      {
+        for (j = 0; j < 3; j++)
         {
-          std_tables_2d_quad[i] = make_quad_table(i, std_np_2d_quad[i]);
-          for (j = 0; j < 4; j++)
-          {
-            k = max_order[1] + 1 + 4*i + j;
-            l = j < 3 ? j + 1 : 0;
-            std_tables_2d_quad[k] = make_edge_table(ref_vert[1][j], ref_vert[1][l], std_np_2d_quad[k], i);
-          }
+          k = max_order[0] + 1 + 3*i + j;
+          l = j < 2 ? j + 1 : 0;
+          std_tables_2d_tri[k] = make_edge_table(ref_vert[0][j], ref_vert[0][l], std_np_2d_tri[k], i);
+        }
+      }
+
+      for (i = 0; i <= max_order[1]; i++)
+      {
+        std_tables_2d_quad[i] = make_quad_table(i, std_np_2d_quad[i]);
+        for (j = 0; j < 4; j++)
+        {
+          k = max_order[1] + 1 + 4*i + j;
+          l = j < 3 ? j + 1 : 0;
+          std_tables_2d_quad[k] = make_edge_table(ref_vert[1][j], ref_vert[1][l], std_np_2d_quad[k], i);
         }
       }
 
@@ -2536,27 +2532,24 @@ namespace Hermes
     Quad2DStd::~Quad2DStd()
     {
       int i, j, k, l;
-      if(!--quad_pt_ref)
+      for (i = 0; i <= max_order[0]; i++)
       {
-        for (i = 0; i <= max_order[0]; i++)
+        for (j = 0; j < 3; j++)
         {
-          for (j = 0; j < 3; j++)
-          {
-            k = max_order[0] + 1 + 3*i + j;
-            l = j < 2 ? j + 1 : 0;
-            delete [] std_tables_2d_tri[k];
-          }
+          k = max_order[0] + 1 + 3*i + j;
+          l = j < 2 ? j + 1 : 0;
+          ::free(std_tables_2d_tri[k]);
         }
+      }
 
-        for (i = 0; i <= max_order[1]; i++)
+      for (i = 0; i <= max_order[1]; i++)
+      {
+        delete [] std_tables_2d_quad[i];
+        for (j = 0; j < 4; j++)
         {
-          delete [] std_tables_2d_quad[i];
-          for (j = 0; j < 4; j++)
-          {
-            k = max_order[1] + 1 + 4*i + j;
-            l = j < 3 ? j + 1 : 0;
-            delete [] std_tables_2d_quad[k];
-          }
+          k = max_order[1] + 1 + 4*i + j;
+          l = j < 3 ? j + 1 : 0;
+          ::free(std_tables_2d_quad[k]);
         }
       }
     }

@@ -30,13 +30,221 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    double** CurvMap::edge_proj_matrix = nullptr;
-    double** CurvMap::bubble_proj_matrix_tri = nullptr;
-    double** CurvMap::bubble_proj_matrix_quad = nullptr;
+    H1ShapesetJacobi ref_map_shapeset;
+    PrecalcShapeset ref_map_pss(&ref_map_shapeset);
 
-    double* CurvMap::edge_p = nullptr;
-    double* CurvMap::bubble_tri_p = nullptr;
-    double* CurvMap::bubble_quad_p = nullptr;
+    CurvMapStatic::CurvMapStatic()
+    {
+      int order = ref_map_shapeset.get_max_order();
+
+      this->edge_proj_matrix_size = order - 1;
+
+      // Edges.
+      this->edge_proj_matrix = new_matrix<double>(edge_proj_matrix_size, edge_proj_matrix_size);
+      edge_p = new double[edge_proj_matrix_size];
+
+      // Bubbles - triangles.
+      this->tri_bubble_np = ref_map_shapeset.get_num_bubbles(order, HERMES_MODE_TRIANGLE);
+      bubble_proj_matrix_tri = new_matrix<double>(tri_bubble_np, tri_bubble_np);
+      bubble_tri_p = new double[tri_bubble_np];
+
+      // Bubbles - quads.
+      order = H2D_MAKE_QUAD_ORDER(order, order);
+      this->quad_bubble_np = ref_map_shapeset.get_num_bubbles(order, HERMES_MODE_QUAD);
+      bubble_proj_matrix_quad = new_matrix<double>(quad_bubble_np, quad_bubble_np);
+      bubble_quad_p = new double[quad_bubble_np];
+
+      this->precalculate_cholesky_projection_matrices_bubble();
+      this->precalculate_cholesky_projection_matrix_edge();
+    }
+
+    CurvMapStatic::~CurvMapStatic()
+    {
+      delete [] edge_proj_matrix;
+      delete [] bubble_proj_matrix_tri;
+      delete [] bubble_proj_matrix_quad;
+      delete [] edge_p;
+      delete [] bubble_tri_p;
+      delete [] bubble_quad_p;
+    }
+
+    double** CurvMapStatic::calculate_bubble_projection_matrix(int* indices, ElementMode2D mode)
+    {
+      int nb;
+      double** mat;
+
+      if(mode == HERMES_MODE_TRIANGLE)
+      {
+        mat = this->bubble_proj_matrix_tri;
+        nb = this->tri_bubble_np;
+      }
+      else
+      {
+        mat = this->bubble_proj_matrix_quad;
+        nb = this->quad_bubble_np;
+      }
+
+      for (int i = 0; i < nb; i++)
+      {
+        for (int j = i; j < nb; j++)
+        {
+          int ii = indices[i], ij = indices[j];
+          int o = ref_map_shapeset.get_order(ii, mode) + ref_map_shapeset.get_order(ij, mode);
+          o = std::max(H2D_GET_V_ORDER(o), H2D_GET_H_ORDER(o));
+
+          ref_map_pss.set_active_shape(ii);
+          ref_map_pss.set_quad_order(o, H2D_FN_VAL);
+          double* fni = ref_map_pss.get_fn_values();
+
+          ref_map_pss.set_active_shape(ij);
+          ref_map_pss.set_quad_order(o, H2D_FN_VAL);
+          double* fnj = ref_map_pss.get_fn_values();
+
+          double3* pt = g_quad_2d_std.get_points(o, mode);
+          double val = 0.0;
+          for (int k = 0; k < g_quad_2d_std.get_num_points(o, mode); k++)
+            val += pt[k][2] * (fni[k] * fnj[k]);
+
+          mat[i][j] = mat[j][i] = val;
+        }
+      }
+
+      return mat;
+    }
+
+    void CurvMapStatic::precalculate_cholesky_projection_matrices_bubble()
+    {
+      // *** triangles ***
+      // calculate projection matrix of maximum order
+      {
+        Element e;
+        e.nvert = 3;
+        ref_map_pss.set_active_element(&e);
+        int* indices = ref_map_shapeset.get_bubble_indices(ref_map_shapeset.get_max_order(), HERMES_MODE_TRIANGLE);
+        curvMapStatic.bubble_proj_matrix_tri = calculate_bubble_projection_matrix(indices, HERMES_MODE_TRIANGLE);
+
+        // cholesky factorization of the matrix
+        choldc(curvMapStatic.bubble_proj_matrix_tri, this->tri_bubble_np, curvMapStatic.bubble_tri_p);
+      }
+
+      // *** quads ***
+      // calculate projection matrix of maximum order
+      {
+        Element e;
+        e.nvert = 4;
+        ref_map_pss.set_active_element(&e);
+        int *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
+        curvMapStatic.bubble_proj_matrix_quad = calculate_bubble_projection_matrix(indices, HERMES_MODE_QUAD);
+
+        // cholesky factorization of the matrix
+        choldc(curvMapStatic.bubble_proj_matrix_quad, this->quad_bubble_np, curvMapStatic.bubble_quad_p);
+      }
+    }
+
+    void CurvMapStatic::precalculate_cholesky_projection_matrix_edge()
+    {
+      // calculate projection matrix of maximum order
+      for (int i = 0; i < this->edge_proj_matrix_size; i++)
+      {
+        for (int j = i; j < this->edge_proj_matrix_size; j++)
+        {
+          int o = i + j + 4;
+          double2* pt = g_quad_1d_std.get_points(o);
+          double val = 0.0;
+          for (int k = 0; k < g_quad_1d_std.get_num_points(o); k++)
+          {
+            double fi = 0;
+            double fj = 0;
+            double x = pt[k][0];
+            switch (i + 2)
+            {
+            case 0:
+              fi = l0(x);
+              break;
+            case 1:
+              fi = l1(x);
+              break;
+            case 2:
+              fi = l2(x);
+              break;
+            case 3:
+              fi = l3(x);
+              break;
+            case 4:
+              fi = l4(x);
+              break;
+            case 5:
+              fi = l5(x);
+              break;
+            case 6:
+              fi = l6(x);
+              break;
+            case 7:
+              fi = l7(x);
+              break;
+            case 8:
+              fi = l8(x);
+              break;
+            case 9:
+              fi = l9(x);
+              break;
+            case 10:
+              fi = l10(x);
+              break;
+            case 11:
+              fi = l11(x);
+              break;
+            }
+            switch (j + 2)
+            {
+            case 0:
+              fj = l0(x);
+              break;
+            case 1:
+              fj = l1(x);
+              break;
+            case 2:
+              fj = l2(x);
+              break;
+            case 3:
+              fj = l3(x);
+              break;
+            case 4:
+              fj = l4(x);
+              break;
+            case 5:
+              fj = l5(x);
+              break;
+            case 6:
+              fj = l6(x);
+              break;
+            case 7:
+              fj = l7(x);
+              break;
+            case 8:
+              fj = l8(x);
+              break;
+            case 9:
+              fj = l9(x);
+              break;
+            case 10:
+              fj = l10(x);
+              break;
+            case 11:
+              fj = l11(x);
+              break;
+            }
+            val += pt[k][1] * (fi * fj);
+          }
+          this->edge_proj_matrix[i][j] = this->edge_proj_matrix[j][i] = val;
+        }
+      }
+
+      // Cholesky factorization of the matrix
+      choldc(this->edge_proj_matrix, this->edge_proj_matrix_size, this->edge_p);
+    }
+
+    CurvMapStatic curvMapStatic;
 
     Curve::Curve()
     {
@@ -116,12 +324,12 @@ namespace Hermes
       if (toplevel)
       {
         for (int i = 0; i < 4; i++)
-        if (nurbs[i] != nullptr)
-        {
-          nurbs[i]->unref();
-          if (nurbs[i]->ref <= 0)
-            delete nurbs[i];
-        }
+          if (nurbs[i] != nullptr)
+          {
+            nurbs[i]->unref();
+            if (nurbs[i]->ref <= 0)
+              delete nurbs[i];
+          }
       }
     }
 
@@ -452,188 +660,6 @@ namespace Hermes
         calc_ref_map_tri(e, nurbs, xi_1, xi_2, f[0], f[1]);
     }
 
-    void CurvMap::precalculate_cholesky_projection_matrix_edge(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
-    {
-      int order = ref_map_shapeset->get_max_order();
-      int n = order - 1; // number of edge basis functions
-
-      if (!edge_proj_matrix)
-        edge_proj_matrix = new_matrix<double>(n, n);
-
-      // calculate projection matrix of maximum order
-      for (int i = 0; i < n; i++)
-      {
-        for (int j = i; j < n; j++)
-        {
-          int o = i + j + 4;
-          double2* pt = g_quad_1d_std.get_points(o);
-          double val = 0.0;
-          for (int k = 0; k < g_quad_1d_std.get_num_points(o); k++)
-          {
-            double fi = 0;
-            double fj = 0;
-            double x = pt[k][0];
-            switch (i + 2)
-            {
-            case 0:
-              fi = l0(x);
-              break;
-            case 1:
-              fi = l1(x);
-              break;
-            case 2:
-              fi = l2(x);
-              break;
-            case 3:
-              fi = l3(x);
-              break;
-            case 4:
-              fi = l4(x);
-              break;
-            case 5:
-              fi = l5(x);
-              break;
-            case 6:
-              fi = l6(x);
-              break;
-            case 7:
-              fi = l7(x);
-              break;
-            case 8:
-              fi = l8(x);
-              break;
-            case 9:
-              fi = l9(x);
-              break;
-            case 10:
-              fi = l10(x);
-              break;
-            case 11:
-              fi = l11(x);
-              break;
-            }
-            switch (j + 2)
-            {
-            case 0:
-              fj = l0(x);
-              break;
-            case 1:
-              fj = l1(x);
-              break;
-            case 2:
-              fj = l2(x);
-              break;
-            case 3:
-              fj = l3(x);
-              break;
-            case 4:
-              fj = l4(x);
-              break;
-            case 5:
-              fj = l5(x);
-              break;
-            case 6:
-              fj = l6(x);
-              break;
-            case 7:
-              fj = l7(x);
-              break;
-            case 8:
-              fj = l8(x);
-              break;
-            case 9:
-              fj = l9(x);
-              break;
-            case 10:
-              fj = l10(x);
-              break;
-            case 11:
-              fj = l11(x);
-              break;
-            }
-            val += pt[k][1] * (fi * fj);
-          }
-          edge_proj_matrix[i][j] = edge_proj_matrix[j][i] = val;
-        }
-      }
-
-      // Cholesky factorization of the matrix
-      if (!edge_p)
-        edge_p = new double[n];
-      choldc(edge_proj_matrix, n, edge_p);
-    }
-
-    double** CurvMap::calculate_bubble_projection_matrix(int nb, int* indices, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss, ElementMode2D mode)
-    {
-      double** mat = new_matrix<double>(nb, nb);
-
-      for (int i = 0; i < nb; i++)
-      {
-        for (int j = i; j < nb; j++)
-        {
-          int ii = indices[i], ij = indices[j];
-          int o = ref_map_shapeset->get_order(ii, mode) + ref_map_shapeset->get_order(ij, mode);
-          o = std::max(H2D_GET_V_ORDER(o), H2D_GET_H_ORDER(o));
-
-          ref_map_pss->set_active_shape(ii);
-          ref_map_pss->set_quad_order(o, H2D_FN_VAL);
-          double* fni = ref_map_pss->get_fn_values();
-
-          ref_map_pss->set_active_shape(ij);
-          ref_map_pss->set_quad_order(o, H2D_FN_VAL);
-          double* fnj = ref_map_pss->get_fn_values();
-
-          double3* pt = g_quad_2d_std.get_points(o, mode);
-          double val = 0.0;
-          for (int k = 0; k < g_quad_2d_std.get_num_points(o, mode); k++)
-            val += pt[k][2] * (fni[k] * fnj[k]);
-
-          mat[i][j] = mat[j][i] = val;
-        }
-      }
-
-      return mat;
-    }
-
-    void CurvMap::precalculate_cholesky_projection_matrices_bubble(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
-    {
-      // *** triangles ***
-      int order = ref_map_shapeset->get_max_order();
-
-      // calculate projection matrix of maximum order
-      if (ref_map_pss->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE)
-      {
-        int nb = ref_map_shapeset->get_num_bubbles(order, HERMES_MODE_TRIANGLE);
-        int* indices = ref_map_shapeset->get_bubble_indices(order, HERMES_MODE_TRIANGLE);
-        bubble_proj_matrix_tri = calculate_bubble_projection_matrix(nb, indices, ref_map_shapeset, ref_map_pss, HERMES_MODE_TRIANGLE);
-
-        // cholesky factorization of the matrix
-        bubble_tri_p = new double[nb];
-        choldc(bubble_proj_matrix_tri, nb, bubble_tri_p);
-      }
-
-      // *** quads ***
-
-      // calculate projection matrix of maximum order
-      if (ref_map_pss->get_active_element()->get_mode() == HERMES_MODE_QUAD)
-      {
-        order = H2D_MAKE_QUAD_ORDER(order, order);
-        int nb = ref_map_shapeset->get_num_bubbles(order, HERMES_MODE_QUAD);
-        int *indices = ref_map_shapeset->get_bubble_indices(order, HERMES_MODE_QUAD);
-
-        bubble_proj_matrix_quad = calculate_bubble_projection_matrix(nb, indices, ref_map_shapeset, ref_map_pss, HERMES_MODE_QUAD);
-
-        // cholesky factorization of the matrix
-        if (bubble_quad_p != nullptr)
-        {
-          delete bubble_quad_p;
-          bubble_quad_p = nullptr;
-        }
-        bubble_quad_p = new double[nb];
-        choldc(bubble_proj_matrix_quad, nb, bubble_quad_p);
-      }
-    }
-
     void CurvMap::edge_coord(Element* e, int edge, double t, double2& x, double2& v) const
     {
       int mode = e->get_mode();
@@ -652,10 +678,8 @@ namespace Hermes
       v[0] /= lenght; v[1] /= lenght;
     }
 
-    void CurvMap::calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss) const
+    void CurvMap::calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj) const
     {
-      ref_map_pss->set_active_element(e);
-
       int i, j, k;
       int mo1 = g_quad_1d_std.get_max_order();
       int np = g_quad_1d_std.get_num_points(mo1);
@@ -744,13 +768,13 @@ namespace Hermes
           }
         }
         // solve
-        cholsl(edge_proj_matrix, ne, edge_p, rhside[k], rhside[k]);
+        cholsl(curvMapStatic.edge_proj_matrix, ne, curvMapStatic.edge_p, rhside[k], rhside[k]);
         for (i = 0; i < ne; i++)
           result[i][k] = rhside[k][i];
       }
     }
 
-    void CurvMap::old_projection(Element* e, int order, double2* proj, double* old[2], H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss) const
+    void CurvMap::old_projection(Element* e, int order, double2* proj, double* old[2]) const
     {
       int mo2 = g_quad_2d_std.get_max_order(e->get_mode());
       int np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
@@ -759,40 +783,40 @@ namespace Hermes
       {
         // vertex basis functions in all integration points
         double* vd;
-        int index_v = ref_map_shapeset->get_vertex_index(k, e->get_mode());
-        ref_map_pss->set_active_shape(index_v);
-        ref_map_pss->set_quad_order(mo2);
-        vd = ref_map_pss->get_fn_values();
+        int index_v = ref_map_shapeset.get_vertex_index(k, e->get_mode());
+        ref_map_pss.set_active_shape(index_v);
+        ref_map_pss.set_quad_order(mo2);
+        vd = ref_map_pss.get_fn_values();
 
         for (int m = 0; m < 2; m++)   // part 0 or 1
-        for (int j = 0; j < np; j++)
-          old[m][j] += proj[k][m] * vd[j];
+          for (int j = 0; j < np; j++)
+            old[m][j] += proj[k][m] * vd[j];
 
         for (int ii = 0; ii < order - 1; ii++)
         {
           // edge basis functions in all integration points
           double* ed;
-          int index_e = ref_map_shapeset->get_edge_index(k, 0, ii + 2, e->get_mode());
-          ref_map_pss->set_active_shape(index_e);
-          ref_map_pss->set_quad_order(mo2);
-          ed = ref_map_pss->get_fn_values();
+          int index_e = ref_map_shapeset.get_edge_index(k, 0, ii + 2, e->get_mode());
+          ref_map_pss.set_active_shape(index_e);
+          ref_map_pss.set_quad_order(mo2);
+          ed = ref_map_pss.get_fn_values();
 
           for (int m = 0; m < 2; m++)  //part 0 or 1
-          for (int j = 0; j < np; j++)
-            old[m][j] += proj[e->get_nvert() + k * (order - 1) + ii][m] * ed[j];
+            for (int j = 0; j < np; j++)
+              old[m][j] += proj[e->get_nvert() + k * (order - 1) + ii][m] * ed[j];
         }
       }
     }
 
-    void CurvMap::calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss) const
+    void CurvMap::calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj) const
     {
-      ref_map_pss->set_active_element(e);
+      ref_map_pss.set_active_element(e);
 
       int i, j, k;
       int mo2 = g_quad_2d_std.get_max_order(e->get_mode());
       int np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
       int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
-      int nb = ref_map_shapeset->get_num_bubbles(qo, e->get_mode());
+      int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
 
       double2* fn = new double2[np];
       memset(fn, 0, np * sizeof(double2));
@@ -808,7 +832,7 @@ namespace Hermes
       }
 
       // compute known part of projection (vertex and edge part)
-      old_projection(e, order, proj, old, ref_map_shapeset, ref_map_pss);
+      old_projection(e, order, proj, old);
 
       // fn values of both components of nonpolynomial function
       double3* pt = g_quad_2d_std.get_points(mo2, e->get_mode());
@@ -827,10 +851,10 @@ namespace Hermes
         {
           // bubble basis functions in all integration points
           double *bfn;
-          int index_i = ref_map_shapeset->get_bubble_indices(qo, e->get_mode())[i];
-          ref_map_pss->set_active_shape(index_i);
-          ref_map_pss->set_quad_order(mo2);
-          bfn = ref_map_pss->get_fn_values();
+          int index_i = ref_map_shapeset.get_bubble_indices(qo, e->get_mode())[i];
+          ref_map_pss.set_active_shape(index_i);
+          ref_map_pss.set_quad_order(mo2);
+          bfn = ref_map_pss.get_fn_values();
 
           for (j = 0; j < np; j++) // over all integration points
             rhside[k][i] += pt[j][2] * (bfn[j] * (fn[j][k] - old[k][j]));
@@ -838,9 +862,9 @@ namespace Hermes
 
         // solve
         if (e->get_mode() == HERMES_MODE_TRIANGLE)
-          cholsl(bubble_proj_matrix_tri, nb, bubble_tri_p, rhside[k], rhside[k]);
+          cholsl(curvMapStatic.bubble_proj_matrix_tri, nb, curvMapStatic.bubble_tri_p, rhside[k], rhside[k]);
         else
-          cholsl(bubble_proj_matrix_quad, nb, bubble_quad_p, rhside[k], rhside[k]);
+          cholsl(curvMapStatic.bubble_proj_matrix_quad, nb, curvMapStatic.bubble_quad_p, rhside[k], rhside[k]);
 
         for (i = 0; i < nb; i++)
           result[i][k] = rhside[k][i];
@@ -856,67 +880,59 @@ namespace Hermes
 
     void CurvMap::update_refmap_coeffs(Element* e)
     {
-      H1ShapesetJacobi ref_map_shapeset;
-      PrecalcShapeset ref_map_pss(&ref_map_shapeset);
-
-      ref_map_pss.set_quad_2d(&g_quad_2d_std);
-      ref_map_pss.set_active_element(e);
-
-      // calculation of projection matrices
-      if (edge_proj_matrix == nullptr)
-        precalculate_cholesky_projection_matrix_edge(&ref_map_shapeset, &ref_map_pss);
-      if (bubble_proj_matrix_tri == nullptr && e->get_mode() == HERMES_MODE_TRIANGLE)
-        precalculate_cholesky_projection_matrices_bubble(&ref_map_shapeset, &ref_map_pss);
-      if (bubble_proj_matrix_quad == nullptr && e->get_mode() == HERMES_MODE_QUAD)
-        precalculate_cholesky_projection_matrices_bubble(&ref_map_shapeset, &ref_map_pss);
-
-      // allocate projection coefficients
-      int nv = e->get_nvert();
-      int ne = order - 1;
-      int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
-      int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
-      nc = nv + nv*ne + nb;
-      if (coeffs != nullptr)
+#pragma omp critical (updating_coeffs_shared_refmap)
       {
-        delete[] coeffs;
-        coeffs = nullptr;
-      }
-      coeffs = new double2[nc];
-
-      // WARNING: do not change the format of the array 'coeffs'. If it changes,
-      // RefMap::set_active_element() has to be changed too.
-
-      Nurbs** nurbs;
-      if (toplevel == false)
-      {
+        ref_map_pss.set_quad_2d(&g_quad_2d_std);
         ref_map_pss.set_active_element(e);
-        ref_map_pss.set_transform(this->sub_idx);
-        nurbs = parent->cm->nurbs;
+
+        // allocate projection coefficients
+        int nv = e->get_nvert();
+        int ne = order - 1;
+        int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
+        int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
+        nc = nv + nv*ne + nb;
+        if (coeffs != nullptr)
+        {
+          delete[] coeffs;
+          coeffs = nullptr;
+        }
+        coeffs = new double2[nc];
+
+        // WARNING: do not change the format of the array 'coeffs'. If it changes,
+        // RefMap::set_active_element() has to be changed too.
+
+        Nurbs** nurbs;
+        if (toplevel == false)
+        {
+          ref_map_pss.set_active_element(e);
+          ref_map_pss.set_transform(this->sub_idx);
+          nurbs = parent->cm->nurbs;
+        }
+        else
+        {
+          ref_map_pss.reset_transform();
+          nurbs = e->cm->nurbs;
+        }
+        ctm = ref_map_pss.get_ctm();
+
+        // calculation of new projection coefficients
+        // vertex part
+        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        {
+          coeffs[i][0] = e->vn[i]->x;
+          coeffs[i][1] = e->vn[i]->y;
+        }
+
+        if (e->cm->toplevel == false)
+          e = e->cm->parent;
+
+        // edge part
+        for (int edge = 0; edge < e->get_nvert(); edge++)
+          calc_edge_projection(e, edge, nurbs, order, coeffs);
+
+        //bubble part
+        calc_bubble_projection(e, nurbs, order, coeffs);
       }
-      else
-      {
-        ref_map_pss.reset_transform();
-        nurbs = e->cm->nurbs;
-      }
-      ctm = ref_map_pss.get_ctm();
-
-      // calculation of new projection coefficients
-      // vertex part
-      for (unsigned int i = 0; i < e->get_nvert(); i++)
-      {
-        coeffs[i][0] = e->vn[i]->x;
-        coeffs[i][1] = e->vn[i]->y;
-      }
-
-      if (e->cm->toplevel == false)
-        e = e->cm->parent;
-
-      // edge part
-      for (int edge = 0; edge < (int)e->get_nvert(); edge++)
-        calc_edge_projection(e, edge, nurbs, order, coeffs, &ref_map_shapeset, &ref_map_pss);
-
-      //bubble part
-      calc_bubble_projection(e, nurbs, order, coeffs, &ref_map_shapeset, &ref_map_pss);
     }
 
     void CurvMap::get_mid_edge_points(Element* e, double2* pt, int n)

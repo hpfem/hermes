@@ -206,10 +206,10 @@ namespace Hermes
           delete this->recordTable[this->hashTable[i]->cache_record_index];
           delete hashTable[i];
         }
-        
-      memset(this->recordTable, 0, this->size * sizeof(CacheRecord*));
-      memset(this->hashTable, 0, this->hash_table_size * sizeof(StateHash*));
-      memset(this->hashTableUsed, 0, this->hash_table_size * sizeof(bool));
+
+        memset(this->recordTable, 0, this->size * sizeof(CacheRecord*));
+        memset(this->hashTable, 0, this->hash_table_size * sizeof(StateHash*));
+        memset(this->hashTableUsed, 0, this->hash_table_size * sizeof(bool));
     }
 
     template<typename Scalar>
@@ -259,6 +259,8 @@ namespace Hermes
         }
       }
 
+      bool found = false;
+
 #ifdef _DEBUG
       assert(parent_son != -1);
 #endif
@@ -266,60 +268,63 @@ namespace Hermes
       int hash = this->get_hash_record(rep->parent->id, parent_son, rep_sub_idx, rep_i);
       if (this->hashTable[hash] == nullptr)
       {
-        if(recordCount > 0.9 * size)
-        {
-#pragma omp critical(record_size_increase)
-          {
-            size *= 1.5;
-            this->recordTable = (CacheRecord**)realloc(this->recordTable, size * sizeof(CacheRecord*));
-          }
-        }
-        cache_record = new CacheRecord();
 #pragma omp critical(record_count_increase)
+        if (this->hashTable[hash] == nullptr)
         {
+          cache_record = new CacheRecord();
           recordTable[recordCount] = cache_record;
           this->hashTable[hash] = new StateHash(rep->parent->id, parent_son, rep_sub_idx, rep_i, recordCount++);
         }
-        return false;
       }
       else
       {
         cache_record = this->recordTable[this->hashTable[hash]->cache_record_index];
-        return true;
+        found = true;
       }
+      return found;
     }
 
     template<typename Scalar>
     bool DiscreteProblemCache<Scalar>::get(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record)
     {
+      this->resize();
+
+      bool found = false;
+
       if(rep->parent)
         return get_adaptivity(rep, rep_sub_idx, rep_i, cache_record);
       else
       {
         int hash = this->get_hash_record(rep->id, -1, rep_sub_idx, rep_i);
+
         if (this->hashTable[hash] == nullptr)
         {
-          if(recordCount > 0.9 * size)
-          {
-#pragma omp critical(record_size_increase)
-            {
-              size *= 1.5;
-              this->recordTable = (CacheRecord**)realloc(this->recordTable, size * sizeof(CacheRecord*));
-            }
-          }
-          cache_record = new CacheRecord();
 #pragma omp critical(record_count_increase)
+          if (this->hashTable[hash] == nullptr)
           {
+            cache_record = new CacheRecord();
             recordTable[recordCount] = cache_record;
             this->hashTable[hash] = new StateHash(rep->id, -1, rep_sub_idx, rep_i, recordCount++);
           }
-          return false;
         }
         else
         {
           cache_record = this->recordTable[this->hashTable[hash]->cache_record_index];
-          return true;
+          found = true;
         }
+      }
+
+      return found;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemCache<Scalar>::resize()
+    {
+#pragma omp critical(record_count_increase)
+      if(this->recordCount > 0.9 * this->size)
+      {
+        this->size *= 1.5;
+        this->recordTable = (CacheRecord**)realloc(this->recordTable, this->size * sizeof(CacheRecord*));
       }
     }
 

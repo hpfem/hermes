@@ -182,28 +182,34 @@ namespace Hermes
 
     int Shapeset::get_vertex_index(int vertex, ElementMode2D mode) const
     {
+#ifdef _DEBUG
       if(mode == HERMES_MODE_TRIANGLE)
         assert(vertex < 3);
       else
         assert(vertex < 4);
+#endif
       return vertex_indices[mode][vertex];
     }
 
     int Shapeset::get_edge_index(int edge, int ori, int order, ElementMode2D mode) const
     {
+#ifdef _DEBUG
       if(mode == HERMES_MODE_TRIANGLE)
         assert(edge < 3);
       else
         assert(edge < 4);
       assert(order >= 0 && order <= max_order);
       assert(ori == 0 || ori == 1);
+#endif
       return edge_indices[mode][edge][2*order + ori];
     }
 
     int* Shapeset::get_bubble_indices(int order, ElementMode2D mode) const
     {
+#ifdef _DEBUG
       assert(H2D_GET_H_ORDER(order) >= 0 && H2D_GET_H_ORDER(order) <= max_order);
       assert(H2D_GET_V_ORDER(order) >= 0 && H2D_GET_V_ORDER(order) <= max_order);
+#endif
       int index = order;
       if(mode == HERMES_MODE_QUAD) //tables of bubble indices are transposed
         index = H2D_MAKE_QUAD_ORDER(H2D_GET_V_ORDER(order), H2D_GET_H_ORDER(order));
@@ -212,13 +218,16 @@ namespace Hermes
 
     int Shapeset::get_num_bubbles(int order, ElementMode2D mode) const
     {
+#ifdef _DEBUG
       assert(H2D_GET_H_ORDER(order) >= 0 && H2D_GET_H_ORDER(order) <= max_order);
       assert(H2D_GET_V_ORDER(order) >= 0 && H2D_GET_V_ORDER(order) <= max_order);
+#endif
       return bubble_count[mode][order];
     }
 
     int Shapeset::get_constrained_edge_index(int edge, int order, int ori, int part, ElementMode2D mode) const
     {
+#ifdef _DEBUG
       if(mode == HERMES_MODE_TRIANGLE)
         assert(edge < 3);
       else
@@ -226,6 +235,7 @@ namespace Hermes
       assert(order >= 0 && order <= max_order);
       assert(part >= 0);
       assert(order <= H2D_ORDER_MASK);
+#endif
       return -1 - ((part << 7) + (order << 3) + (edge << 1) + ori);
     }
 

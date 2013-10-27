@@ -370,16 +370,16 @@ namespace Hermes
     Geom<Hermes::Ord>* init_geom_ord()
     {
       Geom<Hermes::Ord>* e = new Geom<Hermes::Ord>;
-      static Hermes::Ord x[] = { Hermes::Ord(1) };
-      static Hermes::Ord y[] = { Hermes::Ord(1) };
+      Hermes::Ord x[] = { Hermes::Ord(1) };
+      Hermes::Ord y[] = { Hermes::Ord(1) };
 
-      static Hermes::Ord nx[] = { Hermes::Ord(1) };
-      static Hermes::Ord ny[] = { Hermes::Ord(1) };
+      Hermes::Ord nx[] = { Hermes::Ord(1) };
+      Hermes::Ord ny[] = { Hermes::Ord(1) };
 
-      static Hermes::Ord tx[] = { Hermes::Ord(1) };
-      static Hermes::Ord ty[] = { Hermes::Ord(1) };
+      Hermes::Ord tx[] = { Hermes::Ord(1) };
+      Hermes::Ord ty[] = { Hermes::Ord(1) };
 
-      static Hermes::Ord diam = Hermes::Ord(1);
+      Hermes::Ord diam = Hermes::Ord(1);
 
       e->x = x; e->y = y;
       e->nx = nx; e->ny = ny;

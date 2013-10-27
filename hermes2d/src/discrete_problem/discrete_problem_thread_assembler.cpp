@@ -205,6 +205,8 @@ namespace Hermes
         cache_searches++;
 
       this->current_cache_record = nullptr;
+
+
       if (cache->get(current_state->rep, current_state->rep_subidx, current_state->rep_i, this->current_cache_record))
       {
         if (this->report_cache_hits_and_misses)

@@ -1225,7 +1225,7 @@ namespace Hermes
     void Mesh::free()
     {
       Element* e;
-      for_all_used_elements(e, this)
+      for_all_elements(e, this)
       {
         if(e->cm != nullptr)
         {

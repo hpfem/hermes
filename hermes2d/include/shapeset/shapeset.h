@@ -127,12 +127,12 @@ namespace Hermes
       double get_dyy_value(int index, double x, double y, int component, ElementMode2D mode);
       double get_dxy_value(int index, double x, double y, int component, ElementMode2D mode);
 
+      /// Returns the number of bubble functions for an element of the given order.
+      virtual int get_num_bubbles(int order, ElementMode2D mode) const;
+
     protected:
       /// Returns a complete set of indices of bubble functions for an element of the given order.
       virtual int* get_bubble_indices(int order, ElementMode2D mode) const;
-
-      /// Returns the number of bubble functions for an element of the given order.
-      virtual int get_num_bubbles(int order, ElementMode2D mode) const;
 
       /// Returns the index of a constrained edge function. 'part' is 0 or 1 for edge
       /// halves, 2, 3, 4, 5 for edge quarters, etc. See shapeset.cpp.
@@ -199,7 +199,9 @@ namespace Hermes
 
       template<typename Scalar> friend class DiscreteProblem;
       template<typename Scalar> friend class Solution;
-      friend class CurvMap; friend class RefMap;
+      friend class CurvMap;
+      friend class CurvMapStatic;
+      friend class RefMap;
       template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector;

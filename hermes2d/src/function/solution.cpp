@@ -267,19 +267,28 @@ namespace Hermes
 
       mono_lu_init()
       {
-        memset(mat, 0, sizeof(mat));
-        memset(perm, 0, sizeof(perm));
+        for (int m = 0; m <= 1; m++)
+        {
+          for (int i = 0; i <= 10; i++)
+          {
+            mat[m][i] = nullptr;
+            perm[m][i] = nullptr;
+          }
+        }
       }
 
       ~mono_lu_init()
       {
         for (int m = 0; m <= 1; m++)
+        {
           for (int i = 0; i <= 10; i++)
-            if(mat[m][i] != nullptr)
-            {
+          {
+            if(mat[m][i])
               delete [] mat[m][i];
+            if(perm[m][i])
               delete [] perm[m][i];
-            }
+          }
+        }
       }
     }
     mono_lu;
@@ -311,8 +320,7 @@ namespace Hermes
 
         double d;
         if (mono_lu.perm[mode][o] == nullptr)
-          delete[] mono_lu.perm[mode][o];
-        mono_lu.perm[mode][o] = new int[n];
+          mono_lu.perm[mode][o] = new int[n];
         ludcmp(mono_lu.mat[mode][o], n, mono_lu.perm[mode][o], &d);
       }
 

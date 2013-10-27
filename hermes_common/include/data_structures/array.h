@@ -83,8 +83,15 @@ namespace Hermes
     {
       free();
 
-      this->pages = (TYPE**)realloc(this->pages, array.page_count * sizeof(TYPE*));
-      this->unused = (int*)realloc(this->unused, array.unused_size * sizeof(int));
+      if(this->pages)
+        this->pages = (TYPE**)realloc(this->pages, array.page_count * sizeof(TYPE*));
+      else
+        this->pages = (TYPE**)malloc(array.page_count * sizeof(TYPE*));
+      if(this->unused)
+        this->unused = (int*)realloc(this->unused, array.unused_size * sizeof(int));
+      else
+        this->unused = (int*)malloc(array.unused_size * sizeof(int));
+
       memcpy(this->unused, array.unused, array.unused_size * sizeof(int));
       
       this->page_count = array.page_count;
@@ -167,7 +174,8 @@ namespace Hermes
       item->used = 0;
       if(nunused >= unused_size)
       {
-        this->unused = (int*)realloc(this->unused, ++this->unused_size * sizeof(int));
+        this->unused_size = std::max<int>(unused_size + 1, (int)(unused_size * 1.5));
+        this->unused = (int*)realloc(this->unused, this->unused_size * sizeof(int));
       }
       unused[nunused++] = id;
       nitems--;
@@ -258,9 +266,11 @@ namespace Hermes
     {
       if (!(size & HERMES_PAGE_MASK))
       {
-        this->pages = (TYPE**)realloc(this->pages, (this->page_count + 1) * sizeof(TYPE*));
+        int local_page_count = this->page_count;
+        this->page_count = std::max<int>(this->page_count + 1, (int)(this->page_count * 1.5));
+        this->pages = (TYPE**)realloc(this->pages, this->page_count * sizeof(TYPE*));
         TYPE* new_page = new TYPE[HERMES_PAGE_SIZE];
-        pages[this->page_count++] = new_page;
+        pages[local_page_count++] = new_page;
       }
       TYPE* item = pages[size >> HERMES_PAGE_BITS] + (size & HERMES_PAGE_MASK);
       item->id = size++;

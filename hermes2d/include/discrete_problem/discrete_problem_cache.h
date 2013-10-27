@@ -83,6 +83,9 @@ namespace Hermes
       /// \return Found in cache.
       bool get(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record);
 
+      /// Optionally resize when necessary.
+      void resize();
+
     private:
       /// Special handling of adaptivity situtation.
       bool get_adaptivity(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record);

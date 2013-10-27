@@ -1112,8 +1112,8 @@ namespace Hermes
     {
       for (unsigned int i = 0; i < bc_data_projections.size(); i++)
         delete[] bc_data_projections[i];
-      //for (unsigned int i = 0; i < bc_data_base_components.size(); i++)
-     //   ::free(bc_data_base_components[i]);
+      for (unsigned int i = 0; i < bc_data_base_components.size(); i++)
+        ::free(bc_data_base_components[i]);
       bc_data_projections.clear();
       bc_data_base_components.clear();
     }

@@ -24,8 +24,6 @@ namespace Hermes
   namespace Hermes2D
   {
     class Element;
-    class H1ShapesetJacobi;
-    class PrecalcShapeset;
     class Quad1DStd;
     class Quad2DStd;
     struct Trf;
@@ -122,14 +120,6 @@ namespace Hermes
 
       void get_mid_edge_points(Element* e, double2* pt, int n);
 
-      static double** edge_proj_matrix;  ///< projection matrix for each edge is the same
-      static double** bubble_proj_matrix_tri; ///< projection matrix for triangle bubbles
-      static double** bubble_proj_matrix_quad; ///< projection matrix for quad bubbles
-
-      static double* edge_p;  ///<  diagonal vector in cholesky factorization
-      static double* bubble_tri_p; ///<  diagonal vector in cholesky factorization
-      static double* bubble_quad_p; ///<  diagonal vector in cholesky factorization
-
       /// Transformation (2x2) matrix.
       Trf* ctm;
 
@@ -154,21 +144,14 @@ namespace Hermes
 
       static void calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f);
 
-      /// Projection based interpolation
-      /// Preparation of projection matrices, Cholesky factorization
-      static void precalculate_cholesky_projection_matrix_edge(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
-      /// Calculate the H1 seminorm products (\phi_i, \phi_j) for all 0 <= i, j < n, n is the number of bubble functions
-      static double** calculate_bubble_projection_matrix(int nb, int* indices, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss, ElementMode2D mode);
-      static void precalculate_cholesky_projection_matrices_bubble(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
-
       /// Edge part of projection based interpolation ///////////////////////////////////////////////////
       /// Compute point (x, y) in reference element, edge vector (v1, v2)
       void edge_coord(Element* e, int edge, double t, double2& x, double2& v) const;
-      void calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss) const;
+      void calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj) const;
 
       //// Bubble part of projection based interpolation /////////////////////////////////////////////////
-      void old_projection(Element* e, int order, double2* proj, double* old[2], H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss) const;
-      void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss) const;
+      void old_projection(Element* e, int order, double2* proj, double* old[2]) const;
+      void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj) const;
 
       static bool warning_issued;
 
@@ -189,6 +172,34 @@ namespace Hermes
       friend class MeshReaderH2DXML;
       friend class MeshReaderH2DBSON;
     };
+
+    class CurvMapStatic
+    {
+    public:
+      CurvMapStatic();
+      ~CurvMapStatic();
+
+      /// Projection based interpolation
+      /// Preparation of projection matrices, Cholesky factorization
+      void precalculate_cholesky_projection_matrix_edge();
+      /// Calculate the H1 seminorm products (\phi_i, \phi_j) for all 0 <= i, j < n, n is the number of bubble functions
+      double** calculate_bubble_projection_matrix(int* indices, ElementMode2D mode);
+      void precalculate_cholesky_projection_matrices_bubble();
+
+      double** edge_proj_matrix;  ///< projection matrix for each edge is the same
+      int edge_proj_matrix_size;
+      double** bubble_proj_matrix_tri; ///< projection matrix for triangle bubbles
+      double** bubble_proj_matrix_quad; ///< projection matrix for quad bubbles
+
+      double* edge_p;  ///<  diagonal vector in cholesky factorization
+      double* bubble_tri_p; ///<  diagonal vector in cholesky factorization
+      int tri_bubble_np;
+      double* bubble_quad_p; ///<  diagonal vector in cholesky factorization
+      int quad_bubble_np;
+    };
+
+    /// Global instance used inside Hermes which is also accessible to users.
+    extern CurvMapStatic curvMapStatic;
   }
 }
 #endif
