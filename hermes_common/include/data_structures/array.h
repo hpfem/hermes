@@ -262,7 +262,7 @@ namespace Hermes
 
     /// Adds an unused item at the end of the array and skips its ID forever.
     /// This is a special-purpose function used to create empty element slots.
-    void skip_slot()
+    TYPE* skip_slot()
     {
       if (!(size & HERMES_PAGE_MASK))
       {
@@ -276,6 +276,7 @@ namespace Hermes
       item->id = size++;
       item->used = 0;
       nitems++;
+      return item;
     }
 
     int get_size() const { return size; }

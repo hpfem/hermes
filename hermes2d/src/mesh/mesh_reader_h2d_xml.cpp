@@ -398,7 +398,7 @@ namespace Hermes
 
               if(!found)
               {
-                meshes[subdomains_i]->elements.skip_slot();
+                meshes[subdomains_i]->elements.skip_slot()->cm = nullptr;
                 continue;
               }
 

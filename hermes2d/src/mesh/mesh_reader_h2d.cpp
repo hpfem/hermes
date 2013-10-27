@@ -212,7 +212,7 @@ namespace Hermes
         int* idx = new int[nv-1];
         std::string el_marker;
         if(!nv) {
-          mesh->elements.skip_slot();
+          mesh->elements.skip_slot()->cm = nullptr;
           continue;
         }
 

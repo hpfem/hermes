@@ -676,7 +676,11 @@ namespace Hermes
         if(son != nullptr)
         {
           son->unref_all_nodes(this);
-          if(son->cm != nullptr) delete son->cm;
+          if(son->cm != nullptr)
+          {
+            delete son->cm;
+            son->cm = nullptr;
+          }
           elements.remove(son->id);
           this->nactive--;
         }
@@ -723,8 +727,10 @@ namespace Hermes
       if(refinement == -1)
         return;
       Element* e = this->get_element(id);
-      if(!e->used) throw Hermes::Exceptions::Exception("Invalid element id number.");
-      if(!e->active) throw Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
+      if(!e->used)
+        throw Hermes::Exceptions::Exception("Invalid element id number.");
+      if(!e->active)
+        throw Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
       this->refine_element(e, refinement);
     }
 
