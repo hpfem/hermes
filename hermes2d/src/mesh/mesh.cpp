@@ -3108,7 +3108,7 @@ namespace Hermes
     const std::string EggShell::eggShell1Marker = "Eggshell-1";
     const std::string EggShell::eggShell0Marker = "Eggshell-0";
     const std::string EggShell::eggShellMarker = "Eggshell";
-    bool EggShell::egg_shell_verbose = true;
+    bool EggShell::egg_shell_verbose = false;
 
     MeshSharedPtr EggShell::get_egg_shell(MeshSharedPtr mesh, std::string marker, unsigned int levels, int n_element_guess)
     {

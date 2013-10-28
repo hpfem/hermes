@@ -76,15 +76,6 @@ namespace Hermes
 
       virtual void update_constraints();
     };
-
-    class HERMES_API H1SpaceEggShell : public H1Space<double>
-    {
-    private:
-      H1SpaceEggShell(MeshSharedPtr mesh, int p_init = 1, Shapeset* shapeset = nullptr);
-      virtual ~H1SpaceEggShell();
-      virtual void post_assign();
-      friend class ExactSolutionEggShell;
-    };
   }
 }
 #endif

@@ -184,8 +184,8 @@ namespace Hermes
           }
         }
       }
-
     }
+
     template<typename Scalar>
     void H1Space<Scalar>::assign_bubble_dofs()
     {
@@ -256,6 +256,8 @@ namespace Hermes
           al->add_triplet(this->shapeset->get_constrained_edge_index(surf_num, j + 2, ori, part, e->get_mode()), dof, 1.0);
       }
     }
+
+
 
     template<typename Scalar>
     Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc)
@@ -361,7 +363,8 @@ namespace Hermes
     {
       // estimate the upper bound of the result size
       int max_result = n1 + n2;
-      if (edge != nullptr) max_result += this->ndata[edge->id].n;
+      if (edge != nullptr)
+        max_result += this->ndata[edge->id].n;
 
       typename Space<Scalar>::BaseComponent* result = (typename Space<Scalar>::BaseComponent*) malloc(max_result * sizeof(typename Space<Scalar>::BaseComponent));
       typename Space<Scalar>::BaseComponent* current = result;
@@ -378,8 +381,10 @@ namespace Hermes
       }
 
       // finish the longer baselist
-      while (i1 < n1) output_component(current, last, l1 + i1++, edge, edge_dofs);
-      while (i2 < n2) output_component(current, last, l2 + i2++, edge, edge_dofs);
+      while (i1 < n1)
+        output_component(current, last, l1 + i1++, edge, edge_dofs);
+      while (i2 < n2)
+        output_component(current, last, l2 + i2++, edge, edge_dofs);
 
       // don't forget to reserve space for edge dofs if we haven't done that already
       if (edge != nullptr)
@@ -391,17 +396,7 @@ namespace Hermes
       // if we produced less components than we expected, reallocate the resulting array
       // ...this should be OK as we are always shrinking the array so no copying should occur
       ncomponents = current - result;
-      if (ncomponents < max_result)
-      {
-        typename Space<Scalar>::BaseComponent* reallocated_result = (typename Space<Scalar>::BaseComponent*) realloc(result, ncomponents * sizeof(typename Space<Scalar>::BaseComponent));
-        if (edge_dofs != nullptr)
-        {
-          edge_dofs = reallocated_result + (edge_dofs - result);
-        }
-        return reallocated_result;
-      }
-      else
-        return result;
+      return result;
     }
 
     template<typename Scalar>
@@ -423,7 +418,8 @@ namespace Hermes
             nd = &this->ndata[e->en[i]->id];
             nd->base = ei[i]->node;
             nd->part = ei[i]->part;
-            if (ei[i]->ori) nd->part ^= ~0;
+            if (ei[i]->ori)
+              nd->part ^= ~0;
           }
         }
       }
@@ -560,51 +556,6 @@ namespace Hermes
       Element* e;
       for_all_base_elements(e, this->mesh)
         update_constrained_nodes(e, nullptr, nullptr, nullptr, nullptr);
-    }
-
-    H1SpaceEggShell::H1SpaceEggShell(MeshSharedPtr mesh, int p_init, Shapeset* shapeset) : H1Space<double>(mesh, nullptr, p_init, shapeset)
-    {
-      // Initialize essential boundary conditions.
-      this->essential_bcs = new EssentialBCs<double>(Hermes::vector<EssentialBoundaryCondition<double>*>(new DefaultEssentialBCConst<double>(EggShell::eggShell0Marker, 0.), new DefaultEssentialBCConst<double>(EggShell::eggShell1Marker, 1.)));
-      this->assign_dofs();
-    }
-
-    H1SpaceEggShell::~H1SpaceEggShell()
-    {
-      for (Hermes::vector<EssentialBoundaryCondition<double> *>::const_iterator it = this->essential_bcs->begin(); it != this->essential_bcs->end(); it++)
-        delete *it;
-      delete this->essential_bcs;
-    }
-
-    void H1SpaceEggShell::post_assign()
-    {
-      H1Space<double>::post_assign();
-
-      int marker_0 = this->mesh->get_boundary_markers_conversion().get_internal_marker(EggShell::eggShell0Marker).marker;
-      Element* e;
-      for_all_active_elements(e, this->mesh)
-      {
-        for (int edge = 0; edge < e->get_nvert(); edge++)
-        {
-          if (e->en[edge]->marker == marker_0)
-          {
-            Space<double>::NodeData* nd = &this->ndata[e->en[edge]->id];
-            SurfPos surf_pos;
-            surf_pos.marker = marker_0;
-            surf_pos.surf_num = edge;
-            surf_pos.base = e;
-            surf_pos.v1 = e->vn[edge]->id;
-            surf_pos.v2 = e->vn[(edge + 1)%e->nvert]->id;
-            surf_pos.t = .5;
-            surf_pos.lo = .1;
-            surf_pos.hi = .9;
-            nd->edge_bc_proj = this->get_bc_projection(&surf_pos, 10, this->essential_bcs->get_boundary_condition(EggShell::eggShell0Marker));
-            this->bc_data_projections.push_back(nd->edge_bc_proj);
-            this->ndata[e->vn[edge]->id].vertex_bc_coef = nd->edge_bc_proj + 0;
-            this->ndata[e->vn[(edge + 1)%e->nvert]->id].vertex_bc_coef = nd->edge_bc_proj + 1;
-          }
-        }
-      }
     }
 
     template HERMES_API class H1Space<double>;

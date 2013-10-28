@@ -391,8 +391,9 @@ namespace Hermes
             Scalar* edge_bc_proj;
             Scalar* vertex_bc_coef;
           };
-          int n; ///< Number of dofs. Temporarily used during assignment
-          ///< of DOFs to indicate nodes which were not processed yet.
+          /// Number of dofs. Temporarily used during assignment
+          /// of DOFs to indicate nodes which were not processed yet.
+          int n; 
         };
         struct // constrained vertex node
         {
@@ -404,7 +405,7 @@ namespace Hermes
           Node* base;
           int part;
         };
-        NodeData() : dof(0), edge_bc_proj(nullptr) {}
+        NodeData() : dof(0), edge_bc_proj(nullptr), vertex_bc_coef(nullptr) {}
       };
 
       class ElementData
