@@ -61,9 +61,8 @@ namespace Hermes
     template<typename Scalar>
     void AsmList<Scalar>::add_triplet(int i, int d, Scalar c)
     {
-#ifdef _DEBUG
       assert(cnt < ASMLIST_SIZE - 1);
-#endif
+
       idx[cnt] = i;
       dof[cnt] = d;
       coef[cnt++] = c;

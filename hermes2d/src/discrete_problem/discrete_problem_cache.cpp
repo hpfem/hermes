@@ -97,9 +97,7 @@ namespace Hermes
             if(!current_state->e[space_i])
               continue;
 
-#ifdef _DEBUG
             assert(current_alsSurface[space_i][current_state->isurf]);
-#endif
 
             unsigned int func_count = current_alsSurface[space_i][current_state->isurf]->cnt;
             this->asmlistSurfaceCnt[current_state->isurf][space_i] = func_count;
@@ -260,10 +258,7 @@ namespace Hermes
       }
 
       bool found = false;
-
-#ifdef _DEBUG
       assert(parent_son != -1);
-#endif
 
       int hash = this->get_hash_record(rep->parent->id, parent_son, rep_sub_idx, rep_i);
       if (this->hashTable[hash] == nullptr)

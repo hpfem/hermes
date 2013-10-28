@@ -80,9 +80,8 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_u_ext(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Solution<Scalar>** u_ext_sln)
     {
-#ifdef _DEBUG
       assert(this->spaces_size == spaces.size() && this->pss);
-#endif
+
       free_u_ext();
       u_ext = new Solution<Scalar>*[spaces_size];
 
@@ -268,16 +267,14 @@ namespace Hermes
       Func<Scalar>** u_ext_func = nullptr;
       if (this->nonlinear)
       {
-#ifdef _DEBUG
         assert(this->u_ext);
-#endif
+
         u_ext_func = new Func<Scalar>*[spaces_size];
 
         for (int i = 0; i < spaces_size; i++)
         {
-#ifdef _DEBUG
           assert(u_ext[i]);
-#endif
+
           if (u_ext[i]->get_active_element())
             u_ext_func[i] = init_fn(u_ext[i], order);
           else

@@ -688,10 +688,8 @@ namespace Hermes
         {
           for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
           {
-#ifdef _DEBUG
-            if(!(H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i]) == 0 || H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]) == H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i])))
-              throw Exceptions::Exception("Triangle processed but the resulting order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]), H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i]), i);
-#endif
+            assert(H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i]) == 0 || H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]) == H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i]));
+
             refinement.refinement_polynomial_order[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]), 0);
 
             for(int poly_order_type_i = 1; poly_order_type_i < 4; poly_order_type_i++)
