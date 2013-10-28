@@ -393,8 +393,6 @@ namespace Hermes
         current += this->ndata[edge->id].n;
       }
 
-      // if we produced less components than we expected, reallocate the resulting array
-      // ...this should be OK as we are always shrinking the array so no copying should occur
       ncomponents = current - result;
       return result;
     }
