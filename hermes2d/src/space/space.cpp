@@ -1052,6 +1052,7 @@ namespace Hermes
     {
       if(!e->used)
         return;
+
       assert(e->active);
 
       Node* en = e->en[surf_pos->surf_num];
@@ -1087,7 +1088,10 @@ namespace Hermes
           int j = e->next_vert(i);
           if (e->vn[i]->bnd && e->vn[j]->bnd)
           {
-            SurfPos surf_pos = { 0, i, e, e->vn[i]->id, e->vn[j]->id, 0.0, 0.0, 1.0 };
+            Element* parent = e;
+            while(parent->parent != nullptr)
+              parent = parent->parent;
+            SurfPos surf_pos = { 0, i, parent, e->vn[i]->id, e->vn[j]->id, 0.0, 0.0, 1.0 };
             update_edge_bc(e, &surf_pos);
           }
         }
