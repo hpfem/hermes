@@ -405,7 +405,7 @@ namespace Hermes
           Node* base;
           int part;
         };
-        NodeData() : dof(0), edge_bc_proj(nullptr), vertex_bc_coef(nullptr) {}
+        NodeData() : dof(0), edge_bc_proj(nullptr) {}
       };
 
       class ElementData
