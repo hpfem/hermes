@@ -2,87 +2,62 @@
 
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
-using namespace Hermes::Hermes2D::Views;
 
-template<typename Scalar>
-class ExactSolutionScalarXY : public ExactSolutionScalar<Scalar>
+// This example shows how to solve a simple PDE that describes stationary
+// heat transfer in an object consisting of two materials (aluminum and
+// copper). The object is heated by constant volumetric heat sources
+// (generated, for example, by a DC electric current). The temperature
+// on the boundary is fixed. We will learn how to:
+//
+//   - load the mesh,
+//   - perform initial refinements,
+//   - create a H1 space over the mesh,
+//   - define weak formulation,
+//   - initialize matrix solver,
+//   - assemble and solve the matrix system,
+//   - output the solution and element orders in VTK format
+//     (to be visualized, e.g., using Paraview),
+//   - visualize the solution using Hermes' native OpenGL-based functionality.
+//
+// PDE: Poisson equation -div(LAMBDA grad u) - VOLUME_HEAT_SRC = 0.
+//
+// Boundary conditions: Dirichlet u(x, y) = FIXED_BDY_TEMP on the boundary.
+//
+// Geometry: L-Shape domain (see file domain.mesh).
+//
+// The following parameters can be changed:
+
+const bool HERMES_VISUALIZATION = true;   // Set to "false" to suppress Hermes OpenGL visualization.
+const bool VTK_VISUALIZATION = true;     // Set to "true" to enable VTK output.
+const int P_INIT = 3;                     // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refinements.
+
+// Problem parameters.
+const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
+const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
+const double VOLUME_HEAT_SRC = 5e2;        // Volume heat sources generated (for example) by electric current.
+const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
+
+class MyVolumetricIntegralCalculator : public PostProcessing::SurfaceIntegralCalculator<double>
 {
 public:
-  ExactSolutionScalarXY(MeshSharedPtr mesh) : ExactSolutionScalar<Scalar>(mesh) {}
-  virtual ~ExactSolutionScalarXY() {};
-
-  /// Function returning the value.
-  virtual Scalar value (double x, double y) const
-  {
-    return x*x - y*y;
-  }
-
-  virtual Ord ord(double x, double y) const
-  {
-    return Hermes::Ord(5);
-  }
-
-  MeshFunction<Scalar>* clone() const
-  {
-    return new ExactSolutionScalarXY<Scalar>(this->mesh);
-  }
-
-  /// Function returning the derivatives.
-  virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const
-  {
-    dx = 2.0*x;
-    dy = -2.0*y;
-  }
-};
-
-class MagneticVolumetricIntegralEggShellCalculator : public Hermes::Hermes2D::PostProcessing::VolumetricIntegralCalculator<double>
-{
-public:
-  MagneticVolumetricIntegralEggShellCalculator(Hermes::Hermes2D::MeshFunctionSharedPtr<double> source_function, int number_of_integrals)
-    : Hermes::Hermes2D::PostProcessing::VolumetricIntegralCalculator<double>(source_function, number_of_integrals)
+  MyVolumetricIntegralCalculator(MeshFunctionSharedPtr<double> source_function, int number_of_integrals) : PostProcessing::SurfaceIntegralCalculator<double>(source_function, number_of_integrals)
   {
   }
 
-  MagneticVolumetricIntegralEggShellCalculator(Hermes::vector<Hermes::Hermes2D::MeshFunctionSharedPtr<double> > source_functions, int number_of_integrals)
-    : Hermes::Hermes2D::PostProcessing::VolumetricIntegralCalculator<double>(source_functions, number_of_integrals)
+  MyVolumetricIntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<double> > source_functions, int number_of_integrals) : PostProcessing::SurfaceIntegralCalculator<double>(source_functions, number_of_integrals)
   {
   }
 
-  virtual void integral(int n, double* wt, Hermes::Hermes2D::Func<double> **fns, Hermes::Hermes2D::Geom<double> *e, double* result)
+  virtual void integral(int n, double* wt, Func<double> **fns, Geom<double> *e, double* result)
   {
-    double *x = e->x;
-    double *y = e->y;
-
-    // functions
-    double **value = new double*[source_functions.size()];
-    double **dudx = new double*[source_functions.size()];
-    double **dudy = new double*[source_functions.size()];
-
-    for (int i = 0; i < source_functions.size(); i++)
-    {
-      value[i] = fns[i]->val;
-      dudx[i] = fns[i]->dx;
-      dudy[i] = fns[i]->dy;
-    }
-
-    // expressions
     for (int i = 0; i < n; i++)
-    {
-      result[0] += wt[i];
-      result[1] += wt[i] * (y[i]*((dudx[source_functions.size() - 1][i]*(-1e6*(dudx[0][i]*dudx[0][i]+dudy[0][i]*dudy[0][i])+1e6*(dudx[0][i]*dudx[0][i])))+(dudy[source_functions.size() - 1][i]*1e6*dudx[0][i]*dudy[0][i]))-x[i]*((dudy[source_functions.size() - 1][i]*(-1e6*(dudx[0][i]*dudx[0][i]+dudy[0][i]*dudy[0][i])+1e6*(dudy[0][i]*dudy[0][i])))+(dudx[source_functions.size() - 1][i]*1e6*dudx[0][i]*dudy[0][i])));
-    }
+      result[0] += wt[i] * fns[0]->val[i];
+  };
 
-    delete [] value;
-    delete [] dudx;
-    delete [] dudy;
+  virtual void order(Func<Hermes::Ord> **fns, Hermes::Ord* result) {
+    result[0] = Hermes::Ord(21);
   }
-
-  virtual void order(Hermes::Hermes2D::Func<Hermes::Ord> **fns, Hermes::Ord* result)
-  {
-    result[0] = Hermes::Ord(20);
-    result[1] = Hermes::Ord(20);
-  }
-
 };
 
 int main(int argc, char* argv[])
@@ -90,49 +65,76 @@ int main(int argc, char* argv[])
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
-  // Hermes::Hermes2D::MeshReaderH2DBSON mloader_bson;
-  Hermes::vector<MeshSharedPtr> meshes;
-  meshes.push_back(mesh);
-  mloader.load("acoustic.msh", meshes);
+  mloader.load("domain.xml", mesh);
 
-  // mloader_bson.save("bson_mesh", meshes);
-  // mesh->free();
-  // mloader_bson.load("bson_mesh", meshes);
+  // Refine all elements, do it INIT_REF_NUM-times.
+  for(unsigned int i = 0; i < INIT_REF_NUM; i++)
+    mesh->refine_all_elements();
 
+  // Initialize essential boundary conditions.
+  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"),
+    FIXED_BDY_TEMP);
+  Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
-  mesh.get()->refine_towards_boundary("2", 1);
-  mesh.get()->refine_towards_boundary("1", 1);
-  mesh.get()->refine_towards_boundary("25", 2);
+  // Initialize space->
+  SpaceSharedPtr<double> space( new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT));
 
-  mesh.get()->refine_all_elements(1);
+  std::cout << "Ndofs: " << space->get_num_dofs() << std::endl;
 
-  for(int asdf = 0; asdf < 20; asdf++)
+  // Initialize the weak formulation.
+  CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
+    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(-VOLUME_HEAT_SRC));
+
+  // Initialize the solution.
+  MeshFunctionSharedPtr<double> sln(new Solution<double>);
+
+  // Initialize linear solver.
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
+  
+  // Solve the linear problem.
+  try
   {
-    Hermes::Hermes2D::MeshSharedPtr eggShellMesh = Hermes::Hermes2D::EggShell::get_egg_shell(mesh, "3", 3);
+    linear_solver.solve();
 
-    MeshView m;
-    m.show(eggShellMesh);
+    // Get the solution vector.
+    double* sln_vector = linear_solver.get_sln_vector();
 
-    Hermes::Hermes2D::MeshFunctionSharedPtr<double> b;
-    Hermes::Hermes2D::MeshFunctionSharedPtr<double> a(new Hermes::Hermes2D::ExactSolutionEggShell(eggShellMesh, 3));
+    // Translate the solution vector into the previously initialized Solution.
+    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
 
-    ScalarView s;
-    s.show(a);
+    MyVolumetricIntegralCalculator calc(sln, 1);
+    std::cout << calc.calculate(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"))[0];
 
-    b = a;
+    // VTK output.
+    if(VTK_VISUALIZATION)
+    {
+      // Output solution in VTK format.
+      Hermes::Hermes2D::Views::Linearizer lin;
+      bool mode_3D = false;
+      lin.save_solution_vtk(sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
 
-    Hermes::Hermes2D::MeshFunctionSharedPtr<double> sln(new ExactSolutionScalarXY<double>(mesh));
+      // Output mesh and element orders in VTK format.
+      Hermes::Hermes2D::Views::Orderizer ord;
+      ord.save_mesh_vtk(space, "mesh.vtk");
+      ord.save_orders_vtk(space, "ord.vtk");
+      ord.save_markers_vtk(space, "markers.vtk");
+    }
 
-    Hermes::vector<Hermes::Hermes2D::MeshFunctionSharedPtr<double> > slns;
-    slns.push_back(sln);
-    slns.push_back(a);
+    if(HERMES_VISUALIZATION)
+    {
+      // Visualize the solution.
+      Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
+      Hermes::Hermes2D::Views::OrderView viewSp("Space", new Hermes::Hermes2D::Views::WinGeom(0, 400, 500, 400));
 
-    MagneticVolumetricIntegralEggShellCalculator calcEggShell(slns, 2);
-    double *valuesEggShell = calcEggShell.calculate(Hermes::vector<std::string>("0", "1", "2", "4", "5"));
-    std::cout << valuesEggShell[0] << std::endl << valuesEggShell[1] << std::endl;
+      viewS.show(sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+      viewSp.show(space);
 
-    MeshView mview("Hello world!", new WinGeom(0, 0, 350, 350));
-    mview.show(mesh);
+      viewS.wait_for_close();
+    }
+  }
+  catch(std::exception& e)
+  {
+    std::cout << e.what();
   }
   return 0;
 }
