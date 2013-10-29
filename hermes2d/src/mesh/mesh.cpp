@@ -398,7 +398,7 @@ namespace Hermes
       x2 = get_vertex_node(e->vn[2]->id, e->vn[0]->id);
 
       CurvMap* cm[H2D_MAX_NUMBER_EDGES];
-      memset(cm, 0, sizeof(cm));
+      memset(cm, 0, H2D_MAX_NUMBER_EDGES * sizeof(CurvMap*));
 
       // adjust mid-edge coordinates if this is a curved element
       if(e->is_curved())

@@ -274,7 +274,14 @@ namespace Hermes
         surf_pos->t = surf_pos->lo;
         // Find out the (x, y) coordinates for the first endpoint.
         double x, y, n_x, n_y, t_x, t_y;
-        Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : nullptr;
+        Nurbs* nurbs = nullptr;
+        CurvMap* cm = surf_pos->base->cm;
+        if(cm)
+        {
+          while(!cm->toplevel)
+            cm = cm->parent->cm;
+          nurbs = cm->nurbs[surf_pos->surf_num];
+        }
         CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
         // Calculate.
         proj[0] = bc->value(x, y, n_x, n_y, t_x, t_y);
@@ -311,7 +318,14 @@ namespace Hermes
             {
               // Find out the (x, y) coordinate.
               double x, y, n_x, n_y, t_x, t_y;
-              Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : nullptr;
+              Nurbs* nurbs = nullptr;
+              CurvMap* cm = surf_pos->base->cm;
+              if(cm)
+              {
+                while(!cm->toplevel)
+                  cm = cm->parent->cm;
+                nurbs = cm->nurbs[surf_pos->surf_num];
+              }
               CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
               // Calculate.
               rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())

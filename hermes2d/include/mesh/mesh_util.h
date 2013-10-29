@@ -144,7 +144,7 @@ namespace Hermes
     /                       \                   / son[0]\  \ /  /son[1] \
     /                         \                 /         \  *  /         \
     *-------------*-------------*               *-----------*   *-----------*
-    vn[0]      vn[1] vn[2] vn[0]      vn[1]
+    vn[0]                     vn[1]          vn[2]          vn[0]         vn[1]
     vn[0]           en[0]           vn[1]
 
     -Triangle to quads refinement
@@ -166,8 +166,8 @@ namespace Hermes
     /                       \               /  son[0]   | |  son[1]   \
     /                         \             /            | |            \
     *-------------*-------------*           *-------------* *-------------*
-    vn[0]      vn[1]   vn[0]        vn[1]
-    vn[0]           en[0]           vn[1]
+    vn[0]                      vn[1]      vn[0]                       vn[1]
+    vn[0]                                             en[0]           vn[1]
 
     node and son numbering on a quad:          refinement '0':
 
