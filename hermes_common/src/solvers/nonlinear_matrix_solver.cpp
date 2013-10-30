@@ -553,7 +553,7 @@ namespace Hermes
           catch (Exceptions::NonlinearException& e)
           {
             this->finalize_solving();
-            throw;
+            throw e;
             return;
           }
 

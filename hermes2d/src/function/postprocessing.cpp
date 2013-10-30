@@ -964,7 +964,6 @@ namespace Hermes
               int order_int = order.get_order();
               limit_order(order_int, refmap->get_active_element()->get_mode());
 
-              double3* tan;
               Geom<double>* geometry;
               int n = init_surface_geometry_points(&refmap, 1, order_int, edge, current_state->rep->en[edge]->marker, geometry, jacobian_x_weights);
 

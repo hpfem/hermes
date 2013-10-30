@@ -158,7 +158,7 @@ namespace Hermes
         throw Hermes::Exceptions::MeshLoadFailureException("Mesh file not found.");
       s.close();
 
-      int i, j, k, n;
+      int i, j, n;
       Node* en;
       bool debug = false;
 
