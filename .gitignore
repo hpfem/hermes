@@ -105,3 +105,12 @@ Debug/
 *.unsuccessfulbuild
 *.amplxeproj
 *.diff
+
+# VTune
+CURRENT
+LOG
+LOCK
+MANIFEST*
+*.sst
+directory.xml
+*.vtss
