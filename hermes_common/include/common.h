@@ -97,7 +97,7 @@ typedef unsigned __int64 uint64_t;
 #include <inttypes.h>
 #endif
 
-#ifndef finite
+#ifdef _WINDOWS
 #define finite _finite
 #endif
 
