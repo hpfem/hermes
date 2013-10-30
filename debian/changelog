@@ -1,4 +1,15 @@
 hermes2d (3.0-ubuntu190) raring; urgency=low
+  * Speed and stability optimizations
+  * "Eggshell"-integration approximation
+  * IntegralCalculator classes (Surface, Volume)
+  * BSON - binary format for loading / saving of data
+  * Importing and operating on algebraic structures
+  * Picard solver with Newton-like interface 
+  * DG functionality: framework for limiters etc.
+
+ -- Lukas Korous <lukas.korous@gmail.com>  Wed, 30 Oct 2013 14:00:00 +0200
+
+hermes2d (2.0-ubuntu190) raring; urgency=low
 
   * Initial Release.
 
