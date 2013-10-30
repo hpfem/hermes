@@ -32,17 +32,8 @@ macro(MAKE_PATH PATH_OUT PATH_IN)
 endmacro(MAKE_PATH)
 
 # This ensures that a .dll library is built for both debug and release configurations under MSVC.
-macro(ADD_MSVC_BUILD_FLAGS LIB LIB_DEBUG LIB_RELEASE)
+macro(ADD_MSVC_BUILD_FLAGS LIB)
   set_target_properties(${LIB} PROPERTIES COMPILE_FLAGS "-DEXPORT_HERMES_DLL")
-  IF(DEFINED AGROS_BUILD)
-    IF(${AGROS_DEBUG})
-      set_target_properties(${LIB} PROPERTIES DEBUG_OUTPUT_NAME ${LIB_DEBUG})
-      set_target_properties(${LIB} PROPERTIES RELEASE_OUTPUT_NAME ${LIB_RELEASE})
-    ENDIF()
-  ELSE(DEFINED AGROS_BUILD)
-    set_target_properties(${LIB} PROPERTIES DEBUG_OUTPUT_NAME ${LIB_DEBUG})
-    set_target_properties(${LIB} PROPERTIES RELEASE_OUTPUT_NAME ${LIB_RELEASE})
-  ENDIF()
 endmacro(ADD_MSVC_BUILD_FLAGS)
 
 # Installs a library to directories relative to CMAKE_INSTALL_PREFIX.
@@ -51,6 +42,7 @@ macro(INSTALL_LIB LIB)
     RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
     LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
     ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+    
   IF(NOT DEFINED AGROS_BUILD)
     IF(MSVC)
       MAKE_PATH(TARGET_DIR "${CMAKE_INSTALL_PREFIX}/bin")

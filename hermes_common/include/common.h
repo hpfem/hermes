@@ -97,6 +97,9 @@ typedef unsigned __int64 uint64_t;
 #include <inttypes.h>
 #endif
 
+#ifndef finite
+#define finite _finite
+#endif
 
 typedef int int2[2];
 typedef int int3[3];

@@ -22,12 +22,14 @@ project(hermes)
     endif(${CMAKE_CL_64})
     
   # HermesCommon
+  # These are ignored for MSVC (where debug / release are handled differently)
     set(HERMES_COMMON_DEBUG     YES)
     set(HERMES_COMMON_RELEASE   YES)
 
   # Hermes2D:
   set(WITH_H2D                  YES)
     # Release and debug versions.
+    # These are ignored for MSVC (where debug / release are handled differently)
     set(H2D_DEBUG               YES)
     set(H2D_RELEASE             YES)
 	
@@ -214,19 +216,16 @@ project(hermes)
   endif()
   
   if(NOT(WITH_OPENMP))
-	set(NUM_THREADS 1)
+    set(NUM_THREADS 1)
   endif(NOT(WITH_OPENMP))
   
   MESSAGE(STATUS "Hermes will by default be using ${NUM_THREADS} threads for calculation.")
 
   macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
     if (WITH_${HXD})
-      if(MSVC)
-        # In MSVC, Release/Debug is distinguished in a special way
-        # (see hermes_common/cmake/BuildAndInstallScripts.cmake)
-        set(HERMES_COMMON_LIB_DEBUG ${HERMES_COMMON_LIB}-debug)
-        set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
-      else(MSVC)
+      # In MSVC, Release/Debug is distinguished in a special way
+      # (see hermes_common/cmake/BuildAndInstallScripts.cmake)
+      if(NOT MSVC)
         if(${HXD}_DEBUG)
           set(HERMES_COMMON_DEBUG YES)
           set(HERMES_COMMON_LIB_DEBUG  ${HERMES_COMMON_LIB}-debug)
@@ -236,7 +235,7 @@ project(hermes)
           set(HERMES_COMMON_RELEASE YES)
           set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
         endif(${HXD}_RELEASE)
-      endif(MSVC)
+      endif(NOT MSVC)
     endif (WITH_${HXD})
   endmacro(DETERMINE_HERMES_COMMON_RELEASE_DEBUG)
 
@@ -252,31 +251,9 @@ project(hermes)
     set(HERMES_DEBUG_FLAGS   "${CMAKE_CXX_FLAGS} -g -D_DEBUG")
   endif()
 
-  # Enabling multiprocessor build on MSVC
-  if(MSVC)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-    if(WITH_OPENMP)
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp")
-    endif(WITH_OPENMP)
-  endif(MSVC)
-
   # This overrides CXX flags for MSVC
   if(MSVC)
-    if(WIN64)
-      set(MSVC_DEFINES "/DWIN64 /D_WINDOWS /Dfinite=_finite /wd4275 /wd4251")
-    else(WIN64)
-      set(MSVC_DEFINES "/DWIN32 /D_WINDOWS /Dfinite=_finite /wd4275 /wd4251")
-    endif(WIN64)
-    set(CMAKE_CXX_FLAGS_DEBUG          "/D_DEBUG /Od /Ob2 /MDd /Zi ${MSVC_DEFINES}")
-    set(HERMES_DEBUG_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
-    set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT     "/O2 /Ob2 /MD ${MSVC_DEFINES}")
-    set(CMAKE_CXX_FLAGS_RELEASE        "/DNDEBUG /O2 /Ob2 /MD ${MSVC_DEFINES}")
-    set(HERMES_RELEASE_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/DNDEBUG /O2 /Ob2 /MD /Zi ${MSVC_DEFINES}")
-    
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
-    set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
-    set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
+    include(MSVC_FLAGS)
   endif(MSVC)
 
   if(H2D_WITH_TESTS OR HERMES_COMMON_WITH_TESTS)
