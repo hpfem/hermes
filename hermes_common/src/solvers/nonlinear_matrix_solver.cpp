@@ -49,6 +49,8 @@ namespace Hermes
     template<typename Scalar>
     NonlinearMatrixSolver<Scalar>::~NonlinearMatrixSolver()
     {
+      if (this->sln_vector)
+        delete[] this->sln_vector;
     }
 
     template<typename Scalar>
