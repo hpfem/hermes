@@ -266,170 +266,170 @@ project(hermes)
   # Find necessary packages according to the settings above.
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    find_package(PTHREAD REQUIRED)
-    include_directories(${PTHREAD_INCLUDE_DIR})
-    
-    if(WITH_TC_MALLOC)
-      find_package(TCMALLOC REQUIRED)
-      include_directories(${TCMALLOC_INCLUDE_DIR})
-    endif(WITH_TC_MALLOC)
+  find_package(PTHREAD REQUIRED)
+  include_directories(${PTHREAD_INCLUDE_DIR})
+  
+  if(WITH_TC_MALLOC)
+    find_package(TCMALLOC REQUIRED)
+    include_directories(${TCMALLOC_INCLUDE_DIR})
+  endif(WITH_TC_MALLOC)
 
-    IF(DEFINED BSON_LIBRARY)
-      IF(DEFINED BSON_INCLUDE_DIR)
-        include_directories(${BSON_INCLUDE_DIR})
-      ELSE()
-        MESSAGE(FATAL_ERROR When BSON_LIBRARY is defined, so must be BSON_INCLUDE_DIR.)
-      ENDIF()
+  IF(DEFINED BSON_LIBRARY)
+    IF(DEFINED BSON_INCLUDE_DIR)
+      include_directories(${BSON_INCLUDE_DIR})
     ELSE()
-      if(WITH_BSON)
-        find_package(BSON REQUIRED)
-        include_directories(${BSON_INCLUDE_DIR})
-      endif(WITH_BSON)
+      MESSAGE(FATAL_ERROR When BSON_LIBRARY is defined, so must be BSON_INCLUDE_DIR.)
     ENDIF()
+  ELSE()
+    if(WITH_BSON)
+      find_package(BSON REQUIRED)
+      include_directories(${BSON_INCLUDE_DIR})
+    endif(WITH_BSON)
+  ENDIF()
 
-    IF(DEFINED MATIO_LIBRARY)
-      IF(DEFINED MATIO_INCLUDE_DIR)
-        include_directories(${MATIO_INCLUDE_DIR})
-      ELSE()
-        MESSAGE(FATAL_ERROR When MATIO_LIBRARY is defined, so must be MATIO_INCLUDE_DIR.)
-      ENDIF()
+  IF(DEFINED MATIO_LIBRARY)
+    IF(DEFINED MATIO_INCLUDE_DIR)
+      include_directories(${MATIO_INCLUDE_DIR})
     ELSE()
-      if(WITH_MATIO)
-        find_package(MATIO REQUIRED)
-        include_directories(${MATIO_INCLUDE_DIR})
-      endif(WITH_MATIO)
+      MESSAGE(FATAL_ERROR When MATIO_LIBRARY is defined, so must be MATIO_INCLUDE_DIR.)
     ENDIF()
+  ELSE()
+    if(WITH_MATIO)
+      find_package(MATIO REQUIRED)
+      include_directories(${MATIO_INCLUDE_DIR})
+    endif(WITH_MATIO)
+  ENDIF()
 
-    find_package(XSD REQUIRED)
-    find_package(XERCES REQUIRED)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      if(WITH_STACKTRACE)
-        find_package(EXECINFO)
-      endif(WITH_STACKTRACE)
-    endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    
-    # Solvers.
-    if(WITH_UMFPACK)
-      find_package(UMFPACK REQUIRED)
-      include_directories(${UMFPACK_INCLUDE_DIRS})
-    endif(WITH_UMFPACK)
-    
-    if(WITH_MATIO AND MATIO_WITH_HDF5)
-      find_package(HDF5 REQUIRED)
-      include_directories(${HDF5_INCLUDE_DIR})
-    else()
-      set(MATIO_WITH_HDF5 NO)
-    endif()
-    
-    IF(DEFINED PARALUTION_LIBRARY)
-      IF(DEFINED PARALUTION_INCLUDE_DIR)
-        include_directories(${PARALUTION_INCLUDE_DIR})
-      ELSE()
-        MESSAGE(FATAL_ERROR When PARALUTION_LIBRARY is defined, so must be PARALUTION_INCLUDE_DIR.)
-      ENDIF()
+  find_package(XSD REQUIRED)
+  find_package(XERCES REQUIRED)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(WITH_STACKTRACE)
+      find_package(EXECINFO)
+    endif(WITH_STACKTRACE)
+  endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  
+  # Solvers.
+  if(WITH_UMFPACK)
+    find_package(UMFPACK REQUIRED)
+    include_directories(${UMFPACK_INCLUDE_DIRS})
+  endif(WITH_UMFPACK)
+  
+  if(WITH_MATIO AND MATIO_WITH_HDF5)
+    find_package(HDF5 REQUIRED)
+    include_directories(${HDF5_INCLUDE_DIR})
+  else()
+    set(MATIO_WITH_HDF5 NO)
+  endif()
+  
+  IF(DEFINED PARALUTION_LIBRARY)
+    IF(DEFINED PARALUTION_INCLUDE_DIR)
+      include_directories(${PARALUTION_INCLUDE_DIR})
     ELSE()
-      if(WITH_PARALUTION)
-        find_package(PARALUTION REQUIRED)
-        include_directories(${PARALUTION_INCLUDE_DIR})
-      endif(WITH_PARALUTION)
+      MESSAGE(FATAL_ERROR When PARALUTION_LIBRARY is defined, so must be PARALUTION_INCLUDE_DIR.)
     ENDIF()
-    
-    if(MSVC)
-      if(WITH_PETSC OR WITH_TRILINOS OR WITH_SUPERLU)
-          # The search for CLAPACK and associated libraries will be performed
-          # every time the project is configured in MSVC (TODO: Find out if
-          # CLAPACK_LIBRARY, BLAS_LIBRARY, F2C_LIBRARY and CLAPACK_INCLUDE_DIRS
-          # could be cached to improve subsequent configuration performance).
-          find_package(CLAPACK REQUIRED)
-          include_directories(${CLAPACK_INCLUDE_DIRS})
-      endif(WITH_PETSC OR WITH_TRILINOS OR WITH_SUPERLU)
-      if(WITH_MUMPS)
-        find_package(WINBLAS REQUIRED)
-      endif(WITH_MUMPS)
-    else(MSVC)
-      # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
-      # FindLAPACK is Fortran-only so Fortran must be enabled as well.
-      if(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-        if (NOT LAPACK_FOUND)
-            enable_language(Fortran)
-            find_package(LAPACK REQUIRED)
-                
-            # If no error occured, LAPACK library has been found. Save the path to
-            # it to cache, so that it will not be searched for during next 'cmake .'
-            set(LAPACK_LIBRARIES  ${LAPACK_LIBRARIES}
-                    CACHE STRING  "Path to LAPACK/BLAS libraries.")
-            set(LAPACK_FOUND      YES
-                    CACHE STRING  "Have LAPACK/BLAS libraries been found?")
-        endif (NOT LAPACK_FOUND)
-        
-        add_definitions(-DWITH_BLAS)  
-      endif(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-    endif(MSVC)
-    
-    if(WITH_PETSC)
-      find_package(PETSC REQUIRED)
-      # For some header files, PETSc uses the same name for both real and complex
-      # versions (they only reside in different directories), so we can't globally
-      # set the architecture-specific include directory here, but rather on a
-      # per-target basis.
-      include_directories(${PETSC_INCLUDE_DIRS})
-      include_directories(${PETSC_CPLX_INCLUDE_DIRS})
-      set(PETSC_LIBRARIES ${PETSC_CPLX_LIBRARIES})
-    endif(WITH_PETSC)
-
+  ELSE()
+    if(WITH_PARALUTION)
+      find_package(PARALUTION REQUIRED)
+      include_directories(${PARALUTION_INCLUDE_DIR})
+    endif(WITH_PARALUTION)
+  ENDIF()
+  
+  if(MSVC)
+    if(WITH_PETSC OR WITH_TRILINOS OR WITH_SUPERLU)
+        # The search for CLAPACK and associated libraries will be performed
+        # every time the project is configured in MSVC (TODO: Find out if
+        # CLAPACK_LIBRARY, BLAS_LIBRARY, F2C_LIBRARY and CLAPACK_INCLUDE_DIRS
+        # could be cached to improve subsequent configuration performance).
+        find_package(CLAPACK REQUIRED)
+        include_directories(${CLAPACK_INCLUDE_DIRS})
+    endif(WITH_PETSC OR WITH_TRILINOS OR WITH_SUPERLU)
     if(WITH_MUMPS)
-      find_package(MUMPS REQUIRED)
-      if(WITH_MPI)
-        find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS
-      endif(WITH_MPI)
-      include_directories(${MUMPS_INCLUDE_DIR})
-      set(MUMPS_LIBRARIES ${MUMPS_CPLX_LIBRARIES})
-      LIST(APPEND MUMPS_LIBRARIES ${MUMPS_REAL_LIBRARIES})
+      find_package(WINBLAS REQUIRED)
     endif(WITH_MUMPS)
+  else(MSVC)
+    # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
+    # FindLAPACK is Fortran-only so Fortran must be enabled as well.
+    if(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+      if (NOT LAPACK_FOUND)
+          enable_language(Fortran)
+          find_package(LAPACK REQUIRED)
+              
+          # If no error occured, LAPACK library has been found. Save the path to
+          # it to cache, so that it will not be searched for during next 'cmake .'
+          set(LAPACK_LIBRARIES  ${LAPACK_LIBRARIES}
+                  CACHE STRING  "Path to LAPACK/BLAS libraries.")
+          set(LAPACK_FOUND      YES
+                  CACHE STRING  "Have LAPACK/BLAS libraries been found?")
+      endif (NOT LAPACK_FOUND)
+      
+      add_definitions(-DWITH_BLAS)  
+    endif(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+  endif(MSVC)
+  
+  if(WITH_PETSC)
+    find_package(PETSC REQUIRED)
+    # For some header files, PETSc uses the same name for both real and complex
+    # versions (they only reside in different directories), so we can't globally
+    # set the architecture-specific include directory here, but rather on a
+    # per-target basis.
+    include_directories(${PETSC_INCLUDE_DIRS})
+    include_directories(${PETSC_CPLX_INCLUDE_DIRS})
+    set(PETSC_LIBRARIES ${PETSC_CPLX_LIBRARIES})
+  endif(WITH_PETSC)
 
-    if(WITH_TRILINOS)
-      find_package(TRILINOS REQUIRED)
-      include_directories(${TRILINOS_INCLUDE_DIR})
-    endif(WITH_TRILINOS)
-    
-    if(WITH_SUPERLU)
-      find_package(SUPERLU REQUIRED)
-      include_directories(${SUPERLU_INCLUDE_DIR})
-      if(SUPERLU_MT)
-        add_definitions(-DSLU_MT)
-      endif(SUPERLU_MT)
-    endif(WITH_SUPERLU)
-
-    # SMP.
-    if(WITH_OPENMP)
-      find_package(OpenMP REQUIRED)
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    endif(WITH_OPENMP)
-
-    if(WITH_EXODUSII)
-      find_package(EXODUSII REQUIRED)
-      include_directories(${EXODUSII_INCLUDE_DIR})
-    endif(WITH_EXODUSII)
-
-    # If using any package that requires MPI (e.g. parallel versions of MUMPS, PETSC).
+  if(WITH_MUMPS)
+    find_package(MUMPS REQUIRED)
     if(WITH_MPI)
-      if(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH) # If MPI was not defined by the user
-        find_package(MPI REQUIRED)
-      else(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
-        if(NOT EXISTS MPI_INCLUDE_PATH)
-          message(FATAL_ERROR "MPI include directory ${MPI_INCLUDE_PATH} not found")
-        endif(NOT EXISTS MPI_INCLUDE_PATH)
-      endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
-      include_directories(${MPI_INCLUDE_PATH})
+      find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS
     endif(WITH_MPI)
-    
-    IF(WITH_STACKTRACE)
-      IF(MSVC)
-        find_package(STACK_WALKER REQUIRED)
-        include_directories(${STACK_WALKER_INCLUDE_DIR})
-      ENDIF(MSVC)
-    ENDIF(WITH_STACKTRACE)
+    include_directories(${MUMPS_INCLUDE_DIR})
+    set(MUMPS_LIBRARIES ${MUMPS_CPLX_LIBRARIES})
+    LIST(APPEND MUMPS_LIBRARIES ${MUMPS_REAL_LIBRARIES})
+  endif(WITH_MUMPS)
+
+  if(WITH_TRILINOS)
+    find_package(TRILINOS REQUIRED)
+    include_directories(${TRILINOS_INCLUDE_DIR})
+  endif(WITH_TRILINOS)
+  
+  if(WITH_SUPERLU)
+    find_package(SUPERLU REQUIRED)
+    include_directories(${SUPERLU_INCLUDE_DIR})
+    if(SUPERLU_MT)
+      add_definitions(-DSLU_MT)
+    endif(SUPERLU_MT)
+  endif(WITH_SUPERLU)
+
+  # SMP.
+  if(WITH_OPENMP)
+    find_package(OpenMP REQUIRED)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  endif(WITH_OPENMP)
+
+  if(WITH_EXODUSII)
+    find_package(EXODUSII REQUIRED)
+    include_directories(${EXODUSII_INCLUDE_DIR})
+  endif(WITH_EXODUSII)
+
+  # If using any package that requires MPI (e.g. parallel versions of MUMPS, PETSC).
+  if(WITH_MPI)
+    if(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH) # If MPI was not defined by the user
+      find_package(MPI REQUIRED)
+    else(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
+      if(NOT EXISTS MPI_INCLUDE_PATH)
+        message(FATAL_ERROR "MPI include directory ${MPI_INCLUDE_PATH} not found")
+      endif(NOT EXISTS MPI_INCLUDE_PATH)
+    endif(NOT MPI_LIBRARIES OR NOT MPI_INCLUDE_PATH)
+    include_directories(${MPI_INCLUDE_PATH})
+  endif(WITH_MPI)
+  
+  IF(WITH_STACKTRACE)
+    IF(MSVC)
+      find_package(STACK_WALKER REQUIRED)
+      include_directories(${STACK_WALKER_INCLUDE_DIR})
+    ENDIF(MSVC)
+  ENDIF(WITH_STACKTRACE)
 
   # Match debug or release version of all other libraries.
   DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)
