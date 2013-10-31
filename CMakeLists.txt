@@ -59,17 +59,52 @@ project(hermes)
   set(WITH_MATIO NO)
   set(MATIO_WITH_HDF5 NO)
 
-  #### Solvers ###
-  # Standard UMFPACK
-    # UMFPACK is chosen by default.
-    set(WITH_UMFPACK YES)
-    # PARALUTION is chosen by default.
-    set(WITH_PARALUTION YES)
-    
   # Optional stacktrace - in development
-    set(WITH_STACKTRACE NO)
+  set(WITH_STACKTRACE NO)
+  
+  #### Solvers ###
+  # UMFPACK is chosen by default.
+  set(WITH_UMFPACK YES)
+  
+  # PARALUTION is chosen by default.
+  set(WITH_PARALUTION YES)
     
+  # MUMPS
+  # Sequential version of MUMPS may be enabled by setting YES on the following line
+  # and pointing to the package installation directory with MUMPS_ROOT. To enable the
+  # parallel version, setting WITH_MPI to YES in addition to that should suffice. If link
+  # problems arise, it may be that the automatically found SCALAPACK libraries (reported
+  # during the CMake configuration phase) do not match those used when compiling MUMPS.
+  # In this case, set SCALAPACK_LIBRARIES manually in CMake.vars and reconfigure Hermes.
+  set(WITH_MUMPS              NO)
+  # set(MUMPS_ROOT            root/dir/of/mumps/)
+  # set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
+
+  # Trilinos
+  # Enable support for Trilinos solvers.
+  set(WITH_TRILINOS           NO)
     
+  ### Mesh format ###
+    set(WITH_EXODUSII           NO)
+    set(WITH_HDF5               NO)
+
+  ### Others ###
+  # Parallel execution.
+    # (tells the linker to use parallel versions of the selected solvers, if available):
+    #
+    # Enable OpenMP for shared memory processing.
+    #
+    set(WITH_OPENMP             YES)
+
+    # If MPI is enabled, the MPI library installed on the system should be found by
+    # CMake automatically. If the found library doesn't match the one used to compile the
+    # particular MPI-dependent package, the other two options should be used to specify it.
+    #
+    set(WITH_MPI                NO)
+    # set(MPI_LIBRARIES         -lmpi)
+    # set(MPI_INCLUDE_PATH      /usr/include/openmpi
+
+  
   ################################## CURRENTLY NOT SUPPORTED ###################################
   #  \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/
   
@@ -92,41 +127,6 @@ project(hermes)
     set(WITH_PETSC              NO)
     set(PETSC_ROOT              /opt/petsc/petsc-3.1-p7)
     set(PETSC_ARCH              petsc-arch-without-scalar-type)
-
-  # MUMPS
-    # Sequential version of MUMPS may be enabled by setting YES on the following line
-    # and pointing to the package installation directory with MUMPS_ROOT. To enable the
-    # parallel version, setting WITH_MPI to YES in addition to that should suffice. If link
-    # problems arise, it may be that the automatically found SCALAPACK libraries (reported
-    # during the CMake configuration phase) do not match those used when compiling MUMPS.
-    # In this case, set SCALAPACK_LIBRARIES manually in CMake.vars and reconfigure Hermes.
-    set(WITH_MUMPS              NO)
-    # set(MUMPS_ROOT            root/dir/of/mumps/)
-    # set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
-
-  # Trilinos
-    # Enable support for Trilinos solvers.
-    set(WITH_TRILINOS           NO)
-    
-  ### Mesh format ###
-    set(WITH_EXODUSII           NO)
-    set(WITH_HDF5               NO)
-
-  ### Others ###
-  # Parallel execution.
-    # (tells the linker to use parallel versions of the selected solvers, if available):
-    #
-    # Enable OpenMP for shared memory processing.
-    #
-    set(WITH_OPENMP             YES)
-
-    # If MPI is enabled, the MPI library installed on the system should be found by
-    # CMake automatically. If the found library doesn't match the one used to compile the
-    # particular MPI-dependent package, the other two options should be used to specify it.
-    #
-    set(WITH_MPI                NO)
-    # set(MPI_LIBRARIES         -lmpi)
-    # set(MPI_INCLUDE_PATH      /usr/include/openmpi
 
   #  /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\
 	################################## CURRENTLY NOT SUPPORTED ###################################
