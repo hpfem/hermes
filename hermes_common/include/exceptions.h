@@ -25,11 +25,8 @@
 #include "common.h"
 #include "util/compat.h"
 
+#ifndef _DEBUG
 #undef assert
-#ifdef _DEBUG
-#define assert(x) \
-  (x) ? (void)0 : throw Hermes::Exceptions::Exception("Failed assertion: %s in %s (%d)", #x, __FILE__, __LINE__)
-#else
 #define assert(x)
 #endif
 
