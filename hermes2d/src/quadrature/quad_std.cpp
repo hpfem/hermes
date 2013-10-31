@@ -2544,7 +2544,7 @@ namespace Hermes
 
       for (i = 0; i <= max_order[1]; i++)
       {
-        delete [] std_tables_2d_quad[i];
+        ::free(std_tables_2d_quad[i]);
         for (j = 0; j < 4; j++)
         {
           k = max_order[1] + 1 + 4*i + j;
