@@ -56,7 +56,8 @@ namespace Hermes
       public:
         /// Constructor.
         /// \param[in] default_val Default value, if the user does not specify his own.
-				Parameter(T default_val);
+        Parameter(T default_val);
+        ~Parameter();
         bool user_set;
         T user_val;
         T default_val;
