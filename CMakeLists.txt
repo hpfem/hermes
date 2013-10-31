@@ -14,17 +14,17 @@ project(hermes)
   # Generate static libs (instead of dynamic)
   set(HERMES_STATIC_LIBS NO)
   
-    # For Win64
-    if(${CMAKE_CL_64})
-      set(WIN64 YES)
-    else(${CMAKE_CL_64})
-      set(WIN64 NO)
-    endif(${CMAKE_CL_64})
+  # For Win64
+  if(${CMAKE_CL_64})
+    set(WIN64 YES)
+  else(${CMAKE_CL_64})
+    set(WIN64 NO)
+  endif(${CMAKE_CL_64})
     
   # HermesCommon
   # These are ignored for MSVC (where debug / release are handled differently)
-    set(HERMES_COMMON_DEBUG     YES)
-    set(HERMES_COMMON_RELEASE   YES)
+  set(HERMES_COMMON_DEBUG     YES)
+  set(HERMES_COMMON_RELEASE   YES)
 
   # Hermes2D:
   set(WITH_H2D                  YES)
@@ -37,18 +37,19 @@ project(hermes)
     set(H2D_WITH_GLUT           YES)
     set(H2D_WITH_TEST_EXAMPLES  YES)
 	
-	# Advanced settings.
-	# Number of solution / filter components.
-	# Minimum is 1, maximum 999.
-	set(H2D_MAX_COMPONENTS 10)
-	# Number of quadratures, recommended is 4.
-	# Minimum is 2, maximum 999.
-	set(H2D_MAX_QUADRATURES 4)
-	#  This number has to be smaller than 21.
-	set(H2D_MAX_HANGING_NODES_LEVEL 15)
-	#  Use second derivatives (that are turned off by default).
-	set(H2D_USE_SECOND_DERIVATIVES NO)
+    # Advanced settings.
+    # Number of solution / filter components.
+    # Minimum is 1, maximum 999.
+    set(H2D_MAX_COMPONENTS 10)
+    # Number of quadratures, recommended is 4.
+    # Minimum is 2, maximum 999.
+    set(H2D_MAX_QUADRATURES 4)
+    #  This number has to be smaller than 21.
+    set(H2D_MAX_HANGING_NODES_LEVEL 15)
+    #  Use second derivatives (that are turned off by default).
+    set(H2D_USE_SECOND_DERIVATIVES NO)
   
+  # TC_MALLOC
   set(WITH_TC_MALLOC YES)
 
   # BSON 
