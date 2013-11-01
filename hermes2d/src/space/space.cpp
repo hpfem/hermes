@@ -248,6 +248,8 @@ namespace Hermes
         for (int i = oldsize; i < esize; i++)
         {
           edata[i].order = -1;
+          edata[i].bdof = -1;
+          edata[i].n = -1;
           edata[i].changed_in_last_adaptation = true;
         }
       }
