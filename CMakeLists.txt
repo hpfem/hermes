@@ -50,7 +50,7 @@ project(hermes)
     set(H2D_USE_SECOND_DERIVATIVES NO)
   
   # TC_MALLOC
-  set(WITH_TC_MALLOC YES)
+  set(WITH_TC_MALLOC NO)
 
   # BSON 
   set(WITH_BSON NO)
@@ -67,7 +67,7 @@ project(hermes)
   set(WITH_UMFPACK YES)
   
   # PARALUTION is chosen by default.
-  set(WITH_PARALUTION YES)
+  set(WITH_PARALUTION NO)
     
   # MUMPS
   # Sequential version of MUMPS may be enabled by setting YES on the following line
