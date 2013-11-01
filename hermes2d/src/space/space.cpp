@@ -181,8 +181,8 @@ namespace Hermes
         return true;
     }
 
-    template<>
-    Space<double>::~Space()
+    template<typename Scalar>
+    Space<Scalar>::~Space()
     {
       free();
 
@@ -193,17 +193,6 @@ namespace Hermes
 
       if (this->own_shapeset)
         delete this->shapeset;
-    }
-
-    template<>
-    Space<std::complex<double> >::~Space()
-    {
-      free();
-
-      if (this->proj_mat != nullptr)
-        delete[] this->proj_mat;
-      if (this->chol_p != nullptr)
-        delete[] this->chol_p;
     }
 
     template<typename Scalar>
