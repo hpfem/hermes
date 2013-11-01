@@ -1,4 +1,4 @@
-hermes2d (3.0-ubuntu192) raring; urgency=low
+hermes2d (3.0-ubuntu193) raring; urgency=low
   * Speed and stability optimizations
   * "Eggshell"-integration approximation
   * IntegralCalculator classes (Surface, Volume)
