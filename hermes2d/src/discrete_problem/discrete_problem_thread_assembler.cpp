@@ -100,6 +100,8 @@ namespace Hermes
             u_ext[j] = new ZeroSolutionVector<Scalar>(spaces[j]->get_mesh());
         }
       }
+
+      this->integrationOrderCalculator.u_ext = this->u_ext;
     }
 
     template<typename Scalar>
@@ -152,6 +154,7 @@ namespace Hermes
     void DiscreteProblemThreadAssembler<Scalar>::init_assembling_one_state(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state_)
     {
       current_state = current_state_;
+      this->integrationOrderCalculator.current_state = this->current_state;
 
       for (int j = 0; j < fns.size(); j++)
       {
@@ -195,7 +198,7 @@ namespace Hermes
       if (this->do_not_use_cache)
       {
         this->current_cache_record = new typename DiscreteProblemCache<Scalar>::CacheRecord;
-        int order = this->integrationOrderCalculator.calculate_order(spaces, current_state, refmaps, u_ext, this->wf);
+        int order = this->integrationOrderCalculator.calculate_order(spaces, refmaps, this->wf);
         this->current_cache_record->init(current_state, pss, refmaps, u_ext, als, alsSurface, this->wf, order);
         return;
       }
@@ -248,7 +251,7 @@ namespace Hermes
             cache_record_found_reinit++;
 
           this->current_cache_record->free();
-          int order = this->integrationOrderCalculator.calculate_order(spaces, current_state, refmaps, u_ext, this->wf);
+          int order = this->integrationOrderCalculator.calculate_order(spaces, refmaps, this->wf);
           this->current_cache_record->init(current_state, pss, refmaps, u_ext, als, alsSurface, this->wf, order);
         }
       }
@@ -256,7 +259,7 @@ namespace Hermes
       {
         if (this->report_cache_hits_and_misses)
           cache_record_not_found++;
-        int order = this->integrationOrderCalculator.calculate_order(spaces, current_state, refmaps, u_ext, this->wf);
+        int order = this->integrationOrderCalculator.calculate_order(spaces, refmaps, this->wf);
         this->current_cache_record->init(current_state, pss, refmaps, u_ext, als, alsSurface, this->wf, order);
       }
     }
@@ -313,8 +316,7 @@ namespace Hermes
         {
           if (u_ext_fns[ext_i])
           {
-            u_ext_fns[ext_i]->set_active_element(current_state->rep);
-            ext_func[ext_i] = init_fn(u_ext_fns[ext_i].get(), u_ext_func, this->spaces_size, order, geometry);
+            ext_func[ext_i] = init_fn(u_ext_fns[ext_i].get(), u_ext_func, this->spaces_size, order, geometry, current_state->rep->get_mode());
           }
           else
             ext_func[ext_i] = nullptr;

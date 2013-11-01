@@ -50,7 +50,7 @@ namespace Hermes
     {
     public:
       /// \return The element associated with the function being represented by the class.
-      Element* get_active_element() const;
+      inline Element* get_active_element() const { return this->element; }
 
       /// Sets the current transform at once as if it was created by multiple calls to push_transform().
       /// \param idx[in] The number of the sub-element, as returned by get_transform().

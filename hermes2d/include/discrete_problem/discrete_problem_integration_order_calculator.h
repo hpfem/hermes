@@ -47,21 +47,27 @@ namespace Hermes
       void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps);
 
       /// Matrix volumetric forms - calculate the integration order.
-      int calc_order_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      int calc_order_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixForm<Scalar>* mfv, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext);
 
       /// Vector volumetric forms - calculate the integration order.
-      int calc_order_vector_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, VectorForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      int calc_order_vector_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, VectorForm<Scalar>* mfv, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext);
 
       /// Order calculation.
-      int calculate_order(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* state, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, WeakForm<Scalar>* current_wf);
-      
+      int calculate_order(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, RefMap** current_refmaps, WeakForm<Scalar>* current_wf);
+    
+      /// \ingroup Helper methods inside {calc_order_*, assemble_*}
+      /// Calculates orders for previous nonlinear iterations.
+      Func<Hermes::Ord>** init_u_ext_orders();
+      /// \ingroup Helper methods inside {calc_order_*, assemble_*}
+      /// Cleans up after init_u_ext_orders.
+      void deinit_u_ext_orders(Func<Hermes::Ord>** u_ext_func);
+
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for external functions.
-      void init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>**& oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      Func<Hermes::Ord>** init_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func);
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext_orders.
-      template<typename FormType>
-      void deinit_ext_orders(Form<Scalar> *form, FormType** oi, FormType** oext);
+      void deinit_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** ext_func);
 
       /// Calculates integration order for DG matrix forms.
       int calc_order_dg_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* state, MatrixFormDG<Scalar>* mfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_u, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches);
@@ -75,9 +81,17 @@ namespace Hermes
       /// Initialize orders of external functions for DG forms.
       DiscontinuousFunc<Hermes::Ord>** init_ext_fns_ord(Hermes::vector<MeshFunctionSharedPtr<Scalar> > &ext,
         NeighborSearch<Scalar>** neighbor_searches);
+      
+      /// Deinitialize orders of external functions for DG forms.
+      template<typename FormType>
+      void deinit_ext_fns_ord(Form<Scalar> *form, FormType** oi, FormType** oext);
 
       /// For selective assembling.
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;
+
+      /// For initialization of external functions.
+      Solution<Scalar>** u_ext;
+      Traverse::State* current_state;
 
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemThreadAssembler;

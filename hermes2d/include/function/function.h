@@ -107,7 +107,7 @@ namespace Hermes
       virtual ~Function();
 
       /// \brief Returns the number of components of the function being represented by the class.
-      int get_num_components() const;
+      inline int get_num_components() { return num_components; }
 
       /// \brief Returns function values.
       /// \param component[in] The component of the function (0 or 1).

@@ -91,7 +91,8 @@ namespace Hermes
       bool vector_structure_reusable;
 
       friend class DiscreteProblem<Scalar>;
-      friend class Solver<Scalar>;
+      friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
+      friend class Solver<Scalar>; 
     };
   }
 }

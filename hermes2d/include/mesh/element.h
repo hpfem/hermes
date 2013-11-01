@@ -127,12 +127,23 @@ namespace Hermes
 
       // returns the edge orientation. This works for the unconstrained edges.
       int get_edge_orientation(int ie) const;
-      ElementMode2D  get_mode() const;
+      
+      inline ElementMode2D  get_mode() const { 
+        return (nvert == 3) ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD; 
+      }
 
-      bool is_triangle() const;
-      bool is_quad() const;
-      bool is_curved() const;
-      int get_nvert() const;
+      inline bool is_triangle() const {
+        return nvert == 3;
+      }
+      inline bool is_quad() const {
+        return nvert == 4;
+      }
+      inline bool is_curved() const {
+        return cm != nullptr;
+      }
+      inline int get_nvert() const {
+        return this->nvert;
+      }
 
       bool hsplit() const;
       bool vsplit() const;

@@ -400,18 +400,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_element_order(int id) const
-    {
-      if (id >= esize)
-      {
-        this->warn("Element index %d in Space<Scalar>::get_element_order() while maximum is %d.", id, esize);
-        throw Hermes::Exceptions::Exception("Wrong element index in Space<Scalar>::get_element_order().");
-      }
-
-      return edata[id].order;
-    }
-
-    template<typename Scalar>
     void Space<Scalar>::set_uniform_order(int order, std::string marker)
     {
       if (marker == HERMES_ANY)

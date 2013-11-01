@@ -34,84 +34,113 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblemIntegrationOrderCalculator<Scalar>::DiscreteProblemIntegrationOrderCalculator(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) : selectiveAssembler(selectiveAssembler)
+    DiscreteProblemIntegrationOrderCalculator<Scalar>::DiscreteProblemIntegrationOrderCalculator(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) : 
+      selectiveAssembler(selectiveAssembler),
+      current_state(nullptr),
+      u_ext(nullptr)
     {
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, WeakForm<Scalar>* current_wf)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, RefMap** current_refmaps, WeakForm<Scalar>* current_wf)
     {
+      // Order set to constant.
+      if (current_wf->global_integration_order_set)
+        return current_wf->global_integration_order;
+
       // Order calculation.
-      int order = current_wf->global_integration_order_set ? current_wf->global_integration_order : 0;
-      if (order == 0)
+      int order = 0;
+
+      // init - u_ext_func
+      Func<Hermes::Ord>** u_ext_func = this->init_u_ext_orders();
+      // init - ext
+      Func<Hermes::Ord>** ext_func = this->init_ext_orders(current_wf->ext, current_wf->u_ext_fn, u_ext_func);
+
+      for (int current_mfvol_i = 0; current_mfvol_i < current_wf->mfvol.size(); current_mfvol_i++)
       {
-        for (int current_mfvol_i = 0; current_mfvol_i < current_wf->mfvol.size(); current_mfvol_i++)
-        {
-          MatrixFormVol<Scalar>* current_mfvol = current_wf->mfvol[current_mfvol_i];
-          if (!selectiveAssembler->form_to_be_assembled(current_mfvol, current_state))
-            continue;
-          current_mfvol->wf = current_wf;
-          int orderTemp = calc_order_matrix_form(spaces, current_mfvol, current_refmaps, current_u_ext, current_state);
-          if (order < orderTemp)
-            order = orderTemp;
-        }
+        MatrixFormVol<Scalar>* current_mfvol = current_wf->mfvol[current_mfvol_i];
+        if (!selectiveAssembler->form_to_be_assembled(current_mfvol, current_state))
+          continue;
+        current_mfvol->wf = current_wf;
+        int orderTemp = calc_order_matrix_form(spaces, current_mfvol, current_refmaps, ext_func, u_ext_func);
+        if (order < orderTemp)
+          order = orderTemp;
+      }
 
-        for (int current_vfvol_i = 0; current_vfvol_i < current_wf->vfvol.size(); current_vfvol_i++)
-        {
-          VectorFormVol<Scalar>* current_vfvol = current_wf->vfvol[current_vfvol_i];
-          if (!selectiveAssembler->form_to_be_assembled(current_vfvol, current_state))
-            continue;
-          current_vfvol->wf = current_wf;
-          int orderTemp = calc_order_vector_form(spaces, current_vfvol, current_refmaps, current_u_ext, current_state);
-          if (order < orderTemp)
-            order = orderTemp;
-        }
+      for (int current_vfvol_i = 0; current_vfvol_i < current_wf->vfvol.size(); current_vfvol_i++)
+      {
+        VectorFormVol<Scalar>* current_vfvol = current_wf->vfvol[current_vfvol_i];
+        if (!selectiveAssembler->form_to_be_assembled(current_vfvol, current_state))
+          continue;
+        current_vfvol->wf = current_wf;
+        int orderTemp = calc_order_vector_form(spaces, current_vfvol, current_refmaps, ext_func, u_ext_func);
+        if (order < orderTemp)
+          order = orderTemp;
+      }
 
-        // Surface forms.
-        if (current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
+      // Surface forms.
+      if (current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
+      {
+        for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
         {
-          for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
+          if (!current_state->bnd[current_state->isurf])
+            continue;
+
+          // init - u_ext_func
+          Func<Hermes::Ord>** u_ext_funcSurf = this->init_u_ext_orders();
+
+          // init - ext
+          Func<Hermes::Ord>** ext_funcSurf = this->init_ext_orders(current_wf->ext, current_wf->u_ext_fn, u_ext_func);
+
+          for (int current_mfsurf_i = 0; current_mfsurf_i < current_wf->mfsurf.size(); current_mfsurf_i++)
           {
-            if (!current_state->bnd[current_state->isurf])
+            MatrixFormSurf<Scalar>* current_mfsurf = current_wf->mfsurf[current_mfsurf_i];
+            if (!selectiveAssembler->form_to_be_assembled(current_mfsurf, current_state))
               continue;
-            for (int current_mfsurf_i = 0; current_mfsurf_i < current_wf->mfsurf.size(); current_mfsurf_i++)
-            {
-              MatrixFormSurf<Scalar>* current_mfsurf = current_wf->mfsurf[current_mfsurf_i];
-              if (!selectiveAssembler->form_to_be_assembled(current_mfsurf, current_state))
-                continue;
-              current_mfsurf->wf = current_wf;
-              int orderTemp = calc_order_matrix_form(spaces, current_mfsurf, current_refmaps, current_u_ext, current_state);
-              if (order < orderTemp)
-                order = orderTemp;
-            }
-
-            for (int current_vfsurf_i = 0; current_vfsurf_i < current_wf->vfsurf.size(); current_vfsurf_i++)
-            {
-              VectorFormSurf<Scalar>* current_vfsurf = current_wf->vfsurf[current_vfsurf_i];
-              if (!selectiveAssembler->form_to_be_assembled(current_vfsurf, current_state))
-                continue;
-
-              current_vfsurf->wf = current_wf;
-              int orderTemp = calc_order_vector_form(spaces, current_vfsurf, current_refmaps, current_u_ext, current_state);
-              if (order < orderTemp)
-                order = orderTemp;
-            }
+            current_mfsurf->wf = current_wf;
+            int orderTemp = calc_order_matrix_form(spaces, current_mfsurf, current_refmaps, ext_funcSurf, u_ext_funcSurf);
+            if (order < orderTemp)
+              order = orderTemp;
           }
+
+          for (int current_vfsurf_i = 0; current_vfsurf_i < current_wf->vfsurf.size(); current_vfsurf_i++)
+          {
+            VectorFormSurf<Scalar>* current_vfsurf = current_wf->vfsurf[current_vfsurf_i];
+            if (!selectiveAssembler->form_to_be_assembled(current_vfsurf, current_state))
+              continue;
+
+            current_vfsurf->wf = current_wf;
+            int orderTemp = calc_order_vector_form(spaces, current_vfsurf, current_refmaps, ext_funcSurf, u_ext_funcSurf);
+            if (order < orderTemp)
+              order = orderTemp;
+          }
+
+          // deinit - u_ext_func
+          this->deinit_u_ext_orders(u_ext_funcSurf);
+
+          // deinit - ext
+          this->deinit_ext_orders(current_wf->ext, current_wf->u_ext_fn, ext_funcSurf);
         }
       }
+
+      // deinit - u_ext_func
+      this->deinit_u_ext_orders(u_ext_func);
+
+      // deinit - ext
+      this->deinit_ext_orders(current_wf->ext, current_wf->u_ext_fn, ext_func);
 
       return order;
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixForm<Scalar> *form, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixForm<Scalar> *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
     {
       int order;
 
-      // order of solutions from the previous Newton iteration etc..
-      Func<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
-      Func<Hermes::Ord>** ext_ord = nullptr;
-      init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
+      Func<Hermes::Ord>** local_ext = ext;
+      // If the user supplied custom ext functions for this form.
+      if (form->ext.size() > 0)
+        local_ext = this->init_ext_orders(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : form->wf->u_ext_fn), u_ext);
 
       // Order of shape functions.
       int max_order_j = spaces[form->j]->get_element_order(current_state->e[form->j]->id);
@@ -141,13 +170,15 @@ namespace Hermes
       // Total order of the vector form.
       double fake_wt = 1.0;
       Geom<Hermes::Ord> *tmp = init_geom_ord();
-      Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ou, ov, tmp, ext_ord);
+      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ou, ov, tmp, local_ext);
       delete tmp;
 
       adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
       // Cleanup.
-      deinit_ext_orders(form, u_ext_ord, ext_ord);
+      if (form->ext.size() > 0)
+        this->deinit_ext_orders(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : form->wf->u_ext_fn), local_ext);
+
       ou->free_ord();
       delete ou;
       ov->free_ord();
@@ -157,14 +188,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_vector_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, VectorForm<Scalar> *form, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_vector_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, VectorForm<Scalar> *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
     {
       int order;
 
-      // order of solutions from the previous Newton iteration etc..
-      Func<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
-      Func<Hermes::Ord>** ext_ord = nullptr;
-      init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
+      Func<Hermes::Ord>** local_ext = ext;
+      // If the user supplied custom ext functions for this form.
+      if (form->ext.size() > 0)
+        local_ext = this->init_ext_orders(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : form->wf->u_ext_fn), u_ext);
 
       // Order of shape functions.
       int max_order_i = spaces[form->i]->get_element_order(current_state->e[form->i]->id);
@@ -184,13 +215,15 @@ namespace Hermes
       // Total order of the vector form.
       double fake_wt = 1.0;
       Geom<Hermes::Ord> *tmp = init_geom_ord();
-      Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, tmp, ext_ord);
+      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ov, tmp, local_ext);
       delete tmp;
 
       adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
       // Cleanup.
-      deinit_ext_orders(form, u_ext_ord, ext_ord);
+      if (form->ext.size() > 0)
+        this->deinit_ext_orders(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : form->wf->u_ext_fn), local_ext);
+      
       ov->free_ord();
       delete ov;
 
@@ -198,90 +231,118 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>**& oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
+    Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_u_ext_orders()
     {
-      int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
-      int u_ext_fn_size = form->u_ext_fn.size() ? form->u_ext_fn.size() : form->wf->u_ext_fn.size();
-      if (ext_size + u_ext_fn_size > 0)
-        oext = new Func<Hermes::Ord>*[ext_size + u_ext_fn_size];
-
-      unsigned int prev_size = this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset;
-      bool surface_form = (current_state->isurf > -1);
-
-      if (current_u_ext)
+      Func<Hermes::Ord>** u_ext_func = nullptr;
+      bool surface_form = (this->current_state->isurf > -1);
+      if (this->u_ext)
       {
-        for (int i = 0; i < prev_size; i++)
-        if (current_u_ext[i + form->u_ext_offset])
-        if (surface_form)
-          oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_edge_fn_order(current_state->isurf) + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
-        else
-          oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order() + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
-        else
-          oi[i] = init_fn_ord(0);
-      }
+        u_ext_func = new Func<Hermes::Ord>*[this->selectiveAssembler->spaces_size];
 
-      if (form->u_ext_fn.size() > 0)
-      {
-        for (int i = 0; i < u_ext_fn_size; i++)
+        for (int i = 0; i < this->selectiveAssembler->spaces_size; i++)
         {
-          oext[i] = init_fn_ord(0);
-          form->u_ext_fn[i]->ord(oi, oext[i]);
-        }
-      }
-      else
-      {
-        for (int i = 0; i < u_ext_fn_size; i++)
-        {
-          oext[i] = init_fn_ord(0);
-          form->wf->u_ext_fn[i]->ord(oi, oext[i]);
-        }
-      }
+          assert(this->u_ext[i]);
 
-      if (form->ext.size() > 0)
-      {
-        for (int i = 0; i < ext_size; i++)
-        {
-          if (surface_form)
-            oext[u_ext_fn_size + i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+          if (this->u_ext[i]->get_active_element())
+          {
+            if (surface_form)
+              u_ext_func[i] = init_fn_ord(this->u_ext[i]->get_edge_fn_order(this->current_state->isurf) + (this->u_ext[i]->get_num_components() > 1 ? 1 : 0));
+            else
+              u_ext_func[i] = init_fn_ord(this->u_ext[i]->get_fn_order() + (this->u_ext[i]->get_num_components() > 1 ? 1 : 0));
+          }
           else
-            oext[u_ext_fn_size + i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+            u_ext_func[i] = init_fn_ord(0);
         }
       }
-      else
+
+      return u_ext_func;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_u_ext_orders(Func<Hermes::Ord>** u_ext_func)
+    {
+      if (u_ext_func)
       {
-        for (int i = 0; i < ext_size; i++)
-        if (surface_form)
-          oext[u_ext_fn_size + i] = init_fn_ord(form->wf->ext[i]->get_edge_fn_order(current_state->isurf) + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
-        else
-          oext[u_ext_fn_size + i] = init_fn_ord(form->wf->ext[i]->get_fn_order() + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
+        for (int i = 0; i < this->selectiveAssembler->spaces_size; i++)
+        {
+          if (u_ext_func[i])
+          {
+            u_ext_func[i]->free_ord();
+            delete u_ext_func[i];
+          }
+        }
+        delete[] u_ext_func;
       }
     }
 
     template<typename Scalar>
-    template<typename FormType>
-    void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_orders(Form<Scalar> *form, FormType** oi, FormType** oext)
+    Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func)
     {
-      unsigned int prev_size = oi ? (this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset) : 0;
-      if (oi)
+      Func<Hermes::Ord>** ext_func = nullptr;
+      bool surface_form = (this->current_state->isurf > -1);
+      if (ext.size() > 0 || u_ext_fns.size() > 0)
       {
-        for (int i = 0; i < prev_size; i++)
+        ext_func = new Func<Hermes::Ord>*[ext.size() + u_ext_fns.size()];
+        for (int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
         {
-          oi[i]->free_ord();
-          delete oi[i];
+          if (u_ext_fns[ext_i])
+          {
+            ext_func[ext_i] = init_fn_ord(0);
+            u_ext_fns[ext_i]->ord(u_ext_func, ext_func[ext_i]);
+          }
+          else
+            ext_func[ext_i] = nullptr;
         }
-        delete[] oi;
+
+        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
+        {
+          if (ext[ext_i])
+          {
+            if (ext[ext_i]->get_active_element())
+            {
+              if (surface_form)
+                ext_func[u_ext_fns.size() + ext_i] = init_fn_ord(ext[ext_i]->get_edge_fn_order(this->current_state->isurf) + (ext[ext_i]->get_num_components() > 1 ? 1 : 0));
+              else
+                ext_func[u_ext_fns.size() + ext_i] = init_fn_ord(ext[ext_i]->get_fn_order() + (ext[ext_i]->get_num_components() > 1 ? 1 : 0));
+            }
+            else
+              ext_func[u_ext_fns.size() + ext_i] = nullptr;
+          }
+          else
+            ext_func[u_ext_fns.size() + ext_i] = nullptr;
+        }
       }
 
-      int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
-      int u_ext_fn_size = form->u_ext_fn.size() ? form->u_ext_fn.size() : form->wf->u_ext_fn.size();
-      if (oext)
+      if (this->rungeKutta)
       {
-        for (int i = 0; i < ext_size + u_ext_fn_size; i++)
+        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
+          u_ext_func[ext_i]->add(ext_func[ext.size() - this->RK_original_spaces_count + ext_i]);
+      }
+
+      return ext_func;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** ext_func)
+    {
+      if (ext_func)
+      {
+        for (int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
         {
-          oext[i]->free_ord();
-          delete oext[i];
+          ext_func[ext_i]->free_ord();
+          delete ext_func[ext_i];
         }
-        delete[] oext;
+
+        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
+        {
+          if (ext[ext_i] && ext[ext_i]->get_active_element())
+          {
+            ext_func[u_ext_fns.size() + ext_i]->free_ord();
+            delete ext_func[u_ext_fns.size() + ext_i];
+          }
+        }
+
+        delete[] ext_func;
       }
     }
 
@@ -313,6 +374,34 @@ namespace Hermes
         fake_ext_fns[j] = init_ext_fn_ord(DiscreteProblemDGAssembler<Scalar>::get_neighbor_search_ext(this->selectiveAssembler->get_weak_formulation(), neighbor_searches, j), ext[j]);
 
       return fake_ext_fns;
+    }
+
+    template<typename Scalar>
+    template<typename FormType>
+    void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_fns_ord(Form<Scalar> *form, FormType** oi, FormType** oext)
+    {
+      unsigned int prev_size = oi ? (this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset) : 0;
+      if (oi)
+      {
+        for (int i = 0; i < prev_size; i++)
+        {
+          oi[i]->free_ord();
+          delete oi[i];
+        }
+        delete[] oi;
+      }
+
+      int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
+      int u_ext_fn_size = form->u_ext_fn.size() ? form->u_ext_fn.size() : form->wf->u_ext_fn.size();
+      if (oext)
+      {
+        for (int i = 0; i < ext_size + u_ext_fn_size; i++)
+        {
+          oext[i]->free_ord();
+          delete oext[i];
+        }
+        delete[] oext;
+      }
     }
 
     template<typename Scalar>
@@ -367,7 +456,7 @@ namespace Hermes
       adjust_order_to_refmaps(mfDG, order, &o, current_refmaps);
 
       // Cleanup.
-      deinit_ext_orders(mfDG, u_ext_ord, ext_ord);
+      deinit_ext_fns_ord(mfDG, u_ext_ord, ext_ord);
       ou->free_ord();
       delete ou;
       ov->free_ord();
@@ -423,7 +512,7 @@ namespace Hermes
       adjust_order_to_refmaps(vfDG, order, &o, current_refmaps);
 
       // Cleanup.
-      deinit_ext_orders(vfDG, u_ext_ord, ext_ord);
+      deinit_ext_fns_ord(vfDG, u_ext_ord, ext_ord);
       ov->free_ord();
       delete ov;
 

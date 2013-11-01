@@ -154,7 +154,9 @@ namespace Hermes
 
 #pragma region Getters
       /// Returns element polynomial order.
-      int get_element_order(int id) const;
+      inline int get_element_order(int id) const {
+        return edata[id].order;
+      }
 
       /// \brief Returns the number of basis functions contained in the space.
       int get_num_dofs() const;

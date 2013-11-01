@@ -92,32 +92,6 @@ namespace Hermes
     Element::Element() : visited(false), area(0.0), diameter(0.0), center_set(false)
     {
     };
-
-    bool Element::is_triangle() const
-    {
-      return nvert == 3;
-    }
-
-    bool Element::is_quad() const
-    {
-      return nvert == 4;
-    }
-
-    bool Element::is_curved() const
-    {
-      return cm != nullptr;
-    }
-
-    int Element::get_nvert() const
-    {
-      return this->nvert;
-    }
-
-    ElementMode2D Element::get_mode() const
-    {
-      return (nvert == 3) ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD;
-    }
-
     int Element::next_vert(int i) const
     {
       return (i < (int)nvert-1) ? i + 1 : 0;

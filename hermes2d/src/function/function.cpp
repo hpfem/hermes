@@ -63,12 +63,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Function<Scalar>::get_num_components() const
-    {
-      return num_components;
-    }
-
-    template<typename Scalar>
     void Function<Scalar>::set_quad_order(unsigned int order, int mask)
     {
       if(nodes->present(order)) {

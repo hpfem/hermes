@@ -56,8 +56,6 @@ namespace Hermes
 
     Transformable::~Transformable() {}
 
-    Element* Transformable::get_active_element() const { return element; }
-
     void Transformable::pop_transform()
     {
       assert(top > 0);
