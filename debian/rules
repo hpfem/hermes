@@ -20,3 +20,5 @@ clean:
 install: build
 	$(MAKE) install
 	$(MAKE) --directory doc html
+
+binary: build
