@@ -195,7 +195,7 @@ namespace Hermes
     template<typename Scalar>
     MatrixFormVol<Scalar>* MatrixDefaultNormFormVol<Scalar>::clone() const
     {
-      return new MatrixDefaultNormFormVol(*this);
+      return new MatrixDefaultNormFormVol(this->i, this->j, this->normType);
     }
 
     template<typename Scalar>
@@ -249,7 +249,7 @@ namespace Hermes
     template<typename Scalar>
     VectorFormVol<Scalar>* VectorDefaultNormFormVol<Scalar>::clone() const
     {
-      return new VectorDefaultNormFormVol(*this);
+      return new VectorDefaultNormFormVol(this->i, this->normType);
     }
 
     template HERMES_API class NormFormVol<double>;
