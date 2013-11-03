@@ -424,7 +424,7 @@ namespace Hermes
         {
           if(hcurl_casted)
             delete [] rval[son][HcurlProjBasedSelector<Scalar>::H2D_HCFE_CURL];
-          delete [] rval[son];
+          ::free(rval[son]);
         }
       }
 
