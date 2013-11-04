@@ -278,6 +278,8 @@ namespace Hermes
         else
           this->edata[e->id].changed_in_last_adaptation = false;
       }
+
+      this->assign_dofs();
     }
 
     template<typename Scalar>
