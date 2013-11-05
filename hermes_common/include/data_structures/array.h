@@ -269,8 +269,8 @@ namespace Hermes
         int local_page_count = this->page_count;
         this->page_count = std::max<int>(this->page_count + 1, (int)(this->page_count * 1.5));
         this->pages = (TYPE**)realloc(this->pages, this->page_count * sizeof(TYPE*));
-        TYPE* new_page = new TYPE[HERMES_PAGE_SIZE];
-        pages[local_page_count++] = new_page;
+        for(int new_i = local_page_count; new_i < this->page_count; new_i++)
+          pages[new_i] = new TYPE[HERMES_PAGE_SIZE];
       }
       TYPE* item = pages[size >> HERMES_PAGE_BITS] + (size & HERMES_PAGE_MASK);
       item->id = size++;
