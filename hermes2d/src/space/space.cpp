@@ -330,8 +330,10 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::set_element_order_internal(int id, int order, int order_v)
     {
+#ifdef _DEBUG
       if (id < 0 || id >= mesh->get_max_element_id())
         throw Hermes::Exceptions::Exception("Space<Scalar>::set_element_order_internal: Invalid element id.");
+#endif
 
       resize_tables();
 
