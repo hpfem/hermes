@@ -25,7 +25,7 @@ namespace Hermes
   {
     void StateQueryable::check() const
     {
-      if(!this->isOkay())
+      if (!this->isOkay())
       {
         std::stringstream ss;
         ss << "The instance of " << this->getClassName() << " is not OK.";
@@ -33,7 +33,6 @@ namespace Hermes
       }
     }
 
-    Loggable::LoggerMonitor Loggable::logger_monitor;
     char* Loggable::staticLogFileName = nullptr;
 
     std::map<std::string, bool> Loggable::logger_written;
@@ -44,8 +43,8 @@ namespace Hermes
 
     void Loggable::set_logFile_name(const char* filename)
     {
-      if(this->logFileName)
-        delete [] this->logFileName;
+      if (this->logFileName)
+        delete[] this->logFileName;
       int strlength = std::strlen(filename);
       this->logFileName = new char[strlength];
       strcpy(this->logFileName, filename);
@@ -58,8 +57,8 @@ namespace Hermes
 
     void Loggable::set_static_logFile_name(const char* filename)
     {
-      if(Loggable::staticLogFileName)
-        delete [] Loggable::staticLogFileName;
+      if (Loggable::staticLogFileName)
+        delete[] Loggable::staticLogFileName;
       int strlength = std::strlen(filename);
       Loggable::staticLogFileName = new char[strlength];
       strcpy(Loggable::staticLogFileName, filename);
@@ -244,7 +243,7 @@ namespace Hermes
 
     void Loggable::error(const char* msg, ...) const
     {
-      if(!this->verbose_output)
+      if (!this->verbose_output)
         return;
 
       char text[BUF_SZ];
@@ -264,10 +263,10 @@ namespace Hermes
 
     void Loggable::error_if(bool cond, const char* msg, ...) const
     {
-      if(!this->verbose_output)
+      if (!this->verbose_output)
         return;
 
-      if(cond)
+      if (cond)
       {
         char text[BUF_SZ];
         char* text_contents = text + 1;
@@ -287,7 +286,7 @@ namespace Hermes
 
     void Loggable::warn(const char* msg, ...) const
     {
-      if(!this->verbose_output)
+      if (!this->verbose_output)
         return;
 
       char text[BUF_SZ];
@@ -307,10 +306,10 @@ namespace Hermes
 
     void Loggable::warn_if(bool cond, const char* msg, ...) const
     {
-      if(!this->verbose_output)
+      if (!this->verbose_output)
         return;
 
-      if(cond)
+      if (cond)
       {
         char text[BUF_SZ];
         char* text_contents = text + 1;
@@ -329,7 +328,7 @@ namespace Hermes
     }
     void Loggable::info(const char* msg, ...) const
     {
-      if(!this->verbose_output)
+      if (!this->verbose_output)
         return;
 
       char text[BUF_SZ];
@@ -348,10 +347,10 @@ namespace Hermes
     }
     void Loggable::info_if(bool cond, const char* msg, ...) const
     {
-      if(!this->verbose_output)
+      if (!this->verbose_output)
         return;
 
-      if(cond)
+      if (cond)
       {
         char text[BUF_SZ];
         char* text_contents = text + 1;
@@ -374,19 +373,19 @@ namespace Hermes
       //Windows platform
 #ifdef _WINDOWS
       HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
-      if(h_console == INVALID_HANDLE_VALUE)
+      if (h_console == INVALID_HANDLE_VALUE)
         return false;
 
       //read current console settings
       CONSOLE_SCREEN_BUFFER_INFO console_info;
-      if(!GetConsoleScreenBufferInfo(h_console, &console_info))
+      if (!GetConsoleScreenBufferInfo(h_console, &console_info))
         return false;
 
       //generate console settings
       WORD console_attr_red = FOREGROUND_RED, console_attr_green = FOREGROUND_GREEN, console_attr_blue = FOREGROUND_BLUE;
 
       WORD console_attrs = 0;
-      switch(code)
+      switch (code)
       {
       case HERMES_EC_ERROR: console_attrs |= console_attr_red; break;
       case HERMES_EC_WARNING: console_attrs |= console_attr_red | console_attr_green; break;
@@ -404,7 +403,7 @@ namespace Hermes
       //return previous settings
       SetConsoleTextAttribute(h_console, console_info.wAttributes);
 
-      if(write_success)
+      if (write_success)
         return true;
       else
         return false;
@@ -443,16 +442,16 @@ namespace Hermes
 
     void Loggable::hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream) const
     {
-      if(fwrite(ptr, size, nitems, stream) != nitems || ferror(stream))
+      if (fwrite(ptr, size, nitems, stream) != nitems || ferror(stream))
         throw Hermes::Exceptions::Exception("Error writing to file: %s", strerror(ferror(stream)));
     }
 
     void Loggable::hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream) const
     {
       size_t ret = fread(ptr, size, nitems, stream);
-      if(ret < nitems)
+      if (ret < nitems)
         throw Hermes::Exceptions::Exception("Premature end of file.");
-      else if(ferror(stream))
+      else if (ferror(stream))
         throw Hermes::Exceptions::Exception("Error reading file: %s", strerror(ferror(stream)));
     }
 
@@ -462,51 +461,50 @@ namespace Hermes
 
     void Loggable::hermes_log_message(const char code, const char* msg) const
     {
-      logger_monitor.enter();
-
-      //print the message
-      if(!write_console(code, msg))
-        printf("%s", msg);  //safe fallback
-      printf("\n");  //write a new line
-
-      HermesLogEventInfo* info = this->hermes_build_log_info(code);
-
-      //print to file
-      char* log_file_name = (this->logFileName ? this->logFileName : Loggable::staticLogFileName);
-      if(log_file_name)
+#pragma omp critical (hermes_log_message)
       {
-        FILE* file = fopen(log_file_name, "at");
-        if(file != nullptr)
+        //print the message
+        if (!write_console(code, msg))
+        printf("%s", msg);  //safe fallback
+        printf("\n");  //write a new line
+
+        HermesLogEventInfo* info = this->hermes_build_log_info(code);
+
+        //print to file
+        char* log_file_name = (this->logFileName ? this->logFileName : Loggable::staticLogFileName);
+        if (log_file_name)
         {
-          //check whether log file was already written
-          std::map<std::string, bool>::const_iterator found = logger_written.find(log_file_name);
-          if(found == logger_written.end()) {  //first write, write delimited to a file
-            logger_written[log_file_name] = true;
-            fprintf(file, "\n");
-            for(int i = 0; i < HERMES_LOG_FILE_DELIM_SIZE; i++)
-              fprintf(file, "-");
-            fprintf(file, "\n\n");
+          FILE* file = fopen(log_file_name, "at");
+          if (file != nullptr)
+          {
+            //check whether log file was already written
+            std::map<std::string, bool>::const_iterator found = logger_written.find(log_file_name);
+            if (found == logger_written.end()) {  //first write, write delimited to a file
+              logger_written[log_file_name] = true;
+              fprintf(file, "\n");
+              for (int i = 0; i < HERMES_LOG_FILE_DELIM_SIZE; i++)
+                fprintf(file, "-");
+              fprintf(file, "\n\n");
+            }
+
+            //get time
+            time_t now;
+            time(&now);
+            struct tm* now_tm = gmtime(&now);
+            char time_buf[BUF_SZ];
+            strftime(time_buf, BUF_SZ, "%y%m%d-%H:%M", now_tm);
+
+            //write
+            fprintf(file, "%s\t%s\n", time_buf, msg);
+            fclose(file);
+
+            if (this->verbose_callback != nullptr)
+              this->verbose_callback(msg);
           }
-
-          //get time
-          time_t now;
-          time(&now);
-          struct tm* now_tm = gmtime(&now);
-          char time_buf[BUF_SZ];
-          strftime(time_buf, BUF_SZ, "%y%m%d-%H:%M", now_tm);
-
-          //write
-          fprintf(file, "%s\t%s\n", time_buf, msg);
-          fclose(file);
-
-          if(this->verbose_callback != nullptr)
-            this->verbose_callback(msg);
         }
+
+        delete info;
       }
-
-      delete info;
-
-      logger_monitor.leave();
     }
 
     void Loggable::set_verbose_output(bool to_set)
@@ -526,7 +524,7 @@ namespace Hermes
       //initialization
 #ifdef _WINDOWS  //Windows
       LARGE_INTEGER freq;
-      if(QueryPerformanceFrequency(&freq))
+      if (QueryPerformanceFrequency(&freq))
         frequency = (double)freq.QuadPart;
       else
         frequency = -1;
@@ -537,7 +535,7 @@ namespace Hermes
     TimeMeasurable::SysTime TimeMeasurable::get_time() const
     {
 #ifdef _WINDOWS  //Windows
-      if(frequency > 0)
+      if (frequency > 0)
       {
         LARGE_INTEGER ticks;
         QueryPerformanceCounter(&ticks);
@@ -562,7 +560,7 @@ namespace Hermes
     {
 #ifdef _WINDOWS  //Windows
       uint64_t period = end - begin;
-      if(frequency > 0)
+      if (frequency > 0)
         return period / frequency;
       else
         return period / (double)CLOCKS_PER_SEC;
@@ -582,7 +580,7 @@ namespace Hermes
     const TimeMeasurable& TimeMeasurable::tick(TimerPeriodTickType type)
     {
       SysTime cur_time = get_time();
-      if(type == HERMES_ACCUMULATE)
+      if (type == HERMES_ACCUMULATE)
       {
         double secs = period_in_seconds(last_time, cur_time);
         accum += secs;
@@ -636,18 +634,18 @@ namespace Hermes
 
     std::string TimeMeasurable::to_string(double secs) const
     {
-      if(secs < 0)
+      if (secs < 0)
         return "NO TIME";
       else
       {
-        int hours = (int) secs / (3600);
-        int mins = (int) fmod(secs, 3600) / 60;
+        int hours = (int)secs / (3600);
+        int mins = (int)fmod(secs, 3600) / 60;
         secs = fmod(secs, 60);
 
         std::stringstream str;
-        if(hours > 0)
+        if (hours > 0)
           str << hours << "h ";
-        if(hours > 0 || mins > 0)
+        if (hours > 0 || mins > 0)
           str << mins << "m ";
         str << secs << "s";
 

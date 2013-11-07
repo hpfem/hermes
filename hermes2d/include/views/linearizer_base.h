@@ -17,6 +17,7 @@
 #define __H2D_LINEARIZER_SUPPORT_H
 
 #include "global.h"
+#include <pthread.h>
 #include "../quadrature/quad_all.h"
 #include "../mesh/mesh.h"
 #include "mixins2d.h"

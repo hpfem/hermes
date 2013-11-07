@@ -28,11 +28,6 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
   
     - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
 
-  - PTHREAD(2.9.1)
-
-    - Download appropriate files (ftp://sourceware.org/pub/pthreads-win32/prebuilt-dll-2-9-1-release/).
-    - Copy 'dll\\x86\\pthreadVCE2.dll', 'include\\\*.h' and 'lib\\x86\\pthreadVCE2.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
-    
   - UMFPACK
 
     - MinGW used for compiling AMD and UMFPACK: `Download MinGW <http://sourceforge.net/projects/mingw/>`_.
@@ -79,6 +74,13 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
 
       - Download glew Win32 precompiled binaries ver.1.5.4 (http://glew.sourceforge.net/) and unpack it.
       - Copy 'my_glew_root\\bin\\glew32.dll', 'my_glew_root\\include\\GL\\\*.h', and 'my_glew_root\\lib\\glew32.lib' to 'bin', 'include\\GL', and 'lib' dependency directories respectively.
+      
+    - PTHREAD(2.9.1)
+
+    - Download appropriate files (ftp://sourceware.org/pub/pthreads-win32/prebuilt-dll-2-9-1-release/).
+    - Copy 'dll\\x86\\pthreadVCE2.dll', 'include\\\*.h' and 'lib\\x86\\pthreadVCE2.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
+    
+  
 
   - The rest is optional. If a directive WITH_BSON is *not* used, this step including all sub-steps can be skipped and you can proceed to `build Hermes <win.html#building-hermes>`_.
 	

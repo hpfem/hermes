@@ -133,37 +133,6 @@ namespace Hermes
 
       HermesLogEventInfo* hermes_build_log_info(char event) const;
 
-      /// \brief Logging output monitor. \internal \ingroup g_logging
-      /** This class protects a logging function __hermes_log_message_if() in multithreded environment. */
-      class LoggerMonitor
-      {
-        pthread_mutexattr_t mutex_attr; ///< Mutext attributes.
-        pthread_mutex_t mutex; ///< Mutex that protects monitor.
-
-      public:
-        /// Constructor. Creates a mutex.
-        LoggerMonitor()
-        {
-          pthread_mutexattr_init(&mutex_attr);
-          pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
-          pthread_mutex_init(&mutex, &mutex_attr);
-        };
-        /// Destructor. Deletes a mutex.
-        ~LoggerMonitor()
-        {
-          pthread_mutex_destroy(&mutex);
-          pthread_mutexattr_destroy(&mutex_attr);
-        };
-
-        /// Enters protected section.
-        void enter() { pthread_mutex_lock(&mutex); };
-
-        /// Leaves protected section.
-        void leave() { pthread_mutex_unlock(&mutex); };
-      };
-
-      static LoggerMonitor logger_monitor;
-
       static std::map<std::string, bool> logger_written;
 
       /// \brief Logs an event if the condition is true. \internal

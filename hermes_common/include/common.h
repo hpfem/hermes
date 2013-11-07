@@ -34,7 +34,6 @@
 #include <errno.h>
 #include <cmath>
 
-#include <pthread.h>
 #include <cstdlib>
 #include <ctime>
 #include <cstring>
