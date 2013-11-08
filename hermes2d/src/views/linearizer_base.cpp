@@ -46,6 +46,13 @@ namespace Hermes
 
         vertex_count = triangle_count = edges_count = this->vertex_size = this->triangle_size = this->edges_size = 0;
 
+#ifndef NOGLUT
+        pthread_mutexattr_t attr;
+        pthread_mutexattr_init(&attr);
+        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutex_init(&data_mutex, &attr);
+        pthread_mutexattr_destroy(&attr);
+#endif
         this->level_map = nullptr;
       }
 
@@ -80,18 +87,23 @@ namespace Hermes
 
       LinearizerBase::~LinearizerBase()
       {
-        
+#ifndef NOGLUT
         pthread_mutex_destroy(&data_mutex);
+#endif
       }
 
       void LinearizerBase::lock_data() const
       {
+#ifndef NOGLUT
         pthread_mutex_lock(&data_mutex);
+#endif
       }
 
       void LinearizerBase::unlock_data() const
       {
+#ifndef NOGLUT
         pthread_mutex_unlock(&data_mutex);
+#endif
       }
 
       void LinearizerBase::process_edge(int iv1, int iv2, int marker)

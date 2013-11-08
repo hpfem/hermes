@@ -897,7 +897,6 @@ namespace Hermes
 
         FILE* f = fopen(filename, "wb");
         if(f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
-        lock_data();
 
         // Output header for vertices.
         fprintf(f, "# vtk DataFile Version 2.0\n");
@@ -939,7 +938,6 @@ namespace Hermes
           fprintf(f, "%g\n", this->verts[i][2]);
         }
 
-        unlock_data();
         fclose(f);
       }
 

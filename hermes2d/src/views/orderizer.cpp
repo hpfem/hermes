@@ -337,7 +337,6 @@ namespace Hermes
 
         FILE* f = fopen(file_name, "wb");
         if(f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
-        lock_data();
 
         // Output header for vertices.
         fprintf(f, "# vtk DataFile Version 2.0\n");
@@ -375,7 +374,6 @@ namespace Hermes
         fprintf(f, "LOOKUP_TABLE %s\n", "default");
         for (int i = 0; i < this->vertex_count; i++)
           fprintf(f, "%g \n", this->verts[i][2]);
-        unlock_data();
         fclose(f);
       }
 
@@ -386,7 +384,6 @@ namespace Hermes
 
         FILE* f = fopen(file_name, "wb");
         if(f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
-        lock_data();
 
         // Output header for vertices.
         fprintf(f, "# vtk DataFile Version 2.0\n");
@@ -424,7 +421,6 @@ namespace Hermes
         fprintf(f, "LOOKUP_TABLE %s\n", "default");
         for (int i = 0; i < this->triangle_count; i++)
           fprintf(f, "%d \n", this->tri_markers[i]);
-        unlock_data();
         fclose(f);
       }
 
@@ -435,7 +431,6 @@ namespace Hermes
 
         FILE* f = fopen(file_name, "wb");
         if(f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
-        lock_data();
 
         // Output header for vertices.
         fprintf(f, "# vtk DataFile Version 2.0\n");
@@ -469,7 +464,6 @@ namespace Hermes
         fprintf(f, "LOOKUP_TABLE %s\n", "default");
         for (int i = 0; i < this->edges_count; i++)
           fprintf(f, "0 \n");
-        unlock_data();
         fclose(f);
       }
 

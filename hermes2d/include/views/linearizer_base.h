@@ -144,8 +144,9 @@ namespace Hermes
 
         int hash(int p1, int p2);
 
+#ifndef NOGLUT
         mutable pthread_mutex_t data_mutex;
-
+#endif
         /// Calculates AABB from an array of X-axis and Y-axis coordinates. The distance between values in the array is stride bytes.
         static void calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y);
         friend class MeshView;
