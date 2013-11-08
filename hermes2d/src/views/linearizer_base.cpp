@@ -46,12 +46,6 @@ namespace Hermes
 
         vertex_count = triangle_count = edges_count = this->vertex_size = this->triangle_size = this->edges_size = 0;
 
-        pthread_mutexattr_t attr;
-        pthread_mutexattr_init(&attr);
-        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-        pthread_mutex_init(&data_mutex, &attr);
-        pthread_mutexattr_destroy(&attr);
-
         this->level_map = nullptr;
       }
 
