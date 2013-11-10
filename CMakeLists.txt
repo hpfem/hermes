@@ -1,11 +1,11 @@
 project(hermes)
   cmake_minimum_required(VERSION 2.8)
 
-  #------------------------------------------------------------------------------
+  #---------------------------------------------------------------------------------------------
   # Main configuration options.
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  ### BEGIN DEFAULT CONFIGURATION ###
+  ### BEGIN DEFAULT CONFIGURATION ##############################################################
 
   # The values below are sane defaults to produce a build on all platforms,
   # if you want to override them, set them in CMake.vars
@@ -131,11 +131,18 @@ project(hermes)
   #  /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\
 	################################## CURRENTLY NOT SUPPORTED ###################################
   
-	# Allow to override the default values in CMake.vars:
+	### END DEFAULT CONFIGURATION ################################################################
+  ##############################################################################################
+  
+  ##############################################################################################
+  ##############################################################################################
+  
+  ##############################################################################################
+  ### INTERNALS FOLLOW - DO NOT CHANGE #########################################################
+    
+  # Allow to override the default values in CMake.vars:
 	include(CMake.vars OPTIONAL)
     include(../CMakeHermes.cmake OPTIONAL)
-    
-  ### END DEFAULT CONFIGURATION ###
     
   set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
   if(WIN64)
@@ -239,9 +246,6 @@ project(hermes)
       endif(NOT MSVC)
     endif (WITH_${HXD})
   endmacro(DETERMINE_HERMES_COMMON_RELEASE_DEBUG)
-
-  # Enable debugging symbols for all files all the time:
-  # set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
 
   if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # Disable all warnings and turn on only important ones:
