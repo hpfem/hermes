@@ -33,7 +33,7 @@ namespace Hermes
 
     template<typename Scalar>
     DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) :
-      pss(nullptr), refmaps(nullptr), u_ext(nullptr), als(nullptr), alsSurface(nullptr),
+      pss(nullptr), refmaps(nullptr), u_ext(nullptr),
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler)
     {
     }
@@ -53,8 +53,6 @@ namespace Hermes
 
       pss = new PrecalcShapeset*[spaces_size];
       refmaps = new RefMap*[spaces_size];
-      als = new AsmList<Scalar>*[spaces_size];
-      alsSurface = new AsmList<Scalar>**[spaces_size];
 
       for (unsigned int j = 0; j < spaces_size; j++)
       {
@@ -62,9 +60,8 @@ namespace Hermes
         refmaps[j] = new RefMap();
         refmaps[j]->set_quad_2d(&g_quad_2d_std);
         als[j] = new AsmList<Scalar>();
-        alsSurface[j] = new AsmList<Scalar>*[H2D_MAX_NUMBER_EDGES];
         for (unsigned int k = 0; k < H2D_MAX_NUMBER_EDGES; k++)
-          alsSurface[j][k] = new AsmList<Scalar>();
+          alsSurface[k][j] = new AsmList<Scalar>();
       }
     }
 
@@ -148,23 +145,6 @@ namespace Hermes
 
       // Process markers.
       this->wf->processFormMarkers(spaces);
-
-      // Pre-prepare calculation storage.
-      this->funcs = (Func<double>***)calloc(this->spaces_size, sizeof(Func<double>**));
-      this->asmlistCnt = new int[this->spaces_size];
-      this->asmlistIdx = new int*[this->spaces_size];
-
-      if (this->wf->mfsurf.size() > 0 || this->wf->vfsurf.size() > 0)
-      {
-        this->geometrySurface = new Geom<double>*[H2D_MAX_NUMBER_EDGES];
-        this->jacobian_x_weightsSurface = new double*[H2D_MAX_NUMBER_EDGES];
-
-        this->n_quadrature_pointsSurface = new int[H2D_MAX_NUMBER_EDGES];
-        this->orderSurface = new int[H2D_MAX_NUMBER_EDGES];
-
-        this->funcsSurface = (Func<double>****)calloc(H2D_MAX_NUMBER_EDGES, sizeof(Func<double>***));
-        this->asmlistSurfaceCnt = new int*[H2D_MAX_NUMBER_EDGES];
-      }
     }
 
     template<typename Scalar>
@@ -204,7 +184,7 @@ namespace Hermes
             for (int k = 0; k < current_state->rep->nvert; k++)
             {
               if (current_state->bnd[k])
-                spaces[j]->get_boundary_assembly_list(current_state->e[j], k, alsSurface[j][k]);
+                spaces[j]->get_boundary_assembly_list(current_state->e[j], k, alsSurface[k][j]);
             }
           }
         }
@@ -224,59 +204,39 @@ namespace Hermes
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
         if (current_state->e[space_i] == nullptr)
-        {
-          this->funcs[space_i] = nullptr;
           continue;
-        }
 
-        this->asmlistCnt[space_i] = this->als[space_i]->cnt;
-        this->asmlistIdx[space_i] = new int[this->als[space_i]->cnt];
-        memcpy(this->asmlistIdx[space_i], this->als[space_i]->idx, this->als[space_i]->cnt * sizeof(int));
-
-        this->funcs[space_i] = new Func<double>*[this->asmlistCnt[space_i]];
-
-        for (unsigned int j = 0; j < this->asmlistCnt[space_i]; j++)
+        for (unsigned int j = 0; j < this->als[space_i]->cnt; j++)
         {
           pss[space_i]->set_active_shape(this->als[space_i]->idx[j]);
           this->funcs[space_i][j] = init_fn(pss[space_i], refmaps[space_i], this->order);
         }
       }
 
-      this->n_quadrature_points = init_geometry_points(refmaps, this->spaces_size, this->order, this->geometry, this->jacobian_x_weights);
+      this->n_quadrature_points = init_geometry_points_allocated_jwt(refmaps, this->spaces_size, this->order, this->geometry, this->jacobian_x_weights);
 
       if (current_state->isBnd && (this->wf->mfsurf.size() > 0 || this->wf->vfsurf.size() > 0))
       {
         int order_local = this->order;
 
-        for (current_state->isurf = 0; current_state->isurf < this->current_state->rep->nvert; current_state->isurf++)
+        for (unsigned int edge_i = 0; edge_i < this->current_state->rep->nvert; edge_i++)
         {
-          if (!current_state->bnd[current_state->isurf])
-          {
-            this->funcsSurface[current_state->isurf] = nullptr;
+          if (!current_state->bnd[edge_i])
             continue;
-          }
 
-          this->n_quadrature_pointsSurface[current_state->isurf] = init_surface_geometry_points(refmaps, this->spaces_size, this->order, current_state->isurf, current_state->rep->marker, this->geometrySurface[current_state->isurf], this->jacobian_x_weightsSurface[current_state->isurf]);
-          this->orderSurface[current_state->isurf] = this->order;
+          this->n_quadrature_pointsSurface[edge_i] = init_surface_geometry_points_allocated_jwt(refmaps, this->spaces_size, this->order, edge_i, current_state->rep->marker, this->geometrySurface[edge_i], this->jacobian_x_weightsSurface[edge_i]);
+          this->orderSurface[edge_i] = this->order;
           this->order = order_local;
-
-          this->funcsSurface[current_state->isurf] = (Func<double>***)calloc(this->spaces_size, sizeof(Func<double>**));
-
-          this->asmlistSurfaceCnt[current_state->isurf] = new int[this->spaces_size];
 
           for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
           {
             if (!current_state->e[space_i])
               continue;
 
-            unsigned int func_count = this->alsSurface[space_i][current_state->isurf]->cnt;
-            this->asmlistSurfaceCnt[current_state->isurf][space_i] = func_count;
-
-            this->funcsSurface[current_state->isurf][space_i] = new Func<double>*[func_count];
-            for (unsigned int j = 0; j < func_count; j++)
+            for (unsigned int j = 0; j < this->alsSurface[edge_i][space_i]->cnt; j++)
             {
-              pss[space_i]->set_active_shape(this->alsSurface[space_i][current_state->isurf]->idx[j]);
-              this->funcsSurface[current_state->isurf][space_i][j] = init_fn(pss[space_i], refmaps[space_i], this->orderSurface[current_state->isurf]);
+              pss[space_i]->set_active_shape(this->alsSurface[edge_i][space_i]->idx[j]);
+              this->funcsSurface[edge_i][space_i][j] = init_fn(pss[space_i], refmaps[space_i], this->orderSurface[edge_i]);
             }
           }
         }
@@ -288,19 +248,16 @@ namespace Hermes
     {
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
-        if (!this->funcs[space_i])
+        if (current_state->e[space_i] == nullptr)
           continue;
 
-        for (unsigned int i = 0; i < this->asmlistCnt[space_i]; i++)
+        for (unsigned int i = 0; i < this->als[space_i]->cnt; i++)
         {
           this->funcs[space_i][i]->free_fn();
           delete this->funcs[space_i][i];
         }
-        delete[] this->funcs[space_i];
-        delete[] this->asmlistIdx[space_i];
       }
 
-      delete[] this->jacobian_x_weights;
       this->geometry->free();
       delete this->geometry;
 
@@ -308,26 +265,23 @@ namespace Hermes
       {
         for (unsigned int edge_i = 0; edge_i < this->current_state->rep->nvert; edge_i++)
         {
-          if (!this->funcsSurface[edge_i])
+          if (!current_state->bnd[edge_i])
             continue;
 
           this->geometrySurface[edge_i]->free();
           delete this->geometrySurface[edge_i];
-          delete[] this->jacobian_x_weightsSurface[edge_i];
 
           for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
           {
-            if (!this->funcsSurface[edge_i][space_i])
+            if (!current_state->e[space_i])
               continue;
-            for (unsigned int i = 0; i < this->asmlistSurfaceCnt[edge_i][space_i]; i++)
+
+            for (unsigned int i = 0; i < this->alsSurface[edge_i][space_i]->cnt; i++)
             {
               this->funcsSurface[edge_i][space_i][i]->free_fn();
               delete this->funcsSurface[edge_i][space_i][i];
             }
-            delete[] this->funcsSurface[edge_i][space_i];
           }
-          ::free(this->funcsSurface[edge_i]);
-          delete[] this->asmlistSurfaceCnt[edge_i];
         }
       }
     }
@@ -529,7 +483,7 @@ namespace Hermes
                 this->funcsSurface[isurf][form_j],
                 this->funcsSurface[isurf][form_i],
                 ext_funcSurf, u_ext_funcSurf,
-                this->alsSurface[form_i][isurf], this->alsSurface[form_j][isurf],
+                this->alsSurface[isurf][form_i], this->alsSurface[isurf][form_j],
                 this->n_quadrature_pointsSurface[isurf], this->geometrySurface[isurf], this->jacobian_x_weightsSurface[isurf]);
             }
           }
@@ -547,7 +501,7 @@ namespace Hermes
                 this->orderSurface[isurf],
                 this->funcsSurface[isurf][form_i],
                 ext_funcSurf, u_ext_funcSurf,
-                this->alsSurface[form_i][isurf],
+                this->alsSurface[isurf][form_i],
                 this->n_quadrature_pointsSurface[isurf], this->geometrySurface[isurf], this->jacobian_x_weightsSurface[isurf]);
             }
           }
@@ -713,22 +667,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_assembling()
     {
-      ::free(this->funcs);
-      delete[] this->asmlistCnt;
-      delete[] this->asmlistIdx;
-
-      this->funcsSurface = nullptr;
-
-      if (this->wf->mfsurf.size() > 0 || this->wf->vfsurf.size() > 0)
-      {
-        ::free(this->funcsSurface);
-        delete[] this->geometrySurface;
-        delete[] this->jacobian_x_weightsSurface;
-
-        delete[] this->n_quadrature_pointsSurface;
-        delete[] this->orderSurface;
-        delete[] this->asmlistSurfaceCnt;
-      }
     }
 
     template<typename Scalar>
@@ -756,15 +694,12 @@ namespace Hermes
 
       for (unsigned int j = 0; j < spaces_size; j++)
         delete als[j];
-      delete[] als;
 
       for (unsigned int j = 0; j < spaces_size; j++)
       {
         for (unsigned int k = 0; k < H2D_MAX_NUMBER_EDGES; k++)
-          delete alsSurface[j][k];
-        delete[] alsSurface[j];
+          delete alsSurface[k][j];
       }
-      delete[] alsSurface;
     }
 
     template<typename Scalar>

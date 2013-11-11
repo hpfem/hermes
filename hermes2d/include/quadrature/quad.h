@@ -31,8 +31,13 @@ namespace Hermes
     static int H2D_GIP1D_X = 0;
     static int H2D_GIP1D_W = 1;
 
+    // Maximum integration order for global quadrature, for quadrilaterals.
     const int g_max_quad = 24;
+    // Maximum integration order for global quadrature, for triangles.
     const int g_max_tri = 20;
+    
+    // Maximum number of integration points.
+#define H2D_MAX_INTEGRATION_POINTS_COUNT 125
 
     /// Quad1D is a base class for all 1D quadrature points.
     ///

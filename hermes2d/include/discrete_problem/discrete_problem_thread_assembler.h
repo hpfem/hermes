@@ -85,8 +85,8 @@ namespace Hermes
       PrecalcShapeset** pss;
       RefMap** refmaps;
       Solution<Scalar>** u_ext;
-      AsmList<Scalar>** als;
-      AsmList<Scalar>*** alsSurface;
+      AsmList<Scalar>* als[H2D_MAX_COMPONENTS];
+      AsmList<Scalar>* alsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_COMPONENTS];
       Hermes::vector<Transformable *> fns;
       int spaces_size;
       bool nonlinear, add_dirichlet_lift;
@@ -103,22 +103,19 @@ namespace Hermes
       /// - volumetric
       int order;
       /// - surface
-      int* orderSurface;
+      int orderSurface[H2D_MAX_NUMBER_EDGES];
 
       /// Holding values formerly held by cache record.
       void init_calculation_variables();
       void deinit_calculation_variables();
-      int** asmlistIdx;
-      int* asmlistCnt;
-      Func<double>*** funcs;
-      Func<double>**** funcsSurface;
+      Func<double>* funcs[H2D_MAX_COMPONENTS][H2D_MAX_LOCAL_BASIS_SIZE];
+      Func<double>* funcsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_COMPONENTS][H2D_MAX_LOCAL_BASIS_SIZE];
       Geom<double>* geometry;
-      Geom<double>** geometrySurface;
-      double* jacobian_x_weights;
-      double** jacobian_x_weightsSurface;
+      Geom<double>* geometrySurface[H2D_MAX_NUMBER_EDGES];
+      double jacobian_x_weights[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      double jacobian_x_weightsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_INTEGRATION_POINTS_COUNT];
       int n_quadrature_points;
-      int* n_quadrature_pointsSurface;
-      int** asmlistSurfaceCnt;
+      int n_quadrature_pointsSurface[H2D_MAX_NUMBER_EDGES];
 
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;

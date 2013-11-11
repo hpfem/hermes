@@ -43,6 +43,8 @@ namespace Hermes
       template<typename Scalar> class HcurlProjBasedSelector;
     };
 
+#define H2D_MAX_LOCAL_BASIS_SIZE 136
+
     /// @ingroup spaces
     /// \brief Defines a set of shape functions.
     ///
@@ -74,6 +76,9 @@ namespace Hermes
     /// and 1. This simplifies constraint calculations and BC projections.
     ///
     /// Shape functions are always Real-valued.
+    ///
+    /// Very important: Should one create a custom shapeset, or enlarge the existing ones, one must
+    /// increase the value of H2D_MAX_LOCAL_BASIS_SIZE.
     ///
     class HERMES_API Shapeset : public Hermes::Mixins::Loggable
     {
