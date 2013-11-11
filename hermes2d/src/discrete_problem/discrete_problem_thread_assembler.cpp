@@ -24,13 +24,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-#ifdef _DEBUG
-    static int cache_searches = 0;
-    static int cache_record_found = 0;
-    static int cache_record_found_reinit = 0;
-    static int cache_record_not_found = 0;
-#endif
-
     template<typename Scalar>
     DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) :
       pss(nullptr), refmaps(nullptr), u_ext(nullptr),
@@ -59,9 +52,6 @@ namespace Hermes
         pss[j] = new PrecalcShapeset(spaces[j]->shapeset);
         refmaps[j] = new RefMap();
         refmaps[j]->set_quad_2d(&g_quad_2d_std);
-        als[j] = new AsmList<Scalar>();
-        for (unsigned int k = 0; k < H2D_MAX_NUMBER_EDGES; k++)
-          alsSurface[k][j] = new AsmList<Scalar>();
       }
     }
 
@@ -110,17 +100,19 @@ namespace Hermes
 
       // Transformables setup.
       fns.clear();
+      // - precalc shapesets.
       for (unsigned j = 0; j < this->spaces_size; j++)
       {
         fns.push_back(pss[j]);
         pss[j]->set_quad_2d(&g_quad_2d_std);
       }
+      // - wf->ext.
       for (unsigned j = 0; j < this->wf->ext.size(); j++)
       {
         fns.push_back(this->wf->ext[j].get());
         this->wf->ext[j]->set_quad_2d(&g_quad_2d_std);
       }
-
+      // - forms->ext.
       for (unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
       {
         Form<Scalar>* form = this->wf->get_forms()[form_i];
@@ -133,6 +125,7 @@ namespace Hermes
           }
         }
       }
+      // - u_ext.
       if (this->nonlinear)
       {
         init_u_ext(spaces, u_ext_sln);
@@ -145,6 +138,37 @@ namespace Hermes
 
       // Process markers.
       this->wf->processFormMarkers(spaces);
+
+      // Initialize Func storage.
+      this->init_funcs();
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemThreadAssembler<Scalar>::init_funcs()
+    {
+      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+      {
+        for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+          this->funcs[space_i][j] = init_fn_preallloc(this->pss[space_i]);
+
+        for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
+          for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+            this->funcsSurface[edge_i][space_i][j] = init_fn_preallloc(this->pss[space_i]);
+      }
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemThreadAssembler<Scalar>::deinit_funcs()
+    {
+      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+      {
+        for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+          delete this->funcs[space_i][j];
+
+        for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
+          for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+            delete this->funcsSurface[edge_i][space_i][j];
+      }
     }
 
     template<typename Scalar>
@@ -168,7 +192,7 @@ namespace Hermes
       {
         if (current_state->e[j])
         {
-          spaces[j]->get_element_assembly_list(current_state->e[j], als[j]);
+          spaces[j]->get_element_assembly_list(current_state->e[j], &als[j]);
           refmaps[j]->set_active_element(current_state->e[j]);
           refmaps[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
         }
@@ -184,7 +208,7 @@ namespace Hermes
             for (int k = 0; k < current_state->rep->nvert; k++)
             {
               if (current_state->bnd[k])
-                spaces[j]->get_boundary_assembly_list(current_state->e[j], k, alsSurface[k][j]);
+                spaces[j]->get_boundary_assembly_list(current_state->e[j], k, &alsSurface[k][j]);
             }
           }
         }
@@ -197,7 +221,6 @@ namespace Hermes
       this->init_calculation_variables();
     }
 
-
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_calculation_variables()
     {
@@ -206,10 +229,10 @@ namespace Hermes
         if (current_state->e[space_i] == nullptr)
           continue;
 
-        for (unsigned int j = 0; j < this->als[space_i]->cnt; j++)
+        for (unsigned int j = 0; j < this->als[space_i].cnt; j++)
         {
-          pss[space_i]->set_active_shape(this->als[space_i]->idx[j]);
-          this->funcs[space_i][j] = init_fn(pss[space_i], refmaps[space_i], this->order);
+          pss[space_i]->set_active_shape(this->als[space_i].idx[j]);
+          init_fn_calc_preallocated(this->funcs[space_i][j], pss[space_i], refmaps[space_i], this->order);
         }
       }
 
@@ -233,10 +256,10 @@ namespace Hermes
             if (!current_state->e[space_i])
               continue;
 
-            for (unsigned int j = 0; j < this->alsSurface[edge_i][space_i]->cnt; j++)
+            for (unsigned int j = 0; j < this->alsSurface[edge_i][space_i].cnt; j++)
             {
-              pss[space_i]->set_active_shape(this->alsSurface[edge_i][space_i]->idx[j]);
-              this->funcsSurface[edge_i][space_i][j] = init_fn(pss[space_i], refmaps[space_i], this->orderSurface[edge_i]);
+              pss[space_i]->set_active_shape(this->alsSurface[edge_i][space_i].idx[j]);
+              init_fn_calc_preallocated(this->funcsSurface[edge_i][space_i][j], pss[space_i], refmaps[space_i], this->orderSurface[edge_i]);
             }
           }
         }
@@ -251,7 +274,7 @@ namespace Hermes
         if (current_state->e[space_i] == nullptr)
           continue;
 
-        for (unsigned int i = 0; i < this->als[space_i]->cnt; i++)
+        for (unsigned int i = 0; i < this->als[space_i].cnt; i++)
         {
           this->funcs[space_i][i]->free_fn();
           delete this->funcs[space_i][i];
@@ -276,7 +299,7 @@ namespace Hermes
             if (!current_state->e[space_i])
               continue;
 
-            for (unsigned int i = 0; i < this->alsSurface[edge_i][space_i]->cnt; i++)
+            for (unsigned int i = 0; i < this->alsSurface[edge_i][space_i].cnt; i++)
             {
               this->funcsSurface[edge_i][space_i][i]->free_fn();
               delete this->funcsSurface[edge_i][space_i][i];
@@ -415,12 +438,7 @@ namespace Hermes
           int form_i = mfv->i;
           int form_j = mfv->j;
 
-          this->assemble_matrix_form(mfv,
-            this->order,
-            this->funcs[form_j], this->funcs[form_i],
-            ext_func, u_ext_func,
-            this->als[form_i], this->als[form_j],
-            this->n_quadrature_points, this->geometry, this->jacobian_x_weights);
+          this->assemble_matrix_form(mfv, order, funcs[form_j], funcs[form_i], ext_func, u_ext_func, &als[form_i], &als[form_j], n_quadrature_points, geometry, jacobian_x_weights);
         }
       }
       if (this->current_rhs)
@@ -434,12 +452,7 @@ namespace Hermes
 
           int form_i = vfv->i;
 
-          this->assemble_vector_form(vfv,
-            this->order,
-            this->funcs[form_i],
-            ext_func, u_ext_func,
-            this->als[form_i],
-            this->n_quadrature_points, this->geometry, this->jacobian_x_weights);
+          this->assemble_vector_form(vfv, order, funcs[form_i], ext_func, u_ext_func, &als[form_i], n_quadrature_points, geometry, jacobian_x_weights);
         }
       }
 
@@ -478,13 +491,8 @@ namespace Hermes
               int form_i = this->wf->mfsurf[current_mfsurf_i]->i;
               int form_j = this->wf->mfsurf[current_mfsurf_i]->j;
 
-              this->assemble_matrix_form(this->wf->mfsurf[current_mfsurf_i],
-                this->orderSurface[isurf],
-                this->funcsSurface[isurf][form_j],
-                this->funcsSurface[isurf][form_i],
-                ext_funcSurf, u_ext_funcSurf,
-                this->alsSurface[isurf][form_i], this->alsSurface[isurf][form_j],
-                this->n_quadrature_pointsSurface[isurf], this->geometrySurface[isurf], this->jacobian_x_weightsSurface[isurf]);
+              this->assemble_matrix_form(wf->mfsurf[current_mfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_j], funcsSurface[isurf][form_i], ext_funcSurf, 
+                u_ext_funcSurf, &alsSurface[isurf][form_i], &alsSurface[isurf][form_j], n_quadrature_pointsSurface[isurf], geometrySurface[isurf], jacobian_x_weightsSurface[isurf]);
             }
           }
 
@@ -497,12 +505,8 @@ namespace Hermes
 
               int form_i = this->wf->vfsurf[current_vfsurf_i]->i;
 
-              this->assemble_vector_form(this->wf->vfsurf[current_vfsurf_i],
-                this->orderSurface[isurf],
-                this->funcsSurface[isurf][form_i],
-                ext_funcSurf, u_ext_funcSurf,
-                this->alsSurface[isurf][form_i],
-                this->n_quadrature_pointsSurface[isurf], this->geometrySurface[isurf], this->jacobian_x_weightsSurface[isurf]);
+              this->assemble_vector_form(wf->vfsurf[current_vfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_i], ext_funcSurf, u_ext_funcSurf, 
+                &alsSurface[isurf][form_i], n_quadrature_pointsSurface[isurf], geometrySurface[isurf], jacobian_x_weightsSurface[isurf]);
             }
           }
 
@@ -667,6 +671,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_assembling()
     {
+      this->deinit_funcs();
     }
 
     template<typename Scalar>
@@ -691,15 +696,6 @@ namespace Hermes
       for (unsigned int j = 0; j < spaces_size; j++)
         delete refmaps[j];
       delete[] refmaps;
-
-      for (unsigned int j = 0; j < spaces_size; j++)
-        delete als[j];
-
-      for (unsigned int j = 0; j < spaces_size; j++)
-      {
-        for (unsigned int k = 0; k < H2D_MAX_NUMBER_EDGES; k++)
-          delete alsSurface[k][j];
-      }
     }
 
     template<typename Scalar>

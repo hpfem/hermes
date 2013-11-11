@@ -44,56 +44,6 @@ namespace Hermes
       return &quad_1d;
     }
 
-    /// Returns true if the jacobian of the reference map is constant (which
-    /// is the case for non-curvilinear triangular elements), false otherwise.
-    bool RefMap::is_jacobian_const() const
-    {
-      return is_const;
-    }
-
-    /// Returns the increase in the integration order due to the reference map.
-    int RefMap::get_inv_ref_order() const
-    {
-      return inv_ref_order;
-    }
-
-    /// If the jacobian of the reference map is constant, this is the fast
-    /// way to obtain it.
-    double RefMap::get_const_jacobian() const
-    {
-      return const_jacobian;
-    }
-
-    /// If the reference map is constant, this is the fast way to obtain
-    /// its inverse matrix.
-    double2x2* RefMap::get_const_inv_ref_map()
-    {
-      return &const_inv_ref_map;
-    }
-
-    /// Returns the jacobian of the reference map precalculated at the integration
-    /// points of the specified order. Intended for non-constant jacobian elements.
-    double* RefMap::get_jacobian(int order)
-    {
-      if(cur_node == nullptr)
-        throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
-      if(cur_node->inv_ref_map[order] == nullptr)
-        calc_inv_ref_map(order);
-      return cur_node->jacobian[order];
-    }
-
-    /// Returns the inverse matrices of the reference map precalculated at the
-    /// integration points of the specified order. Intended for non-constant
-    /// jacobian elements.
-    double2x2* RefMap::get_inv_ref_map(int order)
-    {
-      if(cur_node == nullptr)
-        throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
-      if(cur_node->inv_ref_map[order] == nullptr)
-        calc_inv_ref_map(order);
-      return cur_node->inv_ref_map[order];
-    }
-
     /// Returns coefficients for weak forms with second derivatives.
     double3x2* RefMap::get_second_ref_map(int order)
     {

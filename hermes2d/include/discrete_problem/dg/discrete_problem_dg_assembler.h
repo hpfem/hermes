@@ -89,7 +89,7 @@ namespace Hermes
       PrecalcShapeset** pss;
       RefMap** refmaps;
       Solution<Scalar>** u_ext;
-      AsmList<Scalar>** als;
+      AsmList<Scalar>* als;
       Hermes::vector<Transformable *> fns;
       WeakForm<Scalar>* wf;
       int spaces_size;

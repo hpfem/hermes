@@ -35,7 +35,6 @@ namespace Hermes
       : pss(threadAssembler->pss),
       refmaps(threadAssembler->refmaps),
       u_ext(threadAssembler->u_ext),
-      als(threadAssembler->als),
       fns(threadAssembler->fns),
       wf(threadAssembler->wf),
       spaces_size(threadAssembler->spaces_size),
@@ -69,7 +68,9 @@ namespace Hermes
           nrefmaps[j] = new RefMap();
         }
       }
+      this->als = threadAssembler->als;
     }
+      
 
     template<typename Scalar>
     NeighborSearch<Scalar>* DiscreteProblemDGAssembler<Scalar>::get_neighbor_search_ext(WeakForm<Scalar>* wf, NeighborSearch<Scalar>** neighbor_searches, int index)
@@ -245,7 +246,7 @@ namespace Hermes
 
         if(current_mat && DG_matrix_forms_present && !edge_processed)
         {
-          ext_asmlist[i] = current_neighbor_searches[i]->create_extended_asmlist(spaces[i], als[i]);
+          ext_asmlist[i] = current_neighbor_searches[i]->create_extended_asmlist(spaces[i], &als[i]);
           testFunctions[i] = new DiscontinuousFunc<double>*[ext_asmlist[i]->cnt];
           for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
           {
@@ -373,15 +374,15 @@ namespace Hermes
           NeighborSearch<Scalar>* current_neighbor_searches_v = current_neighbor_searches[n];
 
           // Here we use the standard pss, possibly just transformed by NeighborSearch.
-          for (unsigned int dof_i = 0; dof_i < als[n]->cnt; dof_i++)
+          for (unsigned int dof_i = 0; dof_i < als[n].cnt; dof_i++)
           {
-            if(als[n]->dof[dof_i] < 0)
+            if(als[n].dof[dof_i] < 0)
               continue;
-            pss[n]->set_active_shape(als[n]->idx[dof_i]);
+            pss[n]->set_active_shape(als[n].idx[dof_i]);
 
             Func<double>* v = init_fn(pss[n], refmaps[n], current_neighbor_searches_v->get_quad_eo());
 
-            current_rhs->add(als[n]->dof[dof_i], 0.5 * vfs->value(n_quadrature_points, jacobian_x_weights[n], u_ext_func, v, e[n], ext) * vfs->scaling_factor * als[n]->coef[dof_i]);
+            current_rhs->add(als[n].dof[dof_i], 0.5 * vfs->value(n_quadrature_points, jacobian_x_weights[n], u_ext_func, v, e[n], ext) * vfs->scaling_factor * als[n].coef[dof_i]);
 
             v->free_fn();
             delete v;

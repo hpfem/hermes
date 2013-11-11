@@ -644,6 +644,205 @@ namespace Hermes
       return u;
     }
 
+    Func<double>* init_fn_preallloc(PrecalcShapeset *fu)
+    {
+      SpaceType space_type = fu->get_space_type();
+      Func<double>* u = new Func<double>(H2D_MAX_INTEGRATION_POINTS_COUNT, fu->get_num_components());
+      if (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE)
+      {
+        u->val = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->dx = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->dy = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+        u->laplace = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+#endif
+      }
+      // Hcurl space.
+      else if (space_type == HERMES_HCURL_SPACE)
+      {
+        u->val0 = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val1 = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->curl = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      }
+      // Hdiv space.
+      else if (space_type == HERMES_HDIV_SPACE)
+      {
+        u->val0 = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val1 = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      }
+      else
+        throw Hermes::Exceptions::Exception("Wrong space type - space has to be either H1, Hcurl, Hdiv or L2");
+
+      return u;
+    }
+
+    void init_fn_calc_preallocated(Func<double>* u, PrecalcShapeset *fu, RefMap *rm, const int order)
+    {
+      SpaceType space_type = fu->get_space_type();
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+      if (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE)
+        fu->set_quad_order(order, H2D_FN_ALL);
+      else
+        fu->set_quad_order(order);
+#else
+      fu->set_quad_order(order);
+#endif
+
+      int np = g_quad_2d_std.get_num_points(order, fu->get_active_element()->get_mode());
+
+      // H1 & L2 space.
+      if (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE)
+      {
+        double *fn = fu->get_fn_values();
+        double *dx = fu->get_dx_values();
+        double *dy = fu->get_dy_values();
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+        double *dxx = fu->get_dxx_values();
+        double *dxy = fu->get_dxy_values();
+        double *dyy = fu->get_dyy_values();
+#endif
+
+        if (rm->is_jacobian_const())
+        {
+          double const_inv_ref_map00 = rm->get_const_inv_ref_map()[0][0][0];
+          double const_inv_ref_map01 = rm->get_const_inv_ref_map()[0][0][1];
+          double const_inv_ref_map10 = rm->get_const_inv_ref_map()[0][1][0];
+          double const_inv_ref_map11 = rm->get_const_inv_ref_map()[0][1][1];
+          for (int i = 0; i < np; i++)
+          {
+            u->val[i] = fn[i];
+            u->dx[i] = (dx[i] * const_inv_ref_map00 + dy[i] * const_inv_ref_map01);
+            u->dy[i] = (dx[i] * const_inv_ref_map10 + dy[i] * const_inv_ref_map11);
+          }
+#ifdef H2D_USE_SECOND_DERIVATIVES
+          double3x2 *mm;
+          mm = rm->get_second_ref_map(order);
+          for (int i = 0; i < np; i++, mm++)
+          {
+            u->val[i] = fn[i];
+            u->dx[i] = (dx[i] * const_inv_ref_map00 + dy[i] * const_inv_ref_map01);
+            u->dy[i] = (dx[i] * const_inv_ref_map10 + dy[i] * const_inv_ref_map11);
+
+            double axx = (Hermes::sqr(const_inv_ref_map00) + Hermes::sqr(const_inv_ref_map10));
+            double ayy = (Hermes::sqr(const_inv_ref_map01) + Hermes::sqr(const_inv_ref_map11));
+            double axy = 2.0 * (const_inv_ref_map00 * const_inv_ref_map01 + const_inv_ref_map10 * const_inv_ref_map11);
+            double ax = (*mm)[0][0] + (*mm)[2][0];
+            double ay = (*mm)[0][1] + (*mm)[2][1];
+            u->laplace[i] = (dx[i] * ax + dy[i] * ay + dxx[i] * axx + dxy[i] * axy + dyy[i] * ayy);
+          }
+#endif
+        }
+        else
+        {
+          double2x2 *m = rm->get_inv_ref_map(order);
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+          double3x2 *mm;
+          mm = rm->get_second_ref_map(order);
+          for (int i = 0; i < np; i++, m++, mm++)
+          {
+            u->val[i] = fn[i];
+            u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
+            u->dy[i] = (dx[i] * (*m)[1][0] + dy[i] * (*m)[1][1]);
+
+            double axx = (Hermes::sqr((*m)[0][0]) + Hermes::sqr((*m)[1][0]));
+            double ayy = (Hermes::sqr((*m)[0][1]) + Hermes::sqr((*m)[1][1]));
+            double axy = 2.0 * ((*m)[0][0] * (*m)[0][1] + (*m)[1][0] * (*m)[1][1]);
+            double ax = (*mm)[0][0] + (*mm)[2][0];
+            double ay = (*mm)[0][1] + (*mm)[2][1];
+            u->laplace[i] = (dx[i] * ax + dy[i] * ay + dxx[i] * axx + dxy[i] * axy + dyy[i] * ayy);
+          }
+#else
+          for (int i = 0; i < np; i++, m++)
+          {
+            u->val[i] = fn[i];
+            u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
+            u->dy[i] = (dx[i] * (*m)[1][0] + dy[i] * (*m)[1][1]);
+          }
+#endif
+
+          m -= np;
+          delete[] m;
+        }
+      }
+      // Hcurl space.
+      else if (space_type == HERMES_HCURL_SPACE)
+      {
+        double *fn0 = fu->get_fn_values(0);
+        double *fn1 = fu->get_fn_values(1);
+        double *dx1 = fu->get_dx_values(1);
+        double *dy0 = fu->get_dy_values(0);
+        if (rm->is_jacobian_const())
+        {
+          double const_inv_ref_map00 = rm->get_const_inv_ref_map()[0][0][0];
+          double const_inv_ref_map01 = rm->get_const_inv_ref_map()[0][0][1];
+          double const_inv_ref_map10 = rm->get_const_inv_ref_map()[0][1][0];
+          double const_inv_ref_map11 = rm->get_const_inv_ref_map()[0][1][1];
+          double determinant = (const_inv_ref_map00 * const_inv_ref_map11 - const_inv_ref_map10 * const_inv_ref_map01);
+          for (int i = 0; i < np; i++)
+          {
+            u->val0[i] = (fn0[i] * const_inv_ref_map00 + fn1[i] * const_inv_ref_map01);
+            u->val1[i] = (fn0[i] * const_inv_ref_map10 + fn1[i] * const_inv_ref_map11);
+            u->curl[i] = determinant * (dx1[i] - dy0[i]);
+          }
+        }
+        else
+        {
+          double2x2* m = rm->get_inv_ref_map(order);
+          for (int i = 0; i < np; i++, m++)
+          {
+            u->val0[i] = (fn0[i] * (*m)[0][0] + fn1[i] * (*m)[0][1]);
+            u->val1[i] = (fn0[i] * (*m)[1][0] + fn1[i] * (*m)[1][1]);
+            u->curl[i] = ((*m)[0][0] * (*m)[1][1] - (*m)[1][0] * (*m)[0][1]) * (dx1[i] - dy0[i]);
+          }
+
+          m -= np;
+          delete[] m;
+        }
+      }
+      // Hdiv space.
+      else if (space_type == HERMES_HDIV_SPACE)
+      {
+        double *fn0 = fu->get_fn_values(0);
+        double *fn1 = fu->get_fn_values(1);
+        double *dx0 = fu->get_dx_values(0);
+        double *dy1 = fu->get_dy_values(1);
+        if (rm->is_jacobian_const())
+        {
+          double const_inv_ref_map00 = rm->get_const_inv_ref_map()[0][0][0];
+          double const_inv_ref_map01 = rm->get_const_inv_ref_map()[0][0][1];
+          double const_inv_ref_map10 = rm->get_const_inv_ref_map()[0][1][0];
+          double const_inv_ref_map11 = rm->get_const_inv_ref_map()[0][1][1];
+          double determinant = (const_inv_ref_map00 * const_inv_ref_map11 - const_inv_ref_map10 * const_inv_ref_map01);
+
+          for (int i = 0; i < np; i++)
+          {
+            u->val0[i] = (fn0[i] * const_inv_ref_map11 - fn1[i] * const_inv_ref_map10);
+            u->val1[i] = (-fn0[i] * const_inv_ref_map01 + fn1[i] * const_inv_ref_map00);
+            u->div[i] = determinant * (dx0[i] + dy1[i]);
+          }
+        }
+        else
+        {
+          double2x2* m = rm->get_inv_ref_map(order);
+          for (int i = 0; i < np; i++, m++)
+          {
+            u->val0[i] = (fn0[i] * (*m)[1][1] - fn1[i] * (*m)[1][0]);
+            u->val1[i] = (-fn0[i] * (*m)[0][1] + fn1[i] * (*m)[0][0]);
+            u->div[i] = ((*m)[0][0] * (*m)[1][1] - (*m)[1][0] * (*m)[0][1]) * (dx0[i] + dy1[i]);
+          }
+
+          m -= np;
+          delete[] m;
+        }
+      }
+      else
+        throw Hermes::Exceptions::Exception("Wrong space type - space has to be either H1, Hcurl, Hdiv or L2");
+    }
+
     template<typename Scalar>
     Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order)
     {

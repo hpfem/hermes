@@ -51,6 +51,11 @@ namespace Hermes
       /// Initializes the Transformable array for doing transformations.
       void init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear, bool add_dirichlet_lift);
 
+      /// Initialize Func storages.
+      void init_funcs();
+      /// De-initialize Func storages.
+      void deinit_funcs();
+
       /// Sets active elements & transformations
       void init_assembling_one_state(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state);
       /// Assemble the state.
@@ -85,8 +90,8 @@ namespace Hermes
       PrecalcShapeset** pss;
       RefMap** refmaps;
       Solution<Scalar>** u_ext;
-      AsmList<Scalar>* als[H2D_MAX_COMPONENTS];
-      AsmList<Scalar>* alsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_COMPONENTS];
+      AsmList<Scalar> als[H2D_MAX_COMPONENTS];
+      AsmList<Scalar> alsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_COMPONENTS];
       Hermes::vector<Transformable *> fns;
       int spaces_size;
       bool nonlinear, add_dirichlet_lift;

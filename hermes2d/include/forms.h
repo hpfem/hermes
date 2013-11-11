@@ -219,6 +219,8 @@ namespace Hermes
     HERMES_API Func<Hermes::Ord>* init_fn_ord(const int order);
     /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values).
     HERMES_API Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
+    HERMES_API Func<double>* init_fn_preallloc(PrecalcShapeset *fu);
+    HERMES_API void init_fn_calc_preallocated(Func<double>* u, PrecalcShapeset *fu, RefMap *rm, const int order);
 
     /// Init the mesh-function for the evaluation of the volumetric/surface integral.
     template<typename Scalar>

@@ -112,39 +112,82 @@ namespace Hermes
       /// \brief Returns function values.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The values of the function at all points of the current integration rule.
-      Scalar* get_fn_values(int component = 0);
+      inline Scalar* get_fn_values(int component = 0)
+      {
+#ifdef _DEBUG
+        check_params(component, cur_node, num_components); check_table(component, cur_node, 0, "Function values");
+#endif
+        return cur_node->values[component][0];
+      }
 
       /// \brief Returns the x partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The x partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dx_values(int component = 0);
+      inline Scalar* get_dx_values(int component = 0)
+      {
+#ifdef _DEBUG
+        check_params(component, cur_node, num_components); check_table(component, cur_node, 1, "DX values");
+#endif
+        return cur_node->values[component][1];
+      }
 
       /// \brief Returns the y partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The y partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dy_values(int component = 0);
+      inline Scalar* get_dy_values(int component = 0)
+      {
+#ifdef _DEBUG
+        check_params(component, cur_node, num_components); check_table(component, cur_node, 2, "DY values");
+#endif
+        return cur_node->values[component][2];
+      }
 
       /// \brief Returns both x and y partial derivatives.
       /// This function provides the both often-used dx and dy values in one call.
       /// \param dx[out] Variable which receives the pointer to the first partial derivatives by x
       /// \param dy[out] Variable which receives the pointer to the first partial derivatives by y
       /// \param component[in] The component of the function (0 or 1).
-      void get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0);
+      inline void get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0)
+      {
+#ifdef _DEBUG
+        check_params(component, cur_node, num_components); check_table(component, cur_node, 1, "DX values"); check_table(component, cur_node, 2, "DY values");
+#endif
+        dx = cur_node->values[component][1];
+        dy = cur_node->values[component][2];
+      }
 
       /// \brief Returns the second x partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The x second partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dxx_values(int component = 0);
+      inline Scalar* get_dxx_values(int component = 0)
+      {
+#ifdef _DEBUG
+        check_params(component, cur_node, num_components); check_table(component, cur_node, 3, "DXX values");
+#endif
+        return cur_node->values[component][3];
+      }
 
       /// \brief Returns the second y partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The y second partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dyy_values(int component = 0);
+      inline Scalar* get_dyy_values(int component = 0)
+      {
+#ifdef _DEBUG
+        check_params(component, cur_node, num_components); check_table(component, cur_node, 4, "DYY values");
+#endif
+        return cur_node->values[component][4];
+      }
 
       /// \brief Returns the second mixed derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The second mixed derivative of the function at all points of the current integration rule.
-      Scalar* get_dxy_values(int component = 0);
+      inline Scalar* get_dxy_values(int component = 0)
+      {
+#ifdef _DEBUG
+        check_params(component, cur_node, num_components); check_table(component, cur_node, 5, "DXY values");
+#endif
+        return cur_node->values[component][5];
+      }
 
       /// \brief Returns the current quadrature points.
       Quad2D* get_quad_2d() const;

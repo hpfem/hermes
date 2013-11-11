@@ -101,27 +101,53 @@ namespace Hermes
 
       /// Returns true if the jacobian of the reference map is constant (which
       /// is the case for non-curvilinear triangular elements), false otherwise.
-      bool is_jacobian_const() const;
+      inline bool is_jacobian_const() const
+      {
+        return is_const;
+      }
+
+      /// Returns the increase in the integration order due to the reference map.
+      inline int get_inv_ref_order() const
+      {
+        return inv_ref_order;
+      }
 
       /// If the jacobian of the reference map is constant, this is the fast
       /// way to obtain it.
-      double get_const_jacobian() const;
+      inline double get_const_jacobian() const
+      {
+        return const_jacobian;
+      }
+
+      /// If the reference map is constant, this is the fast way to obtain
+      /// its inverse matrix.
+      inline double2x2* get_const_inv_ref_map()
+      {
+        return &const_inv_ref_map;
+      }
 
       /// Returns the jacobian of the reference map precalculated at the integration
       /// points of the specified order. Intended for non-constant jacobian elements.
-      double* get_jacobian(int order);
-
-      /// Returns the increase in the integration order due to the reference map.
-      int get_inv_ref_order() const;
+      inline double* get_jacobian(int order)
+      {
+        if (cur_node == nullptr)
+          throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
+        if (cur_node->inv_ref_map[order] == nullptr)
+          calc_inv_ref_map(order);
+        return cur_node->jacobian[order];
+      }
 
       /// Returns the inverse matrices of the reference map precalculated at the
       /// integration points of the specified order. Intended for non-constant
       /// jacobian elements.
-      double2x2* get_inv_ref_map(int order);
-
-      /// If the reference map is constant, this is the fast way to obtain
-      /// its inverse matrix.
-      double2x2* get_const_inv_ref_map();
+      inline double2x2* get_inv_ref_map(int order)
+      {
+        if (cur_node == nullptr)
+          throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
+        if (cur_node->inv_ref_map[order] == nullptr)
+          calc_inv_ref_map(order);
+        return cur_node->inv_ref_map[order];
+      }
 
       H1ShapesetJacobi ref_map_shapeset;
       PrecalcShapeset ref_map_pss;
