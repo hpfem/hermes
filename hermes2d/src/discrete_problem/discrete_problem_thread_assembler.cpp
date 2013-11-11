@@ -149,11 +149,11 @@ namespace Hermes
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-          this->funcs[space_i][j] = init_fn_preallloc(this->pss[space_i]);
+          this->funcs[space_i][j] = preallocate_fn(this->pss[space_i]);
 
         for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
           for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-            this->funcsSurface[edge_i][space_i][j] = init_fn_preallloc(this->pss[space_i]);
+            this->funcsSurface[edge_i][space_i][j] = preallocate_fn(this->pss[space_i]);
       }
     }
 
@@ -232,7 +232,7 @@ namespace Hermes
         for (unsigned int j = 0; j < this->als[space_i].cnt; j++)
         {
           pss[space_i]->set_active_shape(this->als[space_i].idx[j]);
-          init_fn_calc_preallocated(this->funcs[space_i][j], pss[space_i], refmaps[space_i], this->order);
+          init_fn_preallocated(this->funcs[space_i][j], pss[space_i], refmaps[space_i], this->order);
         }
       }
 
@@ -259,7 +259,7 @@ namespace Hermes
             for (unsigned int j = 0; j < this->alsSurface[edge_i][space_i].cnt; j++)
             {
               pss[space_i]->set_active_shape(this->alsSurface[edge_i][space_i].idx[j]);
-              init_fn_calc_preallocated(this->funcsSurface[edge_i][space_i][j], pss[space_i], refmaps[space_i], this->orderSurface[edge_i]);
+              init_fn_preallocated(this->funcsSurface[edge_i][space_i][j], pss[space_i], refmaps[space_i], this->orderSurface[edge_i]);
             }
           }
         }
@@ -430,29 +430,25 @@ namespace Hermes
       {
         for (int current_mfvol_i = 0; current_mfvol_i < this->wf->mfvol.size(); current_mfvol_i++)
         {
-          MatrixFormVol<Scalar>* mfv = this->wf->mfvol[current_mfvol_i];
-
-          if (!selectiveAssembler->form_to_be_assembled(mfv, current_state))
+          if (!selectiveAssembler->form_to_be_assembled(this->wf->mfvol[current_mfvol_i], current_state))
             continue;
 
-          int form_i = mfv->i;
-          int form_j = mfv->j;
+          int form_i = this->wf->mfvol[current_mfvol_i]->i;
+          int form_j = this->wf->mfvol[current_mfvol_i]->j;
 
-          this->assemble_matrix_form(mfv, order, funcs[form_j], funcs[form_i], ext_func, u_ext_func, &als[form_i], &als[form_j], n_quadrature_points, geometry, jacobian_x_weights);
+          this->assemble_matrix_form(this->wf->mfvol[current_mfvol_i], order, funcs[form_j], funcs[form_i], ext_func, u_ext_func, &als[form_i], &als[form_j], n_quadrature_points, geometry, jacobian_x_weights);
         }
       }
       if (this->current_rhs)
       {
         for (int current_vfvol_i = 0; current_vfvol_i < this->wf->vfvol.size(); current_vfvol_i++)
         {
-          VectorFormVol<Scalar>* vfv = this->wf->vfvol[current_vfvol_i];
-
-          if (!selectiveAssembler->form_to_be_assembled(vfv, current_state))
+          if (!selectiveAssembler->form_to_be_assembled(this->wf->vfvol[current_vfvol_i], current_state))
             continue;
 
-          int form_i = vfv->i;
+          int form_i = this->wf->vfvol[current_vfvol_i]->i;
 
-          this->assemble_vector_form(vfv, order, funcs[form_i], ext_func, u_ext_func, &als[form_i], n_quadrature_points, geometry, jacobian_x_weights);
+          this->assemble_vector_form(this->wf->vfvol[current_vfvol_i], order, funcs[form_i], ext_func, u_ext_func, &als[form_i], n_quadrature_points, geometry, jacobian_x_weights);
         }
       }
 
@@ -491,7 +487,7 @@ namespace Hermes
               int form_i = this->wf->mfsurf[current_mfsurf_i]->i;
               int form_j = this->wf->mfsurf[current_mfsurf_i]->j;
 
-              this->assemble_matrix_form(wf->mfsurf[current_mfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_j], funcsSurface[isurf][form_i], ext_funcSurf, 
+              this->assemble_matrix_form(this->wf->mfsurf[current_mfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_j], funcsSurface[isurf][form_i], ext_funcSurf, 
                 u_ext_funcSurf, &alsSurface[isurf][form_i], &alsSurface[isurf][form_j], n_quadrature_pointsSurface[isurf], geometrySurface[isurf], jacobian_x_weightsSurface[isurf]);
             }
           }
@@ -505,7 +501,7 @@ namespace Hermes
 
               int form_i = this->wf->vfsurf[current_vfsurf_i]->i;
 
-              this->assemble_vector_form(wf->vfsurf[current_vfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_i], ext_funcSurf, u_ext_funcSurf, 
+              this->assemble_vector_form(this->wf->vfsurf[current_vfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_i], ext_funcSurf, u_ext_funcSurf,
                 &alsSurface[isurf][form_i], n_quadrature_pointsSurface[isurf], geometrySurface[isurf], jacobian_x_weightsSurface[isurf]);
             }
           }

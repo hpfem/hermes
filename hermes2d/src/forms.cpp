@@ -644,7 +644,122 @@ namespace Hermes
       return u;
     }
 
-    Func<double>* init_fn_preallloc(PrecalcShapeset *fu)
+    template<typename Scalar>
+    Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order)
+    {
+      // Sanity checks.
+      if(fu == nullptr) throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
+      if(fu->get_mesh() == nullptr) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
+
+      int nc = fu->get_num_components();
+      Quad2D* quad = fu->get_quad_2d();
+      fu->set_quad_order(order);
+      double3* pt = quad->get_points(order, fu->get_active_element()->get_mode());
+      int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
+      Func<Scalar>* u = new Func<Scalar>(np, nc);
+
+      if(u->nc == 1)
+      {
+        u->val = new Scalar[np];
+        u->dx  = new Scalar[np];
+        u->dy  = new Scalar[np];
+        memcpy(u->val, fu->get_fn_values(), np * sizeof(Scalar));
+        memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
+        memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
+      }
+      else if(u->nc == 2)
+      {
+        u->val0 = new Scalar[np];
+        u->val1 = new Scalar[np];
+        u->curl = new Scalar[np];
+        u->div = new Scalar[np];
+
+        memcpy(u->val0, fu->get_fn_values(0), np * sizeof(Scalar));
+        memcpy(u->val1, fu->get_fn_values(1), np * sizeof(Scalar));
+
+        Scalar *dx1 = fu->get_dx_values(1);
+        Scalar *dy0 = fu->get_dy_values(0);
+        for (int i = 0; i < np; i++) u->curl[i] = dx1[i] - dy0[i];
+
+        Scalar *dx0 = fu->get_dx_values(0);
+        Scalar *dy1 = fu->get_dy_values(1);
+        for (int i = 0; i < np; i++) u->div[i] = dx0[i] + dy1[i];
+      }
+      return u;
+    }
+    
+    template<typename Scalar>
+    Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order)
+    {
+      // Sanity checks.
+      if (fu == nullptr) throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
+      if (fu->get_mesh() == nullptr) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
+
+      SpaceType space_type = fu->get_space_type();
+      SolutionType sln_type = fu->get_type();
+
+      int nc = fu->get_num_components();
+      Quad2D* quad = fu->get_quad_2d();
+#ifdef H2D_USE_SECOND_DERIVATIVES
+      if ((space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE) && sln_type != HERMES_EXACT)
+        fu->set_quad_order(order, H2D_FN_ALL);
+      else
+        fu->set_quad_order(order);
+#else
+      fu->set_quad_order(order);
+#endif
+      double3* pt = quad->get_points(order, fu->get_active_element()->get_mode());
+      int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
+      Func<Scalar>* u = new Func<Scalar>(np, nc);
+
+      if (u->nc == 1)
+      {
+        u->val = new Scalar[np];
+        u->dx = new Scalar[np];
+        u->dy = new Scalar[np];
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+        if ((space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE) && sln_type != HERMES_EXACT)
+          u->laplace = new Scalar[np];
+#endif
+
+        memcpy(u->val, fu->get_fn_values(), np * sizeof(Scalar));
+        memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
+        memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+        if ((space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE) && sln_type != HERMES_EXACT)
+        {
+          Scalar *dxx = fu->get_dxx_values();
+          Scalar *dyy = fu->get_dyy_values();
+          for (int i = 0; i < np; i++)
+            u->laplace[i] = dxx[i] + dyy[i];
+        }
+#endif
+      }
+      else if (u->nc == 2)
+      {
+        u->val0 = new Scalar[np];
+        u->val1 = new Scalar[np];
+        u->curl = new Scalar[np];
+        u->div = new Scalar[np];
+
+        memcpy(u->val0, fu->get_fn_values(0), np * sizeof(Scalar));
+        memcpy(u->val1, fu->get_fn_values(1), np * sizeof(Scalar));
+
+        Scalar *dx1 = fu->get_dx_values(1);
+        Scalar *dy0 = fu->get_dy_values(0);
+        for (int i = 0; i < np; i++)
+          u->curl[i] = dx1[i] - dy0[i];
+
+        Scalar *dx0 = fu->get_dx_values(0);
+        Scalar *dy1 = fu->get_dy_values(1);
+        for (int i = 0; i < np; i++)
+          u->div[i] = dx0[i] + dy1[i];
+      }
+    }
+
+    Func<double>* preallocate_fn(PrecalcShapeset *fu)
     {
       SpaceType space_type = fu->get_space_type();
       Func<double>* u = new Func<double>(H2D_MAX_INTEGRATION_POINTS_COUNT, fu->get_num_components());
@@ -670,6 +785,7 @@ namespace Hermes
       {
         u->val0 = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
         u->val1 = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->div = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
       }
       else
         throw Hermes::Exceptions::Exception("Wrong space type - space has to be either H1, Hcurl, Hdiv or L2");
@@ -677,7 +793,7 @@ namespace Hermes
       return u;
     }
 
-    void init_fn_calc_preallocated(Func<double>* u, PrecalcShapeset *fu, RefMap *rm, const int order)
+    void init_fn_preallocated(Func<double>* u, PrecalcShapeset *fu, RefMap *rm, const int order)
     {
       SpaceType space_type = fu->get_space_type();
 
@@ -844,29 +960,28 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order)
+    void init_fn_preallocated(Func<Scalar>* u, MeshFunction<Scalar>* fu, const int order)
     {
       // Sanity checks.
-      if(fu == nullptr) throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
-      if(fu->get_mesh() == nullptr) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
+      if (fu == nullptr) throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
+      if (fu->get_mesh() == nullptr) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
 
       int nc = fu->get_num_components();
       Quad2D* quad = fu->get_quad_2d();
       fu->set_quad_order(order);
       double3* pt = quad->get_points(order, fu->get_active_element()->get_mode());
       int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
-      Func<Scalar>* u = new Func<Scalar>(np, nc);
 
-      if(u->nc == 1)
+      if (u->nc == 1)
       {
         u->val = new Scalar[np];
-        u->dx  = new Scalar[np];
-        u->dy  = new Scalar[np];
+        u->dx = new Scalar[np];
+        u->dy = new Scalar[np];
         memcpy(u->val, fu->get_fn_values(), np * sizeof(Scalar));
         memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
         memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
       }
-      else if(u->nc == 2)
+      else if (u->nc == 2)
       {
         u->val0 = new Scalar[np];
         u->val1 = new Scalar[np];
@@ -884,9 +999,79 @@ namespace Hermes
         Scalar *dy1 = fu->get_dy_values(1);
         for (int i = 0; i < np; i++) u->div[i] = dx0[i] + dy1[i];
       }
-      return u;
     }
-    
+
+    template<typename Scalar>
+    void init_fn_preallocated(Func<Scalar>* u, Solution<Scalar>* fu, const int order)
+    {
+      // Sanity checks.
+      if (fu == nullptr) throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
+      if (fu->get_mesh() == nullptr) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
+
+      SpaceType space_type = fu->get_space_type();
+      SolutionType sln_type = fu->get_type();
+
+      int nc = fu->get_num_components();
+      Quad2D* quad = fu->get_quad_2d();
+#ifdef H2D_USE_SECOND_DERIVATIVES
+      if ((space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE) && sln_type != HERMES_EXACT)
+        fu->set_quad_order(order, H2D_FN_ALL);
+      else
+        fu->set_quad_order(order);
+#else
+      fu->set_quad_order(order);
+#endif
+      double3* pt = quad->get_points(order, fu->get_active_element()->get_mode());
+      int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
+
+      if (u->nc == 1)
+      {
+        u->val = new Scalar[np];
+        u->dx = new Scalar[np];
+        u->dy = new Scalar[np];
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+        if ((space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE) && sln_type != HERMES_EXACT)
+          u->laplace = new Scalar[np];
+#endif
+
+        memcpy(u->val, fu->get_fn_values(), np * sizeof(Scalar));
+        memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
+        memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+        if ((space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE) && sln_type != HERMES_EXACT)
+        {
+          Scalar *dxx = fu->get_dxx_values();
+          Scalar *dyy = fu->get_dyy_values();
+          for (int i = 0; i < np; i++)
+            u->laplace[i] = dxx[i] + dyy[i];
+        }
+#endif
+      }
+      else if (u->nc == 2)
+      {
+        u->val0 = new Scalar[np];
+        u->val1 = new Scalar[np];
+        u->curl = new Scalar[np];
+        u->div = new Scalar[np];
+
+        memcpy(u->val0, fu->get_fn_values(0), np * sizeof(Scalar));
+        memcpy(u->val1, fu->get_fn_values(1), np * sizeof(Scalar));
+
+        Scalar *dx1 = fu->get_dx_values(1);
+        Scalar *dy0 = fu->get_dy_values(0);
+        for (int i = 0; i < np; i++)
+          u->curl[i] = dx1[i] - dy0[i];
+
+        Scalar *dx0 = fu->get_dx_values(0);
+        Scalar *dy1 = fu->get_dy_values(1);
+        for (int i = 0; i < np; i++)
+          u->div[i] = dx0[i] + dy1[i];
+      }
+    }
+
+
     template<typename Scalar>
     Func<Scalar>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad, int nc)
     {
@@ -917,78 +1102,6 @@ namespace Hermes
         memset(u->val1, 0, np * sizeof(Scalar));
         memset(u->curl, 0, np * sizeof(Scalar));
         memset(u->div, 0, np * sizeof(Scalar));
-      }
-      return u;
-    }
-
-    template<typename Scalar>
-    Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order)
-    {
-      // Sanity checks.
-      if(fu == nullptr) throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
-      if(fu->get_mesh() == nullptr) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
-
-      SpaceType space_type = fu->get_space_type();
-      SolutionType sln_type = fu->get_type();
-
-      int nc = fu->get_num_components();
-      Quad2D* quad = fu->get_quad_2d();
-#ifdef H2D_USE_SECOND_DERIVATIVES
-      if((space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE) && sln_type != HERMES_EXACT)
-        fu->set_quad_order(order, H2D_FN_ALL);
-      else
-        fu->set_quad_order(order);
-#else
-        fu->set_quad_order(order);
-#endif
-      double3* pt = quad->get_points(order, fu->get_active_element()->get_mode());
-      int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
-      Func<Scalar>* u = new Func<Scalar>(np, nc);
-
-      if(u->nc == 1)
-      {
-        u->val = new Scalar[np];
-        u->dx  = new Scalar[np];
-        u->dy  = new Scalar[np];
-        
-#ifdef H2D_USE_SECOND_DERIVATIVES
-        if((space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE) && sln_type != HERMES_EXACT)
-          u->laplace = new Scalar[np];
-#endif
-
-        memcpy(u->val, fu->get_fn_values(), np * sizeof(Scalar));
-        memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
-        memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
-
-#ifdef H2D_USE_SECOND_DERIVATIVES
-        if((space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE) && sln_type != HERMES_EXACT)
-        {
-          Scalar *dxx = fu->get_dxx_values();
-          Scalar *dyy = fu->get_dyy_values();
-          for (int i = 0; i < np; i++)
-            u->laplace[i] = dxx[i] + dyy[i];
-        }
-#endif
-      }
-      else if(u->nc == 2)
-      {
-        u->val0 = new Scalar[np];
-        u->val1 = new Scalar[np];
-        u->curl = new Scalar[np];
-        u->div = new Scalar[np];
-
-        memcpy(u->val0, fu->get_fn_values(0), np * sizeof(Scalar));
-        memcpy(u->val1, fu->get_fn_values(1), np * sizeof(Scalar));
-
-        Scalar *dx1 = fu->get_dx_values(1);
-        Scalar *dy0 = fu->get_dy_values(0);
-        for (int i = 0; i < np; i++) 
-          u->curl[i] = dx1[i] - dy0[i];
-
-        Scalar *dx0 = fu->get_dx_values(0);
-        Scalar *dy1 = fu->get_dy_values(1);
-        for (int i = 0; i < np; i++) 
-          u->div[i] = dx0[i] + dy1[i];
       }
       return u;
     }
@@ -1030,6 +1143,20 @@ namespace Hermes
 
     template HERMES_API Func<double>* init_fn(Solution<double>* fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(Solution<std::complex<double> >* fu, const int order);
+
+
+    template HERMES_API Func<double>* preallocate_fn(MeshFunction<double>*);
+    template HERMES_API Func<std::complex<double> >* preallocate_fn(MeshFunction<std::complex<double> >*);
+
+    template HERMES_API Func<double>* preallocate_fn(Solution<double>*);
+    template HERMES_API Func<std::complex<double> >* preallocate_fn(Solution<std::complex<double> >*);
+
+    template HERMES_API void init_fn_preallocated(Func<double>* u, MeshFunction<double>* fu, const int order);
+    template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, MeshFunction<std::complex<double> >* fu, const int order);
+    
+    template HERMES_API void init_fn_preallocated(Func<double>* u, Solution<double>* fu, const int order);
+    template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, Solution<std::complex<double> >* fu, const int order);
+
 
     template HERMES_API Func<double>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);
     template HERMES_API Func<std::complex<double> >* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);

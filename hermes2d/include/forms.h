@@ -34,6 +34,87 @@ namespace Hermes
       "Neighboring elements are not defined and so are not function traces on their interface. "
       "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
 
+
+
+#pragma region Geometry
+    /// Geometry (coordinates, normals, tangents) of either an element or an edge.
+    /// @ingroup inner
+    template<typename T>
+    class HERMES_API Geom
+    {
+    public:
+      /// Constructor.
+      Geom();
+
+      T diam;           ///< Element diameter (for edge, diameter of the parent element).
+      T area;           ///< Element area (for edge, area of the parent element).
+      T *x, *y;         ///< Coordinates[in physical domain].
+      T *nx, *ny;       ///< Normals[in physical domain] (locally oriented
+      ///< to point outside the element). Only for edge
+      ///< (undefined for element).
+      T *tx, *ty;       ///< Tangents[in physical domain]. Only for edge.
+      int id;           ///< ID number of the element (undefined for edge).
+      int isurf;        ///< Order number of an edge of the element.
+
+      /// Methods designed for discontinuous functions, return errors here.
+      virtual int get_neighbor_marker() const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
+      /// Methods designed for discontinuous functions, return errors here.
+      virtual int get_neighbor_id()     const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
+      /// Methods designed for discontinuous functions, return errors here.
+      virtual T   get_neighbor_diam()   const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
+
+      /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
+      virtual ~Geom() {};
+
+      /// Deallocation.
+      virtual void free();
+      virtual void free_ord() {};
+      int elem_marker;       ///< Element marker (for both volumetric and surface forms).
+      int edge_marker;       ///< Edge marker (for surface forms only).
+
+      int orientation;  ///< 0 .... if(nx, ny) is equal to the global normal,
+      ///< otherwise 1 (each edge has a unique global normal).
+      ///< Only for edge.
+    };
+
+    /// Small class which contains information about the element on the other side of an interface.
+    ///
+    /// It just appends three new parameters to an instance of Geom. During destruction, the wrapped
+    /// instance is not touched - it must be destroyed separately. You may call the overriden methods
+    /// \c free or \c free_ord in order to do this via the instance of InterfaceGeom.
+    ///
+    /// @ingroup inner
+    template<typename T>
+    class HERMES_API InterfaceGeom : public Geom<T>
+    {
+    public:
+      int neighb_id;
+      T   neighb_diam;
+      int get_neighbor_marker() const;
+      int get_neighbor_id()  const;
+      T get_neighbor_diam() const;
+
+      /// Constructor.
+      InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
+
+      virtual void free();
+      virtual void free_ord();
+
+    private:
+      Geom<T>* wrapped_geom;
+      int neighb_marker;
+      template<typename Scalar> friend class KellyTypeAdapt;
+    };
+
+    /// Init element geometry for calculating the integration order.
+    HERMES_API Geom<Hermes::Ord>* init_geom_ord();
+    /// Init element geometry for volumetric integrals.
+    HERMES_API Geom<double>* init_geom_vol(RefMap *rm, const int order);
+    /// Init element geometry for surface integrals.
+    HERMES_API Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan);
+#pragma endregion
+
+#pragma region Func
     /// Calculated function values (from the class Function) on an element for assembling.
     /// @ingroup inner
     template<typename T>
@@ -139,89 +220,12 @@ namespace Hermes
       static T zero;              ///< Zero value used for the zero-extension.
     };
 
-    /// Geometry (coordinates, normals, tangents) of either an element or an edge.
-    /// @ingroup inner
-    template<typename T>
-    class HERMES_API Geom
-    {
-    public:
-      /// Constructor.
-      Geom();
-
-      T diam;           ///< Element diameter (for edge, diameter of the parent element).
-      T area;           ///< Element area (for edge, area of the parent element).
-      T *x, *y;         ///< Coordinates[in physical domain].
-      T *nx, *ny;       ///< Normals[in physical domain] (locally oriented
-      ///< to point outside the element). Only for edge
-      ///< (undefined for element).
-      T *tx, *ty;       ///< Tangents[in physical domain]. Only for edge.
-      int id;           ///< ID number of the element (undefined for edge).
-      int isurf;        ///< Order number of an edge of the element.
-
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual int get_neighbor_marker() const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual int get_neighbor_id()     const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual T   get_neighbor_diam()   const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
-
-      /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
-      virtual ~Geom() {};
-
-      /// Deallocation.
-      virtual void free();
-      virtual void free_ord() {};
-      int elem_marker;       ///< Element marker (for both volumetric and surface forms).
-      int edge_marker;       ///< Edge marker (for surface forms only).
-
-      int orientation;  ///< 0 .... if(nx, ny) is equal to the global normal,
-      ///< otherwise 1 (each edge has a unique global normal).
-      ///< Only for edge.
-    };
-
-    /// Small class which contains information about the element on the other side of an interface.
-    ///
-    /// It just appends three new parameters to an instance of Geom. During destruction, the wrapped
-    /// instance is not touched - it must be destroyed separately. You may call the overriden methods
-    /// \c free or \c free_ord in order to do this via the instance of InterfaceGeom.
-    ///
-    /// @ingroup inner
-    template<typename T>
-    class HERMES_API InterfaceGeom : public Geom<T>
-    {
-    public:
-      int neighb_id;
-      T   neighb_diam;
-      int get_neighbor_marker() const;
-      int get_neighbor_id()  const;
-      T get_neighbor_diam() const;
-
-      /// Constructor.
-      InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
-
-      virtual void free();
-      virtual void free_ord();
-
-    private:
-      Geom<T>* wrapped_geom;
-      int neighb_marker;
-      template<typename Scalar> friend class KellyTypeAdapt;
-    };
-
-    /// Init element geometry for calculating the integration order.
-    HERMES_API Geom<Hermes::Ord>* init_geom_ord();
-    /// Init element geometry for volumetric integrals.
-    HERMES_API Geom<double>* init_geom_vol(RefMap *rm, const int order);
-    /// Init element geometry for surface integrals.
-    HERMES_API Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan);
-
+    
     /// Init the function for calculation the integration order.
     HERMES_API Func<Hermes::Ord>* init_fn_ord(const int order);
+
     /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values).
     HERMES_API Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
-    HERMES_API Func<double>* init_fn_preallloc(PrecalcShapeset *fu);
-    HERMES_API void init_fn_calc_preallocated(Func<double>* u, PrecalcShapeset *fu, RefMap *rm, const int order);
-
     /// Init the mesh-function for the evaluation of the volumetric/surface integral.
     template<typename Scalar>
     HERMES_API Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order);
@@ -229,12 +233,33 @@ namespace Hermes
     template<typename Scalar>
     HERMES_API Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order);
 
+
+    /// Preallocate the Func (all we need is np & nc).
+    HERMES_API Func<double>* preallocate_fn(PrecalcShapeset *fu);
+
+    template<typename Scalar>
+    HERMES_API Func<Scalar>* preallocate_fn(MeshFunction<Scalar> *fu);
+    template<typename Scalar>
+    HERMES_API Func<Scalar>* preallocate_fn(Solution<Scalar> *fu);
+
+    /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values) - preallocated version.
+    HERMES_API void init_fn_preallocated(Func<double>* u, PrecalcShapeset *fu, RefMap *rm, const int order);
+    /// Init the mesh-function for the evaluation of the volumetric/surface integral - preallocated version.
+    template<typename Scalar>
+    HERMES_API void init_fn_preallocated(Func<Scalar>* u, MeshFunction<Scalar>* fu, const int order);
+    /// Init the solution for the evaluation of the volumetric/surface integral - preallocated version.
+    template<typename Scalar>
+    HERMES_API void init_fn_preallocated(Func<Scalar>* u, Solution<Scalar>* fu, const int order);
+
+    /// Utilities follow
     /// Init zero function
     template<typename Scalar>
     HERMES_API Func<Scalar>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d = nullptr, int nc = 1);
 
+    /// Init UExt function
     template<typename Scalar>
     HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
+#pragma endregion
   }
 }
 #endif
