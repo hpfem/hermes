@@ -27,7 +27,8 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) :
       pss(nullptr), refmaps(nullptr), u_ext(nullptr),
-      selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler)
+      selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
+      ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0)
     {
     }
 
@@ -146,14 +147,72 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_funcs()
     {
+      // Basis & test fns, u_ext funcs.
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
           this->funcs[space_i][j] = preallocate_fn(this->pss[space_i]);
 
         for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
-          for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-            this->funcsSurface[edge_i][space_i][j] = preallocate_fn(this->pss[space_i]);
+        for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+          this->funcsSurface[edge_i][space_i][j] = preallocate_fn(this->pss[space_i]);
+
+        this->u_ext_funcs[space_i] = preallocate_fn(this->u_ext[space_i]);
+      }
+
+      // Reallocation of wf-(nonlocal-) ext funcs.
+      int ext_size = this->wf->ext.size();
+      int u_ext_fns_size = this->wf->u_ext_fn.size();
+
+      if (ext_size + u_ext_fns_size > ext_funcs_allocated_size)
+      {
+        ext_funcs_allocated_size = ext_size + u_ext_fns_size;
+        if (ext_funcs)
+          ext_funcs = (Func<Scalar>**)realloc(ext_funcs, ext_funcs_allocated_size * sizeof(Func<Scalar>*));
+        else
+          ext_funcs = (Func<Scalar>**)malloc(ext_funcs_allocated_size * sizeof(Func<Scalar>*));
+      }
+
+      // Initializaton of wf-(nonlocal-)ext funcs
+      if (ext_size > 0 || u_ext_fns_size > 0)
+      {
+        for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
+          this->ext_funcs[ext_i] = preallocate_fn(this->wf->u_ext_fn[ext_i]);
+
+        for (int ext_i = 0; ext_i < ext_size; ext_i++)
+          this->ext_funcs[u_ext_fns_size + ext_i] = preallocate_fn(this->wf->ext[ext_i]);
+      }
+
+      // Calculating local sizes.
+      int local_ext_size = 0;
+      int local_u_ext_fns_size = 0;
+      for (int form_i = 0; form_i < this->wf->forms.size(); form_i++)
+      {
+        if (this->wf->forms[form_i]->ext.size() > local_ext_size)
+          local_ext_size = this->wf->forms[form_i]->ext.size();
+
+        if (this->wf->forms[form_i]->u_ext_fn.size() > local_u_ext_fns_size)
+          local_u_ext_fns_size = this->wf->forms[form_i]->u_ext_fn.size();
+      }
+
+      if (local_ext_size > 0 || local_u_ext_fns_size > 0)
+      {
+        // Reallocation of form-(local-) ext funcs.
+        if (local_ext_size + local_u_ext_fns_size > ext_funcs_local_allocated_size)
+        {
+          ext_funcs_local_allocated_size = local_ext_size + local_u_ext_fns_size;
+          if (ext_funcs_local)
+            ext_funcs_local = (Func<Scalar>**)realloc(ext_funcs_local, ext_funcs_local_allocated_size * sizeof(Func<Scalar>*));
+          else
+            ext_funcs_local = (Func<Scalar>**)malloc(ext_funcs_local_allocated_size * sizeof(Func<Scalar>*));
+        }
+
+        // Initializaton of form-(local-)ext funcs
+        for (int ext_i = 0; ext_i < local_u_ext_fns_size; ext_i++)
+          this->ext_funcs_local[ext_i] = preallocate_fn(UExtFunctionSharedPtr<Scalar>(nullptr));
+
+        for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
+          this->ext_funcs_local[local_u_ext_fns_size + ext_i] = preallocate_fn(MeshFunctionSharedPtr<Scalar>(nullptr));
       }
     }
 
@@ -166,8 +225,8 @@ namespace Hermes
           delete this->funcs[space_i][j];
 
         for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
-          for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-            delete this->funcsSurface[edge_i][space_i][j];
+        for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+          delete this->funcsSurface[edge_i][space_i][j];
       }
     }
 
@@ -487,7 +546,7 @@ namespace Hermes
               int form_i = this->wf->mfsurf[current_mfsurf_i]->i;
               int form_j = this->wf->mfsurf[current_mfsurf_i]->j;
 
-              this->assemble_matrix_form(this->wf->mfsurf[current_mfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_j], funcsSurface[isurf][form_i], ext_funcSurf, 
+              this->assemble_matrix_form(this->wf->mfsurf[current_mfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_j], funcsSurface[isurf][form_i], ext_funcSurf,
                 u_ext_funcSurf, &alsSurface[isurf][form_i], &alsSurface[isurf][form_j], n_quadrature_pointsSurface[isurf], geometrySurface[isurf], jacobian_x_weightsSurface[isurf]);
             }
           }
@@ -676,6 +735,11 @@ namespace Hermes
       this->free_spaces();
       this->free_weak_formulation();
       this->free_u_ext();
+
+      if (this->ext_funcs)
+        ::free(ext_funcs);
+      if (this->ext_funcs_local)
+        ::free(ext_funcs_local);
     }
 
     template<typename Scalar>

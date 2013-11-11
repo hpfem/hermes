@@ -236,11 +236,12 @@ namespace Hermes
 
     /// Preallocate the Func (all we need is np & nc).
     HERMES_API Func<double>* preallocate_fn(PrecalcShapeset *fu);
-
     template<typename Scalar>
-    HERMES_API Func<Scalar>* preallocate_fn(MeshFunction<Scalar> *fu);
+    HERMES_API Func<Scalar>* preallocate_fn(MeshFunction<Scalar>* fu = nullptr);
     template<typename Scalar>
-    HERMES_API Func<Scalar>* preallocate_fn(Solution<Scalar> *fu);
+    HERMES_API Func<Scalar>* preallocate_fn(MeshFunctionSharedPtr<Scalar> fu);
+    template<typename Scalar>
+    HERMES_API Func<Scalar>* preallocate_fn(UExtFunctionSharedPtr<Scalar> fu);
 
     /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values) - preallocated version.
     HERMES_API void init_fn_preallocated(Func<double>* u, PrecalcShapeset *fu, RefMap *rm, const int order);
@@ -250,6 +251,10 @@ namespace Hermes
     /// Init the solution for the evaluation of the volumetric/surface integral - preallocated version.
     template<typename Scalar>
     HERMES_API void init_fn_preallocated(Func<Scalar>* u, Solution<Scalar>* fu, const int order);
+    /// Init UExt function - preallocated version.
+    template<typename Scalar>
+    HERMES_API void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
+
 
     /// Utilities follow
     /// Init zero function

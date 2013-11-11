@@ -478,7 +478,6 @@ namespace Hermes
         fu->set_quad_order(order);
 #endif
 
-      double3* pt = quad->get_points(order, rm->get_active_element()->get_mode());
       int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
       Func<double>* u = new Func<double>(np, nc);
 
@@ -658,7 +657,7 @@ namespace Hermes
       int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
-      if(u->nc == 1)
+      if(nc == 1)
       {
         u->val = new Scalar[np];
         u->dx  = new Scalar[np];
@@ -667,7 +666,7 @@ namespace Hermes
         memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
         memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
       }
-      else if(u->nc == 2)
+      else
       {
         u->val0 = new Scalar[np];
         u->val1 = new Scalar[np];
@@ -712,7 +711,7 @@ namespace Hermes
       int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
-      if (u->nc == 1)
+      if (nc == 1)
       {
         u->val = new Scalar[np];
         u->dx = new Scalar[np];
@@ -737,7 +736,7 @@ namespace Hermes
         }
 #endif
       }
-      else if (u->nc == 2)
+      else
       {
         u->val0 = new Scalar[np];
         u->val1 = new Scalar[np];
@@ -789,6 +788,56 @@ namespace Hermes
       }
       else
         throw Hermes::Exceptions::Exception("Wrong space type - space has to be either H1, Hcurl, Hdiv or L2");
+
+      return u;
+    }
+
+    template<typename Scalar>
+    Func<Scalar>* preallocate_fn(MeshFunction<Scalar>* fu)
+    {
+      int nc = fu ? fu->get_num_components() : 1;
+      Func<Scalar>* u = new Func<Scalar>(H2D_MAX_INTEGRATION_POINTS_COUNT, nc);
+      if (nc == 1)
+      {
+        u->val = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->dx = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->dy = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      }
+      else
+      {
+        u->val0 = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val1 = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->curl = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->div = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      }
+
+      return u;
+    }
+
+    template<typename Scalar>
+    Func<Scalar>* preallocate_fn(MeshFunctionSharedPtr<Scalar> fu)
+    {
+      return preallocate_fn(fu.get());
+    }
+
+    template<typename Scalar>
+    Func<Scalar>* preallocate_fn(UExtFunctionSharedPtr<Scalar> fu)
+    {
+      int nc = fu ? fu->get_num_components() : 1;
+      Func<Scalar>* u = new Func<Scalar>(H2D_MAX_INTEGRATION_POINTS_COUNT, nc);
+      if (nc == 1)
+      {
+        u->val = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->dx = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->dy = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      }
+      else
+      {
+        u->val0 = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val1 = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->curl = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->div = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      }
 
       return u;
     }
@@ -966,7 +1015,6 @@ namespace Hermes
       if (fu == nullptr) throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
       if (fu->get_mesh() == nullptr) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
 
-      int nc = fu->get_num_components();
       Quad2D* quad = fu->get_quad_2d();
       fu->set_quad_order(order);
       double3* pt = quad->get_points(order, fu->get_active_element()->get_mode());
@@ -974,14 +1022,11 @@ namespace Hermes
 
       if (u->nc == 1)
       {
-        u->val = new Scalar[np];
-        u->dx = new Scalar[np];
-        u->dy = new Scalar[np];
         memcpy(u->val, fu->get_fn_values(), np * sizeof(Scalar));
         memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
         memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
       }
-      else if (u->nc == 2)
+      else
       {
         u->val0 = new Scalar[np];
         u->val1 = new Scalar[np];
@@ -1049,7 +1094,7 @@ namespace Hermes
         }
 #endif
       }
-      else if (u->nc == 2)
+      else
       {
         u->val0 = new Scalar[np];
         u->val1 = new Scalar[np];
@@ -1069,6 +1114,19 @@ namespace Hermes
         for (int i = 0; i < np; i++)
           u->div[i] = dx0[i] + dy1[i];
       }
+    }
+
+    template<typename Scalar>
+    void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode)
+    {
+      // Sanity check.
+      if (fu == nullptr)
+        throw Hermes::Exceptions::Exception("nullptr UExtFunction in Func<Scalar>*::init_fn().");
+      
+      Quad2D* quad = &g_quad_2d_std;
+      int np = quad->get_num_points(order, mode);
+
+      fu->value(np, u_ext, u, geometry);
     }
 
 
@@ -1112,7 +1170,6 @@ namespace Hermes
       int nc = 1;
       Quad2D* quad = &g_quad_2d_std;
 
-      double3* pt = quad->get_points(order, mode);
       int np = quad->get_num_points(order, mode);
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
@@ -1120,8 +1177,6 @@ namespace Hermes
       if(fu == nullptr)
         throw Hermes::Exceptions::Exception("nullptr UExtFunction in Func<Scalar>*::init_fn().");
 
-      if(u->nc == 1)
-      {
         u->val = new Scalar[np];
         u->dx  = new Scalar[np];
         u->dy  = new Scalar[np];
@@ -1131,9 +1186,6 @@ namespace Hermes
 #endif
 
       fu->value(np, u_ext, u, geometry);
-      }
-      else
-        throw Hermes::Exceptions::MethodNotImplementedException("init_fn(UExtFunction<Scalar>* fu, const int order) - nc == 2");
 
       return u;
     }
@@ -1144,18 +1196,23 @@ namespace Hermes
     template HERMES_API Func<double>* init_fn(Solution<double>* fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(Solution<std::complex<double> >* fu, const int order);
 
+    template HERMES_API Func<double>* preallocate_fn(MeshFunction<double>* fu);
+    template HERMES_API Func<std::complex<double> >* preallocate_fn(MeshFunction<std::complex<double> >* fu);
 
-    template HERMES_API Func<double>* preallocate_fn(MeshFunction<double>*);
-    template HERMES_API Func<std::complex<double> >* preallocate_fn(MeshFunction<std::complex<double> >*);
+    template HERMES_API Func<double>* preallocate_fn(MeshFunctionSharedPtr<double> fu);
+    template HERMES_API Func<std::complex<double> >* preallocate_fn(MeshFunctionSharedPtr<std::complex<double> > fu);
 
-    template HERMES_API Func<double>* preallocate_fn(Solution<double>*);
-    template HERMES_API Func<std::complex<double> >* preallocate_fn(Solution<std::complex<double> >*);
+    template HERMES_API Func<double>* preallocate_fn(UExtFunctionSharedPtr<double> fu);
+    template HERMES_API Func<std::complex<double> >* preallocate_fn(UExtFunctionSharedPtr<std::complex<double> > fu);
 
     template HERMES_API void init_fn_preallocated(Func<double>* u, MeshFunction<double>* fu, const int order);
     template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, MeshFunction<std::complex<double> >* fu, const int order);
     
     template HERMES_API void init_fn_preallocated(Func<double>* u, Solution<double>* fu, const int order);
     template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, Solution<std::complex<double> >* fu, const int order);
+
+    template HERMES_API void init_fn_preallocated(Func<double>* u, UExtFunction<double>* fu, Func<double>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
+    template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
 
 
     template HERMES_API Func<double>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);

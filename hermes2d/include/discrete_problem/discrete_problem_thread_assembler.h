@@ -55,6 +55,14 @@ namespace Hermes
       void init_funcs();
       /// De-initialize Func storages.
       void deinit_funcs();
+      /// Initializitation of u-ext values into Funcs
+      Func<Scalar>** init_u_ext_values(int order);
+      /// De-initializitation of u-ext values
+      void deinit_u_ext_values(Func<Scalar>** u_ext_func);
+      /// Initializitation of ext values into Funcs
+      Func<Scalar>** init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry);
+      /// De-initializitation of ext values
+      void deinit_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Scalar>** ext_func);
 
       /// Sets active elements & transformations
       void init_assembling_one_state(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state);
@@ -81,20 +89,10 @@ namespace Hermes
       /// Free nonlinearities-related data.
       void free_u_ext();
 
-      Func<Scalar>** init_u_ext_values(int order);
-      void deinit_u_ext_values(Func<Scalar>** u_ext_func);
-
-      Func<Scalar>** init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry);
-      void deinit_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Scalar>** ext_func);
-
       PrecalcShapeset** pss;
       RefMap** refmaps;
       Solution<Scalar>** u_ext;
-      AsmList<Scalar> als[H2D_MAX_COMPONENTS];
-      AsmList<Scalar> alsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_COMPONENTS];
       Hermes::vector<Transformable *> fns;
-      int spaces_size;
-      bool nonlinear, add_dirichlet_lift;
       
       /// For selective reassembling.
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;
@@ -121,6 +119,18 @@ namespace Hermes
       double jacobian_x_weightsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_INTEGRATION_POINTS_COUNT];
       int n_quadrature_points;
       int n_quadrature_pointsSurface[H2D_MAX_NUMBER_EDGES];
+
+      /// Ext values storage.
+      Func<Scalar>* u_ext_funcs[H2D_MAX_COMPONENTS];
+      Func<Scalar>** ext_funcs;
+      int ext_funcs_allocated_size;
+      Func<Scalar>** ext_funcs_local;
+      int ext_funcs_local_allocated_size;
+
+      AsmList<Scalar> als[H2D_MAX_COMPONENTS];
+      AsmList<Scalar> alsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_COMPONENTS];
+      int spaces_size;
+      bool nonlinear, add_dirichlet_lift;
 
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
