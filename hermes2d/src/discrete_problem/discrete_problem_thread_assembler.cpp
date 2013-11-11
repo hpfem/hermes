@@ -151,7 +151,6 @@ namespace Hermes
 
       // Pre-prepare calculation storage.
       this->funcs = (Func<double>***)calloc(this->spaces_size, sizeof(Func<double>**));
-      this->funcsSurface = nullptr;
       this->asmlistCnt = new int[this->spaces_size];
       this->asmlistIdx = new int*[this->spaces_size];
 
@@ -257,8 +256,8 @@ namespace Hermes
             continue;
           }
 
-          this->n_quadrature_pointsSurface[current_state->isurf] = init_surface_geometry_points(refmaps, this->spaces_size, order, current_state->isurf, current_state->rep->marker, this->geometrySurface[current_state->isurf], this->jacobian_x_weightsSurface[current_state->isurf]);
-          this->orderSurface[current_state->isurf] = order_local;
+          this->n_quadrature_pointsSurface[current_state->isurf] = init_surface_geometry_points(refmaps, this->spaces_size, this->order, current_state->isurf, current_state->rep->marker, this->geometrySurface[current_state->isurf], this->jacobian_x_weightsSurface[current_state->isurf]);
+          this->orderSurface[current_state->isurf] = this->order;
           this->order = order_local;
 
           this->funcsSurface[current_state->isurf] = (Func<double>***)calloc(this->spaces_size, sizeof(Func<double>**));
@@ -305,7 +304,7 @@ namespace Hermes
       this->geometry->free();
       delete this->geometry;
 
-      if (this->funcsSurface)
+      if (current_state->isBnd && (this->wf->mfsurf.size() > 0 || this->wf->vfsurf.size() > 0))
       {
         for (unsigned int edge_i = 0; edge_i < this->current_state->rep->nvert; edge_i++)
         {
@@ -513,7 +512,7 @@ namespace Hermes
           Func<Scalar>** u_ext_funcSurf = this->init_u_ext_values(this->orderSurface[isurf]);
 
           // init - ext
-          Func<Scalar>** ext_funcSurf = this->init_ext_values(this->wf->ext, this->wf->u_ext_fn, this->orderSurface[isurf], u_ext_funcSurf, this->geometry);
+          Func<Scalar>** ext_funcSurf = this->init_ext_values(this->wf->ext, this->wf->u_ext_fn, this->orderSurface[isurf], u_ext_funcSurf, this->geometrySurface[isurf]);
 
           if (this->current_mat || this->add_dirichlet_lift)
           {

@@ -320,13 +320,12 @@ namespace Hermes
               
               this->threadAssembler[thread_number]->assemble_one_state();
 
-              if(is_DG)
+              if (is_DG)
               {
                 dgAssembler->init_assembling_one_state(current_state);
                 dgAssembler->assemble_one_state();
                 dgAssembler->deinit_assembling_one_state();
               }
-
               this->threadAssembler[thread_number]->deinit_assembling_one_state();
             }
 
