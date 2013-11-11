@@ -133,22 +133,6 @@ namespace Hermes
       for(int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_RK(original_spaces_count, force_diagonal_blocks_, block_weights_);
     }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_do_not_use_cache(bool to_set)
-    {
-      DiscreteProblemCacheSettings::set_do_not_use_cache(to_set);
-      for(int i = 0; i < this->num_threads_used; i++)
-        this->threadAssembler[i]->set_do_not_use_cache(to_set);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_report_cache_hits_and_misses(bool to_set)
-    {
-      DiscreteProblemCacheSettings::set_report_cache_hits_and_misses(to_set);
-      for(int i = 0; i < this->num_threads_used; i++)
-        this->threadAssembler[i]->set_report_cache_hits_and_misses(to_set);
-    }
       
     template<typename Scalar>
     void DiscreteProblem<Scalar>::invalidate_matrix()
@@ -198,11 +182,6 @@ namespace Hermes
       this->spaces = spacesToSet;
 
       this->selectiveAssembler.set_spaces(spacesToSet);
-
-      /// \todo TEMPORARY There is something wrong with caching vector shapesets.
-      for(unsigned int i = 0; i < spacesToSet.size(); i++)
-        if(spacesToSet[i]->get_shapeset()->get_num_components() > 1)
-          this->set_do_not_use_cache();
 
       for(int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->init_spaces(spaces);
@@ -264,10 +243,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, Hermes::vector<MeshSharedPtr >& meshes)
     {
-      // Optionally zero cache hits and misses.
-      if(this->report_cache_hits_and_misses)
-        this->zero_cache_hits_and_misses();
-
       // Vector of meshes.
       for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
         meshes.push_back(spaces[space_i]->get_mesh());
@@ -308,9 +283,6 @@ namespace Hermes
       this->set_matrix(mat);
       this->set_rhs(rhs);
 
-      // Initialize cache.
-      this->cache.init_assembling();
-
       // Initialize states && previous iterations.
       int num_states;
       Traverse::State** states;
@@ -345,9 +317,7 @@ namespace Hermes
               Traverse::State* current_state = states[state_i];
 
               this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);
-
-              this->threadAssembler[thread_number]->handle_cache(spaces, &this->cache);
-
+              
               this->threadAssembler[thread_number]->assemble_one_state();
 
               if(is_DG)
@@ -375,9 +345,6 @@ namespace Hermes
       // Deinitialize states && previous iterations.
       this->deinit_assembling(states, num_states);
 
-      // Deinitialize cache.
-      this->cache.free_unused();
-
       /// Finish the algebraic structures for solving.
       if(this->current_mat)
         this->current_mat->finish();
@@ -404,14 +371,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::deinit_assembling(Traverse::State** states, int num_states)
     {
-      for(int i = 0; i < this->num_threads_used; i++)
-      {
-        this->threadAssembler[i]->deinit_assembling();
-
-        if(this->report_cache_hits_and_misses)
-          this->add_cache_hits_and_misses(this->threadAssembler[i]);
-      }
-
       for(int i = 0; i < num_states; i++)
         delete states[i];
       free(states);

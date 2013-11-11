@@ -25,7 +25,6 @@ namespace Hermes
 #pragma region forward-declarations
     class RefMap;
     template<typename Scalar> class DiscreteProblem;
-    template<typename Scalar> class DiscreteProblemCache;
     template<typename Scalar> class DiscreteProblemSelectiveAssembler;
     template<typename Scalar> class DiscreteProblemIntegrationOrderCalculator;
     template<typename Scalar> class RungeKutta;
@@ -221,7 +220,6 @@ namespace Hermes
       bool** get_blocks(bool force_diagonal_blocks) const;
 
       friend class DiscreteProblem<Scalar>;
-      friend class DiscreteProblemCache<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
       friend class DiscreteProblemThreadAssembler<Scalar>;
       friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
@@ -323,7 +321,6 @@ namespace Hermes
       friend class WeakForm<Scalar>;
       friend class RungeKutta<Scalar>;
       friend class DiscreteProblem<Scalar>;
-      friend class DiscreteProblemCache<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
       friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
       friend class DiscreteProblemSelectiveAssembler<Scalar>;

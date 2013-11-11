@@ -42,7 +42,6 @@ namespace Hermes
       public Hermes::Algebra::Mixins::MatrixRhsOutput<Scalar>, 
       public Hermes::Mixins::IntegrableWithGlobalOrder, 
       public virtual Hermes::Mixins::StateQueryable, 
-      public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings,
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>
     {
     public:
@@ -70,9 +69,6 @@ namespace Hermes
       /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
       virtual void solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess);
 
-      /// See DiscreteProblemCacheSettings in mixins2d.h for details.
-      virtual void free_cache();
-
       /// set time information for time-dependent problems.
       virtual void set_time(double time);
       virtual void set_time_step(double time_step);
@@ -83,13 +79,6 @@ namespace Hermes
 
       /// DiscreteProblemWeakForm helper.
       virtual void set_weak_formulation(WeakForm<Scalar>* wf);
-
-      /// If the cache should not be used for any reason.
-      virtual void set_do_not_use_cache(bool to_set = true);
-      
-      /// \TODO This is not used now.
-      /// Report cache hits and misses.
-      virtual void set_report_cache_hits_and_misses(bool to_set = true);
     protected:
       virtual bool isOkay() const;
       

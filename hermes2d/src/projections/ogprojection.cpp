@@ -34,7 +34,6 @@ namespace Hermes
       // Initialize DiscreteProblem.
       DiscreteProblem<Scalar> dp(wf, space);
       dp.set_linear();
-      dp.set_do_not_use_cache();
 
       // Initialize linear solver.
       Hermes::Hermes2D::LinearSolver<Scalar> linear_solver(&dp, true);

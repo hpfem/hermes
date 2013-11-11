@@ -65,38 +65,6 @@ namespace Hermes
         WeakForm<Scalar>* wf;
       };
 
-      /// \ingroup g_mixins2d
-      /// Mixin that intermediate DiscreteProblemCache settings.
-      class HERMES_API DiscreteProblemCacheSettings
-      {
-      public:
-        /// If the cache should not be used for any reason.
-        virtual void set_do_not_use_cache(bool to_set = true);
-        
-        /// Reports cache hits and misses.
-        virtual void set_report_cache_hits_and_misses(bool to_set = true);
-
-        void get_cache_hits_and_misses(int& cache_searches, int& cache_record_found, int& cache_record_found_reinit, int& cache_record_not_found);
-        
-      protected:
-        DiscreteProblemCacheSettings();
-        
-        bool do_not_use_cache;
-
-#pragma region cache_hits_and_misses
-        /// Adds TO own hits and misses FROM other.
-        void add_cache_hits_and_misses(DiscreteProblemCacheSettings* other);
-
-        void zero_cache_hits_and_misses();
-
-        bool report_cache_hits_and_misses;
-        int cache_searches;
-        int cache_record_found;
-        int cache_record_found_reinit;
-        int cache_record_not_found;
-#pragma endregion
-      };
-
       template<typename Scalar>
       class HERMES_API DiscreteProblemMatrixVector
       {

@@ -133,26 +133,6 @@ namespace Hermes
       return this->dp->get_spaces();
     }
 
-    template<typename Scalar>
-    void Solver<Scalar>::set_report_cache_hits_and_misses(bool to_set)
-    {
-      DiscreteProblemCacheSettings::set_report_cache_hits_and_misses(to_set);
-      this->dp->set_report_cache_hits_and_misses(to_set);
-    }
-
-    template<typename Scalar>
-    void Solver<Scalar>::set_do_not_use_cache(bool to_set)
-    {
-      DiscreteProblemCacheSettings::set_do_not_use_cache(to_set);
-      this->dp->set_do_not_use_cache(to_set);
-    }
-
-    template<typename Scalar>
-    void Solver<Scalar>::free_cache()
-    {
-      this->dp->cache.free();
-    }
-
     template class HERMES_API Solver<double>;
     template class HERMES_API Solver<std::complex<double> >;
   }

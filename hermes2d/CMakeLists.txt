@@ -192,8 +192,7 @@ project(hermes2d)
     src/weakform_library/weakforms_neutronics.cpp
     
     src/discrete_problem.cpp
-    src/discrete_problem/discrete_problem_helpers.cpp
-    src/discrete_problem/discrete_problem_cache.cpp
+    src/discrete_problem/discrete_problem_helpers.cpp    
     src/discrete_problem/discrete_problem_selective_assembler.cpp
     src/discrete_problem/discrete_problem_thread_assembler.cpp
     src/discrete_problem/discrete_problem_integration_order_calculator.cpp
@@ -332,7 +331,6 @@ project(hermes2d)
     "Source Files\\Discrete Problem" FILES 
     src/discrete_problem.cpp
     src/discrete_problem/discrete_problem_helpers.cpp
-    src/discrete_problem/discrete_problem_cache.cpp
     src/discrete_problem/discrete_problem_selective_assembler.cpp
     src/discrete_problem/discrete_problem_thread_assembler.cpp
     src/discrete_problem/discrete_problem_integration_order_calculator.cpp
@@ -446,7 +444,6 @@ project(hermes2d)
     
     include/discrete_problem.h
     include/discrete_problem/discrete_problem_helpers.h
-    include/discrete_problem/discrete_problem_cache.h
     include/discrete_problem/discrete_problem_selective_assembler.h
     include/discrete_problem/discrete_problem_thread_assembler.h
     include/discrete_problem/discrete_problem_integration_order_calculator.h
@@ -585,7 +582,6 @@ project(hermes2d)
     "Header Files\\Discrete Problem" FILES 
     include/discrete_problem.h
     include/discrete_problem/discrete_problem_helpers.h
-    include/discrete_problem/discrete_problem_cache.h
     include/discrete_problem/discrete_problem_selective_assembler.h
     include/discrete_problem/discrete_problem_thread_assembler.h
     include/discrete_problem/discrete_problem_integration_order_calculator.h

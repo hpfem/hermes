@@ -20,7 +20,6 @@
 #include "../shapeset/precalc.h"
 #include "../function/solution.h"
 #include "discrete_problem_helpers.h"
-#include "discrete_problem_cache.h"
 #include "discrete_problem_integration_order_calculator.h"
 #include "discrete_problem_selective_assembler.h"
 
@@ -36,7 +35,6 @@ namespace Hermes
     class HERMES_API DiscreteProblemThreadAssembler : 
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings,
       public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
     {
     private:
@@ -55,9 +53,6 @@ namespace Hermes
 
       /// Sets active elements & transformations
       void init_assembling_one_state(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state);
-      /// Takes the global cache and according to the current_state, it
-      /// either gets or gets a record.
-      void handle_cache(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, DiscreteProblemCache<Scalar>* cache);
       /// Assemble the state.
       void assemble_one_state();
       /// Matrix volumetric forms - assemble the form.
@@ -66,10 +61,10 @@ namespace Hermes
       /// Vector volumetric forms - assemble the form.
       void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
         AsmList<Scalar>* current_als, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
-
-      /// Delete the cache record if do_not_use_cache etc.
+      /// De-initialization of 1 state assembly
       void deinit_assembling_one_state();
-      /// Delete the cache record if do_not_use_cache etc.
+      
+      /// De-initialization.
       void deinit_assembling();
       
       /// Free all data.
@@ -92,18 +87,38 @@ namespace Hermes
       Solution<Scalar>** u_ext;
       AsmList<Scalar>** als;
       AsmList<Scalar>*** alsSurface;
-      Hermes::vector<Transformable *> fns;  
+      Hermes::vector<Transformable *> fns;
       int spaces_size;
       bool nonlinear, add_dirichlet_lift;
-
-      Traverse::State* current_state;
-      typename DiscreteProblemCache<Scalar>::CacheRecord* current_cache_record;
       
       /// For selective reassembling.
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;
+      
+      /// Currently assembled state.
+      Traverse::State* current_state;
 
-      /// Integration order calculator.
+      /// Integration orders for the currently assembled state.
+      /// - calculator
       DiscreteProblemIntegrationOrderCalculator<Scalar> integrationOrderCalculator;
+      /// - volumetric
+      int order;
+      /// - surface
+      int* orderSurface;
+
+      /// Holding values formerly held by cache record.
+      void init_calculation_variables();
+      void deinit_calculation_variables();
+      int** asmlistIdx;
+      int* asmlistCnt;
+      Func<double>*** funcs;
+      Func<double>**** funcsSurface;
+      Geom<double>* geometry;
+      Geom<double>** geometrySurface;
+      double* jacobian_x_weights;
+      double** jacobian_x_weightsSurface;
+      int n_quadrature_points;
+      int* n_quadrature_pointsSurface;
+      int** asmlistSurfaceCnt;
 
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;

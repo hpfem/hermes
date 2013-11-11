@@ -44,7 +44,6 @@ namespace Hermes
       current_rhs(threadAssembler->current_rhs),
       current_state(nullptr),
       selectiveAssembler(threadAssembler->selectiveAssembler),
-      do_not_use_cache(threadAssembler->do_not_use_cache),
       spaces(spaces),
       meshes(meshes)
     {

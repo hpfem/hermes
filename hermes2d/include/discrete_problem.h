@@ -21,7 +21,6 @@
 #include "function/function.h"
 #include "exceptions.h"
 #include "mixins2d.h"
-#include "discrete_problem/discrete_problem_cache.h"
 #include "discrete_problem/discrete_problem_helpers.h"
 #include "discrete_problem/discrete_problem_thread_assembler.h"
 
@@ -42,7 +41,6 @@ namespace Hermes
       public Hermes::Mixins::StateQueryable,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings,
       public Hermes::Mixins::IntegrableWithGlobalOrder,
       public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>,
       public Hermes::Hermes2D::Mixins::Parallel
@@ -94,12 +92,6 @@ namespace Hermes
       /// Get all spaces as a Hermes::vector.
       Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
 
-      /// If the cache should not be used for any reason.
-      void set_do_not_use_cache(bool to_set = true);
-      
-      /// Reports cache hits and misses.
-      void set_report_cache_hits_and_misses(bool to_set = true);
-
     protected:
       /// Initialize states.
       void init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, Hermes::vector<MeshSharedPtr>& meshes);
@@ -126,9 +118,6 @@ namespace Hermes
       void set_matrix(SparseMatrix<Scalar>* mat);
       void set_rhs(Vector<Scalar>* rhs);
       void invalidate_matrix();
-
-      /// The cache.
-      DiscreteProblemCache<Scalar> cache;
       
       /// Assembly data.
       DiscreteProblemThreadAssembler<Scalar>** threadAssembler;

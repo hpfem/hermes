@@ -98,8 +98,7 @@ namespace Hermes
 
       SparseMatrix<Scalar>* current_mat;
       Vector<Scalar>* current_rhs;
-
-      bool do_not_use_cache;
+      
       Traverse::State* current_state;
 
       const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces;

@@ -106,7 +106,6 @@ namespace Hermes
       friend class Traverse;
       friend class Views::Linearizer;
       friend class Views::Vectorizer;
-      template<typename T> friend class DiscreteProblemCache;
       template<typename Scalar> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemDGAssembler;
       template<typename T> friend class DiscreteProblemThreadAssembler;
@@ -160,7 +159,6 @@ namespace Hermes
       template<typename T> friend class Adapt;
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class DiscreteProblem;
-      template<typename T> friend class DiscreteProblemCache;
       template<typename T> friend class DiscreteProblemDGAssembler;
       template<typename T> friend class DiscreteProblemIntegrationOrderCalculator;
       template<typename T> friend class Filter;
