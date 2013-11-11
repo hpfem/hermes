@@ -157,7 +157,8 @@ namespace Hermes
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
           this->funcsSurface[edge_i][space_i][j] = preallocate_fn(this->pss[space_i]);
 
-        this->u_ext_funcs[space_i] = preallocate_fn(this->u_ext[space_i]);
+        if (this->nonlinear)
+          this->u_ext_funcs[space_i] = preallocate_fn(this->u_ext[space_i]);
       }
 
       // Reallocation of wf-(nonlocal-) ext funcs.
