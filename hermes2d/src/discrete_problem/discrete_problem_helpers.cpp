@@ -40,7 +40,7 @@ namespace Hermes
       template<typename Scalar>
       double DiscreteProblemRungeKutta<Scalar>::block_scaling_coeff(MatrixForm<Scalar>* form) const
       {
-        if(block_weights)
+        if (block_weights)
           return block_weights->get_A(form->i / this->RK_original_spaces_count, form->j / this->RK_original_spaces_count);
         return 1.0;
       }
@@ -48,7 +48,7 @@ namespace Hermes
       template<typename Scalar>
       double DiscreteProblemRungeKutta<Scalar>::block_scaling_coeff(MatrixFormDG<Scalar>* form) const
       {
-        if(block_weights)
+        if (block_weights)
           return block_weights->get_A(form->i / this->RK_original_spaces_count, form->j / this->RK_original_spaces_count);
         return 1.0;
       }
@@ -61,7 +61,7 @@ namespace Hermes
       template<typename Scalar>
       void DiscreteProblemWeakForm<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf_)
       {
-        if(!wf_)
+        if (!wf_)
           throw Hermes::Exceptions::NullException(0);
 
         this->wf = wf_;
@@ -102,6 +102,7 @@ namespace Hermes
 
     int init_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
+      Element* rep_element = nullptr;
       RefMap* rep_reference_mapping = nullptr;
       for (int i = 0; i < reference_mapping_count; i++)
       {
@@ -109,57 +110,15 @@ namespace Hermes
         {
           if (reference_mapping[i]->get_active_element())
           {
-            rep_reference_mapping = reference_mapping[i];
-            break;
-          }
-        }
-      }
-      
-      double3* pt = rep_reference_mapping->get_quad_2d()->get_points(order, rep_reference_mapping->get_active_element()->get_mode());
-      int np = rep_reference_mapping->get_quad_2d()->get_num_points(order, rep_reference_mapping->get_active_element()->get_mode());
-
-      // Init geometry and jacobian*weights.
-      geometry = init_geom_vol(rep_reference_mapping, order);
-
-      for(int i = 0; i < reference_mapping_count; i++)
-        if(reference_mapping[i])
-          if(reference_mapping[i]->get_active_element())
-          {
-            geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
-            geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
-          }
-
-      double* jac = nullptr;
-      if(!rep_reference_mapping->is_jacobian_const())
-        jac = rep_reference_mapping->get_jacobian(order);
-      jacobian_x_weights = new double[np];
-      for(int i = 0; i < np; i++)
-      {
-        if(rep_reference_mapping->is_jacobian_const())
-          jacobian_x_weights[i] = pt[i][2] * rep_reference_mapping->get_const_jacobian();
-        else
-          jacobian_x_weights[i] = pt[i][2] * jac[i];
-      }
-      return np;
-    }
-
-    int init_geometry_points_allocated_jwt(RefMap** reference_mapping, int reference_mapping_count, int order, Geom<double>*& geometry, double* jacobian_x_weights)
-    {
-      RefMap* rep_reference_mapping = nullptr;
-      for (int i = 0; i < reference_mapping_count; i++)
-      {
-        if (reference_mapping[i])
-        {
-          if (reference_mapping[i]->get_active_element())
-          {
+            rep_element = reference_mapping[i]->get_active_element();
             rep_reference_mapping = reference_mapping[i];
             break;
           }
         }
       }
 
-      double3* pt = rep_reference_mapping->get_quad_2d()->get_points(order, rep_reference_mapping->get_active_element()->get_mode());
-      int np = rep_reference_mapping->get_quad_2d()->get_num_points(order, rep_reference_mapping->get_active_element()->get_mode());
+      double3* pt = rep_reference_mapping->get_quad_2d()->get_points(order, rep_element->get_mode());
+      int np = rep_reference_mapping->get_quad_2d()->get_num_points(order, rep_element->get_mode());
 
       // Init geometry and jacobian*weights.
       geometry = init_geom_vol(rep_reference_mapping, order);
@@ -168,11 +127,62 @@ namespace Hermes
       if (reference_mapping[i])
       if (reference_mapping[i]->get_active_element())
       {
-        geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
-        geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
+        {
+          geometry->area = std::min(geometry->area, rep_element->get_area());
+          geometry->diam = std::min(geometry->area, rep_element->get_diameter());
+        }
+      }
+      
+      jacobian_x_weights = new double[np];
+      if (rep_reference_mapping->is_jacobian_const())
+      {
+        double jac = rep_reference_mapping->get_const_jacobian();
+        for (int i = 0; i < np; i++)
+          jacobian_x_weights[i] = pt[i][2] * jac;
+      }
+      else
+      {
+        double* jac = rep_reference_mapping->get_jacobian(order);
+        for (int i = 0; i < np; i++)
+          jacobian_x_weights[i] = pt[i][2] * jac[i];
+      }
+      return np;
+    }
+
+    int init_geometry_points_allocated_jwt(RefMap** reference_mapping, int reference_mapping_count, int order, Geom<double>*& geometry, double* jacobian_x_weights)
+    {
+      Element* rep_element = nullptr;
+      RefMap* rep_reference_mapping = nullptr;
+      for (int i = 0; i < reference_mapping_count; i++)
+      {
+        if (reference_mapping[i])
+        {
+          if (reference_mapping[i]->get_active_element())
+          {
+            rep_element = reference_mapping[i]->get_active_element();
+            rep_reference_mapping = reference_mapping[i];
+            break;
+          }
+        }
       }
 
-      if (!rep_reference_mapping->is_jacobian_const())
+      double3* pt = rep_reference_mapping->get_quad_2d()->get_points(order, rep_element->get_mode());
+      int np = rep_reference_mapping->get_quad_2d()->get_num_points(order, rep_element->get_mode());
+
+      // Init geometry and jacobian*weights.
+      geometry = init_geom_vol(rep_reference_mapping, order);
+
+      for (int i = 0; i < reference_mapping_count; i++)
+      if (reference_mapping[i])
+      {
+        if (reference_mapping[i]->get_active_element())
+        {
+          geometry->area = std::min(geometry->area, rep_element->get_area());
+          geometry->diam = std::min(geometry->area, rep_element->get_diameter());
+        }
+      }
+
+      if (rep_reference_mapping->is_jacobian_const())
       {
         double jac = rep_reference_mapping->get_const_jacobian();
         for (int i = 0; i < np; i++)
@@ -212,7 +222,7 @@ namespace Hermes
       geometry->area = rep_reference_mapping->get_active_element()->get_area();
       geometry->diam = rep_reference_mapping->get_active_element()->get_diameter();
       jacobian_x_weights = new double[np];
-      for(int i = 0; i < np; i++)
+      for (int i = 0; i < np; i++)
         jacobian_x_weights[i] = pt[i][2] * tan[i][2];
       order = eo;
       return np;

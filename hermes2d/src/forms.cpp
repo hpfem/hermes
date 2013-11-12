@@ -465,7 +465,7 @@ namespace Hermes
 
     Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     {
-      Func<double>* u = new Func<double>(fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode()), fu->get_num_components());
+      Func<double>* u = preallocate_fn(fu, fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode()));
 
       init_fn_preallocated(u, fu, rm, order);
 
@@ -475,50 +475,40 @@ namespace Hermes
     template<typename Scalar>
     Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order)
     {
-      Func<Scalar>* u = new Func<Scalar>(fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode()), fu->get_num_components());
-
-      init_fn_preallocated(u, fu, order);
-
-      return u;
-    }
-    
-    template<typename Scalar>
-    Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order)
-    {
-      Func<Scalar>* u = new Func<Scalar>(fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode()), fu->get_num_components());
+      Func<Scalar>* u = preallocate_fn(fu, fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode()));
 
       init_fn_preallocated(u, fu, order);
 
       return u;
     }
 
-    Func<double>* preallocate_fn(PrecalcShapeset *fu)
+    Func<double>* preallocate_fn(PrecalcShapeset *fu, int num_points)
     {
       SpaceType space_type = fu->get_space_type();
-      Func<double>* u = new Func<double>(H2D_MAX_INTEGRATION_POINTS_COUNT, fu->get_num_components());
+      Func<double>* u = new Func<double>(num_points, fu->get_num_components());
       if (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE)
       {
-        u->val = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->dx = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->dy = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val = new double[num_points];
+        u->dx = new double[num_points];
+        u->dy = new double[num_points];
 
 #ifdef H2D_USE_SECOND_DERIVATIVES
-        u->laplace = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->laplace = new double[num_points];
 #endif
       }
       // Hcurl space.
       else if (space_type == HERMES_HCURL_SPACE)
       {
-        u->val0 = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->val1 = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->curl = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val0 = new double[num_points];
+        u->val1 = new double[num_points];
+        u->curl = new double[num_points];
       }
       // Hdiv space.
       else if (space_type == HERMES_HDIV_SPACE)
       {
-        u->val0 = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->val1 = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->div = new double[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val0 = new double[num_points];
+        u->val1 = new double[num_points];
+        u->div = new double[num_points];
       }
       else
         throw Hermes::Exceptions::Exception("Wrong space type - space has to be either H1, Hcurl, Hdiv or L2");
@@ -527,60 +517,60 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* preallocate_fn(MeshFunction<Scalar>* fu)
+    Func<Scalar>* preallocate_fn(MeshFunction<Scalar>* fu, int num_points)
     {
       int nc = fu ? fu->get_num_components() : 1;
-      Func<Scalar>* u = new Func<Scalar>(H2D_MAX_INTEGRATION_POINTS_COUNT, nc);
+      Func<Scalar>* u = new Func<Scalar>(num_points, nc);
       if (nc == 1)
       {
-        u->val = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->dx = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->dy = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val = new Scalar[num_points];
+        u->dx = new Scalar[num_points];
+        u->dy = new Scalar[num_points];
 
 #ifdef H2D_USE_SECOND_DERIVATIVES
         Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(fu);
         if(sln)
         {
           if ((sln->get_space_type() == HERMES_H1_SPACE || sln->get_space_type() == HERMES_L2_SPACE) && sln->get_type() != HERMES_EXACT)
-            u->laplace = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+            u->laplace = new Scalar[num_points];
         }
 #endif
 
       }
       else
       {
-        u->val0 = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->val1 = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->curl = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->div = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val0 = new Scalar[num_points];
+        u->val1 = new Scalar[num_points];
+        u->curl = new Scalar[num_points];
+        u->div = new Scalar[num_points];
       }
 
       return u;
     }
 
     template<typename Scalar>
-    Func<Scalar>* preallocate_fn(MeshFunctionSharedPtr<Scalar> fu)
+    Func<Scalar>* preallocate_fn(MeshFunctionSharedPtr<Scalar> fu, int num_points)
     {
-      return preallocate_fn(fu.get());
+      return preallocate_fn(fu.get(), num_points);
     }
 
     template<typename Scalar>
-    Func<Scalar>* preallocate_fn(UExtFunctionSharedPtr<Scalar> fu)
+    Func<Scalar>* preallocate_fn(UExtFunctionSharedPtr<Scalar> fu, int num_points)
     {
       int nc = fu ? fu->get_num_components() : 1;
-      Func<Scalar>* u = new Func<Scalar>(H2D_MAX_INTEGRATION_POINTS_COUNT, nc);
+      Func<Scalar>* u = new Func<Scalar>(num_points, nc);
       if (nc == 1)
       {
-        u->val = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->dx = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->dy = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val = new Scalar[num_points];
+        u->dx = new Scalar[num_points];
+        u->dy = new Scalar[num_points];
       }
       else
       {
-        u->val0 = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->val1 = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->curl = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
-        u->div = new Scalar[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        u->val0 = new Scalar[num_points];
+        u->val1 = new Scalar[num_points];
+        u->curl = new Scalar[num_points];
+        u->div = new Scalar[num_points];
       }
 
       return u;
@@ -880,17 +870,14 @@ namespace Hermes
     template HERMES_API Func<double>* init_fn(MeshFunction<double>* fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(MeshFunction<std::complex<double> >* fu, const int order);
 
-    template HERMES_API Func<double>* init_fn(Solution<double>* fu, const int order);
-    template HERMES_API Func<std::complex<double> >* init_fn(Solution<std::complex<double> >* fu, const int order);
+    template HERMES_API Func<double>* preallocate_fn(MeshFunction<double>* fu, int num_points);
+    template HERMES_API Func<std::complex<double> >* preallocate_fn(MeshFunction<std::complex<double> >* fu, int num_points);
 
-    template HERMES_API Func<double>* preallocate_fn(MeshFunction<double>* fu);
-    template HERMES_API Func<std::complex<double> >* preallocate_fn(MeshFunction<std::complex<double> >* fu);
+    template HERMES_API Func<double>* preallocate_fn(MeshFunctionSharedPtr<double> fu, int num_points);
+    template HERMES_API Func<std::complex<double> >* preallocate_fn(MeshFunctionSharedPtr<std::complex<double> > fu, int num_points);
 
-    template HERMES_API Func<double>* preallocate_fn(MeshFunctionSharedPtr<double> fu);
-    template HERMES_API Func<std::complex<double> >* preallocate_fn(MeshFunctionSharedPtr<std::complex<double> > fu);
-
-    template HERMES_API Func<double>* preallocate_fn(UExtFunctionSharedPtr<double> fu);
-    template HERMES_API Func<std::complex<double> >* preallocate_fn(UExtFunctionSharedPtr<std::complex<double> > fu);
+    template HERMES_API Func<double>* preallocate_fn(UExtFunctionSharedPtr<double> fu, int num_points);
+    template HERMES_API Func<std::complex<double> >* preallocate_fn(UExtFunctionSharedPtr<std::complex<double> > fu, int num_points);
 
     template HERMES_API void init_fn_preallocated(Func<double>* u, MeshFunction<double>* fu, const int order);
     template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, MeshFunction<std::complex<double> >* fu, const int order);

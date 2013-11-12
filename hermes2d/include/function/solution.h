@@ -278,7 +278,6 @@ namespace Hermes
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemIntegrationOrderCalculator;
       template<typename T> friend class NeighborSearch;
-      template<typename T> friend HERMES_API Func<T>* init_fn(Solution<T>*fu, const int order);
       template<typename T> friend class RefinementSelectors::ProjBasedSelector;
       template<typename T> friend class RefinementSelectors::H1ProjBasedSelector;
       template<typename T> friend class RefinementSelectors::L2ProjBasedSelector;

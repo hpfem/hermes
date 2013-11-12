@@ -229,19 +229,16 @@ namespace Hermes
     /// Init the mesh-function for the evaluation of the volumetric/surface integral.
     template<typename Scalar>
     HERMES_API Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order);
-    /// Init the solution for the evaluation of the volumetric/surface integral.
-    template<typename Scalar>
-    HERMES_API Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order);
 
 
     /// Preallocate the Func (all we need is np & nc).
-    HERMES_API Func<double>* preallocate_fn(PrecalcShapeset *fu);
+    HERMES_API Func<double>* preallocate_fn(PrecalcShapeset *fu, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
     template<typename Scalar>
-    HERMES_API Func<Scalar>* preallocate_fn(MeshFunction<Scalar>* fu = nullptr);
+    HERMES_API Func<Scalar>* preallocate_fn(MeshFunction<Scalar>* fu = nullptr, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
     template<typename Scalar>
-    HERMES_API Func<Scalar>* preallocate_fn(MeshFunctionSharedPtr<Scalar> fu);
+    HERMES_API Func<Scalar>* preallocate_fn(MeshFunctionSharedPtr<Scalar> fu, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
     template<typename Scalar>
-    HERMES_API Func<Scalar>* preallocate_fn(UExtFunctionSharedPtr<Scalar> fu);
+    HERMES_API Func<Scalar>* preallocate_fn(UExtFunctionSharedPtr<Scalar> fu, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
 
     /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values) - preallocated version.
     HERMES_API void init_fn_preallocated(Func<double>* u, PrecalcShapeset *fu, RefMap *rm, const int order);
