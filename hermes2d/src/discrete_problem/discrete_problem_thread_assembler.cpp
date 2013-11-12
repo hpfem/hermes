@@ -223,11 +223,19 @@ namespace Hermes
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+        {
+          this->funcs[space_i][j]->free_fn();
           delete this->funcs[space_i][j];
+        }
 
         for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
-        for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-          delete this->funcsSurface[edge_i][space_i][j];
+        {
+          for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+          {
+            this->funcsSurface[edge_i][space_i][j]->free_fn();
+            delete this->funcsSurface[edge_i][space_i][j];
+          }
+        }
       }
     }
 
@@ -329,18 +337,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_calculation_variables()
     {
-      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
-      {
-        if (current_state->e[space_i] == nullptr)
-          continue;
-
-        for (unsigned int i = 0; i < this->als[space_i].cnt; i++)
-        {
-          this->funcs[space_i][i]->free_fn();
-          delete this->funcs[space_i][i];
-        }
-      }
-
       this->geometry->free();
       delete this->geometry;
 
@@ -353,81 +349,35 @@ namespace Hermes
 
           this->geometrySurface[edge_i]->free();
           delete this->geometrySurface[edge_i];
-
-          for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
-          {
-            if (!current_state->e[space_i])
-              continue;
-
-            for (unsigned int i = 0; i < this->alsSurface[edge_i][space_i].cnt; i++)
-            {
-              this->funcsSurface[edge_i][space_i][i]->free_fn();
-              delete this->funcsSurface[edge_i][space_i][i];
-            }
-          }
         }
       }
     }
 
     template<typename Scalar>
-    Func<Scalar>** DiscreteProblemThreadAssembler<Scalar>::init_u_ext_values(int order)
+    void DiscreteProblemThreadAssembler<Scalar>::init_u_ext_values(int order)
     {
-      Func<Scalar>** u_ext_func = nullptr;
       if (this->nonlinear)
       {
-        assert(this->u_ext);
-
-        u_ext_func = new Func<Scalar>*[spaces_size];
-
         for (int i = 0; i < spaces_size; i++)
         {
-          assert(u_ext[i]);
-
           if (u_ext[i]->get_active_element())
-            u_ext_func[i] = init_fn(u_ext[i], order);
-          else
-            u_ext_func[i] = nullptr;
+            init_fn_preallocated(u_ext_funcs[i], u_ext[i], order);
         }
-      }
-
-      return u_ext_func;
-    }
-
-    template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::deinit_u_ext_values(Func<Scalar>** u_ext_func)
-    {
-      if (u_ext_func)
-      {
-        for (int i = 0; i < spaces_size; i++)
-        {
-          if (u_ext_func[i])
-          {
-            u_ext_func[i]->free_fn();
-            delete u_ext_func[i];
-          }
-        }
-        delete[] u_ext_func;
       }
     }
 
     template<typename Scalar>
-    Func<Scalar>** DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry)
+    void DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Func<Scalar>** target_array, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry)
     {
-      Func<Scalar>** ext_func = nullptr;
       int ext_size = ext.size();
       int u_ext_fns_size = u_ext_fns.size();
 
       if (ext_size > 0 || u_ext_fns_size > 0)
       {
-        ext_func = new Func<Scalar>*[ext_size + u_ext_fns_size];
         for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
         {
           if (u_ext_fns[ext_i])
-          {
-            ext_func[ext_i] = init_fn(u_ext_fns[ext_i].get(), u_ext_func, this->spaces_size, order, geometry, current_state->rep->get_mode());
-          }
-          else
-            ext_func[ext_i] = nullptr;
+            init_fn_preallocated(target_array[ext_i], u_ext_fns[ext_i].get(), u_ext_func, this->spaces_size, order, geometry, current_state->rep->get_mode());
         }
 
         for (int ext_i = 0; ext_i < ext_size; ext_i++)
@@ -435,45 +385,23 @@ namespace Hermes
           if (ext[ext_i])
           {
             if (ext[ext_i]->get_active_element())
-              ext_func[u_ext_fns_size + ext_i] = init_fn(ext[ext_i].get(), order);
-            else
-              ext_func[u_ext_fns_size + ext_i] = nullptr;
+            {
+              if (ext[ext_i]->get_num_components() != target_array[u_ext_fns_size + ext_i]->nc)
+              {
+                target_array[u_ext_fns_size + ext_i]->free_fn();
+                delete target_array[u_ext_fns_size + ext_i];
+                target_array[u_ext_fns_size + ext_i] = preallocate_fn(ext[ext_i]);
+              }
+              init_fn_preallocated(target_array[u_ext_fns_size + ext_i], ext[ext_i].get(), order);
+            }
           }
-          else
-            ext_func[u_ext_fns_size + ext_i] = nullptr;
         }
       }
 
       if (this->rungeKutta)
       {
         for (int ext_i = 0; ext_i < ext.size(); ext_i++)
-          u_ext_func[ext_i]->add(ext_func[ext.size() - this->RK_original_spaces_count + ext_i]);
-      }
-
-      return ext_func;
-    }
-
-    template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::deinit_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Scalar>** ext_func)
-    {
-      if (ext_func)
-      {
-        for (int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
-        {
-          ext_func[ext_i]->free_fn();
-          delete ext_func[ext_i];
-        }
-
-        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
-        {
-          if (ext[ext_i] && ext[ext_i]->get_active_element())
-          {
-            ext_func[u_ext_fns.size() + ext_i]->free_fn();
-            delete ext_func[u_ext_fns.size() + ext_i];
-          }
-        }
-
-        delete[] ext_func;
+          u_ext_func[ext_i]->add(target_array[ext.size() - this->RK_original_spaces_count + ext_i]);
       }
     }
 
@@ -481,10 +409,10 @@ namespace Hermes
     void DiscreteProblemThreadAssembler<Scalar>::assemble_one_state()
     {
       // init - u_ext_func
-      Func<Scalar>** u_ext_func = this->init_u_ext_values(this->order);
+      this->init_u_ext_values(this->order);
 
       // init - ext
-      Func<Scalar>** ext_func = this->init_ext_values(this->wf->ext, this->wf->u_ext_fn, this->order, u_ext_func, this->geometry);
+      this->init_ext_values(this->ext_funcs, this->wf->ext, this->wf->u_ext_fn, this->order, this->u_ext_funcs, this->geometry);
 
       if (this->current_mat || this->add_dirichlet_lift)
       {
@@ -496,7 +424,7 @@ namespace Hermes
           int form_i = this->wf->mfvol[current_mfvol_i]->i;
           int form_j = this->wf->mfvol[current_mfvol_i]->j;
 
-          this->assemble_matrix_form(this->wf->mfvol[current_mfvol_i], order, funcs[form_j], funcs[form_i], ext_func, u_ext_func, &als[form_i], &als[form_j], n_quadrature_points, geometry, jacobian_x_weights);
+          this->assemble_matrix_form(this->wf->mfvol[current_mfvol_i], order, funcs[form_j], funcs[form_i], &als[form_i], &als[form_j], n_quadrature_points, geometry, jacobian_x_weights);
         }
       }
       if (this->current_rhs)
@@ -508,15 +436,9 @@ namespace Hermes
 
           int form_i = this->wf->vfvol[current_vfvol_i]->i;
 
-          this->assemble_vector_form(this->wf->vfvol[current_vfvol_i], order, funcs[form_i], ext_func, u_ext_func, &als[form_i], n_quadrature_points, geometry, jacobian_x_weights);
+          this->assemble_vector_form(this->wf->vfvol[current_vfvol_i], order, funcs[form_i], &als[form_i], n_quadrature_points, geometry, jacobian_x_weights);
         }
       }
-
-      // deinit - u_ext_func
-      this->deinit_u_ext_values(u_ext_func);
-
-      // deinit - ext
-      this->deinit_ext_values(this->wf->ext, this->wf->u_ext_fn, ext_func);
 
       // Assemble surface integrals now: loop through surfaces of the element.
       if (current_state->isBnd && (this->wf->mfsurf.size() > 0 || this->wf->vfsurf.size() > 0))
@@ -532,10 +454,10 @@ namespace Hermes
           this->wf->set_active_edge_state(current_state->e, isurf);
 
           // init - u_ext_func
-          Func<Scalar>** u_ext_funcSurf = this->init_u_ext_values(this->orderSurface[isurf]);
+          this->init_u_ext_values(this->orderSurface[isurf]);
 
           // init - ext
-          Func<Scalar>** ext_funcSurf = this->init_ext_values(this->wf->ext, this->wf->u_ext_fn, this->orderSurface[isurf], u_ext_funcSurf, this->geometrySurface[isurf]);
+          this->init_ext_values(this->ext_funcs, this->wf->ext, this->wf->u_ext_fn, this->orderSurface[isurf], this->u_ext_funcs, this->geometrySurface[isurf]);
 
           if (this->current_mat || this->add_dirichlet_lift)
           {
@@ -547,8 +469,8 @@ namespace Hermes
               int form_i = this->wf->mfsurf[current_mfsurf_i]->i;
               int form_j = this->wf->mfsurf[current_mfsurf_i]->j;
 
-              this->assemble_matrix_form(this->wf->mfsurf[current_mfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_j], funcsSurface[isurf][form_i], ext_funcSurf,
-                u_ext_funcSurf, &alsSurface[isurf][form_i], &alsSurface[isurf][form_j], n_quadrature_pointsSurface[isurf], geometrySurface[isurf], jacobian_x_weightsSurface[isurf]);
+              this->assemble_matrix_form(this->wf->mfsurf[current_mfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_j], funcsSurface[isurf][form_i],
+                &alsSurface[isurf][form_i], &alsSurface[isurf][form_j], n_quadrature_pointsSurface[isurf], geometrySurface[isurf], jacobian_x_weightsSurface[isurf]);
             }
           }
 
@@ -561,22 +483,16 @@ namespace Hermes
 
               int form_i = this->wf->vfsurf[current_vfsurf_i]->i;
 
-              this->assemble_vector_form(this->wf->vfsurf[current_vfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_i], ext_funcSurf, u_ext_funcSurf,
-                &alsSurface[isurf][form_i], n_quadrature_pointsSurface[isurf], geometrySurface[isurf], jacobian_x_weightsSurface[isurf]);
+              this->assemble_vector_form(this->wf->vfsurf[current_vfsurf_i], orderSurface[isurf], funcsSurface[isurf][form_i], &alsSurface[isurf][form_i],
+                n_quadrature_pointsSurface[isurf], geometrySurface[isurf], jacobian_x_weightsSurface[isurf]);
             }
           }
-
-          // deinit - u_ext_func
-          this->deinit_u_ext_values(u_ext_funcSurf);
-
-          // deinit - ext
-          this->deinit_ext_values(this->wf->ext, this->wf->u_ext_fn, ext_funcSurf);
         }
       }
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
+    void DiscreteProblemThreadAssembler<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns,
       AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
       bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == nullptr);
@@ -589,14 +505,18 @@ namespace Hermes
       // Assemble the local stiffness matrix for the form form.
       Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(current_als_i->cnt, current_als_j->cnt));
 
-      Func<Scalar>** local_ext = ext;
+      Func<Scalar>** ext_local = this->ext_funcs;
       // If the user supplied custom ext functions for this form.
-      if (form->ext.size() > 0)
-        local_ext = this->init_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), order, u_ext, geometry);
+      if (form->ext.size() > 0 || form->u_ext_fn.size() > 0)
+      {
+        this->init_ext_values(this->ext_funcs_local, form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), order, this->u_ext_funcs, geometry);
+        ext_local = this->ext_funcs_local;
+      }
 
       // Account for the previous time level solution previously inserted at the back of ext.
+      Func<Scalar>** u_ext_local = this->u_ext_funcs;
       if (this->rungeKutta)
-        u_ext += form->u_ext_offset;
+        u_ext_local += form->u_ext_offset;
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
@@ -623,7 +543,7 @@ namespace Hermes
           Func<double>* u = base_fns[j];
           Func<double>* v = test_fns[i];
 
-          Scalar val = block_scaling_coefficient * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+          Scalar val = block_scaling_coefficient * form->value(n_quadrature_points, jacobian_x_weights, u_ext_local, u, v, geometry, ext_local) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
 
           if (current_als_j->dof[j] >= 0)
           {
@@ -666,29 +586,28 @@ namespace Hermes
         }
       }
 
-      if (form->ext.size() > 0)
-        this->deinit_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), local_ext);
-
-      if (this->rungeKutta)
-        u_ext -= form->u_ext_offset;
-
       // Cleanup.
       delete[] local_stiffness_matrix;
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
+    void DiscreteProblemThreadAssembler<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns,
       AsmList<Scalar>* current_als_i, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
       bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == nullptr);
 
-      Func<Scalar>** local_ext = ext;
-      if (form->ext.size() > 0)
-        local_ext = this->init_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), order, u_ext, geometry);
+      Func<Scalar>** ext_local = this->ext_funcs;
+      // If the user supplied custom ext functions for this form.
+      if (form->ext.size() > 0 || form->u_ext_fn.size() > 0)
+      {
+        this->init_ext_values(this->ext_funcs_local, form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), order, this->u_ext_funcs, geometry);
+        ext_local = this->ext_funcs_local;
+      }
 
       // Account for the previous time level solution previously inserted at the back of ext.
+      Func<Scalar>** u_ext_local = this->u_ext_funcs;
       if (this->rungeKutta)
-        u_ext += form->u_ext_offset;
+        u_ext_local += form->u_ext_offset;
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
@@ -704,18 +623,12 @@ namespace Hermes
 
         Scalar val;
         if (surface_form)
-          val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
+          val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext_local, v, geometry, ext_local) * form->scaling_factor * current_als_i->coef[i];
         else
-          val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
+          val = form->value(n_quadrature_points, jacobian_x_weights, u_ext_local, v, geometry, ext_local) * form->scaling_factor * current_als_i->coef[i];
 
         this->current_rhs->add(current_als_i->dof[i], val);
       }
-
-      if (form->ext.size() > 0)
-        this->deinit_ext_values(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : this->wf->u_ext_fn), local_ext);
-
-      if (this->rungeKutta)
-        u_ext -= form->u_ext_offset;
     }
 
     template<typename Scalar>

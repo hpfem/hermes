@@ -56,24 +56,20 @@ namespace Hermes
       /// De-initialize Func storages.
       void deinit_funcs();
       /// Initializitation of u-ext values into Funcs
-      Func<Scalar>** init_u_ext_values(int order);
-      /// De-initializitation of u-ext values
-      void deinit_u_ext_values(Func<Scalar>** u_ext_func);
+      void init_u_ext_values(int order);
       /// Initializitation of ext values into Funcs
-      Func<Scalar>** init_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry);
-      /// De-initializitation of ext values
-      void deinit_ext_values(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Scalar>** ext_func);
+      void init_ext_values(Func<Scalar>** target_array, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry);
 
       /// Sets active elements & transformations
       void init_assembling_one_state(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state);
       /// Assemble the state.
       void assemble_one_state();
       /// Matrix volumetric forms - assemble the form.
-      void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
+      void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns,
         AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
       /// Vector volumetric forms - assemble the form.
-      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
-        AsmList<Scalar>* current_als, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
+      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, AsmList<Scalar>* current_als,
+        int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
       /// De-initialization of 1 state assembly
       void deinit_assembling_one_state();
       

@@ -263,7 +263,7 @@ namespace Hermes
       /// For internal use only.
       void force_transform(uint64_t sub_idx, Trf* ctm);
 
-      Quad2D* quads[8]; ///< list of available quadratures
+      Quad2D* quads[H2D_MAX_QUADRATURES]; ///< list of available quadratures
 
       int cur_quad;     ///< active quadrature (index into 'quads')
 

@@ -37,7 +37,7 @@ namespace Hermes
     const int g_max_tri = 20;
     
     // Maximum number of integration points.
-#define H2D_MAX_INTEGRATION_POINTS_COUNT 125
+#define H2D_MAX_INTEGRATION_POINTS_COUNT 169
 
     /// Quad1D is a base class for all 1D quadrature points.
     ///

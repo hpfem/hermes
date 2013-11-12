@@ -172,14 +172,16 @@ namespace Hermes
         geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
       }
 
-      double* jac = nullptr;
       if (!rep_reference_mapping->is_jacobian_const())
-        jac = rep_reference_mapping->get_jacobian(order);
-      for (int i = 0; i < np; i++)
       {
-        if (rep_reference_mapping->is_jacobian_const())
-          jacobian_x_weights[i] = pt[i][2] * rep_reference_mapping->get_const_jacobian();
-        else
+        double jac = rep_reference_mapping->get_const_jacobian();
+        for (int i = 0; i < np; i++)
+          jacobian_x_weights[i] = pt[i][2] * jac;
+      }
+      else
+      {
+        double* jac = rep_reference_mapping->get_jacobian(order);
+        for (int i = 0; i < np; i++)
           jacobian_x_weights[i] = pt[i][2] * jac[i];
       }
       return np;

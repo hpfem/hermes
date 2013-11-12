@@ -42,7 +42,8 @@ namespace Hermes
       cur_node = nullptr;
       sub_tables = nullptr;
       nodes = nullptr;
-      memset(quads, 0, sizeof(quads));
+      memset(quads, 0, H2D_MAX_QUADRATURES*sizeof(Quad2D*));
+
     }
 
     template<typename Scalar>
@@ -93,7 +94,7 @@ namespace Hermes
       int i;
 
       // check to see if we already have the quadrature
-      for (i = 0; i < 4; i++)
+      for (i = 0; i < H2D_MAX_QUADRATURES; i++)
       {
         if (quads[i] == quad_2d)
         {
@@ -103,7 +104,7 @@ namespace Hermes
       }
 
       // if not, add the quadrature to a free slot
-      for (i = 0; i < 4; i++)
+      for (i = 0; i < H2D_MAX_QUADRATURES; i++)
       {
         if (quads[i] == nullptr)
         {
@@ -111,9 +112,9 @@ namespace Hermes
           cur_quad = i;
           return;
         }
-
-        throw Hermes::Exceptions::Exception("too many quadratures.");
       }
+
+      throw Hermes::Exceptions::Exception("too many quadratures.");
     }
 
     template<typename Scalar>

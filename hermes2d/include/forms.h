@@ -248,9 +248,6 @@ namespace Hermes
     /// Init the mesh-function for the evaluation of the volumetric/surface integral - preallocated version.
     template<typename Scalar>
     HERMES_API void init_fn_preallocated(Func<Scalar>* u, MeshFunction<Scalar>* fu, const int order);
-    /// Init the solution for the evaluation of the volumetric/surface integral - preallocated version.
-    template<typename Scalar>
-    HERMES_API void init_fn_preallocated(Func<Scalar>* u, Solution<Scalar>* fu, const int order);
     /// Init UExt function - preallocated version.
     template<typename Scalar>
     HERMES_API void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
