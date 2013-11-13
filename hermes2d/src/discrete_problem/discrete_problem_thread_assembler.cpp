@@ -222,18 +222,72 @@ namespace Hermes
     {
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
+        // Test functions
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
         {
           this->funcs[space_i][j]->free_fn();
           delete this->funcs[space_i][j];
         }
 
+        // Test functions - surface
         for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
         {
           for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
           {
             this->funcsSurface[edge_i][space_i][j]->free_fn();
             delete this->funcsSurface[edge_i][space_i][j];
+          }
+        }
+
+        // UExt
+        if (this->nonlinear)
+        {
+          this->u_ext_funcs[space_i]->free_fn();
+          delete this->u_ext_funcs[space_i];
+        }
+
+        // Ext
+        int ext_size = this->wf->ext.size();
+        int u_ext_fns_size = this->wf->u_ext_fn.size();
+        if (ext_size > 0 || u_ext_fns_size > 0)
+        {
+          for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
+          {
+            this->ext_funcs[ext_i]->free_fn();
+            delete this->ext_funcs[ext_i];
+          }
+
+          for (int ext_i = 0; ext_i < ext_size; ext_i++)
+          {
+            this->ext_funcs[u_ext_fns_size + ext_i]->free_fn();
+            delete this->ext_funcs[u_ext_fns_size + ext_i];
+          }
+        }
+
+        // Ext - local
+        int local_ext_size = 0;
+        int local_u_ext_fns_size = 0;
+        for (int form_i = 0; form_i < this->wf->forms.size(); form_i++)
+        {
+          if (this->wf->forms[form_i]->ext.size() > local_ext_size)
+            local_ext_size = this->wf->forms[form_i]->ext.size();
+
+          if (this->wf->forms[form_i]->u_ext_fn.size() > local_u_ext_fns_size)
+            local_u_ext_fns_size = this->wf->forms[form_i]->u_ext_fn.size();
+        }
+
+        if (local_ext_size > 0 || local_u_ext_fns_size > 0)
+        {
+          for (int ext_i = 0; ext_i < local_u_ext_fns_size; ext_i++)
+          {
+            this->ext_funcs_local[ext_i]->free_fn();
+            delete this->ext_funcs_local[ext_i];
+          }
+
+          for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
+          {
+            this->ext_funcs_local[local_u_ext_fns_size + ext_i]->free_fn();
+            delete this->ext_funcs_local[local_u_ext_fns_size + ext_i];
           }
         }
       }
@@ -263,6 +317,7 @@ namespace Hermes
           spaces[j]->get_element_assembly_list(current_state->e[j], &als[j]);
           refmaps[j]->set_active_element(current_state->e[j]);
           refmaps[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
+          rep_refmap = refmaps[j];
         }
       }
 
@@ -304,7 +359,7 @@ namespace Hermes
         }
       }
 
-      this->n_quadrature_points = init_geometry_points_allocated_jwt(refmaps, this->spaces_size, this->order, this->geometry, this->jacobian_x_weights);
+      this->n_quadrature_points = init_geometry_points_allocated_jwt(this->rep_refmap, this->order, this->geometry, this->jacobian_x_weights);
 
       if (current_state->isBnd && (this->wf->mfsurf.size() > 0 || this->wf->vfsurf.size() > 0))
       {
@@ -315,7 +370,7 @@ namespace Hermes
           if (!current_state->bnd[edge_i])
             continue;
 
-          this->n_quadrature_pointsSurface[edge_i] = init_surface_geometry_points_allocated_jwt(refmaps, this->spaces_size, this->order, edge_i, current_state->rep->marker, this->geometrySurface[edge_i], this->jacobian_x_weightsSurface[edge_i]);
+          this->n_quadrature_pointsSurface[edge_i] = init_surface_geometry_points_allocated_jwt(this->rep_refmap, this->order, edge_i, current_state->rep->marker, this->geometrySurface[edge_i], this->jacobian_x_weightsSurface[edge_i]);
           this->orderSurface[edge_i] = this->order;
           this->order = order_local;
 

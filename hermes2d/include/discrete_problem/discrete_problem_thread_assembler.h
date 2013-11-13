@@ -87,6 +87,7 @@ namespace Hermes
 
       PrecalcShapeset** pss;
       RefMap** refmaps;
+      RefMap* rep_refmap;
       Solution<Scalar>** u_ext;
       Hermes::vector<Transformable *> fns;
       
