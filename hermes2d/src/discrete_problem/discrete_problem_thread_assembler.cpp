@@ -245,50 +245,50 @@ namespace Hermes
           this->u_ext_funcs[space_i]->free_fn();
           delete this->u_ext_funcs[space_i];
         }
+      }
 
-        // Ext
-        int ext_size = this->wf->ext.size();
-        int u_ext_fns_size = this->wf->u_ext_fn.size();
-        if (ext_size > 0 || u_ext_fns_size > 0)
+      // Ext
+      int ext_size = this->wf->ext.size();
+      int u_ext_fns_size = this->wf->u_ext_fn.size();
+      if (ext_size > 0 || u_ext_fns_size > 0)
+      {
+        for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
         {
-          for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
-          {
-            this->ext_funcs[ext_i]->free_fn();
-            delete this->ext_funcs[ext_i];
-          }
-
-          for (int ext_i = 0; ext_i < ext_size; ext_i++)
-          {
-            this->ext_funcs[u_ext_fns_size + ext_i]->free_fn();
-            delete this->ext_funcs[u_ext_fns_size + ext_i];
-          }
+          this->ext_funcs[ext_i]->free_fn();
+          delete this->ext_funcs[ext_i];
         }
 
-        // Ext - local
-        int local_ext_size = 0;
-        int local_u_ext_fns_size = 0;
-        for (int form_i = 0; form_i < this->wf->forms.size(); form_i++)
+        for (int ext_i = 0; ext_i < ext_size; ext_i++)
         {
-          if (this->wf->forms[form_i]->ext.size() > local_ext_size)
-            local_ext_size = this->wf->forms[form_i]->ext.size();
+          this->ext_funcs[u_ext_fns_size + ext_i]->free_fn();
+          delete this->ext_funcs[u_ext_fns_size + ext_i];
+        }
+      }
 
-          if (this->wf->forms[form_i]->u_ext_fn.size() > local_u_ext_fns_size)
-            local_u_ext_fns_size = this->wf->forms[form_i]->u_ext_fn.size();
+      // Ext - local
+      int local_ext_size = 0;
+      int local_u_ext_fns_size = 0;
+      for (int form_i = 0; form_i < this->wf->forms.size(); form_i++)
+      {
+        if (this->wf->forms[form_i]->ext.size() > local_ext_size)
+          local_ext_size = this->wf->forms[form_i]->ext.size();
+
+        if (this->wf->forms[form_i]->u_ext_fn.size() > local_u_ext_fns_size)
+          local_u_ext_fns_size = this->wf->forms[form_i]->u_ext_fn.size();
+      }
+
+      if (local_ext_size > 0 || local_u_ext_fns_size > 0)
+      {
+        for (int ext_i = 0; ext_i < local_u_ext_fns_size; ext_i++)
+        {
+          this->ext_funcs_local[ext_i]->free_fn();
+          delete this->ext_funcs_local[ext_i];
         }
 
-        if (local_ext_size > 0 || local_u_ext_fns_size > 0)
+        for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
         {
-          for (int ext_i = 0; ext_i < local_u_ext_fns_size; ext_i++)
-          {
-            this->ext_funcs_local[ext_i]->free_fn();
-            delete this->ext_funcs_local[ext_i];
-          }
-
-          for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
-          {
-            this->ext_funcs_local[local_u_ext_fns_size + ext_i]->free_fn();
-            delete this->ext_funcs_local[local_u_ext_fns_size + ext_i];
-          }
+          this->ext_funcs_local[local_u_ext_fns_size + ext_i]->free_fn();
+          delete this->ext_funcs_local[local_u_ext_fns_size + ext_i];
         }
       }
     }
