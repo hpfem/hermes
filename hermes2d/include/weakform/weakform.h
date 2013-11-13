@@ -228,8 +228,6 @@ namespace Hermes
       friend class OGProjection<Scalar>;
       friend class Hermes::Preconditioners::Precond<Scalar>;
 
-      bool warned_nonOverride;
-
       // Internal.
       virtual void cloneMembers(const WeakForm<Scalar>* other_wf);
       // Internal.

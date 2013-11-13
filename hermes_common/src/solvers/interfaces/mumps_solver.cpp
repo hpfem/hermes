@@ -169,8 +169,26 @@ namespace Hermes
       return a;
     }
 
-    template<typename Scalar>
-    void MumpsMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
+    template<>
+    void MumpsMatrix<double>::add(unsigned int m, unsigned int n, double v)
+    {
+      //          produced an error in neutronics-2-group-adapt (although tutorial-07
+      //          ran well).
+      // Find m-th row in the n-th column.
+      int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+      // Make sure we are adding to an existing non-zero entry.
+      if(pos < 0)
+        throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
+      // Add offset to the n-th column.
+      pos += Ap[n];
+#pragma omp atomic
+        Ax[pos] += v;
+      irn[pos] = m + 1;  // MUMPS is indexing from 1
+      jcn[pos] = n + 1;
+    }
+
+    template<>
+    void MumpsMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, std::complex<double> v)
     {
       //          produced an error in neutronics-2-group-adapt (although tutorial-07
       //          ran well).

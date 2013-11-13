@@ -30,6 +30,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    static bool warned_nonOverride = false;
 
     /// This is to be used by weak forms specifying numerical flux through interior edges.
     /// Forms with this identifier will receive DiscontinuousFunc representations of shape
@@ -37,7 +38,7 @@ namespace Hermes
     static const std::string H2D_DG_INNER_EDGE = "-1234567";
 
     template<typename Scalar>
-    WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free) : Hermes::Mixins::Loggable(false), warned_nonOverride(false)
+    WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free) : Hermes::Mixins::Loggable(false)
     {
       this->neq = neq;
       this->is_matfree = mat_free;
@@ -60,12 +61,12 @@ namespace Hermes
     template<typename Scalar>
     WeakForm<Scalar>* WeakForm<Scalar>::clone() const
     {
-      if(!this->warned_nonOverride)
+      if(!warned_nonOverride)
 #pragma omp critical (warning_weakform_nonOverride)
       {
-        if(!this->warned_nonOverride)
+        if(!warned_nonOverride)
           this->warn("Using default WeakForm<Scalar>::clone, if you have any dynamically created data in your WeakForm constructor, you need to overload this method!");
-        const_cast<WeakForm<Scalar>*>(this)->warned_nonOverride = true;
+        warned_nonOverride = true;
       }
       return new WeakForm(*this);
     }
