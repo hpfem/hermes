@@ -127,7 +127,7 @@ namespace Hermes
     Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n) const
     {
       // Find m-th row in the n-th column.
-      int mid = find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
+      int mid = CSMatrix<Scalar>::find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
       // Return 0 if the entry has not been found.
       if(mid < 0)
         return 0.0;
@@ -147,7 +147,7 @@ namespace Hermes
     void MumpsMatrix<double>::add(unsigned int m, unsigned int n, double v)
     {
       // Find m-th row in the n-th column.
-      int pos = find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
+      int pos = CSMatrix<double>::find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
       // Make sure we are adding to an existing non-zero entry.
       if(pos < 0)
         throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
@@ -163,7 +163,7 @@ namespace Hermes
     void MumpsMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, std::complex<double> v)
     {
       // Find m-th row in the n-th column.
-      int pos = find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
+      int pos = CSMatrix<std::complex<double> >::find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
       // Make sure we are adding to an existing non-zero entry.
       if(pos < 0)
         throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
