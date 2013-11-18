@@ -147,11 +147,11 @@ namespace Hermes
       Scalar* data = node->data;
       for (int j = 0; j < num_components; j++) {
         for (int i = 0; i < 6; i++)
-        if (mask & idx2mask[i][j])
-        {
-          node->values[j][i] = data;
-          data += num_points;
-        }
+          if (mask & idx2mask[i][j])
+          {
+            node->values[j][i] = data;
+            data += num_points;
+          }
       }
 
       return node;
@@ -174,6 +174,73 @@ namespace Hermes
       this->sub_idx = sub_idx;
       this->ctm = ctm;
       update_nodes_ptr();
+    }
+
+    template<typename Scalar>
+    int Function<Scalar>::get_num_components() { return num_components; }
+
+    template<typename Scalar>
+        Scalar* Function<Scalar>::get_fn_values(int component = 0)
+    {
+#ifdef _DEBUG
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 0, "Function values");
+#endif
+      return cur_node->values[component][0];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_dx_values(int component = 0)
+    {
+#ifdef _DEBUG
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 1, "DX values");
+#endif
+      return cur_node->values[component][1];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_dy_values(int component = 0)
+    {
+#ifdef _DEBUG
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 2, "DY values");
+#endif
+      return cur_node->values[component][2];
+    }
+
+    template<typename Scalar>
+    void Function<Scalar>::get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0)
+    {
+#ifdef _DEBUG
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 1, "DX values"); check_table(component, cur_node, 2, "DY values");
+#endif
+      dx = cur_node->values[component][1];
+      dy = cur_node->values[component][2];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_dxx_values(int component = 0)
+    {
+#ifdef _DEBUG
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 3, "DXX values");
+#endif
+      return cur_node->values[component][3];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_dyy_values(int component = 0)
+    {
+#ifdef _DEBUG
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 4, "DYY values");
+#endif
+      return cur_node->values[component][4];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_dxy_values(int component = 0)
+    {
+#ifdef _DEBUG
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 5, "DXY values");
+#endif
+      return cur_node->values[component][5];
     }
 
     template class HERMES_API Function<double>;

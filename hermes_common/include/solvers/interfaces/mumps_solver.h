@@ -145,10 +145,19 @@ namespace Hermes
       /// @return true on succes
       /// \sa #check_status()
       bool reinit();
-      /// True if solver is inited.
-      bool inited;
     private:
       void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
+      
+      /// True if solver is inited.
+      bool inited;
+
+      /// Internal - control parameter for MUMPS.
+      /// See MUMPS doc, page 27, version 4.10.
+      int icntl_14;
+      /// Initial value is 1 * 100%.
+      static const int init_icntl_14 = 1;
+      /// Maximum value is 128 * 100%.
+      static const int max_icntl_14 = 128;
     };
   }
 }

@@ -377,7 +377,34 @@ namespace Hermes
 #define JOB_FACTORIZE_SOLVE          5
 #define JOB_SOLVE                    3
 
-    template<>
+    template<typename Scalar>
+    MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) :
+    DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs), icntl_14(init_icntl_14)
+    {
+      inited = false;
+
+      // Initial values for some fields of the MUMPS_STRUC structure that may be accessed
+      // before MUMPS has been initialized.
+      param.rhs = nullptr;
+      param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
+      // in setup_factorization()
+    }
+
+    template<typename Scalar>
+    MumpsSolver<Scalar>::~MumpsSolver()
+    {
+      // Terminate the current instance of MUMPS.
+      if(inited)
+      {
+        param.job = JOB_END;
+        mumps_c(&param);
+      }
+
+      if(param.rhs != nullptr)
+        delete [] param.rhs;
+    }
+
+   template<>
     void MumpsSolver<double>::mumps_c(mumps_type<double>::mumps_struct * param)
     {
       dmumps_c(param);
@@ -435,8 +462,19 @@ namespace Hermes
         param.ICNTL(3) = -1;
         param.ICNTL(4) = 0;
 
+        param.ICNTL(5) = 0;  // =/ both centralized assembled matrix
+        param.ICNTL(18) = 0; // =\ both centralized assembled matrix
         param.ICNTL(20) = 0; // centralized dense RHS
         param.ICNTL(21) = 0; // centralized dense solution
+
+        // Fixing the memory problems - this parameter specifies the maximum
+        // extra fill-in.
+        // Extract from the docs (4.10, page 27):
+        // ICNTL(14) is accessed by the host both during the analysis and the factorization phases. It corresponds
+        // to the percentage increase in the estimated working space. When significant extra fill-in is caused
+        // by numerical pivoting, increasing ICNTL(14) may help. Except in special cases, the default value
+        // is 20 (which corresponds to a 20 % increase).
+        param.ICNTL(14) = 100 * this->icntl_14;
 
         // Specify the matrix.
         param.n = m->size;
@@ -449,34 +487,7 @@ namespace Hermes
       return inited;
     }
 
-    template<typename Scalar>
-    MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) :
-      DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs)
-    {
-      inited = false;
-
-      // Initial values for some fields of the MUMPS_STRUC structure that may be accessed
-      // before MUMPS has been initialized.
-      param.rhs = nullptr;
-      param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
-      // in setup_factorization()
-    }
-
-    template<typename Scalar>
-    MumpsSolver<Scalar>::~MumpsSolver()
-    {
-      // Terminate the current instance of MUMPS.
-      if(inited)
-      {
-        param.job = JOB_END;
-        mumps_c(&param);
-      }
-
-      if(param.rhs != nullptr)
-        delete [] param.rhs;
-    }
-
-    template<typename Scalar>
+     template<typename Scalar>
     int MumpsSolver<Scalar>::get_matrix_size()
     {
       return m->size;
@@ -514,8 +525,15 @@ namespace Hermes
       else
       {
         delete [] param.rhs;
-        param.icntl[14] *= 2.;
-        this->solve();
+
+        icntl_14 *= 2;
+        if(icntl_14 > max_icntl_14)
+          throw Hermes::Exceptions::LinearMatrixSolverException("MUMPS memory overflow - potentially singular matrix");
+        else
+        {
+          this->reinit();
+          this->solve();
+        }
         return;
         /* From the MUMPS docs - these two cases are forwarded from check_status().
         case –8: throw Hermes::Exceptions::LinearMatrixSolverException("Main internal integer workarray IS too small for factorization. This may happen, for example, if
