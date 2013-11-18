@@ -1126,8 +1126,6 @@ namespace Hermes
       // Count.
       bson_append_int(&bw, "element_data_count", this->mesh->get_max_element_id());
 
-      Element* e;
-
       // Coefficients.
       bson_append_start_array(&bw, "orders");
       for (int _id = 0, _max = this->get_mesh()->get_max_element_id(); _id < _max; _id++)

@@ -689,9 +689,6 @@ namespace Hermes
       std::sort (elements.begin(), elements.end(), elementCompare);
 #pragma endregion
 
-      // Utility pointer.
-      Element* e;
-
       // Init bson
       bson bw;
       bson_init(&bw);

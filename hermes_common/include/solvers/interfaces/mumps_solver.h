@@ -72,32 +72,24 @@ namespace Hermes
     };
 
     /** \brief Matrix used with MUMPS solver */
+    /// Important: MUMPS is indexing from 1
     template <typename Scalar>
-    class MumpsMatrix : public SparseMatrix<Scalar>
+    class MumpsMatrix : public CSCMatrix<Scalar>
     {
     public:
       MumpsMatrix();
-      virtual ~MumpsMatrix();
 
-      virtual void alloc();
-      virtual void free();
-      virtual Scalar get(unsigned int m, unsigned int n) const;
-      virtual void zero();
-      virtual void add(unsigned int m, unsigned int n, Scalar v);
-      virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
+      void alloc_data();
+      void free();
+      Scalar get(unsigned int m, unsigned int n) const;
+      void zero();
+      void add(unsigned int m, unsigned int n, Scalar v);
       using Matrix<Scalar>::export_to_file;
-      virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
-      virtual unsigned int get_nnz() const;
-      virtual double get_fill_in() const;
+      void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
       
-      /// Add matrix to specific position.
-      /// @param[in] i row in target matrix coresponding with top row of added matrix
-      /// @param[in] j column in target matrix coresponding with lef column of added matrix
-      /// @param[in] mat added matrix
-      virtual void add_as_block(unsigned int i, unsigned int j, MumpsMatrix* mat);
-
       /// Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);
+
       /// Applies the matrix to vector_in and saves result to vector_out.
       void multiply_with_vector(Scalar* vector_in, Scalar*& vector_out, bool vector_out_initialized = false) const;
 
@@ -105,20 +97,16 @@ namespace Hermes
       void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
       
       /// Duplicates a matrix (including allocation).
-      SparseMatrix<Scalar>* duplicate() const;
+      CSMatrix<Scalar>* duplicate() const;
 
     protected:
-      /// MUMPS specific data structures for storing the system matrix (CSC format).
-      unsigned int nnz;          ///< Number of non-zero elements.
       int *irn;         ///< Row indices.
       int *jcn;         ///< Column indices.
       typename mumps_type<Scalar>::mumps_Scalar *Ax; ///< Matrix entries (column-wise).
-      int *Ai;          ///< Row indices of values in Ax.
-      int *Ap;          ///< Index to Ax/Ai, where each column starts.
 
       friend class Solvers::MumpsSolver<Scalar>;
       template<typename T> friend SparseMatrix<T>*  create_matrix();
-    };
+		};
   }
 
   namespace Solvers

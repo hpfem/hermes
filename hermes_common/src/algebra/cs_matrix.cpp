@@ -25,7 +25,8 @@ namespace Hermes
 {
   namespace Algebra
   {
-    static int find_position(int *Ai, int Alen, int idx)
+    template<typename Scalar>
+    int CSMatrix<Scalar>::find_position(int *Ai, int Alen, int idx)
     {
       assert(Ai != nullptr);
       assert(Alen > 0);
@@ -53,12 +54,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    CSMatrix<Scalar>::CSMatrix()
+    CSMatrix<Scalar>::CSMatrix() : SparseMatrix<Scalar>(), nnz(0), Ap(nullptr), Ai(nullptr), Ax(nullptr)
     {
-      this->size = 0; nnz = 0;
-      Ap = nullptr;
-      Ai = nullptr;
-      Ax = nullptr;
     }
 
     template<typename Scalar>
@@ -106,6 +103,12 @@ namespace Hermes
 
       nnz = Ap[this->size];
 
+      this->alloc_data();
+    }
+    
+    template<typename Scalar>
+    void CSMatrix<Scalar>::alloc_data()
+    {
       Ax = new Scalar[nnz];
       memset(Ax, 0, sizeof(Scalar) * nnz);
     }

@@ -2427,7 +2427,7 @@ namespace Hermes
       // points on a quad are calculated as a simple cartesian
       // product of 1D quadrature points...
 
-      np = sqr(std_np_1d[order]);
+      np = Hermes::sqr(std_np_1d[order]);
       double3* result = (double3*)malloc(np * sizeof(double3));
       double2* table = std_tables_1d[order];
 

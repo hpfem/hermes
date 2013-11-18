@@ -420,7 +420,6 @@ namespace Hermes
               info_array[this->elements_to_refine[i].id] = 2;
             else
             {
-              int id;
               for(int sons_i = 0; sons_i < H2D_MAX_ELEMENT_SONS; sons_i++)
                 if(this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i])
                   info_array[this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i]->id] = this->elements_to_refine[i].split == 1 ? 1 : 2;

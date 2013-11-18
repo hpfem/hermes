@@ -194,11 +194,17 @@ namespace Hermes
       sprintf(this->message, "Linear solver failed.");
     }
 
-    LinearMatrixSolverException::LinearMatrixSolverException(const char * reason) : Exception()
+    LinearMatrixSolverException::LinearMatrixSolverException(const char * reason, ...) : Exception()
     {
-      char * msg =  new char[34 + strlen(reason)];
-      sprintf(msg, "Linear solver failed because:\"%s\"", reason);
-      message = msg;
+      char* text = new char[2048];
+      sprintf(text, "Linear solver failed because: ");
+
+      // print the message
+      va_list arglist;
+      va_start(arglist, reason);
+      vsprintf(text = text + strlen("Linear solver failed because: "), reason, arglist);
+      va_end(arglist);
+      message = text - strlen("Linear solver failed because: ");
     }
 
     LinearMatrixSolverException::LinearMatrixSolverException(const LinearMatrixSolverException&e) : Exception()

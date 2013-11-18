@@ -43,6 +43,9 @@ namespace Hermes
       /// @param[in] ax values
       void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
 
+      /// Finds the correct position to insert / retrieve elements.
+      static int find_position(int *Ai, int Alen, int idx);
+
       /// \brief Default constructor.
       CSMatrix();
       /// \brief Constructor with specific size
@@ -62,8 +65,10 @@ namespace Hermes
       /// Virtual - the method body is 1:1 for CSCMatrix, inverted for CSR.
       virtual Scalar get(unsigned int Ai_data_index, unsigned int Ai_index) const;
 
-      /// Utility method.
+      /// Allocate utility storage (row, column indices, etc.).
       virtual void alloc();
+      // Allocate data storage.
+      virtual void alloc_data();
       /// Utility method.
       virtual void free();
       /// Utility method.

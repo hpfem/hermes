@@ -93,11 +93,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    SparseMatrix<Scalar>::SparseMatrix()
+    SparseMatrix<Scalar>::SparseMatrix() : Matrix<Scalar>()
     {
-      this->size = 0;
       pages = nullptr;
-
       row_storage = false;
       col_storage = false;
     }

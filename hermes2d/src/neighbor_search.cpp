@@ -340,7 +340,7 @@ namespace Hermes
     {
       if(position >= this->central_transformations_alloc_size)
       {
-        int new_alloc_size = position * 1.5;
+        int new_alloc_size = std::min(position + 1, (int)(position * 1.5));
         this->central_transformations = (Transformations**)realloc(this->central_transformations, new_alloc_size * sizeof(Transformations*));
         memset(this->central_transformations + this->central_transformations_alloc_size, 0, sizeof(Transformations*) * (new_alloc_size - this->central_transformations_alloc_size));
         this->central_transformations_alloc_size = new_alloc_size;
@@ -366,7 +366,7 @@ namespace Hermes
     {
       if(position >= this->neighbor_transformations_alloc_size)
       {
-        int new_alloc_size = position * 1.5;
+        int new_alloc_size = std::min(position + 1, (int)(position * 1.5));
         this->neighbor_transformations = (Transformations**)realloc(this->neighbor_transformations, new_alloc_size * sizeof(Transformations*));
         memset(this->neighbor_transformations + this->neighbor_transformations_alloc_size, 0, sizeof(Transformations*) * (new_alloc_size - this->neighbor_transformations_alloc_size));
         this->neighbor_transformations_alloc_size = new_alloc_size;

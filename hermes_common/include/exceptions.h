@@ -157,7 +157,7 @@ namespace Hermes
       LinearMatrixSolverException();
       /// Linear solver failed from spevific reason.
       /// \param[in] reason specification of solver fail.
-      LinearMatrixSolverException(const char * reason);
+      LinearMatrixSolverException(const char * reason, ...);
       virtual ~LinearMatrixSolverException() throw() {};
       LinearMatrixSolverException(const LinearMatrixSolverException & e);
       virtual Exception* clone();
