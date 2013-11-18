@@ -119,8 +119,7 @@ namespace Hermes
 
       update_cur_node();
 
-      is_const = !element->is_curved() &&
-        (element->is_triangle() || is_parallelogram(element));
+      is_const = !element->is_curved() && (element->is_triangle() || is_parallelogram(element));
 
       // prepare the shapes and coefficients of the reference map
       int j, k = 0;
@@ -154,14 +153,19 @@ namespace Hermes
       }
 
       // calculate the order of the inverse reference map
-      if(element->iro_cache == -1 && quad_2d->get_max_order(e->get_mode()) > 1)
+      if(element->iro_cache == -1)
+#pragma omp critical
       {
-        element->iro_cache = is_const ? 0 : calc_inv_ref_order();
+        if(element->iro_cache == -1)
+          element->iro_cache = is_const ? 0 : calc_inv_ref_order();
       }
       inv_ref_order = element->iro_cache;
 
       // constant inverse reference map
-      if(is_const) calc_const_inv_ref_map(); else const_jacobian = 0.0;
+      if(is_const)
+        calc_const_inv_ref_map();
+      else
+        const_jacobian = 0.0;
     }
 
     void RefMap::push_transform(int son)
