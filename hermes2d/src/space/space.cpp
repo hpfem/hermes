@@ -251,6 +251,10 @@ namespace Hermes
       this->vertex_functions_count = this->edge_functions_count = this->bubble_functions_count = 0;
 
       this->essential_bcs = space->essential_bcs;
+
+      if (this->own_shapeset)
+        delete this->shapeset;
+
       this->shapeset = space->shapeset->clone();
 
       if (new_mesh->get_seq() != space->get_mesh()->get_seq())
