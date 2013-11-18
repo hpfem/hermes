@@ -243,19 +243,24 @@ namespace Hermes
       if(dxdy_buffer != nullptr) { delete [] dxdy_buffer;  dxdy_buffer = nullptr; }
 
       for (int i = 0; i < this->num_components; i++)
+      {
         if(elem_coeffs[i] != nullptr)
-        { delete [] elem_coeffs[i];  elem_coeffs[i] = nullptr; }
+        {
+          delete [] elem_coeffs[i];
+          elem_coeffs[i] = nullptr;
+        }
+      }
 
-        e_last = nullptr;
+      e_last = nullptr;
 
-        free_tables();
+      free_tables();
+      space_type = HERMES_INVALID_SPACE;
     }
 
     template<typename Scalar>
     Solution<Scalar>::~Solution()
     {
       free();
-      space_type = HERMES_INVALID_SPACE;
     }
 
     class mono_lu_init
