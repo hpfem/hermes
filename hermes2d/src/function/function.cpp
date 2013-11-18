@@ -177,10 +177,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Function<Scalar>::get_num_components() { return num_components; }
+    int Function<Scalar>::get_num_components() const
+    {
+      return num_components;
+    }
 
     template<typename Scalar>
-        Scalar* Function<Scalar>::get_fn_values(int component = 0)
+    Scalar* Function<Scalar>::get_fn_values(int component) const
     {
 #ifdef _DEBUG
       check_params(component, cur_node, num_components); check_table(component, cur_node, 0, "Function values");
@@ -189,7 +192,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar* Function<Scalar>::get_dx_values(int component = 0)
+    Scalar* Function<Scalar>::get_dx_values(int component) const
     {
 #ifdef _DEBUG
       check_params(component, cur_node, num_components); check_table(component, cur_node, 1, "DX values");
@@ -198,7 +201,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar* Function<Scalar>::get_dy_values(int component = 0)
+    Scalar* Function<Scalar>::get_dy_values(int component) const
     {
 #ifdef _DEBUG
       check_params(component, cur_node, num_components); check_table(component, cur_node, 2, "DY values");
@@ -207,7 +210,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Function<Scalar>::get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0)
+    void Function<Scalar>::get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0) const
     {
 #ifdef _DEBUG
       check_params(component, cur_node, num_components); check_table(component, cur_node, 1, "DX values"); check_table(component, cur_node, 2, "DY values");
@@ -217,7 +220,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar* Function<Scalar>::get_dxx_values(int component = 0)
+    Scalar* Function<Scalar>::get_dxx_values(int component) const
     {
 #ifdef _DEBUG
       check_params(component, cur_node, num_components); check_table(component, cur_node, 3, "DXX values");
@@ -226,7 +229,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar* Function<Scalar>::get_dyy_values(int component = 0)
+    Scalar* Function<Scalar>::get_dyy_values(int component) const
     {
 #ifdef _DEBUG
       check_params(component, cur_node, num_components); check_table(component, cur_node, 4, "DYY values");
@@ -235,7 +238,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar* Function<Scalar>::get_dxy_values(int component = 0)
+    Scalar* Function<Scalar>::get_dxy_values(int component) const
     {
 #ifdef _DEBUG
       check_params(component, cur_node, num_components); check_table(component, cur_node, 5, "DXY values");

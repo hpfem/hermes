@@ -107,44 +107,44 @@ namespace Hermes
       virtual ~Function();
 
       /// \brief Returns the number of components of the function being represented by the class.
-      int get_num_components();
+      int get_num_components() const;
 
       /// \brief Returns function values.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The values of the function at all points of the current integration rule.
-      Scalar* get_fn_values(int component = 0);
+      Scalar* get_fn_values(int component = 0) const;
 
       /// \brief Returns the x partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The x partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dx_values(int component = 0);
+      Scalar* get_dx_values(int component = 0) const;
 
       /// \brief Returns the y partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The y partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dy_values(int component = 0);
+      Scalar* get_dy_values(int component = 0) const;
 
       /// \brief Returns both x and y partial derivatives.
       /// This function provides the both often-used dx and dy values in one call.
       /// \param dx[out] Variable which receives the pointer to the first partial derivatives by x
       /// \param dy[out] Variable which receives the pointer to the first partial derivatives by y
       /// \param component[in] The component of the function (0 or 1).
-      void get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0);
+      void get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0) const;
 
       /// \brief Returns the second x partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The x second partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dxx_values(int component = 0);
+      Scalar* get_dxx_values(int component = 0) const;
 
       /// \brief Returns the second y partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The y second partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dyy_values(int component = 0);
+      Scalar* get_dyy_values(int component = 0) const;
 
       /// \brief Returns the second mixed derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The second mixed derivative of the function at all points of the current integration rule.
-      Scalar* get_dxy_values(int component = 0);
+      Scalar* get_dxy_values(int component = 0) const;
 
       /// \brief Returns the current quadrature points.
       Quad2D* get_quad_2d() const;
