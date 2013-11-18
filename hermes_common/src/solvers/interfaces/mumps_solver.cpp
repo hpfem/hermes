@@ -90,12 +90,12 @@ namespace Hermes
     template<typename Scalar>
     void MumpsMatrix<Scalar>::alloc_data()
     {
-      Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz];
-      memset(Ax, 0, sizeof(Scalar) * nnz);
+      Ax = new typename mumps_type<Scalar>::mumps_Scalar[this->nnz];
+      memset(Ax, 0, sizeof(Scalar) * this->nnz);
 
-      irn = new int[nnz];
-      jcn = new int[nnz];
-      for (unsigned int i = 0; i < nnz; i++)
+      irn = new int[this->nnz];
+      jcn = new int[this->nnz];
+      for (unsigned int i = 0; i < this->nnz; i++)
       {
         irn[i] = 1;
         jcn[i] = 1;
@@ -127,12 +127,12 @@ namespace Hermes
     Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n) const
     {
       // Find m-th row in the n-th column.
-      int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+      int mid = find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
       // Return 0 if the entry has not been found.
       if(mid < 0)
         return 0.0;
       else
-        mid += Ap[n];
+        mid += this->Ap[n];
 
       return mumps_to_Scalar(Ax[mid]);
     }
@@ -140,19 +140,19 @@ namespace Hermes
     template<typename Scalar>
     void MumpsMatrix<Scalar>::zero()
     {
-      memset(Ax, 0, sizeof(typename mumps_type<Scalar>::mumps_Scalar) * Ap[this->size]);
+      memset(this->Ax, 0, sizeof(typename mumps_type<Scalar>::mumps_Scalar) * this->Ap[this->size]);
     }
 
     template<>
     void MumpsMatrix<double>::add(unsigned int m, unsigned int n, double v)
     {
       // Find m-th row in the n-th column.
-      int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+      int pos = find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
       // Make sure we are adding to an existing non-zero entry.
       if(pos < 0)
         throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
       // Add offset to the n-th column.
-      pos += Ap[n];
+      pos += this->Ap[n];
 #pragma omp atomic
       Ax[pos] += v;
       irn[pos] = m + 1;  // MUMPS is indexing from 1
@@ -163,12 +163,12 @@ namespace Hermes
     void MumpsMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, std::complex<double> v)
     {
       // Find m-th row in the n-th column.
-      int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+      int pos = find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
       // Make sure we are adding to an existing non-zero entry.
       if(pos < 0)
         throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
       // Add offset to the n-th column.
-      pos += Ap[n];
+      pos += this->Ap[n];
 #pragma omp critical (MumpsMatrix_add)
       Ax[pos] += v;
       irn[pos] = m + 1;  // MUMPS is indexing from 1
@@ -190,7 +190,7 @@ namespace Hermes
 
           for (unsigned int j = 0; j < this->size; j++)
           {
-            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+            for (int i = this->Ap[j]; i < this->Ap[j + 1]; i++)
             {
               Helpers::fprint_coordinate_num(file, irn[i]-1, jcn[i]-1, mumps_to_Scalar(Ax[i]), number_format);
               fprintf(file, "\n");
@@ -212,9 +212,9 @@ namespace Hermes
           double* Ax_im = nullptr;
 
           sparse.nir = this->nnz;
-          sparse.ir = Ai;
+          sparse.ir = this->Ai;
           sparse.njc = this->size + 1;
-          sparse.jc = (int *) Ap;
+          sparse.jc = (int *) this->Ap;
           sparse.ndata = this->nnz;
 
           size_t dims[2];
@@ -270,7 +270,7 @@ namespace Hermes
             throw Exceptions::IOException(Exceptions::IOException::Write, filename);
           for (unsigned int j = 0; j < this->size; j++)
           {
-            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+            for (int i = this->Ap[j]; i < this->Ap[j + 1]; i++)
             {
               Helpers::fprint_coordinate_num(file, irn[i]-1, jcn[i]-1, mumps_to_Scalar(Ax[i]), number_format);
               fprintf(file, "\n");
@@ -291,7 +291,7 @@ namespace Hermes
       memset(vector_out, 0, sizeof(Scalar) * this->size);
 
       Scalar a;
-      for (unsigned int i = 0; i < nnz; i++)
+      for (unsigned int i = 0; i < this->nnz; i++)
       {
         a = mumps_to_Scalar(Ax[i]);
         vector_out[jcn[i] - 1] += vector_in[irn[i] - 1] * a;
@@ -308,15 +308,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax)
+    void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz_, int* ap, int* ai, Scalar* ax)
     {
-      this->nnz = nnz;
+      this->nnz = nnz_;
       this->size = size;
       this->Ap = new int[this->size + 1];
-      this->Ai = new int[nnz];
-      this->Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz];
-      irn = new int[nnz];
-      jcn = new int[nnz];
+      this->Ai = new int[this->nnz];
+      this->Ax = new typename mumps_type<Scalar>::mumps_Scalar[this->nnz];
+      irn = new int[this->nnz];
+      jcn = new int[this->nnz];
 
       for (unsigned int i = 0; i < this->size; i++)
       {
@@ -325,7 +325,7 @@ namespace Hermes
           jcn[j] = i;
       }
       this->Ap[this->size] = ap[this->size];
-      for (unsigned int i = 0; i < nnz; i++)
+      for (unsigned int i = 0; i < this->nnz; i++)
       {
         mumps_assign_Scalar(this->Ax[i], ax[i]);
         this->Ai[i] = ai[i];
@@ -338,23 +338,23 @@ namespace Hermes
     {
       MumpsMatrix<Scalar> * nmat = new MumpsMatrix<Scalar>();
 
-      nmat->nnz = nnz;
+      nmat->nnz = this->nnz;
       nmat->size = this->size;
       nmat->Ap = new int[this->size + 1];
-      nmat->Ai = new int[nnz];
-      nmat->Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz];
-      nmat->irn = new int[nnz];
-      nmat->jcn = new int[nnz];
-      for (unsigned int i = 0; i <nnz; i++)
+      nmat->Ai = new int[this->nnz];
+      nmat->Ax = new typename mumps_type<Scalar>::mumps_Scalar[this->nnz];
+      nmat->irn = new int[this->nnz];
+      nmat->jcn = new int[this->nnz];
+      for (unsigned int i = 0; i <this->nnz; i++)
       {
-        nmat->Ai[i] = Ai[i];
+        nmat->Ai[i] = this->Ai[i];
         nmat->Ax[i] = Ax[i];
         nmat->irn[i] = irn[i];
         nmat->jcn[i] = jcn[i];
       }
       for (unsigned int i = 0;i<this->size + 1;i++)
       {
-        nmat->Ap[i] = Ap[i];
+        nmat->Ap[i] = this->Ap[i];
       }
       return nmat;
     }
