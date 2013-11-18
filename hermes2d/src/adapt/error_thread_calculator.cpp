@@ -366,8 +366,8 @@ namespace Hermes
         {
           error_func[1]->free_fn();
           delete error_func[1];
-          delete norm_func[1];
           norm_func[1]->free_fn();
+          delete norm_func[1];
         }
         break;
       }
