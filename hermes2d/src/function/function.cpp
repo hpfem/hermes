@@ -210,7 +210,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Function<Scalar>::get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0) const
+    void Function<Scalar>::get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component) const
     {
 #ifdef _DEBUG
       check_params(component, cur_node, num_components); check_table(component, cur_node, 1, "DX values"); check_table(component, cur_node, 2, "DY values");
