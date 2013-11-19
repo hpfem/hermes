@@ -86,8 +86,8 @@ namespace Hermes
         this->set_area(area);
         this->setSymFlag(sym);
 
-        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff is nullptr, initialize it to be constant 1.0.
+        if(f_coeff == nullptr) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
@@ -100,15 +100,15 @@ namespace Hermes
         this->set_areas(areas);
         this->setSymFlag(sym);
 
-        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff is nullptr, initialize it to be constant 1.0.
+        if(f_coeff == nullptr) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
       DefaultMatrixFormVol<Scalar>::~DefaultMatrixFormVol()
       {
-        if(function_coeff == HERMES_DEFAULT_FUNCTION)
+        if(function_coeff == nullptr)
           delete function_coeff;
       };
 
@@ -156,8 +156,8 @@ namespace Hermes
         this->set_area(area);
         this->setSymFlag(sym);
 
-        // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
-        if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
+        // If spline is nullptr, initialize it to be constant 1.0.
+        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       };
 
@@ -171,8 +171,8 @@ namespace Hermes
         this->set_areas(areas);
         this->setSymFlag(sym);
 
-        // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
-        if(c_spline == HERMES_DEFAULT_SPLINE)
+        // If spline is nullptr, initialize it to be constant 1.0.
+        if(c_spline == nullptr)
           this->spline_coeff = new CubicSpline(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
@@ -180,7 +180,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianCurlCurl<Scalar>::~DefaultJacobianCurlCurl()
       {
-        if(spline_coeff == HERMES_DEFAULT_SPLINE)
+        if(spline_coeff == nullptr)
           delete spline_coeff;
       };
 
@@ -227,10 +227,10 @@ namespace Hermes
       {
         this->set_area(area);
 
-        // If f_coeff0 is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff0 == HERMES_DEFAULT_FUNCTION) this->function_coeff0 = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff0 is nullptr, initialize it to be constant 1.0.
+        if(f_coeff0 == nullptr) this->function_coeff0 = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
-        if(f_coeff1 == HERMES_DEFAULT_FUNCTION) this->function_coeff1 = new Hermes2DFunction<Scalar>(1.0);
+        if(f_coeff1 == nullptr) this->function_coeff1 = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
@@ -244,18 +244,18 @@ namespace Hermes
       {
         this->set_areas(areas);
         
-        // If f_coeff0 is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff0 == HERMES_DEFAULT_FUNCTION) this->function_coeff0 = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff0 is nullptr, initialize it to be constant 1.0.
+        if(f_coeff0 == nullptr) this->function_coeff0 = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
-        if(f_coeff1 == HERMES_DEFAULT_FUNCTION) this->function_coeff1 = new Hermes2DFunction<Scalar>(1.0);
+        if(f_coeff1 == nullptr) this->function_coeff1 = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
       DefaultVectorFormVol<Scalar>::~DefaultVectorFormVol()
       {
-        if(function_coeff0 == HERMES_DEFAULT_FUNCTION) delete function_coeff0;
-        if(function_coeff1 == HERMES_DEFAULT_FUNCTION) delete function_coeff1;
+        if(function_coeff0 == nullptr) delete function_coeff0;
+        if(function_coeff1 == nullptr) delete function_coeff1;
       };
 
       template<typename Scalar>
@@ -293,8 +293,8 @@ namespace Hermes
       {
         this->set_area(area);
 
-        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff is nullptr, initialize it to be constant 1.0.
+        if(f_coeff == nullptr) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
@@ -307,15 +307,15 @@ namespace Hermes
       {
         this->set_areas(areas);
 
-        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff is nullptr, initialize it to be constant 1.0.
+        if(f_coeff == nullptr) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
       DefaultResidualVol<Scalar>::~DefaultResidualVol()
       {
-        if(function_coeff == HERMES_DEFAULT_FUNCTION) delete function_coeff;
+        if(function_coeff == nullptr) delete function_coeff;
       };
 
       template<typename Scalar>
@@ -368,8 +368,8 @@ namespace Hermes
       {
         this->set_area(area);
 
-        // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
-        if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
+        // If spline is nullptr, initialize it to be constant 1.0.
+        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       };
 
@@ -382,15 +382,15 @@ namespace Hermes
       {
         this->set_areas(areas);
 
-        // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
-        if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
+        // If spline is nullptr, initialize it to be constant 1.0.
+        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
       DefaultResidualCurlCurl<Scalar>::~DefaultResidualCurlCurl()
       {
-        if(spline_coeff == HERMES_DEFAULT_SPLINE) delete spline_coeff;
+        if(spline_coeff == nullptr) delete spline_coeff;
       };
 
       template<typename Scalar>
@@ -450,8 +450,8 @@ namespace Hermes
         : MatrixFormSurf<Scalar>(i, j), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
         this->set_area(area);
-        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff is nullptr, initialize it to be constant 1.0.
+        if(f_coeff == nullptr) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
@@ -462,15 +462,15 @@ namespace Hermes
         : MatrixFormSurf<Scalar>(i, j), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
         this->set_areas(areas);
-        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff is nullptr, initialize it to be constant 1.0.
+        if(f_coeff == nullptr) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
       DefaultMatrixFormSurf<Scalar>::~DefaultMatrixFormSurf()
       {
-        if(function_coeff == HERMES_DEFAULT_FUNCTION) delete function_coeff;
+        if(function_coeff == nullptr) delete function_coeff;
       };
 
       template<typename Scalar>
@@ -515,8 +515,8 @@ namespace Hermes
         : VectorFormSurf<Scalar>(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
         this->set_area(area);
-        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff is nullptr, initialize it to be constant 1.0.
+        if(f_coeff == nullptr) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
@@ -526,15 +526,15 @@ namespace Hermes
         GeomType gt)
         : VectorFormSurf<Scalar>(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
-        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff is nullptr, initialize it to be constant 1.0.
+        if(f_coeff == nullptr) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
       DefaultResidualSurf<Scalar>::~DefaultResidualSurf()
       {
-        if(function_coeff == HERMES_DEFAULT_FUNCTION) delete function_coeff;
+        if(function_coeff == nullptr) delete function_coeff;
       };
 
       template<typename Scalar>
@@ -583,8 +583,8 @@ namespace Hermes
         : VectorFormSurf<Scalar>(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
         this->set_area(area);
-        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff is nullptr, initialize it to be constant 1.0.
+        if(f_coeff == nullptr) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
@@ -595,15 +595,15 @@ namespace Hermes
         : VectorFormSurf<Scalar>(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
         this->set_areas(areas);
-        // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
-        if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
+        // If f_coeff is nullptr, initialize it to be constant 1.0.
+        if(f_coeff == nullptr) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
       DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf()
       {
-        if(function_coeff == HERMES_DEFAULT_FUNCTION) delete function_coeff;
+        if(function_coeff == nullptr) delete function_coeff;
       };
 
       template<typename Scalar>

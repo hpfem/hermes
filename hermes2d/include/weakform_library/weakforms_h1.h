@@ -35,11 +35,11 @@ namespace Hermes
       {
       public:
         DefaultMatrixFormVol(int i, int j, std::string area = HERMES_ANY,
-          Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          Hermes2DFunction<Scalar>* coeff = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
         DefaultMatrixFormVol(int i, int j, Hermes::vector<std::string> areas,
-          Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          Hermes2DFunction<Scalar>* coeff = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
         virtual ~DefaultMatrixFormVol();
@@ -55,6 +55,7 @@ namespace Hermes
       private:
 
         Hermes2DFunction<Scalar>* coeff;
+        bool own_coeff;
         GeomType gt;
       };
 
@@ -68,10 +69,10 @@ namespace Hermes
       class HERMES_API DefaultJacobianDiffusion : public MatrixFormVol<Scalar>
       {
       public:
-        DefaultJacobianDiffusion(int i, int j, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultJacobianDiffusion(int i, int j, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
-        DefaultJacobianDiffusion(int i, int j, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultJacobianDiffusion(int i, int j, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
         ~DefaultJacobianDiffusion();
@@ -88,6 +89,7 @@ namespace Hermes
         int idx_j;
 
         Hermes1DFunction<Scalar>* coeff;
+        bool own_coeff;
         GeomType gt;
       };
 
@@ -95,10 +97,10 @@ namespace Hermes
       class HERMES_API DefaultMatrixFormDiffusion : public MatrixFormVol<Scalar>
       {
       public:
-        DefaultMatrixFormDiffusion(int i, int j, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultMatrixFormDiffusion(int i, int j, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
-        DefaultMatrixFormDiffusion(int i, int j, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultMatrixFormDiffusion(int i, int j, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
         ~DefaultMatrixFormDiffusion();
@@ -115,6 +117,7 @@ namespace Hermes
         int idx_j;
 
         Hermes1DFunction<Scalar>* coeff;
+        bool own_coeff;
         GeomType gt;
       };
 
@@ -131,10 +134,10 @@ namespace Hermes
       {
       public:
         DefaultJacobianAdvection(int i, int j, std::string area = HERMES_ANY,
-          Hermes1DFunction<Scalar>* coeff_1 = HERMES_ONE, Hermes1DFunction<Scalar>* coeff_2 = HERMES_ONE, GeomType gt = HERMES_PLANAR);
+          Hermes1DFunction<Scalar>* coeff_1 = nullptr, Hermes1DFunction<Scalar>* coeff_2 = nullptr, GeomType gt = HERMES_PLANAR);
 
         DefaultJacobianAdvection(int i, int j, Hermes::vector<std::string> areas,
-          Hermes1DFunction<Scalar>* coeff_1 = HERMES_ONE, Hermes1DFunction<Scalar>* coeff_2 = HERMES_ONE,
+          Hermes1DFunction<Scalar>* coeff_1 = nullptr, Hermes1DFunction<Scalar>* coeff_2 = nullptr,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultJacobianAdvection();
@@ -150,6 +153,8 @@ namespace Hermes
       private:
         int idx_j;
         Hermes1DFunction<Scalar>* coeff1, *coeff2;
+        bool own_coeff1;
+        bool own_coeff2;
         GeomType gt;
       };
 
@@ -162,10 +167,10 @@ namespace Hermes
       class HERMES_API DefaultVectorFormVol : public VectorFormVol<Scalar>
       {
       public:
-        DefaultVectorFormVol(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultVectorFormVol(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
-        DefaultVectorFormVol(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultVectorFormVol(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultVectorFormVol();
@@ -180,6 +185,7 @@ namespace Hermes
       private:
 
         Hermes2DFunction<Scalar>* coeff;
+        bool own_coeff;
         GeomType gt;
       };
 
@@ -192,9 +198,9 @@ namespace Hermes
       class HERMES_API DefaultResidualVol : public VectorFormVol<Scalar>
       {
       public:
-        DefaultResidualVol(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultResidualVol(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
-        DefaultResidualVol(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultResidualVol(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultResidualVol();
@@ -211,6 +217,7 @@ namespace Hermes
         int idx_i;
 
         Hermes2DFunction<Scalar>* coeff;
+        bool own_coeff;
         GeomType gt;
       };
 
@@ -224,10 +231,10 @@ namespace Hermes
       class HERMES_API DefaultResidualDiffusion : public VectorFormVol<Scalar>
       {
       public:
-        DefaultResidualDiffusion(int i, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultResidualDiffusion(int i, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
-        DefaultResidualDiffusion(int i, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultResidualDiffusion(int i, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultResidualDiffusion();
@@ -244,6 +251,7 @@ namespace Hermes
         int idx_i;
 
         Hermes1DFunction<Scalar>* coeff;
+        bool own_coeff;
         GeomType gt;
       };
 
@@ -257,10 +265,10 @@ namespace Hermes
       {
       public:
         DefaultResidualAdvection(int i, std::string area = HERMES_ANY,
-          Hermes1DFunction<Scalar>* coeff_1 = HERMES_ONE, Hermes1DFunction<Scalar>* coeff_2 = HERMES_ONE,
+          Hermes1DFunction<Scalar>* coeff_1 = nullptr, Hermes1DFunction<Scalar>* coeff_2 = nullptr,
           GeomType gt = HERMES_PLANAR);
         DefaultResidualAdvection(int i, Hermes::vector<std::string> areas,
-          Hermes1DFunction<Scalar>* coeff_1 = HERMES_ONE, Hermes1DFunction<Scalar>* coeff_2 = HERMES_ONE, GeomType gt = HERMES_PLANAR);
+          Hermes1DFunction<Scalar>* coeff_1 = nullptr, Hermes1DFunction<Scalar>* coeff_2 = nullptr, GeomType gt = HERMES_PLANAR);
 
         ~DefaultResidualAdvection();
 
@@ -275,6 +283,8 @@ namespace Hermes
       private:
         int idx_i;
         Hermes1DFunction<Scalar>* coeff1, *coeff2;
+        bool own_coeff1;
+        bool own_coeff2;
         GeomType gt;
       };
 
@@ -288,11 +298,11 @@ namespace Hermes
       {
       public:
         DefaultMatrixFormSurf(int i, int j, std::string area = HERMES_ANY,
-          Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          Hermes2DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
         DefaultMatrixFormSurf(int i, int j, Hermes::vector<std::string> areas,
-          Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          Hermes2DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultMatrixFormSurf();
@@ -308,6 +318,7 @@ namespace Hermes
       private:
 
         Hermes2DFunction<Scalar>* coeff;
+        bool own_coeff;
         GeomType gt;
       };
 
@@ -320,9 +331,9 @@ namespace Hermes
       class HERMES_API DefaultJacobianFormSurf : public MatrixFormSurf<Scalar>
       {
       public:
-        DefaultJacobianFormSurf(int i, int j, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultJacobianFormSurf(int i, int j, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
-        DefaultJacobianFormSurf(int i, int j, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultJacobianFormSurf(int i, int j, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultJacobianFormSurf();
@@ -339,6 +350,7 @@ namespace Hermes
         int idx_j;
 
         Hermes1DFunction<Scalar>* coeff;
+        bool own_coeff;
         GeomType gt;
       };
 
@@ -351,9 +363,9 @@ namespace Hermes
       class HERMES_API DefaultVectorFormSurf : public VectorFormSurf<Scalar>
       {
       public:
-        DefaultVectorFormSurf(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultVectorFormSurf(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
-        DefaultVectorFormSurf(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultVectorFormSurf(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultVectorFormSurf();
@@ -369,6 +381,7 @@ namespace Hermes
       private:
 
         Hermes2DFunction<Scalar>* coeff;
+        bool own_coeff;
         GeomType gt;
       };
 
@@ -381,9 +394,9 @@ namespace Hermes
       class HERMES_API DefaultResidualSurf : public VectorFormSurf<Scalar>
       {
       public:
-        DefaultResidualSurf(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultResidualSurf(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
-        DefaultResidualSurf(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultResidualSurf(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultResidualSurf();
@@ -400,6 +413,7 @@ namespace Hermes
         int idx_i;
 
         Hermes2DFunction<Scalar>* coeff;
+        bool own_coeff;
         GeomType gt;
       };
 
@@ -409,7 +423,7 @@ namespace Hermes
       class HERMES_API DefaultWeakFormLaplace : public WeakForm<Scalar>
       {
       public:
-        DefaultWeakFormLaplace(std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+        DefaultWeakFormLaplace(std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
       };
 
