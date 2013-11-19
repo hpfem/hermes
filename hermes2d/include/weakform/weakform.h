@@ -304,18 +304,19 @@ namespace Hermes
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext;
       Hermes::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
 
+      double get_current_stage_time() const;
+
+      WeakForm<Scalar>* wf;
+    private:
+      double stage_time;
+      void set_uExtOffset(int u_ext_offset);
+      /// Form will be always multiplied (scaled) with this number.
+      double scaling_factor;
       /// For time-dependent right-hand side functions.
       /// E.g. for Runge-Kutta methods. Otherwise the one time for the whole WeakForm can be used.
       void set_current_stage_time(double time);
-
-      double get_current_stage_time() const;
-
-      /// Form will be always multiplied (scaled) with this number.
-      double scaling_factor;
-
-      WeakForm<Scalar>* wf;
-      double stage_time;
-      void set_uExtOffset(int u_ext_offset);
+      /// Copy the basic data from other_form - used in cloning.
+      void copy_base(Form<Scalar>* other_form);
       friend class WeakForm<Scalar>;
       friend class RungeKutta<Scalar>;
       friend class DiscreteProblem<Scalar>;
