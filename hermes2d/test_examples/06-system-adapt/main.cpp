@@ -56,7 +56,7 @@ Adapt<double> adaptivity(&errorCalculator, &stoppingCriterion);
 // Predefined list of element refinement candidates.
 const CandList CAND_LIST = H2D_HP_ANISO;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 1e0;
+const double ERR_STOP = 1e-1;
 
 // Problem parameters.
 const double D_u = 1;
@@ -183,6 +183,12 @@ int main(int argc, char* argv[])
     OGProjection<double> ogProjection; ogProjection.project_global(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space), ref_slns, slns);
 
     cpu_time.tick();
+
+    // View the coarse mesh solution and polynomial orders.
+    s_view_0.show(u_sln);
+    o_view_0.show(u_space);
+    s_view_1.show(v_sln);
+    o_view_1.show(v_space);
 
     // Calculate element errors.
     Hermes::Mixins::Loggable::Static::info("Calculating error estimate and exact error.");
