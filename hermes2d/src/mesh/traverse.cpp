@@ -586,53 +586,57 @@ namespace Hermes
     static void testMeshesCompliance(int n, MeshSharedPtr* meshes)
     {
       // Test whether all master meshes have the same number of elements.
-          int base_elem_num = meshes[0]->get_num_base_elements();
-          for (int i = 1; i < n; i++)
-            if(base_elem_num != meshes[i]->get_num_base_elements())
-              throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
+      int base_elem_num = meshes[0]->get_num_base_elements();
+      for (int i = 1; i < n; i++)
+        if(base_elem_num != meshes[i]->get_num_base_elements())
+          throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
+    }
 
-          Element* e;
-          // Test whether areas of corresponding elements are the same.
-          double *areas = new double[base_elem_num];
-          memset(areas, 0, base_elem_num*sizeof(double));
+    static void testMeshesQuality(int n, MeshSharedPtr* meshes)
+    {
+      Element* e;
+      int base_elem_num = meshes[0]->get_num_base_elements();
+      // Test whether areas of corresponding elements are the same.
+      double *areas = new double[base_elem_num];
+      memset(areas, 0, base_elem_num*sizeof(double));
 
-          // Read base element areas from the first mesh,
-          // Also get minimum element area.
-          int counter = 0;
-          double min_elem_area = 1e30;  
-          for_all_base_elements_incl_inactive(e, meshes[0])
-          {
-            if(!e->used)
-              areas[counter] = 0.0;
-            else
+      // Read base element areas from the first mesh,
+      // Also get minimum element area.
+      int counter = 0;
+      double min_elem_area = 1e30;
+      for_all_base_elements_incl_inactive(e, meshes[0])
+      {
+        if(!e->used)
+          areas[counter] = 0.0;
+        else
+        {
+          areas[counter] = e->get_area();
+          if(areas[counter] < min_elem_area)
+            min_elem_area = areas[counter];
+        }
+
+        counter++;
+      }
+      // take one mesh at a time and compare element areas to the areas[] array
+      double tolerance = min_elem_area/100.;
+
+      if(min_elem_area < 0)
+        throw Exceptions::ValueException("min_elem_area", 0.0, Hermes::HermesSqrtEpsilon);
+
+      for (int i = 1; i < n; i++)
+      {
+        counter = 0;
+        for_all_base_elements_incl_inactive(e, meshes[i])
+        {
+          if(e->used)
+            if(fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] > Hermes::HermesSqrtEpsilon)
             {
-              areas[counter] = e->get_area();
-              if(areas[counter] < min_elem_area)
-                min_elem_area = areas[counter];
+              throw Hermes::Exceptions::Exception("An element is probably too distorted, try different meshing.");
             }
-
             counter++;
-          }
-          // take one mesh at a time and compare element areas to the areas[] array
-          double tolerance = min_elem_area/100.;
-
-          if(min_elem_area < 0)
-            throw Exceptions::ValueException("min_elem_area", 0.0, Hermes::HermesSqrtEpsilon);
-
-          for (int i = 1; i < n; i++)
-          {
-            counter = 0;
-            for_all_base_elements_incl_inactive(e, meshes[i])
-            {
-              if(e->used)
-                if(fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] > Hermes::HermesSqrtEpsilon)
-                {
-                  throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
-                }
-                counter++;
-            }
-          }
-          delete [] areas;
+        }
+      }
+      delete [] areas;
     }
 
     void Traverse::begin(int n)
