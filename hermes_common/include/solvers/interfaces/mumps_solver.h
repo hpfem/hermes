@@ -78,6 +78,7 @@ namespace Hermes
     {
     public:
       MumpsMatrix();
+      virtual ~MumpsMatrix() {};
 
       void alloc_data();
       void free();
