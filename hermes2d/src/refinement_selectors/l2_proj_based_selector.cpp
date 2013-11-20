@@ -183,7 +183,7 @@ namespace Hermes
       Scalar** L2ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order)
       {
         // fill with values
-        Scalar** rvals_son = new Scalar*[H2D_L2FE_NUM];
+        Scalar** rvals_son = (Scalar**)malloc(sizeof(Scalar*)* H2D_L2FE_NUM);
         rvals_son[H2D_L2FE_VALUE] = rsln->get_fn_values(0);
         return rvals_son;
       }
