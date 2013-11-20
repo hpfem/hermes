@@ -88,6 +88,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    MumpsMatrix<Scalar>::~MumpsMatrix()
+    {
+      this->free();
+    }
+
+    template<typename Scalar>
     void MumpsMatrix<Scalar>::alloc_data()
     {
       Ax = new typename mumps_type<Scalar>::mumps_Scalar[this->nnz];
