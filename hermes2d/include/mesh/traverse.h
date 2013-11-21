@@ -130,13 +130,12 @@ namespace Hermes
       void init_transforms(State* s, int i);
 
 #pragma region union-mesh
-      UniData** construct_union_mesh(int n, MeshSharedPtr* meshes, MeshSharedPtr unimesh);
+      static UniData** construct_union_mesh(int n, MeshSharedPtr* meshes, MeshSharedPtr unimesh);
       void union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, Element* uni);
       uint64_t init_idx(Rect* cr, Rect* er);
 
       UniData** unidata;
       int udsize;
-      bool tri;
 #pragma endregion
 
       /// Internal.
