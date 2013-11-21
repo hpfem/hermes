@@ -163,7 +163,7 @@ namespace Hermes
 
       /// Return the error mesh function - for postprocessing the information about which elements have been refined.
       /// \param component The component.
-      MeshFunctionSharedPtr<double> get_refinementInfoMeshFunction(int component = 0);
+      MeshFunctionSharedPtr<double> get_refinementInfoMeshFunction(int component = -1);
     protected:
       /// Set default values.
       void set_defaults();
@@ -210,6 +210,8 @@ namespace Hermes
       /// Regularization (max. level of hanging nodes) level.
       int regularization;
 
+      /// Meshes.
+      Hermes::vector<MeshSharedPtr> meshes;
       /// Spaces.
       Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
 
@@ -220,8 +222,10 @@ namespace Hermes
       ElementToRefine* elements_to_refine;
       int elements_to_refine_count;
       
-      /// Mesh function for postprocessing the information about which elements have been refined.
+      /// Mesh function for postprocessing the information about which elements have been refined - on component basis
       MeshFunctionSharedPtr<double> refinementInfoMeshFunction[H2D_MAX_COMPONENTS];
+      /// Mesh function for postprocessing the information about which elements have been refined - for the whole system.
+      MeshFunctionSharedPtr<double> refinementInfoMeshFunctionGlobal;
     };
   }
 }

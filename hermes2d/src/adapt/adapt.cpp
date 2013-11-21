@@ -80,8 +80,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces_, ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), spaces(spaces_), strategy(strategy)
+    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces_, ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), strategy(strategy)
     {
+      this->set_spaces(spaces_);
       this->init();
       this->set_defaults();
     }
@@ -89,37 +90,9 @@ namespace Hermes
     template<typename Scalar>
     Adapt<Scalar>::Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), strategy(strategy)
     {
-      spaces.push_back(space);
+      this->set_space(space);
       this->init();
       this->set_defaults();
-    }
-
-    template<typename Scalar>
-    Adapt<Scalar>::~Adapt()
-    {
-      if(elements_to_refine)
-        delete [] elements_to_refine;
-    }
-
-    template<typename Scalar>
-    void Adapt<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
-    {
-      this->spaces = spaces;
-      this->num = spaces.size();
-    }
-
-    template<typename Scalar>
-    void Adapt<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
-    {
-      this->spaces.clear();
-      this->spaces.push_back(space);
-      this->num = 1;
-    }
-
-    template<typename Scalar>
-    void Adapt<Scalar>::set_defaults()
-    {
-      regularization = -1;
     }
 
     template<typename Scalar>
@@ -141,6 +114,42 @@ namespace Hermes
       }
 
       elements_to_refine = nullptr;
+    }
+
+    template<typename Scalar>
+    Adapt<Scalar>::~Adapt()
+    {
+      if(elements_to_refine)
+        delete [] elements_to_refine;
+    }
+
+    template<typename Scalar>
+    void Adapt<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
+    {
+      this->spaces = spaces;
+      this->num = spaces.size();
+
+      // Meshes.
+      this->meshes.clear();
+      for(int i = 0; i < this->num; i++)
+        this->meshes.push_back(this->spaces[i]->get_mesh());
+    }
+
+    template<typename Scalar>
+    void Adapt<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
+    {
+      this->spaces.clear();
+      this->spaces.push_back(space);
+      this->num = 1;
+      // Meshes.
+      this->meshes.clear();
+      this->meshes.push_back(space->get_mesh());
+    }
+
+    template<typename Scalar>
+    void Adapt<Scalar>::set_defaults()
+    {
+      regularization = -1;
     }
 
     template<typename Scalar>
@@ -192,7 +201,7 @@ namespace Hermes
       // Get meshes
       for (int j = 0; j < this->num; j++)
       {
-        meshes[j] = this->spaces[j]->get_mesh();
+        meshes[j] = this->meshes[j];
         element_refinement_location[j] = (ElementToRefine**)calloc(meshes[j]->get_max_element_id() + 1, sizeof(ElementToRefine*));
       }
 
@@ -200,11 +209,13 @@ namespace Hermes
       if(elements_to_refine)
         delete [] elements_to_refine;
 
-      // Also handle the refinementInfoMeshFunction.
+      // Also handle the refinementInfoMeshFunctions.
+      if(this->refinementInfoMeshFunctionGlobal)
+        this->refinementInfoMeshFunctionGlobal.reset();
       for(int i = 0; i < this->num; i++)
         if(this->refinementInfoMeshFunction[i])
           this->refinementInfoMeshFunction[i].reset();
-      
+
       // Init the caught parallel exception message.
       this->exceptionMessageCaughtInParallelBlock.clear();
     }
@@ -265,7 +276,7 @@ namespace Hermes
       {
         rslns[i] = MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>());
 
-        typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[i]->get_mesh());
+        typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->meshes[i]);
         MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
         typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh);
         SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
@@ -372,7 +383,7 @@ namespace Hermes
           int* parents;
           parents = meshes[i]->regularize(this->regularization);
           for(int j = 0; j < this->num; j++)
-            if(this->spaces[i]->get_mesh()->get_seq() == this->spaces[j]->get_mesh()->get_seq())
+            if(this->meshes[i]->get_seq() == this->meshes[j]->get_seq())
               this->spaces[j]->distribute_orders(meshes[i], parents);
           ::free(parents);
         }
@@ -385,7 +396,7 @@ namespace Hermes
       Element* e;
       for (int i = 0; i < this->num; i++)
       {
-        for_all_active_elements(e, this->spaces[i]->get_mesh())
+        for_all_active_elements(e, this->meshes[i])
           this->spaces[i]->edata[e->id].changed_in_last_adaptation = false;
       }
 
@@ -402,32 +413,77 @@ namespace Hermes
     template<typename Scalar>
     MeshFunctionSharedPtr<double> Adapt<Scalar>::get_refinementInfoMeshFunction(int component)
     {
-      if(component >= this->num)
-        throw Exceptions::ValueException("component", component, this->num);
-
-      // The value is ready to be returned if it has been initialized and no other adaptivity run has been performed since.
-      if(this->refinementInfoMeshFunction[component])
-        return this->refinementInfoMeshFunction[component];
-      else
+      if(component == -1)
       {
-        int* info_array = new int[this->spaces[component]->get_mesh()->get_num_elements()];
-        memset(info_array, 0, sizeof(int) * this->spaces[component]->get_mesh()->get_num_elements());
-        for(int i = 0; i < this->elements_to_refine_count; i++)
+        // The value is ready to be returned if it has been initialized and no other adaptivity run has been performed since.
+        if(refinementInfoMeshFunctionGlobal)
+          return refinementInfoMeshFunctionGlobal;
+
+        // Union mesh preparation.
+        MeshSharedPtr union_mesh(new Mesh);
+        Traverse::construct_union_mesh(this->num, &this->meshes[0], union_mesh);
+        // Allocate union mesh element count to info array.
+        int* info_array = new int[union_mesh->get_num_elements()];
+        memset(info_array, 0, sizeof(int) * union_mesh->get_num_elements());
+        // Traverse
+        this->meshes.push_back(union_mesh);
+        Traverse trav(this->meshes.size());
+        int num_states;
+        Traverse::State** states = trav.get_states(meshes, num_states);
+#pragma omp parallel num_threads(this->num_threads_used)
         {
-          if(this->elements_to_refine[i].comp == component)
+          int thread_number = omp_get_thread_num();
+          int start = (num_states / this->num_threads_used) * thread_number;
+          int end = (num_states / this->num_threads_used) * (thread_number + 1);
+          if(thread_number == this->num_threads_used - 1)
+            end = num_states;
+
+          for(int state_i = start; state_i < end; state_i++)
           {
-            if(this->elements_to_refine[i].split == 0)
-              info_array[this->elements_to_refine[i].id] = 2;
-            else
+            Traverse::State* current_state = states[state_i];
+            for(int i = 0; i < this->elements_to_refine_count; i++)
             {
-              for(int sons_i = 0; sons_i < H2D_MAX_ELEMENT_SONS; sons_i++)
-                if(this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i])
-                  info_array[this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i]->id] = this->elements_to_refine[i].split == 1 ? 1 : 2;
+              Element* current_element = current_state->e[this->elements_to_refine[i].comp];
+              if(this->elements_to_refine[i].id == current_element->id || (current_element->parent && this->elements_to_refine[i].id == current_element->parent->id))
+                info_array[current_state->e[this->num]->id] = this->elements_to_refine[i].split;
             }
           }
         }
-        this->refinementInfoMeshFunction[component].reset(new ExactSolutionConstantArray<double, int>(spaces[component]->get_mesh(), info_array, true));
-        return this->refinementInfoMeshFunction[component];
+
+        this->meshes.pop_back();
+
+        refinementInfoMeshFunctionGlobal.reset(new ExactSolutionConstantArray<double, int>(union_mesh, info_array, true));
+        return refinementInfoMeshFunctionGlobal;
+      }
+      else
+      {
+        if(component >= this->num)
+          throw Exceptions::ValueException("component", component, this->num);
+
+        // The value is ready to be returned if it has been initialized and no other adaptivity run has been performed since.
+        if(this->refinementInfoMeshFunction[component])
+          return this->refinementInfoMeshFunction[component];
+        else
+        {
+          int* info_array = new int[this->spaces[component]->get_mesh()->get_num_elements()];
+          memset(info_array, 0, sizeof(int) * this->spaces[component]->get_mesh()->get_num_elements());
+          for(int i = 0; i < this->elements_to_refine_count; i++)
+          {
+            if(this->elements_to_refine[i].comp == component)
+            {
+              if(this->elements_to_refine[i].split == H2D_REFINEMENT_P)
+                info_array[this->elements_to_refine[i].id] = 2;
+              else
+              {
+                for(int sons_i = 0; sons_i < H2D_MAX_ELEMENT_SONS; sons_i++)
+                  if(this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i])
+                    info_array[this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i]->id] = this->elements_to_refine[i].split == H2D_REFINEMENT_H ? 1 : 2;
+              }
+            }
+          }
+          this->refinementInfoMeshFunction[component].reset(new ExactSolutionConstantArray<double, int>(spaces[component]->get_mesh(), info_array, true));
+          return this->refinementInfoMeshFunction[component];
+        }
       }
     }
 

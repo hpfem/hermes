@@ -707,19 +707,21 @@ namespace Hermes
       // are we at the bottom?
       bool leaf = true;
       for (i = 0; i < num; i++)
+      {
         if(!e[i]->active)
         {
           leaf = false;
           break;
         }
-
+      }
         // if yes, store the element transformation indices
         if(leaf)
         {
           if(udsize <= uni->id)
           {
             if(!udsize) udsize = 1024;
-            while (udsize <= uni->id) udsize *= 2;
+            while (udsize <= uni->id)
+              udsize *= 2;
             for (i = 0; i < num; i++)
               unidata[i] = (UniData*) realloc(unidata[i], udsize * sizeof(UniData));
           }
@@ -740,7 +742,7 @@ namespace Hermes
         uint64_t* idx_new = new uint64_t[num];
         memcpy(idx_new, idx, num*sizeof(uint64_t));
 
-        if(tri)
+        if(uni->is_triangle())
         {
           // visit all sons of the triangle
           unimesh->refine_element_id(uni->id);
@@ -752,7 +754,8 @@ namespace Hermes
               {
                 e_new[i] = e[i];
                 idx_new[i] = (idx[i] << 3) + son + 1;
-              } else
+              }
+              else
                 e_new[i] = e[i]->sons[son];
             }
             union_recurrent(nullptr, e_new, nullptr, idx_new, uni->sons[son]);
@@ -780,11 +783,13 @@ namespace Hermes
                 {
                   e_new[i] = e[i];
                   idx_new[i] = (idx[i] << 3) + son + 1;
-                } else
+                }
+                else
                 {
                   e_new[i] = e[i]->sons[sons[i][son] & 3];
                   move_to_son(&(er_new[i]), er + i, sons[i][son]);
-                  if(e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+                  if(e_new[i]->active)
+                    idx_new[i] = init_idx(&cr_new, &(er_new[i]));
                 }
               }
               union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son]);
@@ -808,11 +813,13 @@ namespace Hermes
                 {
                   e_new[i] = e[i];
                   idx_new[i] = (idx[i] << 3) + son + 1;
-                } else
+                }
+                else
                 {
                   e_new[i] = e[i]->sons[sons[i][j] & 3];
                   move_to_son(&(er_new[i]), er + i, sons[i][j]);
-                  if(e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+                  if(e_new[i]->active)
+                    idx_new[i] = init_idx(&cr_new, &(er_new[i]));
                 }
               }
               union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son & 3]);
@@ -830,7 +837,8 @@ namespace Hermes
               {
                 e_new[i] = e[i]->sons[sons[i][0] & 3];
                 move_to_son(&(er_new[i]), er + i, sons[i][0]);
-                if(e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+                if(e_new[i]->active)
+                  idx_new[i] = init_idx(&cr_new, &(er_new[i]));
               }
             }
             union_recurrent(&cr_new, e_new, er_new, idx_new, uni);
@@ -848,45 +856,47 @@ namespace Hermes
       // Initial check.
       testMeshesCompliance(n, meshes);
 
+      Traverse traverse(n);
+
       // Initialization.
-      this->begin(n);
+      traverse.begin(n);
 
       int i;
-      Element** e = new Element*[num];
-      Rect* er = new Rect[num];
+      Element** e = new Element*[n];
+      Rect* er = new Rect[n];
       Rect cr;
 
-      this->unimesh = unimesh;
+      traverse.unimesh = unimesh;
       unimesh->copy_base(meshes[0]);
 
       // Unimesh initialization.
-      udsize = 0;
-      unidata = new UniData*[num];
-      memset(unidata, 0, sizeof(UniData*) * num);
+      traverse.udsize = 0;
+      traverse.unidata = new UniData*[n];
+      memset(traverse.unidata, 0, sizeof(UniData*) * n);
 
-      uint64_t* idx = new uint64_t[num];
-      memset(idx, 0, num*sizeof(uint64_t));
+      uint64_t* idx = new uint64_t[n];
+      memset(idx, 0, n*sizeof(uint64_t));
 
       // Calculation.
       for (int id = 0; id < meshes[0]->get_num_base_elements(); id++)
       {
         if(!meshes[0]->get_element(id)->used)
           continue;
-        for (i = 0; i < num; i++)
+        for (i = 0; i < n; i++)
         {
           e[i] = meshes[i]->get_element(id);
           static const Rect H2D_UNITY = { 0, 0, ONE, ONE };
           cr = er[i] = H2D_UNITY;
         }
-        tri = e[0]->is_triangle();
-        union_recurrent(&cr, e, er, idx, unimesh->get_element(id));
+        traverse.union_recurrent(&cr, e, er, idx, unimesh->get_element(id));
       }
 
       delete [] e;
       delete [] er;
       delete [] idx;
 
-      return unidata;
+      traverse.finish();
+      return traverse.unidata;
     }
 
     template HERMES_API Traverse::State** Traverse::get_states<double>(Hermes::vector<MeshFunctionSharedPtr<double> > mesh_functions, int& states_count);
