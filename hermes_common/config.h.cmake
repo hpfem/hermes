@@ -27,7 +27,7 @@
 #cmakedefine UMFPACK_LONG_INT
 
 // stacktrace
-#cmakedefine WITH_STACKTRACE
+#cmakedefine WITH_WINDOWS_STACKWALKER
 #cmakedefine EXECINFO_FOUND
 
 // trilinos

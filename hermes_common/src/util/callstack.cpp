@@ -25,34 +25,18 @@
 
 // Basically GNU stuff
 #ifdef EXECINFO_FOUND
-  #include <execinfo.h>
-  void handler(int sig)
-  {
-    void *array[20];
-    size_t size;
-
-    // get void*'s for all entries on the stack
-    size = backtrace(array, 20);
-
-    // print out all the frames to stderr
-    printf("Error: signal %d:\n", sig);
-    backtrace_symbols_fd(array, size, 2);
-    exit(1);
-  }
-
-#endif
-
-void CallStack::dump(int signalCode)
+#include <execinfo.h>
+void handler(int sig)
 {
-// Basically WIN stuff
-#ifdef WITH_STACKTRACE
-  #ifdef _WINDOWS
-    MyStackWalker sw;
-    sw.ShowCallstack();
-  #else
-    #ifdef EXECINFO_FOUND
-      handler(signalCode);
-    #endif
-  #endif
-#endif
+  void *array[20];
+  size_t size;
+
+  // get void*'s for all entries on the stack
+  size = backtrace(array, 20);
+
+  // print out all the frames to stderr
+  printf("Error: signal %d:\n", sig);
+  backtrace_symbols_fd(array, size, 2);
+  exit(1);
 }
+#endif

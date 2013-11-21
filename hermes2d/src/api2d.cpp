@@ -43,12 +43,6 @@ namespace Hermes
 
     Api2D::Api2D()
     {
-      signal(SIGABRT, CallStack::dump);
-      signal(SIGFPE, CallStack::dump);
-      signal(SIGILL, CallStack::dump);
-      signal(SIGSEGV, CallStack::dump);
-      signal(SIGTERM, CallStack::dump);
-
       // Xerces initialization - for better performance.
       XMLPlatformUtils::Initialize();
 
