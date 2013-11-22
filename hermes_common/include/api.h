@@ -30,7 +30,6 @@ namespace Hermes
   /// Enumeration of potential keys in the Api::parameters storage.
   enum HermesCommonApiParam
   {
-    exceptionsPrintCallstack,
     numThreads,
     matrixSolverType,
     directMatrixSolverType,
