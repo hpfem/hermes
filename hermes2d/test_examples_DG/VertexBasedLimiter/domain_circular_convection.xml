@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mesh:mesh xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:mesh="XMLMesh"
+  xmlns:element="XMLMesh"
+  xsi:schemaLocation="XMLMesh ../../xml_schemas/mesh_h2d_xml.xsd">
+  
+  <vertices>
+    <v x="0" y="0" i="0"/>
+    <v x="2" y="0" i="1"/>
+    <v x="2" y="1" i="2"/>
+    <v x="0" y="1" i="3"/>
+    <v x="1" y="0" i="4"/>
+    <v x="1" y="1" i="5"/>
+  </vertices>
+
+  <elements>
+    <mesh:q v1="0" v2="4" v3="5" v4="3" m="-" />
+    <mesh:q v1="4" v2="1" v3="2" v4="5" m="-" />
+  </elements>
+
+  <edges>
+    <ed v1="0" v2="4" m="Inlet" />
+    <ed v1="4" v2="1" m="Bdy" />
+    <ed v1="1" v2="2" m="Bdy" />
+    <ed v1="2" v2="5" m="Bdy" />
+    <ed v1="5" v2="3" m="Bdy" />
+    <ed v1="3" v2="0" m="Bdy" />
+  </edges>
+</mesh:mesh>

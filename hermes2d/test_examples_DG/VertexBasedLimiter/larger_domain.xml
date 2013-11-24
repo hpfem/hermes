@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mesh:mesh xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:mesh="XMLMesh"
+  xmlns:element="XMLMesh"
+  xsi:schemaLocation="XMLMesh ../../xml_schemas/mesh_h2d_xml.xsd">
+  
+  <vertices>
+  <!-- Contains all examples how it is possible to write a zero. -->
+    <v x="-1.6" y="-1.6" i="0"/>
+    <v x="1.6" y="-1.6" i="1"/>
+    <v x="1.6" y="1.6" i="2"/>
+    <v x="-1.6" y="1.6" i="3"/>
+  </vertices>
+
+  <elements>
+    <mesh:q v1="0" v2="1" v3="2" v4="3" m="-" />
+  </elements>
+
+  <edges>
+    <ed v1="0" v2="1" m="Bnd" />
+    <ed v1="1" v2="2" m="Bnd" />
+    <ed v1="2" v2="3" m="Bnd" />
+    <ed v1="3" v2="0" m="Bnd" />
+  </edges>
+</mesh:mesh>
