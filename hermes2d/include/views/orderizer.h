@@ -61,6 +61,10 @@ namespace Hermes
 
         void free();
       protected:
+        /// Reallocation at the beginning of process_*.
+        /// Specific for Linearizer
+        void reallocate_specific(int number_of_elements);
+
         char  buffer[1000];
         char* labels[11][11];
 

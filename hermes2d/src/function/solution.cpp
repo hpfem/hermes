@@ -416,11 +416,14 @@ namespace Hermes
         for (unsigned int k = 0; k < e->get_nvert(); k++)
         {
           int eo = space->get_edge_order(e, k);
-          if(eo > o) o = eo;
+          if(eo > o)
+            o = eo;
         }
 
         // Hcurl and Hdiv: actual order of functions is one higher than element order
-        if((space->shapeset)->get_num_components() == 2) o++;
+        if(space->shapeset->get_num_components() == 2)
+          if (o < space->shapeset->get_max_order())
+            o++;
 
         num_coeffs += this->mode ? sqr(o + 1) : (o + 1)*(o + 2)/2;
         elem_orders[e->id] = o;

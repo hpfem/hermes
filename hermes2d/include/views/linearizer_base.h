@@ -19,6 +19,7 @@
 #include "global.h"
 #include <pthread.h>
 #include "../quadrature/quad_all.h"
+#include "../mesh/traverse.h"
 #include "../mesh/mesh.h"
 #include "mixins2d.h"
 
@@ -28,9 +29,9 @@ namespace Hermes
   {
     namespace Views
     {
-      const double HERMES_EPS_LOW      = 0.007;
-      const double HERMES_EPS_NORMAL   = 0.0004;
-      const double HERMES_EPS_HIGH     = 0.0001;
+      const double HERMES_EPS_LOW = 0.007;
+      const double HERMES_EPS_NORMAL = 0.0004;
+      const double HERMES_EPS_HIGH = 0.0001;
       const double HERMES_EPS_VERYHIGH = 0.000002;
 
       //// linearization "quadrature" ////////////////////////////////////////////////////////////////////
@@ -70,7 +71,7 @@ namespace Hermes
 
       /// Base class for Linearizer, Orderizer, Vectorizer.
 
-      class HERMES_API LinearizerBase : 
+      class HERMES_API LinearizerBase :
         public Hermes::Mixins::TimeMeasurable,
         public Hermes::Mixins::Loggable,
         public Hermes::Hermes2D::Mixins::Parallel
@@ -101,17 +102,24 @@ namespace Hermes
 
         /// Frees the instance.
         void free();
-        
+
         /// Experimental upper-limiting of the maximum refinement level.
         int get_max_level(Element* e, int polynomial_order, MeshSharedPtr mesh);
         static double large_elements_fraction_of_mesh_size_threshold;
         int* level_map;
-        
+
       protected:
         LinearizerBase(bool auto_max = true);
         ~LinearizerBase();
 
         void process_edge(int iv1, int iv2, int marker);
+
+        /// Reallocation at the beginning of process_*.
+        /// Common for all linearizers
+        void reallocate_common(MeshSharedPtr mesh);
+        /// Reallocation at the beginning of process_*.
+        /// Specific for all linearizers
+        virtual void reallocate_specific(int number_of_elements) = 0;
 
         bool empty;
 
@@ -135,7 +143,8 @@ namespace Hermes
 
         double min_val, max_val;
 
-        int del_slot;   ///< free slot index after a triangle which was deleted
+        Traverse::State** states;
+        int num_states;
 
         int peek_vertex(int p1, int p2);
 

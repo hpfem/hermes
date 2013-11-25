@@ -43,7 +43,7 @@ namespace Hermes
       template<typename Scalar> class HcurlProjBasedSelector;
     };
 
-#define H2D_MAX_LOCAL_BASIS_SIZE 136
+#define H2D_MAX_LOCAL_BASIS_SIZE 308
 
     /// @ingroup spaces
     /// \brief Defines a set of shape functions.
