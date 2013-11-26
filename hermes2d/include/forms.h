@@ -46,8 +46,6 @@ namespace Hermes
       /// Constructor.
       Geom();
 
-      T diam;           ///< Element diameter (for edge, diameter of the parent element).
-      T area;           ///< Element area (for edge, area of the parent element).
       T *x, *y;         ///< Coordinates[in physical domain].
       T *nx, *ny;       ///< Normals[in physical domain] (locally oriented
       ///< to point outside the element). Only for edge
@@ -62,6 +60,11 @@ namespace Hermes
       virtual int get_neighbor_id()     const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
       /// Methods designed for discontinuous functions, return errors here.
       virtual T   get_neighbor_diam()   const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
+
+      /// Element diameter (for edge, diameter of the parent element).
+      T get_diam_approximation(int n);
+      /// Element area (for edge, area of the parent element).
+      T get_area(int n, double* wt);
 
       /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
       virtual ~Geom() {};
@@ -97,8 +100,8 @@ namespace Hermes
       /// Constructor.
       InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
 
-      virtual void free();
-      virtual void free_ord();
+      void free();
+      void free_ord();
 
     private:
       Geom<T>* wrapped_geom;

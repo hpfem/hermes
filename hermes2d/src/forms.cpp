@@ -315,6 +315,51 @@ namespace Hermes
       delete [] nx;    delete [] ny;
     }
 
+    template<>
+    double Geom<double>::get_diam_approximation(int n)
+    {
+      double x_min = std::numeric_limits<double>::max(),
+        x_max = std::numeric_limits<double>::min(),
+        y_min = std::numeric_limits<double>::max(),
+        y_max = std::numeric_limits<double>::min();
+
+      for (int i = 0; i < n; i++)
+      {
+        if (this->x[i] < x_min)
+          x_min = this->x[i];
+        if (this->x[i] > x_max)
+          x_max = this->x[i];
+
+        if (this->y[i] < y_min)
+          y_min = this->y[i];
+        if (this->y[i] > y_max)
+          y_max = this->y[i];
+      }
+
+      return std::sqrt((x_max - x_min) * (x_max - x_min) + (y_max - y_min) * (y_max - y_min));
+    }
+
+    template<>
+    double Geom<double>::get_area(int n, double* wt)
+    {
+      double area = 0.;
+      for (int i = 0; i < n; i++)
+        area += wt[i];
+      return area;
+    }
+
+    template<>
+    Hermes::Ord Geom<Hermes::Ord>::get_diam_approximation(int n)
+    {
+      return Hermes::Ord(0);
+    }
+
+    template<>
+    Hermes::Ord Geom<Hermes::Ord>::get_area(int n, double* wt)
+    {
+      return Hermes::Ord(0);
+    }
+
     template<typename T>
     InterfaceGeom<T>::InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam) :
     Geom<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
@@ -324,8 +369,6 @@ namespace Hermes
       this->elem_marker = geom->elem_marker;
       this->id = geom->id;
       this->isurf = geom->isurf;
-      this->diam = geom->diam;
-      this->area = geom->area;
       this->x = geom->x;
       this->y = geom->y;
       this->tx = geom->tx;
@@ -384,7 +427,6 @@ namespace Hermes
       e->x = x; e->y = y;
       e->nx = nx; e->ny = ny;
       e->tx = tx; e->ty = ty;
-      e->diam = diam;
 
       return e;
     }
@@ -392,8 +434,6 @@ namespace Hermes
     Geom<double>* init_geom_vol(RefMap *rm, const int order)
     {
       Geom<double>* e = new Geom<double>;
-      e->diam = rm->get_active_element()->get_diameter();
-      e->area = rm->get_active_element()->get_area();
       e->id = rm->get_active_element()->id;
       e->elem_marker = rm->get_active_element()->marker;
       Quad2D* quad = rm->get_quad_2d();
@@ -415,8 +455,6 @@ namespace Hermes
       Geom<double>* e = new Geom<double>;
       e->edge_marker = marker;
       e->elem_marker = rm->get_active_element()->marker;
-      e->diam = rm->get_active_element()->get_diameter();
-      e->area = rm->get_active_element()->get_area();
       e->id = rm->get_active_element()->id;
       e->isurf = isurf;
       
