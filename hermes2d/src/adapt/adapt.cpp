@@ -350,7 +350,7 @@ namespace Hermes
       apply_refinements(elements_to_refine, attempted_element_refinements_count);
 
       // in singlemesh case, impose same orders across meshes
-      homogenize_shared_mesh_orders(meshes);
+      // homogenize_shared_mesh_orders(meshes);
 
       this->deinit_adapt(element_refinement_location);
 
@@ -578,7 +578,8 @@ namespace Hermes
               { // element (of the other comp.) not refined at all: assign refinement
                 ElementToRefine elem_ref_new(elem_ref.id, j);
                 elem_ref_new.split = selected_refinement;
-                ElementToRefine::copy_orders(elem_ref_new.refinement_polynomial_order, elem_ref.refinement_polynomial_order);
+                for (int k = 0; k < H2D_MAX_ELEMENT_SONS; k++)
+                  elem_ref_new.refinement_polynomial_order[k] = this->spaces[j]->get_element_order(elem_ref.id);
                 new_elems_to_refine.push_back(elem_ref_new);
               }
             }
