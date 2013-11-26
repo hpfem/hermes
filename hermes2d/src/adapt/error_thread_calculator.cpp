@@ -349,24 +349,18 @@ namespace Hermes
       {
       case CoarseSolutions:
       case FineSolutions:
-        error_func[0]->free_fn();
         delete error_func[0];
         if(mf->i != mf->j)
         {
-          error_func[1]->free_fn();
           delete error_func[1];
         }
         break;
       case SolutionsDifference:
-        error_func[0]->free_fn();
         delete error_func[0];
-        norm_func[0]->free_fn();
         delete norm_func[0];
         if(mf->i != mf->j)
         {
-          error_func[1]->free_fn();
           delete error_func[1];
-          norm_func[1]->free_fn();
           delete norm_func[1];
         }
         break;
