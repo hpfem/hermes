@@ -33,21 +33,21 @@ namespace Hermes
     this->default_val = default_val;
     this->user_set = false;
   }
-  
+
   Api::Api()
   {
     // Insert parameters.
-    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::numThreads,new Parameter(NUM_THREADS)));
-    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::matrixSolverType, new Parameter(SOLVER_UMFPACK)));
-    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::directMatrixSolverType, new Parameter(SOLVER_UMFPACK)));
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::numThreads, new Parameter(NUM_THREADS)));
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::matrixSolverType, new Parameter(SOLVER_UMFPACK)));
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::directMatrixSolverType, new Parameter(SOLVER_UMFPACK)));
 #ifdef _DEBUG
-    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::showInternalWarnings, new Parameter(1)));
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::showInternalWarnings, new Parameter(1)));
 #else
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::showInternalWarnings, new Parameter(0)));
 #endif
-    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::useAccelerators, new Parameter(1)));
-    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::checkMeshesOnLoad, new Parameter(1)));
-    
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::useAccelerators, new Parameter(1)));
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::checkMeshesOnLoad, new Parameter(1)));
+
     // Set handlers.
 #ifdef WITH_PARALUTION
     this->setter_handlers.insert(std::pair<HermesCommonApiParam, typename Api::SetterHandler>(Hermes::numThreads, &ParalutionInitialization::set_threads_paralution));
@@ -56,32 +56,37 @@ namespace Hermes
     this->change_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_ITERATIVE), &ParalutionInitialization::deinit_paralution));
     this->change_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION_AMG), &ParalutionInitialization::deinit_paralution));
 #endif
-    
+
     // Initialize TCMalloc (this line also serves for TCMalloc not to be linker-optimized out).
 #ifdef WITH_TC_MALLOC
     ::tc_set_new_mode(1);
 #endif
+
+    pj_init();
+    pj_caching_pool_init(&HermesMemoryPoolCache, NULL, 1024 * 1024 * 1024);
   }
 
   Api::~Api()
   {
     // Call the change_handlers upon exit.
-    for(std::map<HermesCommonApiParam, Parameter*>::iterator param_iterator = this->parameters.begin(); param_iterator != this->parameters.end(); param_iterator++)
+    for (std::map<HermesCommonApiParam, Parameter*>::iterator param_iterator = this->parameters.begin(); param_iterator != this->parameters.end(); param_iterator++)
     {
       std::map<std::pair<HermesCommonApiParam, int>, SetterHandler>::iterator change_handler_iterator = this->change_handlers.find(std::pair<HermesCommonApiParam, int>(param_iterator->first, param_iterator->second->user_set ? param_iterator->second->user_val : param_iterator->second->default_val));
-      if(change_handler_iterator != this->change_handlers.end())
+      if (change_handler_iterator != this->change_handlers.end())
         change_handler_iterator->second();
     }
 
-    for(std::map<HermesCommonApiParam, Parameter*>::const_iterator it = this->parameters.begin(); it != this->parameters.end(); ++it)
-        delete it->second;
+    for (std::map<HermesCommonApiParam, Parameter*>::const_iterator it = this->parameters.begin(); it != this->parameters.end(); ++it)
+      delete it->second;
+
+    pj_caching_pool_destroy(&HermesMemoryPoolCache);
   }
 
   int Api::get_integral_param_value(HermesCommonApiParam param)
   {
-    if(this->parameters.find(param) == parameters.end())
+    if (this->parameters.find(param) == parameters.end())
       throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
-    if(this->parameters.find(param)->second->user_set)
+    if (this->parameters.find(param)->second->user_set)
       return this->parameters.find(param)->second->user_val;
     else
       return this->parameters.find(param)->second->default_val;
@@ -89,14 +94,14 @@ namespace Hermes
 
   void Api::set_integral_param_value(HermesCommonApiParam param, int value)
   {
-    if(this->parameters.find(param) == parameters.end())
+    if (this->parameters.find(param) == parameters.end())
       throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
 
     // If already set, we might have to call some custom handler.
-    if(this->parameters.find(param)->second->user_set)
+    if (this->parameters.find(param)->second->user_set)
     {
       std::map<std::pair<HermesCommonApiParam, int>, SetterHandler>::iterator change_handler_iterator = this->change_handlers.find(std::pair<HermesCommonApiParam, int>(param, this->parameters.find(param)->second->user_val));
-      if(change_handler_iterator != this->change_handlers.end())
+      if (change_handler_iterator != this->change_handlers.end())
       {
         change_handler_iterator->second();
       }
@@ -107,14 +112,14 @@ namespace Hermes
     // And now we might have to call some handler of the new value setting.
     // First - generic.
     std::map<HermesCommonApiParam, SetterHandler>::iterator setter_handler_iterator = this->setter_handlers.find(param);
-    if(setter_handler_iterator != this->setter_handlers.end())
+    if (setter_handler_iterator != this->setter_handlers.end())
     {
       setter_handler_iterator->second();
     }
 
     // Second - specific.
     std::map<std::pair<HermesCommonApiParam, int>, SetterHandler>::iterator value_setter_handler_iterator = this->value_setter_handlers.find(std::pair<HermesCommonApiParam, int>(param, this->parameters.find(param)->second->user_val));
-    if(value_setter_handler_iterator != this->value_setter_handlers.end())
+    if (value_setter_handler_iterator != this->value_setter_handlers.end())
     {
       value_setter_handler_iterator->second();
     }
@@ -122,7 +127,9 @@ namespace Hermes
 
 #if defined(WIN32) || defined(_WINDOWS)
   __declspec(dllexport) Hermes::Api HermesCommonApi;
+  __declspec(dllexport) pj_caching_pool HermesMemoryPoolCache;
 #else
   Hermes::Api HermesCommonApi;
+  pj_caching_pool HermesMemoryPoolCache;
 #endif
 }

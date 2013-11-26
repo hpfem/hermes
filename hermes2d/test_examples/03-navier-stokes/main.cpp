@@ -40,7 +40,7 @@ using namespace Hermes::Hermes2D;
 // tutorial for comparisons.
 const bool STOKES = false;
 
-const bool HERMES_VISUALIZATION = true;
+const bool HERMES_VISUALIZATION = false;
 
 #define PRESSURE_IN_L2
 
@@ -63,7 +63,7 @@ const double VEL_INLET = 1.0;
 const double STARTUP_TIME = 1.0;
 
 const double TAU = 0.1;                           // Time step.
-const double T_FINAL = 50.0;                      // Time interval length.
+const double T_FINAL = 1.0;                      // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const int max_allowed_iterations = 10;            // Maximum allowed number of Newton iterations.
 const double H = 5;                               // Domain height (necessary to define the parabolic
@@ -127,6 +127,7 @@ int main(int argc, char* argv[])
   MeshFunctionSharedPtr<double> xvel_prev_time(new ConstantSolution<double> (mesh, 0.0));
   MeshFunctionSharedPtr<double> yvel_prev_time(new ConstantSolution<double> (mesh, 0.0));
   MeshFunctionSharedPtr<double> p_prev_time(new ConstantSolution<double> (mesh, 0.0));
+  Hermes::vector<MeshFunctionSharedPtr<double> > sln_prev_time(xvel_prev_time, yvel_prev_time, p_prev_time);
 
   // Initialize weak formulation.
   WeakFormNSNewton wf(STOKES, RE, TAU, xvel_prev_time, yvel_prev_time);
@@ -185,9 +186,8 @@ int main(int argc, char* argv[])
     {
       e.print_msg();
     }
-    Hermes::vector<MeshFunctionSharedPtr<double> > tmp(xvel_prev_time, yvel_prev_time, p_prev_time);
-    Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), 
-      Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space), tmp);
+
+    Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), spaces, sln_prev_time);
 
     // Show the solution at the end of time step.
     if(HERMES_VISUALIZATION)

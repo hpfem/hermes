@@ -30,6 +30,11 @@ namespace Hermes
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
       ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0)
     {
+      this->FuncMemoryPool = pj_pool_create(&HermesMemoryPoolCache.factory, // the factory
+        "pool-DiscreteProblemThreadAssembler", // pool's name
+        sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * (H2D_MAX_NUMBER_EDGES + 1), // initial size
+        sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_NUMBER_EDGES, // increment size
+        NULL);
     }
 
     template<typename Scalar>
@@ -694,6 +699,8 @@ namespace Hermes
         ::free(ext_funcs);
       if (this->ext_funcs_local)
         ::free(ext_funcs_local);
+
+      pj_pool_release();
     }
 
     template<typename Scalar>
