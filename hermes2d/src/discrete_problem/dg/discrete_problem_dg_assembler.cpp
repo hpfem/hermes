@@ -46,6 +46,8 @@ namespace Hermes
       spaces(spaces),
       meshes(meshes)
     {
+      this->local_stiffness_matrix = (Scalar*)malloc(sizeof(Scalar)* H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_LOCAL_BASIS_SIZE * 4);
+
       this->DG_matrix_forms_present = false;
       this->DG_vector_forms_present = false;
       if(this->wf)
@@ -91,6 +93,7 @@ namespace Hermes
         delete [] npss;
         delete [] nrefmaps;
       }
+      ::free(this->local_stiffness_matrix);
     }
 
     template<typename Scalar>
@@ -306,7 +309,6 @@ namespace Hermes
           typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = ext_asmlist[n];
           typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = ext_asmlist[m];
 
-          Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(ext_asmlist_u->cnt, ext_asmlist_v->cnt));
           for (int i = 0; i < ext_asmlist_v->cnt; i++)
           {
             if(ext_asmlist_v->dof[i] < 0)
@@ -329,14 +331,12 @@ namespace Hermes
                 Scalar val = 0.5 * res * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
                   * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
 
-                local_stiffness_matrix[i][j] = val;
+                local_stiffness_matrix[i * H2D_MAX_LOCAL_BASIS_SIZE + j] = val;
               }
             }
           }
 
-          current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
-
-          delete [] local_stiffness_matrix;
+          current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, this->local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof, H2D_MAX_LOCAL_BASIS_SIZE * 2);
         }
       }
 

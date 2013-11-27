@@ -242,12 +242,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void EpetraMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
+    void EpetraMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar *mat, int *rows, int *cols, const int size)
     {
       for (unsigned int i = 0; i < m; i++)        // rows
       for (unsigned int j = 0; j < n; j++)      // cols
       if (rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
-        add(rows[i], cols[j], mat[i][j]);
+        add(rows[i], cols[j], mat[i * size + j]);
     }
 
     template<>

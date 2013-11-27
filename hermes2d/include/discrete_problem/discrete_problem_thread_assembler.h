@@ -98,6 +98,8 @@ namespace Hermes
       
       /// Currently assembled state.
       Traverse::State* current_state;
+      /// Current local matrix.
+      Scalar* local_stiffness_matrix;
 
       /// Integration orders for the currently assembled state.
       /// - calculator

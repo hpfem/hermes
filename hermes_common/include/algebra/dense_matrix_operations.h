@@ -167,13 +167,49 @@ namespace Hermes
               matrix[j][i] = matrix[i][j];
       }
 
+      /// Transposes an m by n matrix. If m != n, the array matrix in fact has to be
+      /// a square matrix of the size max(m, n) in order for the transpose to fit inside it.
+      template<typename T>
+      void transpose(T *matrix, unsigned int m, unsigned int n, unsigned int size)
+      {
+        unsigned int min = std::min(m, n);
+        for (int i = 0; i < min; i++)
+        {
+          for (int j = i + 1; j < min; j++)
+          {
+            std::swap(matrix[i * size + j], matrix[j * size + i]);
+          }
+        }
+
+        if (m < n)
+        for (unsigned int i = 0; i < m; i++)
+        for (unsigned int j = m; j < n; j++)
+          matrix[j * size + i] = matrix[i * size + j];
+
+        else if (n < m)
+        for (unsigned int i = n; i < m; i++)
+        for (unsigned int j = 0; j < n; j++)
+          matrix[j * size + i] = matrix[i * size + j];
+      }
+
       /// Changes the sign of a matrix
       template<typename T>
-      void chsgn(T **matrix, unsigned int m, unsigned int n)
+      void change_sign(T **matrix, unsigned int m, unsigned int n)
       {
         for (unsigned int i = 0; i < m; i++)
           for (unsigned int j = 0; j < n; j++)
             matrix[i][j] = -matrix[i][j];
+      }
+      /// Changes the sign of an array
+      template<typename T>
+      void change_sign(T *matrix, unsigned int m, unsigned int n, unsigned int size)
+      {
+        for (unsigned int i = 0; i < m; i++)
+        for (unsigned int j = 0; j < n; j++)
+        {
+          int local_matrix_index_array = i * size + j;
+          matrix[local_matrix_index_array] = -matrix[local_matrix_index_array];
+        }
       }
 
       /// Given a matrix a[n][n], this routine replaces it by the LU decomposition of a rowwise

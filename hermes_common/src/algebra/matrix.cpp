@@ -84,12 +84,18 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    void Matrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
+    void Matrix<Scalar>::add(unsigned int m, unsigned int n, Scalar *mat, int *rows, int *cols, const int size)
     {
-      for (unsigned int i = 0; i < m; i++)       // rows
-        for (unsigned int j = 0; j < n; j++)     // cols
-          if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
-            add(rows[i], cols[j], mat[i][j]);
+      for (unsigned int i = 0; i < m; i++)
+      {
+        for (unsigned int j = 0; j < n; j++)
+        {
+          if (rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+          {
+            add(rows[i], cols[j], mat[i * size + j]);
+          }
+        }
+      }
     }
 
     template<typename Scalar>

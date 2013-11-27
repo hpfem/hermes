@@ -100,6 +100,8 @@ namespace Hermes
       Vector<Scalar>* current_rhs;
       
       Traverse::State* current_state;
+      /// Current local matrix.
+      Scalar* local_stiffness_matrix;
 
       const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces;
       const Hermes::vector<MeshSharedPtr>& meshes;

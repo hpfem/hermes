@@ -30,6 +30,7 @@ namespace Hermes
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
       ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0)
     {
+      this->local_stiffness_matrix = (Scalar*)malloc(sizeof(Scalar)* H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_LOCAL_BASIS_SIZE);
     }
 
     template<typename Scalar>
@@ -491,9 +492,6 @@ namespace Hermes
       bool tra = (form->i != form->j) && (form->sym != 0);
       bool sym = (form->i == form->j) && (form->sym == 1);
 
-      // Assemble the local stiffness matrix for the form form.
-      Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(current_als_i->cnt, current_als_j->cnt));
-
       Func<Scalar>** ext_local = this->ext_funcs;
       // If the user supplied custom ext functions for this form.
       if (form->ext.size() > 0 || form->u_ext_fn.size() > 0)
@@ -536,13 +534,18 @@ namespace Hermes
 
           if (current_als_j->dof[j] >= 0)
           {
+            int local_matrix_index_array = i * H2D_MAX_LOCAL_BASIS_SIZE + j;
+
             if (surface_form)
-              local_stiffness_matrix[i][j] = 0.5 * val;
+              local_stiffness_matrix[local_matrix_index_array] = 0.5 * val;
             else
-              local_stiffness_matrix[i][j] = val;
+              local_stiffness_matrix[local_matrix_index_array] = val;
 
             if (sym)
-              local_stiffness_matrix[j][i] = local_stiffness_matrix[i][j];
+            {
+              int local_matrix_index_array_transposed = j * H2D_MAX_LOCAL_BASIS_SIZE + i;
+              local_stiffness_matrix[local_matrix_index_array_transposed] = local_stiffness_matrix[local_matrix_index_array];
+            }
           }
           else if (this->add_dirichlet_lift && this->current_rhs)
           {
@@ -553,30 +556,36 @@ namespace Hermes
 
       // Insert the local stiffness matrix into the global one.
       if (this->current_mat)
-        this->current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
+        this->current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof, H2D_MAX_LOCAL_BASIS_SIZE);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
       if (tra)
       {
         if (form->sym < 0)
-          chsgn(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
-        transpose(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
+          change_sign(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt, H2D_MAX_LOCAL_BASIS_SIZE);
+        transpose(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt, H2D_MAX_LOCAL_BASIS_SIZE);
 
         if (this->current_mat)
-          this->current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
+          this->current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof, H2D_MAX_LOCAL_BASIS_SIZE);
 
         if (this->add_dirichlet_lift && this->current_rhs)
         {
           for (unsigned int j = 0; j < current_als_i->cnt; j++)
-          if (current_als_i->dof[j] < 0)
-          for (unsigned int i = 0; i < current_als_j->cnt; i++)
-          if (current_als_j->dof[i] >= 0)
-            this->current_rhs->add(current_als_j->dof[i], -local_stiffness_matrix[i][j]);
+          {
+            if (current_als_i->dof[j] < 0)
+            {
+              for (unsigned int i = 0; i < current_als_j->cnt; i++)
+              {
+                if (current_als_j->dof[i] >= 0)
+                {
+                  int local_matrix_index_array = i * H2D_MAX_LOCAL_BASIS_SIZE + j;
+                  this->current_rhs->add(current_als_j->dof[i], -local_stiffness_matrix[local_matrix_index_array]);
+                }
+              }
+            }
+          }
         }
       }
-
-      // Cleanup.
-      delete[] local_stiffness_matrix;
     }
 
     template<typename Scalar>

@@ -77,7 +77,7 @@ namespace Hermes
       /// @param[in] mat    - block of values
       /// @param[in] rows      - array with row indexes
       /// @param[in] cols      - array with column indexes
-      virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
+      virtual void add(unsigned int m, unsigned int n, Scalar *mat, int *rows, int *cols, const int size);
 
       /// Add a number to each diagonal entry.
       virtual void add_to_diagonal(Scalar v);

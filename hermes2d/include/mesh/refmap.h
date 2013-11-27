@@ -204,6 +204,8 @@ namespace Hermes
       /// Table of RefMap::Nodes, indexed by a sub-element mapping.
       SubElementMap<Node> nodes;
 
+      double m[2][2][H2D_MAX_INTEGRATION_POINTS_COUNT];
+
       Node* cur_node;
 
       Node* overflow;
