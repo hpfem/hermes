@@ -2015,9 +2015,6 @@ namespace Hermes
         {
           Scalar val, dx = 0.0, dy = 0.0;
           val = (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_function(x, y, dx, dy);
-          toReturn->val = new Scalar[1];
-          toReturn->dx = new Scalar[1];
-          toReturn->dy = new Scalar[1];
           toReturn->val[0] = val * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
           toReturn->dx[0] = dx * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
           toReturn->dy[0] = dy * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
@@ -2026,19 +2023,8 @@ namespace Hermes
         {
           Scalar2<Scalar> dx(0.0, 0.0), dy(0.0, 0.0);
           Scalar2<Scalar> val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x, y, dx, dy);
-
-          toReturn->val0 = new Scalar[1];
-          toReturn->dx0 = new Scalar[1];
-          toReturn->dy0 = new Scalar[1];
-          toReturn->val1 = new Scalar[1];
-          toReturn->dx1 = new Scalar[1];
-          toReturn->dy1 = new Scalar[1];
           toReturn->val0[0] = val[0] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
           toReturn->val1[0] = val[1] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
-          toReturn->dx0[0] = dx[0] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
-          toReturn->dx1[0] = dx[1] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
-          toReturn->dy0[0] = dy[0] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
-          toReturn->dy1[0] = dy[1] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
         }
 #ifdef H2D_USE_SECOND_DERIVATIVES
         this->warn("Cannot obtain second derivatives of an exact solution.");
@@ -2063,10 +2049,6 @@ namespace Hermes
         {
           if(this->num_components == 1)
           {
-            toReturn->val = new Scalar[1];
-            toReturn->dx = new Scalar[1];
-            toReturn->dy = new Scalar[1];
-
             toReturn->val[0] = get_ref_value(e, xi1, xi2, 0, 0);
 
             double2x2 m;
@@ -2095,9 +2077,6 @@ namespace Hermes
           }
           else // vector solution
           {
-            toReturn->val0 = new Scalar[1];
-            toReturn->val1 = new Scalar[1];
-
             double2x2 m;
             double xx, yy;
             this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, m);

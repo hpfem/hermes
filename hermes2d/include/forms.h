@@ -24,7 +24,6 @@
 #include "function/exact_solution.h"
 #include "mesh/refmap.h"
 #include "mesh/traverse.h"
-#include <complex>
 
 namespace Hermes
 {
@@ -46,8 +45,6 @@ namespace Hermes
       /// Constructor.
       Geom();
 
-      T diam;           ///< Element diameter (for edge, diameter of the parent element).
-      T area;           ///< Element area (for edge, area of the parent element).
       T *x, *y;         ///< Coordinates[in physical domain].
       T *nx, *ny;       ///< Normals[in physical domain] (locally oriented
       ///< to point outside the element). Only for edge
@@ -62,6 +59,11 @@ namespace Hermes
       virtual int get_neighbor_id()     const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
       /// Methods designed for discontinuous functions, return errors here.
       virtual T   get_neighbor_diam()   const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
+
+      /// Element diameter (for edge, diameter of the parent element).
+      T get_diam_approximation(int n);
+      /// Element area (for edge, area of the parent element).
+      T get_area(int n, double* wt);
 
       /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
       virtual ~Geom() {};
@@ -97,8 +99,8 @@ namespace Hermes
       /// Constructor.
       InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
 
-      virtual void free();
-      virtual void free_ord();
+      void free();
+      void free_ord();
 
     private:
       Geom<T>* wrapped_geom;
@@ -117,53 +119,62 @@ namespace Hermes
 #pragma region Func
     /// Calculated function values (from the class Function) on an element for assembling.
     /// @ingroup inner
-    template<typename T>
+    template<typename Scalar>
     class HERMES_API Func
     {
     public:
       /// Constructor.
+      Func();
+      /// Constructor.
       /** \param[in] num_gip A number of integration points.
       *  \param[in] num_comps A number of components. */
-      Func(int num_gip, int num_comps);
+      Func(int np, int nc);
 
-      T *val;            ///< Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
-      T *dx, *dy;        ///< First-order partial derivatives.
-#ifdef H2D_USE_SECOND_DERIVATIVES
-      T *laplace;        ///< Sum of second-order partial derivatives. Enabled by defining H2D_USE_SECOND_DERIVATIVES in h2d_common.h.
-#endif
-      T *val0, *val1;    ///< Components of a vector field.
-      T *dx0, *dx1;      ///< Components of the gradient of a vector field.
-      T *dy0, *dy1;      ///< Components of the gradient of a vector field.
-      T *curl;           ///< Components of the curl of a vector field.
-      T *div;            ///< Components of the div of a vector field.
+      Scalar val[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      Scalar val0[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
-      /// Dellocates an instance of Func<Ord>
-      virtual void free_ord();
+      Scalar dx[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      Scalar val1[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
-      /// Dellocates an instance of Func<double> / Func<std::complex<double> >
-      virtual void free_fn();
+      Scalar dy[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      Scalar curl[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
-      /// All deallocation done via free_fn / free_ord.
-      /// This is to allow proper destruction of DiscontinuousFunc by applying delete on a Func pointer.
-      /// NOTE: An error is raised if the user tries to use a Func object for a discontinuous function.
-      /// Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
-      /// expected from a continuous function.
-      virtual ~Func() { };
-
-      void subtract(Func<T>* func);
-      void add(T* attribute, T* other_attribute);
-
-      const int num_gip; ///< Number of integration points used by this intance.
-      const int nc;      ///< Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
+      Scalar laplace[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      Scalar div[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
       /// Calculate this -= func for each function expations and each integration point.
-      /** \param[in] func A function which is subtracted from *this. A number of integratioN points and a number of component has to match. */
-      void subtract(T* attribute, T* other_attribute);
-
+      /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
+      void subtract(Func<Scalar>* func);
+      /// Subtract version specifying just one attribute.
+      void subtract(Scalar* attribute, Scalar* other_attribute);
       /// Calculate this += func for each function expations and each integration point.
       /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
-      void add(Func<T>* func);
+      void add(Func<Scalar>* func);
+      /// Add version specifying just one attribute.
+      void add(Scalar* attribute, Scalar* other_attribute);
+
+      /// Number of integration points used by this intance.
+      int np;
+      /// Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
+      int nc;
     };
+
+    template<>
+    class HERMES_API Func<Ord>
+    {
+    public:
+      Ord val;
+      Ord dx;
+      Ord dy;
+      Ord laplace;
+
+      Ord val0;
+      Ord val1;
+      Ord curl;
+      Ord div;
+      void subtract(Func<Ord>* func);
+    };
+
 
     /// @ingroup inner
     /** \class DiscontinuousFunc forms.h "src/form/forms.h"
@@ -186,6 +197,8 @@ namespace Hermes
       Func<T> *fn_central;        ///< Central element's component.
       Func<T> *fn_neighbor;       ///< Neighbor element's component.
 
+      T *val;              ///< Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
+      T *dx, *dy; ///< First-order partial derivatives.
       T *val_neighbor;              ///< Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
       T *dx_neighbor, *dy_neighbor; ///< First-order partial derivatives.
 
@@ -205,19 +218,50 @@ namespace Hermes
       ///
       DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false);
 
+      virtual ~DiscontinuousFunc();
+
       using Func<T>::subtract;
       void subtract(const DiscontinuousFunc<T>& func);
-
-      /// Default destructor may be used. Deallocation is done using the following functions.
-      /// FIXME: This is not safe since it allows calling free_ord in a Func<Scalar> object. Template-specialized
-      ///  destructors should be used instead (also in Func).
-      virtual void free_fn();
-
-      virtual void free_ord();
 
       bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
       ///< (when retrieving values on an edge that is oriented differently in both elements).
       static T zero;              ///< Zero value used for the zero-extension.
+    };
+
+    template<>
+    class HERMES_API DiscontinuousFunc<Ord> : public Func<Ord>
+    {
+    public:
+      Func<Ord> *fn_central;        ///< Central element's component.
+      Func<Ord> *fn_neighbor;       ///< Neighbor element's component.
+
+      Ord val;
+      Ord dx, dy;
+      Ord val_neighbor;
+      Ord dx_neighbor, dy_neighbor;
+
+      /// One-component constructor.
+      ///
+      /// \param[in]  fn                  Function defined either on the central or the neighbor element.
+      /// \param[in]  support_on_neighbor True if \c fn is defined on the neighbor element, false if on the central element.
+      /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
+      ///
+      DiscontinuousFunc(Func<Ord>* fn, bool support_on_neighbor, bool reverse = false);
+
+      /// Two-component constructor.
+      ///
+      /// \param[in]  fn_c                Function defined on the central element.
+      /// \param[in]  fn_n                Function defined on the neighbor element.
+      /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
+      ///
+      DiscontinuousFunc(Func<Ord>* fn_c, Func<Ord>* fn_n, bool reverse = false);
+
+      using Func<Ord>::subtract;
+      void subtract(const DiscontinuousFunc<Ord>& func);
+
+      bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
+      ///< (when retrieving values on an edge that is oriented differently in both elements).
+      static Ord zero;              ///< Zero value used for the zero-extension.
     };
 
     
@@ -232,13 +276,8 @@ namespace Hermes
 
 
     /// Preallocate the Func (all we need is np & nc).
-    HERMES_API Func<double>* preallocate_fn(PrecalcShapeset *fu, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
     template<typename Scalar>
-    HERMES_API Func<Scalar>* preallocate_fn(MeshFunction<Scalar>* fu = nullptr, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
-    template<typename Scalar>
-    HERMES_API Func<Scalar>* preallocate_fn(MeshFunctionSharedPtr<Scalar> fu, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
-    template<typename Scalar>
-    HERMES_API Func<Scalar>* preallocate_fn(UExtFunctionSharedPtr<Scalar> fu, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
+    HERMES_API Func<Scalar>* preallocate_fn(pj_pool_t* memoryPool = nullptr);
 
     /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values) - preallocated version.
     HERMES_API void init_fn_preallocated(Func<double>* u, PrecalcShapeset *fu, RefMap *rm, const int order);

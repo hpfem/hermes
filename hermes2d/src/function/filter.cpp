@@ -309,7 +309,6 @@ namespace Hermes
         val[i] = this->sln[i]->get_pt_value(x, y, use_MeshHashGrid, e)->val[0];
 
       Func<Scalar>* toReturn = new Func<Scalar>(1, 1);
-      toReturn->val = new Scalar[1];
 
       Scalar result;
       Hermes::vector<Scalar*> values;

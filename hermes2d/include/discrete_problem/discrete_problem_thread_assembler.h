@@ -53,6 +53,8 @@ namespace Hermes
 
       /// Initialize Func storages.
       void init_funcs();
+      /// Func Memory Pool
+      pj_pool_t *FuncMemoryPool;
       /// De-initialize Func storages.
       void deinit_funcs();
       /// Initializitation of u-ext values into Funcs

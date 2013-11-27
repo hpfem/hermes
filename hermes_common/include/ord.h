@@ -31,7 +31,6 @@ namespace Hermes
   class HERMES_API Ord
   {
   public:
-
     Ord();
     explicit Ord(int o);
     explicit Ord(double o);
@@ -40,6 +39,7 @@ namespace Hermes
 
     static Ord get_max_order();
 
+    Ord operator[] (const int nIndex) { return *this; }
     Ord operator + (const Ord &o);
     Ord operator + (double d);
     Ord operator + (std::complex<double> d);

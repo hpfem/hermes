@@ -24,30 +24,21 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename T>
-    Func<T>::Func(int num_gip, int num_comps) : num_gip(num_gip), nc(num_comps)
+    Func<T>::Func() : np(-1), nc(-1)
     {
-      val = nullptr;
-      dx = nullptr;
-      dy = nullptr;
-#ifdef H2D_USE_SECOND_DERIVATIVES
-      laplace = nullptr;
-#endif
-      if(this->nc > 1)
-      {
-        val0 = val1 = nullptr;
-        dx0 = dx1 = nullptr;
-        dy0 = dy1 = nullptr;
-        curl = nullptr;
-        div = nullptr;
-      }
+    }
+
+    template<typename T>
+    Func<T>::Func(int np, int nc) : np(np), nc(nc)
+    {
     }
 
     template<typename T>
     void Func<T>::subtract(Func<T>* func)
     {
-      if(num_gip != func->num_gip)
-        throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", num_gip, func->num_gip);
-      if(nc != func->nc)
+      if (this->np != func->np)
+        throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", np, func->np);
+      if (nc != func->nc)
         throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of components (this: %d, other: %d)", nc, func->nc);
 
       subtract(this->val, func->val);
@@ -55,17 +46,13 @@ namespace Hermes
       subtract(this->dy, func->dy);
 
 #ifdef H2D_USE_SECOND_DERIVATIVES
-        subtract(this->laplace, func->laplace);
+      subtract(this->laplace, func->laplace);
 #endif
 
-      if(nc > 1)
+      if (nc > 1)
       {
         subtract(this->val0, func->val0);
         subtract(this->val1, func->val1);
-        subtract(this->dx0, func->dx0);
-        subtract(this->dx1, func->dx1);
-        subtract(this->dy0, func->dy0);
-        subtract(this->dy1, func->dy1);
         subtract(this->curl, func->curl);
         subtract(this->div, func->div);
       }
@@ -74,9 +61,9 @@ namespace Hermes
     template<typename T>
     void Func<T>::subtract(T* attribute, T* other_attribute)
     {
-      if(attribute != nullptr && other_attribute != nullptr)
+      if (attribute != nullptr && other_attribute != nullptr)
       {
-        for(int i = 0; i < num_gip; i++)
+        for (int i = 0; i < this->np; i++)
           attribute[i] -= other_attribute[i];
       }
     }
@@ -84,9 +71,9 @@ namespace Hermes
     template<typename T>
     void Func<T>::add(Func<T>* func)
     {
-      if(num_gip != func->num_gip)
-        throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of integration points (this: %d, other: %d)", num_gip, func->num_gip);
-      if(nc != func->nc)
+      if (this->np != func->np)
+        throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of integration points (this: %d, other: %d)", np, func->np);
+      if (nc != func->nc)
         throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of components (this: %d, other: %d)", nc, func->nc);
 
       add(this->val, func->val);
@@ -97,14 +84,10 @@ namespace Hermes
       add(this->laplace, func->laplace);
 #endif
 
-      if(nc > 1)
+      if (nc > 1)
       {
         add(this->val0, func->val0);
         add(this->val1, func->val1);
-        add(this->dx0, func->dx0);
-        add(this->dx1, func->dx1);
-        add(this->dy0, func->dy0);
-        add(this->dy1, func->dy1);
         add(this->curl, func->curl);
         add(this->div, func->div);
       }
@@ -113,81 +96,93 @@ namespace Hermes
     template<typename T>
     void Func<T>::add(T* attribute, T* other_attribute)
     {
-      if(attribute != nullptr && other_attribute != nullptr)
+      if (attribute != nullptr && other_attribute != nullptr)
       {
-        for(int i = 0; i < num_gip; i++)
+        for (int i = 0; i < np; i++)
           attribute[i] += other_attribute[i];
       }
     }
 
     template<typename T>
-    void Func<T>::free_ord()
-    {
-      delete val;
-      delete dx;
-      val = nullptr;
-      dx = nullptr;
-      dy = nullptr;
-      
-      if(this->nc > 1)
-      {
-        val0 = val1 = nullptr;
-        dx0 = dx1 = nullptr;
-        dy0 = dy1 = nullptr;
-        curl = nullptr;
-        div = nullptr;
-      }
-
-#ifdef H2D_USE_SECOND_DERIVATIVES
-      laplace = nullptr;
-#endif
-    }
-
-    template<typename T>
-    void Func<T>::free_fn()
-    {
-      delete [] val; val = nullptr;
-      delete [] dx; dx = nullptr;
-      delete [] dy; dy = nullptr;
-
-#ifdef H2D_USE_SECOND_DERIVATIVES
-      delete [] laplace; 
-      laplace = nullptr;
-#endif
-
-      if(this->nc > 1)
-      {
-        delete [] val0; delete [] val1; val0 = val1 = nullptr;
-        delete [] dx0;  delete [] dx1; dx0 = dx1 = nullptr;
-        delete [] dy0;  delete [] dy1; dy0 = dy1 = nullptr;
-        delete [] curl; curl = nullptr;
-        delete [] div; div = nullptr;
-      }
-    }
-
-    template<typename T>
     DiscontinuousFunc<T>::DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor, bool reverse) :
-    Func<T>(fn->num_gip, fn->nc),
-      fn_central(nullptr),
-      fn_neighbor(nullptr),
-      reverse_neighbor_side(reverse)
+      Func<T>(fn->np, fn->nc), fn_central(nullptr), fn_neighbor(nullptr), reverse_neighbor_side(reverse)
     {
-      if(fn == nullptr)
+        if (fn == nullptr)
+          throw Hermes::Exceptions::Exception("Invalid arguments to DiscontinuousFunc constructor.");
+        if (support_on_neighbor)
+        {
+          fn_neighbor = fn;
+          if (reverse_neighbor_side)
+          {
+            this->val_neighbor = new T[this->np];
+            this->dx_neighbor = new T[this->np];
+            this->dy_neighbor = new T[this->np];
+            for (int i = 0; i < this->np; i++)
+            {
+              this->val_neighbor[i] = fn->val[this->np - i - 1];
+              this->dx_neighbor[i] = fn->dx[this->np - i - 1];
+              this->dy_neighbor[i] = fn->dy[this->np - i - 1];
+            }
+          }
+          else
+          {
+            this->val_neighbor = fn->val;
+            this->dx_neighbor = fn->dx;
+            this->dy_neighbor = fn->dy;
+          }
+
+          this->val = this->dx = this->dy = nullptr;
+        }
+        else
+        {
+          this->fn_central = fn;
+          this->val = fn->val;
+          this->dx = fn->dx;
+          this->dy = fn->dy;
+          this->val_neighbor = this->dx_neighbor = this->dy_neighbor = nullptr;
+        }
+      }
+
+    template<typename T>
+    DiscontinuousFunc<T>::DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse) :
+      Func<T>(fn_c->np, fn_c->nc), fn_central(fn_c), fn_neighbor(fn_n), reverse_neighbor_side(reverse)
+    {
+        if (reverse_neighbor_side)
+        {
+          this->val_neighbor = new T[this->np];
+          this->dx_neighbor = new T[this->np];
+          this->dy_neighbor = new T[this->np];
+          for (int i = 0; i < this->np; i++)
+          {
+            this->val_neighbor[i] = fn_neighbor->val[this->np - i - 1];
+            this->dx_neighbor[i] = fn_neighbor->dx[this->np - i - 1];
+            this->dy_neighbor[i] = fn_neighbor->dy[this->np - i - 1];
+          }
+        }
+        else
+        {
+          this->val_neighbor = fn_neighbor->val;
+          this->dx_neighbor = fn_neighbor->dx;
+          this->dy_neighbor = fn_neighbor->dy;
+        }
+        this->val = fn_central->val;
+        this->dx = fn_central->dx;
+        this->dy = fn_central->dy;
+      }
+
+    DiscontinuousFunc<Ord>::DiscontinuousFunc(Func<Ord>* fn, bool support_on_neighbor, bool reverse) : Func<Ord>(),
+      fn_central(nullptr), fn_neighbor(nullptr), reverse_neighbor_side(reverse)
+    {
+      if (fn == nullptr)
         throw Hermes::Exceptions::Exception("Invalid arguments to DiscontinuousFunc constructor.");
-      if(support_on_neighbor)
+      if (support_on_neighbor)
       {
         fn_neighbor = fn;
-        if(reverse_neighbor_side)
+        if (reverse_neighbor_side)
         {
-          this->val_neighbor = new T[this->num_gip];
-          this->dx_neighbor = new T[this->num_gip];
-          this->dy_neighbor = new T[this->num_gip];
-          for(int i = 0; i < this->num_gip; i++)
-          {
-            this->val_neighbor[i] = fn->val[this->num_gip-i-1];
-            this->dx_neighbor[i] = fn->dx[this->num_gip-i-1];
-            this->dy_neighbor[i] = fn->dy[this->num_gip-i-1];
-          }
+          this->val_neighbor = fn->val;
+          this->dx_neighbor = fn->dx;
+          this->dy_neighbor = fn->dy;
         }
         else
         {
@@ -195,8 +190,6 @@ namespace Hermes
           this->dx_neighbor = fn->dx;
           this->dy_neighbor = fn->dy;
         }
-
-        this->val = this->dx = this->dy = nullptr;
       }
       else
       {
@@ -204,28 +197,17 @@ namespace Hermes
         this->val = fn->val;
         this->dx = fn->dx;
         this->dy = fn->dy;
-        this->val_neighbor = this->dx_neighbor = this->dy_neighbor = nullptr;
       }
     }
 
-    template<typename T>
-    DiscontinuousFunc<T>::DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse) :
-    Func<T>(fn_c->num_gip, fn_c->nc),
-      fn_central(fn_c),
-      fn_neighbor(fn_n),
-      reverse_neighbor_side(reverse)
+    DiscontinuousFunc<Ord>::DiscontinuousFunc(Func<Ord>* fn_c, Func<Ord>* fn_n, bool reverse) : Func<Ord>(),
+      fn_central(fn_c), fn_neighbor(fn_n), reverse_neighbor_side(reverse)
     {
-      if(reverse_neighbor_side)
+      if (reverse_neighbor_side)
       {
-        this->val_neighbor = new T[this->num_gip];
-        this->dx_neighbor = new T[this->num_gip];
-        this->dy_neighbor = new T[this->num_gip];
-        for(int i = 0; i < this->num_gip; i++)
-        {
-          this->val_neighbor[i] = fn_neighbor->val[this->num_gip-i-1];
-          this->dx_neighbor[i] = fn_neighbor->dx[this->num_gip-i-1];
-          this->dy_neighbor[i] = fn_neighbor->dy[this->num_gip-i-1];
-        }
+        this->val_neighbor = fn_neighbor->val;
+        this->dx_neighbor = fn_neighbor->dx;
+        this->dy_neighbor = fn_neighbor->dy;
       }
       else
       {
@@ -233,6 +215,7 @@ namespace Hermes
         this->dx_neighbor = fn_neighbor->dx;
         this->dy_neighbor = fn_neighbor->dy;
       }
+
       this->val = fn_central->val;
       this->dx = fn_central->dx;
       this->dy = fn_central->dy;
@@ -241,12 +224,12 @@ namespace Hermes
     template<typename T>
     void DiscontinuousFunc<T>::subtract(const DiscontinuousFunc<T>& func)
     {
-      if(fn_central != nullptr && func.fn_central != nullptr)
+      if (fn_central != nullptr && func.fn_central != nullptr)
         fn_central->subtract(func.fn_central);
-      if(fn_neighbor != nullptr && func.fn_neighbor != nullptr)
+      if (fn_neighbor != nullptr && func.fn_neighbor != nullptr)
       {
         fn_neighbor->subtract(func.fn_neighbor);
-        if(reverse_neighbor_side)
+        if (reverse_neighbor_side)
         {
           Func<T>::subtract(this->val_neighbor, func.val_neighbor);
           Func<T>::subtract(this->dx_neighbor, func.dx_neighbor);
@@ -256,40 +239,21 @@ namespace Hermes
     }
 
     template<typename T>
-    void DiscontinuousFunc<T>::free_fn()
+    DiscontinuousFunc<T>::~DiscontinuousFunc()
     {
-      if(fn_central != nullptr)
+      if (fn_central != nullptr)
       {
-        fn_central->free_fn();
         delete fn_central;
         fn_central = nullptr;
       }
-      if(fn_neighbor != nullptr)
+      if (fn_neighbor != nullptr)
       {
-        if(reverse_neighbor_side)
+        if (reverse_neighbor_side)
         {
-          delete [] this->val_neighbor;
-          delete [] this->dx_neighbor;
-          delete [] this->dy_neighbor;
+          delete[] this->val_neighbor;
+          delete[] this->dx_neighbor;
+          delete[] this->dy_neighbor;
         }
-        fn_neighbor->free_fn();
-        delete fn_neighbor;
-        fn_neighbor = nullptr;
-      }
-    }
-
-    template<typename T>
-    void DiscontinuousFunc<T>::free_ord()
-    {
-      if(fn_central != nullptr)
-      {
-        fn_central->free_ord();
-        delete fn_central;
-        fn_central = nullptr;
-      }
-      if(fn_neighbor != nullptr)
-      {
-        fn_neighbor->free_ord();
         delete fn_neighbor;
         fn_neighbor = nullptr;
       }
@@ -310,31 +274,74 @@ namespace Hermes
     template<typename T>
     void Geom<T>::free()
     {
-      delete [] x;    delete [] y;
-      delete [] tx;    delete [] ty;
-      delete [] nx;    delete [] ny;
+      delete[] x;    delete[] y;
+      delete[] tx;    delete[] ty;
+      delete[] nx;    delete[] ny;
+    }
+
+    template<>
+    double Geom<double>::get_diam_approximation(int n)
+    {
+      double x_min = std::numeric_limits<double>::max(),
+        x_max = std::numeric_limits<double>::min(),
+        y_min = std::numeric_limits<double>::max(),
+        y_max = std::numeric_limits<double>::min();
+
+      for (int i = 0; i < n; i++)
+      {
+        if (this->x[i] < x_min)
+          x_min = this->x[i];
+        if (this->x[i] > x_max)
+          x_max = this->x[i];
+
+        if (this->y[i] < y_min)
+          y_min = this->y[i];
+        if (this->y[i] > y_max)
+          y_max = this->y[i];
+      }
+
+      return std::sqrt((x_max - x_min) * (x_max - x_min) + (y_max - y_min) * (y_max - y_min));
+    }
+
+    template<>
+    double Geom<double>::get_area(int n, double* wt)
+    {
+      double area = 0.;
+      for (int i = 0; i < n; i++)
+        area += wt[i];
+      return area;
+    }
+
+    template<>
+    Hermes::Ord Geom<Hermes::Ord>::get_diam_approximation(int n)
+    {
+      return Hermes::Ord(0);
+    }
+
+    template<>
+    Hermes::Ord Geom<Hermes::Ord>::get_area(int n, double* wt)
+    {
+      return Hermes::Ord(0);
     }
 
     template<typename T>
     InterfaceGeom<T>::InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam) :
-    Geom<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
+      Geom<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
     {
-      // Let this class expose the standard Geom interface.
-      this->edge_marker = geom->edge_marker;
-      this->elem_marker = geom->elem_marker;
-      this->id = geom->id;
-      this->isurf = geom->isurf;
-      this->diam = geom->diam;
-      this->area = geom->area;
-      this->x = geom->x;
-      this->y = geom->y;
-      this->tx = geom->tx;
-      this->ty = geom->ty;
-      this->nx = geom->nx;
-      this->ny = geom->ny;
-      this->orientation = geom->orientation;
-      this->wrapped_geom = geom;
-    }
+        // Let this class expose the standard Geom interface.
+        this->edge_marker = geom->edge_marker;
+        this->elem_marker = geom->elem_marker;
+        this->id = geom->id;
+        this->isurf = geom->isurf;
+        this->x = geom->x;
+        this->y = geom->y;
+        this->tx = geom->tx;
+        this->ty = geom->ty;
+        this->nx = geom->nx;
+        this->ny = geom->ny;
+        this->orientation = geom->orientation;
+        this->wrapped_geom = geom;
+      }
 
     template<typename T>
     void InterfaceGeom<T>::free()
@@ -384,7 +391,6 @@ namespace Hermes
       e->x = x; e->y = y;
       e->nx = nx; e->ny = ny;
       e->tx = tx; e->ty = ty;
-      e->diam = diam;
 
       return e;
     }
@@ -392,8 +398,6 @@ namespace Hermes
     Geom<double>* init_geom_vol(RefMap *rm, const int order)
     {
       Geom<double>* e = new Geom<double>;
-      e->diam = rm->get_active_element()->get_diameter();
-      e->area = rm->get_active_element()->get_area();
       e->id = rm->get_active_element()->id;
       e->elem_marker = rm->get_active_element()->marker;
       Quad2D* quad = rm->get_quad_2d();
@@ -415,15 +419,13 @@ namespace Hermes
       Geom<double>* e = new Geom<double>;
       e->edge_marker = marker;
       e->elem_marker = rm->get_active_element()->marker;
-      e->diam = rm->get_active_element()->get_diameter();
-      e->area = rm->get_active_element()->get_area();
       e->id = rm->get_active_element()->id;
       e->isurf = isurf;
-      
+
       tan = rm->get_tangent(isurf, order);
       double* x = rm->get_phys_x(order);
       double* y = rm->get_phys_y(order);
-      
+
       Quad2D* quad = rm->get_quad_2d();
       int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
       e->x = new double[np];
@@ -436,8 +438,8 @@ namespace Hermes
       {
         e->x[i] = x[i];
         e->y[i] = y[i];
-        e->tx[i] = tan[i][0];  e->ty[i] =   tan[i][1];
-        e->nx[i] = tan[i][1];  e->ny[i] = - tan[i][0];
+        e->tx[i] = tan[i][0];  e->ty[i] = tan[i][1];
+        e->nx[i] = tan[i][1];  e->ny[i] = -tan[i][0];
       }
       e->orientation = rm->get_active_element()->get_edge_orientation(isurf);
       return e;
@@ -445,19 +447,18 @@ namespace Hermes
 
     Func<Hermes::Ord>* init_fn_ord(const int order)
     {
-      Hermes::Ord *d = new Hermes::Ord(order);
-      Hermes::Ord *d1 = new Hermes::Ord(order > 1 ? order - 1 : order);
+      Hermes::Ord d(order);
+      Hermes::Ord d1(order > 1 ? order - 1 : order);
 
-      Func<Hermes::Ord>* f = new Func<Hermes::Ord>(1, 2);
+      Func<Hermes::Ord>* f = new Func<Hermes::Ord>();
       f->val = d;
       f->dx = d1;
       f->dy = d1;
 #ifdef H2D_USE_SECOND_DERIVATIVES
+      Hermes::Ord d2(std::min(0, order - 2));
       f->laplace = d;
 #endif
       f->val0 = f->val1 = d;
-      f->dx0 = f->dx1 = d1;
-      f->dy0 = f->dy1 = d1;
       f->curl = d1;
       f->div = d1;
       return f;
@@ -465,7 +466,7 @@ namespace Hermes
 
     Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     {
-      Func<double>* u = preallocate_fn(fu, fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode()));
+      Func<double>* u = preallocate_fn<double>();
 
       init_fn_preallocated(u, fu, rm, order);
 
@@ -475,105 +476,20 @@ namespace Hermes
     template<typename Scalar>
     Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order)
     {
-      Func<Scalar>* u = preallocate_fn(fu, fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode()));
+      Func<Scalar>* u = preallocate_fn<Scalar>();
 
       init_fn_preallocated(u, fu, order);
 
       return u;
     }
 
-    Func<double>* preallocate_fn(PrecalcShapeset *fu, int num_points)
-    {
-      SpaceType space_type = fu->get_space_type();
-      Func<double>* u = new Func<double>(num_points, fu->get_num_components());
-      if (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE)
-      {
-        u->val = new double[num_points];
-        u->dx = new double[num_points];
-        u->dy = new double[num_points];
-
-#ifdef H2D_USE_SECOND_DERIVATIVES
-        u->laplace = new double[num_points];
-#endif
-      }
-      // Hcurl space.
-      else if (space_type == HERMES_HCURL_SPACE)
-      {
-        u->val0 = new double[num_points];
-        u->val1 = new double[num_points];
-        u->curl = new double[num_points];
-      }
-      // Hdiv space.
-      else if (space_type == HERMES_HDIV_SPACE)
-      {
-        u->val0 = new double[num_points];
-        u->val1 = new double[num_points];
-        u->div = new double[num_points];
-      }
-      else
-        throw Hermes::Exceptions::Exception("Wrong space type - space has to be either H1, Hcurl, Hdiv or L2");
-
-      return u;
-    }
-
     template<typename Scalar>
-    Func<Scalar>* preallocate_fn(MeshFunction<Scalar>* fu, int num_points)
+    Func<Scalar>* preallocate_fn(pj_pool_t* memoryPool)
     {
-      int nc = fu ? fu->get_num_components() : 1;
-      Func<Scalar>* u = new Func<Scalar>(num_points, nc);
-      if (nc == 1)
-      {
-        u->val = new Scalar[num_points];
-        u->dx = new Scalar[num_points];
-        u->dy = new Scalar[num_points];
-
-#ifdef H2D_USE_SECOND_DERIVATIVES
-        Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(fu);
-        if(sln)
-        {
-          if ((sln->get_space_type() == HERMES_H1_SPACE || sln->get_space_type() == HERMES_L2_SPACE) && sln->get_type() != HERMES_EXACT)
-            u->laplace = new Scalar[num_points];
-        }
-#endif
-
-      }
+      if (memoryPool)
+        return (Func<Scalar>*)pj_pool_alloc(memoryPool, sizeof(Func<Scalar>));
       else
-      {
-        u->val0 = new Scalar[num_points];
-        u->val1 = new Scalar[num_points];
-        u->curl = new Scalar[num_points];
-        u->div = new Scalar[num_points];
-      }
-
-      return u;
-    }
-
-    template<typename Scalar>
-    Func<Scalar>* preallocate_fn(MeshFunctionSharedPtr<Scalar> fu, int num_points)
-    {
-      return preallocate_fn(fu.get(), num_points);
-    }
-
-    template<typename Scalar>
-    Func<Scalar>* preallocate_fn(UExtFunctionSharedPtr<Scalar> fu, int num_points)
-    {
-      int nc = fu ? fu->get_num_components() : 1;
-      Func<Scalar>* u = new Func<Scalar>(num_points, nc);
-      if (nc == 1)
-      {
-        u->val = new Scalar[num_points];
-        u->dx = new Scalar[num_points];
-        u->dy = new Scalar[num_points];
-      }
-      else
-      {
-        u->val0 = new Scalar[num_points];
-        u->val1 = new Scalar[num_points];
-        u->curl = new Scalar[num_points];
-        u->div = new Scalar[num_points];
-      }
-
-      return u;
+        return new Func<Scalar>();
     }
 
     void init_fn_preallocated(Func<double>* u, PrecalcShapeset *fu, RefMap *rm, const int order)
@@ -589,7 +505,10 @@ namespace Hermes
       fu->set_quad_order(order);
 #endif
 
+      int nc = fu->get_num_components();
       int np = fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode());
+      u->np = np;
+      u->nc = nc;
 
       // H1 & L2 space.
       if (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE)
@@ -741,12 +660,11 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("nullptr MeshFunction in Func<Scalar>*::init_fn().");
       if (fu->get_mesh() == nullptr)
         throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
-      
-      int nc = fu->get_num_components();
+
       Quad2D* quad = fu->get_quad_2d();
 #ifdef H2D_USE_SECOND_DERIVATIVES
       Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(fu);
-      if(sln)
+      if (sln)
       {
         if ((sln->get_space_type() == HERMES_H1_SPACE || sln->get_space_type() == HERMES_L2_SPACE) && sln->get_type() != HERMES_EXACT)
           fu->set_quad_order(order, H2D_FN_ALL);
@@ -758,7 +676,10 @@ namespace Hermes
 #else
       fu->set_quad_order(order);
 #endif
+      int nc = fu->get_num_components();
       int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
+      u->np = np;
+      u->nc = nc;
 
       if (u->nc == 1)
       {
@@ -767,7 +688,7 @@ namespace Hermes
         memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
 
 #ifdef H2D_USE_SECOND_DERIVATIVES
-        if(sln && (sln->get_space_type() == HERMES_H1_SPACE || sln->get_space_type() == HERMES_L2_SPACE) && sln->get_type() != HERMES_EXACT)
+        if (sln && (sln->get_space_type() == HERMES_H1_SPACE || sln->get_space_type() == HERMES_L2_SPACE) && sln->get_type() != HERMES_EXACT)
         {
           Scalar *dxx = fu->get_dxx_values();
           Scalar *dyy = fu->get_dyy_values();
@@ -799,7 +720,7 @@ namespace Hermes
       // Sanity check.
       if (fu == nullptr)
         throw Hermes::Exceptions::Exception("nullptr UExtFunction in Func<Scalar>*::init_fn().");
-      
+
       Quad2D* quad = &g_quad_2d_std;
       int np = quad->get_num_points(order, mode);
 
@@ -819,20 +740,12 @@ namespace Hermes
 
       if (nc == 1)
       {
-        u->val = new Scalar[np];
-        u->dx = new Scalar[np];
-        u->dy = new Scalar[np];
         memset(u->val, 0, np * sizeof(Scalar));
         memset(u->dx, 0, np * sizeof(Scalar));
         memset(u->dy, 0, np * sizeof(Scalar));
       }
       else if (nc == 2)
       {
-        u->val0 = new Scalar[np];
-        u->val1 = new Scalar[np];
-        u->curl = new Scalar[np];
-        u->div = new Scalar[np];
-
         memset(u->val0, 0, np * sizeof(Scalar));
         memset(u->val1, 0, np * sizeof(Scalar));
         memset(u->curl, 0, np * sizeof(Scalar));
@@ -851,16 +764,8 @@ namespace Hermes
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
       // Sanity check.
-      if(fu == nullptr)
+      if (fu == nullptr)
         throw Hermes::Exceptions::Exception("nullptr UExtFunction in Func<Scalar>*::init_fn().");
-
-        u->val = new Scalar[np];
-        u->dx  = new Scalar[np];
-        u->dy  = new Scalar[np];
-
-#ifdef H2D_USE_SECOND_DERIVATIVES
-        u->laplace = new Scalar[np];
-#endif
 
       fu->value(np, u_ext, u, geometry);
 
@@ -870,18 +775,12 @@ namespace Hermes
     template HERMES_API Func<double>* init_fn(MeshFunction<double>* fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(MeshFunction<std::complex<double> >* fu, const int order);
 
-    template HERMES_API Func<double>* preallocate_fn(MeshFunction<double>* fu, int num_points);
-    template HERMES_API Func<std::complex<double> >* preallocate_fn(MeshFunction<std::complex<double> >* fu, int num_points);
-
-    template HERMES_API Func<double>* preallocate_fn(MeshFunctionSharedPtr<double> fu, int num_points);
-    template HERMES_API Func<std::complex<double> >* preallocate_fn(MeshFunctionSharedPtr<std::complex<double> > fu, int num_points);
-
-    template HERMES_API Func<double>* preallocate_fn(UExtFunctionSharedPtr<double> fu, int num_points);
-    template HERMES_API Func<std::complex<double> >* preallocate_fn(UExtFunctionSharedPtr<std::complex<double> > fu, int num_points);
+    template HERMES_API Func<double>* preallocate_fn(pj_pool_t* memoryPool);
+    template HERMES_API Func<std::complex<double> >* preallocate_fn(pj_pool_t* memoryPool);
 
     template HERMES_API void init_fn_preallocated(Func<double>* u, MeshFunction<double>* fu, const int order);
     template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, MeshFunction<std::complex<double> >* fu, const int order);
-    
+
     template HERMES_API void init_fn_preallocated(Func<double>* u, UExtFunction<double>* fu, Func<double>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
     template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
 

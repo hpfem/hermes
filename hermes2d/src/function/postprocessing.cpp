@@ -792,9 +792,7 @@ namespace Hermes
 
             for (int i = 0; i < source_functions_size; i++)
             { 
-              func_ord[i]->free_ord();
               delete func_ord[i];
-              func[i]->free_fn();
               delete func[i];
             }
 
@@ -988,9 +986,7 @@ namespace Hermes
 
               for (int i = 0; i < source_functions_size; i++)
               {
-                func_ord[i]->free_ord();
                 delete func_ord[i];
-                func[i]->free_fn();
                 delete func[i];
               }
 

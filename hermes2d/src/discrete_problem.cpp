@@ -296,8 +296,20 @@ namespace Hermes
         // Is this a DG assembling.
         bool is_DG = this->wf->is_DG();
 
-  #pragma omp parallel num_threads(this->num_threads_used)
+#pragma omp parallel num_threads(this->num_threads_used)
         {
+          /*
+          pj_thread_init();
+          pj_thread_desc rtpdesc;
+          pj_thread_t *thread;
+#pragma omp critical (asf)
+          {
+            pj_bzero(rtpdesc, sizeof(rtpdesc));
+            if (!pj_thread_is_registered())
+            {
+              std::cout << std::endl << omp_get_thread_num() << pj_thread_register(NULL, rtpdesc, &thread) << std::endl;
+            }
+            */
           int thread_number = omp_get_thread_num();
           int start = (num_states / this->num_threads_used) * thread_number;
           int end = (num_states / this->num_threads_used) * (thread_number + 1);

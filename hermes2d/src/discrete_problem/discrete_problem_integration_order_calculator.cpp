@@ -179,9 +179,7 @@ namespace Hermes
       if (form->ext.size() > 0)
         this->deinit_ext_orders(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : form->wf->u_ext_fn), local_ext);
 
-      ou->free_ord();
       delete ou;
-      ov->free_ord();
       delete ov;
 
       return order;
@@ -224,7 +222,6 @@ namespace Hermes
       if (form->ext.size() > 0)
         this->deinit_ext_orders(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : form->wf->u_ext_fn), local_ext);
       
-      ov->free_ord();
       delete ov;
 
       return order;
@@ -266,10 +263,7 @@ namespace Hermes
         for (int i = 0; i < this->selectiveAssembler->spaces_size; i++)
         {
           if (u_ext_func[i])
-          {
-            u_ext_func[i]->free_ord();
             delete u_ext_func[i];
-          }
         }
         delete[] u_ext_func;
       }
@@ -313,12 +307,6 @@ namespace Hermes
         }
       }
 
-      if (this->rungeKutta)
-      {
-        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
-          u_ext_func[ext_i]->add(ext_func[ext.size() - this->RK_original_spaces_count + ext_i]);
-      }
-
       return ext_func;
     }
 
@@ -328,18 +316,12 @@ namespace Hermes
       if (ext_func)
       {
         for (int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
-        {
-          ext_func[ext_i]->free_ord();
           delete ext_func[ext_i];
-        }
 
         for (int ext_i = 0; ext_i < ext.size(); ext_i++)
         {
           if (ext[ext_i] && ext[ext_i]->get_active_element())
-          {
-            ext_func[u_ext_fns.size() + ext_i]->free_ord();
             delete ext_func[u_ext_fns.size() + ext_i];
-          }
         }
 
         delete[] ext_func;
@@ -384,10 +366,7 @@ namespace Hermes
       if (oi)
       {
         for (int i = 0; i < prev_size; i++)
-        {
-          oi[i]->free_ord();
           delete oi[i];
-        }
         delete[] oi;
       }
 
@@ -396,10 +375,7 @@ namespace Hermes
       if (oext)
       {
         for (int i = 0; i < ext_size + u_ext_fn_size; i++)
-        {
-          oext[i]->free_ord();
           delete oext[i];
-        }
         delete[] oext;
       }
     }
@@ -457,9 +433,8 @@ namespace Hermes
 
       // Cleanup.
       deinit_ext_fns_ord(mfDG, u_ext_ord, ext_ord);
-      ou->free_ord();
+
       delete ou;
-      ov->free_ord();
       delete ov;
 
       return order;
@@ -513,7 +488,6 @@ namespace Hermes
 
       // Cleanup.
       deinit_ext_fns_ord(vfDG, u_ext_ord, ext_ord);
-      ov->free_ord();
       delete ov;
 
       return order;

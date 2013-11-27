@@ -123,16 +123,6 @@ namespace Hermes
       // Init geometry and jacobian*weights.
       geometry = init_geom_vol(rep_reference_mapping, order);
 
-      for (int i = 0; i < reference_mapping_count; i++)
-      if (reference_mapping[i])
-      if (reference_mapping[i]->get_active_element())
-      {
-        {
-          geometry->area = std::min(geometry->area, rep_element->get_area());
-          geometry->diam = std::min(geometry->area, rep_element->get_diameter());
-        }
-      }
-      
       jacobian_x_weights = new double[np];
       if (rep_reference_mapping->is_jacobian_const())
       {
@@ -157,9 +147,6 @@ namespace Hermes
 
       // Init geometry and jacobian*weights.
       geometry = init_geom_vol(rep_reference_mapping, order);
-
-      geometry->area = e->get_area();
-      geometry->diam = e->get_diameter();
 
       if (rep_reference_mapping->is_jacobian_const())
       {
@@ -198,8 +185,6 @@ namespace Hermes
       // Init geometry and jacobian*weights.
       double3* tan;
       geometry = init_geom_surf(rep_reference_mapping, isurf, marker, eo, tan);
-      geometry->area = rep_reference_mapping->get_active_element()->get_area();
-      geometry->diam = rep_reference_mapping->get_active_element()->get_diameter();
       jacobian_x_weights = new double[np];
       for (int i = 0; i < np; i++)
         jacobian_x_weights[i] = pt[i][2] * tan[i][2];
@@ -217,8 +202,6 @@ namespace Hermes
       // Init geometry and jacobian*weights.
       double3* tan;
       geometry = init_geom_surf(rep_reference_mapping, isurf, marker, eo, tan);
-      geometry->area = e->get_area();
-      geometry->diam = e->get_diameter();
       for (int i = 0; i < np; i++)
         jacobian_x_weights[i] = pt[i][2] * tan[i][2];
       order = eo;

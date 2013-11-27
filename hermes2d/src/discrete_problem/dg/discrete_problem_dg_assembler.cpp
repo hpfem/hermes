@@ -348,7 +348,6 @@ namespace Hermes
           {
             if(ext_asmlist[i]->dof[func_i] < 0)
               continue;
-            testFunctions[i][func_i]->free_fn();
             delete testFunctions[i][func_i];
           }        
           delete ext_asmlist[i];
@@ -383,8 +382,6 @@ namespace Hermes
             Func<double>* v = init_fn(pss[n], refmaps[n], current_neighbor_searches_v->get_quad_eo());
 
             current_rhs->add(als[n].dof[dof_i], 0.5 * vfs->value(n_quadrature_points, jacobian_x_weights[n], u_ext_func, v, e[n], ext) * vfs->scaling_factor * als[n].coef[dof_i]);
-
-            v->free_fn();
             delete v;
           }
         }
@@ -394,7 +391,6 @@ namespace Hermes
       {
         for(unsigned int i = 0; i < wf->ext.size(); i++)
         {
-          ext[i]->free_fn();
           delete ext[i];
         }
         delete [] ext;
@@ -407,7 +403,6 @@ namespace Hermes
           for(int u_ext_i = 0; u_ext_i < this->spaces_size; u_ext_i++)
             if(u_ext[u_ext_i])
             {
-              u_ext_func[u_ext_i]->free_fn();
               delete u_ext_func[u_ext_i];
             }
         }

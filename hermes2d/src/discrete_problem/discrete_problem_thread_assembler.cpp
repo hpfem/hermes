@@ -30,6 +30,11 @@ namespace Hermes
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
       ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0)
     {
+      this->FuncMemoryPool = pj_pool_create(&HermesMemoryPoolCache.factory, // the factory
+        "pool-DiscreteProblemThreadAssembler", // pool's name
+        sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * (H2D_MAX_NUMBER_EDGES + 1), // initial size
+        sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_NUMBER_EDGES, // increment size
+        NULL);
     }
 
     template<typename Scalar>
@@ -151,14 +156,14 @@ namespace Hermes
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-          this->funcs[space_i][j] = preallocate_fn(this->pss[space_i]);
+          this->funcs[space_i][j] = preallocate_fn<double>();
 
         for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-          this->funcsSurface[edge_i][space_i][j] = preallocate_fn(this->pss[space_i]);
+          this->funcsSurface[edge_i][space_i][j] = preallocate_fn<double>();
 
         if (this->nonlinear)
-          this->u_ext_funcs[space_i] = preallocate_fn(this->u_ext[space_i]);
+          this->u_ext_funcs[space_i] = preallocate_fn<Scalar>();
       }
 
       // Reallocation of wf-(nonlocal-) ext funcs.
@@ -178,10 +183,10 @@ namespace Hermes
       if (ext_size > 0 || u_ext_fns_size > 0)
       {
         for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
-          this->ext_funcs[ext_i] = preallocate_fn(this->wf->u_ext_fn[ext_i]);
+          this->ext_funcs[ext_i] = preallocate_fn<Scalar>();
 
         for (int ext_i = 0; ext_i < ext_size; ext_i++)
-          this->ext_funcs[u_ext_fns_size + ext_i] = preallocate_fn(this->wf->ext[ext_i]);
+          this->ext_funcs[u_ext_fns_size + ext_i] = preallocate_fn<Scalar>();
       }
 
       // Calculating local sizes.
@@ -210,10 +215,10 @@ namespace Hermes
 
         // Initializaton of form-(local-)ext funcs
         for (int ext_i = 0; ext_i < local_u_ext_fns_size; ext_i++)
-          this->ext_funcs_local[ext_i] = preallocate_fn(UExtFunctionSharedPtr<Scalar>(nullptr));
+          this->ext_funcs_local[ext_i] = preallocate_fn<Scalar>();
 
         for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
-          this->ext_funcs_local[local_u_ext_fns_size + ext_i] = preallocate_fn(MeshFunctionSharedPtr<Scalar>(nullptr));
+          this->ext_funcs_local[local_u_ext_fns_size + ext_i] = preallocate_fn<Scalar>();
       }
     }
 
@@ -225,7 +230,6 @@ namespace Hermes
         // Test functions
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
         {
-          this->funcs[space_i][j]->free_fn();
           delete this->funcs[space_i][j];
         }
 
@@ -234,7 +238,6 @@ namespace Hermes
         {
           for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
           {
-            this->funcsSurface[edge_i][space_i][j]->free_fn();
             delete this->funcsSurface[edge_i][space_i][j];
           }
         }
@@ -242,7 +245,6 @@ namespace Hermes
         // UExt
         if (this->nonlinear)
         {
-          this->u_ext_funcs[space_i]->free_fn();
           delete this->u_ext_funcs[space_i];
         }
       }
@@ -254,13 +256,11 @@ namespace Hermes
       {
         for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
         {
-          this->ext_funcs[ext_i]->free_fn();
           delete this->ext_funcs[ext_i];
         }
 
         for (int ext_i = 0; ext_i < ext_size; ext_i++)
         {
-          this->ext_funcs[u_ext_fns_size + ext_i]->free_fn();
           delete this->ext_funcs[u_ext_fns_size + ext_i];
         }
       }
@@ -281,13 +281,11 @@ namespace Hermes
       {
         for (int ext_i = 0; ext_i < local_u_ext_fns_size; ext_i++)
         {
-          this->ext_funcs_local[ext_i]->free_fn();
           delete this->ext_funcs_local[ext_i];
         }
 
         for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
         {
-          this->ext_funcs_local[local_u_ext_fns_size + ext_i]->free_fn();
           delete this->ext_funcs_local[local_u_ext_fns_size + ext_i];
         }
       }
@@ -440,15 +438,7 @@ namespace Hermes
           if (ext[ext_i])
           {
             if (ext[ext_i]->get_active_element())
-            {
-              if (ext[ext_i]->get_num_components() != target_array[u_ext_fns_size + ext_i]->nc)
-              {
-                target_array[u_ext_fns_size + ext_i]->free_fn();
-                delete target_array[u_ext_fns_size + ext_i];
-                target_array[u_ext_fns_size + ext_i] = preallocate_fn(ext[ext_i]);
-              }
               init_fn_preallocated(target_array[u_ext_fns_size + ext_i], ext[ext_i].get(), order);
-            }
           }
         }
       }
@@ -709,6 +699,8 @@ namespace Hermes
         ::free(ext_funcs);
       if (this->ext_funcs_local)
         ::free(ext_funcs_local);
+
+      pj_pool_release();
     }
 
     template<typename Scalar>
