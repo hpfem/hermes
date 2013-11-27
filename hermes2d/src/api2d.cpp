@@ -58,6 +58,9 @@ namespace Hermes
       }
 
       XMLPlatformUtils::Terminate();
+
+      pj_init();
+      pj_caching_pool_init(&Hermes2DMemoryPoolCache, NULL, 1024 * 1024 * 1024);
     }
 
     Api2D::~Api2D()
@@ -67,6 +70,8 @@ namespace Hermes
 
       for (std::map<Hermes2DApiParam, Parameter<int>*>::const_iterator it = this->integral_parameters.begin(); it != this->integral_parameters.end(); ++it)
         delete it->second;
+
+      pj_caching_pool_destroy(&Hermes2DMemoryPoolCache);
     }
 
     int Api2D::get_integral_param_value(Hermes2DApiParam param)
@@ -106,5 +111,6 @@ namespace Hermes
     }
 
     Hermes::Hermes2D::Api2D HERMES_API Hermes2DApi;
+    pj_caching_pool HERMES_API Hermes2DMemoryPoolCache;
   }
 }

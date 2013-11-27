@@ -95,6 +95,5 @@ namespace Hermes
 
   /// Global instance used inside Hermes which is also accessible to users.
   HERMES_COMMON_API extern Hermes::Api HermesCommonApi;
-  HERMES_COMMON_API extern pj_caching_pool HermesMemoryPoolCache;
 }
 #endif

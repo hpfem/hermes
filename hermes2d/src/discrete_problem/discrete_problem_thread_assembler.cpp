@@ -30,11 +30,6 @@ namespace Hermes
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
       ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0)
     {
-      this->FuncMemoryPool = pj_pool_create(&HermesMemoryPoolCache.factory, // the factory
-        "pool-DiscreteProblemThreadAssembler", // pool's name
-        sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * (H2D_MAX_NUMBER_EDGES + 1), // initial size
-        sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_NUMBER_EDGES, // increment size
-        NULL);
     }
 
     template<typename Scalar>
@@ -152,18 +147,30 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_funcs()
     {
+      pj_thread_desc rtpdesc;
+      pj_thread_t *thread;
+      pj_bzero(rtpdesc, sizeof(rtpdesc));
+      if (!pj_thread_is_registered())
+        pj_thread_register(NULL, rtpdesc, &thread);
+
+      this->FuncMemoryPool = pj_pool_create(&Hermes2DMemoryPoolCache.factory, // the factory
+        "pool-DiscreteProblemThreadAssembler", // pool's name
+        sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * (H2D_MAX_NUMBER_EDGES + 1), // initial size
+        sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_NUMBER_EDGES, // increment size
+        NULL);
+
       // Basis & test fns, u_ext funcs.
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-          this->funcs[space_i][j] = preallocate_fn<double>();
+          this->funcs[space_i][j] = preallocate_fn<double>(this->FuncMemoryPool);
 
         for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-          this->funcsSurface[edge_i][space_i][j] = preallocate_fn<double>();
+          this->funcsSurface[edge_i][space_i][j] = preallocate_fn<double>(this->FuncMemoryPool);
 
         if (this->nonlinear)
-          this->u_ext_funcs[space_i] = preallocate_fn<Scalar>();
+          this->u_ext_funcs[space_i] = preallocate_fn<Scalar>(this->FuncMemoryPool);
       }
 
       // Reallocation of wf-(nonlocal-) ext funcs.
@@ -183,10 +190,10 @@ namespace Hermes
       if (ext_size > 0 || u_ext_fns_size > 0)
       {
         for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
-          this->ext_funcs[ext_i] = preallocate_fn<Scalar>();
+          this->ext_funcs[ext_i] = preallocate_fn<Scalar>(this->FuncMemoryPool);
 
         for (int ext_i = 0; ext_i < ext_size; ext_i++)
-          this->ext_funcs[u_ext_fns_size + ext_i] = preallocate_fn<Scalar>();
+          this->ext_funcs[u_ext_fns_size + ext_i] = preallocate_fn<Scalar>(this->FuncMemoryPool);
       }
 
       // Calculating local sizes.
@@ -215,80 +222,17 @@ namespace Hermes
 
         // Initializaton of form-(local-)ext funcs
         for (int ext_i = 0; ext_i < local_u_ext_fns_size; ext_i++)
-          this->ext_funcs_local[ext_i] = preallocate_fn<Scalar>();
+          this->ext_funcs_local[ext_i] = preallocate_fn<Scalar>(this->FuncMemoryPool);
 
         for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
-          this->ext_funcs_local[local_u_ext_fns_size + ext_i] = preallocate_fn<Scalar>();
+          this->ext_funcs_local[local_u_ext_fns_size + ext_i] = preallocate_fn<Scalar>(this->FuncMemoryPool);
       }
     }
 
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_funcs()
     {
-      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
-      {
-        // Test functions
-        for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-        {
-          delete this->funcs[space_i][j];
-        }
-
-        // Test functions - surface
-        for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
-        {
-          for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-          {
-            delete this->funcsSurface[edge_i][space_i][j];
-          }
-        }
-
-        // UExt
-        if (this->nonlinear)
-        {
-          delete this->u_ext_funcs[space_i];
-        }
-      }
-
-      // Ext
-      int ext_size = this->wf->ext.size();
-      int u_ext_fns_size = this->wf->u_ext_fn.size();
-      if (ext_size > 0 || u_ext_fns_size > 0)
-      {
-        for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
-        {
-          delete this->ext_funcs[ext_i];
-        }
-
-        for (int ext_i = 0; ext_i < ext_size; ext_i++)
-        {
-          delete this->ext_funcs[u_ext_fns_size + ext_i];
-        }
-      }
-
-      // Ext - local
-      int local_ext_size = 0;
-      int local_u_ext_fns_size = 0;
-      for (int form_i = 0; form_i < this->wf->forms.size(); form_i++)
-      {
-        if (this->wf->forms[form_i]->ext.size() > local_ext_size)
-          local_ext_size = this->wf->forms[form_i]->ext.size();
-
-        if (this->wf->forms[form_i]->u_ext_fn.size() > local_u_ext_fns_size)
-          local_u_ext_fns_size = this->wf->forms[form_i]->u_ext_fn.size();
-      }
-
-      if (local_ext_size > 0 || local_u_ext_fns_size > 0)
-      {
-        for (int ext_i = 0; ext_i < local_u_ext_fns_size; ext_i++)
-        {
-          delete this->ext_funcs_local[ext_i];
-        }
-
-        for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
-        {
-          delete this->ext_funcs_local[local_u_ext_fns_size + ext_i];
-        }
-      }
+      pj_pool_release(this->FuncMemoryPool);
     }
 
     template<typename Scalar>
@@ -700,7 +644,7 @@ namespace Hermes
       if (this->ext_funcs_local)
         ::free(ext_funcs_local);
 
-      pj_pool_release();
+      ::free(this->local_stiffness_matrix);
     }
 
     template<typename Scalar>

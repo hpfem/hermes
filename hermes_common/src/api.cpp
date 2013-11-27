@@ -61,9 +61,6 @@ namespace Hermes
 #ifdef WITH_TC_MALLOC
     ::tc_set_new_mode(1);
 #endif
-
-    pj_init();
-    pj_caching_pool_init(&HermesMemoryPoolCache, NULL, 1024 * 1024 * 1024);
   }
 
   Api::~Api()
@@ -78,8 +75,6 @@ namespace Hermes
 
     for (std::map<HermesCommonApiParam, Parameter*>::const_iterator it = this->parameters.begin(); it != this->parameters.end(); ++it)
       delete it->second;
-
-    pj_caching_pool_destroy(&HermesMemoryPoolCache);
   }
 
   int Api::get_integral_param_value(HermesCommonApiParam param)
@@ -127,9 +122,7 @@ namespace Hermes
 
 #if defined(WIN32) || defined(_WINDOWS)
   __declspec(dllexport) Hermes::Api HermesCommonApi;
-  __declspec(dllexport) pj_caching_pool HermesMemoryPoolCache;
 #else
   Hermes::Api HermesCommonApi;
-  pj_caching_pool HermesMemoryPoolCache;
 #endif
 }
