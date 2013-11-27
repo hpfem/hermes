@@ -36,16 +36,8 @@ namespace Hermes
   
   Api::Api()
   {
-    // Dump stack upon some signals.
-    signal(SIGABRT, CallStack::dump);
-    signal(SIGFPE, CallStack::dump);
-    signal(SIGILL, CallStack::dump);
-    signal(SIGSEGV, CallStack::dump);
-    signal(SIGTERM, CallStack::dump);
-
     // Insert parameters.
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::numThreads,new Parameter(NUM_THREADS)));
-    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::exceptionsPrintCallstack,new Parameter(0)));
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::matrixSolverType, new Parameter(SOLVER_UMFPACK)));
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::directMatrixSolverType, new Parameter(SOLVER_UMFPACK)));
 #ifdef _DEBUG

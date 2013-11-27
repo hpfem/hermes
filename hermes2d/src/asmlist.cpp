@@ -23,9 +23,9 @@ namespace Hermes
     AsmList<Scalar>::AsmList(const AsmList<Scalar> & other)
     {
       this->cnt = other.cnt;
-      memcpy(this->idx, other.idx, sizeof(int) * ASMLIST_SIZE);
-      memcpy(this->dof, other.dof, sizeof(int) * ASMLIST_SIZE);
-      memcpy(this->coef, other.coef, sizeof(Scalar) * ASMLIST_SIZE);
+      memcpy(this->idx, other.idx, sizeof(int)* H2D_MAX_LOCAL_BASIS_SIZE);
+      memcpy(this->dof, other.dof, sizeof(int)* H2D_MAX_LOCAL_BASIS_SIZE);
+      memcpy(this->coef, other.coef, sizeof(Scalar)* H2D_MAX_LOCAL_BASIS_SIZE);
     }
 
     template<typename Scalar>
@@ -61,7 +61,7 @@ namespace Hermes
     template<typename Scalar>
     void AsmList<Scalar>::add_triplet(int i, int d, Scalar c)
     {
-      assert(cnt < ASMLIST_SIZE - 1);
+      assert(cnt < H2D_MAX_LOCAL_BASIS_SIZE - 1);
 
       idx[cnt] = i;
       dof[cnt] = d;

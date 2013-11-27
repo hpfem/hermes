@@ -74,12 +74,18 @@ namespace Hermes
         void free();
 
       protected:
+        /// Reallocation at the beginning of process_*.
+        /// Specific for Vectorizer
+        void reallocate_specific(int number_of_elements);
+
+        void deallocate();
+
         /// The 'curvature' epsilon.
         double curvature_epsilon;
 
         /// Information if user-supplied displacement functions have been provided.
         bool user_xdisp, user_ydisp;
-        
+
         /// Displacement functions, default to ZeroFunctions, may be supplied by set_displacement();
         MeshFunctionSharedPtr<double> xdisp, ydisp;
         double dmult;
@@ -88,6 +94,7 @@ namespace Hermes
         int yitem, component_y, value_type_y;
 
         double4* verts;  ///< vertices: (x, y, xvalue, yvalue) quadruples
+        MeshFunction<double>*** fns;
         int2* dashes;
 
         int dashes_count; ///< Real numbers of vertices, triangles and edges, dashes

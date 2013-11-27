@@ -25,40 +25,40 @@ namespace Hermes
     namespace Views
     {
       // vertices
-      static int*      ord_np[2]          = { num_vert_tri, num_vert_quad };
-      static double3*  ord_tables_tri[2]  = { vert_tri0, vert_tri1 };
+      static int*      ord_np[2] = { num_vert_tri, num_vert_quad };
+      static double3*  ord_tables_tri[2] = { vert_tri0, vert_tri1 };
       static double3*  ord_tables_quad[2] = { vert_quad0, vert_quad1 };
-      static double3** ord_tables[2]      = { ord_tables_tri, ord_tables_quad };
+      static double3** ord_tables[2] = { ord_tables_tri, ord_tables_quad };
 
       // triangles
-      static int*      num_elem[2]        = { num_elem_tri, num_elem_quad};
-      static int3*     ord_elem_tri[2]    = { elem_tri0, elem_tri1 };
-      static int3*     ord_elem_quad[2]   = { elem_quad0,  elem_quad1 };
-      static int3**    ord_elem[2]        = { ord_elem_tri, ord_elem_quad };
+      static int*      num_elem[2] = { num_elem_tri, num_elem_quad };
+      static int3*     ord_elem_tri[2] = { elem_tri0, elem_tri1 };
+      static int3*     ord_elem_quad[2] = { elem_quad0, elem_quad1 };
+      static int3**    ord_elem[2] = { ord_elem_tri, ord_elem_quad };
 
       // edges
-      static int*      num_edge[2]        = { num_edge_tri, num_edge_quad};
-      static int3*     ord_edge_tri[2]    = { edge_tri0, edge_tri1 };
-      static int3*     ord_edge_quad[2]   = { edge_quad0,  edge_quad1 };
-      static int3**    ord_edge[2]        = { ord_edge_tri, ord_edge_quad };
+      static int*      num_edge[2] = { num_edge_tri, num_edge_quad };
+      static int3*     ord_edge_tri[2] = { edge_tri0, edge_tri1 };
+      static int3*     ord_edge_quad[2] = { edge_quad0, edge_quad1 };
+      static int3**    ord_edge[2] = { ord_edge_tri, ord_edge_quad };
 
       // vertices_simple
-      static int*      ord_np_simple[2]          = { num_vert_tri_simple, num_vert_quad_simple };
-      static double3*  ord_tables_tri_simple[2]  = { vert_tri_simple, vert_tri_simple };
+      static int*      ord_np_simple[2] = { num_vert_tri_simple, num_vert_quad_simple };
+      static double3*  ord_tables_tri_simple[2] = { vert_tri_simple, vert_tri_simple };
       static double3*  ord_tables_quad_simple[2] = { vert_quad_simple, vert_quad_simple };
-      static double3** ord_tables_simple[2]      = { ord_tables_tri_simple, ord_tables_quad_simple };
+      static double3** ord_tables_simple[2] = { ord_tables_tri_simple, ord_tables_quad_simple };
 
       // triangles
-      static int*      num_elem_simple[2]        = { num_elem_tri_simple, num_elem_quad_simple};
-      static int3*     ord_elem_tri_simple[2]    = { elem_tri_simple, elem_tri_simple };
-      static int3*     ord_elem_quad_simple[2]   = { elem_quad_simple,  elem_quad_simple };
-      static int3**    ord_elem_simple[2]        = { ord_elem_tri_simple, ord_elem_quad_simple };
+      static int*      num_elem_simple[2] = { num_elem_tri_simple, num_elem_quad_simple };
+      static int3*     ord_elem_tri_simple[2] = { elem_tri_simple, elem_tri_simple };
+      static int3*     ord_elem_quad_simple[2] = { elem_quad_simple, elem_quad_simple };
+      static int3**    ord_elem_simple[2] = { ord_elem_tri_simple, ord_elem_quad_simple };
 
       // edges
-      static int*      num_edge_simple[2]        = { num_edge_tri_simple, num_edge_quad_simple};
-      static int3*     ord_edge_tri_simple[2]    = { edge_tri_simple, edge_tri_simple };
-      static int3*     ord_edge_quad_simple[2]   = { edge_quad_simple,  edge_quad_simple };
-      static int3**    ord_edge_simple[2]        = { ord_edge_tri_simple, ord_edge_quad_simple };
+      static int*      num_edge_simple[2] = { num_edge_tri_simple, num_edge_quad_simple };
+      static int3*     ord_edge_tri_simple[2] = { edge_tri_simple, edge_tri_simple };
+      static int3*     ord_edge_quad_simple[2] = { edge_quad_simple, edge_quad_simple };
+      static int3**    ord_edge_simple[2] = { ord_edge_tri_simple, ord_edge_quad_simple };
 
       static class Quad2DOrd : public Quad2D
       {
@@ -100,8 +100,8 @@ namespace Hermes
         {
           for (int j = 0; j <= 10; j++)
           {
-            assert((unsigned) p < sizeof(buffer)-5);
-            if(i == j)
+            assert((unsigned)p < sizeof(buffer)-5);
+            if (i == j)
               sprintf(buffer + p, "%d", i);
             else
               sprintf(buffer + p, "%d|%d", i, j);
@@ -113,10 +113,15 @@ namespace Hermes
 
       int Orderizer::add_vertex()
       {
-        if(this->vertex_count >= this->vertex_size)
+        if (this->vertex_count >= this->vertex_size)
         {
           this->vertex_size *= 2;
-          verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
+          this->verts = (double3*)realloc(verts, sizeof(double3)* vertex_size);
+          if ((!this->verts))
+          {
+            free();
+            throw Exceptions::Exception("Orderizer out of memory!");
+          }
         }
         return this->vertex_count++;
       }
@@ -129,39 +134,52 @@ namespace Hermes
         verts[index][2] = val;
       }
 
+      void Orderizer::reallocate_specific(int number_of_elements)
+      {
+        this->label_size = std::max(this->label_size, number_of_elements + 10);
+        this->label_count = 0;
+
+        if (this->verts)
+          this->verts = (double3*)realloc(this->verts, sizeof(double3)* this->vertex_size);
+        else
+          this->verts = (double3*)malloc(sizeof(double3)* this->vertex_size);
+
+        if (this->lvert)
+          this->lvert = (int*)realloc(this->lvert, sizeof(int)* label_size);
+        else
+          this->lvert = (int*)malloc(sizeof(int)* label_size);
+
+        if (this->ltext)
+          ltext = (char**)realloc(this->ltext, sizeof(char*)* label_size);
+        else
+          ltext = (char**)malloc(sizeof(char*)* label_size);
+
+        if (this->lbox)
+          lbox = (double2*)realloc(this->lbox, sizeof(double2)* label_size);
+        else
+          lbox = (double2*)malloc(sizeof(double2)* label_size);
+
+        if ((!this->lbox) || (!this->ltext) || (!this->verts) || (!this->lvert))
+        {
+          free();
+          throw Exceptions::Exception("Orderizer out of memory!");
+        }
+      }
+
       template<typename Scalar>
       void Orderizer::process_space(SpaceSharedPtr<Scalar> space, bool show_edge_orders)
       {
         // sanity check
-        if(space == nullptr)
+        if (space == nullptr)
           throw Hermes::Exceptions::Exception("Space is nullptr in Orderizer:process_space().");
 
-        if(!space->is_up_to_date())
+        if (!space->is_up_to_date())
           throw Hermes::Exceptions::Exception("The space is not up to date.");
 
-        label_count = 0;
-        vertex_count = 0;
-        triangle_count = 0;
-        edges_count = 0;
-
-        // estimate the required number of vertices and triangles
         MeshSharedPtr mesh = space->get_mesh();
-        int nn = mesh->get_num_active_elements();
-        this->vertex_size = std::max(this->vertex_size, 77 * nn);
-        this->triangle_size = std::max(this->triangle_size, 64 * nn);
-        this->edges_size = std::max(this->edges_size, 16 * nn);
-        this->label_size = std::max(this->label_size, nn + 10);
 
-        // reuse or allocate vertex, triangle and edge arrays
-        verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
-				this->tris = (int3*) realloc(this->tris, sizeof(int3) * this->triangle_size);
-				this->tri_markers = (int*) realloc(this->tri_markers, sizeof(int) * this->triangle_size);
-				this->edges = (int2*) realloc(this->edges, sizeof(int2) * this->edges_size);
-				this->edge_markers = (int*) realloc(this->edge_markers, sizeof(int) * this->edges_size);
-        this->empty = false;
-        lvert = (int*) realloc(lvert, sizeof(int) * label_size);
-        ltext = (char**) realloc(ltext, sizeof(char*) * label_size);
-        lbox = (double2*) realloc(lbox, sizeof(double2) * label_size);
+        // Reallocate.
+        this->reallocate_common(mesh);
 
         RefMap refmap;
         int type = 1;
@@ -173,24 +191,24 @@ namespace Hermes
         for_all_active_elements(e, mesh)
         {
           oo = o[4] = o[5] = space->get_element_order(e->id);
-          if(show_edge_orders)
-            for (unsigned int k = 0; k < e->get_nvert(); k++)
-              o[k] = space->get_edge_order(e, k);
-          else if(e->is_curved())
+          if (show_edge_orders)
+          for (unsigned int k = 0; k < e->get_nvert(); k++)
+            o[k] = space->get_edge_order(e, k);
+          else if (e->is_curved())
           {
-            if(e->is_triangle())
-              for (unsigned int k = 0; k < e->get_nvert(); k++)
-                o[k] = oo;
+            if (e->is_triangle())
+            for (unsigned int k = 0; k < e->get_nvert(); k++)
+              o[k] = oo;
             else
-              for (unsigned int k = 0; k < e->get_nvert(); k++)
-                o[k] = H2D_GET_H_ORDER(oo);
+            for (unsigned int k = 0; k < e->get_nvert(); k++)
+              o[k] = H2D_GET_H_ORDER(oo);
           }
 
           double3* pt;
           int np;
           double* x;
           double* y;
-          if(show_edge_orders || e->is_curved())
+          if (show_edge_orders || e->is_curved())
           {
             refmap.set_quad_2d(&quad_ord);
             refmap.set_active_element(e);
@@ -215,24 +233,24 @@ namespace Hermes
           assert(np <= 80);
 
           int mode = e->get_mode();
-          if(e->is_quad())
+          if (e->is_quad())
           {
             o[4] = H2D_GET_H_ORDER(oo);
             o[5] = H2D_GET_V_ORDER(oo);
           }
-          if(show_edge_orders || e->is_curved())
+          if (show_edge_orders || e->is_curved())
           {
             make_vert(lvert[label_count], x[0], y[0], o[4]);
 
             for (int i = 1; i < np; i++)
-              make_vert(id[i-1], x[i], y[i], o[(int) pt[i][2]]);
+              make_vert(id[i - 1], x[i], y[i], o[(int)pt[i][2]]);
 
             for (int i = 0; i < num_elem[mode][type]; i++)
               this->add_triangle(id[ord_elem[mode][type][i][0]], id[ord_elem[mode][type][i][1]], id[ord_elem[mode][type][i][2]], e->marker);
 
             for (int i = 0; i < num_edge[mode][type]; i++)
             {
-              if(e->en[ord_edge[mode][type][i][2]]->bnd || (y[ord_edge[mode][type][i][0] + 1] < y[ord_edge[mode][type][i][1] + 1]) ||
+              if (e->en[ord_edge[mode][type][i][2]]->bnd || (y[ord_edge[mode][type][i][0] + 1] < y[ord_edge[mode][type][i][1] + 1]) ||
                 ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
                 (x[ord_edge[mode][type][i][0] + 1] < x[ord_edge[mode][type][i][1] + 1])))
               {
@@ -246,7 +264,7 @@ namespace Hermes
             make_vert(lvert[label_count], x[0], y[0], o[5]);
 
             for (int i = 0; i < np; i++)
-              make_vert(id[i], x[i], y[i], o[(int) pt[i][2]]);
+              make_vert(id[i], x[i], y[i], o[(int)pt[i][2]]);
 
             for (int i = 0; i < num_elem_simple[mode][type]; i++)
               this->add_triangle(id[ord_elem_simple[mode][type][i][0]], id[ord_elem_simple[mode][type][i][1]], id[ord_elem_simple[mode][type][i][2]], e->marker);
@@ -260,10 +278,10 @@ namespace Hermes
           double xmin = 1e100, ymin = 1e100, xmax = -1e100, ymax = -1e100;
           for (unsigned int k = 0; k < e->get_nvert(); k++)
           {
-            if(e->vn[k]->x < xmin) xmin = e->vn[k]->x;
-            if(e->vn[k]->x > xmax) xmax = e->vn[k]->x;
-            if(e->vn[k]->y < ymin) ymin = e->vn[k]->y;
-            if(e->vn[k]->y > ymax) ymax = e->vn[k]->y;
+            if (e->vn[k]->x < xmin) xmin = e->vn[k]->x;
+            if (e->vn[k]->x > xmax) xmax = e->vn[k]->x;
+            if (e->vn[k]->y < ymin) ymin = e->vn[k]->y;
+            if (e->vn[k]->y > ymax) ymax = e->vn[k]->y;
           }
           lbox[label_count][0] = xmax - xmin;
           lbox[label_count][1] = ymax - ymin;
@@ -278,45 +296,43 @@ namespace Hermes
         int index;
 #pragma omp critical(realloc_triangles)
         {
-          if(this->del_slot >= 0) // reuse a slot after a deleted triangle
+          if (triangle_count >= triangle_size)
           {
-            index = this->del_slot;
-            del_slot = -1;
-          }
-          {
-            if(triangle_count >= triangle_size)
+            this->triangle_size *= 2;
+            tri_markers = (int*)realloc(tri_markers, sizeof(int)* triangle_size);
+            tris = (int3*)realloc(tris, sizeof(int3)* triangle_size);
+            if ((!tri_markers) || (!this->tris))
             {
-							tri_markers = (int*) realloc(tri_markers, sizeof(int) * (triangle_size * 2));
-              tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size * 2));
+              free();
+              throw Exceptions::Exception("Orderizer out of memory!");
             }
-            index = triangle_count++;
-
-            tris[index][0] = iv0;
-            tris[index][1] = iv1;
-            tris[index][2] = iv2;
-            tri_markers[index] = marker;
           }
+          index = triangle_count++;
         }
+        tris[index][0] = iv0;
+        tris[index][1] = iv1;
+        tris[index][2] = iv2;
+        tri_markers[index] = marker;
       }
-      
+
       void Orderizer::free()
       {
-        if(verts != nullptr)
+        if (verts != nullptr)
         {
           ::free(verts);
           verts = nullptr;
         }
-        if(lvert != nullptr)
+        if (lvert != nullptr)
         {
           ::free(lvert);
           lvert = nullptr;
         }
-        if(ltext != nullptr)
+        if (ltext != nullptr)
         {
           ::free(ltext);
           ltext = nullptr;
         }
-        if(lbox != nullptr)
+        if (lbox != nullptr)
         {
           ::free(lbox);
           lbox = nullptr;
@@ -336,7 +352,7 @@ namespace Hermes
         process_space(space);
 
         FILE* f = fopen(file_name, "wb");
-        if(f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
+        if (f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
 
         // Output header for vertices.
         fprintf(f, "# vtk DataFile Version 2.0\n");
@@ -383,7 +399,7 @@ namespace Hermes
         process_space(space);
 
         FILE* f = fopen(file_name, "wb");
-        if(f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
+        if (f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
 
         // Output header for vertices.
         fprintf(f, "# vtk DataFile Version 2.0\n");
@@ -430,7 +446,7 @@ namespace Hermes
         process_space(space);
 
         FILE* f = fopen(file_name, "wb");
-        if(f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
+        if (f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
 
         // Output header for vertices.
         fprintf(f, "# vtk DataFile Version 2.0\n");
@@ -445,7 +461,7 @@ namespace Hermes
 
         // Output elements.
         fprintf(f, "\n");
-        fprintf(f, "CELLS %d %d\n", this->edges_count, + 3 * this->edges_count);
+        fprintf(f, "CELLS %d %d\n", this->edges_count, +3 * this->edges_count);
         for (int i = 0; i < this->edges_count; i++)
           fprintf(f, "2 %d %d\n", this->edges[i][0], this->edges[i][1]);
 
@@ -477,7 +493,7 @@ namespace Hermes
 
       void Orderizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
-        if(verts == nullptr)
+        if (verts == nullptr)
           throw Exceptions::Exception("Cannot calculate AABB from nullptr vertices");
         calc_aabb(&verts[0][0], &verts[0][1], sizeof(double3), vertex_count, min_x, max_x, min_y, max_y);
       }

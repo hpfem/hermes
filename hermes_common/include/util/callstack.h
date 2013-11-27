@@ -24,11 +24,15 @@
 
 #include "util/compat.h"
 #include "common.h"
-#ifdef WITH_STACKTRACE
+#ifdef WITH_WINDOWS_STACKWALKER
   #ifdef _WINDOWS
     #include <windows.h>
     #include "StackWalker.h"
-
+    
+    /// A windows stack walker implementation
+    /// Usage:
+    ///  MyStackWalker sw;
+    ///  sw.ShowCallstack();
     class MyStackWalker : public StackWalker
     {
     public:
@@ -43,12 +47,4 @@
 
   #endif
 #endif
-
-/// Call stack class.
-class HERMES_API CallStack
-{
-public:
-  // dump the call stack objects to standard error
-  static void dump(int signalCode);
-};
 #endif

@@ -26,7 +26,7 @@ namespace Hermes
 
       Quad2DLin::Quad2DLin()
       {
-        max_order[0]  = max_order[1]  = 1;
+        max_order[0] = max_order[1] = 1;
         num_tables[0] = num_tables[1] = 2;
         tables = lin_tables;
         np = lin_np;
@@ -34,11 +34,11 @@ namespace Hermes
 
       double LinearizerBase::large_elements_fraction_of_mesh_size_threshold = 1e-2;
 
-      LinearizerBase::LinearizerBase(bool auto_max) : auto_max(auto_max), del_slot(-1), empty(true)
+      LinearizerBase::LinearizerBase(bool auto_max) : auto_max(auto_max), empty(true), states(nullptr), num_states(0)
       {
-				tris = nullptr;
+        tris = nullptr;
         tri_markers = nullptr;
-				edges = nullptr;
+        edges = nullptr;
         edge_markers = nullptr;
         hash_table = nullptr;
         info = nullptr;
@@ -63,23 +63,23 @@ namespace Hermes
 
       void LinearizerBase::free()
       {
-        if(tris != nullptr)
+        if (tris != nullptr)
         {
           ::free(tris);
           tris = nullptr;
-					::free(tri_markers);
-					tri_markers = nullptr;
+          ::free(tri_markers);
+          tri_markers = nullptr;
         }
-        if(edges != nullptr)
+        if (edges != nullptr)
         {
           ::free(edges);
           edges = nullptr;
-					::free(edge_markers);
-					edge_markers = nullptr;
+          ::free(edge_markers);
+          edge_markers = nullptr;
         }
-        if(this->level_map)
+        if (this->level_map)
         {
-          delete [] level_map;
+          delete[] level_map;
           level_map = nullptr;
         }
         this->empty = true;
@@ -109,7 +109,7 @@ namespace Hermes
       void LinearizerBase::process_edge(int iv1, int iv2, int marker)
       {
         int mid = peek_vertex(iv1, iv2);
-        if(mid != -1)
+        if (mid != -1)
         {
           process_edge(iv1, mid, marker);
           process_edge(mid, iv2, marker);
@@ -121,26 +121,26 @@ namespace Hermes
       void LinearizerBase::init_linearizer_base(MeshFunctionSharedPtr<double> sln)
       {
         lock_data();
-        if(this->level_map)
+        if (this->level_map)
         {
-          delete [] level_map;
+          delete[] level_map;
           level_map = nullptr;
         }
         this->level_map = new int[sln->get_mesh()->get_max_element_id()];
-        memset(this->level_map, -1, sizeof(int) * sln->get_mesh()->get_max_element_id());
+        memset(this->level_map, -1, sizeof(int)* sln->get_mesh()->get_max_element_id());
       }
 
       void LinearizerBase::deinit_linearizer_base()
       {
         unlock_data();
       }
-      
+
       int LinearizerBase::get_max_level(Element* e, int polynomial_order, MeshSharedPtr mesh)
       {
-        if(this->level_map[e->id] != -1)
+        if (this->level_map[e->id] != -1)
           return this->level_map[e->id];
 
-        if(e->is_curved())
+        if (e->is_curved())
           this->level_map[e->id] = LIN_MAX_LEVEL;
         else
         {
@@ -154,7 +154,7 @@ namespace Hermes
           this->level_map[e->id] = std::min<int>(LIN_MAX_LEVEL, (int)ratio);
         }
 
-        if(e->is_quad() && polynomial_order == 1)
+        if (e->is_quad() && polynomial_order == 1)
           this->level_map[e->id] = 2;
         return this->level_map[e->id];
       }
@@ -163,10 +163,10 @@ namespace Hermes
       {
         // count the number of hanging mid-edge vertices
         int n = 0;
-        if(mid0 >= 0) n++;
-        if(mid1 >= 0) n++;
-        if(mid2 >= 0) n++;
-        if(n == 3)
+        if (mid0 >= 0) n++;
+        if (mid1 >= 0) n++;
+        if (mid2 >= 0) n++;
+        if (n == 3)
         {
           // three hanging vertices: split into four triangles
           regularize_triangle(iv0, mid0, mid2, peek_vertex(iv0, mid0), -1, peek_vertex(mid2, iv0), marker);
@@ -174,16 +174,16 @@ namespace Hermes
           regularize_triangle(mid2, mid1, iv2, -1, peek_vertex(mid1, iv2), peek_vertex(iv2, mid2), marker);
           regularize_triangle(mid0, mid1, mid2, -1, -1, -1, marker);
         }
-        else if(n == 2)
+        else if (n == 2)
         {
           // two hanging vertices: split into three triangles
-          if(mid0 < 0)
+          if (mid0 < 0)
           {
             regularize_triangle(iv0, iv1, mid1, peek_vertex(iv0, iv1), peek_vertex(iv1, mid1), -1, marker);
             regularize_triangle(mid2, iv0, mid1, peek_vertex(mid2, iv0), -1, -1, marker);
             regularize_triangle(mid2, mid1, iv2, -1, peek_vertex(mid1, iv2), peek_vertex(iv2, mid2), marker);
           }
-          else if(mid1 < 0)
+          else if (mid1 < 0)
           {
             regularize_triangle(iv1, iv2, mid2, peek_vertex(iv1, iv2), peek_vertex(iv2, mid2), -1, marker);
             regularize_triangle(mid0, iv1, mid2, peek_vertex(mid0, iv1), -1, -1, marker);
@@ -196,15 +196,15 @@ namespace Hermes
             regularize_triangle(mid1, mid0, iv1, -1, peek_vertex(mid0, iv1), peek_vertex(iv1, mid1), marker);
           }
         }
-        else if(n == 1)
+        else if (n == 1)
         {
           // one hanging vertex: split into two triangles
-          if(mid0 >= 0)
+          if (mid0 >= 0)
           {
             regularize_triangle(iv0, mid0, iv2, peek_vertex(iv0, mid0), -1, peek_vertex(iv2, iv0), marker);
             regularize_triangle(mid0, iv1, iv2, peek_vertex(mid0, iv1), peek_vertex(iv1, iv2), -1, marker);
           }
-          else if(mid1 >= 0)
+          else if (mid1 >= 0)
           {
             regularize_triangle(iv1, mid1, iv0, peek_vertex(iv1, mid1), -1, peek_vertex(iv0, iv1), marker);
             regularize_triangle(mid1, iv2, iv0, peek_vertex(mid1, iv2), peek_vertex(iv2, iv0), -1, marker);
@@ -226,10 +226,10 @@ namespace Hermes
       {
 #pragma omp critical(realloc_edges)
         {
-          if(edges_count >= edges_size)
+          if (edges_count >= edges_size)
           {
-						edges = (int2*) realloc(edges, sizeof(int2) * (edges_size * 1.5));
-            edge_markers = (int*) realloc(edge_markers, sizeof(int) * (edges_size = edges_size * 1.5));
+            edges = (int2*)realloc(edges, sizeof(int2)* (edges_size * 1.5));
+            edge_markers = (int*)realloc(edge_markers, sizeof(int)* (edges_size = edges_size * 1.5));
           }
           edges[edges_count][0] = iv1;
           edges[edges_count][1] = iv2;
@@ -240,12 +240,12 @@ namespace Hermes
       int LinearizerBase::peek_vertex(int p1, int p2)
       {
         // search for a vertex with parents p1, p2
-        if(p1 > p2) std::swap(p1, p2);
+        if (p1 > p2) std::swap(p1, p2);
         int index = hash(p1, p2);
         int i = hash_table[index];
         while (i >= 0)
         {
-          if(info[i][0] == p1 && info[i][1] == p2) return i;
+          if (info[i][0] == p1 && info[i][1] == p2) return i;
           i = info[i][2];
         }
         return -1;
@@ -256,35 +256,28 @@ namespace Hermes
         int index;
 #pragma omp critical(realloc_triangles)
         {
-          if(this->del_slot >= 0) // reuse a slot after a deleted triangle
+          if (triangle_count >= triangle_size)
           {
-            index = this->del_slot;
-            del_slot = -1;
+            tris = (int3*)realloc(tris, sizeof(int3)* (triangle_size * 2));
+            tri_markers = (int*)realloc(tri_markers, sizeof(int)* (triangle_size = triangle_size * 2));
           }
-          {
-            if(triangle_count >= triangle_size)
-						{
-							tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size * 2));
-              tri_markers = (int*) realloc(tri_markers, sizeof(int) * (triangle_size = triangle_size * 2));
-						}
-            index = triangle_count++;
-
-            tris[index][0] = iv0;
-            tris[index][1] = iv1;
-            tris[index][2] = iv2;
-						tri_markers[index] = marker;
-          }
+          index = triangle_count++;
         }
+
+        tris[index][0] = iv0;
+        tris[index][1] = iv1;
+        tris[index][2] = iv2;
+        tri_markers[index] = marker;
       }
 
       int LinearizerBase::hash(int p1, int p2)
       {
-        return (984120265*p1 + 125965121*p2) & (vertex_size - 1);
+        return (984120265 * p1 + 125965121 * p2) & (vertex_size - 1);
       }
 
       void LinearizerBase::set_max_absolute_value(double max_abs)
       {
-        if(max_abs < 0.0)
+        if (max_abs < 0.0)
           this->warn("Setting of maximum absolute value in Linearizer with a negative value");
         else
         {
@@ -311,7 +304,7 @@ namespace Hermes
 
         uint8_t* ptr_x = (uint8_t*)x;
         uint8_t* ptr_y = (uint8_t*)y;
-        for(int i = 0; i < num; i++, ptr_x += stride, ptr_y += stride)
+        for (int i = 0; i < num; i++, ptr_x += stride, ptr_y += stride)
         {
           *min_x = std::min(*min_x, *((double*)ptr_x));
           *min_y = std::min(*min_y, *((double*)ptr_y));
@@ -324,10 +317,10 @@ namespace Hermes
       {
         return this->tris;
       }
-			int* LinearizerBase::get_triangle_markers()
-			{
-				return this->tri_markers;
-			}
+      int* LinearizerBase::get_triangle_markers()
+      {
+        return this->tri_markers;
+      }
       int LinearizerBase::get_num_triangles()
       {
         return this->triangle_count;
@@ -336,13 +329,59 @@ namespace Hermes
       {
         return this->edges;
       }
-			int* LinearizerBase::get_edge_markers()
-			{
-				return this->edge_markers;
-			}
+      int* LinearizerBase::get_edge_markers()
+      {
+        return this->edge_markers;
+      }
       int LinearizerBase::get_num_edges()
       {
         return this->edges_count;
+      }
+
+      static const int default_allocation_multiplier_vertices = 10;
+      static const int default_allocation_multiplier_triangles = 15;
+      static const int default_allocation_multiplier_edges = 10;
+
+      static const int default_allocation_minsize_vertices = 10000;
+      static const int default_allocation_minsize_triangles = 15000;
+      static const int default_allocation_minsize_edges = 10000;
+
+      void LinearizerBase::reallocate_common(MeshSharedPtr mesh)
+      {
+        int number_of_elements = mesh->get_num_elements();
+
+        this->vertex_size = std::max(default_allocation_multiplier_vertices * number_of_elements, std::max(this->vertex_size, default_allocation_minsize_vertices));
+        this->triangle_size = std::max(default_allocation_multiplier_triangles * number_of_elements, std::max(this->triangle_size, default_allocation_minsize_triangles));
+        this->edges_size = std::max(default_allocation_multiplier_edges * number_of_elements, std::max(this->edges_size, default_allocation_minsize_edges));
+
+        // Set count.
+        this->vertex_count = 0;
+        this->triangle_count = 0;
+        this->edges_count = 0;
+
+        if (this->tris)
+          this->tris = (int3*)realloc(this->tris, sizeof(int3)* this->triangle_size);
+        else
+          this->tris = (int3*)malloc(sizeof(int3)* this->triangle_size);
+        if (this->tri_markers)
+          this->tri_markers = (int*)realloc(this->tri_markers, sizeof(int)* this->triangle_size);
+        else
+          this->tri_markers = (int*)malloc(sizeof(int)* this->triangle_size);
+        if (this->edges)
+          this->edges = (int2*)realloc(this->edges, sizeof(int2)* this->edges_size);
+        else
+          this->edges = (int2*)malloc(sizeof(int2)* this->edges_size);
+        if (this->edge_markers)
+          this->edge_markers = (int*)realloc(this->edge_markers, sizeof(int)* this->edges_size);
+        else
+          this->edge_markers = (int*)malloc(sizeof(int)* this->edges_size);
+
+        this->empty = false;
+
+        this->reallocate_specific(number_of_elements);
+
+        if (!this->tris || !this->tri_markers || !this->edges || !this->edge_markers)
+          throw Exceptions::Exception("Linearizer out of memory!");
       }
     }
   }

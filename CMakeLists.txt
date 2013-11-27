@@ -59,9 +59,6 @@ project(hermes)
   set(WITH_MATIO NO)
   set(MATIO_WITH_HDF5 NO)
 
-  # Optional stacktrace - in development
-  set(WITH_STACKTRACE NO)
-  
   #### Solvers ###
   # UMFPACK is chosen by default.
   set(WITH_UMFPACK YES)
@@ -85,8 +82,8 @@ project(hermes)
   set(WITH_TRILINOS           NO)
     
   ### Mesh format ###
-    set(WITH_EXODUSII           NO)
-    set(WITH_HDF5               NO)
+  set(WITH_EXODUSII           NO)
+  set(WITH_HDF5               NO)
 
   ### Others ###
   # Parallel execution.
@@ -104,7 +101,9 @@ project(hermes)
     # set(MPI_LIBRARIES         -lmpi)
     # set(MPI_INCLUDE_PATH      /usr/include/openmpi
 
-  
+    # Optional Windows stacktrace
+    set(WITH_WINDOWS_STACKWALKER NO)
+    
   ################################## CURRENTLY NOT SUPPORTED ###################################
   #  \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/
   
@@ -129,14 +128,10 @@ project(hermes)
     set(PETSC_ARCH              petsc-arch-without-scalar-type)
 
   #  /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\
-	################################## CURRENTLY NOT SUPPORTED ###################################
+  ################################## CURRENTLY NOT SUPPORTED ###################################
   
-	### END DEFAULT CONFIGURATION ################################################################
+  ### END DEFAULT CONFIGURATION ################################################################
   ##############################################################################################
-  
-  ##############################################################################################
-  ##############################################################################################
-  
   ##############################################################################################
   ### INTERNALS FOLLOW - DO NOT CHANGE #########################################################
     
@@ -425,12 +420,12 @@ project(hermes)
     include_directories(${MPI_INCLUDE_PATH})
   endif(WITH_MPI)
   
-  IF(WITH_STACKTRACE)
+  IF(WITH_WINDOWS_STACKWALKER)
     IF(MSVC)
       find_package(STACK_WALKER REQUIRED)
       include_directories(${STACK_WALKER_INCLUDE_DIR})
     ENDIF(MSVC)
-  ENDIF(WITH_STACKTRACE)
+  ENDIF(WITH_WINDOWS_STACKWALKER)
 
   # Match debug or release version of all other libraries.
   DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)

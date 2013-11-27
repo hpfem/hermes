@@ -17,14 +17,12 @@
 #define __H2D_ASMLIST_H
 
 #include "global.h"
+#include "shapeset/shapeset.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
-    /// This has to be big enough - i.e. higher than the maximum number of polynomials on an element
-    static const unsigned int ASMLIST_SIZE = 137;
-
     /// AsmList is a simple container for the element assembly arrays idx, dof and coef.
     /// These arrays are filled by Space::get_element_assembly_list() and used by the
     /// assembling procedure and the Solution class. The arrays are allocated and deallocated
@@ -47,9 +45,9 @@ namespace Hermes
       Scalar* get_coef();
       unsigned int get_cnt();
 
-      int idx[ASMLIST_SIZE];      ///< array of shape function indices
-      int dof[ASMLIST_SIZE];      ///< array of basis function numbers (DOFs)
-      Scalar coef[ASMLIST_SIZE];  ///< array of coefficients
+      int idx[H2D_MAX_LOCAL_BASIS_SIZE];      ///< array of shape function indices
+      int dof[H2D_MAX_LOCAL_BASIS_SIZE];      ///< array of basis function numbers (DOFs)
+      Scalar coef[H2D_MAX_LOCAL_BASIS_SIZE];  ///< array of coefficients
       unsigned int cnt;       ///< the number of items in the arrays idx, dof and coef
 
       /// Adds a record for one basis function (shape functions index, basis functions index, coefficient).

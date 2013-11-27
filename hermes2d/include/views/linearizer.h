@@ -83,6 +83,12 @@ namespace Hermes
         void free();
 
       protected:
+        /// Reallocation at the beginning of process_*.
+        /// Specific for Linearizer
+        void reallocate_specific(int number_of_elements);
+
+        void deallocate();
+
         /// The 'curvature' epsilon.
         double curvature_epsilon;
 
@@ -94,6 +100,7 @@ namespace Hermes
         double dmult;
 
         int3* tris_contours;      ///< triangles: vertex index triplets
+        MeshFunction<double>*** fns;
         int triangle_contours_count;
         double3* verts;  ///< vertices: (x, y, value) triplets
 

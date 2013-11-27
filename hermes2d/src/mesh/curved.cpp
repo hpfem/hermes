@@ -450,7 +450,7 @@ namespace Hermes
           SB[1] = B[1] - S[1];
           double R = sqrt(sqr(SA[0]) + sqr(SA[1]));
           double R2 = sqrt(sqr(SB[0]) + sqr(SB[1]));
-          if (std::abs(R - R2) > Hermes::HermesEpsilon)
+          if (std::abs(R - R2) > Hermes::HermesSqrtEpsilon)
             throw Hermes::Exceptions::Exception("Internal error in nurbs_edge() - bad radius R.");
 
           // Normal vectors to circular arc at edge end points A, B.

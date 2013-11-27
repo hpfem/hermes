@@ -47,8 +47,6 @@ namespace Hermes
     void Exception::print_msg() const
     {
       printf("Exception: %s\n", message);
-      if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::exceptionsPrintCallstack) == 1)
-        CallStack::dump(0);
     }
 
     Exception* Exception::clone()

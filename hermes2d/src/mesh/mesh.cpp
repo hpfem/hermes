@@ -1199,6 +1199,7 @@ namespace Hermes
         {
           Element* e_temp = elements.add();
           e_temp->used = false;
+          e_temp->cm = nullptr;
           continue;
         }
         Element* enew;

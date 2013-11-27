@@ -336,7 +336,8 @@ namespace Hermes
           }
           catch(std::exception& exception)
           {
-            this->exceptionMessageCaughtInParallelBlock = exception.what();
+#pragma omp critical (exceptionMessageCaughtInParallelBlock)
+              this->exceptionMessageCaughtInParallelBlock = exception.what();
           }
         }
       }
