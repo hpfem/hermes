@@ -5,13 +5,13 @@
 int polynomialDegree = 2;
 int initialRefinementsCount = 4;
 const Algorithm algorithm = Multiscale;
-const SolvedExample solvedExample = CircularConvection;
+const SolvedExample solvedExample = SolvedExample::MovingPeak;
 double MovingPeakDiffusivity = 1e-2;
 const EulerLimiterType limiter_type = VertexBased;
 
-double diffusivity = 1e-2;
+double diffusivity = 1e-3;
 double s = -1;
-double CFL = 128.;
+double CFL = 1.;
 
 int main(int argc, char* argv[])
 {
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
   {
     logger.info("Multiscale solver");
     
-    multiscale_decomposition(mesh, solvedExample, polynomialDegree, previous_mean_values, previous_derivatives, diffusivity, s, sigma, time_step_length,
+    multiscale_decomposition(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_mean_values, previous_derivatives, diffusivity, s, sigma, time_step_length,
     initial_sln, solution, exact_solution, &solution_view, &exact_view, logger, logger_details);
     
     cpu_time.tick();
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
 
       MeshFunctionSharedPtr<double> previous_solution_local(new ExactSolutionMovingPeak(mesh, MovingPeakDiffusivity, M_PI / 2.));
   
-      p_multigrid(mesh, solvedExample, polynomialDegree, previous_solution_local, diffusivity, time_step_length, 
+      p_multigrid(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_solution_local, diffusivity, time_step_length,
         solution, exact_solution, &solution_view, &exact_view, s, sigma, logger, logger_details, steps[si]);
         
       cpu_time.tick();
