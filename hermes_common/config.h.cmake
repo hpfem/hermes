@@ -21,6 +21,7 @@
 #cmakedefine WITH_MPI
 
 #cmakedefine WITH_TC_MALLOC
+#cmakedefine WITH_PJLIB
 #cmakedefine WITH_BSON
 #cmakedefine WITH_MATIO
 #cmakedefine MONGO_STATIC_BUILD

@@ -85,7 +85,12 @@ namespace Hermes
 
     /// Global instance used inside Hermes which is also accessible to users.
     extern HERMES_API Hermes::Hermes2D::Api2D Hermes2DApi;
+#ifdef WITH_PJLIB
     extern HERMES_API pj_caching_pool Hermes2DMemoryPoolCache;
+#else
+#define pj_pool_t void
+#define pj_pool_alloc(T, size) malloc(size)
+#endif
   }
 }
 #endif

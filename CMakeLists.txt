@@ -101,6 +101,9 @@ project(hermes)
     # set(MPI_LIBRARIES         -lmpi)
     # set(MPI_INCLUDE_PATH      /usr/include/openmpi
 
+    # PJLIB - memory pool implementation
+    set(WITH_PJLIB               NO)
+      
     # Optional Windows stacktrace
     set(WITH_WINDOWS_STACKWALKER NO)
     
@@ -269,7 +272,12 @@ project(hermes)
     find_package(TCMALLOC REQUIRED)
     include_directories(${TCMALLOC_INCLUDE_DIR})
   endif(WITH_TC_MALLOC)
-
+  
+  if(WITH_PJLIB)
+    find_package(PJLIB REQUIRED)
+    include_directories(${PJLIB_INCLUDE_DIR})
+  endif(WITH_PJLIB)
+  
   IF(DEFINED BSON_LIBRARY)
     IF(DEFINED BSON_INCLUDE_DIR)
       include_directories(${BSON_INCLUDE_DIR})

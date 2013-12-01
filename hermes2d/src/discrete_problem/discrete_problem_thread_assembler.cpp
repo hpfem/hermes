@@ -96,6 +96,10 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear_, bool add_dirichlet_lift_)
     {
+#ifdef WITH_PJLIB
+      this->init_funcs_memory_pool();
+#endif
+
       // Basic settings.
       this->nonlinear = nonlinear_;
       this->add_dirichlet_lift = add_dirichlet_lift_;
@@ -145,8 +149,9 @@ namespace Hermes
       this->init_funcs();
     }
 
+#ifdef WITH_PJLIB
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_funcs()
+    void DiscreteProblemThreadAssembler<Scalar>::init_funcs_memory_pool()
     {
       pj_thread_desc rtpdesc;
       pj_thread_t *thread;
@@ -159,7 +164,12 @@ namespace Hermes
         sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * (H2D_MAX_NUMBER_EDGES + 1), // initial size
         sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_NUMBER_EDGES, // increment size
         NULL);
+    }
+#endif
 
+    template<typename Scalar>
+    void DiscreteProblemThreadAssembler<Scalar>::init_funcs()
+    {
       // Basis & test fns, u_ext funcs.
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
@@ -233,7 +243,61 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_funcs()
     {
+#ifdef WITH_PJLIB
       pj_pool_release(this->FuncMemoryPool);
+#else
+
+      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+      {
+        // Test functions
+        for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+          delete this->funcs[space_i][j];
+
+        // Test functions - surface
+        for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
+        {
+          for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+            delete this->funcsSurface[edge_i][space_i][j];
+        }
+
+        // UExt
+        if (this->nonlinear)
+          delete this->u_ext_funcs[space_i];
+      }
+
+      // Ext
+      int ext_size = this->wf->ext.size();
+      int u_ext_fns_size = this->wf->u_ext_fn.size();
+      if (ext_size > 0 || u_ext_fns_size > 0)
+      {
+        for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
+          delete this->ext_funcs[ext_i];
+
+        for (int ext_i = 0; ext_i < ext_size; ext_i++)
+          delete this->ext_funcs[u_ext_fns_size + ext_i];
+      }
+
+      // Ext - local
+      int local_ext_size = 0;
+      int local_u_ext_fns_size = 0;
+      for (int form_i = 0; form_i < this->wf->forms.size(); form_i++)
+      {
+        if (this->wf->forms[form_i]->ext.size() > local_ext_size)
+          local_ext_size = this->wf->forms[form_i]->ext.size();
+
+        if (this->wf->forms[form_i]->u_ext_fn.size() > local_u_ext_fns_size)
+          local_u_ext_fns_size = this->wf->forms[form_i]->u_ext_fn.size();
+      }
+
+      if (local_ext_size > 0 || local_u_ext_fns_size > 0)
+      {
+        for (int ext_i = 0; ext_i < local_u_ext_fns_size; ext_i++)
+          delete this->ext_funcs_local[ext_i];
+
+        for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
+          delete this->ext_funcs_local[local_u_ext_fns_size + ext_i];
+      }
+#endif
     }
 
     template<typename Scalar>

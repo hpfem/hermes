@@ -24,7 +24,6 @@
 
 #include "util/compat.h"
 #include "common.h"
-#include "pjlib.h"
 
 namespace Hermes
 {

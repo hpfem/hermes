@@ -81,6 +81,11 @@ inline int omp_get_num_threads( ) { return 1; }
 inline int omp_get_thread_num( ) { return 0; }
 #endif
 
+#ifdef WITH_PJLIB
+#include "pjlib.h"
+#endif
+
+
 /// Int types handling.
 #ifdef JU_WIN
 typedef __int8           int8_t;

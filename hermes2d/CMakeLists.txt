@@ -636,9 +636,16 @@ project(hermes2d)
       ${ANTTWEAKBAR_LIBRARY}
       ${XSD_LIBRARY}
       ${XERCES_LIBRARY}
+      ${PJLIB_LIBRARY}
       ${LAPACK_LIBRARY}
       ${CLAPACK_LIBRARY} ${BLAS_LIBRARY}
     )
+    
+    if(MSVC)
+      if(WITH_PJLIB)
+        TARGET_LINK_LIBRARIES(${HERMES_LIB} Ws2_32 wsock32)
+      endif(WITH_PJLIB)
+    endif(MSVC)
   endmacro(BUILD_2D_LIB)
 
   # Build and install:
