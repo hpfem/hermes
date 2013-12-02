@@ -55,11 +55,7 @@ namespace Hermes
       void init_funcs();
       /// Func Memory Pool
       pj_pool_t *FuncMemoryPool;
-
-#ifdef WITH_PJLIB
-      template<typename Scalar>
-      void DiscreteProblemThreadAssembler<Scalar>::init_funcs_memory_pool()
-#endif
+      void init_funcs_memory_pool();
 
       /// De-initialize Func storages.
       void deinit_funcs();

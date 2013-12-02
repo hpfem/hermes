@@ -631,16 +631,15 @@ namespace Hermes
         }
 
         Traverse trav_master(ydisp == nullptr ? (xdisp == nullptr ? 1 : 2) : (xdisp == nullptr ? 2 : 3));
-        int num_states;
-        states = trav_master.get_states(meshes, num_states);
+        states = trav_master.get_states(meshes, this->num_states);
 
 #pragma omp parallel shared(trav_master) num_threads(num_threads_used)
         {
           int thread_number = omp_get_thread_num();
-          int start = (num_states / num_threads_used) * thread_number;
-          int end = (num_states / num_threads_used) * (thread_number + 1);
+          int start = (this->num_states / num_threads_used) * thread_number;
+          int end = (this->num_states / num_threads_used) * (thread_number + 1);
           if (thread_number == num_threads_used - 1)
-            end = num_states;
+            end = this->num_states;
 
           for (int state_i = start; state_i < end; state_i++)
           {

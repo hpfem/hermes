@@ -96,9 +96,8 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear_, bool add_dirichlet_lift_)
     {
-#ifdef WITH_PJLIB
+      // Init the memory pool - if PJLIB is linked, it will do the magic, if not, it will initialize the pointer to null.
       this->init_funcs_memory_pool();
-#endif
 
       // Basic settings.
       this->nonlinear = nonlinear_;
@@ -149,10 +148,10 @@ namespace Hermes
       this->init_funcs();
     }
 
-#ifdef WITH_PJLIB
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_funcs_memory_pool()
     {
+#ifdef WITH_PJLIB
       pj_thread_desc rtpdesc;
       pj_thread_t *thread;
       pj_bzero(rtpdesc, sizeof(rtpdesc));
@@ -164,8 +163,10 @@ namespace Hermes
         sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * (H2D_MAX_NUMBER_EDGES + 1), // initial size
         sizeof(Func<Scalar>) * H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_NUMBER_EDGES, // increment size
         NULL);
-    }
+#else
+      this->FuncMemoryPool = nullptr;
 #endif
+    }
 
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_funcs()
