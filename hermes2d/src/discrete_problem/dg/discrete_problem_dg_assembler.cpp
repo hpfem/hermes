@@ -331,7 +331,7 @@ namespace Hermes
                 Scalar val = 0.5 * res * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
                   * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
 
-                local_stiffness_matrix[i * H2D_MAX_LOCAL_BASIS_SIZE + j] = val;
+                local_stiffness_matrix[i * 2 * H2D_MAX_LOCAL_BASIS_SIZE + j] = val;
               }
             }
           }
