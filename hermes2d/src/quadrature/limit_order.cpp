@@ -65,6 +65,7 @@ namespace Hermes
     HERMES_API void warn_order()
     {
       if(HermesCommonApi.get_integral_param_value(Hermes::showInternalWarnings))
+      {
         if(!warned_order)
         {
   #pragma omp critical (warn_oder)
@@ -75,6 +76,7 @@ namespace Hermes
             warned_order = true;
           }
         }
+      }
     }
 
     HERMES_API void limit_order(int& o, ElementMode2D mode)

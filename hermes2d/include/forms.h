@@ -118,9 +118,69 @@ namespace Hermes
 
 #pragma region Func
     /// Calculated function values (from the class Function) on an element for assembling.
+    /// Internal.
     /// @ingroup inner
     template<typename Scalar>
     class HERMES_API Func
+    {
+    };
+
+    /// Calculated function values (from the class Function) on an element for assembling.
+    /// @ingroup inner
+    template<>
+    class HERMES_API Func<double>
+    {
+    public:
+      /// Constructor.
+      Func();
+      /// Constructor.
+      /** \param[in] num_gip A number of integration points.
+      *  \param[in] num_comps A number of components. */
+      Func(int np, int nc);
+      union
+      {
+        double val[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        double val0[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      };
+
+      union
+      {
+        double dx[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        double val1[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      };
+      
+      union
+      {
+        double dy[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        double curl[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      };
+
+      union
+      {
+        double laplace[H2D_MAX_INTEGRATION_POINTS_COUNT];
+        double div[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      };
+
+      /// Number of integration points used by this intance.
+      int np;
+      /// Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
+      int nc;
+      /// Calculate this -= func for each function expations and each integration point.
+      /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
+      void subtract(Func<double>* func);
+      /// Subtract version specifying just one attribute.
+      void subtract(double* attribute, double* other_attribute);
+      /// Calculate this += func for each function expations and each integration point.
+      /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
+      void add(Func<double>* func);
+      /// Add version specifying just one attribute.
+      void add(double* attribute, double* other_attribute);
+    };
+
+    /// Calculated function values (from the class Function) on an element for assembling.
+    /// @ingroup inner
+    template<>
+    class HERMES_API Func<std::complex<double> >
     {
     public:
       /// Constructor.
@@ -130,33 +190,32 @@ namespace Hermes
       *  \param[in] num_comps A number of components. */
       Func(int np, int nc);
 
-      Scalar val[H2D_MAX_INTEGRATION_POINTS_COUNT];
-      Scalar val0[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      std::complex<double> val[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      std::complex<double> val0[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
-      Scalar dx[H2D_MAX_INTEGRATION_POINTS_COUNT];
-      Scalar val1[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      std::complex<double> dx[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      std::complex<double> val1[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
-      Scalar dy[H2D_MAX_INTEGRATION_POINTS_COUNT];
-      Scalar curl[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      std::complex<double> dy[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      std::complex<double> curl[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
-      Scalar laplace[H2D_MAX_INTEGRATION_POINTS_COUNT];
-      Scalar div[H2D_MAX_INTEGRATION_POINTS_COUNT];
-
-      /// Calculate this -= func for each function expations and each integration point.
-      /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
-      void subtract(Func<Scalar>* func);
-      /// Subtract version specifying just one attribute.
-      void subtract(Scalar* attribute, Scalar* other_attribute);
-      /// Calculate this += func for each function expations and each integration point.
-      /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
-      void add(Func<Scalar>* func);
-      /// Add version specifying just one attribute.
-      void add(Scalar* attribute, Scalar* other_attribute);
+      std::complex<double> laplace[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      std::complex<double> div[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
       /// Number of integration points used by this intance.
       int np;
       /// Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
       int nc;
+      /// Calculate this -= func for each function expations and each integration point.
+      /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
+      void subtract(Func<std::complex<double> >* func);
+      /// Subtract version specifying just one attribute.
+      void subtract(std::complex<double> * attribute, std::complex<double> * other_attribute);
+      /// Calculate this += func for each function expations and each integration point.
+      /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
+      void add(Func<std::complex<double> >* func);
+      /// Add version specifying just one attribute.
+      void add(std::complex<double> * attribute, std::complex<double> * other_attribute);
     };
 
     template<>

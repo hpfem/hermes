@@ -302,7 +302,7 @@ namespace Hermes
           throw Hermes::Exceptions::Exception("Sparse matrix entry not found: [%i, %i]", m, n);
         }
 
-#pragma omp critical
+#pragma omp critical (CSMatrixAdd)
         Ax[Ap[n] + pos] += v;
       }
     }

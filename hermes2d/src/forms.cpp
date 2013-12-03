@@ -23,18 +23,38 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    template<typename T>
-    Func<T>::Func() : np(-1), nc(-1)
+#ifndef _MSC_VER
+    template<>
+#endif
+    Func<double>::Func() : np(-1), nc(-1)
     {
     }
 
-    template<typename T>
-    Func<T>::Func(int np, int nc) : np(np), nc(nc)
+#ifndef _MSC_VER
+    template<>
+#endif
+    Func<double>::Func(int np, int nc) : np(np), nc(nc)
     {
     }
 
-    template<typename T>
-    void Func<T>::subtract(Func<T>* func)
+#ifndef _MSC_VER
+    template<>
+#endif
+    Func<std::complex<double> >::Func() : np(-1), nc(-1)
+    {
+    }
+
+#ifndef _MSC_VER
+    template<>
+#endif
+    Func<std::complex<double> >::Func(int np, int nc) : np(np), nc(nc)
+    {
+    }
+
+#ifndef _MSC_VER
+    template<>
+#endif
+    void Func<double>::subtract(Func<double>* func)
     {
       if (this->np != func->np)
         throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", np, func->np);
@@ -58,8 +78,37 @@ namespace Hermes
       }
     };
 
-    template<typename T>
-    void Func<T>::subtract(T* attribute, T* other_attribute)
+#ifndef _MSC_VER
+    template<>
+#endif
+    void Func<std::complex<double> >::subtract(Func<std::complex<double> >* func)
+    {
+      if (this->np != func->np)
+        throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", np, func->np);
+      if (nc != func->nc)
+        throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of components (this: %d, other: %d)", nc, func->nc);
+
+      subtract(this->val, func->val);
+      subtract(this->dx, func->dx);
+      subtract(this->dy, func->dy);
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+      subtract(this->laplace, func->laplace);
+#endif
+
+      if (nc > 1)
+      {
+        subtract(this->val0, func->val0);
+        subtract(this->val1, func->val1);
+        subtract(this->curl, func->curl);
+        subtract(this->div, func->div);
+      }
+    };
+
+#ifndef _MSC_VER
+    template<>
+#endif
+    void Func<double>::subtract(double* attribute, double* other_attribute)
     {
       if (attribute != nullptr && other_attribute != nullptr)
       {
@@ -68,8 +117,22 @@ namespace Hermes
       }
     }
 
-    template<typename T>
-    void Func<T>::add(Func<T>* func)
+#ifndef _MSC_VER
+    template<>
+#endif
+    void Func<std::complex<double> >::subtract(std::complex<double> * attribute, std::complex<double> * other_attribute)
+    {
+      if (attribute != nullptr && other_attribute != nullptr)
+      {
+        for (int i = 0; i < this->np; i++)
+          attribute[i] -= other_attribute[i];
+      }
+    }
+
+#ifndef _MSC_VER
+    template<>
+#endif
+    void Func<double>::add(Func<double>* func)
     {
       if (this->np != func->np)
         throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of integration points (this: %d, other: %d)", np, func->np);
@@ -93,12 +156,53 @@ namespace Hermes
       }
     };
 
-    template<typename T>
-    void Func<T>::add(T* attribute, T* other_attribute)
+#ifdef H2D_USE_SECOND_DERIVATIVES
+    template<>
+#endif
+    void Func<std::complex<double> >::add(Func<std::complex<double> >* func)
+    {
+      if (this->np != func->np)
+        throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of integration points (this: %d, other: %d)", np, func->np);
+      if (nc != func->nc)
+        throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of components (this: %d, other: %d)", nc, func->nc);
+
+      add(this->val, func->val);
+      add(this->dx, func->dx);
+      add(this->dy, func->dy);
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+      add(this->laplace, func->laplace);
+#endif
+
+      if (nc > 1)
+      {
+        add(this->val0, func->val0);
+        add(this->val1, func->val1);
+        add(this->curl, func->curl);
+        add(this->div, func->div);
+      }
+    };
+
+#ifndef _MSC_VER
+    template<>
+#endif
+    void Func<double>::add(double* attribute, double* other_attribute)
     {
       if (attribute != nullptr && other_attribute != nullptr)
       {
-        for (int i = 0; i < np; i++)
+        for (int i = 0; i < this->np; i++)
+          attribute[i] += other_attribute[i];
+      }
+    }
+
+#ifndef _MSC_VER
+    template<>
+#endif
+    void Func<std::complex<double> >::add(std::complex<double> * attribute, std::complex<double> * other_attribute)
+    {
+      if (attribute != nullptr && other_attribute != nullptr)
+      {
+        for (int i = 0; i < this->np; i++)
           attribute[i] += other_attribute[i];
       }
     }
@@ -107,46 +211,11 @@ namespace Hermes
     DiscontinuousFunc<T>::DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor, bool reverse) :
       Func<T>(fn->np, fn->nc), fn_central(nullptr), fn_neighbor(nullptr), reverse_neighbor_side(reverse)
     {
-        if (fn == nullptr)
-          throw Hermes::Exceptions::Exception("Invalid arguments to DiscontinuousFunc constructor.");
-        if (support_on_neighbor)
-        {
-          fn_neighbor = fn;
-          if (reverse_neighbor_side)
-          {
-            this->val_neighbor = new T[this->np];
-            this->dx_neighbor = new T[this->np];
-            this->dy_neighbor = new T[this->np];
-            for (int i = 0; i < this->np; i++)
-            {
-              this->val_neighbor[i] = fn->val[this->np - i - 1];
-              this->dx_neighbor[i] = fn->dx[this->np - i - 1];
-              this->dy_neighbor[i] = fn->dy[this->np - i - 1];
-            }
-          }
-          else
-          {
-            this->val_neighbor = fn->val;
-            this->dx_neighbor = fn->dx;
-            this->dy_neighbor = fn->dy;
-          }
-
-          this->val = this->dx = this->dy = nullptr;
-        }
-        else
-        {
-          this->fn_central = fn;
-          this->val = fn->val;
-          this->dx = fn->dx;
-          this->dy = fn->dy;
-          this->val_neighbor = this->dx_neighbor = this->dy_neighbor = nullptr;
-        }
-      }
-
-    template<typename T>
-    DiscontinuousFunc<T>::DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse) :
-      Func<T>(fn_c->np, fn_c->nc), fn_central(fn_c), fn_neighbor(fn_n), reverse_neighbor_side(reverse)
-    {
+      if (fn == nullptr)
+        throw Hermes::Exceptions::Exception("Invalid arguments to DiscontinuousFunc constructor.");
+      if (support_on_neighbor)
+      {
+        fn_neighbor = fn;
         if (reverse_neighbor_side)
         {
           this->val_neighbor = new T[this->np];
@@ -154,20 +223,55 @@ namespace Hermes
           this->dy_neighbor = new T[this->np];
           for (int i = 0; i < this->np; i++)
           {
-            this->val_neighbor[i] = fn_neighbor->val[this->np - i - 1];
-            this->dx_neighbor[i] = fn_neighbor->dx[this->np - i - 1];
-            this->dy_neighbor[i] = fn_neighbor->dy[this->np - i - 1];
+            this->val_neighbor[i] = fn->val[this->np - i - 1];
+            this->dx_neighbor[i] = fn->dx[this->np - i - 1];
+            this->dy_neighbor[i] = fn->dy[this->np - i - 1];
           }
         }
         else
         {
-          this->val_neighbor = fn_neighbor->val;
-          this->dx_neighbor = fn_neighbor->dx;
-          this->dy_neighbor = fn_neighbor->dy;
+          this->val_neighbor = fn->val;
+          this->dx_neighbor = fn->dx;
+          this->dy_neighbor = fn->dy;
         }
-        this->val = fn_central->val;
-        this->dx = fn_central->dx;
-        this->dy = fn_central->dy;
+
+        this->val = this->dx = this->dy = nullptr;
+      }
+      else
+      {
+        this->fn_central = fn;
+        this->val = fn->val;
+        this->dx = fn->dx;
+        this->dy = fn->dy;
+        this->val_neighbor = this->dx_neighbor = this->dy_neighbor = nullptr;
+      }
+      }
+
+    template<typename T>
+    DiscontinuousFunc<T>::DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse) :
+      Func<T>(fn_c->np, fn_c->nc), fn_central(fn_c), fn_neighbor(fn_n), reverse_neighbor_side(reverse)
+    {
+      if (reverse_neighbor_side)
+      {
+        this->val_neighbor = new T[this->np];
+        this->dx_neighbor = new T[this->np];
+        this->dy_neighbor = new T[this->np];
+        for (int i = 0; i < this->np; i++)
+        {
+          this->val_neighbor[i] = fn_neighbor->val[this->np - i - 1];
+          this->dx_neighbor[i] = fn_neighbor->dx[this->np - i - 1];
+          this->dy_neighbor[i] = fn_neighbor->dy[this->np - i - 1];
+        }
+      }
+      else
+      {
+        this->val_neighbor = fn_neighbor->val;
+        this->dx_neighbor = fn_neighbor->dx;
+        this->dy_neighbor = fn_neighbor->dy;
+      }
+      this->val = fn_central->val;
+      this->dx = fn_central->dx;
+      this->dy = fn_central->dy;
       }
 
     DiscontinuousFunc<Ord>::DiscontinuousFunc(Func<Ord>* fn, bool support_on_neighbor, bool reverse) : Func<Ord>(),
@@ -328,19 +432,19 @@ namespace Hermes
     InterfaceGeom<T>::InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam) :
       Geom<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
     {
-        // Let this class expose the standard Geom interface.
-        this->edge_marker = geom->edge_marker;
-        this->elem_marker = geom->elem_marker;
-        this->id = geom->id;
-        this->isurf = geom->isurf;
-        this->x = geom->x;
-        this->y = geom->y;
-        this->tx = geom->tx;
-        this->ty = geom->ty;
-        this->nx = geom->nx;
-        this->ny = geom->ny;
-        this->orientation = geom->orientation;
-        this->wrapped_geom = geom;
+      // Let this class expose the standard Geom interface.
+      this->edge_marker = geom->edge_marker;
+      this->elem_marker = geom->elem_marker;
+      this->id = geom->id;
+      this->isurf = geom->isurf;
+      this->x = geom->x;
+      this->y = geom->y;
+      this->tx = geom->tx;
+      this->ty = geom->ty;
+      this->nx = geom->nx;
+      this->ny = geom->ny;
+      this->orientation = geom->orientation;
+      this->wrapped_geom = geom;
       }
 
     template<typename T>

@@ -152,17 +152,16 @@ namespace Hermes
       }
 
       // calculate the order of the inverse reference map
-      if (element->iro_cache == -1)
-#pragma omp critical
-      {
+      if (is_const)
+        element->iro_cache = 0;
+      else
         if (element->iro_cache == -1)
+#pragma omp critical
         {
-          if (is_const)
-            element->iro_cache = 0;
-          else
-            element->iro_cache = calc_inv_ref_order();
+          if (element->iro_cache == -1)
+              element->iro_cache = calc_inv_ref_order();
         }
-      }
+
       inv_ref_order = element->iro_cache;
 
       // constant inverse reference map
