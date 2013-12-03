@@ -895,10 +895,8 @@ namespace Hermes
     template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
     template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
 
-    template class HERMES_API Func<Hermes::Ord>;
     template class HERMES_API Func<double>;
     template class HERMES_API Func<std::complex<double> >;
-    template class HERMES_API DiscontinuousFunc<Hermes::Ord>;
     template class HERMES_API DiscontinuousFunc<double>;
     template class HERMES_API DiscontinuousFunc<std::complex<double> >;
     template class HERMES_API Geom<Hermes::Ord>;
