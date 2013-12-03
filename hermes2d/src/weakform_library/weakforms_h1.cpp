@@ -90,7 +90,6 @@ namespace Hermes
       template<typename Scalar>
       DefaultMatrixFormVol<Scalar>::~DefaultMatrixFormVol()
       {
-
         if (this->own_coeff)
           delete coeff;
       };
@@ -100,9 +99,18 @@ namespace Hermes
         Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
-          for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
+        if (gt == HERMES_PLANAR)
+        {
+          if (coeff->is_constant())
+          {
+            for (int i = 0; i < n; i++)
+              result += wt[i] * u->val[i] * v->val[i];
+            result *= coeff->value(e->x[0], e->y[0]);
+          }
+          else
+          {
+            for (int i = 0; i < n; i++)
+              result += wt[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
           }
         }
         else {
@@ -198,12 +206,29 @@ namespace Hermes
         Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
-          for (int i = 0; i < n; i++) {
-            result += wt[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
-              (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
-              + coeff->value(u_ext[idx_j]->val[i])
-              * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+        if (gt == HERMES_PLANAR)
+        {
+          if (coeff->is_constant())
+          {
+            Scalar result_der = 0;
+            for (int i = 0; i < n; i++)
+            {
+              result += wt[i] * ( (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]) );
+              result_der += wt[i] * (u->val[i] * (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i]));
+            }
+            result *= coeff->value(u_ext[idx_j]->val[0]);
+            result_der *= coeff->derivative(u_ext[idx_j]->val[0]);
+            result += result_der;
+          }
+          else
+          {
+            for (int i = 0; i < n; i++)
+            {
+              result += wt[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
+                (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
+                + coeff->value(u_ext[idx_j]->val[i])
+                * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
+            }
           }
         }
         else {
@@ -429,9 +454,9 @@ namespace Hermes
       DefaultJacobianAdvection<Scalar>::~DefaultJacobianAdvection()
       {
 
-        if(this->own_coeff1)
+        if (this->own_coeff1)
           delete coeff1;
-        if(this->own_coeff2)
+        if (this->own_coeff2)
           delete coeff2;
       };
 
@@ -594,7 +619,7 @@ namespace Hermes
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
-        }
+          }
           else
             this->own_coeff = false;
         }
@@ -1156,7 +1181,7 @@ namespace Hermes
       DefaultResidualSurf<Scalar>::~DefaultResidualSurf()
       {
 
-        if (this->own_coeff) 
+        if (this->own_coeff)
           delete coeff;
       };
 
