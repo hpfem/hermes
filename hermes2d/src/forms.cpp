@@ -23,9 +23,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-#ifndef _MSC_VER
-    template<>
-#endif
     Func<double>::Func() : np(-1), nc(-1)
     {
     }
