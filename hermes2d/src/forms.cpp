@@ -27,30 +27,18 @@ namespace Hermes
     {
     }
 
-#ifndef _MSC_VER
-    template<>
-#endif
     Func<double>::Func(int np, int nc) : np(np), nc(nc)
     {
     }
 
-#ifndef _MSC_VER
-    template<>
-#endif
     Func<std::complex<double> >::Func() : np(-1), nc(-1)
     {
     }
 
-#ifndef _MSC_VER
-    template<>
-#endif
     Func<std::complex<double> >::Func(int np, int nc) : np(np), nc(nc)
     {
     }
 
-#ifndef _MSC_VER
-    template<>
-#endif
     void Func<double>::subtract(Func<double>* func)
     {
       if (this->np != func->np)
@@ -75,9 +63,6 @@ namespace Hermes
       }
     };
 
-#ifndef _MSC_VER
-    template<>
-#endif
     void Func<std::complex<double> >::subtract(Func<std::complex<double> >* func)
     {
       if (this->np != func->np)
@@ -102,9 +87,6 @@ namespace Hermes
       }
     };
 
-#ifndef _MSC_VER
-    template<>
-#endif
     void Func<double>::subtract(double* attribute, double* other_attribute)
     {
       if (attribute != nullptr && other_attribute != nullptr)
@@ -114,9 +96,6 @@ namespace Hermes
       }
     }
 
-#ifndef _MSC_VER
-    template<>
-#endif
     void Func<std::complex<double> >::subtract(std::complex<double> * attribute, std::complex<double> * other_attribute)
     {
       if (attribute != nullptr && other_attribute != nullptr)
@@ -126,9 +105,6 @@ namespace Hermes
       }
     }
 
-#ifndef _MSC_VER
-    template<>
-#endif
     void Func<double>::add(Func<double>* func)
     {
       if (this->np != func->np)
@@ -180,9 +156,6 @@ namespace Hermes
       }
     };
 
-#ifndef _MSC_VER
-    template<>
-#endif
     void Func<double>::add(double* attribute, double* other_attribute)
     {
       if (attribute != nullptr && other_attribute != nullptr)
@@ -192,9 +165,6 @@ namespace Hermes
       }
     }
 
-#ifndef _MSC_VER
-    template<>
-#endif
     void Func<std::complex<double> >::add(std::complex<double> * attribute, std::complex<double> * other_attribute)
     {
       if (attribute != nullptr && other_attribute != nullptr)
@@ -892,8 +862,6 @@ namespace Hermes
     template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
     template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
 
-    template class HERMES_API Func<double>;
-    template class HERMES_API Func<std::complex<double> >;
     template class HERMES_API DiscontinuousFunc<double>;
     template class HERMES_API DiscontinuousFunc<std::complex<double> >;
     template class HERMES_API Geom<Hermes::Ord>;
