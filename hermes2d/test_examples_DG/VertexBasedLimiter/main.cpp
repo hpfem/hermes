@@ -5,13 +5,13 @@
 int polynomialDegree = 2;
 int initialRefinementsCount = 4;
 const Algorithm algorithm = Algorithm::pMultigrid;
-const SolvedExample solvedExample = SolvedExample::MovingPeak;
+const SolvedExample solvedExample = SolvedExample::CircularConvection;
 double MovingPeakDiffusivity = 1e-2;
 const EulerLimiterType limiter_type = VertexBased;
 
 double diffusivity = 1e-3;
 double s = -1;
-double CFL = 1.;
+double CFL = 128.;
 
 int main(int argc, char* argv[])
 {
