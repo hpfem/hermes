@@ -4,7 +4,7 @@
 
 int polynomialDegree = 2;
 int initialRefinementsCount = 4;
-const Algorithm algorithm = Multiscale;
+const Algorithm algorithm = Algorithm::pMultigrid;
 const SolvedExample solvedExample = SolvedExample::MovingPeak;
 double MovingPeakDiffusivity = 1e-2;
 const EulerLimiterType limiter_type = VertexBased;
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
   
   if(algorithm == pMultigrid || algorithm == Both)
   {
-    Hermes::vector<int> steps(1, 3, 5, 10, 15);
+    Hermes::vector<int> steps(3, 5, 10, 15);
     for(int si = 0; si < steps.size(); si++)
     {
       cpu_time.tick();
