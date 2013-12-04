@@ -164,9 +164,14 @@ namespace Hermes
 
       int& element_iro_cache = element->iro_cache;
 
+      // Windows implementation of OpenMP can do this with atomic (faster), gcc cannot and has to use critical section.
+#ifdef _MSC_VER
 #pragma omp atomic
       element_iro_cache = iro_cache;
-
+#else
+#pragma omp critical (element_iro_cache_setting)
+      element_iro_cache = iro_cache;
+#endif
       // constant inverse reference map
       if (is_const)
         calc_const_inv_ref_map();
