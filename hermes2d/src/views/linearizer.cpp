@@ -971,6 +971,30 @@ namespace Hermes
         fclose(f);
       }
 
+      void Linearizer::save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char *quantity_name,
+        int item, double eps)
+      {
+        process_solution(sln, item, eps);
+
+        FILE* f = fopen(filename, "wb");
+        if (f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
+
+        // Output header for vertices.
+        fprintf(f, "TITLE = \"%s created by Hermes.\"\n", filename);
+        fprintf(f, "VARIABLES = \"X\", \"Y\", \"%s\"\n", quantity_name);
+        fprintf(f, "ZONE N = %d, E = %d, DATAPACKING = POINT, ZONETYPE = FETRIANGLE\n", this->vertex_count, this->triangle_count);
+
+        // Output vertices.
+        for (int i = 0; i < this->vertex_count; i++)
+          fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], this->verts[i][2]);
+
+        // Output elements.
+        for (int i = 0; i < this->triangle_count; i++)
+          fprintf(f, "%d %d %d\n", this->tris[i][0] + 1, this->tris[i][1] + 1, this->tris[i][2] + 1);
+
+        fclose(f);
+      }
+      
       void Linearizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
         if (verts == nullptr)
