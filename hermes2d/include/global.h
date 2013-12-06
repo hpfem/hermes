@@ -38,11 +38,14 @@
 #define H2D_MAX_SOLUTION_COMPONENTS 2
 static const std::string H2D_DG_INNER_EDGE = "-1234567";
 
+/// Centroid of the reference quadrilateral.
 #define CENTROID_QUAD_X 0.
 #define CENTROID_QUAD_Y 0.
+/// Centroid of the reference triangle.
 #define CENTROID_TRI_X -0.3333333333333333
 #define CENTROID_TRI_Y -0.3333333333333333
 
+/// Reference element size.
 #define ELEMENT_DELTA_X 2.0
 #define ELEMENT_DELTA_Y 2.0
 
@@ -57,7 +60,6 @@ static const int H2D_TRF_IDENTITY = H2D_TRF_QUAD_NUM;
 
 #define H2DRS_ASSUMED_MAX_CANDS 512 ///< An estimated maximum number of candidates. Used for purpose of reserving space. \internal \ingroup g_selectors
 
-//TODO: find out why 20 used used, should'n be there 2*(H2DRS_MAX_ORDER+1)
 #define H2DRS_INTR_GIP_ORDER 20 ///< An integration order used to integrate while evaluating a candidate. \internal \ingroup g_selectors
 #define H2DRS_MAX_ORDER_INC 1 ///< Maximum increase of an order in candidates. \ingroup g_selectors
 

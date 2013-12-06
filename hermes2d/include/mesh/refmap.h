@@ -57,9 +57,6 @@ namespace Hermes
       /// Returns the current quadrature points.
       Quad2D* get_quad_2d() const;
 
-      /// Returns the 1D quadrature for use in surface integrals.
-      const Quad1D* get_quad_1d() const;
-
       /// Initializes the reference map for the specified element.
       /// Must be called prior to using all other functions in the class.
       virtual void set_active_element(Element* e);
@@ -130,11 +127,11 @@ namespace Hermes
       /// points of the specified order. Intended for non-constant jacobian elements.
       inline double* get_jacobian(int order)
       {
-        if (cur_node == nullptr)
-          throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
-        if (cur_node->inv_ref_map[order] == nullptr)
-          calc_inv_ref_map(order);
-        return cur_node->jacobian[order];
+        if (this->is_const)
+          throw Hermes::Exceptions::Exception("RefMap::get_jacobian() called with a const jacobian.");
+        if (order != this->jacobian_calculated)
+          this->calc_inv_ref_map(order);
+        return this->jacobian;
       }
 
       /// Returns the inverse matrices of the reference map precalculated at the
@@ -142,15 +139,12 @@ namespace Hermes
       /// jacobian elements.
       inline double2x2* get_inv_ref_map(int order)
       {
-        if (cur_node == nullptr)
-          throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
-        if (cur_node->inv_ref_map[order] == nullptr)
-          calc_inv_ref_map(order);
-        return cur_node->inv_ref_map[order];
+        if (this->is_const)
+          throw Hermes::Exceptions::Exception("RefMap::get_inv_ref_map() called with a const jacobian.");
+        if (order != this->inv_ref_map_calculated)
+          this->calc_inv_ref_map(order);
+        return this->inv_ref_map;
       }
-
-      H1ShapesetJacobi ref_map_shapeset;
-      PrecalcShapeset ref_map_pss;
 
       /// Returns coefficients for weak forms with second derivatives.
       double3x2* get_second_ref_map(int order);
@@ -167,50 +161,47 @@ namespace Hermes
       /// See Transformable::pop_transform()
       virtual void pop_transform();
 
-      /// Frees all data associated with the instance.
-      void free();
-
       /// For internal use only.
       void force_transform(uint64_t sub_idx, Trf* ctm);
 
-      Quad2D* quad_2d;
+      static bool is_parallelogram(Element* e);
 
-      int num_tables;
+    private:
+      /// re-init the storage
+      void reinit_storage();
 
+      H1ShapesetJacobi ref_map_shapeset;
+      PrecalcShapeset ref_map_pss;
+
+      /// Constant reference mapping.
       bool is_const;
 
+      /// For constant ref. map.
+      double const_jacobian;
+      double2x2 const_inv_ref_map;
+      double3x2 const_second_ref_map;
+      double const_direct_ref_map[2][2];
+
+      /// For non-constant ref. map.
+      double jacobian[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      int jacobian_calculated;
+      double2x2 inv_ref_map[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      int inv_ref_map_calculated;
+      double3x2 second_ref_map[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      int second_ref_map_calculated;
+      double direct_ref_map[2][2][H2D_MAX_INTEGRATION_POINTS_COUNT];
+      int direct_ref_map_calculated;
       int inv_ref_order;
 
-      double const_jacobian;
+      /// Data
+      double phys_x[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      int phys_x_calculated;
+      double phys_y[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      int phys_y_calculated;
+      double3 tan[H2D_MAX_NUMBER_EDGES][H2D_MAX_INTEGRATION_POINTS_COUNT];
+      int tan_calculated[H2D_MAX_NUMBER_EDGES];
 
-      double2x2 const_inv_ref_map;
-
-      static const int H2D_MAX_TABLES = g_max_quad + 1 + 4 * g_max_quad + 4;
-
-      /// This structure represents one complete piece of information about the reference mapping
-      /// taking into account the sub-element mapping.
-      struct Node
-      {
-        double* jacobian[H2D_MAX_TABLES];
-        double2x2* inv_ref_map[H2D_MAX_TABLES];
-        double3x2* second_ref_map[H2D_MAX_TABLES];
-        double* phys_x[H2D_MAX_TABLES];
-        double* phys_y[H2D_MAX_TABLES];
-        double3* tan[H2D_MAX_NUMBER_EDGES];
-
-        int num_tables;
-      };
-
-      /// Table of RefMap::Nodes, indexed by a sub-element mapping.
-      SubElementMap<Node> nodes;
-
-      double m[2][2][H2D_MAX_INTEGRATION_POINTS_COUNT];
-
-      Node* cur_node;
-
-      Node* overflow;
-
-      void update_cur_node();
+      Quad2D* quad_2d;
 
       void calc_inv_ref_map(int order);
 
@@ -219,8 +210,6 @@ namespace Hermes
       void calc_const_inv_ref_map();
 
       void calc_second_ref_map(int order);
-
-      static bool is_parallelogram(Element* e);
 
       void calc_phys_x(int order);
 
@@ -231,19 +220,6 @@ namespace Hermes
       /// Finds the necessary quadrature degree needed to integrate the inverse reference mapping
       /// matrix alone. This is added to the total integration order in weak form itegrals.
       int calc_inv_ref_order();
-
-      void init_node(Node* pp);
-
-      static void free_node(Node* node);
-
-      static void DeallocationFunction(Node* data)
-      {
-        free_node(data);
-      }
-
-      Node* handle_overflow();
-
-      Quad1DStd quad_1d;
 
       int indices[70];
 

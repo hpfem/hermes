@@ -90,11 +90,14 @@ namespace Hermes
 
         // check first the positivity of the jacobian
         double3* pt = quad->get_points(mo, e->get_mode());
-        double2x2* m = r.get_inv_ref_map(mo);
-        double* jac = r.get_jacobian(mo);
-        for (i = 0; i < quad->get_num_points(mo, e->get_mode()); i++)
-          if(jac[i] <= 0.0)
+        if (!r.is_jacobian_const())
+        {
+          double2x2* m = r.get_inv_ref_map(mo);
+          double* jac = r.get_jacobian(mo);
+          for (i = 0; i < quad->get_num_points(mo, e->get_mode()); i++)
+          if (jac[i] <= 0.0)
             throw Hermes::Exceptions::MeshLoadFailureException("Element #%d is concave or badly oriented in initial_single_check().", e->id);
+        }
       }
     }
 

@@ -24,33 +24,25 @@ namespace Hermes
     RefMap::RefMap() : ref_map_shapeset(H1ShapesetJacobi()), ref_map_pss(PrecalcShapeset(&ref_map_shapeset))
     {
       quad_2d = nullptr;
-      num_tables = 0;
-      cur_node = nullptr;
-      overflow = nullptr;
-      set_quad_2d(&g_quad_2d_std); // default quadrature
+      set_quad_2d(&g_quad_2d_std);
+      this->reinit_storage();
     }
 
-    RefMap::~RefMap() { free(); }
+    RefMap::~RefMap() { }
 
-    /// Returns the current quadrature points.
     Quad2D* RefMap::get_quad_2d() const
     {
       return quad_2d;
     }
 
-    /// Returns the 1D quadrature for use in surface integrals.
-    const Quad1D* RefMap::get_quad_1d() const
-    {
-      return &quad_1d;
-    }
-
     /// Returns coefficients for weak forms with second derivatives.
     double3x2* RefMap::get_second_ref_map(int order)
     {
-      if (cur_node == nullptr)
-        throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
-      if (cur_node->second_ref_map[order] == nullptr) calc_second_ref_map(order);
-      return cur_node->second_ref_map[order];
+      if (this->is_const)
+        throw Hermes::Exceptions::Exception("RefMap::get_second_ref_map() called with a const jacobian.");
+      if (order != this->second_ref_map_calculated)
+        this->calc_second_ref_map(order);
+      return this->second_ref_map;
     }
 
     /// Returns the x-coordinates of the integration points transformed to the
@@ -58,10 +50,9 @@ namespace Hermes
     /// variables.
     double* RefMap::get_phys_x(int order)
     {
-      if (cur_node == nullptr)
-        throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
-      if (cur_node->phys_x[order] == nullptr) calc_phys_x(order);
-      return cur_node->phys_x[order];
+      if (order != this->phys_x_calculated)
+        this->calc_phys_x(order);
+      return this->phys_x;
     }
 
     /// Returns he y-coordinates of the integration points transformed to the
@@ -69,10 +60,9 @@ namespace Hermes
     /// variables.
     double* RefMap::get_phys_y(int order)
     {
-      if (cur_node == nullptr)
-        throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
-      if (cur_node->phys_y[order] == nullptr) calc_phys_y(order);
-      return cur_node->phys_y[order];
+      if (order != this->phys_y_calculated)
+        this->calc_phys_y(order);
+      return this->phys_y;
     }
 
     /// Returns the triples[x, y, norm] of the tangent to the specified (possibly
@@ -82,43 +72,29 @@ namespace Hermes
     /// Quad2D::get_edge_points).
     double3* RefMap::get_tangent(int edge, int order)
     {
-      if (quad_2d == nullptr)
-        throw Hermes::Exceptions::Exception("2d quadrature wasn't set.");
       if (order == -1)
         order = quad_2d->get_edge_points(edge, quad_2d->get_max_order(element->get_mode()), element->get_mode());
 
-      // NOTE: Hermes::Order-based caching of geometric data is already employed in DiscreteProblem.
-      if (cur_node->tan[edge] != nullptr)
-      {
-        delete[] cur_node->tan[edge];
-        cur_node->tan[edge] = nullptr;
-      }
-      calc_tangent(edge, order);
+      if (order != this->tan_calculated[edge])
+        this->calc_tangent(edge, order);
 
-      return cur_node->tan[edge];
+      return tan[edge];
     }
 
     void RefMap::set_quad_2d(Quad2D* quad_2d)
     {
-      free();
       this->quad_2d = quad_2d;
       ref_map_pss.set_quad_2d(quad_2d);
     }
 
     void RefMap::set_active_element(Element* e)
     {
-      if (e == element)
-        return;
-        
-      free();
+      this->reinit_storage();
 
       Transformable::set_active_element(e);
       ref_map_pss.set_active_element(e);
-      num_tables = quad_2d->get_num_tables(e->get_mode());
 
-      update_cur_node();
-
-      is_const = !element->is_curved() && (element->is_triangle() || is_parallelogram(element));
+      this->is_const = !element->is_curved() && (element->is_triangle() || is_parallelogram(element));
 
       // prepare the shapes and coefficients of the reference map
       int j, k = 0;
@@ -152,26 +128,25 @@ namespace Hermes
       }
 
       // calculate the order of the inverse reference map
-      int iro_cache = element->iro_cache;
+      int& element_iro_cache = element->iro_cache;
+      int iro_cache;
+
+      // Critical section - read
+#pragma omp critical (element_iro_cache_setting)
+      iro_cache = element_iro_cache;
 
       if (is_const)
         iro_cache = 0;
       else
-        if (iro_cache == -1)
-          iro_cache = calc_inv_ref_order();
+      if (iro_cache == -1)
+        iro_cache = calc_inv_ref_order();
 
       this->inv_ref_order = iro_cache;
 
-      int& element_iro_cache = element->iro_cache;
-
-      // Windows implementation of OpenMP can do this with atomic (faster), gcc cannot and has to use critical section.
-#ifdef _MSC_VER
-#pragma omp atomic
-      element_iro_cache = iro_cache;
-#else
+      // Critical section - write
 #pragma omp critical (element_iro_cache_setting)
       element_iro_cache = iro_cache;
-#endif
+
       // constant inverse reference map
       if (is_const)
         calc_const_inv_ref_map();
@@ -179,32 +154,44 @@ namespace Hermes
         const_jacobian = 0.0;
     }
 
+    void RefMap::reinit_storage()
+    {
+      jacobian_calculated = -1;
+      inv_ref_map_calculated = -1;
+      second_ref_map_calculated = -1;
+
+      direct_ref_map_calculated = -1;
+      phys_x_calculated = -1;
+      phys_y_calculated = -1;
+      tan_calculated[0] = tan_calculated[1] = tan_calculated[2] = tan_calculated[3] = -1;
+    }
+
     void RefMap::push_transform(int son)
     {
       Transformable::push_transform(son);
-      update_cur_node();
       const_jacobian *= 0.25;
+      this->reinit_storage();
     }
 
     void RefMap::pop_transform()
     {
       Transformable::pop_transform();
-      update_cur_node();
-      const_jacobian *= 4;
+      const_jacobian *= 4.;
+      this->reinit_storage();
     }
 
     void RefMap::calc_inv_ref_map(int order)
     {
-      assert(quad_2d != nullptr);
       int i, j, np = quad_2d->get_num_points(order, element->get_mode());
 
       // construct jacobi matrices of the direct reference map for all integration points
       ref_map_pss.force_transform(sub_idx, ctm);
 
-      double* m_00 = this->m[0][0];
-      double* m_01 = this->m[0][1];
-      double* m_10 = this->m[1][0];
-      double* m_11 = this->m[1][1];
+      double* m_00 = this->direct_ref_map[0][0];
+      double* m_01 = this->direct_ref_map[0][1];
+      double* m_10 = this->direct_ref_map[1][0];
+      double* m_11 = this->direct_ref_map[1][1];
+
       for (j = 0; j < np; j++)
         m_00[j] = m_01[j] = m_10[j] = m_11[j] = 0.;
 
@@ -229,10 +216,11 @@ namespace Hermes
         }
       }
 
+
       // calculate the jacobian and inverted matrix
       double trj = get_transform_jacobian();
-      double2x2* irm = cur_node->inv_ref_map[order] = new double2x2[np];
-      double* jac = cur_node->jacobian[order] = new double[np];
+      double2x2* irm = this->inv_ref_map;
+      double* jac = this->jacobian;
 
       for (i = 0; i < np; i++)
       {
@@ -252,11 +240,13 @@ namespace Hermes
 
         jac[i] *= trj;
       }
+
+      this->inv_ref_map_calculated = order;
+      this->jacobian_calculated = order;
     }
 
     void RefMap::calc_second_ref_map(int order)
     {
-      assert(quad_2d != nullptr);
       int i, j, np = quad_2d->get_num_points(order, element->get_mode());
 
       double3x2* k = new double3x2[np];
@@ -281,7 +271,7 @@ namespace Hermes
         }
       }
 
-      double3x2* mm = cur_node->second_ref_map[order] = new double3x2[np];
+      double3x2* mm = this->second_ref_map;
       double2x2* m = get_inv_ref_map(order);
       for (j = 0; j < np; j++)
       {
@@ -306,6 +296,8 @@ namespace Hermes
       }
 
       delete[] k;
+
+      this->second_ref_map_calculated = order;
     }
 
     bool RefMap::is_parallelogram(Element* e)
@@ -318,8 +310,6 @@ namespace Hermes
 
     void RefMap::calc_const_inv_ref_map()
     {
-      if (element == nullptr)
-        throw Hermes::Exceptions::Exception("The element variable must not be nullptr.");
       int k = element->is_triangle() ? 2 : 3;
       double m[2][2] = { { element->vn[1]->x - element->vn[0]->x, element->vn[k]->x - element->vn[0]->x },
       { element->vn[1]->y - element->vn[0]->y, element->vn[k]->y - element->vn[0]->y } };
@@ -340,7 +330,7 @@ namespace Hermes
     {
       // transform all x coordinates of the integration points
       int i, j, np = quad_2d->get_num_points(order, element->get_mode());
-      double* x = cur_node->phys_x[order] = new double[np];
+      double* x = this->phys_x;
       memset(x, 0, np * sizeof(double));
       ref_map_pss.force_transform(sub_idx, ctm);
       for (i = 0; i < nc; i++)
@@ -351,13 +341,14 @@ namespace Hermes
         for (j = 0; j < np; j++)
           x[j] += coeffs[i][0] * fn[j];
       }
+      this->phys_x_calculated = order;
     }
 
     void RefMap::calc_phys_y(int order)
     {
       // transform all y coordinates of the integration points
       int i, j, np = quad_2d->get_num_points(order, element->get_mode());
-      double* y = cur_node->phys_y[order] = new double[np];
+      double* y = this->phys_y;
       memset(y, 0, np * sizeof(double));
       ref_map_pss.force_transform(sub_idx, ctm);
       for (i = 0; i < nc; i++)
@@ -368,13 +359,14 @@ namespace Hermes
         for (j = 0; j < np; j++)
           y[j] += coeffs[i][1] * fn[j];
       }
+      this->phys_y_calculated = order;
     }
 
     void RefMap::calc_tangent(int edge, int eo)
     {
       int i, j;
       int np = quad_2d->get_num_points(eo, element->get_mode());
-      double3* tan = cur_node->tan[edge] = new double3[np];
+      double3* tan = this->tan[edge];
       int a = edge, b = element->next_vert(edge);
 
       if (!element->is_curved())
@@ -431,6 +423,8 @@ namespace Hermes
           t[2] *= (edge == 0 || edge == 2) ? ctm->m[0] : ctm->m[1];
         }
       }
+
+      this->tan_calculated[edge] = true;
     }
 
     int RefMap::calc_inv_ref_order()
@@ -938,73 +932,14 @@ namespace Hermes
       return nullptr;
     }
 
-    void RefMap::init_node(Node* pp)
-    {
-      memset(pp->inv_ref_map, 0, num_tables * sizeof(double2x2*));
-      memset(pp->jacobian, 0, num_tables * sizeof(double*));
-      memset(pp->second_ref_map, 0, num_tables * sizeof(double3x2*));
-      memset(pp->phys_x, 0, num_tables * sizeof(double*));
-      memset(pp->phys_y, 0, num_tables * sizeof(double*));
-      memset(pp->tan, 0, sizeof(pp->tan));
-      pp->num_tables = this->num_tables;
-    }
-
-    void RefMap::free_node(Node* node)
-    {
-      // destroy all precalculated tables
-      for (int i = 0; i < node->num_tables; i++)
-      {
-        if (node->inv_ref_map[i] != nullptr)
-          delete[] node->inv_ref_map[i];
-
-        if (node->jacobian[i] != nullptr)
-          delete[] node->jacobian[i];
-
-        if (node->second_ref_map[i] != nullptr)
-          delete[] node->second_ref_map[i];
-
-        if (node->phys_x[i] != nullptr)
-          delete[] node->phys_x[i];
-
-        if (node->phys_y[i] != nullptr)
-          delete[] node->phys_y[i];
-      }
-
-      for (int i = 0; i < H2D_MAX_NUMBER_EDGES; i++)
-      if (node->tan[i] != nullptr)
-        delete[] node->tan[i];
-
-      delete node;
-    }
-
-    void RefMap::update_cur_node()
-    {
-      bool to_add = true;
-      SubElementMap<Node>::Node* node_array = this->nodes.get(sub_idx, to_add);
-      if (to_add)
-      {
-        cur_node = new Node;
-        init_node(cur_node);
-        node_array->data = cur_node;
-      }
-      else
-        cur_node = node_array->data;
-    }
-
     void RefMap::force_transform(uint64_t sub_idx, Trf* ctm)
     {
       this->sub_idx = sub_idx;
       stack[top] = *ctm;
       this->ctm = stack + top;
-      update_cur_node();
       if (is_const)
         calc_const_inv_ref_map();
-    }
-
-    void RefMap::free()
-    {
-      nodes.run_for_all(DeallocationFunction);
-      nodes.clear();
+      this->reinit_storage();
     }
   }
 }
