@@ -85,6 +85,7 @@ namespace Hermes
     {
       this->quad_2d = quad_2d;
       ref_map_pss.set_quad_2d(quad_2d);
+      this->reinit_storage();
     }
 
     void RefMap::set_active_element(Element* e)
@@ -424,7 +425,7 @@ namespace Hermes
         }
       }
 
-      this->tan_calculated[edge] = true;
+      this->tan_calculated[edge] = eo;
     }
 
     int RefMap::calc_inv_ref_order()
