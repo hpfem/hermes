@@ -220,9 +220,9 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
     ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
 
     ss_bmp << "exact_solver_solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".bmp";
-    ss_vtk << "exact_solver_solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".vtk";
+    ss_vtk << "exact_solver_solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
     exact_solver_view.save_screenshot(ss_bmp.str().c_str(), true);
-    exact_solver_view.get_linearizer()->save_solution_vtk(previous_solution, ss_vtk.str().c_str(), "solution");
+    exact_solver_view.get_linearizer()->save_solution_tecplot(previous_solution, ss_vtk.str().c_str(), "solution");
   }
 
   double time = 0.;
@@ -287,9 +287,9 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
       ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
       ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
       ss_bmp << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".bmp";
-      ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".vtk";
+      ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
       solution_view->save_screenshot(ss_bmp.str().c_str(), true);
-      solution_view->get_linearizer()->save_solution_vtk(solution, ss_vtk.str().c_str(), "solution");
+      solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution");
     }
 
     bool done = !is_timedep(solvedExample) && error_reduction_condition(calc_l2_error_algebraic(polynomialDegree ? full_space : const_space, merged_sln, es_v, logger));
@@ -613,9 +613,9 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
         ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
 
         ss_bmp << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".bmp";
-        ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".vtk";
+        ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
         solution_view->save_screenshot(ss_bmp.str().c_str(), true);
-        solution_view->get_linearizer()->save_solution_vtk(previous_sln, ss_vtk.str().c_str(), "solution");
+        solution_view->get_linearizer()->save_solution_tecplot(previous_sln, ss_vtk.str().c_str(), "solution");
       }
     }
 #pragma endregion

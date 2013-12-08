@@ -3,13 +3,13 @@
 #include "algorithms.h"
 
 int polynomialDegree = 2;
-int initialRefinementsCount = 4;
-const Algorithm algorithm = Algorithm::pMultigrid;
-const SolvedExample solvedExample = SolvedExample::CircularConvection;
+int initialRefinementsCount = 5;
+const Algorithm algorithm = Algorithm::Multiscale;
+const SolvedExample solvedExample = SolvedExample::Benchmark;
 double MovingPeakDiffusivity = 1e-2;
 const EulerLimiterType limiter_type = VertexBased;
 
-double diffusivity = 1e-3;
+double diffusivity = 1e-2;
 double s = -1;
 double CFL = 128.;
 
@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
   if(argc > 3)
     CFL = atof(argv[3]);
     
-  double sigma = std::pow(2., (double)(initialRefinementsCount)) * (s == -1 ? 10.0 : (s == 1 ? 10. : 0.));
+  double sigma = std::pow(2., (double)(initialRefinementsCount)) * (s == -1 ? 100.0 : (s == 1 ? 10. : 0.));
 
   // test();
   Hermes::Mixins::Loggable logger(true);
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
   
   if(algorithm == pMultigrid || algorithm == Both)
   {
-    Hermes::vector<int> steps(3, 5, 10, 15);
+    Hermes::vector<int> steps(10, 15);
     for(int si = 0; si < steps.size(); si++)
     {
       cpu_time.tick();
