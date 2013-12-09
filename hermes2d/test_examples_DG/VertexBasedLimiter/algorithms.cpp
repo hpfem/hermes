@@ -411,6 +411,7 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   if (is_timedep(solvedExample))
     time_step_length *= ((steps * 2));
   int iteration_count = (int)(is_timedep(solvedExample) ? end_time(solvedExample) / time_step_length : 0) + 1;
+  OGProjection<double>::project_global(space_2, previous_sln, &sln_2);
   for (int step = 0; step < (is_timedep(solvedExample) ? iteration_count : 1000); step++)
   {
     logger_details.info("V-cycle %i.", step);
@@ -419,7 +420,6 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
 
 #pragma region 0 - highest level
     // Store the previous solution.
-    OGProjection<double>::project_global(space_2, previous_sln, &sln_2);
     if (polynomialDegree > 1)
     {
       for (int iteration = 1; iteration <= steps; iteration++)
@@ -588,7 +588,6 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
         // Residual check.
         residual_condition(&matrix_A_2, &vector_b_2, sln_2.v, residual_2, logger_details, iteration, true);
       }
-
       /*
       if ((step == 1) || step > iteration_count - 2)
       {
