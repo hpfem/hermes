@@ -411,7 +411,7 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   if (is_timedep(solvedExample))
     time_step_length *= ((steps * 2));
   int iteration_count = (int)(is_timedep(solvedExample) ? end_time(solvedExample) / time_step_length : 0) + 1;
-  for (int step = 0; is_timedep(solvedExample) ? step < iteration_count : 0 == 0; step++)
+  for (int step = 0; step < (is_timedep(solvedExample) ? iteration_count : 1000); step++)
   {
     logger_details.info("V-cycle %i.", step);
     v_cycles++;
