@@ -62,7 +62,7 @@ double calc_l2_error(SolvedExample solvedExample, MeshSharedPtr mesh, MeshFuncti
   for (int i = 0; i < vector.get_size(); i++)
     result += vector.get(i);
   result = std::sqrt(result);
-  logger.info("L2 Error: %g.", result);
+  //logger.info("L2 Error: %g.", result);
   delete dp;
   return result;
 }
@@ -73,7 +73,7 @@ double calc_l2_error_algebraic(SpaceSharedPtr<double> space, double* v1, double*
   for (int i = 0; i < space->get_num_dofs(); i++)
     result += (v1[i] - v2[i]) * (v1[i] - v2[i]);
   result = std::sqrt(result);
-  logger.info("L2 Error: %g.", result);
+  //logger.info("L2 Error: %g.", result);
   return result;
 }
 
@@ -87,7 +87,7 @@ bool error_reduction_condition(double error)
   return std::abs(error / initial_error) < tolerance;
 }
 
-void solve_exact(SolvedExample solvedExample, SpaceSharedPtr<double> space, double diffusivity, double s, double sigma, MeshFunctionSharedPtr<double> exact_solution, MeshFunctionSharedPtr<double> initial_sln, double time_step, Hermes::Mixins::Loggable& logger, Hermes::Mixins::Loggable& logger_detail)
+void solve_exact(SolvedExample solvedExample, SpaceSharedPtr<double> space, double diffusivity, double s, double sigma, MeshFunctionSharedPtr<double> exact_solution, MeshFunctionSharedPtr<double> initial_sln, double time_step, Hermes::Mixins::Loggable& logger, Hermes::Mixins::Loggable& logger_detail, int poly_degree, int init_ref_num)
 {
   MeshFunctionSharedPtr<double> exact_solver_sln(new Solution<double>());
   ScalarView* exact_solver_view = new ScalarView("Exact solver solution", new WinGeom(0, 360, 600, 350));
@@ -96,16 +96,32 @@ void solve_exact(SolvedExample solvedExample, SpaceSharedPtr<double> space, doub
   ExactWeakForm weakform_exact(solvedExample, add_inlet(solvedExample), "Inlet", diffusivity, s, sigma, initial_sln);
   weakform_exact.set_current_time_step(time_step);
   LinearSolver<double> solver_exact(&weakform_exact, space);
+  
+  // Solve
   solver_exact.solve();
   Solution<double>::vector_to_solution(solver_exact.get_sln_vector(), space, exact_solver_sln);
-  exact_solver_error = calc_l2_error(solvedExample, space->get_mesh(), exact_solver_sln, exact_solution, logger_detail);
-  // exact_solver_view->show(exact_solver_sln);
+
+  // Initial error
   initial_error = get_l2_norm(solver_exact.get_sln_vector(), space->get_num_dofs());
-  logger.info("Initial error: %g.", initial_error);
-  logger.info("Tolerance: %g.", tolerance);
+  //logger.info("Initial error: %g.", initial_error);
+  //logger.info("Tolerance: %g.", tolerance);
+  
+  // es and es_v
   Solution<double>::vector_to_solution(solver_exact.get_sln_vector(), space, es);
   es_v = new double[space->get_num_dofs()];
   memcpy(es_v, solver_exact.get_sln_vector(), sizeof(double)* space->get_num_dofs());
+
+  // output
+  std::stringstream ss_bmp, ss_vtk;
+  ss_bmp.precision(2);
+  ss_vtk.precision(2);
+  ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
+  ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
+
+  ss_bmp << "exact_solver_solution_p=" << poly_degree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".bmp";
+  ss_vtk << "exact_solver_solution_p=" << poly_degree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
+  exact_solver_view->save_screenshot(ss_bmp.str().c_str(), true);
+  exact_solver_view->get_linearizer()->save_solution_tecplot(es, ss_vtk.str().c_str(), "solution");
 }
 
 void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_mean_values,
@@ -199,32 +215,7 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
   int iterations = 0;
 
   double* merged_sln;
-
-  // Exact.
-  TimeDepWeakForm weakform_timedep(solvedExample, add_inlet(solvedExample), "Inlet", diffusivity, s, sigma, exact_solution);
-  weakform_timedep.set_ext(previous_solution);
-  weakform_timedep.set_current_time_step(time_step_length);
-  LinearSolver<double> solver_exact(&weakform_timedep, full_space);
-  ScalarView exact_solver_view("Exact solver solution", new WinGeom(0, 360, 600, 350));
-  if (!is_timedep(solvedExample))
-  {
-    solver_exact.solve();
-    es_v = solver_exact.get_sln_vector();
-    Solution<double>::vector_to_solution(solver_exact.get_sln_vector(), full_space, previous_solution);
-    exact_solver_view.show(previous_solution);
-
-    std::stringstream ss_bmp, ss_vtk;
-    ss_bmp.precision(2);
-    ss_vtk.precision(2);
-    ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
-
-    ss_bmp << "exact_solver_solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".bmp";
-    ss_vtk << "exact_solver_solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
-    exact_solver_view.save_screenshot(ss_bmp.str().c_str(), true);
-    exact_solver_view.get_linearizer()->save_solution_tecplot(previous_solution, ss_vtk.str().c_str(), "solution");
-  }
-
+  
   double time = 0.;
   int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 10000);
   for (int iteration = 0; iteration < iteration_count; iteration++)
@@ -262,7 +253,7 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
 
       vector_A_der.add_vector(&vector_b_der);
       solver_der.solve();
-      if (iteration == 1 || OMEGA >= 1.)
+      if (iteration == 1 || OMEGA >= 0.99)
         sln_der.set_vector(solver_der.get_sln_vector());
       else
       {
@@ -270,25 +261,23 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
           sln_der.set(i, (OMEGA * solver_der.get_sln_vector()[i]) + ((1. - OMEGA) * sln_der.get(i)));
       }
       merged_sln = merge_slns(sln_means.v, const_space, sln_der.v, space, full_space);
-      Solution<double>::vector_to_solution(merged_sln, full_space, solution);
     }
     else
     {
-      Solution<double>::vector_to_solution(sln_means.v, const_space, solution);
       merged_sln = sln_means.v;
     }
 
-    solution_view->show(solution);
     if (iteration == iteration_count - 1)
     {
+      if (polynomialDegree)
+        Solution<double>::vector_to_solution(merged_sln, full_space, solution);
+      else
+        Solution<double>::vector_to_solution(sln_means.v, const_space, solution);
+
       std::stringstream ss_bmp, ss_vtk;
-      ss_bmp.precision(2);
       ss_vtk.precision(2);
-      ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
       ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
-      ss_bmp << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".bmp";
       ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
-      solution_view->save_screenshot(ss_bmp.str().c_str(), true);
       solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution");
     }
 
@@ -325,7 +314,7 @@ double residual_condition(CSCMatrix<double>* mat, SimpleVector<double>* vec, dou
 
   if (output)
   {
-    logger.info("\tIteration: %i, residual norm: %g.", iteration, residual_norm);
+    //logger.info("\tIteration: %i, residual norm: %g.", iteration, residual_norm);
   }
 
   return residual_norm;
@@ -600,12 +589,14 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
         residual_condition(&matrix_A_2, &vector_b_2, sln_2.v, residual_2, logger_details, iteration, true);
       }
 
-      // Make solution & display.
-      Solution<double>::vector_to_solution(&sln_2, space_2, previous_sln);
-      solution_view->set_title("Time: %f", time);
-      solution_view->show(previous_sln);
+      /*
       if ((step == 1) || step > iteration_count - 2)
       {
+        // Make solution & display.
+        Solution<double>::vector_to_solution(&sln_2, space_2, previous_sln);
+        solution_view->set_title("Time: %f", time);
+        solution_view->show(previous_sln);
+
         std::stringstream ss_bmp, ss_vtk;
         ss_bmp.precision(2);
         ss_vtk.precision(2);
@@ -617,6 +608,7 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
         solution_view->save_screenshot(ss_bmp.str().c_str(), true);
         solution_view->get_linearizer()->save_solution_tecplot(previous_sln, ss_vtk.str().c_str(), "solution");
       }
+      */
     }
 #pragma endregion
 
