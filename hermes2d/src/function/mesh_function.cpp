@@ -50,7 +50,7 @@ namespace Hermes
       : Function<Scalar>()
     {
       refmap = new RefMap;
-      this->element = nullptr;
+      this->element = NULL;
     }
 
     template<typename Scalar>
@@ -90,7 +90,7 @@ namespace Hermes
     bool MeshFunction<Scalar>::isOkay() const
     {
       bool okay = true;
-      if(this->mesh == nullptr)
+      if(this->mesh == NULL)
         okay = false;
       try
       {
@@ -271,7 +271,7 @@ namespace Hermes
     template<typename Scalar>
     void MeshFunction<Scalar>::set_quad_2d(Quad2D* quad_2d)
     {
-      if(quad_2d == nullptr) 
+      if(quad_2d == NULL) 
         throw Exceptions::NullException(1);
       Function<Scalar>::set_quad_2d(quad_2d);
       refmap->set_quad_2d(quad_2d);

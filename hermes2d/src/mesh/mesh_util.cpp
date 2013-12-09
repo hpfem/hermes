@@ -26,10 +26,10 @@ namespace Hermes
       for (unsigned int node_i = 0; node_i < 2; node_i++)
       {
         Element* e = en->elem[node_i];
-        if (e == nullptr)
+        if (e == NULL)
           continue;
 
-        if (e->cm == nullptr)
+        if (e->cm == NULL)
         {
           e->cm = new CurvMap;
           memset(e->cm, 0, sizeof(CurvMap));
@@ -105,13 +105,13 @@ namespace Hermes
 
       if (!e->is_triangle())
       {
-        if (e->sons[2] == nullptr) // horz quad
+        if (e->sons[2] == NULL) // horz quad
         {
           if (edge == 0 || edge == 2) { son1 = edge >> 1;   return 1; }
           else if (edge == 1) { son1 = 0; son2 = 1; return 2; }
           else { son1 = 1; son2 = 0; return 2; }
         }
-        else if (e->sons[0] == nullptr) // vert quad
+        else if (e->sons[0] == NULL) // vert quad
         {
           if (edge == 1 || edge == 3) { son1 = (edge == 1) ? 3 : 2; return 1; }
           else if (edge == 0) { son1 = 2; son2 = 3; return 2; }
@@ -132,12 +132,12 @@ namespace Hermes
 
       *en = mesh->peek_edge_node(p1, p2);
 
-      if(*en == nullptr)
+      if(*en == NULL)
       {
         if(!skip_check)
           throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
         else
-          return nullptr;
+          return NULL;
       }
 
       // degree of an arc == 2.
@@ -259,7 +259,7 @@ namespace Hermes
       this->elements = new Element*[MAX_ELEMENTS];
       for (int i = 0; i < 2; i++)
       for (int j = 0; j < 2; j++)
-        m_sons[i][j] = nullptr;
+        m_sons[i][j] = NULL;
     }
 
     MeshHashGridElement::~MeshHashGridElement()
@@ -299,7 +299,7 @@ namespace Hermes
               double y0 = yy[j];
               double y1 = yy[j + 1];
 
-              assert(m_sons[i][j] == nullptr);
+              assert(m_sons[i][j] == NULL);
 
               m_sons[i][j] = new MeshHashGridElement(x0, y0, x1, y1, m_depth + 1);
 
@@ -312,7 +312,7 @@ namespace Hermes
           }
 
           delete[] elements;
-          elements = nullptr;
+          elements = NULL;
         }
       }
       else
@@ -342,7 +342,7 @@ namespace Hermes
         if (RefMap::is_element_on_physical_coordinates(elements[elem_i], x, y))
           return elements[elem_i];
 
-        return nullptr;
+        return NULL;
       }
       else
       {
@@ -356,7 +356,7 @@ namespace Hermes
               return element;
           }
         }
-        return nullptr;
+        return NULL;
       }
     }
 
@@ -404,7 +404,7 @@ namespace Hermes
 
       // this means that x or y is outside mesh, but it can hapen
       if ((i >= GRID_SIZE) || (j >= GRID_SIZE))
-        return nullptr;
+        return NULL;
       else
         return m_grid[i][j]->getElement(x, y);
     }

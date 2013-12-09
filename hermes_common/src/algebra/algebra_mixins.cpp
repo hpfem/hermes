@@ -39,7 +39,7 @@ namespace Hermes
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::process_matrix_output(Hermes::Algebra::SparseMatrix<Scalar>* matrix, int iteration)
       {
-        if (matrix == nullptr)
+        if (matrix == NULL)
           return;
 
         if(this->output_matrixOn)
@@ -63,7 +63,7 @@ namespace Hermes
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::process_matrix_output(Hermes::Algebra::SparseMatrix<Scalar>* matrix)
       {
-        if (matrix == nullptr)
+        if (matrix == NULL)
           return;
 
         if(this->output_matrixOn)
@@ -78,7 +78,7 @@ namespace Hermes
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::process_vector_output(Hermes::Algebra::Vector<Scalar>* rhs, int iteration)
       {
-        if (rhs == nullptr)
+        if (rhs == NULL)
           return;
 
 
@@ -103,7 +103,7 @@ namespace Hermes
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::process_vector_output(Hermes::Algebra::Vector<Scalar>* rhs)
       {
-        if (rhs == nullptr)
+        if (rhs == NULL)
           return;
 
         if(this->output_rhsOn)

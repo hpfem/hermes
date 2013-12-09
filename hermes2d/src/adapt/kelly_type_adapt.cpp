@@ -65,7 +65,7 @@ namespace Hermes
                                            NormType norm_)
       : Adapt<Scalar>(space_, norm_)
     {
-      if(interface_scaling_fn_ == nullptr)
+      if(interface_scaling_fn_ == NULL)
         interface_scaling_fns.push_back(new ScaleByElementDiameter);
       else
         interface_scaling_fns.push_back(interface_scaling_fn_);
@@ -123,7 +123,7 @@ namespace Hermes
       for (int i = 0; i < this->num; i++)
       {
         Solution<Scalar>* solution = dynamic_cast<Solution<Scalar>*>(slns[i].get());
-        if(solution == nullptr)
+        if(solution == NULL)
           throw Exceptions::Exception("Passed solution is in fact not a Solution instance in KellyTypeAdapt::calc_err_*().");
 
         this->sln[i] = solution;
@@ -144,7 +144,7 @@ namespace Hermes
         this->num_act_elems += meshes[i]->get_num_active_elements();
         int max = meshes[i]->get_max_element_id();
 
-        if(this->errors[i] != nullptr) delete [] this->errors[i];
+        if(this->errors[i] != NULL) delete [] this->errors[i];
         this->errors[i] = new double[max];
         memset(this->errors[i], 0, sizeof(double) * max);
       }
@@ -155,7 +155,7 @@ namespace Hermes
       if((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL ||
         (error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) calc_norm = true;
 
-      double *norms = nullptr;
+      double *norms = NULL;
       if(calc_norm)
       {
         norms = new double[this->num];
@@ -186,7 +186,7 @@ namespace Hermes
 
       // Begin the multimesh traversal.
       trav.begin(this->num, meshes, fns);
-      while ((ee = trav.get_next_state()) != nullptr)
+      while ((ee = trav.get_next_state()) != NULL)
       {
         bnd[0] = ee->bnd[0];
         bnd[1] = ee->bnd[1];
@@ -206,7 +206,7 @@ namespace Hermes
         // Go through all solution components.
         for (int i = 0; i < this->num; i++)
         {
-          if(ee->e[i] == nullptr)
+          if(ee->e[i] == NULL)
             continue;
 
           // Set maximum integration order for use in integrals, see limit_order()
@@ -281,7 +281,7 @@ namespace Hermes
                 this->dp.init_neighbors(neighbor_searches, ee, min_dg_mesh_seq);
 
                 // Create a multimesh tree;
-                root = new NeighborNode(nullptr, 0);
+                root = new NeighborNode(NULL, 0);
                 this->dp.build_multimesh_tree(root, neighbor_searches);
 
                 // Update all NeighborSearches according to the multimesh tree.
@@ -426,7 +426,7 @@ namespace Hermes
       trav.finish();
 
       // Store the calculation for each solution component separately.
-      if(component_errors != nullptr)
+      if(component_errors != NULL)
       {
         component_errors->clear();
         for (int i = 0; i < this->num; i++)
@@ -495,7 +495,7 @@ namespace Hermes
 
       double fake_wt = 1.0;
       Geom<Hermes::Ord>* fake_e = init_geom_ord();
-      Hermes::Ord o = form->ord(1, &fake_wt, nullptr, ou, ou, fake_e, nullptr);
+      Hermes::Ord o = form->ord(1, &fake_wt, NULL, ou, ou, fake_e, NULL);
       int order = rm->get_inv_ref_order();
       order += o.get_order();
 
@@ -518,7 +518,7 @@ namespace Hermes
 
       // Function values.
       Func<Scalar>* u = init_fn(sln.get(), order);
-      Scalar res = form->value(np, jwt, nullptr, u, u, e, nullptr);
+      Scalar res = form->value(np, jwt, NULL, u, u, e, NULL);
 
       e->free(); delete e;
       delete [] jwt;
@@ -557,7 +557,7 @@ namespace Hermes
       // Clean up.
       for (int i = 0; i < this->num; i++)
       {
-        if(oi[i] != nullptr)
+        if(oi[i] != NULL)
         {
           oi[i]->free_ord();
           delete oi[i];
@@ -590,10 +590,10 @@ namespace Hermes
       Func<Scalar>** ext_fn = new Func<Scalar>*[err_est_form->ext.size()];
       for (unsigned i = 0; i < err_est_form->ext.size(); i++)
       {
-        if(err_est_form->ext[i] != nullptr)
+        if(err_est_form->ext[i] != NULL)
           ext_fn[i] = init_fn(err_est_form->ext[i].get(), order);
         else
-          ext_fn[i] = nullptr;
+          ext_fn[i] = NULL;
       }
 
       DiscontinuousFunc<Scalar> ui_i(ui[err_est_form->i], false, false);
@@ -602,7 +602,7 @@ namespace Hermes
 
       for (int i = 0; i < this->num; i++)
       {
-        if(ui[i] != nullptr)
+        if(ui[i] != NULL)
         {
           ui[i]->free_fn();
           delete ui[i];
@@ -648,7 +648,7 @@ namespace Hermes
 
       // Clean up.
       for (int i = 0; i < this->num; i++)
-        if(oi[i] != nullptr)
+        if(oi[i] != NULL)
         {
           oi[i]->free_ord();
           delete oi[i];
@@ -681,10 +681,10 @@ namespace Hermes
       Func<Scalar>** ext_fn = new Func<Scalar>*[err_est_form->ext.size()];
       for (unsigned i = 0; i < err_est_form->ext.size(); i++)
       {
-        if(err_est_form->ext[i] != nullptr)
+        if(err_est_form->ext[i] != NULL)
           ext_fn[i] = init_fn(err_est_form->ext[i].get(), order);
         else
-          ext_fn[i] = nullptr;
+          ext_fn[i] = NULL;
       }
 
       DiscontinuousFunc<Scalar> ui_i(ui[err_est_form->i], false, false);
@@ -693,7 +693,7 @@ namespace Hermes
         err_est_form->value(np, jwt, ui, &ui_i, e, ext_fn);
 
       for (int i = 0; i < this->num; i++)
-        if(ui[i] != nullptr)
+        if(ui[i] != NULL)
         {
           ui[i]->free_fn();
           delete ui[i];
@@ -740,7 +740,7 @@ namespace Hermes
       double fake_wt = 1.0;
       DiscontinuousFunc<Hermes::Ord> fake_ext_fns_i(fake_ext_fns[err_est_form->i], false, false);
       
-      Hermes::Ord o = err_est_form->ord(1, &fake_wt, fake_ext_fns, &fake_ext_fns_i, fake_e, nullptr);
+      Hermes::Ord o = err_est_form->ord(1, &fake_wt, fake_ext_fns, &fake_ext_fns_i, fake_e, NULL);
 
       int order = rm->get_inv_ref_order();
       order += o.get_order();
@@ -780,9 +780,9 @@ namespace Hermes
       DiscontinuousFunc<Scalar>** ui = this->dp.init_ext_fns(slns, neighbor_searches, order, 0);
 
       Scalar res = interface_scaling_const *
-        err_est_form->value(np, jwt, nullptr, ui[err_est_form->i], e, nullptr);
+        err_est_form->value(np, jwt, NULL, ui[err_est_form->i], e, NULL);
 
-      if(ui != nullptr)
+      if(ui != NULL)
       {
         for(unsigned int i = 0; i < slns.size(); i++)
           ui[i]->free_fn();

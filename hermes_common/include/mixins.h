@@ -66,7 +66,7 @@ namespace Hermes
       typedef void(*callbackFn)(const char*);
 
     public:
-      Loggable(bool verbose_output = false, callbackFn verbose_callback = nullptr);
+      Loggable(bool verbose_output = false, callbackFn verbose_callback = NULL);
 
       void set_logFile_name(const char* filename);
       void set_logFile_name(std::string filename);
@@ -161,7 +161,7 @@ namespace Hermes
     class HERMES_API TimeMeasurable
     {
     public:
-      TimeMeasurable(const char *name = nullptr); ///< Constructs internal structures and starts measuring.
+      TimeMeasurable(const char *name = NULL); ///< Constructs internal structures and starts measuring.
 
       /// Tick type. Used by the class Hermes::TimePeriod.
       enum TimerPeriodTickType

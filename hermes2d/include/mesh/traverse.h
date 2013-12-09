@@ -146,7 +146,7 @@ namespace Hermes
       int top, size;
 
       /// Internal.
-      State* push_state(int* top_by_ref = nullptr);
+      State* push_state(int* top_by_ref = NULL);
       /// Internal.
       void set_boundary_info(State* s);
       /// Internal.

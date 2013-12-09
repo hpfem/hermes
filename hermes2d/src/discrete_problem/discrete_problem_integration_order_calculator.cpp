@@ -36,8 +36,8 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblemIntegrationOrderCalculator<Scalar>::DiscreteProblemIntegrationOrderCalculator(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) : 
       selectiveAssembler(selectiveAssembler),
-      current_state(nullptr),
-      u_ext(nullptr)
+      current_state(NULL),
+      u_ext(NULL)
     {
     }
 
@@ -233,7 +233,7 @@ namespace Hermes
     template<typename Scalar>
     Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_u_ext_orders()
     {
-      Func<Hermes::Ord>** u_ext_func = nullptr;
+      Func<Hermes::Ord>** u_ext_func = NULL;
       bool surface_form = (this->current_state->isurf > -1);
       if (this->u_ext)
       {
@@ -278,7 +278,7 @@ namespace Hermes
     template<typename Scalar>
     Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func)
     {
-      Func<Hermes::Ord>** ext_func = nullptr;
+      Func<Hermes::Ord>** ext_func = NULL;
       bool surface_form = (this->current_state->isurf > -1);
       if (ext.size() > 0 || u_ext_fns.size() > 0)
       {
@@ -291,7 +291,7 @@ namespace Hermes
             u_ext_fns[ext_i]->ord(u_ext_func, ext_func[ext_i]);
           }
           else
-            ext_func[ext_i] = nullptr;
+            ext_func[ext_i] = NULL;
         }
 
         for (int ext_i = 0; ext_i < ext.size(); ext_i++)
@@ -306,10 +306,10 @@ namespace Hermes
                 ext_func[u_ext_fns.size() + ext_i] = init_fn_ord(ext[ext_i]->get_fn_order() + (ext[ext_i]->get_num_components() > 1 ? 1 : 0));
             }
             else
-              ext_func[u_ext_fns.size() + ext_i] = nullptr;
+              ext_func[u_ext_fns.size() + ext_i] = NULL;
           }
           else
-            ext_func[u_ext_fns.size() + ext_i] = nullptr;
+            ext_func[u_ext_fns.size() + ext_i] = NULL;
         }
       }
 
@@ -414,7 +414,7 @@ namespace Hermes
       // Order to return.
       int order = 0;
 
-      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset];
+      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset];
 
       if (current_u_ext)
       for (int i = 0; i < prev_size; i++)
@@ -424,7 +424,7 @@ namespace Hermes
         u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
 
       // Order of additional external functions.
-      DiscontinuousFunc<Ord>** ext_ord = nullptr;
+      DiscontinuousFunc<Ord>** ext_ord = NULL;
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = mfDG->ext.size() ? mfDG->ext.size() : mfDG->wf->ext.size();
       if (ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
@@ -475,7 +475,7 @@ namespace Hermes
       // Order to return.
       int order = 0;
 
-      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset];
+      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset];
 
       if (current_u_ext)
       for (int i = 0; i < prev_size; i++)
@@ -485,7 +485,7 @@ namespace Hermes
         u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
 
       // Order of additional external functions.
-      DiscontinuousFunc<Ord>** ext_ord = nullptr;
+      DiscontinuousFunc<Ord>** ext_ord = NULL;
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = vfDG->ext.size() ? vfDG->ext.size() : vfDG->wf->ext.size();
       if (ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);

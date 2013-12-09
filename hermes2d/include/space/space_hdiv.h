@@ -38,10 +38,10 @@ namespace Hermes
 		public:
 			HdivSpace();
 			HdivSpace(MeshSharedPtr mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
-				Shapeset* shapeset = nullptr);
+				Shapeset* shapeset = NULL);
 
 			HdivSpace(MeshSharedPtr mesh, int p_init = 1,
-				Shapeset* shapeset = nullptr);
+				Shapeset* shapeset = NULL);
 
 			virtual ~HdivSpace();
 

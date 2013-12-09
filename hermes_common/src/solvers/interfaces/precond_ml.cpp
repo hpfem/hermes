@@ -26,9 +26,9 @@ namespace Hermes
     template<typename Scalar>
     MlPrecond<Scalar>::MlPrecond(const char *type)
     {
-      this->prec = nullptr;
+      this->prec = NULL;
       this->owner = true;
-      this->mat = nullptr;
+      this->mat = NULL;
 
       if(strcmp(type, "sa") == 0) ML_Epetra::SetDefaults("SA", mlist);
       else if(strcmp(type, "nssa") == 0) ML_Epetra::SetDefaults("NSSA", mlist);
@@ -40,7 +40,7 @@ namespace Hermes
     {
       this->prec = mpc;
       this->owner = false;
-      this->mat = nullptr;      // FIXME: get the matrix from mpc
+      this->mat = NULL;      // FIXME: get the matrix from mpc
     }
 
     template<typename Scalar>
@@ -77,7 +77,7 @@ namespace Hermes
     void MlPrecond<Scalar>::create(Matrix<Scalar> *m)
     {
       EpetraMatrix<Scalar> *mt = static_cast<EpetraMatrix<Scalar> *>(m);
-      assert(mt != nullptr);
+      assert(mt != NULL);
       mat = mt;
       if (prec) delete prec;
       prec = new ML_Epetra::MultiLevelPreconditioner(*mat->mat, mlist, false);
@@ -86,21 +86,21 @@ namespace Hermes
     template<typename Scalar>
     void MlPrecond<Scalar>::destroy()
     {
-      assert(prec != nullptr);
+      assert(prec != NULL);
       prec->DestroyPreconditioner();
     }
 
     template<typename Scalar>
     void MlPrecond<Scalar>::compute()
     {
-      assert(prec != nullptr);
+      assert(prec != NULL);
       prec->ComputePreconditioner();
     }
 
     template<typename Scalar>
     void MlPrecond<Scalar>::recompute()
     {
-      assert(prec != nullptr);
+      assert(prec != NULL);
       assert(prec->IsPreconditionerComputed());
       prec->ReComputePreconditioner();
     }
@@ -108,14 +108,14 @@ namespace Hermes
     template<typename Scalar>
     void MlPrecond<Scalar>::print_unused()
     {
-      assert(prec != nullptr);
+      assert(prec != NULL);
       prec->PrintUnused();
     }
 
     template<typename Scalar>
     int MlPrecond<Scalar>::ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const
     {
-      assert(prec != nullptr);
+      assert(prec != NULL);
       return prec->ApplyInverse(r, z);
     }
 

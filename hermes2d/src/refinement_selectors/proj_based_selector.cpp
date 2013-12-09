@@ -48,7 +48,7 @@ namespace Hermes
         for(int m = 0; m < H2D_NUM_MODES; m++)
           for(int i = 0; i < H2DRS_MAX_ORDER + 2; i++)
             for(int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
-              proj_matrix_cache[m][i][k] = nullptr;
+              proj_matrix_cache[m][i][k] = NULL;
       }
 
       template<typename Scalar>
@@ -60,7 +60,7 @@ namespace Hermes
           for(int i = 0; i < H2DRS_MAX_ORDER + 2; i++)
             for(int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
             {
-              if(proj_matrix_cache[m][i][k] != nullptr)
+              if(proj_matrix_cache[m][i][k] != NULL)
                 delete [] proj_matrix_cache[m][i][k];
             }
         }
@@ -97,7 +97,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      ProjBasedSelector<Scalar>::TrfShapeExp::TrfShapeExp() : num_gip(0), num_expansion(0), values(nullptr) {};
+      ProjBasedSelector<Scalar>::TrfShapeExp::TrfShapeExp() : num_gip(0), num_expansion(0), values(NULL) {};
 
       template<typename Scalar>
       ProjBasedSelector<Scalar>::TrfShapeExp::~TrfShapeExp()
@@ -123,7 +123,7 @@ namespace Hermes
       template<typename Scalar>
       bool ProjBasedSelector<Scalar>::TrfShapeExp::empty() const
       {
-        return values == nullptr;
+        return values == NULL;
       }
 
       template<typename Scalar>
@@ -241,7 +241,7 @@ namespace Hermes
 
         // everything is done on the reference domain
         Solution<Scalar>* rsln_sln = dynamic_cast<Solution<Scalar>*>(rsln);
-        if(rsln_sln != nullptr)
+        if(rsln_sln != NULL)
           rsln_sln->enable_transform(false);
 
         // obtain reference solution values on all four refined sons
@@ -268,7 +268,7 @@ namespace Hermes
           {
             //set element
             Element* e = base_element->sons[son];
-            assert(e != nullptr);
+            assert(e != NULL);
             rsln->set_active_element(e);
             rsln->set_quad_order(H2DRS_INTR_GIP_ORDER);
 
@@ -278,7 +278,7 @@ namespace Hermes
         }
 
         //retrieve transformations
-        Trf* trfs = nullptr;
+        Trf* trfs = NULL;
         int num_noni_trfs = 0;
         if(mode == HERMES_MODE_TRIANGLE)
         {
@@ -498,7 +498,7 @@ namespace Hermes
           //calculate projection matrix iff no ortho is used
           if(!use_ortho)
           {
-            if(proj_matrices[order_h][order_v] == nullptr)
+            if(proj_matrices[order_h][order_v] == NULL)
               proj_matrices[order_h][order_v] = build_projection_matrix(gip_points, num_gip_points, shape_inxs, num_shapes, mode);
             copy_matrix(proj_matrix, proj_matrices[order_h][order_v], num_shapes, num_shapes); //copy projection matrix because original matrix will be modified
           }

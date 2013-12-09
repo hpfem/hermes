@@ -95,7 +95,7 @@ namespace Hermes
     template<typename Scalar>
     SparseMatrix<Scalar>::SparseMatrix() : Matrix<Scalar>()
     {
-      pages = nullptr;
+      pages = NULL;
       row_storage = false;
       col_storage = false;
     }
@@ -104,7 +104,7 @@ namespace Hermes
     SparseMatrix<Scalar>::SparseMatrix(unsigned int size)
     {
       this->size = size;
-      pages = nullptr;
+      pages = NULL;
 
       row_storage = false;
       col_storage = false;
@@ -132,7 +132,7 @@ namespace Hermes
       }
       else
       {
-        this->pages = nullptr;
+        this->pages = NULL;
       }
 
       row_storage = false;
@@ -239,7 +239,7 @@ namespace Hermes
     template<typename Scalar>
     void SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
     {
-      if(pages[col] == nullptr || pages[col]->count >= PAGE_SIZE)
+      if(pages[col] == NULL || pages[col]->count >= PAGE_SIZE)
       {
         Page *new_page = new Page;
         new_page->count = 0;
@@ -254,7 +254,7 @@ namespace Hermes
     {
       // gather all pages in the buffer, deleting them along the way
       int *end = buffer;
-      while (page != nullptr)
+      while (page != NULL)
       {
         memcpy(end, page->idx, sizeof(int) * page->count);
         end += page->count;
@@ -278,7 +278,7 @@ namespace Hermes
     {
       int total = 0;
       for (unsigned int i = 0; i < this->size; i++)
-        for (Page *page = pages[i]; page != nullptr; page = page->next)
+        for (Page *page = pages[i]; page != NULL; page = page->next)
           total += page->count;
 
       return total;
@@ -367,7 +367,7 @@ namespace Hermes
       default:
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_matrix().");
       }
-      return nullptr;
+      return NULL;
     }
 
     template<>
@@ -452,7 +452,7 @@ namespace Hermes
       default:
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_matrix().");
       }
-      return nullptr;
+      return NULL;
     }
 
 

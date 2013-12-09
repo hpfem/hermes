@@ -83,7 +83,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MumpsMatrix<Scalar>::MumpsMatrix() : CSCMatrix<Scalar>(), irn(nullptr), jcn(nullptr), Ax(nullptr)
+    MumpsMatrix<Scalar>::MumpsMatrix() : CSCMatrix<Scalar>(), irn(NULL), jcn(NULL), Ax(NULL)
     {
     }
 
@@ -115,17 +115,17 @@ namespace Hermes
       if(Ax)
       {
         delete [] Ax;
-        Ax = nullptr;
+        Ax = NULL;
       }
       if(irn)
       {
         delete [] irn;
-        irn = nullptr;
+        irn = NULL;
       }
       if(jcn)
       {
         delete [] jcn;
-        jcn = nullptr;
+        jcn = NULL;
       }
     }
 
@@ -214,8 +214,8 @@ namespace Hermes
           sparse.nzmax = this->nnz;
 
           // For complex.
-          double* Ax_re = nullptr;
-          double* Ax_im = nullptr;
+          double* Ax_re = NULL;
+          double* Ax_im = NULL;
 
           sparse.nir = this->nnz;
           sparse.ir = this->Ai;
@@ -391,7 +391,7 @@ namespace Hermes
 
       // Initial values for some fields of the MUMPS_STRUC structure that may be accessed
       // before MUMPS has been initialized.
-      param.rhs = nullptr;
+      param.rhs = NULL;
       param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
       // in setup_factorization()
     }
@@ -406,7 +406,7 @@ namespace Hermes
         mumps_c(&param);
       }
 
-      if(param.rhs != nullptr)
+      if(param.rhs != NULL)
         delete [] param.rhs;
     }
 
@@ -502,8 +502,8 @@ namespace Hermes
     template<typename Scalar>
     void MumpsSolver<Scalar>::solve()
     {
-      assert(m != nullptr);
-      assert(rhs != nullptr);
+      assert(m != NULL);
+      assert(rhs != NULL);
 
       this->tick();
 
@@ -557,7 +557,7 @@ namespace Hermes
       this->time = this->accumulated();
 
       delete [] param.rhs;
-      param.rhs = nullptr;
+      param.rhs = NULL;
     }
 
     template<typename Scalar>

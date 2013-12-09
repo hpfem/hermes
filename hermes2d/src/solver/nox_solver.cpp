@@ -53,7 +53,7 @@ namespace Hermes
 
       Scalar* coeff_vec = new Scalar[xx.get_size()];
       xx.extract(coeff_vec);
-      this->assemble(coeff_vec, nullptr, &rhs); // nullptr is for the global matrix.
+      this->assemble(coeff_vec, NULL, &rhs); // NULL is for the global matrix.
       delete [] coeff_vec;
 
       return true;
@@ -63,7 +63,7 @@ namespace Hermes
     bool DiscreteProblemNOX<Scalar>::computeJacobian(const Epetra_Vector &x, Epetra_Operator &op)
     {
       Epetra_RowMatrix *jac = dynamic_cast<Epetra_RowMatrix *>(&op);
-      assert(jac != nullptr);
+      assert(jac != NULL);
 
       EpetraVector<Scalar> xx(x);      // wrap our structures around core Epetra objects
       EpetraMatrix<Scalar> jacob(*jac);
@@ -72,7 +72,7 @@ namespace Hermes
 
       Scalar* coeff_vec = new Scalar[xx.get_size()];
       xx.extract(coeff_vec);
-      this->assemble(coeff_vec, &jacob, nullptr); // nullptr is for the right-hand side.
+      this->assemble(coeff_vec, &jacob, NULL); // NULL is for the right-hand side.
       delete [] coeff_vec;
       //jacob.finish();
 
@@ -116,7 +116,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NewtonSolverNOX<Scalar>::NewtonSolverNOX(DiscreteProblemNOX<Scalar>* problem) : dp(problem), sln_vector(nullptr)
+    NewtonSolverNOX<Scalar>::NewtonSolverNOX(DiscreteProblemNOX<Scalar>* problem) : dp(problem), sln_vector(NULL)
     {
       // default values
       // convergence test

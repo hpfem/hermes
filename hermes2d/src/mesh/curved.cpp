@@ -257,8 +257,8 @@ namespace Hermes
 
     Nurbs::Nurbs()
     {
-      pt = nullptr;
-      kv = nullptr;
+      pt = NULL;
+      kv = NULL;
     };
 
     Nurbs::~Nurbs()
@@ -274,9 +274,9 @@ namespace Hermes
       if (!--this->ref)
       {
         delete[] pt;
-        pt = nullptr;
+        pt = NULL;
         delete[] kv;
-        kv = nullptr;
+        kv = NULL;
       }
     }
 
@@ -295,8 +295,8 @@ namespace Hermes
 
     CurvMap::CurvMap()
     {
-      coeffs = nullptr;
-      ctm = nullptr;
+      coeffs = NULL;
+      ctm = NULL;
     }
 
     CurvMap::CurvMap(CurvMap* cm)
@@ -308,23 +308,23 @@ namespace Hermes
       if (toplevel)
       {
         for (int i = 0; i < 4; i++)
-          if (nurbs[i] != nullptr)
+          if (nurbs[i] != NULL)
             nurbs[i]->ref++;
       }
     }
 
     CurvMap::~CurvMap()
     {
-      if (coeffs != nullptr)
+      if (coeffs != NULL)
       {
         delete[] coeffs;
-        coeffs = nullptr;
+        coeffs = NULL;
       }
 
       if (toplevel)
       {
         for (int i = 0; i < 4; i++)
-          if (nurbs[i] != nullptr)
+          if (nurbs[i] != NULL)
           {
             nurbs[i]->unref();
             if (nurbs[i]->ref <= 0)
@@ -379,7 +379,7 @@ namespace Hermes
       double abs_v = sqrt(sqr(v[0]) + sqr(v[1]));
 
       // Straight line.
-      if (nurbs == nullptr)
+      if (nurbs == NULL)
       {
         x = A[0] + t * v[0];
         y = A[1] + t * v[1];
@@ -891,10 +891,10 @@ namespace Hermes
         int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
         int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
         nc = nv + nv*ne + nb;
-        if (coeffs != nullptr)
+        if (coeffs != NULL)
         {
           delete[] coeffs;
-          coeffs = nullptr;
+          coeffs = NULL;
         }
         coeffs = new double2[nc];
 
@@ -963,12 +963,12 @@ namespace Hermes
       // if the top three bits of part are nonzero, we would overflow
       // -- make the element non-curvilinear
       if (e->cm->sub_idx & 0xe000000000000000ULL)
-        return nullptr;
+        return NULL;
 
       // if the parent element is already almost straight-edged,
       // the son will be even more straight-edged
       if (e->iro_cache == 0)
-        return nullptr;
+        return NULL;
 
       CurvMap* cm = new CurvMap;
       if (e->cm->toplevel == false)

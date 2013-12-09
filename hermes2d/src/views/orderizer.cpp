@@ -88,11 +88,11 @@ namespace Hermes
 
       Orderizer::Orderizer() : LinearizerBase()
       {
-        verts = nullptr;
+        verts = NULL;
         this->label_size = 0;
-        ltext = nullptr;
-        lvert = nullptr;
-        lbox = nullptr;
+        ltext = NULL;
+        lvert = NULL;
+        lbox = NULL;
 
         label_count = 0;
 
@@ -133,8 +133,8 @@ namespace Hermes
       void Orderizer::process_space(SpaceSharedPtr<Scalar> space, bool show_edge_orders)
       {
         // sanity check
-        if(space == nullptr)
-          throw Hermes::Exceptions::Exception("Space is nullptr in Orderizer:process_space().");
+        if(space == NULL)
+          throw Hermes::Exceptions::Exception("Space is NULL in Orderizer:process_space().");
 
         if(!space->is_up_to_date())
           throw Hermes::Exceptions::Exception("The space is not up to date.");
@@ -301,25 +301,25 @@ namespace Hermes
       
       void Orderizer::free()
       {
-        if(verts != nullptr)
+        if(verts != NULL)
         {
           ::free(verts);
-          verts = nullptr;
+          verts = NULL;
         }
-        if(lvert != nullptr)
+        if(lvert != NULL)
         {
           ::free(lvert);
-          lvert = nullptr;
+          lvert = NULL;
         }
-        if(ltext != nullptr)
+        if(ltext != NULL)
         {
           ::free(ltext);
-          ltext = nullptr;
+          ltext = NULL;
         }
-        if(lbox != nullptr)
+        if(lbox != NULL)
         {
           ::free(lbox);
-          lbox = nullptr;
+          lbox = NULL;
         }
 
         LinearizerBase::free();
@@ -336,7 +336,7 @@ namespace Hermes
         process_space(space);
 
         FILE* f = fopen(file_name, "wb");
-        if(f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
+        if(f == NULL) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
 
         // Output header for vertices.
         fprintf(f, "# vtk DataFile Version 2.0\n");
@@ -383,7 +383,7 @@ namespace Hermes
         process_space(space);
 
         FILE* f = fopen(file_name, "wb");
-        if(f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
+        if(f == NULL) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
 
         // Output header for vertices.
         fprintf(f, "# vtk DataFile Version 2.0\n");
@@ -430,7 +430,7 @@ namespace Hermes
         process_space(space);
 
         FILE* f = fopen(file_name, "wb");
-        if(f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
+        if(f == NULL) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
 
         // Output header for vertices.
         fprintf(f, "# vtk DataFile Version 2.0\n");
@@ -477,8 +477,8 @@ namespace Hermes
 
       void Orderizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
-        if(verts == nullptr)
-          throw Exceptions::Exception("Cannot calculate AABB from nullptr vertices");
+        if(verts == NULL)
+          throw Exceptions::Exception("Cannot calculate AABB from NULL vertices");
         calc_aabb(&verts[0][0], &verts[0][1], sizeof(double3), vertex_count, min_x, max_x, min_y, max_y);
       }
 

@@ -99,7 +99,7 @@ namespace Hermes
     void Adapt<Scalar>::init()
     {
       if(!this->errorCalculator)
-        throw Exceptions::Exception("Error calculator must not be nullptr in Adapt::Adapt().");
+        throw Exceptions::Exception("Error calculator must not be NULL in Adapt::Adapt().");
 
       this->num = spaces.size();
 
@@ -113,7 +113,7 @@ namespace Hermes
         spaces[i]->check();
       }
 
-      elements_to_refine = nullptr;
+      elements_to_refine = NULL;
     }
 
     template<typename Scalar>

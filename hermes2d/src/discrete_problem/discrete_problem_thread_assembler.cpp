@@ -26,9 +26,9 @@ namespace Hermes
   {
     template<typename Scalar>
     DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) :
-      pss(nullptr), refmaps(nullptr), u_ext(nullptr),
+      pss(NULL), refmaps(NULL), u_ext(NULL),
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
-      ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0)
+      ext_funcs(NULL), ext_funcs_allocated_size(0), ext_funcs_local(NULL), ext_funcs_local_allocated_size(0)
     {
     }
 
@@ -210,10 +210,10 @@ namespace Hermes
 
         // Initializaton of form-(local-)ext funcs
         for (int ext_i = 0; ext_i < local_u_ext_fns_size; ext_i++)
-          this->ext_funcs_local[ext_i] = preallocate_fn(UExtFunctionSharedPtr<Scalar>(nullptr));
+          this->ext_funcs_local[ext_i] = preallocate_fn(UExtFunctionSharedPtr<Scalar>(NULL));
 
         for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
-          this->ext_funcs_local[local_u_ext_fns_size + ext_i] = preallocate_fn(MeshFunctionSharedPtr<Scalar>(nullptr));
+          this->ext_funcs_local[local_u_ext_fns_size + ext_i] = preallocate_fn(MeshFunctionSharedPtr<Scalar>(NULL));
       }
     }
 
@@ -349,7 +349,7 @@ namespace Hermes
     {
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
-        if (current_state->e[space_i] == nullptr)
+        if (current_state->e[space_i] == NULL)
           continue;
 
         for (unsigned int j = 0; j < this->als[space_i].cnt; j++)
@@ -550,7 +550,7 @@ namespace Hermes
     void DiscreteProblemThreadAssembler<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns,
       AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
-      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == nullptr);
+      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
 
       double block_scaling_coefficient = this->block_scaling_coeff(form);
 
@@ -649,7 +649,7 @@ namespace Hermes
     void DiscreteProblemThreadAssembler<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns,
       AsmList<Scalar>* current_als_i, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
-      bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == nullptr);
+      bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == NULL);
 
       Func<Scalar>** ext_local = this->ext_funcs;
       // If the user supplied custom ext functions for this form.
@@ -720,7 +720,7 @@ namespace Hermes
       for (unsigned int j = 0; j < spaces_size; j++)
         delete pss[j];
       delete[] pss;
-      pss = nullptr;
+      pss = NULL;
 
       for (unsigned int j = 0; j < spaces_size; j++)
         delete refmaps[j];
@@ -734,7 +734,7 @@ namespace Hermes
       {
         this->wf->free_ext();
         delete this->wf;
-        this->wf = nullptr;
+        this->wf = NULL;
       }
     }
 

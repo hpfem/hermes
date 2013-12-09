@@ -55,7 +55,7 @@ void qsort_int(intType* pbase, size_t total_elems)
     stack_node<intType> stack[STACK_SIZE];
     stack_node<intType> *top = stack;
 
-    PUSH(nullptr, nullptr);
+    PUSH(NULL, NULL);
 
     while (STACK_NOT_EMPTY)
     {

@@ -44,7 +44,7 @@ namespace Hermes
       this->do_UMFPACK_reporting = false;
 #endif
 
-      this->sln_vector = nullptr;
+      this->sln_vector = NULL;
     }
 
     template<typename Scalar>

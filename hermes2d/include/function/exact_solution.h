@@ -264,7 +264,7 @@ namespace Hermes
       virtual void value (int n, Func<Scalar>** u_ext , Func<Scalar>* result, Geom<double>* geometry) const = 0;
       virtual void ord(Func<Hermes::Ord>** u_ext, Func<Hermes::Ord>* result) const = 0;
 
-      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
+      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = NULL);
       void free(void);
       virtual void precalculate(int order, int mask);
     };
@@ -273,7 +273,7 @@ namespace Hermes
     class HERMES_API UExtFunctionSharedPtr : public std::tr1::shared_ptr<UExtFunction<Scalar> >
     {
     public:
-      UExtFunctionSharedPtr(UExtFunction<Scalar>* ptr = nullptr);
+      UExtFunctionSharedPtr(UExtFunction<Scalar>* ptr = NULL);
 
       UExtFunctionSharedPtr(const UExtFunctionSharedPtr<Scalar>& other);
 

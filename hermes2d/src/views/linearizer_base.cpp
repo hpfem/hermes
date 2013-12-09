@@ -36,12 +36,12 @@ namespace Hermes
 
       LinearizerBase::LinearizerBase(bool auto_max) : auto_max(auto_max), del_slot(-1), empty(true)
       {
-				tris = nullptr;
-        tri_markers = nullptr;
-				edges = nullptr;
-        edge_markers = nullptr;
-        hash_table = nullptr;
-        info = nullptr;
+				tris = NULL;
+        tri_markers = NULL;
+				edges = NULL;
+        edge_markers = NULL;
+        hash_table = NULL;
+        info = NULL;
         max = -1e100;
 
         vertex_count = triangle_count = edges_count = this->vertex_size = this->triangle_size = this->edges_size = 0;
@@ -53,7 +53,7 @@ namespace Hermes
         pthread_mutex_init(&data_mutex, &attr);
         pthread_mutexattr_destroy(&attr);
 #endif
-        this->level_map = nullptr;
+        this->level_map = NULL;
       }
 
       bool LinearizerBase::is_empty()
@@ -63,24 +63,24 @@ namespace Hermes
 
       void LinearizerBase::free()
       {
-        if(tris != nullptr)
+        if(tris != NULL)
         {
           ::free(tris);
-          tris = nullptr;
+          tris = NULL;
 					::free(tri_markers);
-					tri_markers = nullptr;
+					tri_markers = NULL;
         }
-        if(edges != nullptr)
+        if(edges != NULL)
         {
           ::free(edges);
-          edges = nullptr;
+          edges = NULL;
 					::free(edge_markers);
-					edge_markers = nullptr;
+					edge_markers = NULL;
         }
         if(this->level_map)
         {
           delete [] level_map;
-          level_map = nullptr;
+          level_map = NULL;
         }
         this->empty = true;
       }
@@ -124,7 +124,7 @@ namespace Hermes
         if(this->level_map)
         {
           delete [] level_map;
-          level_map = nullptr;
+          level_map = NULL;
         }
         this->level_map = new int[sln->get_mesh()->get_max_element_id()];
         memset(this->level_map, -1, sizeof(int) * sln->get_mesh()->get_max_element_id());

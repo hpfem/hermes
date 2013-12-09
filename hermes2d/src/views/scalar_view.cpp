@@ -23,7 +23,7 @@
 #include "global.h"
 #include "scalar_view.h"
 
-#define GL_BUFFER_OFFSET(i) ((char *)nullptr + (i))
+#define GL_BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 /* constants */
 #define MIN_CONT_STEP 1.0E-2 ///< A minimal step of a contour.
@@ -44,7 +44,7 @@ namespace Hermes
       {
         lin = new Linearizer;
         pmode = mode3d = false;
-        normals = nullptr;
+        normals = NULL;
         panning = false;
 
         contours = false;
@@ -69,7 +69,7 @@ namespace Hermes
       ScalarView::ScalarView(const char* title, WinGeom* wg) :
       View(title, wg),
         vertex_nodes(0),
-        pointed_vertex_node(nullptr),
+        pointed_vertex_node(NULL),
         allow_node_selection(false),
         pointed_node_widget(0),
         selected_node_widget(0),
@@ -84,7 +84,7 @@ namespace Hermes
       ScalarView::ScalarView(WinGeom* wg) :
       View("ScalarView", wg),
         vertex_nodes(0),
-        pointed_vertex_node(nullptr),
+        pointed_vertex_node(NULL),
         allow_node_selection(false),
         pointed_node_widget(0),
         selected_node_widget(0),
@@ -100,7 +100,7 @@ namespace Hermes
       ScalarView::ScalarView(char* title, WinGeom* wg) :
       View(title, wg),
         vertex_nodes(0),
-        pointed_vertex_node(nullptr),
+        pointed_vertex_node(NULL),
         allow_node_selection(false),
         pointed_node_widget(0),
         selected_node_widget(0),
@@ -187,8 +187,8 @@ namespace Hermes
 
         // Now we reset the active element if it was set before the MeshFunction sln entered this method.
         // Only for Solutions. This method may fail for filters, as they may not have RefMaps correctly set.
-        if(dynamic_cast<Solution<double>* >(sln.get()) != nullptr)
-          if(active_element != nullptr)
+        if(dynamic_cast<Solution<double>* >(sln.get()) != NULL)
+          if(active_element != NULL)
             // Also when there has not been a call to set_active_element since assignment to this MeshFunction,
             // there is nothing to restore to.
             if(active_element->active)
@@ -216,7 +216,7 @@ namespace Hermes
         else
         {
           delete [] normals;
-          normals = nullptr;
+          normals = NULL;
         }
 
         // Get a range of vertex values (or use the range set by the user).
@@ -268,7 +268,7 @@ namespace Hermes
       void ScalarView::init_vertex_nodes(MeshSharedPtr mesh)
       {
         //clear all selections
-        pointed_vertex_node = nullptr;
+        pointed_vertex_node = NULL;
         vertex_nodes.clear();
 
         //count a number of active nodes
@@ -320,7 +320,7 @@ namespace Hermes
         if(found_nearest != vertex_nodes.end())
           return found_nearest.operator->();
         else
-          return nullptr;
+          return NULL;
       }
 
       void ScalarView::draw_single_vertex_node(const VertexNodeInfo& node)
@@ -380,7 +380,7 @@ namespace Hermes
         }
 
         //draw a node under cursor
-        if(pointed_vertex_node != nullptr)
+        if(pointed_vertex_node != NULL)
         {
           glEnable(GL_BLEND);
           glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -470,7 +470,7 @@ namespace Hermes
         element_infos.reserve(mesh->get_num_active_elements());
 
         //build element info
-        Element *element = nullptr;
+        Element *element = NULL;
         for_all_active_elements(element, mesh)
         {
           double sum_x = 0.0, sum_y = 0.0;
@@ -681,7 +681,7 @@ namespace Hermes
               if(gl_index_buffer == 0)
                 glGenBuffersARB(1, &gl_index_buffer);
               glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, gl_index_buffer);
-              glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, sizeof(GLint) * tri_cnt * 3, nullptr, GL_DYNAMIC_DRAW_ARB);
+              glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, sizeof(GLint) * tri_cnt * 3, NULL, GL_DYNAMIC_DRAW_ARB);
               GLenum err = glGetError();
               if(err != GL_NO_ERROR)
                 throw std::runtime_error("unable to allocate vertex buffer: " + err);
@@ -694,7 +694,7 @@ namespace Hermes
 
             //fill indices
             GLuint* gl_triangle = (GLuint*)glMapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
-            if(gl_triangle == nullptr)
+            if(gl_triangle == NULL)
               throw std::runtime_error("unable to map index buffer: " + glGetError());
             gl_tri_cnt = 0;
             for(int i = 0; i < tri_cnt; i++)
@@ -720,7 +720,7 @@ namespace Hermes
               if(gl_coord_buffer == 0)
                 glGenBuffersARB(1, &gl_coord_buffer);
               glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_coord_buffer);
-              glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLVertex2) * vert_cnt, nullptr, GL_DYNAMIC_DRAW_ARB);
+              glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLVertex2) * vert_cnt, NULL, GL_DYNAMIC_DRAW_ARB);
               GLenum err = glGetError();
               if(err != GL_NO_ERROR)
                 throw std::runtime_error("unable to allocate coord buffer: " + err);
@@ -733,7 +733,7 @@ namespace Hermes
 
             //fill vertices
             GLVertex2* gl_verts = (GLVertex2*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
-            if(gl_verts == nullptr)
+            if(gl_verts == NULL)
               throw std::runtime_error("unable to map coord buffer: " + glGetError());
             for(int i = 0; i < vert_cnt; i++)
               gl_verts[i] = GLVertex2((float)verts[i][0], (float)verts[i][1], (float)((verts[i][2] - range_min) * value_irange));
@@ -744,7 +744,7 @@ namespace Hermes
             {
               glGenBuffersARB(1, &gl_edge_inx_buffer);
               glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_edge_inx_buffer);
-              glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLuint) * H2DV_GL_MAX_EDGE_BUFFER * 2, nullptr, GL_DYNAMIC_DRAW_ARB);
+              glBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(GLuint) * H2DV_GL_MAX_EDGE_BUFFER * 2, NULL, GL_DYNAMIC_DRAW_ARB);
               GLenum err = glGetError();
               if(err != GL_NO_ERROR) { //if it fails, no problem
                 glDeleteBuffersARB(1, &gl_edge_inx_buffer);
@@ -894,7 +894,7 @@ namespace Hermes
         //safe fallback
         if(!displayed) { //VBO not suppored
           glBegin(GL_LINES);
-          draw_edges(&draw_gl_edge, nullptr, !show_edges);
+          draw_edges(&draw_gl_edge, NULL, !show_edges);
           glEnd();
         }
       }
@@ -1169,7 +1169,7 @@ namespace Hermes
 
       void ScalarView::calculate_normals(double3* vert, int num_verts, int3* tris, int num_tris)
       {
-        if(normals != nullptr)
+        if(normals != NULL)
           delete [] normals;
         normals = new double3[num_verts];
         memset(normals, 0, sizeof(double3) * num_verts);
@@ -1374,7 +1374,7 @@ namespace Hermes
         if(mode3d)
         {
           lin->lock_data();
-          if(normals == nullptr)
+          if(normals == NULL)
             calculate_normals(lin->get_vertices(), lin->get_num_vertices(), lin->get_triangles(), lin->get_num_triangles());
           lin->unlock_data();
         } 
@@ -1432,7 +1432,7 @@ namespace Hermes
               if(mode3d)
               {
                 lin->lock_data();
-                if(normals == nullptr)
+                if(normals == NULL)
                   calculate_normals(lin->get_vertices(), lin->get_num_vertices(), lin->get_triangles(), lin->get_num_triangles());
                 lin->unlock_data();
               }
@@ -1507,7 +1507,7 @@ namespace Hermes
                   pointed_vertex_node = found_node;
               }
               else
-                pointed_vertex_node = nullptr;
+                pointed_vertex_node = NULL;
               refresh();
             }
             else
@@ -1520,7 +1520,7 @@ namespace Hermes
       void ScalarView::on_right_mouse_down(int x, int y)
       {
           //handle node selection
-          if(allow_node_selection && pointed_vertex_node != nullptr)
+          if(allow_node_selection && pointed_vertex_node != NULL)
           {
             if(pointed_vertex_node->selected) //deselct node
             {

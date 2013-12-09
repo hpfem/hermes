@@ -36,7 +36,7 @@ namespace Hermes
     public:
       L2Space();
       L2Space(MeshSharedPtr mesh, int p_init = 0,
-        Shapeset* shapeset = nullptr);
+        Shapeset* shapeset = NULL);
 
       virtual ~L2Space();
 

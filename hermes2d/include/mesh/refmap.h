@@ -80,14 +80,14 @@ namespace Hermes
       /// \param[in] y Physical y-coordinate.
       /// \param[in] x_reference Optional parameter, in which the x-coordinate of x in the reference domain will be returned.
       /// \param[in] y_reference Optional parameter, in which the y-coordinate of y in the reference domain will be returned.
-      static Element* element_on_physical_coordinates(bool use_MeshHashGrid, MeshSharedPtr mesh, double x, double y, double* x_reference = nullptr, double* y_reference = nullptr);
+      static Element* element_on_physical_coordinates(bool use_MeshHashGrid, MeshSharedPtr mesh, double x, double y, double* x_reference = NULL, double* y_reference = NULL);
 
       /// Find out if the coordinatex [x,y] lie in the element e.
       /// \param[in] x Physical x-coordinate.
       /// \param[in] y Physical y-coordinate.
       /// \param[in] x_reference Optional parameter, in which the x-coordinate of x in the reference domain will be returned.
       /// \param[in] y_reference Optional parameter, in which the y-coordinate of y in the reference domain will be returned.
-      static bool is_element_on_physical_coordinates(Element* e, double x, double y, double* x_reference = nullptr, double* y_reference = nullptr);
+      static bool is_element_on_physical_coordinates(Element* e, double x, double y, double* x_reference = NULL, double* y_reference = NULL);
 
       /// Returns the x-coordinates of the integration points transformed to the
       /// physical domain of the element. Intended for integrals containing spatial
@@ -130,9 +130,9 @@ namespace Hermes
       /// points of the specified order. Intended for non-constant jacobian elements.
       inline double* get_jacobian(int order)
       {
-        if (cur_node == nullptr)
-          throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
-        if (cur_node->inv_ref_map[order] == nullptr)
+        if (cur_node == NULL)
+          throw Hermes::Exceptions::Exception("Cur_node == NULL in RefMap - inner algorithms failed");
+        if (cur_node->inv_ref_map[order] == NULL)
           calc_inv_ref_map(order);
         return cur_node->jacobian[order];
       }
@@ -142,9 +142,9 @@ namespace Hermes
       /// jacobian elements.
       inline double2x2* get_inv_ref_map(int order)
       {
-        if (cur_node == nullptr)
-          throw Hermes::Exceptions::Exception("Cur_node == nullptr in RefMap - inner algorithms failed");
-        if (cur_node->inv_ref_map[order] == nullptr)
+        if (cur_node == NULL)
+          throw Hermes::Exceptions::Exception("Cur_node == NULL in RefMap - inner algorithms failed");
+        if (cur_node->inv_ref_map[order] == NULL)
           calc_inv_ref_map(order);
         return cur_node->inv_ref_map[order];
       }

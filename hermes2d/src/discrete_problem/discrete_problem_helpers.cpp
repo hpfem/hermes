@@ -23,7 +23,7 @@ namespace Hermes
     namespace Mixins
     {
       template<typename Scalar>
-      DiscreteProblemRungeKutta<Scalar>::DiscreteProblemRungeKutta() : rungeKutta(false), RK_original_spaces_count(0), force_diagonal_blocks(false), block_weights(nullptr)
+      DiscreteProblemRungeKutta<Scalar>::DiscreteProblemRungeKutta() : rungeKutta(false), RK_original_spaces_count(0), force_diagonal_blocks(false), block_weights(NULL)
       {
 
       }
@@ -74,7 +74,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DiscreteProblemMatrixVector<Scalar>::DiscreteProblemMatrixVector() : current_mat(nullptr), current_rhs(nullptr)
+      DiscreteProblemMatrixVector<Scalar>::DiscreteProblemMatrixVector() : current_mat(NULL), current_rhs(NULL)
       {
       }
 
@@ -102,8 +102,8 @@ namespace Hermes
 
     int init_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
-      Element* rep_element = nullptr;
-      RefMap* rep_reference_mapping = nullptr;
+      Element* rep_element = NULL;
+      RefMap* rep_reference_mapping = NULL;
       for (int i = 0; i < reference_mapping_count; i++)
       {
         if (reference_mapping[i])
@@ -178,7 +178,7 @@ namespace Hermes
 
     int init_surface_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
-      RefMap* rep_reference_mapping = nullptr;
+      RefMap* rep_reference_mapping = NULL;
       for (int i = 0; i < reference_mapping_count; i++)
       {
         if (reference_mapping[i])

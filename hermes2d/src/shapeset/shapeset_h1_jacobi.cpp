@@ -4078,7 +4078,7 @@ namespace Hermes
 
     static int* jacobi_tri_bubble_indices[11] =
     {
-      nullptr, nullptr, nullptr,
+      NULL, NULL, NULL,
       jacobi_tri_bubble_indices_all_orders,
       jacobi_tri_bubble_indices_all_orders,
       jacobi_tri_bubble_indices_all_orders,
@@ -4250,7 +4250,7 @@ namespace Hermes
 
       ebias = 2;
 
-      comb_table = nullptr;
+      comb_table = NULL;
     }
     const int H1ShapesetJacobi::max_index[2] = { 77, 136 };
   }

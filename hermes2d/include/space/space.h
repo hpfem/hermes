@@ -33,7 +33,7 @@ namespace Hermes
     class HERMES_API SpaceSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
     {
     public:
-      SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar>* ptr = nullptr);
+      SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar>* ptr = NULL);
 
       SpaceSharedPtr(const SpaceSharedPtr<Scalar>& other);
 
@@ -279,13 +279,13 @@ namespace Hermes
 #endif
 
       /// Loads a space from a file in XML format.
-      static SpaceSharedPtr<Scalar> load(const char *filename, MeshSharedPtr mesh, bool validate = false, EssentialBCs<Scalar>* essential_bcs = nullptr, Shapeset* shapeset = nullptr);
+      static SpaceSharedPtr<Scalar> load(const char *filename, MeshSharedPtr mesh, bool validate = false, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
       /// This method is here for rapid re-loading.
       void load(const char *filename);
 
 #ifdef WITH_BSON
       /// Loads a space from a file in BSON.
-      static SpaceSharedPtr<Scalar> load_bson(const char *filename, MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs = nullptr, Shapeset* shapeset = nullptr);
+      static SpaceSharedPtr<Scalar> load_bson(const char *filename, MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
       /// This method is here for rapid re-loading.
       void load_bson(const char *filename);
 #endif
@@ -407,7 +407,7 @@ namespace Hermes
           Node* base;
           int part;
         };
-        NodeData() : dof(0), edge_bc_proj(nullptr) {}
+        NodeData() : dof(0), edge_bc_proj(NULL) {}
       };
 
       class ElementData

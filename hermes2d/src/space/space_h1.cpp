@@ -26,7 +26,7 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::init(Shapeset* shapeset, int p_init, bool assign_dofs_init)
     {
-      if (shapeset == nullptr)
+      if (shapeset == NULL)
       {
         this->shapeset = new H1Shapeset;
         this->own_shapeset = true;
@@ -56,7 +56,7 @@ namespace Hermes
 
     template<typename Scalar>
     H1Space<Scalar>::H1Space(MeshSharedPtr mesh, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, nullptr)
+      : Space<Scalar>(mesh, shapeset, NULL)
     {
       init(shapeset, p_init);
     }
@@ -150,14 +150,14 @@ namespace Hermes
             if (nd->dof == this->H2D_UNASSIGNED_DOF)
             {
               // If the edge node is not constrained, assign it dofs.
-              if (en->ref > 1 || en->bnd || this->mesh->peek_vertex_node(en->p1, en->p2) != nullptr)
+              if (en->ref > 1 || en->bnd || this->mesh->peek_vertex_node(en->p1, en->p2) != NULL)
               {
                 int ndofs = this->get_edge_order_internal(en) - 1;
                 nd->n = ndofs;
 
                 if (en->bnd)
-                  if (this->essential_bcs != nullptr)
-                    if (this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker).marker) != nullptr)
+                  if (this->essential_bcs != NULL)
+                    if (this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker).marker) != NULL)
                       nd->dof = this->H2D_CONSTRAINED_DOF;
                     else
                     {
@@ -274,7 +274,7 @@ namespace Hermes
         surf_pos->t = surf_pos->lo;
         // Find out the (x, y) coordinates for the first endpoint.
         double x, y, n_x, n_y, t_x, t_y;
-        Nurbs* nurbs = nullptr;
+        Nurbs* nurbs = NULL;
         CurvMap* cm = surf_pos->base->cm;
         if(cm)
         {
@@ -318,7 +318,7 @@ namespace Hermes
             {
               // Find out the (x, y) coordinate.
               double x, y, n_x, n_y, t_x, t_y;
-              Nurbs* nurbs = nullptr;
+              Nurbs* nurbs = NULL;
               CurvMap* cm = surf_pos->base->cm;
               if(cm)
               {
@@ -346,14 +346,14 @@ namespace Hermes
       Node*& edge, typename Space<Scalar>::BaseComponent*& edge_dofs)
     {
       // if the dof is already in the list, just add half of the other coef
-      if (last != nullptr && last->dof == min->dof)
+      if (last != NULL && last->dof == min->dof)
       {
         last->coef += min->coef * 0.5;
         return;
       }
 
       // leave space for edge node dofs if they belong in front of the current minimum dof
-      if (edge != nullptr && this->ndata[edge->id].dof <= min->dof)
+      if (edge != NULL && this->ndata[edge->id].dof <= min->dof)
       {
         edge_dofs = current;
 
@@ -362,7 +362,7 @@ namespace Hermes
         {
           current += this->ndata[edge->id].n;
         }
-        edge = nullptr;
+        edge = NULL;
       }
 
       // output new dof
@@ -377,12 +377,12 @@ namespace Hermes
     {
       // estimate the upper bound of the result size
       int max_result = n1 + n2;
-      if (edge != nullptr)
+      if (edge != NULL)
         max_result += this->ndata[edge->id].n;
 
       typename Space<Scalar>::BaseComponent* result = (typename Space<Scalar>::BaseComponent*) malloc(max_result * sizeof(typename Space<Scalar>::BaseComponent));
       typename Space<Scalar>::BaseComponent* current = result;
-      typename Space<Scalar>::BaseComponent* last = nullptr;
+      typename Space<Scalar>::BaseComponent* last = NULL;
 
       // main loop - always output the component with smaller dof so that we get a sorted array
       int i1 = 0, i2 = 0;
@@ -401,7 +401,7 @@ namespace Hermes
         output_component(current, last, l2 + i2++, edge, edge_dofs);
 
       // don't forget to reserve space for edge dofs if we haven't done that already
-      if (edge != nullptr)
+      if (edge != NULL)
       {
         edge_dofs = current;
         current += this->ndata[edge->id].n;
@@ -425,7 +425,7 @@ namespace Hermes
       {
         for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
-          if (ei[i] != nullptr)
+          if (ei[i] != NULL)
           {
             nd = &this->ndata[e->en[i]->id];
             nd->base = ei[i]->node;
@@ -442,14 +442,14 @@ namespace Hermes
         typename Space<Scalar>::EdgeInfo ei_data[4];
         for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
-          if (ei[i] == nullptr)
+          if (ei[i] == NULL)
           {
             j = e->next_vert(i);
             Node* mid_vn = this->get_mid_edge_vertex_node(e, i, j);
-            if (mid_vn != nullptr && mid_vn->is_constrained_vertex())
+            if (mid_vn != NULL && mid_vn->is_constrained_vertex())
             {
               Node* mid_en = this->mesh->peek_edge_node(e->vn[i]->id, e->vn[j]->id);
-              if (mid_en != nullptr)
+              if (mid_en != NULL)
               {
                 ei[i] = ei_data + i;
                 ei[i]->node = mid_en;
@@ -465,11 +465,11 @@ namespace Hermes
         // create a baselist for each mid-edge vertex node
         for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
-          if (ei[i] == nullptr) continue;
+          if (ei[i] == NULL) continue;
           j = e->next_vert(i);
 
           Node* mid_vn = this->get_mid_edge_vertex_node(e, i, j);
-          if (mid_vn == nullptr) continue;
+          if (mid_vn == NULL) continue;
 
           Node* vn[2] = { e->vn[i], e->vn[j] }; // endpoint vertex nodes
           Node* en = ei[i]->node; // constraining edge node
@@ -515,9 +515,9 @@ namespace Hermes
         typename Space<Scalar>::EdgeInfo* half_ei[4][2];
         for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
-          if (ei[i] == nullptr)
+          if (ei[i] == NULL)
           {
-            half_ei[i][0] = half_ei[i][1] = nullptr;
+            half_ei[i][0] = half_ei[i][1] = NULL;
           }
           else
           {
@@ -537,27 +537,27 @@ namespace Hermes
         // recur to sons
         if (e->is_triangle())
         {
-          update_constrained_nodes(e->sons[0], half_ei[0][0], nullptr, half_ei[2][1], nullptr);
-          update_constrained_nodes(e->sons[1], half_ei[0][1], half_ei[1][0], nullptr, nullptr);
-          update_constrained_nodes(e->sons[2], nullptr, half_ei[1][1], half_ei[2][0], nullptr);
-          update_constrained_nodes(e->sons[3], nullptr, nullptr, nullptr, nullptr);
+          update_constrained_nodes(e->sons[0], half_ei[0][0], NULL, half_ei[2][1], NULL);
+          update_constrained_nodes(e->sons[1], half_ei[0][1], half_ei[1][0], NULL, NULL);
+          update_constrained_nodes(e->sons[2], NULL, half_ei[1][1], half_ei[2][0], NULL);
+          update_constrained_nodes(e->sons[3], NULL, NULL, NULL, NULL);
         }
-        else if (e->sons[2] == nullptr) // 'horizontally' split quad
+        else if (e->sons[2] == NULL) // 'horizontally' split quad
         {
-          update_constrained_nodes(e->sons[0], ei[0], half_ei[1][0], nullptr, half_ei[3][1]);
-          update_constrained_nodes(e->sons[1], nullptr, half_ei[1][1], ei[2], half_ei[3][0]);
+          update_constrained_nodes(e->sons[0], ei[0], half_ei[1][0], NULL, half_ei[3][1]);
+          update_constrained_nodes(e->sons[1], NULL, half_ei[1][1], ei[2], half_ei[3][0]);
         }
-        else if (e->sons[0] == nullptr) // 'vertically' split quad
+        else if (e->sons[0] == NULL) // 'vertically' split quad
         {
-          update_constrained_nodes(e->sons[2], half_ei[0][0], nullptr, half_ei[2][1], ei[3]);
-          update_constrained_nodes(e->sons[3], half_ei[0][1], ei[1], half_ei[2][0], nullptr);
+          update_constrained_nodes(e->sons[2], half_ei[0][0], NULL, half_ei[2][1], ei[3]);
+          update_constrained_nodes(e->sons[3], half_ei[0][1], ei[1], half_ei[2][0], NULL);
         }
         else // fully split quad
         {
-          update_constrained_nodes(e->sons[0], half_ei[0][0], nullptr, nullptr, half_ei[3][1]);
-          update_constrained_nodes(e->sons[1], half_ei[0][1], half_ei[1][0], nullptr, nullptr);
-          update_constrained_nodes(e->sons[2], nullptr, half_ei[1][1], half_ei[2][0], nullptr);
-          update_constrained_nodes(e->sons[3], nullptr, nullptr, half_ei[2][1], half_ei[3][0]);
+          update_constrained_nodes(e->sons[0], half_ei[0][0], NULL, NULL, half_ei[3][1]);
+          update_constrained_nodes(e->sons[1], half_ei[0][1], half_ei[1][0], NULL, NULL);
+          update_constrained_nodes(e->sons[2], NULL, half_ei[1][1], half_ei[2][0], NULL);
+          update_constrained_nodes(e->sons[3], NULL, NULL, half_ei[2][1], half_ei[3][0]);
         }
       }
     }
@@ -567,7 +567,7 @@ namespace Hermes
     {
       Element* e;
       for_all_base_elements(e, this->mesh)
-        update_constrained_nodes(e, nullptr, nullptr, nullptr, nullptr);
+        update_constrained_nodes(e, NULL, NULL, NULL, NULL);
     }
 
     template HERMES_API class H1Space<double>;

@@ -103,7 +103,7 @@ namespace Hermes
 
       for(unsigned int i = 0; i < other_wf->forms.size(); i++)
       {
-        if(dynamic_cast<MatrixFormVol<Scalar>*>(other_wf->forms[i]) != nullptr)
+        if(dynamic_cast<MatrixFormVol<Scalar>*>(other_wf->forms[i]) != NULL)
         {
           MatrixFormVol<Scalar>* form = (dynamic_cast<MatrixFormVol<Scalar>*>(other_wf->forms[i]))->clone();
           form->copy_base(other_wf->forms[i]);
@@ -111,7 +111,7 @@ namespace Hermes
           this->mfvol.push_back(dynamic_cast<MatrixFormVol<Scalar>*>(this->forms.back()));
           continue;
         }
-        if(dynamic_cast<VectorFormVol<Scalar>*>(other_wf->forms[i]) != nullptr)
+        if(dynamic_cast<VectorFormVol<Scalar>*>(other_wf->forms[i]) != NULL)
         {
           VectorFormVol<Scalar>* form = (dynamic_cast<VectorFormVol<Scalar>*>(other_wf->forms[i]))->clone();
           form->copy_base(other_wf->forms[i]);
@@ -119,7 +119,7 @@ namespace Hermes
           this->vfvol.push_back(dynamic_cast<VectorFormVol<Scalar>*>(this->forms.back()));
           continue;
         }
-        if(dynamic_cast<MatrixFormSurf<Scalar>*>(other_wf->forms[i]) != nullptr)
+        if(dynamic_cast<MatrixFormSurf<Scalar>*>(other_wf->forms[i]) != NULL)
         {
           MatrixFormSurf<Scalar>* form = (dynamic_cast<MatrixFormSurf<Scalar>*>(other_wf->forms[i]))->clone();
           form->copy_base(other_wf->forms[i]);
@@ -127,7 +127,7 @@ namespace Hermes
           this->mfsurf.push_back(dynamic_cast<MatrixFormSurf<Scalar>*>(this->forms.back()));
           continue;
         }
-        if(dynamic_cast<VectorFormSurf<Scalar>*>(other_wf->forms[i]) != nullptr)
+        if(dynamic_cast<VectorFormSurf<Scalar>*>(other_wf->forms[i]) != NULL)
         {
           VectorFormSurf<Scalar>* form = (dynamic_cast<VectorFormSurf<Scalar>*>(other_wf->forms[i]))->clone();
           form->copy_base(other_wf->forms[i]);
@@ -135,7 +135,7 @@ namespace Hermes
           this->vfsurf.push_back(dynamic_cast<VectorFormSurf<Scalar>*>(this->forms.back()));
           continue;
         }
-        if(dynamic_cast<MatrixFormDG<Scalar>*>(other_wf->forms[i]) != nullptr)
+        if(dynamic_cast<MatrixFormDG<Scalar>*>(other_wf->forms[i]) != NULL)
         {
           MatrixFormDG<Scalar>* form = (dynamic_cast<MatrixFormDG<Scalar>*>(other_wf->forms[i]))->clone();
           form->copy_base(other_wf->forms[i]);
@@ -143,7 +143,7 @@ namespace Hermes
           this->mfDG.push_back(dynamic_cast<MatrixFormDG<Scalar>*>(this->forms.back()));
           continue;
         }
-        if(dynamic_cast<VectorFormDG<Scalar>*>(other_wf->forms[i]) != nullptr)
+        if(dynamic_cast<VectorFormDG<Scalar>*>(other_wf->forms[i]) != NULL)
         {
           VectorFormDG<Scalar>* form = (dynamic_cast<VectorFormDG<Scalar>*>(other_wf->forms[i]))->clone();
           form->copy_base(other_wf->forms[i]);
@@ -172,7 +172,7 @@ namespace Hermes
         Solution<Scalar>* originalSln = dynamic_cast<Solution<Scalar>*>(source_ext[i].get());
         if(originalSln)
         {
-          Solution<Scalar>* newSln = nullptr;
+          Solution<Scalar>* newSln = NULL;
           if(originalSln->get_type() == HERMES_SLN)
           {
             newSln = new Solution<Scalar>;
@@ -282,7 +282,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Form<Scalar>::Form(int i) : scaling_factor(1.0), u_ext_offset(0), wf(nullptr), assembleEverywhere(false), i(i)
+    Form<Scalar>::Form(int i) : scaling_factor(1.0), u_ext_offset(0), wf(NULL), assembleEverywhere(false), i(i)
     {
       areas.push_back(HERMES_ANY);
       stage_time = 0.0;
@@ -429,7 +429,7 @@ namespace Hermes
     MatrixFormVol<Scalar>* MatrixFormVol<Scalar>::clone() const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormVol<Scalar>::clone()");
-      return nullptr;
+      return NULL;
     }
 
     template<typename Scalar>
@@ -442,7 +442,7 @@ namespace Hermes
     MatrixFormSurf<Scalar>* MatrixFormSurf<Scalar>::clone() const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormSurf<Scalar>::clone()");
-      return nullptr;
+      return NULL;
     }
 
     template<typename Scalar>
@@ -482,7 +482,7 @@ namespace Hermes
     MatrixFormDG<Scalar>* MatrixFormDG<Scalar>::clone() const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormDG<Scalar>::clone()");
-      return nullptr;
+      return NULL;
     }
 
     template<typename Scalar>
@@ -527,7 +527,7 @@ namespace Hermes
     VectorFormVol<Scalar>* VectorFormVol<Scalar>::clone() const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("VectorFormVol<Scalar>::clone()");
-      return nullptr;
+      return NULL;
     }
 
     template<typename Scalar>
@@ -545,7 +545,7 @@ namespace Hermes
     VectorFormSurf<Scalar>* VectorFormSurf<Scalar>::clone() const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("VectorFormSurf<Scalar>::clone()");
-      return nullptr;
+      return NULL;
     }
 
     template<typename Scalar>
@@ -580,7 +580,7 @@ namespace Hermes
     VectorFormDG<Scalar>* VectorFormDG<Scalar>::clone() const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("VectorFormDG<Scalar>::clone()");
-      return nullptr;
+      return NULL;
     }
 
     template<typename Scalar>

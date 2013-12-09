@@ -25,7 +25,7 @@ namespace Hermes
     namespace Views
     {
       StreamView::StreamView(const char* title, WinGeom* wg)
-        : View(title, wg), vec(nullptr)
+        : View(title, wg), vec(NULL)
       {
         lines = false;
         pmode = false;
@@ -34,11 +34,11 @@ namespace Hermes
         root_y_min = 1e100;
         root_x_max = -1e100;
         root_y_max = -1e100;
-        root = nullptr;
+        root = NULL;
       }
 
       StreamView::StreamView(char* title, WinGeom* wg)
-        : View(title, wg), vec(nullptr)
+        : View(title, wg), vec(NULL)
       {
         lines = false;
         pmode = false;
@@ -47,12 +47,12 @@ namespace Hermes
         root_y_min = 1e100;
         root_x_max = -1e100;
         root_y_max = -1e100;
-        root = nullptr;
+        root = NULL;
       }
 
       void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps)
       {
-        if(this->vec == nullptr)
+        if(this->vec == NULL)
           this->vec = new Vectorizer;
         if(xsln == ysln)
           throw Hermes::Exceptions::Exception("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
@@ -311,7 +311,7 @@ namespace Hermes
         int3 key;
         key[0] = b_idx;
         int3* edge = (int3*) bsearch(&key, edges, num_edges, sizeof(int3), compare);
-        if(edge == nullptr)
+        if(edge == NULL)
           return -1; // not found
         else
           return edge - edges;
@@ -377,7 +377,7 @@ namespace Hermes
 
       void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps, int xitem, int yitem)
       {
-        if(vec == nullptr)
+        if(vec == NULL)
           vec = new Vectorizer;
         vec->process_solution(xsln, ysln, xitem, yitem, eps);
 
@@ -429,7 +429,7 @@ namespace Hermes
 
       void StreamView::add_streamline(double x, double y)
       {
-        if(root == nullptr)
+        if(root == NULL)
           throw Hermes::Exceptions::Exception("Function add_streamline must be called after StreamView::show().");
         this->tick();
         streamlines = (double2**) realloc(streamlines, sizeof(double2*) * (num_stream + 1));

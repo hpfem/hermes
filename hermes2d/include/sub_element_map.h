@@ -41,20 +41,20 @@ namespace Hermes
       {
         this->root.clear_subtree();
         memset(this->root.children, 0, 8 * sizeof(Node*));
-        this->root.data = nullptr;
+        this->root.data = NULL;
       }
 
       void run_for_all(ProcessingFunction f)
       {
         run_for_node(&this->root, f);
-        this->root.data = nullptr;
+        this->root.data = NULL;
       }
 
     private:
       class Node
       {
       public:
-        Node() : data(nullptr)
+        Node() : data(NULL)
         {
           init();
         }
@@ -68,7 +68,7 @@ namespace Hermes
         {
           for(int i = 0; i < 8; i++)
           {
-            if(this->children[i] != nullptr)
+            if(this->children[i] != NULL)
             {
               this->children[i]->clear_subtree();
               delete this->children[i];
@@ -87,10 +87,10 @@ namespace Hermes
       {
         for(int i = 0; i < 8; i++)
         {
-          if(node->children[i] != nullptr)
+          if(node->children[i] != NULL)
             run_for_node(node->children[i], f);
         }
-        if(node->data != nullptr)
+        if(node->data != NULL)
           f(node->data);
       }
 
@@ -98,7 +98,7 @@ namespace Hermes
       {
         if(sub_idx == 0)
         {
-          if(root.data != nullptr)
+          if(root.data != NULL)
             to_add = false;
           return &root;
         }
@@ -115,17 +115,17 @@ namespace Hermes
         for(int i = sons_count - 1; i >= 0 ; i--)
         {
           Node* child_node = node->children[sons[i]];
-          if(child_node == nullptr)
+          if(child_node == NULL)
             if(to_add)
             {
               added = true;
-              child_node = node->children[sons[i]] = new Node(nullptr);
+              child_node = node->children[sons[i]] = new Node(NULL);
             }
             else
-              return nullptr;
+              return NULL;
           node = child_node;
         }
-        if(!added && node->data != nullptr)
+        if(!added && node->data != NULL)
           to_add = false;
         return node;
       }

@@ -26,7 +26,7 @@ namespace Hermes
     ErrorCalculator<Scalar>::ErrorCalculator(CalculatedErrorType errorType) :
       errorType(errorType),
       elements_stored(false),
-      element_references(nullptr),
+      element_references(NULL),
       errors_squared_sum(0.0),
       norms_squared_sum(0.0)
     {
@@ -80,7 +80,7 @@ namespace Hermes
       {
         int num_elements_i = this->coarse_solutions[i]->get_mesh()->get_max_element_id();
 
-        if (errors[i] == nullptr)
+        if (errors[i] == NULL)
           errors[i] = (double*)calloc(num_elements_i, sizeof(double));
         else
         {
@@ -88,7 +88,7 @@ namespace Hermes
           memset(errors[i], 0, sizeof(double)* num_elements_i);
         }
 
-        if (norms[i] == nullptr)
+        if (norms[i] == NULL)
           norms[i] = (double*)calloc(num_elements_i, sizeof(double));
         else
         {

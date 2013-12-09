@@ -71,7 +71,7 @@ namespace Hermes
       this->mesh = meshes[0];
       
       Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(this->sln[0].get());
-      if (sln == nullptr)
+      if (sln == NULL)
         this->space_type = HERMES_INVALID_SPACE;
       else
         this->space_type = sln->get_space_type();
@@ -81,10 +81,10 @@ namespace Hermes
       for (int i = 1; i < num; i++)
 
       {
-        if(meshes[i] == nullptr)
+        if(meshes[i] == NULL)
         {
           this->warn("You may be initializing a Filter with Solution that is missing a Mesh.");
-          throw Hermes::Exceptions::Exception("this->meshes[%d] is nullptr in Filter<Scalar>::init().", i);
+          throw Hermes::Exceptions::Exception("this->meshes[%d] is NULL in Filter<Scalar>::init().", i);
         }
         if(meshes[i]->get_seq() != this->mesh->get_seq())
         {
@@ -93,7 +93,7 @@ namespace Hermes
         }
         
         sln = dynamic_cast<Solution<Scalar>*>(this->sln[i].get());
-        if(sln == nullptr || sln->get_space_type() != this->space_type)
+        if(sln == NULL || sln->get_space_type() != this->space_type)
           this->space_type = HERMES_INVALID_SPACE;
       }
 
@@ -281,7 +281,7 @@ namespace Hermes
           if(mask >= 0x40) { a = 1; mask >>= 6; }
           while (!(mask & 1)) { mask >>= 1; b++; }
           tab[i] = this->sln[i]->get_values(this->num_components == 1 ? a : j, b);
-          if(tab[i] == nullptr) throw Hermes::Exceptions::Exception("Value of 'item%d' is incorrect in filter definition.", i + 1);
+          if(tab[i] == NULL) throw Hermes::Exceptions::Exception("Value of 'item%d' is incorrect in filter definition.", i + 1);
         }
 
         Hermes::vector<Scalar*> values;

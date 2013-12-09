@@ -102,7 +102,7 @@ namespace Hermes
         node->type = HERMES_TYPE_VERTEX;
         node->bnd = 0;
         node->p1 = node->p2 = -1;
-        node->next_hash = nullptr;
+        node->next_hash = NULL;
         node->x = vertex_xes[vertex_i];
         node->y = vertex_yes[vertex_i];
       }
@@ -169,13 +169,13 @@ namespace Hermes
           &mesh->nodes[vertex_1[element_i]],
           &mesh->nodes[vertex_2[element_i]],
           &mesh->nodes[vertex_3[element_i]],
-          nullptr);
+          NULL);
         else
           e = mesh->create_triangle(mesh->element_markers_conversion.get_internal_marker(markers[element_i]).marker,
           &mesh->nodes[vertex_0[element_i]],
           &mesh->nodes[vertex_1[element_i]],
           &mesh->nodes[vertex_2[element_i]],
-          nullptr);
+          NULL);
       }
 
       delete [] vertex_0;
@@ -218,7 +218,7 @@ namespace Hermes
       for (unsigned int edge_i = 0; edge_i < edges_count; edge_i++)
       {
         en = mesh->peek_edge_node(vertex_0_edge[edge_i], vertex_1_edge[edge_i]);
-        if(en == nullptr)
+        if(en == NULL)
           throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist.", edge_i, vertex_0_edge[edge_i], vertex_1_edge[edge_i]);
 
         std::string edge_marker = edge_markers[edge_i];
@@ -306,7 +306,7 @@ namespace Hermes
 
       // update refmap coeffs of curvilinear elements
       for_all_used_elements(e, mesh)
-        if(e->cm != nullptr)
+        if(e->cm != NULL)
           e->cm->update_refmap_coeffs(e);
 
       delete [] p1s;
@@ -462,7 +462,7 @@ namespace Hermes
       {
         if(e->is_curved())
           for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->nurbs[i] != nullptr && !is_twin_nurbs(e, i))
+            if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
               if(e->cm->nurbs[i]->arc)
                 arc_count++;
       }
@@ -473,7 +473,7 @@ namespace Hermes
       {
         if(e->is_curved())
           for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->nurbs[i] != nullptr && !is_twin_nurbs(e, i))
+            if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
             {
               if(!e->cm->nurbs[i]->arc)
                 continue;
@@ -487,7 +487,7 @@ namespace Hermes
       {
         if(e->is_curved())
           for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->nurbs[i] != nullptr && !is_twin_nurbs(e, i))
+            if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
             {
               if(!e->cm->nurbs[i]->arc)
                 continue;
@@ -501,7 +501,7 @@ namespace Hermes
       {
         if(e->is_curved())
           for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->nurbs[i] != nullptr && !is_twin_nurbs(e, i))
+            if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
             {
               if(!e->cm->nurbs[i]->arc)
                 continue;
@@ -515,7 +515,7 @@ namespace Hermes
       for_all_base_elements(e, mesh)
         if(e->is_curved())
           for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->nurbs[i] != nullptr)
+            if(e->cm->nurbs[i] != NULL)
               if(!e->cm->nurbs[i]->arc)
                 throw Exceptions::Exception("BSON mesh loader can not operate with general NURBS so far.");
 
@@ -665,7 +665,7 @@ namespace Hermes
         {
           if(e->is_curved())
             for (unsigned i = 0; i < e->get_nvert(); i++)
-              if(e->cm->nurbs[i] != nullptr && !is_twin_nurbs(e, i))
+              if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
                 if(vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
                 {
                   if(e->cm->nurbs[i]->arc)
@@ -864,7 +864,7 @@ namespace Hermes
             node->type = HERMES_TYPE_VERTEX;
             node->bnd = 0;
             node->p1 = node->p2 = -1;
-            node->next_hash = nullptr;
+            node->next_hash = NULL;
 
             // assignment.
             node->x = vertices[vertex_number].x;
@@ -899,7 +899,7 @@ namespace Hermes
 
             if(!found)
             {
-              meshes[subdomains_i]->elements.skip_slot()->cm = nullptr;
+              meshes[subdomains_i]->elements.skip_slot()->cm = NULL;
               continue;
             }
 
@@ -919,13 +919,13 @@ namespace Hermes
               &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(element.v2)->second],
               &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(element.v3)->second],
               &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(element.v4)->second],
-              nullptr, element_i);
+              NULL, element_i);
             else
               e = meshes[subdomains_i]->create_triangle(meshes[subdomains_i]->element_markers_conversion.get_internal_marker(element.marker).marker,
               &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(element.v1)->second],
               &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(element.v2)->second],
               &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(element.v3)->second],
-              nullptr, element_i);
+              NULL, element_i);
           }
 
           // Boundary Edge numbers //
@@ -960,7 +960,7 @@ namespace Hermes
               throw Exceptions::MeshLoadFailureException("Wrong boundary-edge number:%i in subdomain %u.", subdomains.at(subdomains_i).boundary_edges.at(boundary_edge_number_i), subdomains_i);
 
             Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge.v1)->second, vertex_vertex_numbers.find(edge.v2)->second);
-            if(en == nullptr)
+            if(en == NULL)
               throw Hermes::Exceptions::MeshLoadFailureException("Boundary data error (edge %i does not exist).", boundary_edge_number_i);
 
             en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge.marker).marker;
@@ -988,7 +988,7 @@ namespace Hermes
               throw Exceptions::MeshLoadFailureException("Wrong inner-edge number:%i in subdomain %u.", subdomains.at(subdomains_i).boundary_edges.at(inner_edge_number_i), subdomains_i);
 
             Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge.v1)->second, vertex_vertex_numbers.find(edge.v2)->second);
-            if(en == nullptr)
+            if(en == NULL)
               throw Hermes::Exceptions::MeshLoadFailureException("Inner data error (edge %i does not exist).", inner_edge_number_i);
 
             en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge.marker).marker;
@@ -1017,7 +1017,7 @@ namespace Hermes
               p2 = vertex_vertex_numbers.find(arcs.at(curves_i).p2)->second;
 
               nurbs = MeshUtil::load_arc(meshes[subdomains_i], curves_i, &en, p1, p2, arcs.at(curves_i).angle, true);
-              if(nurbs == nullptr)
+              if(nurbs == NULL)
                 continue;
             }
 
@@ -1027,7 +1027,7 @@ namespace Hermes
 
           // update refmap coeffs of curvilinear elements
           for_all_used_elements(e, meshes[subdomains_i])
-            if(e->cm != nullptr)
+            if(e->cm != NULL)
               e->cm->update_refmap_coeffs(e);
 
           // refinements.
@@ -1133,7 +1133,7 @@ namespace Hermes
         node->type = HERMES_TYPE_VERTEX;
         node->bnd = 0;
         node->p1 = node->p2 = -1;
-        node->next_hash = nullptr;
+        node->next_hash = NULL;
 
         if(vertices[vertex_i].i > H2D_MAX_NODE_ID - 1)
           throw Exceptions::MeshLoadFailureException("The index 'i' of vertex in the mesh file must be lower than %i.", H2D_MAX_NODE_ID);
@@ -1170,13 +1170,13 @@ namespace Hermes
           &mesh->nodes[element.v2],
           &mesh->nodes[element.v3],
           &mesh->nodes[element.v4],
-          nullptr);
+          NULL);
         else
           e = mesh->create_triangle(mesh->element_markers_conversion.get_internal_marker(element.marker).marker,
           &mesh->nodes[element.v1],
           &mesh->nodes[element.v2],
           &mesh->nodes[element.v3],
-          nullptr);
+          NULL);
       }
 
       // Boundaries //
@@ -1195,7 +1195,7 @@ namespace Hermes
         edge_is.insert(std::pair<int, int>(edge_i, edges[edge_i].i));
 
         en = mesh->peek_edge_node(v1, v2);
-        if(en == nullptr)
+        if(en == NULL)
           throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist.", edge_i, v1, v2);
 
         std::string edge_marker = edges[edge_i].marker;
@@ -1254,7 +1254,7 @@ namespace Hermes
 
       // update refmap coeffs of curvilinear elements
       for_all_used_elements(e, mesh)
-        if(e->cm != nullptr)
+        if(e->cm != NULL)
           e->cm->update_refmap_coeffs(e);
     }
   }

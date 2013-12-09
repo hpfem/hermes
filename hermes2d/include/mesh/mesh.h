@@ -310,7 +310,7 @@ namespace Hermes
 
       void refine_element_to_quads_id(int id);
 
-      void refine_triangle_to_quads(Element* e, Element** elems_out = nullptr);
+      void refine_triangle_to_quads(Element* e, Element** elems_out = NULL);
 
       void refine_element_to_triangles_id(int id);
 
@@ -436,12 +436,12 @@ namespace Hermes
       Hermes::vector<std::pair<unsigned int, int> > refinements;
 
       /// Refines a quad element into four quads, or two quads (horizontally or
-      /// vertically. If mesh != nullptr, the new elements are incorporated into
-      /// the mesh. The option mesh == nullptr is used to perform adaptive numerical
-      /// quadrature. If sons_out != nullptr, pointers to the new elements will be
+      /// vertically. If mesh != NULL, the new elements are incorporated into
+      /// the mesh. The option mesh == NULL is used to perform adaptive numerical
+      /// quadrature. If sons_out != NULL, pointers to the new elements will be
       /// saved there.
-      void refine_quad(Element* e, int refinement, Element** sons_out = nullptr);
-      void refine_triangle_to_triangles(Element* e, Element** sons = nullptr);
+      void refine_quad(Element* e, int refinement, Element** sons_out = NULL);
+      void refine_triangle_to_triangles(Element* e, Element** sons = NULL);
 
       /// Computing vector length.
       static double vector_length(double a_1, double a_2);

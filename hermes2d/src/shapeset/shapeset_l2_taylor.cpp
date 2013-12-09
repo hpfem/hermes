@@ -482,7 +482,7 @@ namespace Hermes
 
       ebias = 0;
 
-      comb_table = nullptr;
+      comb_table = NULL;
     }
 
     int* L2ShapesetTaylor::get_bubble_indices(int order, ElementMode2D mode) const

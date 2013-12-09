@@ -217,7 +217,7 @@ namespace Hermes
 
       KellyTypeAdapt(SpaceSharedPtr<Scalar> space,
                      bool ignore_visited_segments = true,
-                     const InterfaceEstimatorScalingFunction* interface_scaling_fn_ = nullptr,
+                     const InterfaceEstimatorScalingFunction* interface_scaling_fn_ = NULL,
                      NormType norm_ = HERMES_UNSET_NORM);
 
       /// Destructor.
@@ -273,11 +273,11 @@ namespace Hermes
           throw Exceptions::Exception("Wrong number of solutions.");
         Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns;
         slns.push_back(sln);
-        return calc_err_est(slns, nullptr, error_flags);
+        return calc_err_est(slns, NULL, error_flags);
       }
 
       double calc_err_est(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns,
-                          Hermes::vector<double>* component_errors = nullptr,
+                          Hermes::vector<double>* component_errors = NULL,
                           unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
       {
         return calc_err_internal(slns, component_errors, error_flags);
@@ -323,7 +323,7 @@ namespace Hermes
                              Func<Scalar> **ext) const
         {
           Scalar result = 0.;
-          if(u->fn_central != nullptr)
+          if(u->fn_central != NULL)
             for (int i = 0; i < n; i++)
               result += wt[i] * Hermes::sqr( const_by_laplacian * ( e->nx[i] * u->dx[i] + e->ny[i] * u->dy[i]));
           else
@@ -337,7 +337,7 @@ namespace Hermes
                                 DiscontinuousFunc<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
                                 Func<Ord> **ext) const
         {
-          if(u->fn_central != nullptr)
+          if(u->fn_central != NULL)
             return Hermes::sqr(u->dx[0] + u->dy[0]);
           else
             return Hermes::sqr(u->dx_neighbor[0] + u->dy_neighbor[0]);
@@ -362,7 +362,7 @@ namespace Hermes
       }
 
       BasicKellyAdapt(SpaceSharedPtr<Scalar> space_, double const_by_laplacian = 1.0, NormType norm_ = HERMES_UNSET_NORM)
-        : KellyTypeAdapt<Scalar>(space_, true, nullptr, norm_)
+        : KellyTypeAdapt<Scalar>(space_, true, NULL, norm_)
       {
         set_scaling_consts(const_by_laplacian);
         this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(0, const_by_laplacian));

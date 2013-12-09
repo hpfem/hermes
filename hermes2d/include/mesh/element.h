@@ -69,8 +69,8 @@ namespace Hermes
       /// Returns true if the (vertex) node is constrained.
       bool is_constrained_vertex() const;
 
-      void ref_element(Element* e = nullptr);
-      void unref_element(HashTable* ht, Element* e = nullptr);
+      void ref_element(Element* e = NULL);
+      void unref_element(HashTable* ht, Element* e = NULL);
     };
 
     /// \brief Stores one element of a mesh.
@@ -92,7 +92,7 @@ namespace Hermes
     /// elements store pointers to thier son elements and to vertex nodes.
     ///
     /// If an element has curved edges, the member 'cm' points to an associated CurvMap structure,
-    /// otherwise it is nullptr.
+    /// otherwise it is NULL.
     ///
     class HERMES_API Element
     {
@@ -139,7 +139,7 @@ namespace Hermes
         return nvert == 4;
       }
       inline bool is_curved() const {
-        return cm != nullptr;
+        return cm != NULL;
       }
       inline int get_nvert() const {
         return this->nvert;
@@ -149,7 +149,7 @@ namespace Hermes
       bool vsplit() const;
       bool bsplit() const;
 
-      CurvMap* cm; ///< curved mapping, nullptr if not curvilinear
+      CurvMap* cm; ///< curved mapping, NULL if not curvilinear
       /// Serves for saving the once calculated area of this element.
       bool areaCalculated;
       /// Serves for saving the once calculated area of this element.
@@ -171,7 +171,7 @@ namespace Hermes
       int prev_vert(int i) const;
 
       /// Returns a pointer to the neighboring element across the edge 'ie', or
-      /// nullptr if it does not exist or is across an irregular edge.
+      /// NULL if it does not exist or is across an irregular edge.
       Element* get_neighbor(int ie) const;
 
       /// Internal.

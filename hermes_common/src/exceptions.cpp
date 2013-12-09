@@ -63,13 +63,13 @@ namespace Hermes
     }
 
 
-    IOException::IOException(ReadWrite readWrite, const char* filename_) : Exception(), readWrite(readWrite), filename(nullptr)
+    IOException::IOException(ReadWrite readWrite, const char* filename_) : Exception(), readWrite(readWrite), filename(NULL)
     {
       this->filename = (char*)malloc(sizeof(char*) * strlen(filename_));
       ::strcpy(this->filename, filename_);
     }
 
-    IOException::IOException(ReadWrite readWrite, std::string filename_) : Exception(), readWrite(readWrite), filename(nullptr)
+    IOException::IOException(ReadWrite readWrite, std::string filename_) : Exception(), readWrite(readWrite), filename(NULL)
     {
       this->filename = (char*)malloc(sizeof(char*) * filename_.length());
       ::strcpy(this->filename, filename_.c_str());
@@ -98,14 +98,14 @@ namespace Hermes
     {
       this->param_idx = param_idx;
       this->item_idx = -1;
-      sprintf(this->message, "Parameter number %d is nullptr", param_idx);
+      sprintf(this->message, "Parameter number %d is NULL", param_idx);
     }
 
     NullException::NullException(int param_idx, int item_idx) : Exception()
     {
       this->param_idx = param_idx;
       this->item_idx = item_idx;
-      sprintf(this->message, "Element number %d of parameter number %d is nullptr", item_idx, param_idx);
+      sprintf(this->message, "Element number %d of parameter number %d is NULL", item_idx, param_idx);
     }
 
     int NullException::get_param_idx() const

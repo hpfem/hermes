@@ -60,8 +60,8 @@ namespace Hermes
         delete this->dp;
       else
       {
-        this->dp->set_matrix(nullptr);
-        this->dp->set_rhs(nullptr);
+        this->dp->set_matrix(NULL);
+        this->dp->set_rhs(NULL);
       }
     }
 
@@ -73,7 +73,7 @@ namespace Hermes
     template<typename Scalar>
     void Solver<Scalar>::solve()
     {
-      this->solve(nullptr);
+      this->solve(NULL);
     }
 
     template<typename Scalar>

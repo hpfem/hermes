@@ -58,7 +58,7 @@ namespace Hermes
 
       void VectorView::show(MeshFunctionSharedPtr<double> vsln, double eps)
       {
-        if(vec == nullptr)
+        if(vec == NULL)
           vec = new Vectorizer;
         if(vsln->get_num_components() < 2)
           throw Hermes::Exceptions::Exception("The single-argument version of show() is only for vector-valued solutions.");
@@ -67,10 +67,10 @@ namespace Hermes
 
       void VectorView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, double eps, int xitem, int yitem, MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
       {
-        if(vec == nullptr)
+        if(vec == NULL)
           vec = new Vectorizer;
 
-        if(xsln != nullptr && ysln != nullptr && xsln == ysln)
+        if(xsln != NULL && ysln != NULL && xsln == ysln)
           this->warn("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
         
         vec->set_displacement(xdisp, ydisp, dmult);

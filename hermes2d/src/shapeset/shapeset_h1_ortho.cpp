@@ -16870,7 +16870,7 @@ namespace Hermes
 
     static int* ortho2_tri_bubble_indices[11] =
     {
-      nullptr, nullptr, nullptr,
+      NULL, NULL, NULL,
       ortho2_tri_bubble_indices_all_orders,
       ortho2_tri_bubble_indices_all_orders,
       ortho2_tri_bubble_indices_all_orders,
@@ -16977,9 +16977,9 @@ namespace Hermes
       shape_table[0] = ortho2_shape_fn_table;
       shape_table[1] = ortho2_shape_fn_table_dx;
       shape_table[2] = ortho2_shape_fn_table_dy;
-      shape_table[3] = nullptr;
-      shape_table[4] = nullptr;
-      shape_table[5] = nullptr;
+      shape_table[3] = NULL;
+      shape_table[4] = NULL;
+      shape_table[5] = NULL;
 
       vertex_indices = ortho2_vertex_indices;
       edge_indices = ortho2_edge_indices;
@@ -17009,7 +17009,7 @@ namespace Hermes
 
       ebias = 2;
 
-      comb_table = nullptr;
+      comb_table = NULL;
     }
 
     const int H1ShapesetOrtho::max_index[2] = { 77, 136 };

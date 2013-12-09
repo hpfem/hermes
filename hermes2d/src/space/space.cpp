@@ -85,25 +85,25 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::init()
     {
-      this->ndata = nullptr;
-      this->edata = nullptr;
+      this->ndata = NULL;
+      this->edata = NULL;
       this->nsize = esize = 0;
       this->mesh_seq = -1;
       this->seq = g_space_seq++;
       this->seq_assigned = -1;
       this->ndof = 0;
-      this->proj_mat = nullptr;
-      this->chol_p = nullptr;
+      this->proj_mat = NULL;
+      this->chol_p = NULL;
       this->vertex_functions_count = this->edge_functions_count = this->bubble_functions_count = 0;
 
-      if (essential_bcs != nullptr)
+      if (essential_bcs != NULL)
       {
         for (typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
         for (unsigned int i = 0; i < (*it)->markers.size(); i++)
         if (mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
           throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker %s.", (*it)->markers.at(i).c_str());
       }
-      own_shapeset = (shapeset == nullptr);
+      own_shapeset = (shapeset == NULL);
     }
 
     template<typename Scalar>
@@ -114,25 +114,25 @@ namespace Hermes
       {
         ::free(ndata);
         nsize = 0;
-        ndata = nullptr;
+        ndata = NULL;
       }
       if (esize)
       {
         ::free(edata);
         esize = 0;
-        edata = nullptr;
+        edata = NULL;
       }
       this->seq = -1;
     }
 
     template<>
-    Space<double>::Space() : shapeset(nullptr), essential_bcs(nullptr)
+    Space<double>::Space() : shapeset(NULL), essential_bcs(NULL)
     {
       this->init();
     }
 
     template<>
-    Space<std::complex<double> >::Space() : shapeset(nullptr), essential_bcs(nullptr)
+    Space<std::complex<double> >::Space() : shapeset(NULL), essential_bcs(NULL)
     {
       this->init();
     }
@@ -141,7 +141,7 @@ namespace Hermes
     Space<Scalar>::Space(MeshSharedPtr mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs)
       : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
     {
-      if (mesh == nullptr)
+      if (mesh == NULL)
         throw Hermes::Exceptions::NullException(0);
       this->init();
     }
@@ -157,7 +157,7 @@ namespace Hermes
         return false;
       }
 
-      if (ndata == nullptr || edata == nullptr || !nsize || !esize)
+      if (ndata == NULL || edata == NULL || !nsize || !esize)
         return false;
 
       if (ndof == 0)
@@ -166,9 +166,9 @@ namespace Hermes
       if (seq < 0)
         return false;
 
-      if (edata == nullptr)
+      if (edata == NULL)
       {
-        throw Hermes::Exceptions::Exception("nullptr edata detected in Space<Scalar>::get_element_order().");
+        throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
         return false;
       }
 
@@ -186,9 +186,9 @@ namespace Hermes
     {
       free();
 
-      if (this->proj_mat != nullptr)
+      if (this->proj_mat != NULL)
         delete[] this->proj_mat;
-      if (this->chol_p != nullptr)
+      if (this->chol_p != NULL)
         delete[] this->chol_p;
 
       if (this->own_shapeset)
@@ -200,17 +200,17 @@ namespace Hermes
     {
       if (e->is_triangle())
         return e->sons[3]->vn[e->prev_vert(i)];
-      else if (e->sons[2] == nullptr)
-        return i == 1 ? e->sons[0]->vn[2] : i == 3 ? e->sons[0]->vn[3] : nullptr;
-      else if (e->sons[0] == nullptr)
-        return i == 0 ? e->sons[2]->vn[1] : i == 2 ? e->sons[2]->vn[2] : nullptr;
+      else if (e->sons[2] == NULL)
+        return i == 1 ? e->sons[0]->vn[2] : i == 3 ? e->sons[0]->vn[3] : NULL;
+      else if (e->sons[0] == NULL)
+        return i == 0 ? e->sons[2]->vn[1] : i == 2 ? e->sons[2]->vn[2] : NULL;
       else return e->sons[i]->vn[j];
     }
 
     template<typename Scalar>
     void Space<Scalar>::resize_tables()
     {
-      if ((nsize < mesh->get_max_node_id()) || (ndata == nullptr))
+      if ((nsize < mesh->get_max_node_id()) || (ndata == NULL))
       {
         int oldsize = nsize;
         if (!nsize)
@@ -220,13 +220,13 @@ namespace Hermes
         ndata = (NodeData*)realloc(ndata, sizeof(NodeData)* nsize);
         for (int i = oldsize; i < nsize; i++)
         {
-          ndata[i].edge_bc_proj = nullptr;
-          ndata[i].baselist = nullptr;
-          ndata[i].base = nullptr;
+          ndata[i].edge_bc_proj = NULL;
+          ndata[i].baselist = NULL;
+          ndata[i].base = NULL;
         }
       }
 
-      if ((esize < mesh->get_max_element_id()) || (edata == nullptr))
+      if ((esize < mesh->get_max_element_id()) || (edata == NULL))
       {
         int oldsize = esize;
         if (!esize)
@@ -357,7 +357,7 @@ namespace Hermes
       int n = spaces.size();
       for (int i = 0; i < n; i++)
       {
-        if (spaces[i]->get_essential_bcs() != nullptr)
+        if (spaces[i]->get_essential_bcs() != NULL)
           spaces[i]->get_essential_bcs()->set_current_time(time);
         spaces[i]->update_essential_bc_values();
       }
@@ -484,7 +484,7 @@ namespace Hermes
       {
         bool found = true;
         for (unsigned int i = 0; i < 4; i++)
-        if (e->sons[i] != nullptr &&
+        if (e->sons[i] != NULL &&
           (!e->sons[i]->active || (keep_initial_refinements && e->sons[i]->id < this->mesh->ninitial))
           )
         {
@@ -669,20 +669,20 @@ namespace Hermes
     {
       // Initialization.
       // Important - for L2MarkerWiseConstSpace we do not create reference spaces - it would be a waste, and shared pointers will take care of the deallocation.
-      if (dynamic_cast<L2MarkerWiseConstSpace<Scalar>*>(this->coarse_space.get()) != nullptr)
+      if (dynamic_cast<L2MarkerWiseConstSpace<Scalar>*>(this->coarse_space.get()) != NULL)
         return this->coarse_space;
 
       SpaceSharedPtr<Scalar> ref_space;
-      if (dynamic_cast<L2Space<Scalar>*>(this->coarse_space.get()) != nullptr)
+      if (dynamic_cast<L2Space<Scalar>*>(this->coarse_space.get()) != NULL)
         ref_space = this->init_construction_l2();
-      if (dynamic_cast<H1Space<Scalar>*>(this->coarse_space.get()) != nullptr)
+      if (dynamic_cast<H1Space<Scalar>*>(this->coarse_space.get()) != NULL)
         ref_space = this->init_construction_h1();
-      if (dynamic_cast<HcurlSpace<Scalar>*>(this->coarse_space.get()) != nullptr)
+      if (dynamic_cast<HcurlSpace<Scalar>*>(this->coarse_space.get()) != NULL)
         ref_space = this->init_construction_hcurl();
-      if (dynamic_cast<HdivSpace<Scalar>*>(this->coarse_space.get()) != nullptr)
+      if (dynamic_cast<HdivSpace<Scalar>*>(this->coarse_space.get()) != NULL)
         ref_space = this->init_construction_hdiv();
 
-      if (ref_space == nullptr)
+      if (ref_space == NULL)
         throw Exceptions::Exception("Something went wrong in ReferenceSpaceCreator::create_ref_space().");
 
       /// Call to the OVERRIDABLE handling method.
@@ -748,7 +748,7 @@ namespace Hermes
             ref_space->edata[e->id].changed_in_last_adaptation = to_set;
           else
           for (unsigned int i = 0; i < 4; i++)
-          if (ref_space->mesh->get_element(e->id)->sons[i] != nullptr)
+          if (ref_space->mesh->get_element(e->id)->sons[i] != NULL)
           if (ref_space->mesh->get_element(e->id)->sons[i]->active)
             ref_space->edata[ref_space->mesh->get_element(e->id)->sons[i]->id].changed_in_last_adaptation = to_set;
         }
@@ -769,7 +769,7 @@ namespace Hermes
         edata[e->id].order = order;
       else
       for (int i = 0; i < 4; i++)
-      if (e->sons[i] != nullptr)
+      if (e->sons[i] != NULL)
         update_orders_recurrent(e->sons[i], order);
     }
 
@@ -791,9 +791,9 @@ namespace Hermes
       assert(en->type == HERMES_TYPE_EDGE);
       Element** e = en->elem;
       int o1 = 1000, o2 = 1000;
-      assert(e[0] != nullptr || e[1] != nullptr);
+      assert(e[0] != NULL || e[1] != NULL);
 
-      if (e[0] != nullptr)
+      if (e[0] != NULL)
       {
         if (e[0]->is_triangle() || en == e[0]->en[0] || en == e[0]->en[2])
           o1 = H2D_GET_H_ORDER(edata[e[0]->id].order);
@@ -801,7 +801,7 @@ namespace Hermes
           o1 = H2D_GET_V_ORDER(edata[e[0]->id].order);
       }
 
-      if (e[1] != nullptr)
+      if (e[1] != NULL)
       {
         if (e[1]->is_triangle() || en == e[1]->en[0] || en == e[1]->en[2])
           o2 = H2D_GET_H_ORDER(edata[e[1]->id].order);
@@ -869,18 +869,18 @@ namespace Hermes
     template<typename Scalar>
     int Space<Scalar>::assign_dofs(int first_dof)
     {
-      if (ndata == nullptr || edata == nullptr || !nsize || !esize)
+      if (ndata == NULL || edata == NULL || !nsize || !esize)
         return false;
       if (seq < 0)
         return false;
-      if (this->mesh == nullptr)
+      if (this->mesh == NULL)
         return false;
 
       this->mesh->check();
 
-      if (edata == nullptr)
+      if (edata == NULL)
       {
-        throw Hermes::Exceptions::Exception("nullptr edata detected in Space<Scalar>::get_element_order().");
+        throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
         return false;
       }
 
@@ -930,8 +930,8 @@ namespace Hermes
         for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
           if (e->en[i]->bnd)
-          if (essential_bcs != nullptr)
-          if (essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker).marker) != nullptr)
+          if (essential_bcs != NULL)
+          if (essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker).marker) != NULL)
           {
             j = e->next_vert(i);
             ndata[e->vn[i]->id].n = 0;
@@ -1048,13 +1048,13 @@ namespace Hermes
 
       Node* en = e->en[surf_pos->surf_num];
       NodeData* nd = &ndata[en->id];
-      nd->edge_bc_proj = nullptr;
+      nd->edge_bc_proj = NULL;
 
       if (nd->dof != H2D_UNASSIGNED_DOF && en->bnd)
-      if (essential_bcs != nullptr)
+      if (essential_bcs != NULL)
       {
         EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(en->marker).marker);
-        if (bc != nullptr)
+        if (bc != NULL)
         {
           int order = get_edge_order_internal(en);
           surf_pos->marker = en->marker;
@@ -1172,14 +1172,14 @@ namespace Hermes
     template<typename Scalar>
     SpaceSharedPtr<Scalar> Space<Scalar>::init_empty_space(SpaceType spaceType, MeshSharedPtr mesh, Shapeset* shapeset)
     {
-      SpaceSharedPtr<Scalar> space(nullptr);
+      SpaceSharedPtr<Scalar> space(NULL);
 
       if (spaceType == HERMES_H1_SPACE)
       {
         space = new H1Space<Scalar>();
         space->mesh = mesh;
 
-        if (shapeset == nullptr)
+        if (shapeset == NULL)
         {
           space->shapeset = new H1Shapeset;
           space->own_shapeset = true;
@@ -1200,7 +1200,7 @@ namespace Hermes
         space = new HcurlSpace<Scalar>();
         space->mesh = mesh;
 
-        if (shapeset == nullptr)
+        if (shapeset == NULL)
         {
           space->shapeset = new HcurlShapeset;
           space->own_shapeset = true;
@@ -1223,7 +1223,7 @@ namespace Hermes
         space = new HdivSpace<Scalar>();
         space->mesh = mesh;
 
-        if (shapeset == nullptr)
+        if (shapeset == NULL)
         {
           space->shapeset = new HdivShapeset;
           space->own_shapeset = true;
@@ -1246,7 +1246,7 @@ namespace Hermes
         space = new L2Space<Scalar>();
         space->mesh = mesh;
 
-        if (shapeset == nullptr)
+        if (shapeset == NULL)
         {
           space->shapeset = new L2Shapeset;
           space->own_shapeset = true;
@@ -1270,7 +1270,7 @@ namespace Hermes
       else
       {
         throw Exceptions::SpaceLoadFailureException("Wrong spaceType in Space loading subroutine.");
-        return nullptr;
+        return NULL;
       }
 
       return space;
@@ -1281,7 +1281,7 @@ namespace Hermes
     {
       try
       {
-        SpaceSharedPtr<Scalar> space(nullptr);
+        SpaceSharedPtr<Scalar> space(NULL);
 
         ::xml_schema::flags parsing_flags = 0;
 
@@ -1307,7 +1307,7 @@ namespace Hermes
         space->mesh_seq = space->mesh->get_seq();
         space->init(shapeset, 1, false);
 
-        if (essential_bcs != nullptr && spaceTypeFromString(parsed_xml_space->spaceType().get().c_str()) != HERMES_L2_SPACE && spaceTypeFromString(parsed_xml_space->spaceType().get().c_str()) != HERMES_L2_MARKERWISE_CONST_SPACE)
+        if (essential_bcs != NULL && spaceTypeFromString(parsed_xml_space->spaceType().get().c_str()) != HERMES_L2_SPACE && spaceTypeFromString(parsed_xml_space->spaceType().get().c_str()) != HERMES_L2_MARKERWISE_CONST_SPACE)
         {
           space->essential_bcs = essential_bcs;
           for (typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
@@ -1406,7 +1406,7 @@ namespace Hermes
       space->resize_tables();
 
       // L2 space does not have any (strong) essential BCs.
-      if (essential_bcs != nullptr && space->get_type() != HERMES_L2_SPACE && space->get_type() != HERMES_L2_MARKERWISE_CONST_SPACE)
+      if (essential_bcs != NULL && space->get_type() != HERMES_L2_SPACE && space->get_type() != HERMES_L2_MARKERWISE_CONST_SPACE)
       {
         space->essential_bcs = essential_bcs;
         for (typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)

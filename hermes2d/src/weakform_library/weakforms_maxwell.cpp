@@ -35,8 +35,8 @@ namespace Hermes
         this->set_area(area);
         this->setSymFlag(sym);
 
-        // If spline is nullptr, initialize it to be constant 1.0.
-        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+        // If spline is NULL, initialize it to be constant 1.0.
+        if(c_spline == NULL) this->spline_coeff = new CubicSpline(1.0);
       }
       template<typename Scalar>
       DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
@@ -52,8 +52,8 @@ namespace Hermes
         this->set_areas(areas);
         this->setSymFlag(sym);
 
-        // If spline is nullptr, initialize it to be constant 1.0.
-        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+        // If spline is NULL, initialize it to be constant 1.0.
+        if(c_spline == NULL) this->spline_coeff = new CubicSpline(1.0);
       }
 
       template<typename Scalar>
@@ -136,8 +136,8 @@ namespace Hermes
         gt(gt), order_increase(order_increase)
       {
         this->set_area(area);
-        // If spline is nullptr, initialize it to be constant 1.0.
-        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+        // If spline is NULL, initialize it to be constant 1.0.
+        if(c_spline == NULL) this->spline_coeff = new CubicSpline(1.0);
       }
 
       template<typename Scalar>
@@ -149,8 +149,8 @@ namespace Hermes
       {
         this->set_areas(areas);
 
-        // If spline is nullptr, initialize it to be constant 1.0.
-        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+        // If spline is NULL, initialize it to be constant 1.0.
+        if(c_spline == NULL) this->spline_coeff = new CubicSpline(1.0);
       }
 
       template<typename Scalar>

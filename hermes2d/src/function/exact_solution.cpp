@@ -66,7 +66,7 @@ namespace Hermes
     MeshFunction<Scalar>* ExactSolution<Scalar>::clone() const
     {
       throw Hermes::Exceptions::Exception("Solution<Scalar>::clone() must be overridden in the case of exact solutions.");
-      return nullptr;
+      return NULL;
     }
 
     template<typename Scalar>
@@ -597,7 +597,7 @@ namespace Hermes
     Func<Scalar>* UExtFunction<Scalar>::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)
     {
       throw Exceptions::Exception("UExtFunction is only usable in assembling, not for getting point values.");
-      return nullptr;
+      return NULL;
     }
 
     template<typename Scalar>

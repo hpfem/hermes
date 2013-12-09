@@ -32,10 +32,10 @@ namespace Hermes
       {
       public:
         DefaultJacobianMagnetostatics(int i, int j, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-          CubicSpline* c_spline = nullptr, SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR,
+          CubicSpline* c_spline = NULL, SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR,
           int order_increase = 3);
         DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
-          Scalar const_coeff, CubicSpline* c_spline = nullptr,
+          Scalar const_coeff, CubicSpline* c_spline = NULL,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, int order_increase = 3);
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
@@ -60,11 +60,11 @@ namespace Hermes
       {
       public:
         DefaultResidualMagnetostatics(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-          CubicSpline* c_spline = nullptr,
+          CubicSpline* c_spline = NULL,
           GeomType gt = HERMES_PLANAR,
           int order_increase = 3);
         DefaultResidualMagnetostatics(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
-          CubicSpline* c_spline = nullptr,
+          CubicSpline* c_spline = NULL,
           GeomType gt = HERMES_PLANAR, int order_increase = 3);
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,

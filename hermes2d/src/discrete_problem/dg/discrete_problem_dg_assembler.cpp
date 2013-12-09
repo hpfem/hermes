@@ -41,7 +41,7 @@ namespace Hermes
       nonlinear(threadAssembler->nonlinear),
       current_mat(threadAssembler->current_mat),
       current_rhs(threadAssembler->current_rhs),
-      current_state(nullptr),
+      current_state(NULL),
       selectiveAssembler(threadAssembler->selectiveAssembler),
       spaces(spaces),
       meshes(meshes)
@@ -155,7 +155,7 @@ namespace Hermes
             deinit_neighbors(neighbor_searches[current_state->isurf], current_state);
           }
           else
-            processed[current_state->isurf] = nullptr;
+            processed[current_state->isurf] = NULL;
         }
       }
     }
@@ -282,11 +282,11 @@ namespace Hermes
               u_ext_func[u_ext_func_i]  = current_neighbor_searches[u_ext_func_i]->init_ext_fn(u_ext[u_ext_func_i]);
             }
             else
-              u_ext_func[u_ext_func_i] = nullptr;
+              u_ext_func[u_ext_func_i] = NULL;
         }
         else
           for(int u_ext_func_i = 0; u_ext_func_i < this->spaces_size; u_ext_func_i++)
-            u_ext_func[u_ext_func_i] = nullptr;
+            u_ext_func[u_ext_func_i] = NULL;
       }
 
       if(current_mat && DG_matrix_forms_present && !edge_processed)

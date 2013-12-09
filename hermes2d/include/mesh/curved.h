@@ -114,7 +114,7 @@ namespace Hermes
       /// this is called for every curvilinear element when it is created
       /// or when it is necessary to re-calculate coefficients for another
       /// order: 'e' is a pointer to the element to which this CurvMap
-      /// belongs to. First, old "coeffs" are removed if they are not nullptr,
+      /// belongs to. First, old "coeffs" are removed if they are not NULL,
       /// then new coefficients are projected.
       void update_refmap_coeffs(Element* e);
 

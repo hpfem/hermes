@@ -29,7 +29,7 @@ namespace Hermes
           this->set_area(area);
           this->setSymFlag(sym);
 
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<double>(1.0);
             this->own_coeff = true;
@@ -45,7 +45,7 @@ namespace Hermes
       {
           this->set_area(area);
           this->setSymFlag(sym);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<std::complex<double> >(std::complex<double>(1.0, 1.0));
             this->own_coeff = true;
@@ -62,7 +62,7 @@ namespace Hermes
       {
           this->set_areas(areas);
           this->setSymFlag(sym);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<double>(1.0);
             this->own_coeff = true;
@@ -78,7 +78,7 @@ namespace Hermes
       {
           this->set_areas(areas);
           this->setSymFlag(sym);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<std::complex<double> >(std::complex<double>(1.0, 1.0));
             this->own_coeff = true;
@@ -161,7 +161,7 @@ namespace Hermes
       {
           this->set_area(area);
           this->setSymFlag(sym);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -177,7 +177,7 @@ namespace Hermes
       {
           this->set_areas(areas);
           this->setSymFlag(sym);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -277,7 +277,7 @@ namespace Hermes
       {
           this->set_area(area);
           this->setSymFlag(sym);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -293,7 +293,7 @@ namespace Hermes
       {
           this->set_areas(areas);
           this->setSymFlag(sym);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -379,15 +379,15 @@ namespace Hermes
 
           if (gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
-          // If coeff1 == nullptr or coeff22 == nullptr, initialize it to be constant 1.0.
-          if (coeff1 == nullptr)
+          // If coeff1 == NULL or coeff22 == NULL, initialize it to be constant 1.0.
+          if (coeff1 == NULL)
           {
             this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff1 = true;
           }
           else
             this->own_coeff1 = false;
-          if (coeff2 == nullptr)
+          if (coeff2 == NULL)
           {
             this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff2 = true;
@@ -408,15 +408,15 @@ namespace Hermes
 
           if (gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
-          // If coeff1 == nullptr or coeff22 == nullptr, initialize it to be constant 1.0.
-          if (coeff1 == nullptr)
+          // If coeff1 == NULL or coeff22 == NULL, initialize it to be constant 1.0.
+          if (coeff1 == NULL)
           {
             this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff1 = true;
           }
           else
             this->own_coeff1 = false;
-          if (coeff2 == nullptr)
+          if (coeff2 == NULL)
           {
             this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff2 = true;
@@ -477,7 +477,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), coeff(coeff), gt(gt)
       {
           this->set_area(area);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -493,7 +493,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -574,7 +574,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
       {
           this->set_area(area);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -590,7 +590,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -670,7 +670,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
       {
           this->set_area(area);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -685,7 +685,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -762,15 +762,15 @@ namespace Hermes
 
           if (gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
-          // If coeff1 == nullptr or coeff22 == nullptr, initialize it to be constant 1.0.
-          if (coeff1 == nullptr)
+          // If coeff1 == NULL or coeff22 == NULL, initialize it to be constant 1.0.
+          if (coeff1 == NULL)
           {
             this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff1 = true;
           }
           else
             this->own_coeff1 = false;
-          if (coeff2 == nullptr)
+          if (coeff2 == NULL)
           {
             this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff2 = true;
@@ -791,15 +791,15 @@ namespace Hermes
 
           if (gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
-          // If coeff1 == nullptr or coeff22 == nullptr, initialize it to be constant 1.0.
-          if (coeff1 == nullptr)
+          // If coeff1 == NULL or coeff22 == NULL, initialize it to be constant 1.0.
+          if (coeff1 == NULL)
           {
             this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff1 = true;
           }
           else
             this->own_coeff1 = false;
-          if (coeff2 == nullptr)
+          if (coeff2 == NULL)
           {
             this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff2 = true;
@@ -856,7 +856,7 @@ namespace Hermes
         : MatrixFormSurf<Scalar>(i, j), coeff(coeff), gt(gt)
       {
           this->set_area(area);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -872,7 +872,7 @@ namespace Hermes
         : MatrixFormSurf<Scalar>(i, j), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -955,7 +955,7 @@ namespace Hermes
         idx_j(j), coeff(coeff), gt(gt)
       {
           this->set_area(area);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -971,7 +971,7 @@ namespace Hermes
         : MatrixFormSurf<Scalar>(i, j), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes1DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -1027,7 +1027,7 @@ namespace Hermes
         : VectorFormSurf<Scalar>(i), coeff(coeff), gt(gt)
       {
           this->set_area(area);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -1045,7 +1045,7 @@ namespace Hermes
           this->set_areas(areas);
 
 
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -1127,7 +1127,7 @@ namespace Hermes
         : VectorFormSurf<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
       {
           this->set_area(area);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -1143,7 +1143,7 @@ namespace Hermes
         : VectorFormSurf<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
-          if (coeff == nullptr)
+          if (coeff == NULL)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
             this->own_coeff = true;
@@ -1234,7 +1234,7 @@ namespace Hermes
       DefaultWeakFormLaplaceLinear<Scalar>::DefaultWeakFormLaplaceLinear(std::string area, GeomType gt) : WeakForm<Scalar>()
       {
         // Jacobian.
-        this->add_matrix_form(new DefaultMatrixFormDiffusion<Scalar>(0, 0, area, nullptr, HERMES_SYM, gt));
+        this->add_matrix_form(new DefaultMatrixFormDiffusion<Scalar>(0, 0, area, NULL, HERMES_SYM, gt));
       };
 
       template<typename Scalar>
@@ -1263,7 +1263,7 @@ namespace Hermes
         GeomType gt) : WeakForm<Scalar>()
       {
           // Jacobian.
-          this->add_matrix_form(new DefaultMatrixFormDiffusion<Scalar>(0, 0, area, nullptr, HERMES_SYM));
+          this->add_matrix_form(new DefaultMatrixFormDiffusion<Scalar>(0, 0, area, NULL, HERMES_SYM));
 
           // Residual.
           this->add_vector_form(new DefaultVectorFormVol<Scalar>(0, area, f));

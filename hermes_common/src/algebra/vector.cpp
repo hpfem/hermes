@@ -123,8 +123,8 @@ namespace Hermes
           matvar_t *matvar;
 
           // For complex.
-          double* v_re = nullptr;
-          double* v_im = nullptr;
+          double* v_re = NULL;
+          double* v_im = NULL;
 
           void* data;
           if(Hermes::Helpers::TypeIsReal<Scalar>::value)
@@ -252,12 +252,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    SimpleVector<Scalar>::SimpleVector() : Vector<Scalar>(), v(nullptr)
+    SimpleVector<Scalar>::SimpleVector() : Vector<Scalar>(), v(NULL)
     {
     }
 
     template<typename Scalar>
-    SimpleVector<Scalar>::SimpleVector(unsigned int size) : Vector<Scalar>(size), v(nullptr)
+    SimpleVector<Scalar>::SimpleVector(unsigned int size) : Vector<Scalar>(size), v(NULL)
     {
       if(this->size == 0)
         throw Exceptions::ValueException("size", this->size, 1);
@@ -317,7 +317,7 @@ namespace Hermes
     {
       if (this->v)
         delete [] this->v;
-      this->v = nullptr;
+      this->v = NULL;
       this->size = 0;
     }
 
@@ -460,7 +460,7 @@ namespace Hermes
       default:
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_vector().");
       }
-      return nullptr;
+      return NULL;
     }
 
     template<>
@@ -547,7 +547,7 @@ namespace Hermes
       default:
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_vector().");
       }
-      return nullptr;
+      return NULL;
     }
 
     template class Vector<double>;

@@ -99,7 +99,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::alloc()
     {
-      assert(this->pages != nullptr);
+      assert(this->pages != NULL);
 
       // calc nnz
       int *nnz_array = new int[this->size];
@@ -117,7 +117,7 @@ namespace Hermes
       }
       // stote the number of nonzeros
       nnz = pos;
-      delete [] this->pages; this->pages = nullptr;
+      delete [] this->pages; this->pages = NULL;
       delete [] ai;
 
       //
@@ -431,8 +431,8 @@ namespace Hermes
     template<typename Scalar>
     void PetscLinearMatrixSolver<Scalar>::solve()
     {
-      assert(m != nullptr);
-      assert(rhs != nullptr);
+      assert(m != NULL);
+      assert(rhs != NULL);
 
       PetscErrorCode ec;
       KSP ksp;

@@ -73,7 +73,7 @@ namespace Hermes
           node->type = HERMES_TYPE_VERTEX;
           node->bnd = 0;
           node->p1 = node->p2 = -1;
-          node->next_hash = nullptr;
+          node->next_hash = NULL;
 
           // variables matching.
           std::string x = parsed_xml_mesh->v().at(vertices_i % vertices_count).x();
@@ -89,19 +89,19 @@ namespace Hermes
 
           // test of value if no variable found.
           if(!x_found)
-            if(std::strtod(x.c_str(), nullptr) != 0.0)
-              x_value = std::strtod(x.c_str(), nullptr);
+            if(std::strtod(x.c_str(), NULL) != 0.0)
+              x_value = std::strtod(x.c_str(), NULL);
             else
             {
               // This is a hard part, to find out if it is really zero.
-              int dot_position = strchr(x.c_str(), '.') == nullptr ? -1 : strchr(x.c_str(), '.') - x.c_str();
+              int dot_position = strchr(x.c_str(), '.') == NULL ? -1 : strchr(x.c_str(), '.') - x.c_str();
               for(int i = 0; i < dot_position; i++)
                 if(strncmp(x.c_str() + i, "0", 1) != 0)
                   this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
               for(int i = dot_position + 1; i < x.length(); i++)
                 if(strncmp(x.c_str() + i, "0", 1) != 0)
                   this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
-              x_value = std::strtod(x.c_str(), nullptr);
+              x_value = std::strtod(x.c_str(), NULL);
             }
 
           // assignment.
@@ -147,7 +147,7 @@ namespace Hermes
             &mesh->nodes[element_i + 1],
             &mesh->nodes[element_i + vertices_count + 1],
             &mesh->nodes[element_i + vertices_count],
-            nullptr);
+            NULL);
 
           mesh->boundary_markers_conversion.insert_marker("Unused");
 

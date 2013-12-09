@@ -234,7 +234,7 @@ namespace Hermes
     /// Preallocate the Func (all we need is np & nc).
     HERMES_API Func<double>* preallocate_fn(PrecalcShapeset *fu, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
     template<typename Scalar>
-    HERMES_API Func<Scalar>* preallocate_fn(MeshFunction<Scalar>* fu = nullptr, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
+    HERMES_API Func<Scalar>* preallocate_fn(MeshFunction<Scalar>* fu = NULL, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
     template<typename Scalar>
     HERMES_API Func<Scalar>* preallocate_fn(MeshFunctionSharedPtr<Scalar> fu, int num_points = H2D_MAX_INTEGRATION_POINTS_COUNT);
     template<typename Scalar>
@@ -253,7 +253,7 @@ namespace Hermes
     /// Utilities follow
     /// Init zero function
     template<typename Scalar>
-    HERMES_API Func<Scalar>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d = nullptr, int nc = 1);
+    HERMES_API Func<Scalar>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d = NULL, int nc = 1);
 
     /// Init UExt function
     template<typename Scalar>
