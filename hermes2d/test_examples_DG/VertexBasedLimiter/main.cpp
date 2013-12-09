@@ -4,8 +4,8 @@
 
 int polynomialDegree = 2;
 int initialRefinementsCount = 5;
-const Algorithm algorithm = Algorithm::Both;
-const SolvedExample solvedExample = SolvedExample::Benchmark;
+const Algorithm algorithm = Both;
+const SolvedExample solvedExample = Benchmark;
 double MovingPeakDiffusivity = 1e-2;
 const EulerLimiterType limiter_type = VertexBased;
 
@@ -130,7 +130,6 @@ int main(int argc, char* argv[])
   // Visualization.
   ScalarView solution_view("Solution", new WinGeom(0, 0, 600, 350));
   ScalarView exact_view("Exact solution", new WinGeom(610, 0, 600, 350));
-  exact_view.show(exact_solution);
   
   // Exact solver solution
   SpaceSharedPtr<double> space(new L2Space<double>(mesh, polynomialDegree, new L2ShapesetTaylor));
