@@ -4,14 +4,14 @@
 
 int polynomialDegree = 2;
 int initialRefinementsCount = 5;
-const Algorithm algorithm = Both;
-const SolvedExample solvedExample = Benchmark;
+const Algorithm algorithm = pMultigrid;
+const SolvedExample solvedExample = MovingPeak;
 double MovingPeakDiffusivity = 1e-2;
 const EulerLimiterType limiter_type = VertexBased;
 
 double diffusivity = 1e-3;
 double s = -1;
-double CFL = 128.;
+double CFL = 1.;
 
 int main(int argc, char* argv[])
 {
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 
   if(algorithm == pMultigrid || algorithm == Both)
   {
-    Hermes::vector<int> steps(2, 3, 5, 10, 15);
+    Hermes::vector<int> steps(10, 3, 5, 10, 15);
     for(int si = 0; si < steps.size(); si++)
     {
       cpu_time.tick();

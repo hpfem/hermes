@@ -325,8 +325,6 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   MeshFunctionSharedPtr<double> solution, MeshFunctionSharedPtr<double> exact_solution,
   ScalarView* solution_view, ScalarView* exact_view, double s, double sigma, Hermes::Mixins::Loggable& logger, Hermes::Mixins::Loggable& logger_details, int steps)
 {
-  if (is_timedep(solvedExample))
-    time_step_length /= ((steps * 2));
   // Spaces
   SpaceSharedPtr<double> space_2(new L2Space<double>(mesh, polynomialDegree, new L2ShapesetTaylor));
   int ndofs_2 = space_2->get_num_dofs();
@@ -407,12 +405,10 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   int num_1 = 0;
   int v_cycles = 0;
 
-  double time = 0.;
-  if (is_timedep(solvedExample))
-    time_step_length *= ((steps * 2));
-  int iteration_count = (int)(is_timedep(solvedExample) ? end_time(solvedExample) / time_step_length : 0) + 1;
   OGProjection<double>::project_global(space_2, previous_sln, &sln_2);
-  for (int step = 0; step < (is_timedep(solvedExample) ? iteration_count : 1000); step++)
+  double time = 0.;
+  int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 10000);
+  for (int step = 0; step < iteration_count; step++)
   {
     logger_details.info("V-cycle %i.", step);
     v_cycles++;
@@ -588,14 +584,15 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
         // Residual check.
         residual_condition(&matrix_A_2, &vector_b_2, sln_2.v, residual_2, logger_details, iteration, true);
       }
+
+      // Make solution & display.
+      Solution<double>::vector_to_solution(&sln_2, space_2, previous_sln);
+      solution_view->set_title("Time: %f", time);
+      solution_view->show(previous_sln);
+
       /*
       if ((step == 1) || step > iteration_count - 2)
       {
-        // Make solution & display.
-        Solution<double>::vector_to_solution(&sln_2, space_2, previous_sln);
-        solution_view->set_title("Time: %f", time);
-        solution_view->show(previous_sln);
-
         std::stringstream ss_bmp, ss_vtk;
         ss_bmp.precision(2);
         ss_vtk.precision(2);
@@ -610,6 +607,15 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
       */
     }
 #pragma endregion
+
+    if (is_timedep(solvedExample))
+    {
+      if (time + time_step_length > end_time(solvedExample))
+      {
+        time_step_length = end_time(solvedExample) - time;
+        time = end_time(solvedExample);
+      }
+    }
 
     time += time_step_length;
 
