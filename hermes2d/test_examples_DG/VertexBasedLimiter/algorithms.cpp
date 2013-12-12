@@ -267,12 +267,13 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
       merged_sln = sln_means.v;
     }
 
+    /*
     if (iteration == iteration_count - 1)
     {
-      if (polynomialDegree)
-        Solution<double>::vector_to_solution(merged_sln, full_space, solution);
-      else
-        Solution<double>::vector_to_solution(sln_means.v, const_space, solution);
+      //if (polynomialDegree)
+        //Solution<double>::vector_to_solution(merged_sln, full_space, solution);
+      //else
+        //Solution<double>::vector_to_solution(sln_means.v, const_space, solution);
 
       std::stringstream ss_bmp, ss_vtk;
       ss_vtk.precision(2);
@@ -280,6 +281,7 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
       ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
       solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution");
     }
+    */
 
     bool done = !is_timedep(solvedExample) && error_reduction_condition(calc_l2_error_algebraic(polynomialDegree ? full_space : const_space, merged_sln, es_v, logger));
 
@@ -429,15 +431,10 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
         // Residual check.
         residual_condition(&matrix_A_2, &vector_b_2, sln_2.v, residual_2, logger_details, iteration, true);
       }
-
-      // Make solution
-      Solution<double>::vector_to_solution(&sln_2, space_2, previous_sln);
     }
 #pragma endregion
 
 #pragma region 1 - intermediate level
-    // Store the previous solution.
-    OGProjection<double>::project_global(space_1, previous_sln, &sln_1);
 
     // f_P1
     SimpleVector<double> f_P1(ndofs_1);
@@ -453,6 +450,8 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
 
     SimpleVector<double>* sln_2_projected = cut_off_quadratic_part(sln_2.v, space_1, space_2);
     matrix_A_1.multiply_with_vector(sln_2_projected->v, R_P1.v, true);
+
+    sln_1.set_vector(sln_2_projected);
 
     R_P1.change_sign();
     f_P1.add_vector(&R_P1);
@@ -495,13 +494,9 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
       // Residual check.
       residual_condition(&matrix_A_1, &vector_b_1, sln_1.v, residual_1, logger_details, iteration, false);
     }
-
-    // Make solution
-    Solution<double>::vector_to_solution(&sln_1, space_1, previous_sln);
 #pragma endregion
 
 #pragma region  2 - Solve the problem on the coarse level exactly
-    OGProjection<double>::project_global(space_0, previous_sln, &sln_0);
 
     // f_P0
     SimpleVector<double> f_P0(ndofs_0);
@@ -520,6 +515,8 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
 
     SimpleVector<double> projected_f_P1(ndofs_1);
     projected_f_P1.set_vector(&f_P1);
+
+    sln_0.set_vector(sln_1_projected);
 
     R_P0.change_sign();
     f_P0.add_vector(&R_P0);
@@ -586,9 +583,9 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
       }
 
       // Make solution & display.
-      Solution<double>::vector_to_solution(&sln_2, space_2, previous_sln);
-      solution_view->set_title("Time: %f", time);
-      solution_view->show(previous_sln);
+      //Solution<double>::vector_to_solution(&sln_2, space_2, previous_sln);
+      //solution_view->set_title("Time: %f", time);
+      //solution_view->show(previous_sln);
 
       /*
       if ((step == 1) || step > iteration_count - 2)
