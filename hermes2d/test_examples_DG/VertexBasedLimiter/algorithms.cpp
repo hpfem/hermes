@@ -1,5 +1,5 @@
 #include "algorithms.h"
-
+static std::string SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
 static double exact_solver_error;
 static const double tolerance = 1e-4;
 double initial_error = -1;

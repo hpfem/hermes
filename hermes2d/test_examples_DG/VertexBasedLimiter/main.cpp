@@ -6,6 +6,7 @@ int polynomialDegree = 2;
 int initialRefinementsCount = 3;
 const Algorithm algorithm = Multiscale;
 SolvedExample solvedExample = Benchmark;
+static std::string SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
 std::string solvedExampleString = SolvedExampleString[solvedExample];
 double MovingPeakDiffusivity = 1e-2;
 const EulerLimiterType limiter_type = VertexBased;

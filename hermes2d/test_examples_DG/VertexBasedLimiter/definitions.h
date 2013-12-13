@@ -26,8 +26,6 @@ enum SolvedExample
 
 };
 
-extern std::string SolvedExampleString[5];
-
 extern double upwind_flux(double u_cent, double u_neib, double a_dot_n);
 
 extern Ord upwind_flux(Ord u_cent, Ord u_neib, double a_dot_n);
