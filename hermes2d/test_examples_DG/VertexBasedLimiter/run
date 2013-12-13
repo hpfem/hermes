@@ -1,17 +1,35 @@
-./VertexBasedLimiter 3 1e-15
-./VertexBasedLimiter 4 1e-15
-./VertexBasedLimiter 5 1e-15
-./VertexBasedLimiter 6 1e-15
-./VertexBasedLimiter 7 1e-15
+./VertexBasedLimiter 3 1e-15 0
+./VertexBasedLimiter 4 1e-15 0
+./VertexBasedLimiter 5 1e-15 0
+./VertexBasedLimiter 6 1e-15 0
+./VertexBasedLimiter 7 1e-15 0
 
-./VertexBasedLimiter 3 1e-3
-./VertexBasedLimiter 4 1e-3
-./VertexBasedLimiter 5 1e-3
-./VertexBasedLimiter 6 1e-3
-./VertexBasedLimiter 7 1e-3
+./VertexBasedLimiter 3 1e-3 0
+./VertexBasedLimiter 4 1e-3 0
+./VertexBasedLimiter 5 1e-3 0
+./VertexBasedLimiter 6 1e-3 0
+./VertexBasedLimiter 7 1e-3 0
 
-./VertexBasedLimiter 3 1e-1
-./VertexBasedLimiter 4 1e-1
-./VertexBasedLimiter 5 1e-1
-./VertexBasedLimiter 6 1e-1
-./VertexBasedLimiter 7 1e-1
+./VertexBasedLimiter 3 1e-2 0
+./VertexBasedLimiter 4 1e-2 0
+./VertexBasedLimiter 5 1e-2 0
+./VertexBasedLimiter 6 1e-2 0
+./VertexBasedLimiter 7 1e-2 0
+
+./VertexBasedLimiter 3 1e-15 1
+./VertexBasedLimiter 4 1e-15 1
+./VertexBasedLimiter 5 1e-15 1
+./VertexBasedLimiter 6 1e-15 1
+./VertexBasedLimiter 7 1e-15 1
+
+./VertexBasedLimiter 3 1e-3 1
+./VertexBasedLimiter 4 1e-3 1
+./VertexBasedLimiter 5 1e-3 1
+./VertexBasedLimiter 6 1e-3 1
+./VertexBasedLimiter 7 1e-3 1
+
+./VertexBasedLimiter 3 1e-2 1
+./VertexBasedLimiter 4 1e-2 1
+./VertexBasedLimiter 5 1e-2 1
+./VertexBasedLimiter 6 1e-2 1
+./VertexBasedLimiter 7 1e-2 1
