@@ -69,7 +69,7 @@ double calc_l2_error(SolvedExample solvedExample, MeshSharedPtr mesh, MeshFuncti
   return result;
 }
 
-double calc_l2_error_algebraic(SpaceSharedPtr<double> space, double* v1, double* v2, Hermes::Mixins::Loggable* logger = nullptr, int iteration = 0, int init_refs = 0, double D = 0.)
+double calc_l2_error_algebraic(SpaceSharedPtr<double> space, double* v1, double* v2, Hermes::Mixins::Loggable* logger = NULL, int iteration = 0, int init_refs = 0, double D = 0.)
 {
   double result = 0.;
   for (int i = 0; i < space->get_num_dofs(); i++)
