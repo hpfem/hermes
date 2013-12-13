@@ -5,7 +5,8 @@
 int polynomialDegree = 2;
 int initialRefinementsCount = 4;
 const Algorithm algorithm = Both;
-const SolvedExample solvedExample = Benchmark;
+SolvedExample solvedExample = Benchmark;
+char* solvedExampleString = SolvedExampleString[solvedExample];
 double MovingPeakDiffusivity = 1e-2;
 const EulerLimiterType limiter_type = VertexBased;
 
@@ -19,21 +20,16 @@ int main(int argc, char* argv[])
     initialRefinementsCount = atoi(argv[1]);
   if(argc > 2)
     diffusivity = (double)atof(argv[2]);
-  if(argc > 3)
-    CFL = atof(argv[3]);
+  if (argc > 3)
+  {
+    solvedExample = (SolvedExample)atoi(argv[3]);
+    solvedExampleString = SolvedExampleString[solvedExample];
+  }
+  if (argc > 4)
+    CFL = atof(argv[4]);
     
   double sigma = std::pow(2., (double)(initialRefinementsCount)) * (s == -1 ? 10.0 : (s == 1 ? 10. : 0.));
 
-  // test();
-  Hermes::Mixins::Loggable logger(true);
-  Hermes::Mixins::Loggable logger_details(true);
-  std::stringstream ss;
-  ss << "logfile_p=" << polynomialDegree << "_" << initialRefinementsCount << "_eps=" << diffusivity << ".h2d";
-  logger.set_logFile_name(ss.str());
-  std::stringstream ssd;
-  ssd << "logfile_detail_p=" << polynomialDegree << "_" << initialRefinementsCount << "_eps=" << diffusivity << ".h2d";
-  logger_details.set_logFile_name(ssd.str());
-  
   HermesCommonApi.set_integral_param_value(numThreads, 1);
 
   double mesh_size;
@@ -133,45 +129,61 @@ int main(int argc, char* argv[])
   
   // Exact solver solution
   SpaceSharedPtr<double> space(new L2Space<double>(mesh, polynomialDegree, new L2ShapesetTaylor));
-
   if(!is_timedep(solvedExample))
-    solve_exact(solvedExample, space, diffusivity, s, sigma, exact_solution, initial_sln, time_step_length, logger, logger_details, polynomialDegree, initialRefinementsCount);
+    solve_exact(solvedExample, space, diffusivity, s, sigma, exact_solution, initial_sln, time_step_length, polynomialDegree, initialRefinementsCount);
   
   Hermes::Mixins::TimeMeasurable cpu_time;
-  cpu_time.tick();
   if(algorithm == Multiscale || algorithm == Both)
   {
-    logger.info("Multiscale solver");
-    
+    Hermes::Mixins::Loggable logger(true);
+    logger.set_timestamps(false);
+    logger.set_erase_on_beginning(true);
+    Hermes::Mixins::Loggable logger_details(true);
+    logger_details.set_timestamps(false);
+    logger_details.set_erase_on_beginning(true);
+    std::stringstream ss;
+    ss << "HSS_" << solvedExampleString << "_" << initialRefinementsCount << "_" << diffusivity << ".h2d";
+    logger.set_logFile_name(ss.str());
+    std::stringstream ssd;
+    ssd << "HSS_detail_" << solvedExampleString << "_" << initialRefinementsCount << "_" << diffusivity << ".h2d";
+    logger_details.set_logFile_name(ssd.str());
+
+    cpu_time.tick();
     multiscale_decomposition(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_mean_values, previous_derivatives, diffusivity, s, sigma, time_step_length,
     initial_sln, solution, exact_solution, &solution_view, &exact_view, logger, logger_details);
     
     cpu_time.tick();
-    logger.info("Multiscale total: %f", cpu_time.last());
+    logger.info("%f", cpu_time.last());
     logger.info("\n");
   }
 
   if(algorithm == pMultigrid || algorithm == Both)
   {
     Hermes::vector<int> steps(2, 3);
-    for(int si = 0; si < steps.size(); si++)
+    for (int si = 0; si < steps.size(); si++)
     {
-      cpu_time.tick();
-      logger.info("p-Multigrid solver - %i steps", steps[si]);
+      Hermes::Mixins::Loggable logger(true);
+      logger.set_timestamps(false);
+      logger.set_erase_on_beginning(true);
+      std::stringstream ss;
+      ss << "MG(" << steps[si] << ")_" << solvedExampleString << "_" << initialRefinementsCount << "_" << diffusivity << ".h2d";
+      logger.set_logFile_name(ss.str());
 
       MeshFunctionSharedPtr<double> previous_solution_local(new ExactSolutionMovingPeak(mesh, MovingPeakDiffusivity, M_PI / 2.));
-  
+      cpu_time.tick();
+
       p_multigrid(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_solution_local, diffusivity, time_step_length,
-        solution, exact_solution, &solution_view, &exact_view, s, sigma, logger, logger_details, steps[si]);
+        solution, exact_solution, &solution_view, &exact_view, s, sigma, logger, steps[si]);
         
       cpu_time.tick();
-      logger.info("p-Multigrid solver - %i steps total: %f", steps[si], cpu_time.last());
+      logger.info("%f", cpu_time.last());
     }
   }
   
   bool onlySmoothing = false;
   if(onlySmoothing)
   {
+    /*
     cpu_time.tick();
     logger.info("only Smoothing solver");
 
@@ -180,6 +192,7 @@ int main(int argc, char* argv[])
       
     cpu_time.tick();
     logger.info("only Smoothing total: %s", cpu_time.last_str().c_str());
+    */
   }
   
   //View::wait();

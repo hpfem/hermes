@@ -1,6 +1,8 @@
 #include "definitions.h"
 #include "forms.h"
 
+char* SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
+
 double upwind_flux(double u_cent, double u_neib, double a_dot_n)
 {
   return a_dot_n * (a_dot_n >= 0 ? u_cent : u_neib);

@@ -18,12 +18,15 @@ enum Algorithm
 
 enum SolvedExample
 {
-  AdvectedCube,
-  SolidBodyRotation,
-  CircularConvection,
-  MovingPeak,
-  Benchmark
+  Benchmark = 0,
+  CircularConvection = 1,
+  MovingPeak = 2,
+  AdvectedCube = 3,
+  SolidBodyRotation = 4
+
 };
+
+extern char* SolvedExampleString[5];
 
 extern double upwind_flux(double u_cent, double u_neib, double a_dot_n);
 

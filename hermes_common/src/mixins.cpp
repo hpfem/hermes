@@ -35,9 +35,13 @@ namespace Hermes
 
     char* Loggable::staticLogFileName = NULL;
 
-    std::map<std::string, bool> Loggable::logger_written;
-
-    Loggable::Loggable(bool verbose_output, callbackFn verbose_callback) : verbose_output(verbose_output), verbose_callback(verbose_callback), logFileName(NULL)
+    Loggable::Loggable(bool verbose_output, callbackFn verbose_callback) :
+      verbose_output(verbose_output),
+      verbose_callback(verbose_callback),
+      logFileName(NULL),
+      print_timestamps(true),
+      erase_on_beginning(false),
+      log_file_written(false)
     {
     }
 
@@ -459,13 +463,26 @@ namespace Hermes
       : code(code), src_function(src_function), src_file(src_file), src_line(src_line)
     {}
 
+    void Loggable::set_timestamps(bool onOff)
+    {
+      this->print_timestamps = onOff;
+    }
+
+    void Loggable::set_erase_on_beginning(bool onOff)
+    {
+      this->erase_on_beginning = onOff;
+    }
+
     void Loggable::hermes_log_message(const char code, const char* msg) const
     {
 #pragma omp critical (hermes_log_message)
       {
         //print the message
         if (!write_console(code, msg))
-        printf("%s", msg);  //safe fallback
+        {
+          printf("%s", msg);  //safe fallback
+        }
+
         printf("\n");  //write a new line
 
         HermesLogEventInfo* info = this->hermes_build_log_info(code);
@@ -474,28 +491,41 @@ namespace Hermes
         char* log_file_name = (this->logFileName ? this->logFileName : Loggable::staticLogFileName);
         if (log_file_name)
         {
-          FILE* file = fopen(log_file_name, "at");
+          FILE* file;
+          if (this->erase_on_beginning && !this->log_file_written)
+            file = fopen(log_file_name, "wt");
+          else
+            file = fopen(log_file_name, "at");
           if (file != NULL)
           {
             //check whether log file was already written
-            std::map<std::string, bool>::const_iterator found = logger_written.find(log_file_name);
-            if (found == logger_written.end()) {  //first write, write delimited to a file
-              logger_written[log_file_name] = true;
-              fprintf(file, "\n");
-              for (int i = 0; i < HERMES_LOG_FILE_DELIM_SIZE; i++)
-                fprintf(file, "-");
-              fprintf(file, "\n\n");
+            if (!log_file_written)
+            {
+              //first write, write delimited to a file
+              (const_cast<Loggable*>(this))->log_file_written = true;
+              if (!this->erase_on_beginning)
+              {
+                fprintf(file, "\n");
+                for (int i = 0; i < HERMES_LOG_FILE_DELIM_SIZE; i++)
+                  fprintf(file, "-");
+                fprintf(file, "\n\n");
+              }
             }
 
-            //get time
-            time_t now;
-            time(&now);
-            struct tm* now_tm = gmtime(&now);
-            char time_buf[BUF_SZ];
-            strftime(time_buf, BUF_SZ, "%y%m%d-%H:%M", now_tm);
+            if (print_timestamps)
+            {
+              //get time
+              time_t now;
+              time(&now);
+              struct tm* now_tm = gmtime(&now);
+              char time_buf[BUF_SZ];
+              strftime(time_buf, BUF_SZ, "%y%m%d-%H:%M", now_tm);
+              //write
+              fprintf(file, "%s\t%s\n", time_buf, msg);
+            }
+            else
+              fprintf(file, "%s\n", msg);
 
-            //write
-            fprintf(file, "%s\t%s\n", time_buf, msg);
             fclose(file);
 
             if (this->verbose_callback != NULL)
