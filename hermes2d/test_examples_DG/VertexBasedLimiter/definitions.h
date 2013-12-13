@@ -26,7 +26,7 @@ enum SolvedExample
 
 };
 
-extern char* SolvedExampleString[5];
+extern std::string SolvedExampleString[5];
 
 extern double upwind_flux(double u_cent, double u_neib, double a_dot_n);
 

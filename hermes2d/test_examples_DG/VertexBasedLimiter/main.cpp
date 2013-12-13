@@ -3,14 +3,14 @@
 #include "algorithms.h"
 
 int polynomialDegree = 2;
-int initialRefinementsCount = 4;
-const Algorithm algorithm = Both;
+int initialRefinementsCount = 3;
+const Algorithm algorithm = Multiscale;
 SolvedExample solvedExample = Benchmark;
-char* solvedExampleString = SolvedExampleString[solvedExample];
+std::string solvedExampleString = SolvedExampleString[solvedExample];
 double MovingPeakDiffusivity = 1e-2;
 const EulerLimiterType limiter_type = VertexBased;
 
-double diffusivity = 1e-13;
+double diffusivity = 1e-2;
 double s = -1;
 double CFL = 128.;
 

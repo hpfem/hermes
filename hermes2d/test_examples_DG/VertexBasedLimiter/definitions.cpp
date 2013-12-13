@@ -1,7 +1,7 @@
 #include "definitions.h"
 #include "forms.h"
 
-char* SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
+std::string SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
 
 double upwind_flux(double u_cent, double u_neib, double a_dot_n)
 {
