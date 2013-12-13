@@ -50,7 +50,7 @@ namespace Hermes
       if (this->logFileName)
         delete[] this->logFileName;
       int strlength = std::strlen(filename);
-      this->logFileName = new char[strlength];
+      this->logFileName = new char[strlength+1];
       strcpy(this->logFileName, filename);
     }
 
@@ -64,7 +64,7 @@ namespace Hermes
       if (Loggable::staticLogFileName)
         delete[] Loggable::staticLogFileName;
       int strlength = std::strlen(filename);
-      Loggable::staticLogFileName = new char[strlength];
+      Loggable::staticLogFileName = new char[strlength + 1];
       strcpy(Loggable::staticLogFileName, filename);
     }
 
