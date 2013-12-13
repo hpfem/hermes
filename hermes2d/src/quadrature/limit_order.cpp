@@ -79,7 +79,9 @@ namespace Hermes
 
     HERMES_API void limit_order(int& o, ElementMode2D mode)
     {
-      if(o > g_quad_2d_std.get_safe_max_order(mode))
+      o = 24;
+      return;
+      if (o >= g_quad_2d_std.get_safe_max_order(mode))
       {
         o = g_quad_2d_std.get_safe_max_order(mode);
         warn_order();
