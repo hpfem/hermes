@@ -395,7 +395,7 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
 
   OGProjection<double>::project_global(space_2, previous_sln, &sln_2);
   double time = 0.;
-  int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 10000);
+  int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 200);
   for (int step = 0; step < iteration_count; step++)
   {
     static_log.info("V-cycle %i.", step);
