@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 
   if(algorithm == pMultigrid || algorithm == Both)
   {
-    Hermes::vector<int> steps(2, 3);
+    Hermes::vector<int> steps(2, 3, 5, 10, 15);
     for (int si = 0; si < steps.size(); si++)
     {
       Hermes::Mixins::Loggable logger(true);
