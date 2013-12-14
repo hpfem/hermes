@@ -1,9 +1,9 @@
-VertexBasedLimiter 4 0.01 1.0
-VertexBasedLimiter 4 0.001 1.0
-VertexBasedLimiter 4 0.00 1.0
-VertexBasedLimiter 5 0.01 1.0
-VertexBasedLimiter 5 0.001 1.0
-VertexBasedLimiter 5 0.00 1.0
-VertexBasedLimiter 6 0.01 1.0
-VertexBasedLimiter 6 0.001 1.0
-VertexBasedLimiter 6 0.00 1.0
+VertexBasedLimiter 4 0.01
+VertexBasedLimiter 4 0.001
+VertexBasedLimiter 4 0.00
+VertexBasedLimiter 5 0.01
+VertexBasedLimiter 5 0.001
+VertexBasedLimiter 5 0.00
+VertexBasedLimiter 6 0.01
+VertexBasedLimiter 6 0.001
+VertexBasedLimiter 6 0.00

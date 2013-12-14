@@ -76,7 +76,7 @@ double calc_l2_error_algebraic(SpaceSharedPtr<double> space, double* v1, double*
     result += (v1[i] - v2[i]) * (v1[i] - v2[i]);
   result = std::sqrt(result);
   if (logger)
-    logger->info("%d,%f,%d,%f",init_refs, D, iteration, result);
+    logger->info("%d,%f,%d,%f", init_refs, D, iteration, result);
   return result;
 }
 
@@ -99,14 +99,14 @@ void solve_exact(SolvedExample solvedExample, SpaceSharedPtr<double> space, doub
   ExactWeakForm weakform_exact(solvedExample, add_inlet(solvedExample), "Inlet", diffusivity, s, sigma, initial_sln);
   weakform_exact.set_current_time_step(time_step);
   LinearSolver<double> solver_exact(&weakform_exact, space);
-  
+
   // Solve
   solver_exact.solve();
   Solution<double>::vector_to_solution(solver_exact.get_sln_vector(), space, exact_solver_sln);
 
   // Initial error
   initial_error = get_l2_norm(solver_exact.get_sln_vector(), space->get_num_dofs());
-  
+
   // es and es_v
   Solution<double>::vector_to_solution(solver_exact.get_sln_vector(), space, es);
   es_v = new double[space->get_num_dofs()];
@@ -129,7 +129,7 @@ void solve_exact(SolvedExample solvedExample, SpaceSharedPtr<double> space, doub
 void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_mean_values,
   MeshFunctionSharedPtr<double> previous_derivatives, double diffusivity, double s, double sigma, double time_step_length,
   MeshFunctionSharedPtr<double> previous_solution, MeshFunctionSharedPtr<double> solution, MeshFunctionSharedPtr<double> exact_solution,
-  ScalarView* solution_view, ScalarView* exact_view, Hermes::Mixins::Loggable& logger, Hermes::Mixins::Loggable& logger_details)
+  ScalarView* solution_view, ScalarView* exact_view, Hermes::Mixins::Loggable& logger, Hermes::Mixins::Loggable& logger_details, double cfl)
 {
   // Standard L2 space.
   SpaceSharedPtr<double> space(new L2Space<double>(mesh, polynomialDegree, new L2ShapesetTaylor(false)));
@@ -217,7 +217,7 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
   int iterations = 0;
 
   double* merged_sln;
-  
+
   double time = 0.;
   int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 10000);
   for (int iteration = 0; iteration < iteration_count; iteration++)
@@ -270,25 +270,25 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
     }
 
     /*
+    if (polynomialDegree)
+      Solution<double>::vector_to_solution(merged_sln, full_space, solution);
+    else
+      Solution<double>::vector_to_solution(sln_means.v, const_space, solution);
+
+    solution_view->show(solution);
+
     if (iteration == iteration_count - 1)
     {
-      if (polynomialDegree)
-        Solution<double>::vector_to_solution(merged_sln, full_space, solution);
-      else
-        Solution<double>::vector_to_solution(sln_means.v, const_space, solution);
-
-      std::stringstream ss_bmp, ss_vtk;
-      ss_vtk.precision(2);
-      ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
-      ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
-      solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution");
+    
+    std::stringstream ss_bmp, ss_vtk;
+    ss_vtk.precision(2);
+    ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
+    ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
+    solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution");
     }
     */
 
     bool done = !is_timedep(solvedExample) && error_reduction_condition(calc_l2_error_algebraic(polynomialDegree ? full_space : const_space, merged_sln, es_v, &logger_details, iteration, init_ref_num, diffusivity));
-
-    if (polynomialDegree)
-      delete[] merged_sln;
 
     if (is_timedep(solvedExample))
     {
@@ -301,17 +301,47 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
 
     time += time_step_length;
 
+    bool finish_timedep = is_timedep(solvedExample) && (iteration == iteration_count - 1);
+    
+    if (polynomialDegree && !finish_timedep)
+      delete[] merged_sln;
+
     if (done)
       break;
   }
 
+  if (is_timedep(solvedExample))
+  {
+    ((ExactSolutionMovingPeak*)exact_solution.get())->set_current_time(time + (M_PI / 2.));
+    exact_view->show(exact_solution);
+    DefaultErrorCalculator<double, HERMES_L2_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
+
+    if (polynomialDegree)
+      Solution<double>::vector_to_solution(merged_sln, full_space, solution);
+    else
+      Solution<double>::vector_to_solution(sln_means.v, const_space, solution);
+
+    std::stringstream ss_vtk;
+    std::stringstream ss_vtke;
+    ss_vtk.precision(2);
+    ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
+    ss_vtk << "solution_" << "HSS_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_CFL=" << cfl << ".dat";
+    ss_vtke.precision(2);
+    ss_vtke.setf(std::ios_base::uppercase | std::ios_base::scientific);
+    ss_vtke << "exact_solution_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_CFL=" << cfl << ".dat";
+    solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution");
+    solution_view->get_linearizer()->save_solution_tecplot(exact_solution, ss_vtke.str().c_str(), "exactSolution");
+
+    errorCalculator.calculate_errors(solution, exact_solution);
+    logger.info("%f", std::sqrt(errorCalculator.get_total_error_squared()));
+  }
   logger.info("%i", iterations);
 }
 
 void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_sln,
   double diffusivity, double time_step_length,
   MeshFunctionSharedPtr<double> solution, MeshFunctionSharedPtr<double> exact_solution,
-  ScalarView* solution_view, ScalarView* exact_view, double s, double sigma, Hermes::Mixins::Loggable& logger, int steps)
+  ScalarView* solution_view, ScalarView* exact_view, double s, double sigma, Hermes::Mixins::Loggable& logger, int steps, double cfl)
 {
   // Spaces
   SpaceSharedPtr<double> space_2(new L2Space<double>(mesh, polynomialDegree, new L2ShapesetTaylor));
@@ -338,12 +368,18 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   weakform_smoother.set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(previous_sln, exact_solution));
   weakform_smoother_coarse.set_current_time_step(time_step_length);
   weakform_smoother_coarse.set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(previous_sln, exact_solution));
+  MassWeakForm weakform_mass;
+
   CSCMatrix<double> matrix_MA_tilde_2;
   SimpleVector<double> vector_A_2(ndofs_2);
   CSCMatrix<double> matrix_MA_tilde_1;
   SimpleVector<double> vector_A_1(ndofs_1);
   CSCMatrix<double> matrix_MA_0;
   SimpleVector<double> vector_A_0(ndofs_0);
+
+  CSCMatrix<double> matrix_M_2;
+  CSCMatrix<double> matrix_M_1;
+  CSCMatrix<double> matrix_M_0;
 
   // Assembler.
   DiscreteProblem<double> dp;
@@ -353,6 +389,8 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   dp.assemble(&matrix_A_2, &vector_b_2);
   dp.set_weak_formulation(&weakform_smoother);
   dp.assemble(&matrix_MA_tilde_2);
+  dp.set_weak_formulation(&weakform_mass);
+  dp.assemble(&matrix_M_2);
 
   // Level 1.
   dp.set_space(space_1);
@@ -360,6 +398,8 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   dp.assemble(&matrix_A_1, &vector_b_1);
   dp.set_weak_formulation(&weakform_smoother);
   dp.assemble(&matrix_MA_tilde_1);
+  dp.set_weak_formulation(&weakform_mass);
+  dp.assemble(&matrix_M_1);
 
   // Level 0.
   dp.set_space(space_0);
@@ -367,6 +407,8 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   dp.assemble(&matrix_A_0, &vector_b_0);
   dp.set_weak_formulation(&weakform_smoother_coarse);
   dp.assemble(&matrix_MA_0);
+  dp.set_weak_formulation(&weakform_mass);
+  dp.assemble(&matrix_M_0);
 
   UMFPackLinearMatrixSolver<double> solver_2(&matrix_MA_tilde_2, &vector_A_2);
   solver_2.setup_factorization();
@@ -379,12 +421,17 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   solver_0.set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
 
   // Utils.
-  double* residual_2 = new double[ndofs_2];
   SimpleVector<double> sln_2(ndofs_2);
-  double* residual_1 = new double[ndofs_1];
   SimpleVector<double> sln_1(ndofs_1);
-  double* residual_0 = new double[ndofs_0];
   SimpleVector<double> sln_0(ndofs_0);
+
+  SimpleVector<double> prev_sln_2(ndofs_2);
+  SimpleVector<double> prev_sln_1(ndofs_1);
+  SimpleVector<double> prev_sln_0(ndofs_0);
+
+  SimpleVector<double> util_2(ndofs_2), util_21(ndofs_2);
+  SimpleVector<double> util_1(ndofs_1), util_11(ndofs_2);
+  SimpleVector<double> util_0(ndofs_0), util_01(ndofs_2);
 
   double initial_residual_norm;
   // Reports.
@@ -394,80 +441,77 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   int v_cycles = 0;
 
   OGProjection<double>::project_global(space_2, previous_sln, &sln_2);
+  prev_sln_2.set_vector(&sln_2);
+  prev_sln_1.set_vector(cut_off_quadratic_part(prev_sln_2.v, space_1, space_2));
+  prev_sln_0.set_vector(cut_off_linear_part(prev_sln_1.v, space_0, space_1));
+
   double time = 0.;
-  int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 200);
-  for (int step = 0; step < iteration_count; step++)
+  int V_cycles_per_time_step = 1;
+  int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 1);
+  for (int time_step = 0; time_step < iteration_count; time_step++)
   {
-    static_log.info("V-cycle %i.", step);
-    v_cycles++;
-    static_log.info("Time step: %i, time: %f.", step, time);
+    if(!is_timedep(solvedExample))
+      static_log.info("Time step: %i, time: %f.", time_step, time);
+
+    for (int step = 0; step < (is_timedep(solvedExample) ? V_cycles_per_time_step : iteration_count); step++)
+    {
+      static_log.info("V-cycle %i.", step);
+      v_cycles++;
 
 #pragma region 0 - highest level
-    // Store the previous solution.
-    if (polynomialDegree > 1)
-    {
-      for (int iteration = 1; iteration <= steps; iteration++)
+      // Store the previous solution.
+      if (polynomialDegree > 1)
       {
-        // Solve for increment.
-        matrix_A_2.multiply_with_vector(sln_2.v, vector_A_2.v, true);
-        vector_A_2.change_sign()->add_vector(&vector_b_2);
-        solver_2.solve();
-        sln_2.add_vector(solver_2.get_sln_vector());
+        for (int iteration = 1; iteration <= steps; iteration++)
+        {
+          // Solve for increment.
+          matrix_A_2.multiply_with_vector(sln_2.v, vector_A_2.v, true);
+          vector_A_2.change_sign()->add_vector(&vector_b_2);
+
+          util_2.set_vector(&prev_sln_2);
+          util_2.change_sign()->add_vector(sln_2.v)->change_sign();
+          matrix_M_2.multiply_with_vector(util_2.v, util_21.v, true);
+
+          vector_A_2.add_vector(util_21.v);
+
+          solver_2.solve();
+          sln_2.add_vector(solver_2.get_sln_vector());
+        }
       }
 
-      // Residual calculation.
-      matrix_A_2.multiply_with_vector(sln_2.v, residual_2, true);
-      for (int i = 0; i < matrix_A_2.get_size(); i++)
-        residual_2[i] -= vector_b_2.get(i);
-    }
 #pragma endregion
 
 #pragma region 1 - intermediate level
 
-    // f_P1
-    SimpleVector<double> f_P1(ndofs_1);
-    f_P1.zero();
-    // Minus A_P1
-    SimpleVector<double> R_P1(ndofs_1);
-    // Minus(minus) projected_A_P1
-    SimpleVector<double> projected_A_2(ndofs_2);
-    matrix_A_2.multiply_with_vector(sln_2.v, projected_A_2.v, true);
+      // f_P1
+      SimpleVector<double> f_P1(ndofs_1);
+      f_P1.zero();
+      // Minus A_P1
+      SimpleVector<double> R_P1(ndofs_1);
+      // Minus(minus) projected_A_P1
+      SimpleVector<double> projected_A_2(ndofs_2);
+      matrix_A_2.multiply_with_vector(sln_2.v, projected_A_2.v, true);
 
-    SimpleVector<double>* projected_A_P_1
-      = (SimpleVector<double>*)cut_off_quadratic_part(projected_A_2.v, space_1, space_2);
+      SimpleVector<double>* projected_A_P_1
+        = (SimpleVector<double>*)cut_off_quadratic_part(projected_A_2.v, space_1, space_2);
 
-    SimpleVector<double>* sln_2_projected = cut_off_quadratic_part(sln_2.v, space_1, space_2);
-    matrix_A_1.multiply_with_vector(sln_2_projected->v, R_P1.v, true);
+      SimpleVector<double>* sln_2_projected = cut_off_quadratic_part(sln_2.v, space_1, space_2);
+      matrix_A_1.multiply_with_vector(sln_2_projected->v, R_P1.v, true);
 
-    sln_1.set_vector(sln_2_projected);
+      sln_1.set_vector(sln_2_projected);
 
-    R_P1.change_sign();
-    f_P1.add_vector(&R_P1);
-    f_P1.add_vector(projected_A_P_1);
-    delete projected_A_P_1;
-    delete sln_2_projected;
-    f_P1.change_sign();
+      R_P1.change_sign();
+      f_P1.add_vector(&R_P1);
+      f_P1.add_vector(projected_A_P_1);
+      delete projected_A_P_1;
+      delete sln_2_projected;
+      f_P1.change_sign();
 
-    for (int iteration = 1; iteration <= steps; iteration++)
-    {
-      // Solve for increment.
-      SimpleVector<double>* rhs;
-      if (iteration == 1)
+      for (int iteration = 1; iteration <= steps; iteration++)
       {
-        if (polynomialDegree > 1)
-        {
-          rhs = cut_off_quadratic_part(residual_2, space_1, space_2);
-          memcpy(vector_A_1.v, rhs->v, ndofs_1 * sizeof(double));
-          delete rhs;
-        }
-        else
-        {
-          matrix_A_1.multiply_with_vector(sln_1.v, vector_A_1.v, true);
-          vector_A_1.change_sign()->add_vector(&vector_b_1);
-        }
-      }
-      else
-      {
+        // Solve for increment.
+        SimpleVector<double>* rhs;
+
         // A(u_K) - done after the first step.
         matrix_A_1.multiply_with_vector(sln_1.v, vector_A_1.v, true);
 
@@ -475,116 +519,123 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
           vector_A_1.change_sign()->add_vector(&f_P1)->add_vector(&vector_b_1);
         else
           vector_A_1.change_sign()->add_vector(&vector_b_1);
-      }
-      solver_1.solve();
-      sln_1.add_vector(solver_1.get_sln_vector());
-    }
 
-    // Residual calculation.
-    matrix_A_1.multiply_with_vector(sln_1.v, residual_1, true);
-    for (int i = 0; i < matrix_A_1.get_size(); i++)
-      residual_1[i] -= vector_b_1.get(i);
+        util_1.set_vector(&prev_sln_1);
+        util_1.change_sign()->add_vector(sln_1.v)->change_sign();
+        matrix_M_1.multiply_with_vector(util_1.v, util_11.v, true);
+
+        vector_A_1.add_vector(util_11.v);
+
+        solver_1.solve();
+        sln_1.add_vector(solver_1.get_sln_vector());
+      }
+
 #pragma endregion
 
 #pragma region  2 - Solve the problem on the coarse level exactly
 
-    // f_P0
-    SimpleVector<double> f_P0(ndofs_0);
-    f_P0.zero();
-    // Minus A_P0
-    SimpleVector<double> R_P0(ndofs_0);
-    // Minus(minus) projected_A_P0
-    SimpleVector<double> projected_A_1(ndofs_1);
-    matrix_A_1.multiply_with_vector(sln_1.v, projected_A_1.v, true);
+      // f_P0
+      SimpleVector<double> f_P0(ndofs_0);
+      f_P0.zero();
+      // Minus A_P0
+      SimpleVector<double> R_P0(ndofs_0);
+      // Minus(minus) projected_A_P0
+      SimpleVector<double> projected_A_1(ndofs_1);
+      matrix_A_1.multiply_with_vector(sln_1.v, projected_A_1.v, true);
 
-    SimpleVector<double>* projected_A_P_0
-      = (SimpleVector<double>*)cut_off_linear_part(projected_A_1.v, space_0, space_1);
+      SimpleVector<double>* projected_A_P_0
+        = (SimpleVector<double>*)cut_off_linear_part(projected_A_1.v, space_0, space_1);
 
-    SimpleVector<double>* sln_1_projected = cut_off_linear_part(sln_1.v, space_0, space_1);
-    matrix_A_0.multiply_with_vector(sln_1_projected->v, R_P0.v, true);
+      SimpleVector<double>* sln_1_projected = cut_off_linear_part(sln_1.v, space_0, space_1);
+      matrix_A_0.multiply_with_vector(sln_1_projected->v, R_P0.v, true);
 
-    SimpleVector<double> projected_f_P1(ndofs_1);
-    projected_f_P1.set_vector(&f_P1);
+      SimpleVector<double> projected_f_P1(ndofs_1);
+      projected_f_P1.set_vector(&f_P1);
 
-    sln_0.set_vector(sln_1_projected);
+      sln_0.set_vector(sln_1_projected);
 
-    R_P0.change_sign();
-    f_P0.add_vector(&R_P0);
-    f_P0.add_vector(projected_A_P_0);
-    if (polynomialDegree > 1)
-    {
-      Vector<double>* temp = cut_off_linear_part(projected_f_P1.v, space_0, space_1)->change_sign();
-      f_P0.add_vector(temp);
-      delete temp;
-    }
-    delete projected_A_P_0;
-    delete sln_1_projected;
-    f_P0.change_sign();
+      R_P0.change_sign();
+      f_P0.add_vector(&R_P0);
+      f_P0.add_vector(projected_A_P_0);
+      if (polynomialDegree > 1)
+      {
+        Vector<double>* temp = cut_off_linear_part(projected_f_P1.v, space_0, space_1)->change_sign();
+        f_P0.add_vector(temp);
+        delete temp;
+      }
+      delete projected_A_P_0;
+      delete sln_1_projected;
+      f_P0.change_sign();
 
-    num_coarse++;
+      num_coarse++;
 
-    // A(u_K) - done after the first step.
-    matrix_A_0.multiply_with_vector(sln_0.v, vector_A_0.v, true);
-    vector_A_0.change_sign()->add_vector(&f_P0)->add_vector(&vector_b_0);
+      // A(u_K) - done after the first step.
+      matrix_M_0.multiply_with_vector(prev_sln_0.v, vector_A_0.v, true);
+      vector_A_0.add_vector(&f_P0)->add_vector(&vector_b_0);
 
-    solver_0.solve();
-    sln_0.add_vector(solver_0.get_sln_vector());
+      solver_0.solve();
+      sln_0.set_vector(solver_0.get_sln_vector());
+
 #pragma endregion
 
 #pragma region 1 - intermediate level
-    // Store the previous solution.
-    sln_1.set_vector(merge_slns(sln_0.v, space_0, sln_1.v, space_1, space_1, false));
-
-    for (int iteration = 1; iteration <= steps; iteration++)
-    {
-      // Solve for increment.
-      matrix_A_1.multiply_with_vector(sln_1.v, vector_A_1.v, true);
-
-      if (polynomialDegree > 1)
-        vector_A_1.change_sign()->add_vector(&f_P1)->add_vector(&vector_b_1);
-      else
-        vector_A_1.change_sign()->add_vector(&vector_b_1);
-
-      solver_1.solve();
-      sln_1.add_vector(solver_1.get_sln_vector());
-    }
-
-    // Residual calculation.
-    matrix_A_1.multiply_with_vector(sln_1.v, residual_1, true);
-    for (int i = 0; i < matrix_A_1.get_size(); i++)
-      residual_1[i] -= vector_b_1.get(i);
-#pragma endregion
-
-#pragma region 0 - highest level
-
-    if (polynomialDegree > 1)
-    {
       // Store the previous solution.
-      sln_2.set_vector(merge_slns(sln_1.v, space_1, sln_2.v, space_2, space_2, false));
+      sln_1.set_vector(merge_slns(sln_0.v, space_0, sln_1.v, space_1, space_1, false));
 
       for (int iteration = 1; iteration <= steps; iteration++)
       {
         // Solve for increment.
-        matrix_A_2.multiply_with_vector(sln_2.v, vector_A_2.v, true);
-        vector_A_2.change_sign()->add_vector(&vector_b_2);
-        solver_2.solve();
-        sln_2.add_vector(solver_2.get_sln_vector());
+        matrix_A_1.multiply_with_vector(sln_1.v, vector_A_1.v, true);
+
+        if (polynomialDegree > 1)
+          vector_A_1.change_sign()->add_vector(&f_P1)->add_vector(&vector_b_1);
+        else
+          vector_A_1.change_sign()->add_vector(&vector_b_1);
+
+        util_1.set_vector(&prev_sln_1);
+        util_1.change_sign()->add_vector(sln_1.v)->change_sign();
+        matrix_M_1.multiply_with_vector(util_1.v, util_11.v, true);
+
+        vector_A_1.add_vector(util_11.v);
+
+        solver_1.solve();
+        sln_1.add_vector(solver_1.get_sln_vector());
       }
 
-      // Residual calculation.
-      matrix_A_2.multiply_with_vector(sln_2.v, residual_2, true);
-      for (int i = 0; i < matrix_A_2.get_size(); i++)
-        residual_2[i] -= vector_b_2.get(i);
+#pragma endregion
 
-      
-      /*
-      if ((step == 1) || step > iteration_count - 2)
+#pragma region 0 - highest level
+
+      if (polynomialDegree > 1)
       {
+        // Store the previous solution.
+        sln_2.set_vector(merge_slns(sln_1.v, space_1, sln_2.v, space_2, space_2, false));
+
+        for (int iteration = 1; iteration <= steps; iteration++)
+        {
+          // Solve for increment.
+          matrix_A_2.multiply_with_vector(sln_2.v, vector_A_2.v, true);
+          vector_A_2.change_sign()->add_vector(&vector_b_2);
+          
+          util_2.set_vector(&prev_sln_2);
+          util_2.change_sign()->add_vector(sln_2.v)->change_sign();
+          matrix_M_2.multiply_with_vector(util_2.v, util_21.v, true);
+
+          vector_A_2.add_vector(util_21.v);
+
+          solver_2.solve();
+          sln_2.add_vector(solver_2.get_sln_vector());
+        }
+
+
+        /*
         // Make solution & display.
         Solution<double>::vector_to_solution(&sln_2, space_2, previous_sln);
         solution_view->set_title("Time: %f", time);
         solution_view->show(previous_sln);
 
+        if ((step == 1) || step > iteration_count - 2)
+        {
         std::stringstream ss_bmp, ss_vtk;
         ss_bmp.precision(2);
         ss_vtk.precision(2);
@@ -595,10 +646,14 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
         ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
         solution_view->save_screenshot(ss_bmp.str().c_str(), true);
         solution_view->get_linearizer()->save_solution_tecplot(previous_sln, ss_vtk.str().c_str(), "solution");
+        }
+        */
       }
-      */
-    }
 #pragma endregion
+
+      if (!is_timedep(solvedExample) && error_reduction_condition(calc_l2_error_algebraic(space_2, sln_2.v, es_v)))
+        break;
+    }
 
     if (is_timedep(solvedExample))
     {
@@ -611,8 +666,31 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
 
     time += time_step_length;
 
-    if (!is_timedep(solvedExample) && error_reduction_condition(calc_l2_error_algebraic(space_2, sln_2.v, es_v)))
-      break;
+    prev_sln_2.set_vector(&sln_2);
+    prev_sln_1.set_vector(&sln_1);
+    prev_sln_0.set_vector(&sln_0);
+  }
+
+  if (is_timedep(solvedExample))
+  {
+    ((ExactSolutionMovingPeak*)exact_solution.get())->set_current_time(time + (M_PI / 2.));
+    DefaultErrorCalculator<double, HERMES_L2_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
+
+    Solution<double>::vector_to_solution(&sln_2, space_2, solution);
+    
+    std::stringstream ss_vtk;
+    std::stringstream ss_vtke;
+    ss_vtk.precision(2);
+    ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
+    ss_vtk << "solution_" << "MG(" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_CFL=" << cfl << ".dat";
+    ss_vtke.precision(2);
+    ss_vtke.setf(std::ios_base::uppercase | std::ios_base::scientific);
+    ss_vtke << "exact_solution_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_CFL=" << cfl << ".dat";
+    solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution");
+    solution_view->get_linearizer()->save_solution_tecplot(exact_solution, ss_vtke.str().c_str(), "exactSolution");
+
+    errorCalculator.calculate_errors(solution, exact_solution);
+    logger.info("%f", std::sqrt(errorCalculator.get_total_error_squared()));
   }
   logger.info("%i", v_cycles);
 }
