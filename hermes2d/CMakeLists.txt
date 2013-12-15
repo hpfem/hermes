@@ -174,13 +174,16 @@ project(hermes2d)
     src/views/mesh_view.cpp
     src/views/order_view.cpp
     src/views/scalar_view.cpp
+    src/views/scalar_view_old.cpp
     src/views/stream_view.cpp
     src/views/vector_base_view.cpp
     src/views/vector_view.cpp
     src/views/view.cpp
     src/views/view_data.cpp
     src/views/view_support.cpp
+    src/views/thread_linearizer.cpp
     src/views/linearizer.cpp
+    src/views/linearizer_old.cpp
     src/views/linearizer_base.cpp
     src/views/orderizer.cpp
     src/views/vectorizer.cpp
@@ -289,7 +292,10 @@ project(hermes2d)
     src/views/view.cpp
     src/views/view_data.cpp
     src/views/view_support.cpp
+    src/views/thread_linearizer.cpp
+    src/views/scalar_view_old.cpp
     src/views/linearizer.cpp
+    src/views/linearizer_old.cpp
     src/views/linearizer_base.cpp
     src/views/orderizer.cpp
     src/views/vectorizer.cpp
@@ -425,12 +431,15 @@ project(hermes2d)
     include/views/mesh_view.h
     include/views/order_view.h
     include/views/scalar_view.h
+    include/views/scalar_view_old.h
     include/views/stream_view.h
     include/views/vector_base_view.h
     include/views/vector_view.h
     include/views/view.h
     include/views/view_support.h
+    include/views/thread_linearizer.h
     include/views/linearizer.h
+    include/views/linearizer_old.h
     include/views/linearizer_base.h
     include/views/orderizer.h
     include/views/vectorizer.h
@@ -538,12 +547,15 @@ project(hermes2d)
     include/views/mesh_view.h
     include/views/order_view.h
     include/views/scalar_view.h
+    include/views/scalar_view_old.h
     include/views/stream_view.h
     include/views/vector_base_view.h
     include/views/vector_view.h
     include/views/view.h
     include/views/view_support.h
+    include/views/thread_linearizer.h
     include/views/linearizer.h
+    include/views/linearizer_old.h
     include/views/linearizer_base.h
     include/views/orderizer.h
     include/views/vectorizer.h

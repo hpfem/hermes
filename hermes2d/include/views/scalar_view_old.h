@@ -15,11 +15,10 @@
 
 // $Id: view.h 1086 2008-10-21 09:05:44Z jakub $
 
-#ifndef __H2D_SCALAR_VIEW_NEW_H
-#define __H2D_SCALAR_VIEW_NEW_H
+#ifndef __H2D_SCALAR_VIEW_H
+#define __H2D_SCALAR_VIEW_H
 
 #include "view.h"
-#include "linearizer.h"
 
 namespace Hermes
 {
@@ -32,20 +31,20 @@ namespace Hermes
 
       /// \brief Visualizes a Scalar PDE solution.
       ///
-      /// ScalarViewNew is a visualization window for all Scalar-valued PDE solutions.
+      /// ScalarView is a visualization window for all Scalar-valued PDE solutions.
       ///
-      class HERMES_API ScalarViewNew : public View
+      class HERMES_API ScalarView : public View
       {
       public:
 
         void init();
 #ifndef _MSC_VER
-        ScalarViewNew(const char* title = "ScalarViewNew", WinGeom* wg = nullptr);
+        ScalarView(const char* title = "ScalarView", WinGeom* wg = nullptr);
 #else
-        ScalarViewNew(WinGeom* wg = nullptr);
+        ScalarView(WinGeom* wg = nullptr);
 #endif
-        ScalarViewNew(char* title, WinGeom* wg = nullptr);
-        ~ScalarViewNew();
+        ScalarView(char* title, WinGeom* wg = nullptr);
+        ~ScalarView();
 
         void show(MeshFunctionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
           MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0);
@@ -63,11 +62,37 @@ namespace Hermes
         virtual void reset_view(bool force_reset); ///< Resets 2d and 3d view.
 
         /// Returns the internal linearizer for the purpose of parameter settings.
-        LinearizerNew* get_linearizer();
+        Linearizer* get_linearizer();
 
       protected:
-        /// LinearizerNew class responsible for obtaining linearized data.
-        LinearizerNew* lin;
+        /// Linearizer class responsible for obtaining linearized data.
+        Linearizer* lin;
+
+        /// Information about a vertex node.
+        struct VertexNodeInfo
+        {
+          float x, y; ///< location of the node in coordinates of the mesh
+          int id; ///< id of the node
+          bool selected; ///< true if the node is selected
+          VertexNodeInfo() {}; ///< An empty default constructor to limit time
+          VertexNodeInfo(int id, float x, float y) : x(x), y(y), id(id), selected(false) {};
+        };
+        Hermes::vector<VertexNodeInfo> vertex_nodes; ///< Vertex nodes. Sorted accordin to the X-axis.
+        VertexNodeInfo* pointed_vertex_node; ///< A vertex node that is under the mouse cursor. nullptr if none.
+
+        bool allow_node_selection; ///> True if node selection is allowed
+        unsigned int pointed_node_widget; ///> A GL display-list denoting a pointed vertex node. The geometry assumes the size of a pixel is 1x1.
+        unsigned int selected_node_widget; ///> A GL display-list denoting a selected mesh node. The geometry assumes the size of a pixel is 1x1.
+
+        const int node_pixel_radius; ///< A radius of node selection, in pixels.
+        const int node_widget_vert_cnt; ///< A number of vertices for a mesh node widget.
+
+        void init_vertex_nodes(MeshSharedPtr mesh); ///< Creates a copy of vertex nodes for purpose of displaying and selection.
+        VertexNodeInfo* find_nearest_node_in_range(float x, float y, float radius); ///< Finds nearest node in range.
+        static bool compare_vertex_nodes_x(const VertexNodeInfo& a, const VertexNodeInfo& b); ///< Returns true, if a's X-axis coordinate is lower than b's one. Used to sort mesh nodes for searching purposes.
+        void draw_vertex_nodes(); ///< Draws vertex nodes.
+        void draw_single_vertex_node(const VertexNodeInfo& node); ///< Draws a single vertex node.
+        void create_nodes_widgets(); ///< Creates vertex nodes widgets if not created already.
 
       protected:
         struct ElementInfo ///< element info structure
@@ -104,6 +129,9 @@ namespace Hermes
 
         bool lin_updated; ///< true, if lin now contains new values
 
+        unsigned int gl_coord_buffer; ///< Vertex coordinate buffer. (x, y, t)
+        unsigned int gl_index_buffer; ///< Index data buffer.
+        unsigned int gl_edge_inx_buffer; ///< A buffer for edge indices. The side of the buffer is H2DV_GL_MAX_EDGE_BUFFER pairs of indids.
         int max_gl_verts; ///< A maximum allocated number of vertices
         int max_gl_tris; ///< A maximum allocated number of triangles
         int gl_tri_cnt; ///< A number of OpenGL triangles
@@ -114,15 +142,19 @@ namespace Hermes
         void draw_values_2d(); ///< draws values
         void draw_edges_2d(); ///< draws edges
 
+        void draw_normals_3d(); ////< Draws normals of the 3d mesh. Used for debugging purposses only.
+
       protected: //edges
         bool show_edges; ///< true to show edges of mesh
         bool show_aabb;  ///< true to show the bounding box
         float edges_color[3]; ///< color of edges
 
-        typedef void (*DrawSingleEdgeCallback)(int inx_vert_a, int inx_vert_b, ScalarViewNew* viewer, void* param); ///< A callback function that draws edge using specified vertex indices. Param is user supplied parameter.
+        typedef void (*DrawSingleEdgeCallback)(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param); ///< A callback function that draws edge using specified vertex indices. Param is user supplied parameter.
 
         void calculate_mesh_aabb(double* x_min, double* x_max, double* y_min, double* y_max); ///< Calculates AABB from edges.
 
+        static void draw_gl_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param); ///< Draws edge specified by edge indices using GL. Functions assumes that data are locked.
+        void draw_edges(DrawSingleEdgeCallback draw_single_edge, void* param, bool boundary_only); ///< Draws edges of elements and boundary of mesh. Functions assumes that data are locked.
         void draw_aabb(); ///< Draws the axes-aligned bounding box of the model. Assumes a model/view matrix to be the current matrix on the OpenGL stack.
 
       protected:
@@ -144,6 +176,8 @@ namespace Hermes
         ///< Information about the range of vertex values.
         double value_irange, value_range_avg;
 
+        double3* normals;
+
         /// This function calculates the distance that the model (3D plot of the solution over the whole solution domain) must be
         /// translated along the z-axis of the eye coordinate system, so that it fills the actual viewport without being clipped.
         /// The only case when the model will be clipped is when the user defines his own vertical range limits - unfortunately,
@@ -159,14 +193,12 @@ namespace Hermes
         double calculate_ztrans_to_fit_view(); ///< Calculates the z-coordinate (in eye coordinates) of the closest viewpoint from which we can still see the whole model. Assumes a model/view matrix to be the current matrix on the OpenGL stack.
         virtual void update_layout(); ///< Updates layout, i.e., centers 2d and 3d mesh.
 
-        void draw_tri_contours(triangle_t&);
+        void draw_tri_contours(double3* vert, int3* tri);
+        void calculate_normals(double3* verts, int num_verts, int3* tris, int num_tris); ///< Initializes normals.
         void init_lighting();
         void update_mesh_info(); ///< Updates mesh info. Assumes that data lock is locked.
 
         virtual void on_display();
-        void on_display_2d();
-        void on_display_3d();
-
         virtual void on_key_down(unsigned char key, int x, int y);
         virtual void on_mouse_move(int x, int y);
         virtual void on_right_mouse_down(int x, int y); ///< Handles selecting/deselecting of nodes.
@@ -176,12 +208,12 @@ namespace Hermes
         virtual void on_close();
       };
 #else
-class HERMES_API ScalarViewNew : public View
+class HERMES_API ScalarView : public View
       {
       public:
 				void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        ScalarViewNew(const char* title = "ScalarViewNew", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        ScalarViewNew(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        ScalarView(const char* title = "ScalarView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        ScalarView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void show(MeshFunctionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
           MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }

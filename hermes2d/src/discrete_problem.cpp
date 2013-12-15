@@ -314,6 +314,10 @@ namespace Hermes
 
             for(int state_i = start; state_i < end; state_i++)
             {
+              // Exception already thrown -> exit the loop.
+              if (!this->exceptionMessageCaughtInParallelBlock.empty())
+                break;
+
               Traverse::State* current_state = states[state_i];
 
               this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);

@@ -292,14 +292,19 @@ namespace Hermes
 
     Traverse::State** Traverse::get_states(Hermes::vector<MeshSharedPtr> meshes, int& states_count)
     {
+      return Traverse::get_states(&meshes[0], meshes.size(), states_count);
+    }
+
+    Traverse::State** Traverse::get_states(MeshSharedPtr* meshes, int meshes_count, int& states_count)
+    {
       // This will be returned.
       int count = 0, predictedCount = 0;
-      for(int i = 0; i < meshes.size(); i++)
+      this->num = meshes_count;
+      for (int i = 0; i < meshes_count; i++)
         if(meshes[i]->get_num_active_elements() > predictedCount)
           predictedCount = meshes[i]->get_num_active_elements();
       State** states = (State**)malloc(sizeof(State*)*predictedCount);
 
-      this->num = meshes.size();
       this->begin(num);
 
       int id = 0;

@@ -194,8 +194,8 @@ namespace Hermes
         virtual void get_palette_color(double x, float* gl_color); ///< Fills gl_color with palette color. Assumes that gl_color points to a vector of three components (RGB).
 
       protected: //internal functions
-        inline double transform_x(double x) { return (x * scale + trans_x) + center_x; }
-        inline double transform_y(double y) { return center_y - (y * scale + trans_y); }
+#define transform_x(x) { ((x * scale + trans_x) + center_x) }
+#define transform_y(y) { (center_y - (y * scale + trans_y)) }
         inline double untransform_x(double x) { return (x - center_x - trans_x) / scale; }
         inline double untransform_y(double y) { return (center_y - y - trans_y) / scale; }
 

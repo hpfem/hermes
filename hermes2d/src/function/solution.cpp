@@ -173,7 +173,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::copy(const MeshFunction<Scalar>* sln)
+    void Solution<Scalar>::copy(const MeshFunction<Scalar>* sln, bool deep_copy)
     {
       const Solution<Scalar>* solution = dynamic_cast<const Solution<Scalar>*>(sln);
       if(solution == nullptr)
@@ -194,19 +194,27 @@ namespace Hermes
       {
         num_coeffs = solution->num_coeffs;
         num_elems = solution->num_elems;
-
-        mono_coeffs = new Scalar[num_coeffs];
-        memcpy(mono_coeffs, solution->mono_coeffs, sizeof(Scalar) * num_coeffs);
-
-        for (int l = 0; l < this->num_components; l++)
+        if (deep_copy)
         {
-          elem_coeffs[l] = new int[num_elems];
-          memcpy(elem_coeffs[l], solution->elem_coeffs[l], sizeof(int) * num_elems);
+          mono_coeffs = new Scalar[num_coeffs];
+          memcpy(mono_coeffs, solution->mono_coeffs, sizeof(Scalar)* num_coeffs);
+
+          for (int l = 0; l < this->num_components; l++)
+          {
+            elem_coeffs[l] = new int[num_elems];
+            memcpy(elem_coeffs[l], solution->elem_coeffs[l], sizeof(int)* num_elems);
+          }
+
+          elem_orders = new int[num_elems];
+          memcpy(elem_orders, solution->elem_orders, sizeof(int)* num_elems);
         }
-
-        elem_orders = new int[num_elems];
-        memcpy(elem_orders, solution->elem_orders, sizeof(int) * num_elems);
-
+        else
+        {
+          this->mono_coeffs = solution->mono_coeffs;
+          for (int l = 0; l < this->num_components; l++)
+            this->elem_coeffs[l] = solution->elem_coeffs[l];
+          this->elem_orders = solution->elem_orders;
+        }
         init_dxdy_buffer();
       }
       else // Const, exact handled differently.
@@ -1032,9 +1040,6 @@ namespace Hermes
         node = this->new_node(newmask, np);
 
         // transform integration points by the current matrix
-        Scalar* x = new Scalar[np];
-        Scalar* y = new Scalar[np];
-        Scalar* tx = new Scalar[np];
         double3* pt = quad->get_points(order, this->element->get_mode());
         for (i = 0; i < np; i++)
         {
@@ -1075,10 +1080,6 @@ namespace Hermes
             }
           }
         }
-
-        delete [] x;
-        delete [] y;
-        delete [] tx;
 
         // transform gradient or vector solution, if required
         if(transform)

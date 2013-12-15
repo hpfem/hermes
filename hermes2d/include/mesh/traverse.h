@@ -116,6 +116,8 @@ namespace Hermes
       /// \param[out] num Number of states.
       /// \return The states.
       State** get_states(Hermes::vector<MeshSharedPtr> meshes, int& num);
+      State** get_states(MeshSharedPtr* meshes, int meshes_count, int& states_count);
+
       /// Returns all states on the passed meshes.
       /// Overload for mesh functions.
       template<typename Scalar>

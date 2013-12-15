@@ -145,7 +145,8 @@ namespace Hermes
       node->size = size;
       memset(node->values, 0, sizeof(node->values));
       Scalar* data = node->data;
-      for (int j = 0; j < num_components; j++) {
+      for (int j = 0; j < num_components; j++)
+      {
         for (int i = 0; i < 6; i++)
           if (mask & idx2mask[i][j])
           {

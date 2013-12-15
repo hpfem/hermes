@@ -1,0 +1,766 @@
+// This file is part of Hermes2D.
+//
+// Hermes2D is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// Hermes2D is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
+
+#include "thread_linearizer.h"
+#include "refmap.h"
+#include "traverse.h"
+#include "exact_solution.h"
+#include "api2d.h"
+
+//#define DEBUG_LINEARIZER
+
+namespace Hermes
+{
+  namespace Hermes2D
+  {
+    namespace Views
+    {
+      ThreadLinearizerNew::ThreadLinearizerNew(LinearizerNew* linearizer) : user_specified_max(false), user_specified_min(false)
+      {
+        vertex_size = 0;
+        triangle_size = 0;
+        edges_size = 0;
+
+        // OpenGL part.
+        triangles = nullptr;
+        edges = nullptr;
+        edge_markers = nullptr;
+
+        // FileExport part.
+        triangle_indices = nullptr;
+
+        // Common part.
+        vertices = nullptr;
+        triangle_markers = nullptr;
+        hash_table = nullptr;
+        info = nullptr;
+      }
+
+      void ThreadLinearizerNew::init_linearizer_data(LinearizerNew* linearizer)
+      {
+        this->item = linearizer->item;
+        this->epsilon = linearizer->epsilon;
+        this->component = linearizer->component;
+        this->value_type = linearizer->value_type;
+        this->curvature_epsilon = linearizer->curvature_epsilon;
+        this->user_xdisp = linearizer->user_xdisp;
+        this->user_ydisp = linearizer->user_ydisp;
+        this->dmult = linearizer->dmult;
+        this->linearizerOutputType = linearizer->linearizerOutputType;
+      }
+
+      void ThreadLinearizerNew::free()
+      {
+        // OpenGL part.
+        if (this->triangles)
+        {
+          ::free(triangles);
+          triangles = nullptr;
+        }
+        if (this->edges)
+        {
+          ::free(edges);
+          edges = nullptr;
+        }
+        if (this->edge_markers)
+        {
+          ::free(edge_markers);
+          edge_markers = nullptr;
+        }
+
+        // FileExport part.
+        if (this->triangle_indices)
+        {
+          ::free(triangle_indices);
+          triangle_indices = nullptr;
+        }
+
+        // Common part.
+        if (this->vertices)
+        {
+          ::free(vertices);
+          vertices = nullptr;
+        }
+        if (this->triangle_markers)
+        {
+          ::free(triangle_markers);
+          triangle_markers = nullptr;
+        }
+        if (this->hash_table)
+        {
+          ::free(hash_table);
+          hash_table = nullptr;
+        }
+        if (this->info)
+        {
+          ::free(info);
+          info = nullptr;
+        }
+      }
+
+      ThreadLinearizerNew::~ThreadLinearizerNew()
+      {
+        free();
+      }
+
+      void ThreadLinearizerNew::init_processing(MeshFunctionSharedPtr<double> sln, LinearizerNew* linearizer)
+      {
+        this->init_linearizer_data(linearizer);
+
+        // Functions.
+        Solution<double>* solution = dynamic_cast<Solution<double>*>(sln.get());
+        if (solution && solution->get_type() == HERMES_SLN)
+        {
+          fns[0] = new Solution<double>();
+          fns[0]->copy(sln);
+        }
+        else
+          fns[0] = sln->clone();
+        fns[0]->set_refmap(new RefMap);
+        fns[0]->set_quad_2d(&g_quad_lin);
+        if (user_xdisp)
+        {
+          Solution<double>* xdisp_solution = dynamic_cast<Solution<double>*>(linearizer->xdisp.get());
+          if (xdisp_solution && xdisp_solution->get_type() == HERMES_SLN)
+          {
+            fns[1] = new Solution<double>();
+            fns[1]->copy(linearizer->xdisp);
+          }
+          else
+            fns[1] = linearizer->xdisp->clone();
+
+          fns[1]->set_quad_2d(&g_quad_lin);
+        }
+        if (user_ydisp)
+        {
+          Solution<double>* ydisp_solution = dynamic_cast<Solution<double>*>(linearizer->ydisp.get());
+          if (ydisp_solution && ydisp_solution->get_type() == HERMES_SLN)
+          {
+            fns[user_xdisp ? 1 : 2] = new Solution<double>();
+            fns[user_xdisp ? 1 : 2]->copy(linearizer->ydisp);
+          }
+          else
+            fns[user_xdisp ? 1 : 2] = linearizer->ydisp->clone();
+
+          fns[user_xdisp ? 1 : 2]->set_quad_2d(&g_quad_lin);
+        }
+
+        // Init storage data & counts.
+
+        this->reallocate(sln->get_mesh());
+      }
+
+      static const int default_allocation_multiplier_vertices = 10;
+      static const int default_allocation_multiplier_triangles = 15;
+      static const int default_allocation_multiplier_edges = 10;
+
+      static const int default_allocation_minsize_vertices = 10000;
+      static const int default_allocation_minsize_triangles = 15000;
+      static const int default_allocation_minsize_edges = 10000;
+
+      void ThreadLinearizerNew::reallocate(MeshSharedPtr mesh)
+      {
+        int number_of_elements = mesh->get_num_elements();
+
+        this->vertex_size = std::max(default_allocation_multiplier_vertices * number_of_elements, std::max(this->vertex_size, default_allocation_minsize_vertices));
+        this->triangle_size = std::max(default_allocation_multiplier_triangles * number_of_elements, std::max(this->triangle_size, default_allocation_minsize_triangles));
+        this->edges_size = std::max(default_allocation_multiplier_edges * number_of_elements, std::max(this->edges_size, default_allocation_minsize_edges));
+
+        // Set counts.
+        this->vertex_count = 0;
+        this->triangle_count = 0;
+        this->edges_count = 0;
+
+        if (this->linearizerOutputType == OpenGL)
+        {
+          this->triangles = realloc_with_check<ThreadLinearizerNew, triangle_t>(this->triangles, this->triangle_size, this);
+          this->edges = realloc_with_check<ThreadLinearizerNew, edge_t>(this->edges, this->edges_size, this);
+          this->edge_markers = realloc_with_check<ThreadLinearizerNew, int>(this->edge_markers, this->edges_size, this);
+        }
+        else
+          this->triangle_indices = realloc_with_check<ThreadLinearizerNew, triangle_indices_t>(this->triangle_indices, this->triangle_size, this);
+
+        this->vertices = realloc_with_check<ThreadLinearizerNew, vertex_t>(this->vertices, this->vertex_size, this);
+        this->triangle_markers = realloc_with_check<ThreadLinearizerNew, int>(this->triangle_markers, this->triangle_size, this);
+
+        hash_table = (int*)malloc(sizeof(int)* this->vertex_size);
+        info = (internal_vertex_info_t*)malloc(sizeof(internal_vertex_info_t)* this->vertex_size);
+
+        if (!this->hash_table || !this->info)
+        {
+          this->free();
+          throw Exceptions::Exception("LinearizerNew out of memory!");
+        }
+
+        memset(this->hash_table, 0xff, sizeof(int)* this->vertex_size);
+      }
+
+      void ThreadLinearizerNew::deinit_processing()
+      {
+        for (unsigned int j = 0; j < (1 + (this->user_xdisp ? 1 : 0) + (this->user_ydisp ? 1 : 0)); j++)
+          delete fns[j];
+      }
+
+      void ThreadLinearizerNew::set_min_value(double min)
+      {
+        this->user_specified_min = true;
+        this->user_specified_min_value = min;
+      }
+
+      void ThreadLinearizerNew::set_max_value(double max)
+      {
+        this->user_specified_max = true;
+        this->user_specified_max_value = max;
+      }
+
+      void ThreadLinearizerNew::process_state(Traverse::State* current_state)
+      {
+        this->rep_element = current_state->e[0];
+        this->curved = this->rep_element->is_curved();
+
+        fns[0]->set_active_element(this->rep_element);
+        fns[0]->set_transform(current_state->sub_idx[0]);
+        fns[0]->set_quad_order(0, this->item);
+        double* val = fns[0]->get_values(component, value_type);
+        if (val == nullptr)
+          throw Hermes::Exceptions::Exception("Item not defined in the solution in LinearizerNew::process_solution.");
+
+        double *dx = nullptr;
+        double *dy = nullptr;
+
+        if (user_xdisp)
+        {
+          fns[1]->set_active_element(current_state->e[1]);
+          fns[1]->set_transform(current_state->sub_idx[1]);
+          fns[1]->set_quad_order(0, H2D_FN_VAL);
+          dx = fns[1]->get_fn_values();
+        }
+
+        if (user_ydisp)
+        {
+          fns[user_xdisp ? 1 : 2]->set_active_element(current_state->e[user_xdisp ? 1 : 2]);
+          fns[user_xdisp ? 1 : 2]->set_transform(current_state->sub_idx[user_xdisp ? 1 : 2]);
+          fns[user_xdisp ? 1 : 2]->set_quad_order(0, H2D_FN_VAL);
+          dy = fns[user_xdisp ? 1 : 2]->get_fn_values();
+        }
+
+        int iv[H2D_MAX_NUMBER_VERTICES];
+        for (unsigned int i = 0; i < this->rep_element->get_nvert(); i++)
+        {
+          double f = val[i];
+          double x_disp = fns[0]->get_refmap()->get_phys_x(0)[i];
+          double y_disp = fns[0]->get_refmap()->get_phys_y(0)[i];
+          if (user_xdisp)
+            x_disp += dmult * dx[i];
+          if (user_ydisp)
+            y_disp += dmult * dy[i];
+
+          iv[i] = this->get_vertex(-this->rep_element->vn[i]->id, -this->rep_element->vn[i]->id, x_disp, y_disp, f);
+        }
+
+        // recur to sub-elements
+        if (current_state->e[0]->is_triangle())
+          process_triangle(iv[0], iv[1], iv[2], 0, nullptr, nullptr, nullptr, nullptr);
+        else
+          process_quad(iv[0], iv[1], iv[2], iv[3], 0, nullptr, nullptr, nullptr, nullptr);
+
+#ifndef DEBUG_LINEARIZER
+        if (this->linearizerOutputType == OpenGL)
+        {
+          for (unsigned int i = 0; i < this->rep_element->get_nvert(); i++)
+            process_edge(iv[i], iv[this->rep_element->next_vert(i)], this->rep_element->en[i]->marker);
+        }
+#endif
+      }
+
+      void ThreadLinearizerNew::process_triangle(int iv0, int iv1, int iv2, int level, double* values, double* physical_x, double* physical_y, int* vertex_indices)
+      {
+        fns[0]->set_quad_order(1, item);
+        values = fns[0]->get_values(component, value_type);
+        physical_x, *physical_y;
+        vertex_indices = tri_indices[0];
+
+        if (curved)
+        {
+          // obtain physical element coordinates
+          RefMap* refmap = fns[0]->get_refmap();
+          physical_x = refmap->get_phys_x(1);
+          physical_y = refmap->get_phys_y(1);
+
+          if (user_xdisp)
+          {
+            fns[1]->set_quad_order(1, H2D_FN_VAL);
+            double* dx = fns[1]->get_fn_values();
+            for (int i = 0; i < lin_np_tri[1]; i++)
+              physical_x[i] += dmult*dx[i];
+          }
+          if (user_ydisp)
+          {
+            fns[this->user_xdisp ? 1 : 2]->set_quad_order(1, H2D_FN_VAL);
+            double* dy = fns[this->user_xdisp ? 1 : 2]->get_fn_values();
+            for (int i = 0; i < lin_np_tri[1]; i++)
+              physical_y[i] += dmult*dy[i];
+          }
+        }
+
+        // obtain linearized values and coordinates at the midpoints
+        for (int i = 0; i < 3; i++)
+        {
+          midval[i][0] = (this->vertices[iv0][i] + this->vertices[iv1][i])*0.5;
+          midval[i][1] = (this->vertices[iv1][i] + this->vertices[iv2][i])*0.5;
+          midval[i][2] = (this->vertices[iv2][i] + this->vertices[iv0][i])*0.5;
+        };
+
+        // determine whether or not to split the element
+        int split;
+        if (this->epsilon >= 1.0)
+        {
+          // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
+          split = (level < epsilon);
+        }
+        else
+        {
+          this->split_decision(split, iv0, iv1, iv2, 0, rep_element->get_mode(), values, physical_x, physical_y, vertex_indices);
+        }
+
+        // split the triangle if the error is too large, otherwise produce a linear triangle
+        if (split)
+        {
+          if (curved)
+          {
+            for (int i = 0; i < 3; i++)
+            {
+              midval[0][i] = physical_x[vertex_indices[i]];
+              midval[1][i] = physical_y[vertex_indices[i]];
+            }
+          }
+
+          // obtain mid-edge vertices
+          int mid0 = get_vertex(iv0, iv1, midval[0][0], midval[1][0], values[vertex_indices[0]]);
+          int mid1 = get_vertex(iv1, iv2, midval[0][1], midval[1][1], values[vertex_indices[1]]);
+          int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], values[vertex_indices[2]]);
+
+          // recur to sub-elements
+          this->push_transforms(0);
+          process_triangle(iv0, mid0, mid2, level + 1, values, physical_x, physical_y, tri_indices[1]);
+          this->pop_transforms();
+
+          this->push_transforms(1);
+          process_triangle(mid0, iv1, mid1, level + 1, values, physical_x, physical_y, tri_indices[2]);
+          this->pop_transforms();
+
+          this->push_transforms(2);
+          process_triangle(mid2, mid1, iv2, level + 1, values, physical_x, physical_y, tri_indices[3]);
+          this->pop_transforms();
+
+          this->push_transforms(3);
+          process_triangle(mid1, mid2, mid0, level + 1, values, physical_x, physical_y, tri_indices[4]);
+          this->pop_transforms();
+        }
+        else
+          add_triangle(iv0, iv1, iv2, this->rep_element->marker);
+
+#ifdef DEBUG_LINEARIZER
+        if (this->linearizerOutputType == OpenGL)
+        {
+          process_edge(iv0, iv1, this->rep_element->en[0]->marker);
+          process_edge(iv1, iv2, this->rep_element->en[1]->marker);
+          process_edge(iv2, iv0, this->rep_element->en[2]->marker);
+        }
+#endif
+      }
+
+      void ThreadLinearizerNew::process_quad(int iv0, int iv1, int iv2, int iv3, int level, double* values, double* physical_x, double* physical_y, int* vertex_indices)
+      {
+        bool flip = this->quad_flip(iv0, iv1, iv2, iv3);
+        fns[0]->set_quad_order(1, item);
+        values = fns[0]->get_values(component, value_type);
+        physical_x, *physical_y;
+        vertex_indices = quad_indices[0];
+
+        if (curved)
+        {
+          // obtain physical element coordinates
+          RefMap* refmap = fns[0]->get_refmap();
+          physical_x = refmap->get_phys_x(1);
+          physical_y = refmap->get_phys_y(1);
+
+          if (user_xdisp)
+          {
+            fns[1]->set_quad_order(1, H2D_FN_VAL);
+            double* dx = fns[1]->get_fn_values();
+            for (int i = 0; i < lin_np_tri[1]; i++)
+              physical_x[i] += dmult*dx[i];
+          }
+          if (user_ydisp)
+          {
+            fns[this->user_xdisp ? 1 : 2]->set_quad_order(1, H2D_FN_VAL);
+            double* dy = fns[this->user_xdisp ? 1 : 2]->get_fn_values();
+            for (int i = 0; i < lin_np_tri[1]; i++)
+              physical_y[i] += dmult*dy[i];
+          }
+        }
+
+        // obtain linearized values and coordinates at the midpoints
+        for (int i = 0; i < 3; i++)
+        {
+          midval[i][0] = (this->vertices[iv0][i] + this->vertices[iv1][i]) * 0.5;
+          midval[i][1] = (this->vertices[iv1][i] + this->vertices[iv2][i]) * 0.5;
+          midval[i][2] = (this->vertices[iv2][i] + this->vertices[iv3][i]) * 0.5;
+          midval[i][3] = (this->vertices[iv3][i] + this->vertices[iv0][i]) * 0.5;
+          midval[i][4] = (midval[i][0] + midval[i][2])  * 0.5;
+        };
+
+        // the value of the middle point is not the average of the four vertex values, since quad == 2 triangles
+        midval[2][4] = flip ? (this->vertices[iv0][2] + this->vertices[iv2][2]) * 0.5 : (this->vertices[iv1][2] + this->vertices[iv3][2]) * 0.5;
+
+        // determine whether or not to split the element
+        int split;
+        if (this->epsilon >= 1.0)
+        {
+          // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
+          split = (level < epsilon ? 3 : 0);
+        }
+        else
+        {
+          this->split_decision(split, iv0, iv1, iv2, 0, rep_element->get_mode(), values, physical_x, physical_y, vertex_indices);
+        }
+
+        // split the quad if the error is too large, otherwise produce two linear triangles
+        if (split)
+        {
+          if (curved)
+          {
+            for (int i = 0; i < 5; i++)
+            {
+              midval[0][i] = physical_x[vertex_indices[i]];
+              midval[1][i] = physical_y[vertex_indices[i]];
+            }
+          }
+
+          // obtain mid-edge and mid-element vertices
+          int mid0, mid1, mid2, mid3, mid4;
+          if (split != 1) mid0 = get_vertex(iv0, iv1, midval[0][0], midval[1][0], values[vertex_indices[0]]);
+          if (split != 2) mid1 = get_vertex(iv1, iv2, midval[0][1], midval[1][1], values[vertex_indices[1]]);
+          if (split != 1) mid2 = get_vertex(iv2, iv3, midval[0][2], midval[1][2], values[vertex_indices[2]]);
+          if (split != 2) mid3 = get_vertex(iv3, iv0, midval[0][3], midval[1][3], values[vertex_indices[3]]);
+          if (split == 3) mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], values[vertex_indices[4]]);
+
+          // recur to sub-elements
+          if (split == 3)
+          {
+            this->push_transforms(0);
+            process_quad(iv0, mid0, mid4, mid3, level + 1, values, physical_x, physical_y, quad_indices[1]);
+            this->pop_transforms();
+
+            this->push_transforms(1);
+            process_quad(mid0, iv1, mid1, mid4, level + 1, values, physical_x, physical_y, quad_indices[2]);
+            this->pop_transforms();
+
+            this->push_transforms(2);
+            process_quad(mid4, mid1, iv2, mid2, level + 1, values, physical_x, physical_y, quad_indices[3]);
+            this->pop_transforms();
+
+            this->push_transforms(3);
+            process_quad(mid3, mid4, mid2, iv3, level + 1, values, physical_x, physical_y, quad_indices[4]);
+            this->pop_transforms();
+          }
+          else
+          if (split == 1) // h-split
+          {
+            this->push_transforms(4);
+            process_quad(iv0, iv1, mid1, mid3, level + 1, values, physical_x, physical_y, quad_indices[5]);
+            this->pop_transforms();
+
+            this->push_transforms(5);
+            process_quad(mid3, mid1, iv2, iv3, level + 1, values, physical_x, physical_y, quad_indices[6]);
+            this->pop_transforms();
+          }
+          else // v-split
+          {
+            this->push_transforms(6);
+            process_quad(iv0, mid0, mid2, iv3, level + 1, values, physical_x, physical_y, quad_indices[7]);
+            this->pop_transforms();
+
+            this->push_transforms(7);
+            process_quad(mid0, iv1, iv2, mid2, level + 1, values, physical_x, physical_y, quad_indices[8]);
+            this->pop_transforms();
+          }
+        }
+        else
+        {
+          // output two linear triangles,
+          if (!flip)
+          {
+            add_triangle(iv3, iv0, iv1, rep_element->marker);
+            add_triangle(iv1, iv2, iv3, rep_element->marker);
+          }
+          else
+          {
+            add_triangle(iv0, iv1, iv2, rep_element->marker);
+            add_triangle(iv2, iv3, iv0, rep_element->marker);
+          }
+#ifdef DEBUG_LINEARIZER
+          if (this->linearizerOutputType == OpenGL)
+          {
+            process_edge(iv0, iv1, this->rep_element->en[0]->marker);
+            process_edge(iv1, iv2, this->rep_element->en[1]->marker);
+            process_edge(iv2, iv3, this->rep_element->en[2]->marker);
+            process_edge(iv3, iv0, this->rep_element->en[3]->marker);
+          }
+#endif
+        }
+      }
+
+      void ThreadLinearizerNew::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double* values, double* physical_x, double* physical_y, int* vertex_indices) const
+      {
+        bool done = false;
+        double max_value = std::max(std::max(this->vertices[iv0][2], this->vertices[iv1][2]), this->vertices[iv2][2]);
+        if (mode == HERMES_MODE_QUAD)
+          max_value = std::max(max_value, this->vertices[iv3][2]);
+        double min_value = std::min(std::min(this->vertices[iv0][2], this->vertices[iv1][2]), this->vertices[iv2][2]);
+        if (mode == HERMES_MODE_QUAD)
+          min_value = std::min(max_value, this->vertices[iv3][2]);
+        if (this->user_specified_max && (max_value > this->user_specified_max_value))
+        {
+          // do not split if the whole triangle is above the specified maximum value
+          split = 0;
+          done = true;
+        }
+
+        if (!done && this->user_specified_min && (min_value < this->user_specified_min_value))
+        {
+          // do not split if the whole triangle is below the specified minimum value
+          split = 0;
+          done = true;
+        }
+
+        // Core of the decision - calculate the approximate error of linearizing the normalized solution
+        if (!done)
+        {
+          double error = fabs(values[vertex_indices[0]] - midval[2][0])
+            + fabs(values[vertex_indices[1]] - midval[2][1])
+            + fabs(values[vertex_indices[2]] - midval[2][2]);
+          if (mode == HERMES_MODE_QUAD)
+            error += fabs(values[vertex_indices[3]] - midval[2][3]);
+          double max_abs_value = std::max(fabs(max_value), fabs(min_value));
+          if (max_abs_value < HermesEpsilon)
+            split = 0;
+          else
+            split = !finite(error) || ((error / max_abs_value) > this->epsilon);
+        }
+
+        // do the same for the curvature
+        if (!done && curved)
+        {
+          for (int i = 0; i < 3 + mode; i++)
+          {
+            double error = sqr(physical_x[vertex_indices[i]] - midval[0][i])
+              + sqr(physical_y[vertex_indices[i]] - midval[1][i]);
+            double diameter = sqr(fns[0]->get_active_element()->get_diameter());
+
+            split = ((error / diameter) > this->curvature_epsilon);
+          }
+        }
+      }
+
+      bool ThreadLinearizerNew::quad_flip(int iv0, int iv1, int iv2, int iv3) const
+      {
+        int a = (this->vertices[iv0][2] > this->vertices[iv1][2]) ? iv0 : iv1;
+        int b = (this->vertices[iv2][2] > this->vertices[iv3][2]) ? iv2 : iv3;
+        a = (this->vertices[a][2] > this->vertices[b][2]) ? a : b;
+        return (a == iv1 || a == iv3);
+      }
+
+      void ThreadLinearizerNew::push_transforms(int transform)
+      {
+        fns[0]->push_transform(transform);
+
+        if (user_xdisp)
+        {
+          if (fns[1] != fns[0])
+            fns[1]->push_transform(transform);
+        }
+        if (user_ydisp)
+        {
+          if (fns[this->user_xdisp ? 1 : 2] != fns[0])
+          {
+            if (user_xdisp && fns[2] == fns[1])
+              return;
+            fns[this->user_xdisp ? 1 : 2]->push_transform(transform);
+          }
+        }
+      }
+
+      void ThreadLinearizerNew::pop_transforms()
+      {
+        fns[0]->pop_transform();
+
+        if (user_xdisp)
+        {
+          if (fns[1] != fns[0])
+            fns[1]->pop_transform();
+        }
+        if (user_ydisp)
+        {
+          if (fns[this->user_xdisp ? 1 : 2] != fns[0])
+          {
+            if (user_xdisp && fns[2] == fns[1])
+              return;
+            fns[this->user_xdisp ? 1 : 2]->pop_transform();
+          }
+        }
+      }
+
+      int ThreadLinearizerNew::peek_vertex(int p1, int p2)
+      {
+        // search for a vertex with parents p1, p2
+        int index = hash(p1 > p2 ? p2 : p1, p1 > p2 ? p1 : p2);
+        int i = hash_table[index];
+        while (i >= 0)
+        {
+          if (info[i][0] == p1 && info[i][1] == p2)
+            return i;
+          i = info[i][2];
+        }
+        return -1;
+      }
+
+      int ThreadLinearizerNew::hash(int p1, int p2)
+      {
+        /// \todo Find out if this is good.
+        return (984120265 * p1 + 125965121 * p2) & (vertex_size - 1);
+      }
+
+      void ThreadLinearizerNew::process_edge(int iv1, int iv2, int marker)
+      {
+        int mid = peek_vertex(iv1, iv2);
+        if (mid != -1)
+        {
+          process_edge(iv1, mid, marker);
+          process_edge(mid, iv2, marker);
+        }
+        else
+          add_edge(iv1, iv2, marker);
+      }
+
+      int ThreadLinearizerNew::get_vertex(int p1, int p2, double x, double y, double value)
+      {
+        // search for an existing vertex
+        if (p1 > p2)
+          std::swap(p1, p2);
+        int index = this->hash(p1, p2);
+        int i = 0;
+        if (index < this->vertex_count)
+        {
+          i = this->hash_table[index];
+          while (i >= 0 && i < this->vertex_count)
+          {
+            if ((this->info[i][0] == p1 && this->info[i][1] == p2)
+              && (fabs(value - this->vertices[i][2]) < Hermes::HermesSqrtEpsilon)
+              && (fabs(x - this->vertices[i][0]) < Hermes::HermesSqrtEpsilon)
+              && (fabs(y - this->vertices[i][1]) < Hermes::HermesSqrtEpsilon))
+              return i;
+            // note that we won't return a vertex with a different value than the required one;
+            // this takes care for discontinuities in the solution, where more vertices
+            // with different values will be created
+            i = info[i][2];
+          }
+        }
+
+        // if not found, create a new one
+        i = add_vertex();
+
+        this->vertices[i][0] = x;
+        this->vertices[i][1] = y;
+        this->vertices[i][2] = value;
+        this->info[i][0] = p1;
+        this->info[i][1] = p2;
+        this->info[i][2] = hash_table[index];
+        this->hash_table[index] = i;
+        return i;
+      }
+
+      int ThreadLinearizerNew::add_vertex()
+      {
+        if (this->vertex_count >= this->vertex_size)
+        {
+          int new_vertex_size = std::ceil(this->vertex_size * 1.5);
+
+          this->vertices = realloc_with_check<ThreadLinearizerNew, vertex_t>(this->vertices, new_vertex_size, this);
+          this->info = realloc_with_check<ThreadLinearizerNew, internal_vertex_info_t>(this->info, new_vertex_size, this);
+          this->hash_table = realloc_with_check<ThreadLinearizerNew, int>(this->hash_table, new_vertex_size, this);
+          
+          memset(this->hash_table + this->vertex_size, 0xff, sizeof(int)* (new_vertex_size - this->vertex_size));
+
+          this->vertex_size = new_vertex_size;
+        }
+        return this->vertex_count++;
+      }
+
+      void ThreadLinearizerNew::add_edge(int iv1, int iv2, int marker)
+      {
+        if (edges_count >= edges_size)
+        {
+          this->edges_size = std::ceil(this->edges_size * 1.5);
+          this->edges = realloc_with_check<ThreadLinearizerNew, edge_t>(this->edges, this->edges_size, this);
+          this->edge_markers = realloc_with_check<ThreadLinearizerNew, int>(this->edge_markers, this->edges_size, this);
+        }
+
+        this->edges[edges_count][0][0] = this->vertices[iv1][0];
+        this->edges[edges_count][0][1] = this->vertices[iv1][1];
+        this->edges[edges_count][0][2] = this->vertices[iv1][2];
+        this->edges[edges_count][1][0] = this->vertices[iv2][0];
+        this->edges[edges_count][1][1] = this->vertices[iv2][1];
+        this->edges[edges_count][1][2] = this->vertices[iv2][2];
+        this->edge_markers[edges_count++] = marker;
+      }
+
+      void ThreadLinearizerNew::add_triangle(int iv0, int iv1, int iv2, int marker)
+      {
+        if (triangle_count >= triangle_size)
+        {
+          this->triangle_size = std::ceil(this->triangle_size * 1.5);
+          if (this->linearizerOutputType == OpenGL)
+            this->triangles = realloc_with_check<ThreadLinearizerNew, triangle_t>(this->triangles, this->triangle_size, this);
+          else
+            this->triangle_indices = realloc_with_check<ThreadLinearizerNew, triangle_indices_t>(this->triangle_indices, this->triangle_size, this);
+          this->triangle_markers = realloc_with_check<ThreadLinearizerNew, int>(this->triangle_markers, this->triangle_size, this);
+        }
+
+        if (this->linearizerOutputType == OpenGL)
+        {
+          this->triangles[triangle_count][0][0] = this->vertices[iv0][0];
+          this->triangles[triangle_count][0][1] = this->vertices[iv0][1];
+          this->triangles[triangle_count][0][2] = this->vertices[iv0][2];
+          this->triangles[triangle_count][1][0] = this->vertices[iv1][0];
+          this->triangles[triangle_count][1][1] = this->vertices[iv1][1];
+          this->triangles[triangle_count][1][2] = this->vertices[iv1][2];
+          this->triangles[triangle_count][2][0] = this->vertices[iv2][0];
+          this->triangles[triangle_count][2][1] = this->vertices[iv2][1];
+          this->triangles[triangle_count][2][2] = this->vertices[iv2][2];
+        }
+        else
+        {
+          this->triangle_indices[triangle_count][0] = iv0;
+          this->triangle_indices[triangle_count][1] = iv1;
+          this->triangle_indices[triangle_count][2] = iv2;
+        }
+
+        this->triangle_markers[triangle_count++] = marker;
+      }
+    }
+  }
+}

@@ -29,10 +29,43 @@ namespace Hermes
   {
     namespace Views
     {
+      /// Linearizer can store data in an effective way depending on the purpose.
+      /// - whether it is an OpenGL (Hermes views, Agros2d) or a file export (VTK, Tecplot)
+      enum LinearizerOutputType
+      {
+        OpenGL,
+        // VTK, Tecplot, etc.
+        FileExport
+      };
+
+      /// Standard "quality" defining constants.
       const double HERMES_EPS_LOW = 0.007;
       const double HERMES_EPS_NORMAL = 0.0004;
       const double HERMES_EPS_HIGH = 0.0001;
       const double HERMES_EPS_VERYHIGH = 0.000002;
+
+      /// Typedefs used throughout the Linearizer functionality.
+      struct ScalarLinearizerDataDimensions
+      {
+        static const int dimension = 1;
+
+        typedef double3x3 triangle_t;
+        typedef double2x3 edge_t;
+        typedef double3 vertex_t;
+        typedef int3 triangle_indices_t;
+        typedef int3 internal_vertex_info_t;
+      };
+
+      struct VectorLinearizerDataDimensions
+      {
+        static const int dimension = 2;
+
+        typedef double3x4 triangle_t;
+        typedef double2x4 edge_t;
+        typedef double4 vertex_t;
+        typedef int3 triangle_indices_t;
+        typedef int3 internal_vertex_info_t;
+      };
 
       //// linearization "quadrature" ////////////////////////////////////////////////////////////////////
 

@@ -17,6 +17,7 @@
 #define __H2D_VECTORIZER_H
 
 #include "linearizer.h"
+#include "linearizer_old.h"
 
 namespace Hermes
 {

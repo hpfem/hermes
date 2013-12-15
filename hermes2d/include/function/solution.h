@@ -88,7 +88,7 @@ namespace Hermes
       virtual bool isOkay() const;
       virtual inline std::string getClassName() const { return "Solution"; }
 
-      virtual void copy(const MeshFunction<Scalar>* sln);
+      virtual void copy(const MeshFunction<Scalar>* sln, bool deep_copy = true);
 
       /// Sets solution equal to Dirichlet lift only, solution vector = 0.
       void set_dirichlet_lift(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss = nullptr);
@@ -266,6 +266,8 @@ namespace Hermes
       /// Special internal method for loading exact solutions.
       void load_exact_solution(int number_of_components, SpaceSharedPtr<Scalar> space, bool complexness,
         double x_real, double y_real, double x_complex, double y_complex);
+
+      Scalar x[H2D_MAX_INTEGRATION_POINTS_COUNT], y[H2D_MAX_INTEGRATION_POINTS_COUNT], tx[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
       friend class RefMap;
       template<typename T> friend class KellyTypeAdapt;

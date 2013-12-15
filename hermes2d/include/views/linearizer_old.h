@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __H2D_LINEARIZER_NEW_H
-#define __H2D_LINEARIZER_NEW_H
+#ifndef __H2D_LINEARIZER_H
+#define __H2D_LINEARIZER_H
 
-#include "linearizer_base.h"
+#include "../global.h"
 #include "../function/solution.h"
-#include "thread_linearizer.h"
+#include "linearizer_base.h"
 
 namespace Hermes
 {
@@ -26,24 +26,20 @@ namespace Hermes
   {
     namespace Views
     {
-      class HERMES_API ThreadLinearizerNew;
-      
-      /// LinearizerNew is a utility class which converts a higher-order FEM solution defined on
+      /// Linearizer is a utility class which converts a higher-order FEM solution defined on
       /// a curvilinear, irregular mesh to a linear FEM solution defined on a straight-edged,
       /// regular mesh. This is done by adaptive refinement of the higher-order mesh and its
       /// subsequent regularization. The linearized mesh can then be easily displayed or
       /// exported to standard formats. The class correctly handles discontinuities in the
       /// solution (e.g., gradients or in Hcurl) by inserting double vertices where necessary.
-      /// LinearizerNew also serves as a container for the resulting linearized mesh.
-      template<typename LinearizerDataDimensions>
-      class HERMES_API LinearizerNew :
-        public Hermes::Mixins::TimeMeasurable,
-        public Hermes::Mixins::Loggable,
-        public Hermes::Hermes2D::Mixins::Parallel
+      /// Linearizer also serves as a container for the resulting linearized mesh.
+      ///
+      class HERMES_API Linearizer : public LinearizerBase
       {
       public:
-        LinearizerNew(LinearizerOutputType linearizerOutputType, bool auto_max = true);
-        ~LinearizerNew();
+
+        Linearizer(bool auto_max = true);
+        ~Linearizer();
 
         /// Main method - processes the solution and stores the data obtained by the process.
         /// \param[in] sln the solution
@@ -52,7 +48,9 @@ namespace Hermes
         void process_solution(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
 
         /// Save a MeshFunction (Solution, Filter) in VTK format.
-        void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D = true, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
+        void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name,
+          bool mode_3D = true, int item = H2D_FN_VAL_0,
+          double eps = HERMES_EPS_NORMAL);
 
         void save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name,
           int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
@@ -60,24 +58,20 @@ namespace Hermes
         /// Set the displacement, i.e. set two functions that will deform the domain for visualization, in the x-direction, and the y-direction.
         void set_displacement(MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult = 1.0);
 
-        /// Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
-        void calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const;
+        void calc_vertices_aabb(double* min_x, double* max_x,
+          double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
 
-        Quad2D *old_quad, *old_quad_x, *old_quad_y;
+        /// Get the number of vertices of this instance.
+        int get_num_vertices();
 
-        LinearizerOutputType linearizerOutputType;
+        /// Get the vertices of this instance.
+        double3* get_vertices();
 
-        /// Assembly data.
-        ThreadLinearizerNew** threadLinearizerNew;
+        /// Get the contours (the isolines) of this instance.
+        int3* get_contour_triangles();
 
-        void init(MeshFunctionSharedPtr<double> sln, int item_, double eps);
-
-        Hermes::vector<MeshSharedPtr > meshes;
-
-        void set_max_absolute_value(double max_abs);
-
-        double get_min_value() const;
-        double get_max_value() const;
+        /// Get the number of contours (the isolines) of this instance.
+        int get_num_contour_triangles();
 
         /// Set the threshold for how fine the output for curved elements.
         /// \param[in] curvature_epsilon The 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
@@ -86,77 +80,52 @@ namespace Hermes
         void set_curvature_epsilon(double curvature_epsilon);
 
         /// Get the 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
-        double get_curvature_epsilon() const;
+        double get_curvature_epsilon();
 
         /// Free the instance.
         void free();
 
-        /// Iterator class.
-        template<typename T>
-        class Iterator
-        {
-        public:
-          Iterator(const LinearizerNew* linearizer);
-          Iterator& operator++();
-          T& get() const;
-          /// For triangle- and edge- markers.
-          int& get_marker() const;
-          bool end;
-        private:
-          int current_thread_index;
-          int current_thread;
-          int current_thread_size;
-          Hermes::vector<int> thread_sizes;
-          const LinearizerNew* linearizer;
-          friend class LinearizerNew;
-        };
-
-        /// Begin - iterators.
-        Iterator<LinearizerDataDimensions::vertex_t> vertices_begin() const;
-        Iterator<LinearizerDataDimensions::triangle_t> triangles_begin() const;
-        Iterator<LinearizerDataDimensions::edge_t> edges_begin() const;
-        Iterator<LinearizerDataDimensions::triangle_indices_t> triangle_indices_begin() const;
-
-        /// Counts
-        int get_vertex_count() const;
-        int get_triangle_count() const;
-        int get_edge_count() const;
-        int get_triangle_index_count() const;
-
-        void lock_data() const;
-#ifndef NOGLUT
-        mutable pthread_mutex_t data_mutex;
-#endif
-        void unlock_data() const;
-
       protected:
-        /// Standard and curvature epsilon.
-        double epsilon, curvature_epsilon;
+        /// Reallocation at the beginning of process_*.
+        /// Specific for Linearizer
+        void reallocate_specific(int number_of_elements);
+
+        void deallocate();
+
+        /// The 'curvature' epsilon.
+        double curvature_epsilon;
 
         /// Information if user-supplied displacement functions have been provided.
         bool user_xdisp, user_ydisp;
 
         /// Displacement functions, default to ZeroFunctions, may be supplied by set_displacement();
         MeshFunctionSharedPtr<double> xdisp, ydisp;
-
-        /// Displacement multiplicator - used e.g. in Elasticity to multiply the displacement to make it more noticeable.
         double dmult;
+
+        int3* tris_contours;      ///< triangles: vertex index triplets
+        MeshFunction<double>*** fns;
+        int triangle_contours_count;
+        double3* verts;  ///< vertices: (x, y, value) triplets
 
         /// What kind of information do we want to get out of the solution.
         int item, component, value_type;
 
-        // Finish - contour triangles calculation etc.
-        void finish(MeshFunctionSharedPtr<double> sln);
+        int add_vertex();
+        int get_vertex(int p1, int p2, double x, double y, double value);
 
-        Traverse::State** states;
+        void process_triangle(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int level,
+          double* val, double* phx, double* phy, int* indices, bool curved);
 
-        int num_states;
-
-        double min_val, max_val;
+        void process_quad(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int iv3, int level,
+          double* val, double* phx, double* phy, int* indices, bool curved);
 
         void find_min_max();
 
-        friend class ThreadLinearizerNew;
+        /// Internal.
+        void push_transforms(MeshFunction<double>** fns, int transform);
+
+        /// Internal.
+        void pop_transforms(MeshFunction<double>** fns);
       };
     }
   }

@@ -17,7 +17,7 @@
 #define __H2D_BASE_VIEW_H
 
 #include "../global.h"
-#include "scalar_view.h"
+#include "scalar_view_old.h"
 #include "../space/space.h"
 #include "../shapeset/precalc.h"
 

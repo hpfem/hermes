@@ -63,7 +63,7 @@ namespace Hermes
         this->mesh = mesh;
 
         if(lin == nullptr)
-          lin = new Linearizer();
+          lin = new LinearizerNew(OpenGL);
 
         lin->process_solution(sln);
         lin->lock_data();
@@ -120,46 +120,34 @@ namespace Hermes
 
         // transform all vertices
         lin->lock_data();
-        int i, nv = lin->get_num_vertices();
-        double3* vert = lin->get_vertices();
-        double2* tvert = new double2[nv];
-        for (i = 0; i < nv; i++)
-        {
-          tvert[i][0] = transform_x(vert[i][0]);
-          tvert[i][1] = transform_y(vert[i][1]);
-        }
-
+        int i;
+        
         // draw all triangles
-        int3* tris = lin->get_triangles();
         glColor3f(0.9f, 0.9f, 0.9f);
         glBegin(GL_TRIANGLES);
-        for (i = 0; i < lin->get_num_triangles(); i++)
+        for (LinearizerNew::Iterator<triangle_t> it = lin->triangles_begin(); !it.end; it++)
         {
-          glVertex2d(tvert[tris[i][0]][0], tvert[tris[i][0]][1]);
-          glVertex2d(tvert[tris[i][1]][0], tvert[tris[i][1]][1]);
-          glVertex2d(tvert[tris[i][2]][0], tvert[tris[i][2]][1]);
+          triangle_t& triangle = it.get();
+          glVertex2d(transform_x(triangle[0][0]), transform_y(triangle[0][1]));
+          glVertex2d(transform_x(triangle[1][0]), transform_y(triangle[1][1]));
+          glVertex2d(transform_x(triangle[2][0]), transform_y(triangle[2][1]));
         }
         glEnd();
 
         // draw all edges
         glLineStipple(5, 0x5555);
-				int2* edges = lin->get_edges();
-        int* edge_markers = lin->get_edge_markers();
-        for (i = 0; i < lin->get_num_edges(); i++)
+        for (LinearizerNew::Iterator<edge_t> it = lin->edges_begin(); !it.end; it++)
         {
-          int mrk = b_markers ? edge_markers[i] : 0;
+          edge_t& edge = it.get();
 
-          if(!edge_markers[i] &&
-            ((tvert[edges[i][0]][1] == tvert[edges[i][1]][1] &&
-            tvert[edges[i][0]][0] < tvert[edges[i][1]][0]) ||
-            tvert[edges[i][0]][1] < tvert[edges[i][1]][1])) continue;
+          int mrk = b_markers ? it.get_marker() : 0;
 
           float* color = get_marker_color(mrk);
           glColor3f(color[0], color[1], color[2]);
           glLineWidth(mrk ? 3.0f : 1.0f);
           glBegin(GL_LINES);
-          glVertex2d(tvert[edges[i][0]][0], tvert[edges[i][0]][1]);
-          glVertex2d(tvert[edges[i][1]][0], tvert[edges[i][1]][1]);
+          glVertex2d(transform_x(edge[0][0]), transform_y(edge[0][1]));
+          glVertex2d(transform_x(edge[1][0]), transform_y(edge[1][1]));
           glEnd();
 
           if(mrk)
@@ -167,8 +155,8 @@ namespace Hermes
             glEnable(GL_LINE_STIPPLE);
             glColor3f(0.4f, 0.4f, 0.4f);
             glBegin(GL_LINES);
-            glVertex2d(tvert[edges[i][0]][0], tvert[edges[i][0]][1]);
-            glVertex2d(tvert[edges[i][1]][0], tvert[edges[i][1]][1]);
+            glVertex2d(transform_x(edge[0][0]), transform_y(edge[0][1]));
+            glVertex2d(transform_x(edge[1][0]), transform_y(edge[1][1]));
             glEnd();
             glDisable(GL_LINE_STIPPLE);
           }
@@ -198,7 +186,6 @@ namespace Hermes
           }
         }
 
-        delete [] tvert;
         lin->unlock_data();
       }
 

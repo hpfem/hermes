@@ -143,6 +143,20 @@ namespace Hermes
       HERMES_NONSYM = 0,
       HERMES_SYM = 1
     };
+
+    template<typename Caller, typename ArrayItem>
+    ArrayItem* realloc_with_check(ArrayItem* original_array, int new_size, Caller* const caller)
+    {
+      ArrayItem* new_array = (ArrayItem*)realloc(original_array, new_size * sizeof(ArrayItem));
+      if (new_array)
+        return original_array = new_array;
+      else
+      {
+        caller->free();
+        throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", new_size * sizeof(ArrayItem));
+        return nullptr;
+      }
+    }
   }
 }
 #endif
