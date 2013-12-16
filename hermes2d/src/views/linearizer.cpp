@@ -415,7 +415,6 @@ namespace Hermes
         LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(slns, items, filename, quantity_name, mode_3D, eps);
       }
 
-
       template<typename LinearizerDataDimensions>
       void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension],
         int item[LinearizerDataDimensions::dimension], const char* filename, const char *quantity_name[LinearizerDataDimensions::dimension],
@@ -501,7 +500,7 @@ namespace Hermes
 
       template<typename LinearizerDataDimensions>
       template<typename T>
-      typename LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<T>& LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<T>::operator++()
+      void LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<T>::operator++()
       {
         if (this->current_thread_index >= this->current_thread_size - 1)
         {
@@ -515,10 +514,7 @@ namespace Hermes
         }
         else
           this->current_thread_index++;
-
-        return *this;
       }
-
 
       template<>
       template<>
@@ -568,9 +564,6 @@ namespace Hermes
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_markers[this->current_thread_index];
       }
-
-
-
 
       template<>
       template<>

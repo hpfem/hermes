@@ -102,7 +102,7 @@ namespace Hermes
         {
         public:
           Iterator(const LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
-          Iterator& operator++();
+          void operator++();
           T& get() const;
           /// For triangle- and edge- markers.
           int& get_marker() const;
