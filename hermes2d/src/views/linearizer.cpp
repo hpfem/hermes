@@ -615,7 +615,11 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
+#ifdef _MSC_VER
       typename LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<typename LinearizerDataDimensions::vertex_t> LinearizerMultidimensional<LinearizerDataDimensions>::vertices_begin() const
+#else
+      typename LinearizerMultidimensional<LinearizerDataDimensions>::template Iterator<typename LinearizerDataDimensions::vertex_t> LinearizerMultidimensional<LinearizerDataDimensions>::vertices_begin() const
+#endif
       {
         LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<typename LinearizerDataDimensions::vertex_t> iterator(this);
         for (int i = 0; i < this->num_threads_used; i++)
@@ -624,7 +628,11 @@ namespace Hermes
         return iterator;
       }
       template<typename LinearizerDataDimensions>
+#ifdef _MSC_VER
       typename LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<typename LinearizerDataDimensions::triangle_t> LinearizerMultidimensional<LinearizerDataDimensions>::triangles_begin() const
+#else
+      typename LinearizerMultidimensional<LinearizerDataDimensions>::template Iterator<typename LinearizerDataDimensions::triangle_t> LinearizerMultidimensional<LinearizerDataDimensions>::triangles_begin() const
+#endif
       {
         LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<typename LinearizerDataDimensions::triangle_t> iterator(this);
         for (int i = 0; i < this->num_threads_used; i++)
@@ -633,7 +641,11 @@ namespace Hermes
         return iterator;
       }
       template<typename LinearizerDataDimensions>
+#ifdef _MSC_VER
       typename LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<typename LinearizerDataDimensions::edge_t> LinearizerMultidimensional<LinearizerDataDimensions>::edges_begin() const
+#else
+      typename LinearizerMultidimensional<LinearizerDataDimensions>::template Iterator<typename LinearizerDataDimensions::edge_t> LinearizerMultidimensional<LinearizerDataDimensions>::edges_begin() const
+#endif
       {
         LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<typename LinearizerDataDimensions::edge_t> iterator(this);
         for (int i = 0; i < this->num_threads_used; i++)
@@ -642,7 +654,11 @@ namespace Hermes
         return iterator;
       }
       template<typename LinearizerDataDimensions>
+#ifdef _MSC_VER
       typename LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<triangle_indices_t> LinearizerMultidimensional<LinearizerDataDimensions>::triangle_indices_begin() const
+#else
+      typename LinearizerMultidimensional<LinearizerDataDimensions>::template Iterator<triangle_indices_t> LinearizerMultidimensional<LinearizerDataDimensions>::triangle_indices_begin() const
+#endif
       {
         LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<triangle_indices_t> iterator(this);
         for (int i = 0; i < this->num_threads_used; i++)
