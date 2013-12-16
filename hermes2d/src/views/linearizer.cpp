@@ -518,7 +518,7 @@ namespace Hermes
 
       template<>
       template<>
-      typename ScalarLinearizerDataDimensions::triangle_t& LinearizerMultidimensional<typename ScalarLinearizerDataDimensions>::Iterator<typename ScalarLinearizerDataDimensions::triangle_t>::get() const
+      typename ScalarLinearizerDataDimensions::triangle_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<typename ScalarLinearizerDataDimensions::triangle_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangles[this->current_thread_index];
       }
@@ -553,7 +553,7 @@ namespace Hermes
 
       template<>
       template<>
-      typename triangle_indices_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<triangle_indices_t>::get() const
+      triangle_indices_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<triangle_indices_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_indices[this->current_thread_index];
       }
@@ -567,7 +567,7 @@ namespace Hermes
 
       template<>
       template<>
-      typename VectorLinearizerDataDimensions::triangle_t& LinearizerMultidimensional<typename VectorLinearizerDataDimensions>::Iterator<typename VectorLinearizerDataDimensions::triangle_t>::get() const
+      typename VectorLinearizerDataDimensions::triangle_t& LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<typename VectorLinearizerDataDimensions::triangle_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangles[this->current_thread_index];
       }
@@ -602,7 +602,7 @@ namespace Hermes
 
       template<>
       template<>
-      typename triangle_indices_t& LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<triangle_indices_t>::get() const
+      triangle_indices_t& LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<triangle_indices_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_indices[this->current_thread_index];
       }
