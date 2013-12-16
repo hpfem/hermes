@@ -406,7 +406,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item, bool mode_3D, double eps)
+      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D, int item, double eps)
       {
         MeshFunctionSharedPtr<double> slns[LinearizerDataDimensions::dimension];
         int items[LinearizerDataDimensions::dimension];

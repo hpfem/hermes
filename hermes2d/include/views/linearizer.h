@@ -54,7 +54,7 @@ namespace Hermes
         void process_solution(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item[LinearizerDataDimensions::dimension], double eps = HERMES_EPS_NORMAL);
 
         /// Save a MeshFunction (Solution, Filter) in VTK format.
-        void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item = H2D_FN_VAL_0, bool mode_3D = true, double eps = HERMES_EPS_NORMAL);
+        void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D = true, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
         void save_solution_vtk(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item[LinearizerDataDimensions::dimension], const char* filename, const char* quantity_name, bool mode_3D = true, double eps = HERMES_EPS_NORMAL);
         void save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
         void save_solution_tecplot(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item[LinearizerDataDimensions::dimension], const char* filename, const char* quantity_name[LinearizerDataDimensions::dimension], double eps = HERMES_EPS_NORMAL);

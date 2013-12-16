@@ -569,6 +569,7 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double* values[LinearizerDataDimensions::dimension], double* physical_x, double* physical_y, int* vertex_indices) const
       {
+        split = 0;
         bool done = false;
         double max_value = std::max(std::max(this->vertices[iv0][2], this->vertices[iv1][2]), this->vertices[iv2][2]);
         if (mode == HERMES_MODE_QUAD)
@@ -602,9 +603,7 @@ namespace Hermes
             if (mode == HERMES_MODE_QUAD)
               error += fabs(values[k][vertex_indices[3]] - midval[2 + k][3]);
             double max_abs_value = std::max(fabs(max_value), fabs(min_value));
-            if (max_abs_value < HermesEpsilon)
-              split = 0;
-            else
+            if (max_abs_value > HermesEpsilon)
               split = !finite(error) || ((error / max_abs_value) > this->epsilon);
           }
         }
