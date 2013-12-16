@@ -704,7 +704,14 @@ namespace Hermes
       }
 
       template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions>;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<ScalarLinearizerDataDimensions::triangle_t>;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<ScalarLinearizerDataDimensions::vertex_t>;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<ScalarLinearizerDataDimensions::edge_t>;
+
       template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions>;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<VectorLinearizerDataDimensions::triangle_t>;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<VectorLinearizerDataDimensions::vertex_t>;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<VectorLinearizerDataDimensions::edge_t>;
     }
   }
 }
