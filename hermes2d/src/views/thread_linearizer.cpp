@@ -197,14 +197,14 @@ namespace Hermes
 
         if (this->linearizerOutputType == OpenGL)
         {
-          this->triangles = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::triangle_t>(this->triangles, this->triangle_size, this);
-          this->edges = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::edge_t>(this->edges, this->edges_size, this);
+          this->triangles = realloc_with_check<ThreadLinearizerMultidimensional, typename LinearizerDataDimensions::triangle_t>(this->triangles, this->triangle_size, this);
+          this->edges = realloc_with_check<ThreadLinearizerMultidimensional, typename LinearizerDataDimensions::edge_t>(this->edges, this->edges_size, this);
           this->edge_markers = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->edge_markers, this->edges_size, this);
         }
         else
           this->triangle_indices = realloc_with_check<ThreadLinearizerMultidimensional, triangle_indices_t>(this->triangle_indices, this->triangle_size, this);
 
-        this->vertices = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::vertex_t>(this->vertices, this->vertex_size, this);
+        this->vertices = realloc_with_check<ThreadLinearizerMultidimensional, typename LinearizerDataDimensions::vertex_t>(this->vertices, this->vertex_size, this);
         this->triangle_markers = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->triangle_markers, this->triangle_size, this);
 
         hash_table = (int*)malloc(sizeof(int)* this->vertex_size);
@@ -754,7 +754,7 @@ namespace Hermes
         {
           int new_vertex_size = std::ceil(this->vertex_size * 1.5);
 
-          this->vertices = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::vertex_t>(this->vertices, new_vertex_size, this);
+          this->vertices = realloc_with_check<ThreadLinearizerMultidimensional, typename LinearizerDataDimensions::vertex_t>(this->vertices, new_vertex_size, this);
           this->info = realloc_with_check<ThreadLinearizerMultidimensional, internal_vertex_info_t>(this->info, new_vertex_size, this);
           this->hash_table = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->hash_table, new_vertex_size, this);
 
@@ -771,7 +771,7 @@ namespace Hermes
         if (edges_count >= edges_size)
         {
           this->edges_size = std::ceil(this->edges_size * 1.5);
-          this->edges = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::edge_t>(this->edges, this->edges_size, this);
+          this->edges = realloc_with_check<ThreadLinearizerMultidimensional, typename LinearizerDataDimensions::edge_t>(this->edges, this->edges_size, this);
           this->edge_markers = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->edge_markers, this->edges_size, this);
         }
 
@@ -791,7 +791,7 @@ namespace Hermes
         {
           this->triangle_size = std::ceil(this->triangle_size * 1.5);
           if (this->linearizerOutputType == OpenGL)
-            this->triangles = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::triangle_t>(this->triangles, this->triangle_size, this);
+            this->triangles = realloc_with_check<ThreadLinearizerMultidimensional, typename LinearizerDataDimensions::triangle_t>(this->triangles, this->triangle_size, this);
           else
             this->triangle_indices = realloc_with_check<ThreadLinearizerMultidimensional, triangle_indices_t>(this->triangle_indices, this->triangle_size, this);
           this->triangle_markers = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->triangle_markers, this->triangle_size, this);

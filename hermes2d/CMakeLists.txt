@@ -291,6 +291,7 @@ project(hermes2d)
     src/views/view_support.cpp
     src/views/linearizer.cpp
     src/views/linearizer_base.cpp
+    src/views/thread_linearizer.cpp
     src/views/orderizer.cpp
   )
   
