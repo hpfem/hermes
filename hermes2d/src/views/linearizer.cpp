@@ -271,7 +271,7 @@ namespace Hermes
         // find min & max vertex values
         this->min_val = 1e100;
         this->max_val = -1e100;
-        for (Iterator<LinearizerDataDimensions::vertex_t> it = this->vertices_begin(); !it.end; it++)
+        for (Iterator<LinearizerDataDimensions::vertex_t> it = this->vertices_begin(); !it.end; ++it)
         {
           LinearizerDataDimensions::vertex_t& vertex = it.get();
 
@@ -351,7 +351,7 @@ namespace Hermes
 
         // Output vertices.
         fprintf(f, "POINTS %d %s\n", this->get_vertex_count(), "float");
-        for (Iterator<LinearizerDataDimensions::vertex_t> it = this->vertices_begin(); !it.end; it++)
+        for (Iterator<LinearizerDataDimensions::vertex_t> it = this->vertices_begin(); !it.end; ++it)
         {
           LinearizerDataDimensions::vertex_t& vertex = it.get();
           if (mode_3D == true)
@@ -369,7 +369,7 @@ namespace Hermes
         // Output elements.
         fprintf(f, "\n");
         fprintf(f, "CELLS %d %d\n", this->get_triangle_count(), 4 * this->get_triangle_count());
-        for (Iterator<triangle_indices_t> it = this->triangle_indices_begin(); !it.end; it++)
+        for (Iterator<triangle_indices_t> it = this->triangle_indices_begin(); !it.end; ++it)
         {
           triangle_indices_t& triangle_indices = it.get();
           fprintf(f, "3 %d %d %d\n", triangle_indices[0], triangle_indices[1], triangle_indices[2]);
@@ -388,7 +388,7 @@ namespace Hermes
         fprintf(f, "POINT_DATA %d\n", this->get_vertex_count());
         fprintf(f, "SCALARS %s %s %d\n", quantity_name, "float", LinearizerDataDimensions::dimension);
         fprintf(f, "LOOKUP_TABLE %s\n", "default");
-        for (Iterator<LinearizerDataDimensions::vertex_t> it = this->vertices_begin(); !it.end; it++)
+        for (Iterator<LinearizerDataDimensions::vertex_t> it = this->vertices_begin(); !it.end; ++it)
         {
           LinearizerDataDimensions::vertex_t& vertex = it.get();
 
@@ -438,7 +438,7 @@ namespace Hermes
         fprintf(f, "ZONE N = %d, E = %d, DATAPACKING = POINT, ZONETYPE = FETRIANGLE\n", this->get_vertex_count(), this->get_triangle_count());
 
         // Output vertices.
-        for (Iterator<LinearizerDataDimensions::vertex_t> it = this->vertices_begin(); !it.end; it++)
+        for (Iterator<LinearizerDataDimensions::vertex_t> it = this->vertices_begin(); !it.end; ++it)
         {
           LinearizerDataDimensions::vertex_t& vertex = it.get();
 
@@ -450,7 +450,7 @@ namespace Hermes
         }
 
         // Output elements.
-        for (Iterator<triangle_indices_t> it = this->triangle_indices_begin(); !it.end; it++)
+        for (Iterator<triangle_indices_t> it = this->triangle_indices_begin(); !it.end; ++it)
         {
           triangle_indices_t& triangle_indices = it.get();
           fprintf(f, "%d %d %d\n", triangle_indices[0] + 1, triangle_indices[1] + 1, triangle_indices[2] + 1);
@@ -477,7 +477,7 @@ namespace Hermes
         *max_x = *max_y = std::numeric_limits<double>::min();
         *min_x = *min_y = std::numeric_limits<double>::max();
 
-        for (Iterator<LinearizerDataDimensions::vertex_t> it = this->vertices_begin(); !it.end; it++)
+        for (Iterator<LinearizerDataDimensions::vertex_t> it = this->vertices_begin(); !it.end; ++it)
         {
           LinearizerDataDimensions::vertex_t& vertex = it.get();
           if (vertex[0] > *max_x)

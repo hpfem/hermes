@@ -195,7 +195,7 @@ namespace Hermes
         // Calculate average value.
         value_range_avg = 0.0;
 
-        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::vertex_t> it = lin->vertices_begin(); !it.end; it++)
+        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::vertex_t> it = lin->vertices_begin(); !it.end; ++it)
         {
           ScalarLinearizerDataDimensions::vertex_t& vertex = it.get();
           if (vertex[2] > range_max)
@@ -429,7 +429,7 @@ namespace Hermes
         //render triangles
         glBegin(GL_TRIANGLES);
 
-        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = lin->triangles_begin(); !it.end; it++)
+        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = lin->triangles_begin(); !it.end; ++it)
         {
           ScalarLinearizerDataDimensions::triangle_t& triangle = it.get();
           glTexCoord1d((triangle[0][2] - range_min) * value_irange);
@@ -451,7 +451,7 @@ namespace Hermes
       {
         glColor3fv(edges_color);
         glBegin(GL_LINES);
-        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; it++)
+        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; ++it)
         {
           ScalarLinearizerDataDimensions::edge_t& edge = it.get();
           int& edge_marker = it.get_marker();
@@ -539,7 +539,7 @@ namespace Hermes
           glColor3fv(cont_color);
           //glLineWidth(2.0f);
           glBegin(GL_LINES);
-          for (Linearizer::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = this->lin->triangles_begin(); !it.end; it++)
+          for (Linearizer::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = this->lin->triangles_begin(); !it.end; ++it)
           {
             ScalarLinearizerDataDimensions::triangle_t& triangle = it.get();
             draw_tri_contours(triangle);
@@ -596,7 +596,7 @@ namespace Hermes
         glBegin(GL_TRIANGLES);
         double normal_xzscale = 1.0 / xzscale, normal_yscale = 1.0 / yscale;
 
-        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = this->lin->triangles_begin(); !it.end; it++)
+        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = this->lin->triangles_begin(); !it.end; ++it)
         {
           ScalarLinearizerDataDimensions::triangle_t& triangle = it.get();
 
@@ -618,7 +618,7 @@ namespace Hermes
         {
           glColor3fv(edges_color);
           glBegin(GL_LINES);
-          for (Linearizer::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; it++)
+          for (Linearizer::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; ++it)
           {
             ScalarLinearizerDataDimensions::edge_t& edge = it.get();
 
@@ -635,7 +635,7 @@ namespace Hermes
         {
           glColor3fv(edges_color);
           glBegin(GL_LINES);
-          for (Linearizer::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; it++)
+          for (Linearizer::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; ++it)
           {
             // Outline of the domain boundary at the bottom of the plot or at the bottom user-defined limit
             double y_coord = (range_min - yctr) * yscale;

@@ -193,7 +193,7 @@ namespace Hermes
       {
         glColor3f(0.5, 0.5, 0.5);
         glBegin(GL_LINES);
-        for (Vectorizer::Iterator<VectorLinearizerDataDimensions::edge_t> it = vec->edges_begin(); !it.end; it++)
+        for (Vectorizer::Iterator<VectorLinearizerDataDimensions::edge_t> it = vec->edges_begin(); !it.end; ++it)
         {
           VectorLinearizerDataDimensions::edge_t& edge = it.get();
           int& edge_marker = it.get_marker();
@@ -238,7 +238,7 @@ namespace Hermes
         glBegin(GL_TRIANGLES);
         glColor3f(0.95f, 0.95f, 0.95f);
 
-        for (Vectorizer::Iterator<VectorLinearizerDataDimensions::triangle_t> it = vec->triangles_begin(); !it.end; it++)
+        for (Vectorizer::Iterator<VectorLinearizerDataDimensions::triangle_t> it = vec->triangles_begin(); !it.end; ++it)
         {
           VectorLinearizerDataDimensions::triangle_t& triangle = it.get();
 
@@ -276,7 +276,7 @@ namespace Hermes
         // draw arrows
         if (mode != 2)
         {
-          for (Vectorizer::Iterator<VectorLinearizerDataDimensions::triangle_t> it = vec->triangles_begin(); !it.end; it++)
+          for (Vectorizer::Iterator<VectorLinearizerDataDimensions::triangle_t> it = vec->triangles_begin(); !it.end; ++it)
           {
             VectorLinearizerDataDimensions::triangle_t& triangle = it.get();
             {
