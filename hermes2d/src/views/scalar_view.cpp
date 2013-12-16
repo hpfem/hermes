@@ -66,12 +66,6 @@ namespace Hermes
 
       ScalarView::ScalarView(const char* title, WinGeom* wg) :
         View(title, wg),
-        vertex_nodes(0),
-        pointed_vertex_node(nullptr),
-        pointed_node_widget(0),
-        selected_node_widget(0),
-        node_pixel_radius(10),
-        node_widget_vert_cnt(32),
         element_id_widget(0),
         show_element_info(false)
       {
