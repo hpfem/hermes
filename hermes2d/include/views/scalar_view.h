@@ -63,11 +63,11 @@ namespace Hermes
         virtual void reset_view(bool force_reset); ///< Resets 2d and 3d view.
 
         /// Returns the internal linearizer for the purpose of parameter settings.
-        LinearizerNew* get_linearizer();
+        LinearizerScalar* get_linearizer();
 
       protected:
         /// LinearizerNew class responsible for obtaining linearized data.
-        LinearizerNew* lin;
+        LinearizerScalar* lin;
 
       protected:
         struct ElementInfo ///< element info structure
@@ -159,7 +159,7 @@ namespace Hermes
         double calculate_ztrans_to_fit_view(); ///< Calculates the z-coordinate (in eye coordinates) of the closest viewpoint from which we can still see the whole model. Assumes a model/view matrix to be the current matrix on the OpenGL stack.
         virtual void update_layout(); ///< Updates layout, i.e., centers 2d and 3d mesh.
 
-        void draw_tri_contours(triangle_t&);
+        void draw_tri_contours(ScalarLinearizerDataDimensions::triangle_t&);
         void init_lighting();
         void update_mesh_info(); ///< Updates mesh info. Assumes that data lock is locked.
 

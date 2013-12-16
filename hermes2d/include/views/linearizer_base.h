@@ -52,8 +52,6 @@ namespace Hermes
         typedef double3x3 triangle_t;
         typedef double2x3 edge_t;
         typedef double3 vertex_t;
-        typedef int3 triangle_indices_t;
-        typedef int3 internal_vertex_info_t;
       };
 
       struct VectorLinearizerDataDimensions
@@ -63,9 +61,10 @@ namespace Hermes
         typedef double3x4 triangle_t;
         typedef double2x4 edge_t;
         typedef double4 vertex_t;
-        typedef int3 triangle_indices_t;
-        typedef int3 internal_vertex_info_t;
       };
+
+      typedef int3 internal_vertex_info_t;
+      typedef int3 triangle_indices_t;
 
       //// linearization "quadrature" ////////////////////////////////////////////////////////////////////
 

@@ -173,7 +173,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::copy(const MeshFunction<Scalar>* sln, bool deep_copy)
+    void Solution<Scalar>::copy(const MeshFunction<Scalar>* sln)
     {
       const Solution<Scalar>* solution = dynamic_cast<const Solution<Scalar>*>(sln);
       if(solution == nullptr)
@@ -194,27 +194,17 @@ namespace Hermes
       {
         num_coeffs = solution->num_coeffs;
         num_elems = solution->num_elems;
-        if (deep_copy)
-        {
-          mono_coeffs = new Scalar[num_coeffs];
-          memcpy(mono_coeffs, solution->mono_coeffs, sizeof(Scalar)* num_coeffs);
+        mono_coeffs = new Scalar[num_coeffs];
+        memcpy(mono_coeffs, solution->mono_coeffs, sizeof(Scalar)* num_coeffs);
 
-          for (int l = 0; l < this->num_components; l++)
-          {
-            elem_coeffs[l] = new int[num_elems];
-            memcpy(elem_coeffs[l], solution->elem_coeffs[l], sizeof(int)* num_elems);
-          }
-
-          elem_orders = new int[num_elems];
-          memcpy(elem_orders, solution->elem_orders, sizeof(int)* num_elems);
-        }
-        else
+        for (int l = 0; l < this->num_components; l++)
         {
-          this->mono_coeffs = solution->mono_coeffs;
-          for (int l = 0; l < this->num_components; l++)
-            this->elem_coeffs[l] = solution->elem_coeffs[l];
-          this->elem_orders = solution->elem_orders;
+          elem_coeffs[l] = new int[num_elems];
+          memcpy(elem_coeffs[l], solution->elem_coeffs[l], sizeof(int)* num_elems);
         }
+
+        elem_orders = new int[num_elems];
+        memcpy(elem_orders, solution->elem_orders, sizeof(int)* num_elems);
         init_dxdy_buffer();
       }
       else // Const, exact handled differently.

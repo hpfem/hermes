@@ -29,8 +29,8 @@ using namespace Hermes::Hermes2D;
 
 const bool HERMES_VISUALIZATION = true;   // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = true;     // Set to "true" to enable VTK output.
-const int P_INIT = 5;                     // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 5;               // Number of initial uniform mesh refinements.
+const int P_INIT = 1;                     // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 1;               // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
   mloader.load("domain.xml", mesh);
 
-  //HermesCommonApi.set_integral_param_value(numThreads, 1);
+  HermesCommonApi.set_integral_param_value(numThreads, 1);
 
   // Refine all elements, do it INIT_REF_NUM-times.
   for(unsigned int i = 0; i < INIT_REF_NUM; i++)
@@ -110,9 +110,13 @@ int main(int argc, char* argv[])
 
     Hermes::Hermes2D::Views::ScalarViewNew viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
     Hermes::Hermes2D::Views::MeshView viewM("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
-//    Views::LinearizerNew lin(Views::FileExport);
- //   lin.save_solution_vtk(sln, "asf.vtk", "asdf");
-    viewS.show(sln, 2.0);
+    Views::LinearizerVector lin(Views::FileExport);
+    Views::Linearizer lin2;
+    MeshFunctionSharedPtr<double> slns[2] = { sln, sln };
+    int items[2] = { 1, 1 };
+    lin.save_solution_vtk(slns, items, "asf.vtk", "as", false, 1.);
+    lin2.save_solution_vtk(sln, "asf2.vtk", "asdf", 1, true, 1.);
+    viewS.show(sln, 1.0);
     viewS.wait();
   }
   catch(std::exception& e)

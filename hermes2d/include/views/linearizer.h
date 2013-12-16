@@ -26,6 +26,7 @@ namespace Hermes
   {
     namespace Views
     {
+      template<typename LinearizerDataDimensions>
       class HERMES_API ThreadLinearizerNew;
       
       /// LinearizerNew is a utility class which converts a higher-order FEM solution defined on
@@ -50,27 +51,31 @@ namespace Hermes
         /// \param[in] item what item (function value, derivative wrt. x, ..) to use in the solution.
         /// \param[in] eps - tolerance parameter controlling how fine the resulting linearized approximation of the solution is.
         void process_solution(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
+        void process_solution(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item[LinearizerDataDimensions::dimension], double eps = HERMES_EPS_NORMAL);
 
         /// Save a MeshFunction (Solution, Filter) in VTK format.
-        void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D = true, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
+        void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item = H2D_FN_VAL_0, bool mode_3D = true, double eps = HERMES_EPS_NORMAL);
+        void save_solution_vtk(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item[LinearizerDataDimensions::dimension], const char* filename, const char* quantity_name, bool mode_3D = true, double eps = HERMES_EPS_NORMAL);
+        void save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
+        void save_solution_tecplot(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item[LinearizerDataDimensions::dimension], const char* filename, const char* quantity_name[LinearizerDataDimensions::dimension], double eps = HERMES_EPS_NORMAL);
 
-        void save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name,
-          int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
-        
         /// Set the displacement, i.e. set two functions that will deform the domain for visualization, in the x-direction, and the y-direction.
         void set_displacement(MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult = 1.0);
 
         /// Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
         void calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const;
 
-        Quad2D *old_quad, *old_quad_x, *old_quad_y;
+        Quad2D *old_quad[LinearizerDataDimensions::dimension], *old_quad_x, *old_quad_y;
 
         LinearizerOutputType linearizerOutputType;
 
-        /// Assembly data.
-        ThreadLinearizerNew** threadLinearizerNew;
+        /// Before assembling.
+        void check_data(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension]);
 
-        void init(MeshFunctionSharedPtr<double> sln, int item_, double eps);
+        /// Assembly data.
+        ThreadLinearizerNew<LinearizerDataDimensions>** threadLinearizerNew;
+
+        void init(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item_[LinearizerDataDimensions::dimension], double eps);
 
         Hermes::vector<MeshSharedPtr > meshes;
 
@@ -96,7 +101,7 @@ namespace Hermes
         class Iterator
         {
         public:
-          Iterator(const LinearizerNew* linearizer);
+          Iterator(const LinearizerNew<LinearizerDataDimensions>* linearizer);
           Iterator& operator++();
           T& get() const;
           /// For triangle- and edge- markers.
@@ -107,15 +112,15 @@ namespace Hermes
           int current_thread;
           int current_thread_size;
           Hermes::vector<int> thread_sizes;
-          const LinearizerNew* linearizer;
+          const LinearizerNew<LinearizerDataDimensions>* linearizer;
           friend class LinearizerNew;
         };
 
         /// Begin - iterators.
-        Iterator<LinearizerDataDimensions::vertex_t> vertices_begin() const;
-        Iterator<LinearizerDataDimensions::triangle_t> triangles_begin() const;
-        Iterator<LinearizerDataDimensions::edge_t> edges_begin() const;
-        Iterator<LinearizerDataDimensions::triangle_indices_t> triangle_indices_begin() const;
+        Iterator<typename LinearizerDataDimensions::vertex_t> vertices_begin() const;
+        Iterator<typename LinearizerDataDimensions::triangle_t> triangles_begin() const;
+        Iterator<typename LinearizerDataDimensions::edge_t> edges_begin() const;
+        Iterator<triangle_indices_t> triangle_indices_begin() const;
 
         /// Counts
         int get_vertex_count() const;
@@ -143,10 +148,10 @@ namespace Hermes
         double dmult;
 
         /// What kind of information do we want to get out of the solution.
-        int item, component, value_type;
+        int item[LinearizerDataDimensions::dimension], component[LinearizerDataDimensions::dimension], value_type[LinearizerDataDimensions::dimension];
 
         // Finish - contour triangles calculation etc.
-        void finish(MeshFunctionSharedPtr<double> sln);
+        void finish(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension]);
 
         Traverse::State** states;
 
@@ -156,8 +161,11 @@ namespace Hermes
 
         void find_min_max();
 
-        friend class ThreadLinearizerNew;
+        friend class ThreadLinearizerNew<LinearizerDataDimensions>;
       };
+
+      typedef LinearizerNew<ScalarLinearizerDataDimensions> LinearizerScalar;
+      typedef LinearizerNew<VectorLinearizerDataDimensions> LinearizerVector;
     }
   }
 }

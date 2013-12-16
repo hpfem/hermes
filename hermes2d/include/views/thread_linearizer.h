@@ -25,9 +25,11 @@ namespace Hermes
   {
     namespace Views
     {
+      template<typename LinearizerDataDimensions>
       class HERMES_API LinearizerNew;
 
       /// ThreadLinearizerNew is a utility class for linearizing a mesh function on a single thread
+      template<typename LinearizerDataDimensions>
       class HERMES_API ThreadLinearizerNew
       {
       public:
@@ -35,12 +37,12 @@ namespace Hermes
         void free();
         
       private:
-        ThreadLinearizerNew(LinearizerNew* linearizer);
+        ThreadLinearizerNew(LinearizerNew<LinearizerDataDimensions>* linearizer);
         ~ThreadLinearizerNew();
 
-        void init_linearizer_data(LinearizerNew* linearizer);
+        void init_linearizer_data(LinearizerNew<LinearizerDataDimensions>* linearizer);
 
-        void init_processing(MeshFunctionSharedPtr<double> sln, LinearizerNew* linearizer);
+        void init_processing(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], LinearizerNew<LinearizerDataDimensions>* linearizer);
         void deinit_processing();
         
         void process_state(Traverse::State* current_state);
@@ -57,13 +59,13 @@ namespace Hermes
         void add_triangle(int iv0, int iv1, int iv2, int marker);
 
         int add_vertex();
-        int get_vertex(int p1, int p2, double x, double y, double value);
+        int get_vertex(int p1, int p2, double x, double y, double value[LinearizerDataDimensions::dimension]);
 
-        void process_triangle(int iv0, int iv1, int iv2, int level, double* val, double* phx, double* phy, int* indices);
+        void process_triangle(int iv0, int iv1, int iv2, int level, double* val[LinearizerDataDimensions::dimension], double* phx, double* phy, int* indices);
 
-        void process_quad(int iv0, int iv1, int iv2, int iv3, int level, double* val, double* phx, double* phy, int* indices);
+        void process_quad(int iv0, int iv1, int iv2, int iv3, int level, double* val[LinearizerDataDimensions::dimension], double* phx, double* phy, int* indices);
 
-        void split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double* val, double* phx, double* phy, int* indices) const;
+        void split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double* val[LinearizerDataDimensions::dimension], double* phx, double* phy, int* indices) const;
 
         bool quad_flip(int iv0, int iv1, int iv2, int iv3) const;
 
@@ -78,11 +80,11 @@ namespace Hermes
         void reallocate(MeshSharedPtr mesh);
 
         /// Thread-owned clones.
-        MeshFunction<double>* fns[3];
+        MeshFunction<double>* fns[LinearizerDataDimensions::dimension + 2];
 
         // OpenGL part.
-        triangle_t* triangles;
-        edge_t* edges;
+        typename LinearizerDataDimensions::triangle_t* triangles;
+        typename LinearizerDataDimensions::edge_t* edges;
         /// - edge_markers: edge markers, ordering equal to edges
         int* edge_markers;
 
@@ -92,7 +94,7 @@ namespace Hermes
         triangle_indices_t* triangle_indices;
 
         // Common part.
-        vertex_t* vertices;
+        typename LinearizerDataDimensions::vertex_t* vertices;
         /// - triangle_markers: triangle markers, ordering equal to triangles, triangle_indices
         int* triangle_markers;
         /// - hash table
@@ -107,16 +109,16 @@ namespace Hermes
 
         
         /// Temporary storage - per state processing.
-        double midval[3][5];
+        double midval[LinearizerDataDimensions::dimension + 2][5];
         Element* rep_element;
         bool curved;
-
+        double* val[LinearizerDataDimensions::dimension];
         
         /// From LinearizerNew - for convenience & speed.
         LinearizerOutputType linearizerOutputType;
 
         /// The information do we want to get out of the solution.
-        int item, component, value_type;
+        int item[LinearizerDataDimensions::dimension], component[LinearizerDataDimensions::dimension], value_type[LinearizerDataDimensions::dimension];
         bool user_xdisp, user_ydisp;
         double dmult;
         /// Standard and curvature epsilon.
@@ -127,7 +129,7 @@ namespace Hermes
         bool user_specified_max, user_specified_min;
         double user_specified_max_value, user_specified_min_value;
 
-        friend class LinearizerNew;
+        friend class LinearizerNew<LinearizerDataDimensions>;
       };
     }
   }

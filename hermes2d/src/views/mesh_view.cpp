@@ -63,7 +63,7 @@ namespace Hermes
         this->mesh = mesh;
 
         if(lin == nullptr)
-          lin = new LinearizerNew(OpenGL);
+          lin = new LinearizerScalar(OpenGL);
 
         lin->process_solution(sln);
         lin->lock_data();
@@ -125,9 +125,9 @@ namespace Hermes
         // draw all triangles
         glColor3f(0.9f, 0.9f, 0.9f);
         glBegin(GL_TRIANGLES);
-        for (LinearizerNew::Iterator<triangle_t> it = lin->triangles_begin(); !it.end; it++)
+        for (LinearizerScalar::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = this->lin->triangles_begin(); !it.end; it++)
         {
-          triangle_t& triangle = it.get();
+          ScalarLinearizerDataDimensions::triangle_t& triangle = it.get();
           glVertex2d(transform_x(triangle[0][0]), transform_y(triangle[0][1]));
           glVertex2d(transform_x(triangle[1][0]), transform_y(triangle[1][1]));
           glVertex2d(transform_x(triangle[2][0]), transform_y(triangle[2][1]));
@@ -136,9 +136,9 @@ namespace Hermes
 
         // draw all edges
         glLineStipple(5, 0x5555);
-        for (LinearizerNew::Iterator<edge_t> it = lin->edges_begin(); !it.end; it++)
+        for (LinearizerScalar::Iterator<ScalarLinearizerDataDimensions::edge_t> it = this->lin->edges_begin(); !it.end; it++)
         {
-          edge_t& edge = it.get();
+          ScalarLinearizerDataDimensions::edge_t& edge = it.get();
 
           int mrk = b_markers ? it.get_marker() : 0;
 

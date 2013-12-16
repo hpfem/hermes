@@ -17,7 +17,7 @@
 
 #ifndef __H2D_VECTOR_BASE_VIEW_H
 #define __H2D_VECTOR_BASE_VIEW_H
-#include "vector_view.h"
+#include "vector_view_old.h"
 
 namespace Hermes
 {

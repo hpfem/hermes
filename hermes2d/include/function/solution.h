@@ -88,7 +88,7 @@ namespace Hermes
       virtual bool isOkay() const;
       virtual inline std::string getClassName() const { return "Solution"; }
 
-      virtual void copy(const MeshFunction<Scalar>* sln, bool deep_copy = true);
+      virtual void copy(const MeshFunction<Scalar>* sln);
 
       /// Sets solution equal to Dirichlet lift only, solution vector = 0.
       void set_dirichlet_lift(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss = nullptr);

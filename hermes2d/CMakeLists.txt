@@ -178,6 +178,7 @@ project(hermes2d)
     src/views/stream_view.cpp
     src/views/vector_base_view.cpp
     src/views/vector_view.cpp
+    src/views/vector_view_old.cpp
     src/views/view.cpp
     src/views/view_data.cpp
     src/views/view_support.cpp
@@ -289,6 +290,7 @@ project(hermes2d)
     src/views/stream_view.cpp
     src/views/vector_base_view.cpp
     src/views/vector_view.cpp
+    src/views/vector_view_old.cpp
     src/views/view.cpp
     src/views/view_data.cpp
     src/views/view_support.cpp
@@ -435,6 +437,7 @@ project(hermes2d)
     include/views/stream_view.h
     include/views/vector_base_view.h
     include/views/vector_view.h
+    include/views/vector_view_old.h
     include/views/view.h
     include/views/view_support.h
     include/views/thread_linearizer.h
@@ -551,6 +554,7 @@ project(hermes2d)
     include/views/stream_view.h
     include/views/vector_base_view.h
     include/views/vector_view.h
+    include/views/vector_view_old.h
     include/views/view.h
     include/views/view_support.h
     include/views/thread_linearizer.h

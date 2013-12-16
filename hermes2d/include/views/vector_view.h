@@ -14,9 +14,11 @@
 
 // $Id: view.h 1086 2008-10-21 09:05:44Z jakub $
 
-#ifndef __H2D_VECTOR_VIEW_H
-#define __H2D_VECTOR_VIEW_H
+#ifndef __H2D_VECTOR_VIEW_NEW_H
+#define __H2D_VECTOR_VIEW_NEW_H
 #include "view.h"
+#include "linearizer.h"
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -30,13 +32,13 @@ namespace Hermes
       ///
       /// VectorView is a visualization window for all vector-valued PDE solutions.
       ///
-      class HERMES_API VectorView : public View
+      class HERMES_API VectorViewNew : public View
       {
       public:
 
-        VectorView(const char* title = "VectorView", WinGeom* wg = nullptr);
-        VectorView(char* title, WinGeom* wg = nullptr);
-        ~VectorView();
+        VectorViewNew(const char* title = "VectorView", WinGeom* wg = nullptr);
+        VectorViewNew(char* title, WinGeom* wg = nullptr);
+        ~VectorViewNew();
 
         void show(MeshFunctionSharedPtr<double> vsln, double eps = HERMES_EPS_NORMAL);
         void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, double eps = HERMES_EPS_NORMAL, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0);
@@ -45,17 +47,18 @@ namespace Hermes
         void set_mode(int mode);
       
         /// Returns the internal vectorizer for the purpose of parameter settings.
-        Vectorizer* get_vectorizer();
+        LinearizerVector* get_vectorizer();
 
       protected:
         /// Vectorizer class responsible for obtaining linearized data.
-        Vectorizer* vec;
+        LinearizerVector* vec;
 
         double gx, gy, gs;
         bool hexa; ///< false - quad grid, true - hexa grid
         int mode;  ///< 0 - magnitude is on the background, 1 - arrows are colored, 2 - no arrows, just magnitude on the background
         bool lines, pmode;
         double length_coef; ///< for extending or shortening arrows
+        void draw_edges_2d(); ///< draws edges
 
         void plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs);
 
