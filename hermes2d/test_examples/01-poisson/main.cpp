@@ -29,8 +29,8 @@ using namespace Hermes::Hermes2D;
 
 const bool HERMES_VISUALIZATION = true;   // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = true;     // Set to "true" to enable VTK output.
-const int P_INIT = 1;                     // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 1;               // Number of initial uniform mesh refinements.
+const int P_INIT = 3;                     // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -67,8 +67,6 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
   mloader.load("domain.xml", mesh);
 
-  HermesCommonApi.set_integral_param_value(numThreads, 1);
-
   // Refine all elements, do it INIT_REF_NUM-times.
   for(unsigned int i = 0; i < INIT_REF_NUM; i++)
     mesh->refine_all_elements();
@@ -104,20 +102,35 @@ int main(int argc, char* argv[])
     // Translate the solution vector into the previously initialized Solution.
     Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
 
-    Hermes::Hermes2D::Views::ScalarView viewSO("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
- //   viewSO.show(sln, 1.0);
-  //  viewSO.wait();
+    MyVolumetricIntegralCalculator calc(sln, 1);
+    std::cout << calc.calculate(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"))[0];
 
-    Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
-    Hermes::Hermes2D::Views::MeshView viewM("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
-    Views::Linearizer lin(Views::FileExport);
-    Views::Linearizer lin2;
-    MeshFunctionSharedPtr<double> slns[2] = { sln, sln };
-    int items[2] = { 1, 1 };
-    lin.save_solution_vtk(slns, items, "asf.vtk", "as", false, 1.);
-    lin2.save_solution_vtk(sln, "asf2.vtk", "asdf", 1, true, 1.);
-    viewS.show(sln, 1.0);
-    viewS.wait();
+    // VTK output.
+    if(VTK_VISUALIZATION)
+    {
+      // Output solution in VTK format.
+      Hermes::Hermes2D::Views::Linearizer lin;
+      bool mode_3D = false;
+      lin.save_solution_vtk(sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+
+      // Output mesh and element orders in VTK format.
+      Hermes::Hermes2D::Views::Orderizer ord;
+      ord.save_mesh_vtk(space, "mesh.vtk");
+      ord.save_orders_vtk(space, "ord.vtk");
+      ord.save_markers_vtk(space, "markers.vtk");
+    }
+
+    if(HERMES_VISUALIZATION)
+    {
+      // Visualize the solution.
+      Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
+      Hermes::Hermes2D::Views::OrderView viewSp("Space", new Hermes::Hermes2D::Views::WinGeom(0, 400, 500, 400));
+
+      viewS.show(sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+      viewSp.show(space);
+
+      viewS.wait_for_close();
+    }
   }
   catch(std::exception& e)
   {
