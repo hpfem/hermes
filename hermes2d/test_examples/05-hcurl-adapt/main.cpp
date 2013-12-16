@@ -101,9 +101,8 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver< ::complex > newton(&dp);
 
-  Views::Linearizer lin;
+  Views::Linearizer lin(Views::FileExport);
   Views::Orderizer ord;
-  Views::Linearizer vec;
 
   // Adaptivity loop:
   int as = 1; bool done = false;

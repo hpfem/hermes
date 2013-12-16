@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
   char title[100];
 
   // Output solution in VTK format.
-  Linearizer lin;
+  Linearizer lin(Views::FileExport);
   Orderizer ord;
   bool mode_3D = true;
 
