@@ -23,13 +23,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    namespace Views
-    {
-      class Orderizer;
-      class Linearizer;
-      class Vectorizer;
-    };
-
     /** @defgroup inner Hermes hp-FEM/hp-DG assembling core
     * Inner functionality classes that are not for the user to modify.
     */
@@ -104,8 +97,6 @@ namespace Hermes
         Rect  cr;
         Rect* er;
       friend class Traverse;
-      friend class Views::Linearizer;
-      friend class Views::Vectorizer;
       template<typename Scalar> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemDGAssembler;
       template<typename T> friend class DiscreteProblemThreadAssembler;
@@ -165,8 +156,6 @@ namespace Hermes
       template<typename T> friend class Filter;
       template<typename T> friend class SimpleFilter;
       friend class Views::Orderizer;
-      friend class Views::Vectorizer;
-      friend class Views::Linearizer;
     };
   }
 }

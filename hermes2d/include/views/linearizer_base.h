@@ -101,7 +101,7 @@ namespace Hermes
 
       extern HERMES_API Quad2DLin g_quad_lin;
 
-      /// Base class for Linearizer, Orderizer, Vectorizer.
+      /// Base class for Linearizer, Orderizer, Linearizer.
 
       class HERMES_API LinearizerBase :
         public Hermes::Mixins::TimeMeasurable,

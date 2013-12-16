@@ -26,23 +26,23 @@ namespace Hermes
     namespace Views
     {
       template<typename LinearizerDataDimensions>
-      class HERMES_API LinearizerNew;
+      class HERMES_API LinearizerMultidimensional;
 
-      /// ThreadLinearizerNew is a utility class for linearizing a mesh function on a single thread
+      /// ThreadLinearizerMultidimensional is a utility class for linearizing a mesh function on a single thread
       template<typename LinearizerDataDimensions>
-      class HERMES_API ThreadLinearizerNew
+      class HERMES_API ThreadLinearizerMultidimensional
       {
       public:
         /// Free the instance.
         void free();
         
       private:
-        ThreadLinearizerNew(LinearizerNew<LinearizerDataDimensions>* linearizer);
-        ~ThreadLinearizerNew();
+        ThreadLinearizerMultidimensional(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
+        ~ThreadLinearizerMultidimensional();
 
-        void init_linearizer_data(LinearizerNew<LinearizerDataDimensions>* linearizer);
+        void init_linearizer_data(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
 
-        void init_processing(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], LinearizerNew<LinearizerDataDimensions>* linearizer);
+        void init_processing(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
         void deinit_processing();
         
         void process_state(Traverse::State* current_state);
@@ -114,7 +114,7 @@ namespace Hermes
         bool curved;
         double* val[LinearizerDataDimensions::dimension];
         
-        /// From LinearizerNew - for convenience & speed.
+        /// From LinearizerMultidimensional - for convenience & speed.
         LinearizerOutputType linearizerOutputType;
 
         /// The information do we want to get out of the solution.
@@ -129,7 +129,7 @@ namespace Hermes
         bool user_specified_max, user_specified_min;
         double user_specified_max_value, user_specified_min_value;
 
-        friend class LinearizerNew<LinearizerDataDimensions>;
+        friend class LinearizerMultidimensional<LinearizerDataDimensions>;
       };
     }
   }

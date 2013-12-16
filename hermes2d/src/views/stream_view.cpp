@@ -378,7 +378,7 @@ namespace Hermes
       void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps, int xitem, int yitem)
       {
         if(vec == nullptr)
-          vec = new Vectorizer;
+          vec = new Linearizer;
         vec->process_solution(xsln, ysln, xitem, yitem, eps);
 
         vec->lock_data();

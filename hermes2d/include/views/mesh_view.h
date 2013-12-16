@@ -47,7 +47,7 @@ namespace Hermes
 
       protected:
 
-        LinearizerScalar* lin;
+        Linearizer* lin;
 
         bool b_ids, b_markers, b_elem_mrk;
 

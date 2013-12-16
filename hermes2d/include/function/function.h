@@ -38,12 +38,6 @@ namespace Hermes
     };
     template<typename Scalar> class Geom;
 
-    namespace Views{
-      class Orderizer;
-      class Linearizer;
-      class Vectorizer;
-    };
-
     /// Precalculation masks
     enum
     {
@@ -236,9 +230,6 @@ namespace Hermes
       template<typename T> friend class RefinementSelectors::L2ProjBasedSelector;
       template<typename T> friend class RefinementSelectors::HcurlProjBasedSelector;
       template<typename T> friend class Adapt;
-      friend class Views::Orderizer;
-      friend class Views::Vectorizer;
-      friend class Views::Linearizer;
 
       template<typename T> friend class DiscontinuousFunc;
       template<typename T> friend class DiscreteProblem;

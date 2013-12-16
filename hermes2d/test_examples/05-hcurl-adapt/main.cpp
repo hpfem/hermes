@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 
   Views::Linearizer lin;
   Views::Orderizer ord;
-  Views::Vectorizer vec;
+  Views::Linearizer vec;
 
   // Adaptivity loop:
   int as = 1; bool done = false;

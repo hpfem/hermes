@@ -28,7 +28,6 @@ namespace Hermes
     {
       class MeshView;
       class ScalarView;
-      class Linearizer;
       class Orderizer;
     };
 

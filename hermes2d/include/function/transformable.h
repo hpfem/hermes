@@ -24,10 +24,6 @@ namespace Hermes
   {
     class Element;
     template<typename Scalar> class Func;
-    namespace Views
-    {
-      class Vectorizer;
-    }
 
     /// 2D transformation.
     struct Trf
@@ -128,7 +124,6 @@ namespace Hermes
       template<typename T> friend class NeighborSearch;
       friend class CurvMap;
       friend class Traverse;
-      friend class Views::Vectorizer;
     };
   }
 }

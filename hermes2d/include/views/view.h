@@ -18,7 +18,6 @@
 #define __H2D_VIEW_H
 
 #include "../global.h"
-#include "vectorizer.h"
 #include "orderizer.h"
 
 namespace Hermes

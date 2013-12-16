@@ -36,13 +36,13 @@ namespace Hermes
   {
     namespace Views
     {
-      const int ScalarViewNew::fovy = 50;
-      const double ScalarViewNew::znear = 0.05;
-      const double ScalarViewNew::zfar = 10;
+      const int ScalarView::fovy = 50;
+      const double ScalarView::znear = 0.05;
+      const double ScalarView::zfar = 10;
 
-      void ScalarViewNew::init()
+      void ScalarView::init()
       {
-        lin = new LinearizerScalar(OpenGL);
+        lin = new Linearizer(OpenGL);
         pmode = mode3d = false;
         panning = false;
 
@@ -64,7 +64,7 @@ namespace Hermes
 
 #ifndef _MSC_VER
 
-      ScalarViewNew::ScalarViewNew(const char* title, WinGeom* wg) :
+      ScalarView::ScalarView(const char* title, WinGeom* wg) :
         View(title, wg),
         vertex_nodes(0),
         pointed_vertex_node(nullptr),
@@ -78,8 +78,8 @@ namespace Hermes
         init();
       }
 #else
-      ScalarViewNew::ScalarViewNew(WinGeom* wg) :
-        View("ScalarViewNew", wg),
+      ScalarView::ScalarView(WinGeom* wg) :
+        View("ScalarView", wg),
         element_id_widget(0),
         show_element_info(false)
       {
@@ -87,7 +87,7 @@ namespace Hermes
       }
 #endif
 
-      ScalarViewNew::ScalarViewNew(char* title, WinGeom* wg) :
+      ScalarView::ScalarView(char* title, WinGeom* wg) :
         View(title, wg),
         element_id_widget(0),
         show_element_info(false)
@@ -95,12 +95,12 @@ namespace Hermes
         init();
       }
 
-      ScalarViewNew::~ScalarViewNew()
+      ScalarView::~ScalarView()
       {
         delete lin;
       }
 
-      void ScalarViewNew::on_close()
+      void ScalarView::on_close()
       {
         if (element_id_widget != 0)
         {
@@ -112,7 +112,7 @@ namespace Hermes
         View::on_close();
       }
 
-      void ScalarViewNew::show(MeshFunctionSharedPtr<double> sln, double eps, int item,
+      void ScalarView::show(MeshFunctionSharedPtr<double> sln, double eps, int item,
         MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
       {
         // For preservation of the sln's active element. Will be set back after the visualization.
@@ -152,7 +152,7 @@ namespace Hermes
           sln->set_active_element(active_element);
       }
 
-      void ScalarViewNew::show_linearizer_data(double eps, int item)
+      void ScalarView::show_linearizer_data(double eps, int item)
       {
         update_mesh_info();
 
@@ -165,7 +165,7 @@ namespace Hermes
         refresh();
       }
 
-      void ScalarViewNew::update_mesh_info()
+      void ScalarView::update_mesh_info()
       {
         // Get a range of vertex values (or use the range set by the user).
         double vert_min = lin->get_min_value();
@@ -195,7 +195,7 @@ namespace Hermes
         // Calculate average value.
         value_range_avg = 0.0;
 
-        for (LinearizerScalar::Iterator<ScalarLinearizerDataDimensions::vertex_t> it = lin->vertices_begin(); !it.end; it++)
+        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::vertex_t> it = lin->vertices_begin(); !it.end; it++)
         {
           ScalarLinearizerDataDimensions::vertex_t& vertex = it.get();
           if (vertex[2] > range_max)
@@ -210,7 +210,7 @@ namespace Hermes
         lin_updated = true;
       }
 
-      void ScalarViewNew::init_element_info(MeshSharedPtr mesh)
+      void ScalarView::init_element_info(MeshSharedPtr mesh)
       {
         //cleanup
         element_infos.clear();
@@ -246,12 +246,12 @@ namespace Hermes
         }
       }
 
-      LinearizerScalar* ScalarViewNew::get_linearizer()
+      Linearizer* ScalarView::get_linearizer()
       {
         return this->lin;
       }
 
-      void ScalarViewNew::draw_element_infos_2d()
+      void ScalarView::draw_element_infos_2d()
       {
         //create widgets
         create_element_info_widgets();
@@ -303,7 +303,7 @@ namespace Hermes
         }
       }
 
-      void ScalarViewNew::create_element_info_widgets()
+      void ScalarView::create_element_info_widgets()
       {
         if (element_id_widget == 0)
         {
@@ -334,7 +334,7 @@ namespace Hermes
         }
       }
 
-      void ScalarViewNew::show_contours(double step, double orig)
+      void ScalarView::show_contours(double step, double orig)
       {
         if (step == 0.0)
           throw Exceptions::ValueException("step", step, 0.0);
@@ -345,7 +345,7 @@ namespace Hermes
         refresh();
       }
 
-      void ScalarViewNew::draw_tri_contours(ScalarLinearizerDataDimensions::triangle_t& triangle)
+      void ScalarView::draw_tri_contours(ScalarLinearizerDataDimensions::triangle_t& triangle)
       {
         // sort the vertices by their value, keep track of the permutation sign.
         int i, idx[3] = { 0, 1, 2 }, perm = 0;
@@ -406,13 +406,13 @@ namespace Hermes
         }
       }
 
-      void ScalarViewNew::prepare_gl_geometry()
+      void ScalarView::prepare_gl_geometry()
       {
         if (lin_updated)
           lin_updated = false;
       }
 
-      void ScalarViewNew::draw_values_2d()
+      void ScalarView::draw_values_2d()
       {
         //set texture for coloring
         glEnable(GL_TEXTURE_1D);
@@ -429,7 +429,7 @@ namespace Hermes
         //render triangles
         glBegin(GL_TRIANGLES);
 
-        for (LinearizerScalar::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = lin->triangles_begin(); !it.end; it++)
+        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = lin->triangles_begin(); !it.end; it++)
         {
           ScalarLinearizerDataDimensions::triangle_t& triangle = it.get();
           glTexCoord1d((triangle[0][2] - range_min) * value_irange);
@@ -447,11 +447,11 @@ namespace Hermes
         glMatrixMode(GL_MODELVIEW);
       }
 
-      void ScalarViewNew::draw_edges_2d()
+      void ScalarView::draw_edges_2d()
       {
         glColor3fv(edges_color);
         glBegin(GL_LINES);
-        for (LinearizerScalar::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; it++)
+        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; it++)
         {
           ScalarLinearizerDataDimensions::edge_t& edge = it.get();
           int& edge_marker = it.get_marker();
@@ -474,7 +474,7 @@ namespace Hermes
 #define V6    vertices_max_x - xctr, range_max - yctr, -(vertices_max_y - zctr)
 #define V7    vertices_min_x - xctr, range_max - yctr, -(vertices_max_y - zctr)
 
-      void ScalarViewNew::draw_aabb()
+      void ScalarView::draw_aabb()
       {
         // Axis-aligned bounding box of the model.
         GLdouble aabb[] =
@@ -511,7 +511,7 @@ namespace Hermes
         glPopMatrix();
       }
 
-      void ScalarViewNew::on_display_2d()
+      void ScalarView::on_display_2d()
       {
         set_ortho_projection();
         glDisable(GL_LIGHTING);
@@ -539,7 +539,7 @@ namespace Hermes
           glColor3fv(cont_color);
           //glLineWidth(2.0f);
           glBegin(GL_LINES);
-          for (LinearizerScalar::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = this->lin->triangles_begin(); !it.end; it++)
+          for (Linearizer::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = this->lin->triangles_begin(); !it.end; it++)
           {
             ScalarLinearizerDataDimensions::triangle_t& triangle = it.get();
             draw_tri_contours(triangle);
@@ -558,7 +558,7 @@ namespace Hermes
         glPopMatrix();
       }
 
-      void ScalarViewNew::on_display_3d()
+      void ScalarView::on_display_3d()
       {
         set_3d_projection(fovy, znear, zfar);
 
@@ -596,7 +596,7 @@ namespace Hermes
         glBegin(GL_TRIANGLES);
         double normal_xzscale = 1.0 / xzscale, normal_yscale = 1.0 / yscale;
 
-        for (LinearizerScalar::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = this->lin->triangles_begin(); !it.end; it++)
+        for (Linearizer::Iterator<ScalarLinearizerDataDimensions::triangle_t> it = this->lin->triangles_begin(); !it.end; it++)
         {
           ScalarLinearizerDataDimensions::triangle_t& triangle = it.get();
 
@@ -618,7 +618,7 @@ namespace Hermes
         {
           glColor3fv(edges_color);
           glBegin(GL_LINES);
-          for (LinearizerScalar::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; it++)
+          for (Linearizer::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; it++)
           {
             ScalarLinearizerDataDimensions::edge_t& edge = it.get();
 
@@ -635,7 +635,7 @@ namespace Hermes
         {
           glColor3fv(edges_color);
           glBegin(GL_LINES);
-          for (LinearizerScalar::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; it++)
+          for (Linearizer::Iterator<ScalarLinearizerDataDimensions::edge_t> it = lin->edges_begin(); !it.end; it++)
           {
             // Outline of the domain boundary at the bottom of the plot or at the bottom user-defined limit
             double y_coord = (range_min - yctr) * yscale;
@@ -652,7 +652,7 @@ namespace Hermes
         }
       }
 
-      void ScalarViewNew::on_display()
+      void ScalarView::on_display()
       {
         // lock and get data
         lin->lock_data();
@@ -676,7 +676,7 @@ namespace Hermes
         x *= l; y *= l; z *= l;
       }
 
-      void ScalarViewNew::update_layout()
+      void ScalarView::update_layout()
       {
         View::update_layout();
         // (x, y, -z) coordinates (in the eye coordinate system) of the point that lies at the center of solution domain
@@ -687,7 +687,7 @@ namespace Hermes
         zctr = (vertices_max_y + vertices_min_y) / 2.0;
       }
 
-      void ScalarViewNew::reset_view(bool force_reset)
+      void ScalarView::reset_view(bool force_reset)
       {
         if (force_reset || view_not_reset) { // Reset 3d view.
           xrot = 40.0; yrot = 0.0;
@@ -724,7 +724,7 @@ namespace Hermes
         View::reset_view(force_reset); // Reset 2d view.
       }
 
-      double ScalarViewNew::calculate_ztrans_to_fit_view()
+      double ScalarView::calculate_ztrans_to_fit_view()
       {
         // Axis-aligned bounding box of the model (homogeneous coordinates in the model space), divided into the bottom and top base.
         GLdouble aabb[2][16] =
@@ -793,7 +793,7 @@ namespace Hermes
         return -optimal_viewpoint_pos;
       }
 
-      void ScalarViewNew::set_vertical_scaling(double sc)
+      void ScalarView::set_vertical_scaling(double sc)
       {
         if (mode3d)
           yscale *= sc;
@@ -802,7 +802,7 @@ namespace Hermes
         refresh();
       }
 
-      void ScalarViewNew::set_min_max_range(double min, double max)
+      void ScalarView::set_min_max_range(double min, double max)
       {
         /// \todo allow settin min = max, in which case draw the corresponding contour.
         if (fabs(max - min) < Hermes::HermesEpsilon)
@@ -813,7 +813,7 @@ namespace Hermes
         View::set_min_max_range(min, max);
       }
 
-      void ScalarViewNew::init_lighting()
+      void ScalarView::init_lighting()
       {
         float light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
         float light_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
@@ -843,7 +843,7 @@ namespace Hermes
         }
       }
 
-      void ScalarViewNew::set_3d_mode(bool enable)
+      void ScalarView::set_3d_mode(bool enable)
       {
         mode3d = enable; dragging = scaling = false;
         if (mode3d)
@@ -854,7 +854,7 @@ namespace Hermes
         refresh();
       }
 
-      void ScalarViewNew::on_key_down(unsigned char key, int x, int y)
+      void ScalarView::on_key_down(unsigned char key, int x, int y)
       {
         switch (key)
         {
@@ -929,7 +929,7 @@ namespace Hermes
       }
 
 
-      void ScalarViewNew::on_mouse_move(int x, int y)
+      void ScalarView::on_mouse_move(int x, int y)
       {
         if (mode3d && (dragging || scaling || panning))
         {
@@ -967,28 +967,28 @@ namespace Hermes
         }
       }
 
-      void ScalarViewNew::on_right_mouse_down(int x, int y)
+      void ScalarView::on_right_mouse_down(int x, int y)
       {
         View::on_right_mouse_down(x, y);
       }
 
-      void ScalarViewNew::on_middle_mouse_down(int x, int y)
+      void ScalarView::on_middle_mouse_down(int x, int y)
       {
         if (!mode3d) return;
         dragging = scaling = false;
         panning = true;
       }
 
-      void ScalarViewNew::on_middle_mouse_up(int x, int y)
+      void ScalarView::on_middle_mouse_up(int x, int y)
       {
         panning = false;
       }
 
 
-      const char* ScalarViewNew::get_help_text() const
+      const char* ScalarView::get_help_text() const
       {
         return
-          "ScalarViewNew\n\n"
+          "ScalarView\n\n"
           "Controls:\n"
           "  Left mouse - pan\n"
           "  Right mouse - zoom\n"

@@ -14,8 +14,8 @@
 
 // $Id: view.h 1086 2008-10-21 09:05:44Z jakub $
 
-#ifndef __H2D_VECTOR_VIEW_NEW_H
-#define __H2D_VECTOR_VIEW_NEW_H
+#ifndef __H2D_VECTOR_VIEW_H
+#define __H2D_VECTOR_VIEW_H
 #include "view.h"
 #include "linearizer.h"
 
@@ -32,13 +32,13 @@ namespace Hermes
       ///
       /// VectorView is a visualization window for all vector-valued PDE solutions.
       ///
-      class HERMES_API VectorViewNew : public View
+      class HERMES_API VectorView : public View
       {
       public:
 
-        VectorViewNew(const char* title = "VectorView", WinGeom* wg = nullptr);
-        VectorViewNew(char* title, WinGeom* wg = nullptr);
-        ~VectorViewNew();
+        VectorView(const char* title = "VectorView", WinGeom* wg = nullptr);
+        VectorView(char* title, WinGeom* wg = nullptr);
+        ~VectorView();
 
         void show(MeshFunctionSharedPtr<double> vsln, double eps = HERMES_EPS_NORMAL);
         void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, double eps = HERMES_EPS_NORMAL, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0);
@@ -46,12 +46,12 @@ namespace Hermes
         inline void set_grid_type(bool hexa) { this->hexa = hexa; refresh(); };
         void set_mode(int mode);
       
-        /// Returns the internal vectorizer for the purpose of parameter settings.
-        LinearizerVector* get_vectorizer();
+        /// Returns the internal Linearizer for the purpose of parameter settings.
+        Vectorizer* get_vectorizer();
 
       protected:
-        /// Vectorizer class responsible for obtaining linearized data.
-        LinearizerVector* vec;
+        /// Linearizer class responsible for obtaining linearized data.
+        Vectorizer* vec;
 
         double gx, gy, gs;
         bool hexa; ///< false - quad grid, true - hexa grid
@@ -80,8 +80,8 @@ namespace Hermes
         inline void set_grid_type(bool hexa) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_mode(int mode) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       
-        /// Returns the internal vectorizer for the purpose of parameter settings.
-        Vectorizer* get_vectorizer() { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
+        /// Returns the internal Linearizer for the purpose of parameter settings.
+        Linearizer* get_Linearizer() { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
       };
 #endif
     }

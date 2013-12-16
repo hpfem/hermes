@@ -108,9 +108,9 @@ int main(int argc, char* argv[])
  //   viewSO.show(sln, 1.0);
   //  viewSO.wait();
 
-    Hermes::Hermes2D::Views::ScalarViewNew viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
+    Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
     Hermes::Hermes2D::Views::MeshView viewM("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
-    Views::LinearizerVector lin(Views::FileExport);
+    Views::Linearizer lin(Views::FileExport);
     Views::Linearizer lin2;
     MeshFunctionSharedPtr<double> slns[2] = { sln, sln };
     int items[2] = { 1, 1 };

@@ -28,11 +28,6 @@ namespace Hermes
   {
     class Element;
     class Mesh;
-    namespace Views{
-      class Orderizer;
-      class Linearizer;
-      class Vectorizer;
-    };
 
     /// @ingroup meshFunctions
     /// \brief Represents the reference mapping.

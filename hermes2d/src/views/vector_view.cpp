@@ -25,10 +25,10 @@ namespace Hermes
   {
     namespace Views
     {
-      VectorViewNew::VectorViewNew(const char* title, WinGeom* wg)
+      VectorView::VectorView(const char* title, WinGeom* wg)
         : View(title, wg)
       {
-        vec = new LinearizerVector(OpenGL);
+        vec = new Vectorizer(OpenGL);
         gx = gy = 0.0;
         gs = 20.0;
         hexa = true;
@@ -38,10 +38,10 @@ namespace Hermes
         length_coef = 1.0;
       }
 
-      VectorViewNew::VectorViewNew(char* title, WinGeom* wg)
+      VectorView::VectorView(char* title, WinGeom* wg)
         : View(title, wg)
       {
-        vec = new LinearizerVector(OpenGL);
+        vec = new Vectorizer(OpenGL);
         gx = gy = 0.0;
         gs = 20.0;
         hexa = true;
@@ -51,19 +51,19 @@ namespace Hermes
         length_coef = 1.0;
       }
 
-      VectorViewNew::~VectorViewNew()
+      VectorView::~VectorView()
       {
         delete vec;
       }
 
-      void VectorViewNew::show(MeshFunctionSharedPtr<double> vsln, double eps)
+      void VectorView::show(MeshFunctionSharedPtr<double> vsln, double eps)
       {
         if (vsln->get_num_components() < 2)
           throw Hermes::Exceptions::Exception("The single-argument version of show() is only for vector-valued solutions.");
         show(vsln, vsln, eps, H2D_FN_VAL_0, H2D_FN_VAL_1);
       }
 
-      void VectorViewNew::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, double eps, int xitem, int yitem, MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
+      void VectorView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, double eps, int xitem, int yitem, MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
       {
         if (xsln != nullptr && ysln != nullptr && xsln == ysln)
           this->warn("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
@@ -95,18 +95,18 @@ namespace Hermes
       static int n_vert(int i) { return (i + 1) % 3; }
       static int p_vert(int i) { return (i + 2) % 3; }
 
-      void VectorViewNew::set_mode(int mode)
+      void VectorView::set_mode(int mode)
       {
         this->mode = mode % 3;
         refresh();
       }
 
-      LinearizerVector* VectorViewNew::get_vectorizer()
+      Vectorizer* VectorView::get_vectorizer()
       {
         return this->vec;
       }
 
-      void VectorViewNew::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
+      void VectorView::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
       {
         if (mode == 1)
           glColor3f(0.0f, 0.0f, 0.0f);
@@ -189,11 +189,11 @@ namespace Hermes
         }
       }
 
-      void VectorViewNew::draw_edges_2d()
+      void VectorView::draw_edges_2d()
       {
         glColor3f(0.5, 0.5, 0.5);
         glBegin(GL_LINES);
-        for (LinearizerVector::Iterator<VectorLinearizerDataDimensions::edge_t> it = vec->edges_begin(); !it.end; it++)
+        for (Vectorizer::Iterator<VectorLinearizerDataDimensions::edge_t> it = vec->edges_begin(); !it.end; it++)
         {
           VectorLinearizerDataDimensions::edge_t& edge = it.get();
           int& edge_marker = it.get_marker();
@@ -207,7 +207,7 @@ namespace Hermes
         glEnd();
       }
 
-      void VectorViewNew::on_display()
+      void VectorView::on_display()
       {
         set_ortho_projection();
         glDisable(GL_LIGHTING);
@@ -238,7 +238,7 @@ namespace Hermes
         glBegin(GL_TRIANGLES);
         glColor3f(0.95f, 0.95f, 0.95f);
 
-        for (LinearizerVector::Iterator<VectorLinearizerDataDimensions::triangle_t> it = vec->triangles_begin(); !it.end; it++)
+        for (Vectorizer::Iterator<VectorLinearizerDataDimensions::triangle_t> it = vec->triangles_begin(); !it.end; it++)
         {
           VectorLinearizerDataDimensions::triangle_t& triangle = it.get();
 
@@ -276,7 +276,7 @@ namespace Hermes
         // draw arrows
         if (mode != 2)
         {
-          for (LinearizerVector::Iterator<VectorLinearizerDataDimensions::triangle_t> it = vec->triangles_begin(); !it.end; it++)
+          for (Vectorizer::Iterator<VectorLinearizerDataDimensions::triangle_t> it = vec->triangles_begin(); !it.end; it++)
           {
             VectorLinearizerDataDimensions::triangle_t& triangle = it.get();
             {
@@ -423,7 +423,7 @@ namespace Hermes
         }
       }
 
-      void VectorViewNew::on_mouse_move(int x, int y)
+      void VectorView::on_mouse_move(int x, int y)
       {
         if (dragging)
         {
@@ -433,7 +433,7 @@ namespace Hermes
         View::on_mouse_move(x, y);
       }
 
-      void VectorViewNew::on_key_down(unsigned char key, int x, int y)
+      void VectorView::on_key_down(unsigned char key, int x, int y)
       {
         switch (key)
         {
@@ -478,7 +478,7 @@ namespace Hermes
         }
       }
 
-      const char* VectorViewNew::get_help_text() const
+      const char* VectorView::get_help_text() const
       {
         return
           "VectorView\n\n"

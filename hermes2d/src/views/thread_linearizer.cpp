@@ -28,7 +28,7 @@ namespace Hermes
     namespace Views
     {
       template<typename LinearizerDataDimensions>
-      ThreadLinearizerNew<LinearizerDataDimensions>::ThreadLinearizerNew(LinearizerNew<LinearizerDataDimensions>* linearizer) : user_specified_max(false), user_specified_min(false)
+      ThreadLinearizerMultidimensional<LinearizerDataDimensions>::ThreadLinearizerMultidimensional(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer) : user_specified_max(false), user_specified_min(false)
       {
         vertex_size = 0;
         triangle_size = 0;
@@ -50,7 +50,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::init_linearizer_data(LinearizerNew<LinearizerDataDimensions>* linearizer)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::init_linearizer_data(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer)
       {
         this->epsilon = linearizer->epsilon;
         this->curvature_epsilon = linearizer->curvature_epsilon;
@@ -68,7 +68,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::free()
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::free()
       {
         // OpenGL part.
         if (this->triangles)
@@ -118,13 +118,13 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      ThreadLinearizerNew<LinearizerDataDimensions>::~ThreadLinearizerNew()
+      ThreadLinearizerMultidimensional<LinearizerDataDimensions>::~ThreadLinearizerMultidimensional()
       {
         free();
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::init_processing(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], LinearizerNew<LinearizerDataDimensions>* linearizer)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::init_processing(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], LinearizerMultidimensional<LinearizerDataDimensions>* linearizer)
       {
         this->init_linearizer_data(linearizer);
 
@@ -182,7 +182,7 @@ namespace Hermes
       static const int default_allocation_minsize_edges = 10000;
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::reallocate(MeshSharedPtr mesh)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::reallocate(MeshSharedPtr mesh)
       {
         int number_of_elements = mesh->get_num_elements();
 
@@ -197,15 +197,15 @@ namespace Hermes
 
         if (this->linearizerOutputType == OpenGL)
         {
-          this->triangles = realloc_with_check<ThreadLinearizerNew, LinearizerDataDimensions::triangle_t>(this->triangles, this->triangle_size, this);
-          this->edges = realloc_with_check<ThreadLinearizerNew, LinearizerDataDimensions::edge_t>(this->edges, this->edges_size, this);
-          this->edge_markers = realloc_with_check<ThreadLinearizerNew, int>(this->edge_markers, this->edges_size, this);
+          this->triangles = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::triangle_t>(this->triangles, this->triangle_size, this);
+          this->edges = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::edge_t>(this->edges, this->edges_size, this);
+          this->edge_markers = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->edge_markers, this->edges_size, this);
         }
         else
-          this->triangle_indices = realloc_with_check<ThreadLinearizerNew, triangle_indices_t>(this->triangle_indices, this->triangle_size, this);
+          this->triangle_indices = realloc_with_check<ThreadLinearizerMultidimensional, triangle_indices_t>(this->triangle_indices, this->triangle_size, this);
 
-        this->vertices = realloc_with_check<ThreadLinearizerNew, LinearizerDataDimensions::vertex_t>(this->vertices, this->vertex_size, this);
-        this->triangle_markers = realloc_with_check<ThreadLinearizerNew, int>(this->triangle_markers, this->triangle_size, this);
+        this->vertices = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::vertex_t>(this->vertices, this->vertex_size, this);
+        this->triangle_markers = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->triangle_markers, this->triangle_size, this);
 
         hash_table = (int*)malloc(sizeof(int)* this->vertex_size);
         info = (internal_vertex_info_t*)malloc(sizeof(internal_vertex_info_t)* this->vertex_size);
@@ -213,35 +213,35 @@ namespace Hermes
         if (!this->hash_table || !this->info)
         {
           this->free();
-          throw Exceptions::Exception("LinearizerNew out of memory!");
+          throw Exceptions::Exception("LinearizerMultidimensional out of memory!");
         }
 
         memset(this->hash_table, 0xff, sizeof(int)* this->vertex_size);
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::deinit_processing()
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::deinit_processing()
       {
         for (unsigned int j = 0; j < (LinearizerDataDimensions::dimension + (this->user_xdisp ? 1 : 0) + (this->user_ydisp ? 1 : 0)); j++)
           delete fns[j];
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::set_min_value(double min)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::set_min_value(double min)
       {
         this->user_specified_min = true;
         this->user_specified_min_value = min;
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::set_max_value(double max)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::set_max_value(double max)
       {
         this->user_specified_max = true;
         this->user_specified_max_value = max;
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::process_state(Traverse::State* current_state)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_state(Traverse::State* current_state)
       {
         this->rep_element = current_state->e[0];
         this->curved = this->rep_element->is_curved();
@@ -304,7 +304,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::process_triangle(int iv0, int iv1, int iv2, int level, double* values[LinearizerDataDimensions::dimension], double* physical_x, double* physical_y, int* vertex_indices)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_triangle(int iv0, int iv1, int iv2, int level, double* values[LinearizerDataDimensions::dimension], double* physical_x, double* physical_y, int* vertex_indices)
       {
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
         {
@@ -412,7 +412,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::process_quad(int iv0, int iv1, int iv2, int iv3, int level, double* values[LinearizerDataDimensions::dimension], double* physical_x, double* physical_y, int* vertex_indices)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_quad(int iv0, int iv1, int iv2, int iv3, int level, double* values[LinearizerDataDimensions::dimension], double* physical_x, double* physical_y, int* vertex_indices)
       {
         bool flip = this->quad_flip(iv0, iv1, iv2, iv3);
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
@@ -567,7 +567,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double* values[LinearizerDataDimensions::dimension], double* physical_x, double* physical_y, int* vertex_indices) const
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double* values[LinearizerDataDimensions::dimension], double* physical_x, double* physical_y, int* vertex_indices) const
       {
         bool done = false;
         double max_value = std::max(std::max(this->vertices[iv0][2], this->vertices[iv1][2]), this->vertices[iv2][2]);
@@ -624,7 +624,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      bool ThreadLinearizerNew<LinearizerDataDimensions>::quad_flip(int iv0, int iv1, int iv2, int iv3) const
+      bool ThreadLinearizerMultidimensional<LinearizerDataDimensions>::quad_flip(int iv0, int iv1, int iv2, int iv3) const
       {
         int a = (this->vertices[iv0][2] > this->vertices[iv1][2]) ? iv0 : iv1;
         int b = (this->vertices[iv2][2] > this->vertices[iv3][2]) ? iv2 : iv3;
@@ -633,7 +633,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::push_transforms(int transform)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::push_transforms(int transform)
       {
         fns[0]->push_transform(transform);
 
@@ -654,7 +654,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::pop_transforms()
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::pop_transforms()
       {
         fns[0]->pop_transform();
 
@@ -675,7 +675,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      int ThreadLinearizerNew<LinearizerDataDimensions>::peek_vertex(int p1, int p2)
+      int ThreadLinearizerMultidimensional<LinearizerDataDimensions>::peek_vertex(int p1, int p2)
       {
         // search for a vertex with parents p1, p2
         int index = hash(p1 > p2 ? p2 : p1, p1 > p2 ? p1 : p2);
@@ -690,14 +690,14 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      int ThreadLinearizerNew<LinearizerDataDimensions>::hash(int p1, int p2)
+      int ThreadLinearizerMultidimensional<LinearizerDataDimensions>::hash(int p1, int p2)
       {
         /// \todo Find out if this is good.
         return (984120265 * p1 + 125965121 * p2) & (vertex_size - 1);
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::process_edge(int iv1, int iv2, int marker)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_edge(int iv1, int iv2, int marker)
       {
         int mid = peek_vertex(iv1, iv2);
         if (mid != -1)
@@ -710,7 +710,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      int ThreadLinearizerNew<LinearizerDataDimensions>::get_vertex(int p1, int p2, double x, double y, double value[LinearizerDataDimensions::dimension])
+      int ThreadLinearizerMultidimensional<LinearizerDataDimensions>::get_vertex(int p1, int p2, double x, double y, double value[LinearizerDataDimensions::dimension])
       {
         // search for an existing vertex
         if (p1 > p2)
@@ -748,15 +748,15 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      int ThreadLinearizerNew<LinearizerDataDimensions>::add_vertex()
+      int ThreadLinearizerMultidimensional<LinearizerDataDimensions>::add_vertex()
       {
         if (this->vertex_count >= this->vertex_size)
         {
           int new_vertex_size = std::ceil(this->vertex_size * 1.5);
 
-          this->vertices = realloc_with_check<ThreadLinearizerNew, LinearizerDataDimensions::vertex_t>(this->vertices, new_vertex_size, this);
-          this->info = realloc_with_check<ThreadLinearizerNew, internal_vertex_info_t>(this->info, new_vertex_size, this);
-          this->hash_table = realloc_with_check<ThreadLinearizerNew, int>(this->hash_table, new_vertex_size, this);
+          this->vertices = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::vertex_t>(this->vertices, new_vertex_size, this);
+          this->info = realloc_with_check<ThreadLinearizerMultidimensional, internal_vertex_info_t>(this->info, new_vertex_size, this);
+          this->hash_table = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->hash_table, new_vertex_size, this);
 
           memset(this->hash_table + this->vertex_size, 0xff, sizeof(int)* (new_vertex_size - this->vertex_size));
 
@@ -766,13 +766,13 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::add_edge(int iv1, int iv2, int marker)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::add_edge(int iv1, int iv2, int marker)
       {
         if (edges_count >= edges_size)
         {
           this->edges_size = std::ceil(this->edges_size * 1.5);
-          this->edges = realloc_with_check<ThreadLinearizerNew, LinearizerDataDimensions::edge_t>(this->edges, this->edges_size, this);
-          this->edge_markers = realloc_with_check<ThreadLinearizerNew, int>(this->edge_markers, this->edges_size, this);
+          this->edges = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::edge_t>(this->edges, this->edges_size, this);
+          this->edge_markers = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->edge_markers, this->edges_size, this);
         }
 
         this->edges[edges_count][0][0] = this->vertices[iv1][0];
@@ -785,16 +785,16 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerNew<LinearizerDataDimensions>::add_triangle(int iv0, int iv1, int iv2, int marker)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::add_triangle(int iv0, int iv1, int iv2, int marker)
       {
         if (triangle_count >= triangle_size)
         {
           this->triangle_size = std::ceil(this->triangle_size * 1.5);
           if (this->linearizerOutputType == OpenGL)
-            this->triangles = realloc_with_check<ThreadLinearizerNew, LinearizerDataDimensions::triangle_t>(this->triangles, this->triangle_size, this);
+            this->triangles = realloc_with_check<ThreadLinearizerMultidimensional, LinearizerDataDimensions::triangle_t>(this->triangles, this->triangle_size, this);
           else
-            this->triangle_indices = realloc_with_check<ThreadLinearizerNew, triangle_indices_t>(this->triangle_indices, this->triangle_size, this);
-          this->triangle_markers = realloc_with_check<ThreadLinearizerNew, int>(this->triangle_markers, this->triangle_size, this);
+            this->triangle_indices = realloc_with_check<ThreadLinearizerMultidimensional, triangle_indices_t>(this->triangle_indices, this->triangle_size, this);
+          this->triangle_markers = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->triangle_markers, this->triangle_size, this);
         }
 
         if (this->linearizerOutputType == OpenGL)
@@ -819,8 +819,8 @@ namespace Hermes
         this->triangle_markers[triangle_count++] = marker;
       }
 
-      template class HERMES_API ThreadLinearizerNew<ScalarLinearizerDataDimensions>;
-      template class HERMES_API ThreadLinearizerNew<VectorLinearizerDataDimensions>;
+      template class HERMES_API ThreadLinearizerMultidimensional<ScalarLinearizerDataDimensions>;
+      template class HERMES_API ThreadLinearizerMultidimensional<VectorLinearizerDataDimensions>;
     }
   }
 }

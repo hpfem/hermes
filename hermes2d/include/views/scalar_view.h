@@ -15,8 +15,8 @@
 
 // $Id: view.h 1086 2008-10-21 09:05:44Z jakub $
 
-#ifndef __H2D_SCALAR_VIEW_NEW_H
-#define __H2D_SCALAR_VIEW_NEW_H
+#ifndef __H2D_SCALAR_VIEW_H
+#define __H2D_SCALAR_VIEW_H
 
 #include "view.h"
 #include "linearizer.h"
@@ -32,20 +32,20 @@ namespace Hermes
 
       /// \brief Visualizes a Scalar PDE solution.
       ///
-      /// ScalarViewNew is a visualization window for all Scalar-valued PDE solutions.
+      /// ScalarView is a visualization window for all Scalar-valued PDE solutions.
       ///
-      class HERMES_API ScalarViewNew : public View
+      class HERMES_API ScalarView : public View
       {
       public:
 
         void init();
 #ifndef _MSC_VER
-        ScalarViewNew(const char* title = "ScalarViewNew", WinGeom* wg = nullptr);
+        ScalarView(const char* title = "ScalarView", WinGeom* wg = nullptr);
 #else
-        ScalarViewNew(WinGeom* wg = nullptr);
+        ScalarView(WinGeom* wg = nullptr);
 #endif
-        ScalarViewNew(char* title, WinGeom* wg = nullptr);
-        ~ScalarViewNew();
+        ScalarView(char* title, WinGeom* wg = nullptr);
+        ~ScalarView();
 
         void show(MeshFunctionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
           MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0);
@@ -63,11 +63,11 @@ namespace Hermes
         virtual void reset_view(bool force_reset); ///< Resets 2d and 3d view.
 
         /// Returns the internal linearizer for the purpose of parameter settings.
-        LinearizerScalar* get_linearizer();
+        Linearizer* get_linearizer();
 
       protected:
-        /// LinearizerNew class responsible for obtaining linearized data.
-        LinearizerScalar* lin;
+        /// LinearizerMultidimensional class responsible for obtaining linearized data.
+        Linearizer* lin;
 
       protected:
         struct ElementInfo ///< element info structure
@@ -119,7 +119,7 @@ namespace Hermes
         bool show_aabb;  ///< true to show the bounding box
         float edges_color[3]; ///< color of edges
 
-        typedef void (*DrawSingleEdgeCallback)(int inx_vert_a, int inx_vert_b, ScalarViewNew* viewer, void* param); ///< A callback function that draws edge using specified vertex indices. Param is user supplied parameter.
+        typedef void (*DrawSingleEdgeCallback)(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param); ///< A callback function that draws edge using specified vertex indices. Param is user supplied parameter.
 
         void calculate_mesh_aabb(double* x_min, double* x_max, double* y_min, double* y_max); ///< Calculates AABB from edges.
 
@@ -176,12 +176,12 @@ namespace Hermes
         virtual void on_close();
       };
 #else
-class HERMES_API ScalarViewNew : public View
+class HERMES_API ScalarView : public View
       {
       public:
 				void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        ScalarViewNew(const char* title = "ScalarViewNew", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        ScalarViewNew(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        ScalarView(const char* title = "ScalarView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        ScalarView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void show(MeshFunctionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
           MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }

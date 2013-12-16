@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __H2D_LINEARIZER_NEW_H
-#define __H2D_LINEARIZER_NEW_H
+#ifndef __H2D_LINEARIZER_H
+#define __H2D_LINEARIZER_H
 
 #include "linearizer_base.h"
 #include "../function/solution.h"
@@ -27,24 +27,24 @@ namespace Hermes
     namespace Views
     {
       template<typename LinearizerDataDimensions>
-      class HERMES_API ThreadLinearizerNew;
+      class HERMES_API ThreadLinearizerMultidimensional;
       
-      /// LinearizerNew is a utility class which converts a higher-order FEM solution defined on
+      /// LinearizerMultidimensional is a utility class which converts a higher-order FEM solution defined on
       /// a curvilinear, irregular mesh to a linear FEM solution defined on a straight-edged,
       /// regular mesh. This is done by adaptive refinement of the higher-order mesh and its
       /// subsequent regularization. The linearized mesh can then be easily displayed or
       /// exported to standard formats. The class correctly handles discontinuities in the
       /// solution (e.g., gradients or in Hcurl) by inserting double vertices where necessary.
-      /// LinearizerNew also serves as a container for the resulting linearized mesh.
+      /// LinearizerMultidimensional also serves as a container for the resulting linearized mesh.
       template<typename LinearizerDataDimensions>
-      class HERMES_API LinearizerNew :
+      class HERMES_API LinearizerMultidimensional :
         public Hermes::Mixins::TimeMeasurable,
         public Hermes::Mixins::Loggable,
         public Hermes::Hermes2D::Mixins::Parallel
       {
       public:
-        LinearizerNew(LinearizerOutputType linearizerOutputType, bool auto_max = true);
-        ~LinearizerNew();
+        LinearizerMultidimensional(LinearizerOutputType linearizerOutputType, bool auto_max = true);
+        ~LinearizerMultidimensional();
 
         /// Main method - processes the solution and stores the data obtained by the process.
         /// \param[in] sln the solution
@@ -73,7 +73,7 @@ namespace Hermes
         void check_data(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension]);
 
         /// Assembly data.
-        ThreadLinearizerNew<LinearizerDataDimensions>** threadLinearizerNew;
+        ThreadLinearizerMultidimensional<LinearizerDataDimensions>** threadLinearizerMultidimensional;
 
         void init(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item_[LinearizerDataDimensions::dimension], double eps);
 
@@ -101,7 +101,7 @@ namespace Hermes
         class Iterator
         {
         public:
-          Iterator(const LinearizerNew<LinearizerDataDimensions>* linearizer);
+          Iterator(const LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
           Iterator& operator++();
           T& get() const;
           /// For triangle- and edge- markers.
@@ -112,8 +112,8 @@ namespace Hermes
           int current_thread;
           int current_thread_size;
           Hermes::vector<int> thread_sizes;
-          const LinearizerNew<LinearizerDataDimensions>* linearizer;
-          friend class LinearizerNew;
+          const LinearizerMultidimensional<LinearizerDataDimensions>* linearizer;
+          friend class LinearizerMultidimensional;
         };
 
         /// Begin - iterators.
@@ -161,11 +161,11 @@ namespace Hermes
 
         void find_min_max();
 
-        friend class ThreadLinearizerNew<LinearizerDataDimensions>;
+        friend class ThreadLinearizerMultidimensional<LinearizerDataDimensions>;
       };
 
-      typedef LinearizerNew<ScalarLinearizerDataDimensions> LinearizerScalar;
-      typedef LinearizerNew<VectorLinearizerDataDimensions> LinearizerVector;
+      typedef LinearizerMultidimensional<ScalarLinearizerDataDimensions> Linearizer;
+      typedef LinearizerMultidimensional<VectorLinearizerDataDimensions> Vectorizer;
     }
   }
 }
