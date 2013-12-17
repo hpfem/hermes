@@ -595,8 +595,6 @@ namespace Hermes
         if (!finite(max_value))
           throw Exceptions::Exception("Infinite value detected in Linearizer.");
 
-        if (fabs(max_value) < HermesEpsilon)
-          return;
         if (this->user_specified_max && (max_value > this->user_specified_max_value))
           return;
 

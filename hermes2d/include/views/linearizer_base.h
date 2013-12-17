@@ -39,6 +39,7 @@ namespace Hermes
       };
 
       /// Standard "quality" defining constants.
+      const double HERMES_EPS_VERYLOW = 0.25;
       const double HERMES_EPS_LOW = 0.05;
       const double HERMES_EPS_NORMAL = 0.01;
       const double HERMES_EPS_HIGH = 0.005;
