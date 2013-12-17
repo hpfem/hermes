@@ -80,7 +80,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::check_data(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension])
+      void LinearizerMultidimensional<LinearizerDataDimensions>::check_data(MeshFunctionSharedPtr<double>* sln)
       {
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
         if (!sln[k])
@@ -88,7 +88,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::init(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item_[LinearizerDataDimensions::dimension], double eps)
+      void LinearizerMultidimensional<LinearizerDataDimensions>::init(MeshFunctionSharedPtr<double>* sln, int* item_, double eps)
       {
         // Check.
         this->check_data(sln);
@@ -136,7 +136,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::process_solution(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item_[LinearizerDataDimensions::dimension], double eps)
+      void LinearizerMultidimensional<LinearizerDataDimensions>::process_solution(MeshFunctionSharedPtr<double>* sln, int* item_, double eps)
       {
         // Init the caught parallel exception message.
         this->exceptionMessageCaughtInParallelBlock.clear();
@@ -240,7 +240,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::finish(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension])
+      void LinearizerMultidimensional<LinearizerDataDimensions>::finish(MeshFunctionSharedPtr<double>* sln)
       {
         // regularize the linear mesh
         if (this->exceptionMessageCaughtInParallelBlock.empty())
@@ -339,14 +339,13 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension],
-        int item[LinearizerDataDimensions::dimension], const char* filename, const char *quantity_name,
+      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, const char *quantity_name,
         bool mode_3D, double eps)
       {
         if (this->linearizerOutputType != FileExport)
           throw Exceptions::Exception("This LinearizerMultidimensional is not meant to be used for file export, create a new one with appropriate linearizerOutputType.");
 
-        process_solution(sln, item, eps);
+        process_solution(&slns[0], &items[0], eps);
 
         FILE* f = fopen(filename, "wb");
         if (f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
@@ -416,22 +415,21 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D, int item, double eps)
       {
-        MeshFunctionSharedPtr<double> slns[LinearizerDataDimensions::dimension];
-        int items[LinearizerDataDimensions::dimension];
-        slns[0] = sln;
-        items[0] = item;
+        Hermes::vector<MeshFunctionSharedPtr<double> > slns;
+        Hermes::vector<int> items;
+        slns.push_back(sln);
+        items.push_back(item);
         LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(slns, items, filename, quantity_name, mode_3D, eps);
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension],
-        int item[LinearizerDataDimensions::dimension], const char* filename, const char *quantity_name[LinearizerDataDimensions::dimension],
+      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, Hermes::vector<std::string> quantity_names,
         double eps)
       {
         if (this->linearizerOutputType != FileExport)
           throw Exceptions::Exception("This LinearizerMultidimensional is not meant to be used for file export, create a new one with appropriate linearizerOutputType.");
 
-        process_solution(sln, item, eps);
+        process_solution(&slns[0], &items[0], eps);
 
         FILE* f = fopen(filename, "wb");
         if (f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
@@ -441,7 +439,7 @@ namespace Hermes
         std::stringstream ss;
         ss << "VARIABLES = \"X\", \"Y\",";
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
-          ss << " \"" << quantity_name[k] << "\"";
+          ss << " \"" << quantity_names[k] << "\"";
         fprintf(f, "%s\n", ss.str().c_str());
         fprintf(f, "ZONE N = %d, E = %d, DATAPACKING = POINT, ZONETYPE = FETRIANGLE\n", this->get_vertex_count(), this->get_triangle_count());
 
@@ -470,12 +468,12 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item, double eps)
       {
-        MeshFunctionSharedPtr<double> slns[LinearizerDataDimensions::dimension];
-        int items[LinearizerDataDimensions::dimension];
-        const char *quantity_names[LinearizerDataDimensions::dimension];
-        slns[0] = sln;
-        items[0] = item;
-        quantity_names[0] = quantity_name;
+        Hermes::vector<MeshFunctionSharedPtr<double> > slns;
+        Hermes::vector<int> items;
+        slns.push_back(sln);
+        items.push_back(item);
+        Hermes::vector<std::string> quantity_names;
+        quantity_names.push_back(quantity_name);
         LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(slns, items, filename, quantity_names, eps);
       }
 

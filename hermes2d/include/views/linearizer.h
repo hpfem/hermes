@@ -29,7 +29,7 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       class HERMES_API ThreadLinearizerMultidimensional;
 
-#define MAX_LINEARIZER_DIVISION_LEVEL 5
+#define MAX_LINEARIZER_DIVISION_LEVEL 10
       
       /// LinearizerMultidimensional is a utility class which converts a higher-order FEM solution defined on
       /// a curvilinear, irregular mesh to a linear FEM solution defined on a straight-edged,
@@ -53,50 +53,16 @@ namespace Hermes
         /// \param[in] item what item (function value, derivative wrt. x, ..) to use in the solution.
         /// \param[in] eps - tolerance parameter controlling how fine the resulting linearized approximation of the solution is.
         void process_solution(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
-        void process_solution(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item[LinearizerDataDimensions::dimension], double eps = HERMES_EPS_NORMAL);
+        void process_solution(MeshFunctionSharedPtr<double>* sln, int* items, double eps = HERMES_EPS_NORMAL);
 
         /// Save a MeshFunction (Solution, Filter) in VTK format.
         void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D = true, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
-        void save_solution_vtk(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item[LinearizerDataDimensions::dimension], const char* filename, const char* quantity_name, bool mode_3D = true, double eps = HERMES_EPS_NORMAL);
+        void save_solution_vtk(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, const char* quantity_name, bool mode_3D = true, double eps = HERMES_EPS_NORMAL);
         void save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
-        void save_solution_tecplot(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item[LinearizerDataDimensions::dimension], const char* filename, const char* quantity_name[LinearizerDataDimensions::dimension], double eps = HERMES_EPS_NORMAL);
+        void save_solution_tecplot(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, Hermes::vector<std::string> quantity_names, double eps = HERMES_EPS_NORMAL);
 
         /// Set the displacement, i.e. set two functions that will deform the domain for visualization, in the x-direction, and the y-direction.
         void set_displacement(MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult = 1.0);
-
-        /// Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
-        void calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const;
-
-        Quad2D *old_quad[LinearizerDataDimensions::dimension], *old_quad_x, *old_quad_y;
-
-        LinearizerOutputType linearizerOutputType;
-
-        /// Before assembling.
-        void check_data(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension]);
-
-        /// Assembly data.
-        ThreadLinearizerMultidimensional<LinearizerDataDimensions>** threadLinearizerMultidimensional;
-
-        void init(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], int item_[LinearizerDataDimensions::dimension], double eps);
-
-        Hermes::vector<MeshSharedPtr > meshes;
-
-        void set_max_absolute_value(double max_abs);
-
-        double get_min_value() const;
-        double get_max_value() const;
-
-        /// Set the threshold for how fine the output for curved elements.
-        /// \param[in] curvature_epsilon The 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
-        /// The smaller, the finer.
-        /// Default value = 1e-3.
-        void set_curvature_epsilon(double curvature_epsilon);
-
-        /// Get the 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
-        double get_curvature_epsilon() const;
-
-        /// Free the instance.
-        void free();
 
         /// Iterator class.
         template<typename T>
@@ -131,18 +97,54 @@ namespace Hermes
         int get_edge_count() const;
         int get_triangle_index_count() const;
 
+        void set_max_absolute_value(double max_abs);
+
+        double get_min_value() const;
+        double get_max_value() const;
+
+        /// Set the threshold for how fine the output for curved elements.
+        /// \param[in] curvature_epsilon The 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
+        /// The smaller, the finer.
+        /// Default value = 1e-3.
+        void set_curvature_epsilon(double curvature_epsilon);
+
+        /// Get the 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
+        double get_curvature_epsilon() const;
+
+        /// Free the instance.
+        void free();
+
+        /// Internal.
         void lock_data() const;
-#ifndef NOGLUT
-        mutable pthread_mutex_t data_mutex;
-#endif
         void unlock_data() const;
 
+        /// Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
+        void calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const;
+
       protected:
+        Quad2D *old_quad[LinearizerDataDimensions::dimension], *old_quad_x, *old_quad_y;
+
+        LinearizerOutputType linearizerOutputType;
+
+        /// Before assembling.
+        void check_data(MeshFunctionSharedPtr<double>* sln);
+
+        /// Assembly data.
+        ThreadLinearizerMultidimensional<LinearizerDataDimensions>** threadLinearizerMultidimensional;
+
+        void init(MeshFunctionSharedPtr<double>* sln, int* item, double eps);
+
+        Hermes::vector<MeshSharedPtr > meshes;
+
         /// Standard and curvature epsilon.
         double epsilon, curvature_epsilon;
 
         /// Information if user-supplied displacement functions have been provided.
         bool user_xdisp, user_ydisp;
+
+#ifndef NOGLUT
+        mutable pthread_mutex_t data_mutex;
+#endif
 
         /// Displacement functions, default to ZeroFunctions, may be supplied by set_displacement();
         MeshFunctionSharedPtr<double> xdisp, ydisp;
@@ -154,7 +156,7 @@ namespace Hermes
         int item[LinearizerDataDimensions::dimension], component[LinearizerDataDimensions::dimension], value_type[LinearizerDataDimensions::dimension];
 
         // Finish - contour triangles calculation etc.
-        void finish(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension]);
+        void finish(MeshFunctionSharedPtr<double>* sln);
 
         Traverse::State** states;
 

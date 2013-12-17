@@ -42,7 +42,7 @@ namespace Hermes
 
         void init_linearizer_data(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
 
-        void init_processing(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
+        void init_processing(MeshFunctionSharedPtr<double>* sln, LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
         void deinit_processing();
         
         void process_state(Traverse::State* current_state);
@@ -59,13 +59,13 @@ namespace Hermes
         void add_triangle(int iv0, int iv1, int iv2, int marker);
 
         int add_vertex();
-        int get_vertex(int p1, int p2, double x, double y, double value[LinearizerDataDimensions::dimension]);
+        int get_vertex(int p1, int p2, double x, double y, double* value);
 
         void process_triangle(int iv0, int iv1, int iv2, int level);
 
         void process_quad(int iv0, int iv1, int iv2, int iv3, int level);
 
-        void split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double* val[LinearizerDataDimensions::dimension], double* phx, double* phy, int* indices) const;
+        void split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double** val, double* phx, double* phy, int* indices) const;
 
         bool quad_flip(int iv0, int iv1, int iv2, int iv3) const;
 

@@ -124,7 +124,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::init_processing(MeshFunctionSharedPtr<double> sln[LinearizerDataDimensions::dimension], LinearizerMultidimensional<LinearizerDataDimensions>* linearizer)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::init_processing(MeshFunctionSharedPtr<double>* sln, LinearizerMultidimensional<LinearizerDataDimensions>* linearizer)
       {
         this->init_linearizer_data(linearizer);
 
@@ -581,7 +581,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double* values[LinearizerDataDimensions::dimension], double* physical_x, double* physical_y, int* vertex_indices) const
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double** values, double* physical_x, double* physical_y, int* vertex_indices) const
       {
         split = 0;
         bool done = false;
@@ -762,7 +762,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      int ThreadLinearizerMultidimensional<LinearizerDataDimensions>::get_vertex(int p1, int p2, double x, double y, double value[LinearizerDataDimensions::dimension])
+      int ThreadLinearizerMultidimensional<LinearizerDataDimensions>::get_vertex(int p1, int p2, double x, double y, double* value)
       {
         // search for an existing vertex
         if (p1 > p2)
