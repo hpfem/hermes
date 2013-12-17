@@ -290,9 +290,9 @@ namespace Hermes
 
         // recur to sub-elements
         if (current_state->e[0]->is_triangle())
-          process_triangle(iv[0], iv[1], iv[2], 0, val, nullptr, nullptr, nullptr);
+          process_triangle(iv[0], iv[1], iv[2], 0);
         else
-          process_quad(iv[0], iv[1], iv[2], iv[3], 0, val, nullptr, nullptr, nullptr);
+          process_quad(iv[0], iv[1], iv[2], iv[3], 0);
 
 #ifndef DEBUG_LINEARIZER
         if (this->linearizerOutputType == OpenGL)
@@ -304,15 +304,17 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_triangle(int iv0, int iv1, int iv2, int level, double* values[LinearizerDataDimensions::dimension], double* physical_x, double* physical_y, int* vertex_indices)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_triangle(int iv0, int iv1, int iv2, int level)
       {
+        double* values[LinearizerDataDimensions::dimension];
+        double* physical_x;
+        double* physical_y;
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
         {
           fns[k]->set_quad_order(1, item[k]);
           values[k] = fns[k]->get_values(component[k], value_type[k]);
         }
-        physical_x, *physical_y;
-        vertex_indices = tri_indices[0];
+        int* vertex_indices = tri_indices[0];
 
         if (curved)
         {
@@ -347,14 +349,19 @@ namespace Hermes
 
         // determine whether or not to split the element
         int split;
-        if (this->epsilon >= 1.0)
-        {
-          // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
-          split = (level < epsilon);
-        }
+        if (level == MAX_LINEARIZER_DIVISION_LEVEL)
+          split = 0;
         else
         {
-          this->split_decision(split, iv0, iv1, iv2, 0, rep_element->get_mode(), values, physical_x, physical_y, vertex_indices);
+          if (this->epsilon >= 1.0)
+          {
+            // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
+            split = (level < epsilon);
+          }
+          else
+          {
+            this->split_decision(split, iv0, iv1, iv2, 0, rep_element->get_mode(), values, physical_x, physical_y, vertex_indices);
+          }
         }
 
         // split the triangle if the error is too large, otherwise produce a linear triangle
@@ -383,19 +390,19 @@ namespace Hermes
 
           // recur to sub-elements
           this->push_transforms(0);
-          process_triangle(iv0, mid0, mid2, level + 1, values, physical_x, physical_y, tri_indices[1]);
+          process_triangle(iv0, mid0, mid2, level + 1);
           this->pop_transforms();
 
           this->push_transforms(1);
-          process_triangle(mid0, iv1, mid1, level + 1, values, physical_x, physical_y, tri_indices[2]);
+          process_triangle(mid0, iv1, mid1, level + 1);
           this->pop_transforms();
 
           this->push_transforms(2);
-          process_triangle(mid2, mid1, iv2, level + 1, values, physical_x, physical_y, tri_indices[3]);
+          process_triangle(mid2, mid1, iv2, level + 1);
           this->pop_transforms();
 
           this->push_transforms(3);
-          process_triangle(mid1, mid2, mid0, level + 1, values, physical_x, physical_y, tri_indices[4]);
+          process_triangle(mid1, mid2, mid0, level + 1);
           this->pop_transforms();
         }
         else
@@ -412,16 +419,18 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_quad(int iv0, int iv1, int iv2, int iv3, int level, double* values[LinearizerDataDimensions::dimension], double* physical_x, double* physical_y, int* vertex_indices)
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_quad(int iv0, int iv1, int iv2, int iv3, int level)
       {
+        double* values[LinearizerDataDimensions::dimension];
+        double* physical_x;
+        double* physical_y;
+        int* vertex_indices = quad_indices[0];
         bool flip = this->quad_flip(iv0, iv1, iv2, iv3);
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
         {
           fns[k]->set_quad_order(1, item[k]);
           values[k] = fns[k]->get_values(component[k], value_type[k]);
         }
-        physical_x, *physical_y;
-        vertex_indices = quad_indices[0];
 
         if (curved)
         {
@@ -457,21 +466,26 @@ namespace Hermes
         };
 
         // the value of the middle point is not the average of the four vertex values, since quad == 2 triangles
-        midval[LinearizerDataDimensions::dimension + 1][4] = flip ? 
-          (this->vertices[iv0][LinearizerDataDimensions::dimension + 1] + this->vertices[iv2][LinearizerDataDimensions::dimension + 1]) * 0.5 
+        midval[LinearizerDataDimensions::dimension + 1][4] = flip ?
+          (this->vertices[iv0][LinearizerDataDimensions::dimension + 1] + this->vertices[iv2][LinearizerDataDimensions::dimension + 1]) * 0.5
           :
           (this->vertices[iv1][LinearizerDataDimensions::dimension + 1] + this->vertices[iv3][LinearizerDataDimensions::dimension + 1]) * 0.5;
 
         // determine whether or not to split the element
         int split;
-        if (this->epsilon >= 1.0)
-        {
-          // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
-          split = (level < epsilon ? 3 : 0);
-        }
+        if (level == MAX_LINEARIZER_DIVISION_LEVEL)
+          split = 0;
         else
         {
-          this->split_decision(split, iv0, iv1, iv2, 0, rep_element->get_mode(), values, physical_x, physical_y, vertex_indices);
+          if (this->epsilon >= 1.0)
+          {
+            // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
+            split = (level < epsilon ? 3 : 0);
+          }
+          else
+          {
+            this->split_decision(split, iv0, iv1, iv2, 0, rep_element->get_mode(), values, physical_x, physical_y, vertex_indices);
+          }
         }
 
         // split the quad if the error is too large, otherwise produce two linear triangles
@@ -504,40 +518,40 @@ namespace Hermes
           if (split == 3)
           {
             this->push_transforms(0);
-            process_quad(iv0, mid0, mid4, mid3, level + 1, values, physical_x, physical_y, quad_indices[1]);
+            process_quad(iv0, mid0, mid4, mid3, level + 1);
             this->pop_transforms();
 
             this->push_transforms(1);
-            process_quad(mid0, iv1, mid1, mid4, level + 1, values, physical_x, physical_y, quad_indices[2]);
+            process_quad(mid0, iv1, mid1, mid4, level + 1);
             this->pop_transforms();
 
             this->push_transforms(2);
-            process_quad(mid4, mid1, iv2, mid2, level + 1, values, physical_x, physical_y, quad_indices[3]);
+            process_quad(mid4, mid1, iv2, mid2, level + 1);
             this->pop_transforms();
 
             this->push_transforms(3);
-            process_quad(mid3, mid4, mid2, iv3, level + 1, values, physical_x, physical_y, quad_indices[4]);
+            process_quad(mid3, mid4, mid2, iv3, level + 1);
             this->pop_transforms();
           }
           else
           if (split == 1) // h-split
           {
             this->push_transforms(4);
-            process_quad(iv0, iv1, mid1, mid3, level + 1, values, physical_x, physical_y, quad_indices[5]);
+            process_quad(iv0, iv1, mid1, mid3, level + 1);
             this->pop_transforms();
 
             this->push_transforms(5);
-            process_quad(mid3, mid1, iv2, iv3, level + 1, values, physical_x, physical_y, quad_indices[6]);
+            process_quad(mid3, mid1, iv2, iv3, level + 1);
             this->pop_transforms();
           }
           else // v-split
           {
             this->push_transforms(6);
-            process_quad(iv0, mid0, mid2, iv3, level + 1, values, physical_x, physical_y, quad_indices[7]);
+            process_quad(iv0, mid0, mid2, iv3, level + 1);
             this->pop_transforms();
 
             this->push_transforms(7);
-            process_quad(mid0, iv1, iv2, mid2, level + 1, values, physical_x, physical_y, quad_indices[8]);
+            process_quad(mid0, iv1, iv2, mid2, level + 1);
             this->pop_transforms();
           }
         }
@@ -578,38 +592,52 @@ namespace Hermes
         if (mode == HERMES_MODE_QUAD)
           min_value = std::min(max_value, this->vertices[iv3][2]);
 
+        if (!finite(max_value))
+          throw Exceptions::Exception("Infinite value detected in Linearizer.");
+
+        if (fabs(max_value) < HermesEpsilon)
+          return;
         if (this->user_specified_max && (max_value > this->user_specified_max_value))
-        {
-          // do not split if the whole triangle is above the specified maximum value
-          split = 0;
-          done = true;
-        }
+          return;
 
         if (!done && this->user_specified_min && (min_value < this->user_specified_min_value))
-        {
-          // do not split if the whole triangle is below the specified minimum value
-          split = 0;
-          done = true;
-        }
+          return;
 
         // Core of the decision - calculate the approximate error of linearizing the normalized solution
-        if (!done)
-        {
           for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
           {
+            // Errors in edge midpoints summed up.
             double error = fabs(values[k][vertex_indices[0]] - midval[2 + k][0])
               + fabs(values[k][vertex_indices[1]] - midval[2 + k][1])
               + fabs(values[k][vertex_indices[2]] - midval[2 + k][2]);
+
             if (mode == HERMES_MODE_QUAD)
               error += fabs(values[k][vertex_indices[3]] - midval[2 + k][3]);
-            double max_abs_value = std::max(fabs(max_value), fabs(min_value));
-            if (max_abs_value > HermesEpsilon)
-              split = !finite(error) || ((error / max_abs_value) > this->epsilon);
-          }
+
+            // Divide by the edge count.
+            error /= (3 + mode);
+
+            double relative_error = error / this->max_value_approx;
+            split = relative_error > this->epsilon;
+
+            // Quads - division type
+            if (mode == HERMES_MODE_QUAD && split)
+            {
+              double horizontal_error = fabs(values[k][vertex_indices[1]] - midval[2 + k][1]) + fabs(values[k][vertex_indices[3]] - midval[2 + k][3]);
+              double vertical_error = fabs(values[k][vertex_indices[0]] - midval[2 + k][0]) + fabs(values[k][vertex_indices[2]] - midval[2 + k][2]);
+
+              // decide whether to split horizontally or vertically only
+              if (horizontal_error > 5 * vertical_error)
+                split = 1; // h-split
+              else if (vertical_error > 5 * horizontal_error)
+                split = 2; // v-split
+              else
+                split = 3;
+            }
         }
 
         // do the same for the curvature
-        if (!done && curved)
+        if (curved)
         {
           for (int i = 0; i < 3 + mode; i++)
           {
@@ -617,9 +645,36 @@ namespace Hermes
               + sqr(physical_y[vertex_indices[i]] - midval[1][i]);
             double diameter = sqr(fns[0]->get_active_element()->get_diameter());
 
-            split = ((error / diameter) > this->curvature_epsilon);
+            split = (error / diameter) > this->curvature_epsilon;
+            if (split)
+            {
+              if (mode == HERMES_MODE_QUAD)
+                split = 3;
+              break;
+            }
           }
         }
+      }
+
+      template<typename LinearizerDataDimensions>
+      double ThreadLinearizerMultidimensional<LinearizerDataDimensions>::get_max_value(Traverse::State* current_state)
+      {
+        double local_max = 0.;
+        for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
+        {
+          fns[k]->set_active_element(current_state->e[k]);
+          fns[k]->set_transform(current_state->sub_idx[k]);
+          fns[k]->set_quad_order(0, this->item[k]);
+          double* val = fns[k]->get_values(component[k], value_type[k]);
+
+          for (unsigned int i = 0; i < current_state->e[k]->get_nvert(); i++)
+          {
+            double f = fabs(val[i]);
+            if (f > local_max)
+              local_max = f;
+          }
+        }
+        return local_max;
       }
 
       template<typename LinearizerDataDimensions>
@@ -776,10 +831,12 @@ namespace Hermes
 
         this->edges[edges_count][0][0] = this->vertices[iv1][0];
         this->edges[edges_count][0][1] = this->vertices[iv1][1];
-        this->edges[edges_count][0][2] = this->vertices[iv1][2];
+        for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
+          this->edges[edges_count][0][2 + k] = this->vertices[iv1][2 + k];
         this->edges[edges_count][1][0] = this->vertices[iv2][0];
         this->edges[edges_count][1][1] = this->vertices[iv2][1];
-        this->edges[edges_count][1][2] = this->vertices[iv2][2];
+        for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
+          this->edges[edges_count][1][2 + k] = this->vertices[iv2][2 + k];
         this->edge_markers[edges_count++] = marker;
       }
 
@@ -800,13 +857,16 @@ namespace Hermes
         {
           this->triangles[triangle_count][0][0] = this->vertices[iv0][0];
           this->triangles[triangle_count][0][1] = this->vertices[iv0][1];
-          this->triangles[triangle_count][0][2] = this->vertices[iv0][2];
+          for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
+            this->triangles[triangle_count][0][2 + k] = this->vertices[iv0][2 + k];
           this->triangles[triangle_count][1][0] = this->vertices[iv1][0];
           this->triangles[triangle_count][1][1] = this->vertices[iv1][1];
-          this->triangles[triangle_count][1][2] = this->vertices[iv1][2];
+          for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
+            this->triangles[triangle_count][1][2 + k] = this->vertices[iv1][2 + k];
           this->triangles[triangle_count][2][0] = this->vertices[iv2][0];
           this->triangles[triangle_count][2][1] = this->vertices[iv2][1];
-          this->triangles[triangle_count][2][2] = this->vertices[iv2][2];
+          for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
+            this->triangles[triangle_count][2][2 + k] = this->vertices[iv2][2 + k];
         }
         else
         {

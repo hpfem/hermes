@@ -28,6 +28,8 @@ namespace Hermes
     {
       template<typename LinearizerDataDimensions>
       class HERMES_API ThreadLinearizerMultidimensional;
+
+#define MAX_LINEARIZER_DIVISION_LEVEL 5
       
       /// LinearizerMultidimensional is a utility class which converts a higher-order FEM solution defined on
       /// a curvilinear, irregular mesh to a linear FEM solution defined on a straight-edged,
@@ -113,6 +115,7 @@ namespace Hermes
           int current_thread_size;
           Hermes::vector<int> thread_sizes;
           const LinearizerMultidimensional<LinearizerDataDimensions>* linearizer;
+          void check_zero_lengths();
           friend class LinearizerMultidimensional;
         };
 

@@ -26,7 +26,8 @@ namespace Hermes
     namespace Views
     {
       template<typename LinearizerDataDimensions>
-      LinearizerMultidimensional<LinearizerDataDimensions>::LinearizerMultidimensional(LinearizerOutputType linearizerOutputType, bool auto_max) : states(nullptr), num_states(0), dmult(1.0), curvature_epsilon(1e-3), linearizerOutputType(linearizerOutputType)
+      LinearizerMultidimensional<LinearizerDataDimensions>::LinearizerMultidimensional(LinearizerOutputType linearizerOutputType, bool auto_max) : 
+        states(nullptr), num_states(0), dmult(1.0), curvature_epsilon(1e-5), linearizerOutputType(linearizerOutputType)
       {
         xdisp = nullptr;
         user_xdisp = false;
@@ -160,7 +161,14 @@ namespace Hermes
 
           try
           {
+            double max_value_for_adaptive_refinements = 0.;
+
             this->threadLinearizerMultidimensional[thread_number]->init_processing(sln, this);
+
+            for (int state_i = start; state_i < end; state_i++)
+              max_value_for_adaptive_refinements = std::max(max_value_for_adaptive_refinements, this->threadLinearizerMultidimensional[thread_number]->get_max_value(states[state_i]));
+
+            this->threadLinearizerMultidimensional[thread_number]->max_value_approx = max_value_for_adaptive_refinements;
 
             for (int state_i = start; state_i < end; state_i++)
             {
@@ -510,10 +518,26 @@ namespace Hermes
           {
             this->current_thread_index = 0;
             this->current_thread_size = this->thread_sizes[++this->current_thread];
+            this->check_zero_lengths();
           }
         }
         else
           this->current_thread_index++;
+      }
+
+      template<typename LinearizerDataDimensions>
+      template<typename T>
+      void LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<T>::check_zero_lengths()
+      {
+        while (this->current_thread_size == 0)
+        {
+          if (this->current_thread_size == this->thread_sizes.size() - 1)
+          {
+            this->end = true;
+            break;
+          }
+          this->current_thread_size = this->thread_sizes[++this->current_thread];
+        }
       }
 
       template<>
@@ -614,6 +638,7 @@ namespace Hermes
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_markers[this->current_thread_index];
       }
 
+
       template<typename LinearizerDataDimensions>
 #ifdef _MSC_VER
       typename LinearizerMultidimensional<LinearizerDataDimensions>::Iterator<typename LinearizerDataDimensions::vertex_t> LinearizerMultidimensional<LinearizerDataDimensions>::vertices_begin() const
@@ -625,6 +650,7 @@ namespace Hermes
         for (int i = 0; i < this->num_threads_used; i++)
           iterator.thread_sizes.push_back(this->threadLinearizerMultidimensional[i]->vertex_count);
         iterator.current_thread_size = iterator.thread_sizes[0];
+        iterator.check_zero_lengths();
         return iterator;
       }
       template<typename LinearizerDataDimensions>
@@ -638,6 +664,7 @@ namespace Hermes
         for (int i = 0; i < this->num_threads_used; i++)
           iterator.thread_sizes.push_back(this->threadLinearizerMultidimensional[i]->triangle_count);
         iterator.current_thread_size = iterator.thread_sizes[0];
+        iterator.check_zero_lengths();
         return iterator;
       }
       template<typename LinearizerDataDimensions>
@@ -651,6 +678,7 @@ namespace Hermes
         for (int i = 0; i < this->num_threads_used; i++)
           iterator.thread_sizes.push_back(this->threadLinearizerMultidimensional[i]->edges_count);
         iterator.current_thread_size = iterator.thread_sizes[0];
+        iterator.check_zero_lengths();
         return iterator;
       }
       template<typename LinearizerDataDimensions>
@@ -664,6 +692,7 @@ namespace Hermes
         for (int i = 0; i < this->num_threads_used; i++)
           iterator.thread_sizes.push_back(this->threadLinearizerMultidimensional[i]->triangle_count);
         iterator.current_thread_size = iterator.thread_sizes[0];
+        iterator.check_zero_lengths();
         return iterator;
       }
 

@@ -39,10 +39,10 @@ namespace Hermes
       };
 
       /// Standard "quality" defining constants.
-      const double HERMES_EPS_LOW = 0.5;
-      const double HERMES_EPS_NORMAL = 0.1;
-      const double HERMES_EPS_HIGH = 0.05;
-      const double HERMES_EPS_VERYHIGH = 0.01;
+      const double HERMES_EPS_LOW = 0.05;
+      const double HERMES_EPS_NORMAL = 0.01;
+      const double HERMES_EPS_HIGH = 0.005;
+      const double HERMES_EPS_VERYHIGH = 0.001;
 
       /// Typedefs used throughout the Linearizer functionality.
       struct ScalarLinearizerDataDimensions
