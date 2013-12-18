@@ -16,9 +16,9 @@
 #ifndef __H2D_LINEARIZER_H
 #define __H2D_LINEARIZER_H
 
-#include "linearizer_base.h"
-#include "../function/solution.h"
 #include "thread_linearizer.h"
+#include <pthread.h>
+#include "../function/solution.h"
 
 namespace Hermes
 {
@@ -26,6 +26,72 @@ namespace Hermes
   {
     namespace Views
     {
+      /// Standard "quality" defining constants.
+      const double HERMES_EPS_VERYLOW = 0.25;
+      const double HERMES_EPS_LOW = 0.05;
+      const double HERMES_EPS_NORMAL = 0.01;
+      const double HERMES_EPS_HIGH = 0.005;
+      const double HERMES_EPS_VERYHIGH = 0.001;
+
+      //// linearization "quadrature" ////////////////////////////////////////////////////////////////////
+
+      /// The tables with index zero are for obtaining solution values at the element
+      /// vertices. Index one tables serve for the retrieval of interior values. Index one tables
+      /// are used for adaptive approximation of the solution by transforming their points to sub-elements.
+      /// Actually, the tables contain two levels of refinement -- this is an optimization to reduce
+      /// the number of calls to sln->get_values().
+      extern double3 lin_pts_0_tri[];
+
+      extern double3 lin_pts_0_quad[];
+
+      extern double3 lin_pts_1_tri[12];
+
+      extern double3 lin_pts_1_quad[21];
+
+      extern int quad_indices[9][5];
+
+      extern int tri_indices[5][3];
+
+      extern int lin_np_tri[2];
+      extern int lin_np_quad[2];
+      extern int* lin_np[2];
+
+      extern double3*  lin_tables_tri[2];
+      extern double3*  lin_tables_quad[2];
+      extern double3** lin_tables[2];
+
+      class Quad2DLin : public Quad2D
+      {
+      public:
+        Quad2DLin();
+      };
+
+      /// Typedefs used throughout the Linearizer functionality.
+      struct ScalarLinearizerDataDimensions
+      {
+        static const int dimension = 1;
+
+        typedef double3x3 triangle_t;
+        typedef double2x3 edge_t;
+        typedef double3 vertex_t;
+      };
+
+      struct VectorLinearizerDataDimensions
+      {
+        static const int dimension = 2;
+
+        typedef double3x4 triangle_t;
+        typedef double2x4 edge_t;
+        typedef double4 vertex_t;
+      };
+
+      typedef int3 internal_vertex_info_t;
+      typedef int3 triangle_indices_t;
+
+      extern HERMES_API Quad2DLin g_quad_lin;
+
+      const int LIN_MAX_LEVEL = 5;
+
       template<typename LinearizerDataDimensions>
       class HERMES_API ThreadLinearizerMultidimensional;
 

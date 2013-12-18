@@ -16,7 +16,11 @@
 #ifndef __H2D_ORDERIZER_H
 #define __H2D_ORDERIZER_H
 
-#include "linearizer.h"
+#include "../space/space.h"
+#include "global.h"
+#include <pthread.h>
+#include "../quadrature/quad_all.h"
+#include "../mesh/traverse.h"
 
 namespace Hermes
 {
@@ -27,7 +31,7 @@ namespace Hermes
       /// Like the Linearizer, but generates a triangular mesh showing polynomial
       /// orders in a space, hence the funky name.
       ///
-      class HERMES_API Orderizer : public LinearizerBase
+      class HERMES_API Orderizer
       {
       public:
 
@@ -59,11 +63,29 @@ namespace Hermes
         int get_num_vertices();
         double3* get_vertices();
 
+        void lock_data() const;
+        void unlock_data() const;
+
+        int3* get_triangles();
+        int* get_triangle_markers();
+        int get_num_triangles();
+
+        int2* get_edges();
+        int* get_edge_markers();
+        int get_num_edges();
+
         void free();
       protected:
+#ifndef NOGLUT
+        mutable pthread_mutex_t data_mutex;
+#endif
+        int2* edges;     ///< edges: pairs of vertex indices
+        int* edge_markers;     ///< edge_markers: edge markers, ordering equal to edges
+        void add_edge(int iv1, int iv2, int marker);
+
         /// Reallocation at the beginning of process_*.
         /// Specific for Linearizer
-        void reallocate_specific(int number_of_elements);
+        void reallocate(MeshSharedPtr mesh);
 
         char  buffer[1000];
         char* labels[11][11];
@@ -74,10 +96,16 @@ namespace Hermes
         char** ltext;
         double2* lbox;
 
+        int3* tris;      ///< triangles: vertex index triplets
+        int* tri_markers;///< triangle_markers: triangle markers, ordering equal to tris
+
+        int vertex_count, triangle_count, edges_count; ///< Real numbers of vertices, triangles and edges
+        int vertex_size, triangle_size, edges_size; ///< Size of arrays of vertices, triangles and edges
+
         void add_triangle(int iv0, int iv1, int iv2, int marker);
 
-        void add_edge(int iv1, int iv2, int marker);
-
+        static void calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y);
+        
         int add_vertex();
 
         void make_vert(int & index, double x, double y, double val);

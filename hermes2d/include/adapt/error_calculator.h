@@ -96,6 +96,10 @@ namespace Hermes
       /// Return the error mesh function - for visualization and other postprocessing of the element-wise error.
       /// \param component The component.
       MeshFunctionSharedPtr<double> get_errorMeshFunction(int component = 0);
+
+      /// Frees the data.
+      void free();
+
     protected:
       /// State querying helpers.
       virtual bool isOkay() const;

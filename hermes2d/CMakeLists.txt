@@ -182,7 +182,6 @@ project(hermes2d)
     src/views/view_support.cpp
     src/views/thread_linearizer.cpp
     src/views/linearizer.cpp
-    src/views/linearizer_base.cpp
     src/views/orderizer.cpp
     
     src/weakform_library/weakforms_elasticity.cpp
@@ -290,7 +289,6 @@ project(hermes2d)
     src/views/view_data.cpp
     src/views/view_support.cpp
     src/views/linearizer.cpp
-    src/views/linearizer_base.cpp
     src/views/thread_linearizer.cpp
     src/views/orderizer.cpp
   )
@@ -432,7 +430,6 @@ project(hermes2d)
     include/views/view_support.h
     include/views/thread_linearizer.h
     include/views/linearizer.h
-    include/views/linearizer_base.h
     include/views/orderizer.h
 
     include/weakform_library/weakforms_elasticity.h
@@ -545,7 +542,6 @@ project(hermes2d)
     include/views/view_support.h
     include/views/thread_linearizer.h
     include/views/linearizer.h
-    include/views/linearizer_base.h
     include/views/orderizer.h
   )
   

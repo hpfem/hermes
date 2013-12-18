@@ -37,16 +37,7 @@ namespace Hermes
     template<typename Scalar>
     ErrorCalculator<Scalar>::~ErrorCalculator()
     {
-      for (int i = 0; i < this->component_count; i++)
-      {
-        if (errors[i])
-          ::free(errors[i]);
-        if (norms[i])
-          ::free(norms[i]);
-      }
-
-      if (this->element_references)
-        ::free(this->element_references);
+      free();
     }
 
     template<typename Scalar>
@@ -80,21 +71,11 @@ namespace Hermes
       {
         int num_elements_i = this->coarse_solutions[i]->get_mesh()->get_max_element_id();
 
-        if (errors[i] == nullptr)
-          errors[i] = (double*)calloc(num_elements_i, sizeof(double));
-        else
-        {
-          errors[i] = (double*)realloc(errors[i], num_elements_i * sizeof(double));
-          memset(errors[i], 0, sizeof(double)* num_elements_i);
-        }
+        this->errors[i] = realloc_with_check<ErrorCalculator<Scalar>, double>(errors[i], num_elements_i, this);
+        memset(this->errors[i], 0, sizeof(double)* num_elements_i);
 
-        if (norms[i] == nullptr)
-          norms[i] = (double*)calloc(num_elements_i, sizeof(double));
-        else
-        {
-          norms[i] = (double*)realloc(norms[i], num_elements_i * sizeof(double));
-          memset(norms[i], 0, sizeof(double)* num_elements_i);
-        }
+        this->norms[i] = realloc_with_check<ErrorCalculator<Scalar>, double>(norms[i], num_elements_i, this);
+        memset(this->norms[i], 0, sizeof(double)* num_elements_i);
 
         component_errors[i] = 0.;
         component_norms[i] = 0.;
@@ -107,7 +88,7 @@ namespace Hermes
       if (this->element_references)
         ::free(this->element_references);
 
-      this->element_references = (ElementReference*)malloc(this->num_act_elems * sizeof(ElementReference));
+      this->element_references = malloc_with_check<ErrorCalculator<Scalar>, ElementReference>(this->num_act_elems, this);
 
       int running_count_total = 0;
       for (int i = 0; i < this->component_count; i++)
@@ -123,6 +104,21 @@ namespace Hermes
       for (int i = 0; i < this->component_count; i++)
       if (this->errorMeshFunction[i])
         this->errorMeshFunction[i].reset();
+    }
+
+    template<typename Scalar>
+    void ErrorCalculator<Scalar>::free()
+    {
+      for (int i = 0; i < this->component_count; i++)
+      {
+        if (errors[i])
+          ::free(errors[i]);
+        if (norms[i])
+          ::free(norms[i]);
+      }
+
+      if (this->element_references)
+        ::free(this->element_references);
     }
 
     template<typename Scalar>
@@ -186,17 +182,25 @@ namespace Hermes
         if (thread_number == this->num_threads_used - 1)
           end = num_states;
 
-        // Create a calculator for this thread.
-        ErrorThreadCalculator<Scalar> errorThreadCalculator(this);
+        try
+        {
+          // Create a calculator for this thread.
+          ErrorThreadCalculator<Scalar> errorThreadCalculator(this);
 
-        // Do the work.
-        for (int state_i = start; state_i < end; state_i++)
-          errorThreadCalculator.evaluate_one_state(states[state_i]);
+          // Do the work.
+          for (int state_i = start; state_i < end; state_i++)
+            errorThreadCalculator.evaluate_one_state(states[state_i]);
+        }
+        catch (std::exception& exception)
+        {
+#pragma omp critical (exceptionMessageCaughtInParallelBlock)
+          this->exceptionMessageCaughtInParallelBlock = exception.what();
+        }
       }
 
       for (int i = 0; i < num_states; i++)
         delete states[i];
-      free(states);
+      ::free(states);
 
       // Clean after ourselves.
       for (int i = 0; i < this->component_count; i++)
@@ -206,6 +210,12 @@ namespace Hermes
           e->visited = false;
         for_all_active_elements(e, fine_solutions[i]->get_mesh())
           e->visited = false;
+      }
+
+      if (!this->exceptionMessageCaughtInParallelBlock.empty())
+      {
+        throw Hermes::Exceptions::Exception(this->exceptionMessageCaughtInParallelBlock.c_str());
+        return;
       }
 
       // Sums calculation & error postprocessing.

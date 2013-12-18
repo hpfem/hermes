@@ -86,13 +86,21 @@ namespace Hermes
         };
       } quad_ord_simple;
 
-      Orderizer::Orderizer() : LinearizerBase()
+      Orderizer::Orderizer()
       {
         verts = nullptr;
+        edges = nullptr;
         this->label_size = 0;
         ltext = nullptr;
         lvert = nullptr;
         lbox = nullptr;
+
+        tris = nullptr;
+        tri_markers = nullptr;
+        edges = nullptr;
+        edge_markers = nullptr;
+
+        vertex_count = triangle_count = edges_count = this->vertex_size = this->triangle_size = this->edges_size = 0;
 
         label_count = 0;
 
@@ -109,6 +117,13 @@ namespace Hermes
             p += strlen(buffer + p) + 1;
           }
         }
+#ifndef NOGLUT
+        pthread_mutexattr_t attr;
+        pthread_mutexattr_init(&attr);
+        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutex_init(&data_mutex, &attr);
+        pthread_mutexattr_destroy(&attr);
+#endif
       }
 
       int Orderizer::add_vertex()
@@ -134,30 +149,45 @@ namespace Hermes
         verts[index][2] = val;
       }
 
-      void Orderizer::reallocate_specific(int number_of_elements)
+      static const int default_allocation_multiplier_vertices = 10;
+      static const int default_allocation_multiplier_triangles = 15;
+      static const int default_allocation_multiplier_edges = 10;
+
+      static const int default_allocation_minsize_vertices = 10000;
+      static const int default_allocation_minsize_triangles = 15000;
+      static const int default_allocation_minsize_edges = 10000;
+
+      void Orderizer::reallocate(MeshSharedPtr mesh)
       {
+        int number_of_elements = mesh->get_num_elements();
+
+        this->vertex_size = std::max(default_allocation_multiplier_vertices * number_of_elements, std::max(this->vertex_size, default_allocation_minsize_vertices));
+        this->triangle_size = std::max(default_allocation_multiplier_triangles * number_of_elements, std::max(this->triangle_size, default_allocation_minsize_triangles));
+        this->edges_size = std::max(default_allocation_multiplier_edges * number_of_elements, std::max(this->edges_size, default_allocation_minsize_edges));
+
+        // Set count.
+        this->vertex_count = 0;
+        this->triangle_count = 0;
+        this->edges_count = 0;
+
+        this->tris = (int3*)realloc(this->tris, sizeof(int3)* this->triangle_size);
+        this->tri_markers = (int*)realloc(this->tri_markers, sizeof(int)* this->triangle_size);
+        this->edges = (int2*)realloc(this->edges, sizeof(int2)* this->edges_size);
+        this->edge_markers = (int*)realloc(this->edge_markers, sizeof(int)* this->edges_size);
+
+        if (!this->tris || !this->tri_markers || !this->edges || !this->edge_markers)
+          throw Exceptions::Exception("Orderizer out of memory!");
+
         this->label_size = std::max(this->label_size, number_of_elements + 10);
         this->label_count = 0;
 
-        if (this->verts)
-          this->verts = (double3*)realloc(this->verts, sizeof(double3)* this->vertex_size);
-        else
-          this->verts = (double3*)malloc(sizeof(double3)* this->vertex_size);
+        this->verts = (double3*)realloc(this->verts, sizeof(double3)* this->vertex_size);
 
-        if (this->lvert)
-          this->lvert = (int*)realloc(this->lvert, sizeof(int)* label_size);
-        else
-          this->lvert = (int*)malloc(sizeof(int)* label_size);
+        this->lvert = (int*)realloc(this->lvert, sizeof(int)* label_size);
 
-        if (this->ltext)
-          ltext = (char**)realloc(this->ltext, sizeof(char*)* label_size);
-        else
-          ltext = (char**)malloc(sizeof(char*)* label_size);
+        ltext = (char**)realloc(this->ltext, sizeof(char*)* label_size);
 
-        if (this->lbox)
-          lbox = (double2*)realloc(this->lbox, sizeof(double2)* label_size);
-        else
-          lbox = (double2*)malloc(sizeof(double2)* label_size);
+        lbox = (double2*)realloc(this->lbox, sizeof(double2)* label_size);
 
         if ((!this->lbox) || (!this->ltext) || (!this->verts) || (!this->lvert))
         {
@@ -166,6 +196,27 @@ namespace Hermes
         }
       }
 
+      Orderizer::~Orderizer()
+      {
+        free();
+#ifndef NOGLUT
+        pthread_mutex_destroy(&data_mutex);
+#endif
+      }
+
+      void Orderizer::lock_data() const
+      {
+#ifndef NOGLUT
+        pthread_mutex_lock(&data_mutex);
+#endif
+      }
+
+      void Orderizer::unlock_data() const
+      {
+#ifndef NOGLUT
+        pthread_mutex_unlock(&data_mutex);
+#endif
+      }
       template<typename Scalar>
       void Orderizer::process_space(SpaceSharedPtr<Scalar> space, bool show_edge_orders)
       {
@@ -179,7 +230,7 @@ namespace Hermes
         MeshSharedPtr mesh = space->get_mesh();
 
         // Reallocate.
-        this->reallocate_common(mesh);
+        this->reallocate(mesh);
 
         RefMap refmap;
         int type = 1;
@@ -254,7 +305,7 @@ namespace Hermes
                 ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
                 (x[ord_edge[mode][type][i][0] + 1] < x[ord_edge[mode][type][i][1] + 1])))
               {
-                LinearizerBase::add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], e->en[ord_edge[mode][type][i][2]]->marker);
+                add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], e->en[ord_edge[mode][type][i][2]]->marker);
               }
             }
           }
@@ -270,9 +321,7 @@ namespace Hermes
               this->add_triangle(id[ord_elem_simple[mode][type][i][0]], id[ord_elem_simple[mode][type][i][1]], id[ord_elem_simple[mode][type][i][2]], e->marker);
 
             for (int i = 0; i < num_edge_simple[mode][type]; i++)
-            {
-              LinearizerBase::add_edge(id[ord_edge_simple[mode][type][i][0]], id[ord_edge_simple[mode][type][i][1]], e->en[ord_edge_simple[mode][type][i][2]]->marker);
-            }
+              add_edge(id[ord_edge_simple[mode][type][i][0]], id[ord_edge_simple[mode][type][i][1]], e->en[ord_edge_simple[mode][type][i][2]]->marker);
           }
 
           double xmin = 1e100, ymin = 1e100, xmax = -1e100, ymax = -1e100;
@@ -289,6 +338,21 @@ namespace Hermes
         }
 
         refmap.set_quad_2d(&g_quad_2d_std);
+      }
+
+      void Orderizer::add_edge(int iv1, int iv2, int marker)
+      {
+#pragma omp critical(realloc_edges)
+        {
+          if (edges_count >= edges_size)
+          {
+            edges = (int2*)realloc(edges, sizeof(int2)* (edges_size * 1.5));
+            edge_markers = (int*)realloc(edge_markers, sizeof(int)* (edges_size = edges_size * 1.5));
+          }
+          edges[edges_count][0] = iv1;
+          edges[edges_count][1] = iv2;
+          edge_markers[edges_count++] = marker;
+        }
       }
 
       void Orderizer::add_triangle(int iv0, int iv1, int iv2, int marker)
@@ -322,28 +386,39 @@ namespace Hermes
           ::free(verts);
           verts = nullptr;
         }
+
         if (lvert != nullptr)
         {
           ::free(lvert);
           lvert = nullptr;
         }
+
         if (ltext != nullptr)
         {
           ::free(ltext);
           ltext = nullptr;
         }
+
         if (lbox != nullptr)
         {
           ::free(lbox);
           lbox = nullptr;
         }
 
-        LinearizerBase::free();
-      }
-
-      Orderizer::~Orderizer()
-      {
-        free();
+        if (tris != nullptr)
+        {
+          ::free(tris);
+          tris = nullptr;
+          ::free(tri_markers);
+          tri_markers = nullptr;
+        }
+        if (edges != nullptr)
+        {
+          ::free(edges);
+          edges = nullptr;
+          ::free(edge_markers);
+          edge_markers = nullptr;
+        }
       }
 
       template<typename Scalar>
@@ -498,13 +573,60 @@ namespace Hermes
         calc_aabb(&verts[0][0], &verts[0][1], sizeof(double3), vertex_count, min_x, max_x, min_y, max_y);
       }
 
+      void Orderizer::calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y)
+      {
+        *min_x = *max_x = *x;
+        *min_y = *max_y = *y;
+
+        uint8_t* ptr_x = (uint8_t*)x;
+        uint8_t* ptr_y = (uint8_t*)y;
+        for (int i = 0; i < num; i++, ptr_x += stride, ptr_y += stride)
+        {
+          *min_x = std::min(*min_x, *((double*)ptr_x));
+          *min_y = std::min(*min_y, *((double*)ptr_y));
+          *max_x = std::max(*max_x, *((double*)ptr_x));
+          *max_y = std::max(*max_y, *((double*)ptr_y));
+        }
+      }
+
       double3* Orderizer::get_vertices()
       {
         return this->verts;
       }
+
       int Orderizer::get_num_vertices()
       {
         return this->vertex_count;
+      }
+
+      int3* Orderizer::get_triangles()
+      {
+        return this->tris;
+      }
+
+      int* Orderizer::get_triangle_markers()
+      {
+        return this->tri_markers;
+      }
+
+      int Orderizer::get_num_triangles()
+      {
+        return this->triangle_count;
+      }
+
+      int2* Orderizer::get_edges()
+      {
+        return this->edges;
+      }
+
+      int* Orderizer::get_edge_markers()
+      {
+        return this->edge_markers;
+      }
+
+      int Orderizer::get_num_edges()
+      {
+        return this->edges_count;
       }
 
       template HERMES_API void Orderizer::save_orders_vtk<double>(const SpaceSharedPtr<double> space, const char* file_name);

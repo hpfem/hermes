@@ -83,14 +83,8 @@ namespace Hermes
     {
       free();
 
-      if(this->pages)
-        this->pages = (TYPE**)realloc(this->pages, array.page_count * sizeof(TYPE*));
-      else
-        this->pages = (TYPE**)malloc(array.page_count * sizeof(TYPE*));
-      if(this->unused)
-        this->unused = (int*)realloc(this->unused, array.unused_size * sizeof(int));
-      else
-        this->unused = (int*)malloc(array.unused_size * sizeof(int));
+      this->pages = realloc_with_check<Array, TYPE*>(this->pages, array.page_count, this);
+      this->unused = realloc_with_check<Array, int>(this->unused, array.unused_size, this);
 
       memcpy(this->unused, array.unused, array.unused_size * sizeof(int));
       
@@ -268,7 +262,7 @@ namespace Hermes
       {
         int local_page_count = this->page_count;
         this->page_count = std::max<int>(this->page_count + 1, (int)(this->page_count * 1.5));
-        this->pages = (TYPE**)realloc(this->pages, this->page_count * sizeof(TYPE*));
+        this->pages = realloc_with_check<Array, TYPE*>(this->pages, this->page_count, this);
         for(int new_i = local_page_count; new_i < this->page_count; new_i++)
           pages[new_i] = new TYPE[HERMES_PAGE_SIZE];
       }
@@ -307,13 +301,13 @@ namespace Hermes
     LightArray(unsigned int page_bits = 9, unsigned int default_page_count = 512) : page_bits(page_bits), page_size(1 << page_bits), page_mask((1 << page_bits) - 1), page_count(default_page_count)
     {
       size = 0;
-      pages = (TYPE**)malloc(page_count * sizeof(TYPE*));
-      presence = (bool**)malloc(page_count * sizeof(bool*));
+      pages = malloc_with_check<LightArray<TYPE>, TYPE*>(page_count, this);
+      presence = malloc_with_check<LightArray<TYPE>, bool*>(page_count, this);
 
       for(int i = 0; i < page_count; i++)
       {
-        pages[i] = (TYPE*)malloc(page_size*sizeof(TYPE));
-        presence[i] = (bool*)calloc(page_size, sizeof(bool));
+        pages[i] = malloc_with_check<LightArray<TYPE>, TYPE>(page_size, this);
+        presence[i] = calloc_with_check<LightArray<TYPE>, bool>(page_size, this);
       }
     }
 
@@ -327,13 +321,18 @@ namespace Hermes
 
     ~LightArray()
     {
-      for(unsigned int i = 0; i < page_count; i++)
+      free();
+    }
+
+    void free()
+    {
+      for (unsigned int i = 0; i < page_count; i++)
       {
-        free(pages[i]);
-        free(presence[i]);
+        ::free(pages[i]);
+        ::free(presence[i]);
       }
-      free(pages);
-      free(presence);
+      ::free(pages);
+      ::free(presence);
     }
 
     /// Adds a new item to the array.
@@ -345,13 +344,13 @@ namespace Hermes
       {
         int new_page_count = page_count + ((id - (page_count * page_size)) / page_size) + 2;
 
-        pages = (TYPE**)realloc(pages, new_page_count * sizeof(TYPE*));
-        presence = (bool**)realloc(presence, new_page_count * sizeof(bool*));
+        pages = realloc_with_check<LightArray<TYPE>, TYPE*>(pages, new_page_count, this);
+        presence = realloc_with_check<LightArray<TYPE>, bool*>(presence, new_page_count, this);
 
         for(int i = page_count; i < new_page_count; i++)
         {
-          pages[i] = (TYPE*)malloc(page_size*sizeof(TYPE));
-          presence[i] = (bool*)calloc(page_size, sizeof(bool));
+          pages[i] = malloc_with_check<LightArray<TYPE>, TYPE>(page_size, this);
+          presence[i] = calloc_with_check<LightArray<TYPE>, bool>(page_size, this);
         }
 
         page_count = new_page_count;

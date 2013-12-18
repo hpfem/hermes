@@ -17,6 +17,7 @@
 #ifndef __H2D_MESH_VIEW_H
 #define __H2D_MESH_VIEW_H
 #include "view.h"
+#include "linearizer.h"
 #include "../function/exact_solution.h"
 
 namespace Hermes

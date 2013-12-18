@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
     if(VTK_VISUALIZATION)
     {
       // Output solution in VTK format.
-      Hermes::Hermes2D::Views::Linearizer lin(Views::FileExport);
+      Hermes::Hermes2D::Views::Linearizer lin(FileExport);
       bool mode_3D = false;
       lin.save_solution_vtk(sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
 

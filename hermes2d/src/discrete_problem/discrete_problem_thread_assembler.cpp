@@ -192,10 +192,7 @@ namespace Hermes
       if (ext_size + u_ext_fns_size > ext_funcs_allocated_size)
       {
         ext_funcs_allocated_size = ext_size + u_ext_fns_size;
-        if (ext_funcs)
-          ext_funcs = (Func<Scalar>**)realloc(ext_funcs, ext_funcs_allocated_size * sizeof(Func<Scalar>*));
-        else
-          ext_funcs = (Func<Scalar>**)malloc(ext_funcs_allocated_size * sizeof(Func<Scalar>*));
+        ext_funcs = realloc_with_check<DiscreteProblemThreadAssembler<Scalar>, Func<Scalar>*>(ext_funcs, ext_funcs_allocated_size, this);
       }
 
       // Initializaton of wf-(nonlocal-)ext funcs

@@ -37,6 +37,10 @@ namespace Hermes
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
     {
+    public:
+      /// Free all data.
+      void free();
+
     private:
       DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler);
       ~DiscreteProblemThreadAssembler();
@@ -80,8 +84,6 @@ namespace Hermes
       /// De-initialization.
       void deinit_assembling();
       
-      /// Free all data.
-      void free();
       /// Free space-related data.
       void free_spaces();
       /// Free weak formulation data.

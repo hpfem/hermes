@@ -17,6 +17,7 @@
 #define __H2D_THREAD_LINEARIZER_H
 
 #include "linearizer.h"
+#include <pthread.h>
 #include "../function/mesh_function.h"
 
 namespace Hermes
@@ -28,6 +29,9 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       class HERMES_API LinearizerMultidimensional;
 
+      typedef int3 triangle_indices_t;
+      typedef int3 internal_vertex_info_t;
+      
       /// ThreadLinearizerMultidimensional is a utility class for linearizing a mesh function on a single thread
       template<typename LinearizerDataDimensions>
       class HERMES_API ThreadLinearizerMultidimensional

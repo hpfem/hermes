@@ -144,19 +144,14 @@ namespace Hermes
       HERMES_SYM = 1
     };
 
-    template<typename Caller, typename ArrayItem>
-    ArrayItem* realloc_with_check(ArrayItem* original_array, int new_size, Caller* const caller)
+    /// Linearizer can store data in an effective way depending on the purpose.
+    /// - whether it is an OpenGL (Hermes views, Agros2d) or a file export (VTK, Tecplot)
+    enum LinearizerOutputType
     {
-      ArrayItem* new_array = (ArrayItem*)realloc(original_array, new_size * sizeof(ArrayItem));
-      if (new_array)
-        return original_array = new_array;
-      else
-      {
-        caller->free();
-        throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", new_size * sizeof(ArrayItem));
-        return nullptr;
-      }
-    }
+      OpenGL,
+      // VTK, Tecplot, etc.
+      FileExport
+    };
   }
 }
 #endif

@@ -14,7 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "solution.h"
-#include "../views/linearizer_base.h"
+#include "../views/linearizer.h"
 
 namespace Hermes
 {
