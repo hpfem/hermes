@@ -49,11 +49,6 @@ namespace Hermes
       printf("Exception: %s\n", message);
     }
 
-    Exception* Exception::clone()
-    {
-      return new Exception(*this);
-    }
-
     const char * Exception::what() const throw()
     {
       char* messageWithReturn = new char[strlen(message)+2];
@@ -88,11 +83,6 @@ namespace Hermes
       ::strcpy(this->filename, e.filename);
     }
 
-    Exception* IOException::clone()
-    {
-      return new IOException(this->readWrite, this->filename);
-    }
-
 
     NullException::NullException(int param_idx) : Exception()
     {
@@ -125,11 +115,6 @@ namespace Hermes
       message = msg;
       param_idx = e.get_param_idx();
       item_idx = e.get_item_idx();
-    }
-
-    Exception* NullException::clone()
-    {
-      return new NullException(*this);
     }
 
     LengthException::LengthException(int param_idx, int wrong, int right) : Exception()
@@ -182,11 +167,6 @@ namespace Hermes
       this->right = e.get_expected_length();
     }
 
-    Exception* LengthException::clone()
-    {
-      return new LengthException(*this);
-    }
-
     LinearMatrixSolverException::LinearMatrixSolverException() : Exception()
     {
       sprintf(this->message, "Linear solver failed.");
@@ -208,11 +188,6 @@ namespace Hermes
     LinearMatrixSolverException::LinearMatrixSolverException(const LinearMatrixSolverException&e) : Exception()
     {
       strcpy(this->message, e.what());
-    }
-
-    Exception* LinearMatrixSolverException::clone()
-    {
-      return new LinearMatrixSolverException(*this);
     }
 
     ValueException::ValueException(const char * name, double value, double allowed) : Exception()
@@ -257,11 +232,6 @@ namespace Hermes
       this->allowed = e.get_allowed();
     }
 
-    Exception* ValueException::clone()
-    {
-      return new ValueException(*this);
-    }
-
     MethodNotOverridenException::MethodNotOverridenException(const char * name, ...) : Exception()
     {
       char* text = new char[1024];
@@ -278,11 +248,6 @@ namespace Hermes
     MethodNotOverridenException::MethodNotOverridenException(const MethodNotOverridenException&e)
     {
       strcpy(this->message, e.what());
-    }
-
-    Exception* MethodNotOverridenException::clone()
-    {
-      return new MethodNotOverridenException(*this);
     }
 
     MethodNotImplementedException::MethodNotImplementedException(const char * name, ...) : Exception()
@@ -303,11 +268,6 @@ namespace Hermes
       strcpy(this->message, e.what());
     }
 
-    Exception* MethodNotImplementedException::clone()
-    {
-      return new MethodNotImplementedException(*this);
-    }
-
     MeshLoadFailureException::MeshLoadFailureException(const char * reason, ...) : Exception()
     {
       char * text = new char[strlen(reason)+1];
@@ -324,11 +284,6 @@ namespace Hermes
     MeshLoadFailureException::MeshLoadFailureException(const MeshLoadFailureException&e)
     {
       strcpy(this->message, e.what());
-    }
-
-    Exception* MeshLoadFailureException::clone()
-    {
-      return new MeshLoadFailureException(*this);
     }
 
     SpaceLoadFailureException::SpaceLoadFailureException(const char * reason, ...) : Exception()
@@ -349,11 +304,6 @@ namespace Hermes
       strcpy(this->message, e.what());
     }
 
-    Exception* SpaceLoadFailureException::clone()
-    {
-      return new SpaceLoadFailureException(*this);
-    }
-
     SolutionSaveFailureException::SolutionSaveFailureException(const char * reason, ...) : Exception()
     {
       char * text = new char[strlen(reason)+1];
@@ -372,11 +322,6 @@ namespace Hermes
       strcpy(this->message, e.what());
     }
 
-    Exception* SolutionSaveFailureException::clone()
-    {
-      return new SolutionSaveFailureException(*this);
-    }
-
     SolutionLoadFailureException::SolutionLoadFailureException(const char * reason, ...) : Exception()
     {
       char * text = new char[strlen(reason)+1];
@@ -393,11 +338,6 @@ namespace Hermes
     SolutionLoadFailureException::SolutionLoadFailureException(const SolutionLoadFailureException&e)
     {
       strcpy(this->message, e.what());
-    }
-
-    Exception* SolutionLoadFailureException::clone()
-    {
-      return new SolutionLoadFailureException(*this);
     }
   }
 }

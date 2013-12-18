@@ -62,7 +62,6 @@ namespace Hermes
       const char * get_func_name() const;
       virtual ~Exception() throw() { delete [] message; };
 
-      virtual Exception* clone();
     protected:
       char * message;
     };
@@ -87,7 +86,6 @@ namespace Hermes
 
       virtual ~IOException() throw();
       IOException(const IOException & e);
-      virtual Exception* clone();
     private:
       ReadWrite readWrite;
       char* filename;
@@ -112,7 +110,6 @@ namespace Hermes
       int get_item_idx() const;
       virtual ~NullException() throw() {};
       NullException(const NullException & e);
-      virtual Exception* clone();
     private:
       int param_idx, item_idx;
     };
@@ -144,7 +141,6 @@ namespace Hermes
       int get_expected_length() const;
       virtual ~LengthException() throw() {};
       LengthException(const LengthException & e);
-      virtual Exception* clone();
     private:
       int fst_param_idx, snd_param_idx, wrong, right;
     };
@@ -160,7 +156,6 @@ namespace Hermes
       LinearMatrixSolverException(const char * reason, ...);
       virtual ~LinearMatrixSolverException() throw() {};
       LinearMatrixSolverException(const LinearMatrixSolverException & e);
-      virtual Exception* clone();
     };
 
     /// \brief Numeric value is out of allowed range
@@ -186,7 +181,6 @@ namespace Hermes
       double get_allowed() const;
       virtual ~ValueException() throw() {};
       ValueException(const ValueException & e);
-      virtual Exception* clone();
     private:
       double value, allowed;
     };
@@ -200,7 +194,6 @@ namespace Hermes
       MethodNotOverridenException(const char * msg, ...);
       virtual  ~MethodNotOverridenException() throw() {};
       MethodNotOverridenException(const MethodNotOverridenException & e);
-      virtual Exception* clone();
     };
 
     /// \brief Method is not overriden and should be.
@@ -212,7 +205,6 @@ namespace Hermes
       MethodNotImplementedException(const char * msg, ...);
       virtual ~MethodNotImplementedException() throw() {};
       MethodNotImplementedException(const MethodNotImplementedException & e);
-      virtual Exception* clone();
     };
 
 
@@ -227,7 +219,6 @@ namespace Hermes
       MeshLoadFailureException(const char * msg, ...);
       ~MeshLoadFailureException() throw() {};
       MeshLoadFailureException(const MeshLoadFailureException & e);
-      virtual Exception* clone();
     };
 
     /// \brief Space failed to load.
@@ -239,7 +230,6 @@ namespace Hermes
       SpaceLoadFailureException(const char * msg, ...);
       virtual ~SpaceLoadFailureException() throw() {};
       SpaceLoadFailureException(const SpaceLoadFailureException & e);
-      virtual Exception* clone();
     };
 
     /// \brief Solution failed to save.
@@ -251,7 +241,6 @@ namespace Hermes
       SolutionSaveFailureException(const char * msg, ...);
       virtual ~SolutionSaveFailureException() throw() {};
       SolutionSaveFailureException(const SolutionSaveFailureException & e);
-      virtual Exception* clone();
     };
 
     /// \brief Solution failed to load.
@@ -263,7 +252,6 @@ namespace Hermes
       SolutionLoadFailureException(const char * msg, ...);
       virtual ~SolutionLoadFailureException() throw() {};
       SolutionLoadFailureException(const SolutionLoadFailureException & e);
-      virtual Exception* clone();
     };
   }
 }
