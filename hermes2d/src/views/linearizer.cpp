@@ -373,10 +373,15 @@ namespace Hermes
           typename LinearizerDataDimensions::vertex_t& vertex = it.get();
 
           double magnitude = 0.;
-          for (int j = 0; j < LinearizerDataDimensions::dimension; j++)
-            magnitude += vertex[2 + j] * vertex[2 + j];
+          if (LinearizerDataDimensions::dimension == 1)
+            magnitude = vertex[2];
+          else
+          {
+            for (int j = 0; j < LinearizerDataDimensions::dimension; j++)
+              magnitude += vertex[2 + j] * vertex[2 + j];
 
-          magnitude = std::sqrt(magnitude);
+            magnitude = std::sqrt(magnitude);
+          }
 
           if (finite(magnitude) && magnitude < min_val)
             min_val = magnitude;
