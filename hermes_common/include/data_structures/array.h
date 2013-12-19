@@ -19,6 +19,7 @@
 #define __HERMES_COMMON_ARRAY_H
 
 #include "common.h"
+#include "../util/memory_handling.h"
 
 #ifndef INVALID_IDX
 #define INVALID_IDX      INT_MAX
