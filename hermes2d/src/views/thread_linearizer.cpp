@@ -579,10 +579,10 @@ namespace Hermes
         bool done = false;
         double max_value = std::max(std::max(this->vertices[iv0][2], this->vertices[iv1][2]), this->vertices[iv2][2]);
         if (mode == HERMES_MODE_QUAD)
-          max_value = std::max<float>(max_value, this->vertices[iv3][2]);
+          max_value = std::max<LINEARIZER_DATA_TYPE>(max_value, this->vertices[iv3][2]);
         double min_value = std::min(std::min(this->vertices[iv0][2], this->vertices[iv1][2]), this->vertices[iv2][2]);
         if (mode == HERMES_MODE_QUAD)
-          min_value = std::min<float>(max_value, this->vertices[iv3][2]);
+          min_value = std::min<LINEARIZER_DATA_TYPE>(max_value, this->vertices[iv3][2]);
 
         if (!finite(max_value))
           throw Exceptions::Exception("Infinite value detected in Linearizer.");
