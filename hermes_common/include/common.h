@@ -265,7 +265,10 @@ namespace Hermes
     };
   }
 
-
+  namespace Exceptions
+  {
+    class Exception;
+  }
 
   template<typename Caller, typename ArrayItem>
   ArrayItem* calloc_with_check(int size, Caller* const caller)
