@@ -120,6 +120,16 @@ typedef double double3x2[3][2];
 typedef double double3x3[3][3];
 typedef double double3x4[3][4];
 
+typedef float float2[2];
+typedef float float3[3];
+typedef float float4[4];
+typedef float float2x2[2][2];
+typedef float float2x3[2][3];
+typedef float float2x4[2][4];
+typedef float float3x2[3][2];
+typedef float float3x3[3][3];
+typedef float float3x4[3][4];
+
 template<typename Scalar>
 class Scalar2
 {

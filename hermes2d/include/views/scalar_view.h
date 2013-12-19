@@ -47,10 +47,10 @@ namespace Hermes
         ScalarView(char* title, WinGeom* wg = nullptr);
         ~ScalarView();
 
-        void show(MeshFunctionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
+        void show(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0,
           MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0);
 
-        void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0);
+        void show_linearizer_data(double eps, int item = H2D_FN_VAL_0);
 
         inline void show_mesh(bool show = true) { show_edges = show; refresh(); }
         inline void show_bounding_box(bool show = true) { show_aabb = show; refresh(); }
@@ -159,7 +159,7 @@ namespace Hermes
         double calculate_ztrans_to_fit_view(); ///< Calculates the z-coordinate (in eye coordinates) of the closest viewpoint from which we can still see the whole model. Assumes a model/view matrix to be the current matrix on the OpenGL stack.
         virtual void update_layout(); ///< Updates layout, i.e., centers 2d and 3d mesh.
 
-        void draw_tri_contours(ScalarLinearizerDataDimensions::triangle_t&);
+        void draw_tri_contours(ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t&);
         void init_lighting();
         void update_mesh_info(); ///< Updates mesh info. Assumes that data lock is locked.
 
@@ -183,10 +183,10 @@ class HERMES_API ScalarView : public View
         ScalarView(const char* title = "ScalarView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         ScalarView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        void show(MeshFunctionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
+        void show(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0,
           MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show_linearizer_data(double eps, int item = H2D_FN_VAL_0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         inline void show_mesh(bool show = true) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         inline void show_bounding_box(bool show = true) { throw Hermes::Exceptions::Exception("GLUT disabled."); }

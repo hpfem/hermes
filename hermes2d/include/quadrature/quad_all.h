@@ -43,6 +43,41 @@ namespace Hermes
 
     extern HERMES_API Quad1DStd g_quad_1d_std;
     extern HERMES_API Quad2DStd g_quad_2d_std;
+
+    //// linearization "quadrature" ////////////////////////////////////////////////////////////////////
+
+    /// The tables with index zero are for obtaining solution values at the element
+    /// vertices. Index one tables serve for the retrieval of interior values. Index one tables
+    /// are used for adaptive approximation of the solution by transforming their points to sub-elements.
+    /// Actually, the tables contain two levels of refinement -- this is an optimization to reduce
+    /// the number of calls to sln->get_values().
+    extern double3 lin_pts_0_tri[];
+
+    extern double3 lin_pts_0_quad[];
+
+    extern double3 lin_pts_1_tri[12];
+
+    extern double3 lin_pts_1_quad[21];
+
+    extern int quad_indices[9][5];
+
+    extern int tri_indices[5][3];
+
+    extern int lin_np_tri[2];
+    extern int lin_np_quad[2];
+    extern int* lin_np[2];
+
+    extern double3*  lin_tables_tri[2];
+    extern double3*  lin_tables_quad[2];
+    extern double3** lin_tables[2];
+
+    class Quad2DLin : public Quad2D
+    {
+    public:
+      Quad2DLin();
+    };
+
+    extern HERMES_API Quad2DLin g_quad_lin;
   }
 }
 #endif

@@ -56,14 +56,14 @@ namespace Hermes
         delete vec;
       }
 
-      void VectorView::show(MeshFunctionSharedPtr<double> vsln, double eps)
+      void VectorView::show(MeshFunctionSharedPtr<double> vsln)
       {
         if (vsln->get_num_components() < 2)
           throw Hermes::Exceptions::Exception("The single-argument version of show() is only for vector-valued solutions.");
-        show(vsln, vsln, eps, H2D_FN_VAL_0, H2D_FN_VAL_1);
+        show(vsln, vsln, H2D_FN_VAL_0, H2D_FN_VAL_1);
       }
 
-      void VectorView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, double eps, int xitem, int yitem, MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
+      void VectorView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int xitem, int yitem, MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
       {
         if (xsln != nullptr && ysln != nullptr && xsln == ysln)
           this->warn("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
@@ -73,7 +73,7 @@ namespace Hermes
         vec->lock_data();
         MeshFunctionSharedPtr<double> slns[2] = { xsln, ysln };
         int items[2] = { xitem, yitem };
-        vec->process_solution(slns, items, eps);
+        vec->process_solution(slns, items);
 
         if (range_auto)
         {
@@ -193,15 +193,15 @@ namespace Hermes
       {
         glColor3f(0.5, 0.5, 0.5);
         glBegin(GL_LINES);
-        for (Vectorizer::Iterator<VectorLinearizerDataDimensions::edge_t> it = vec->edges_begin(); !it.end; ++it)
+        for (Vectorizer::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t> it = vec->edges_begin(); !it.end; ++it)
         {
-          VectorLinearizerDataDimensions::edge_t& edge = it.get();
+          VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t& edge = it.get();
           int& edge_marker = it.get_marker();
 
           if (lines || edge_marker)
           {
-            glVertex2d(edge[0][0], edge[0][1]);
-            glVertex2d(edge[1][0], edge[1][1]);
+            glVertex2d(transform_x(edge[0][0]), transform_y(edge[0][1]));
+            glVertex2d(transform_x(edge[1][0]), transform_y(edge[1][1]));
           }
         }
         glEnd();
@@ -238,9 +238,9 @@ namespace Hermes
         glBegin(GL_TRIANGLES);
         glColor3f(0.95f, 0.95f, 0.95f);
 
-        for (Vectorizer::Iterator<VectorLinearizerDataDimensions::triangle_t> it = vec->triangles_begin(); !it.end; ++it)
+        for (Vectorizer::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t> it = vec->triangles_begin(); !it.end; ++it)
         {
-          VectorLinearizerDataDimensions::triangle_t& triangle = it.get();
+          VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t& triangle = it.get();
 
           double mag = sqrt(sqr(triangle[0][2]) + sqr(triangle[0][3]));
           glTexCoord2d((mag - min) * irange * tex_scale + tex_shift, 0.0);
@@ -276,9 +276,9 @@ namespace Hermes
         // draw arrows
         if (mode != 2)
         {
-          for (Vectorizer::Iterator<VectorLinearizerDataDimensions::triangle_t> it = vec->triangles_begin(); !it.end; ++it)
+          for (Vectorizer::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t> it = vec->triangles_begin(); !it.end; ++it)
           {
-            VectorLinearizerDataDimensions::triangle_t& triangle = it.get();
+            VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t& triangle = it.get();
             {
               double miny = 1e100;
               int idx = -1, k, l1, l2, r2, r1, s;

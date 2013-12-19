@@ -1,7 +1,6 @@
 #include "postprocessing.h"
 #include "../space/space.h"
 #include "../function/solution.h"
-#include "../views/scalar_view.h"
 #include "refmap.h"
 #include "forms.h"
 #include "limit_order.h"
@@ -126,14 +125,14 @@ namespace Hermes
       VertexBasedLimiter::VertexBasedLimiter(SpaceSharedPtr<double> space, double* solution_vector, int maximum_polynomial_order)
         : Limiter<double>(space, solution_vector)
       {
-        this->init(maximum_polynomial_order);
-      }
+          this->init(maximum_polynomial_order);
+        }
 
       VertexBasedLimiter::VertexBasedLimiter(Hermes::vector<SpaceSharedPtr<double> > spaces, double* solution_vector, int maximum_polynomial_order)
         : Limiter<double>(spaces, solution_vector)
       {
-        this->init(maximum_polynomial_order);
-      }
+          this->init(maximum_polynomial_order);
+        }
 
       void VertexBasedLimiter::set_p_coarsening_only()
       {
@@ -287,20 +286,20 @@ namespace Hermes
 
           }
           else
-            if (vertex_value > centroid_value_multiplied)
-            {
-              fraction = std::min(1., (this->vertex_max_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-              if (this->get_verbose_output())
-                std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][0];
-            }
-            else
-            {
-              fraction = std::min(1., (this->vertex_min_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-              if (this->get_verbose_output())
-                std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][0];
-            }
+          if (vertex_value > centroid_value_multiplied)
+          {
+            fraction = std::min(1., (this->vertex_max_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+            if (this->get_verbose_output())
+              std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][0];
+          }
+          else
+          {
+            fraction = std::min(1., (this->vertex_min_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+            if (this->get_verbose_output())
+              std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][0];
+          }
 
-            correction_factor = std::min(correction_factor, fraction);
+          correction_factor = std::min(correction_factor, fraction);
         }
         if (this->get_verbose_output())
           std::cout << std::endl << "correction_factor " << correction_factor << std::endl;
@@ -365,21 +364,21 @@ namespace Hermes
               fraction = 1.;
             }
             else
-              if (vertex_value > centroid_value_multiplied)
-              {
-                fraction = std::min(1., (this->vertex_max_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-                if (this->get_verbose_output())
-                  std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][i_derivative];
+            if (vertex_value > centroid_value_multiplied)
+            {
+              fraction = std::min(1., (this->vertex_max_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+              if (this->get_verbose_output())
+                std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][i_derivative];
 
-              }
-              else
-              {
-                fraction = std::min(1., (this->vertex_min_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-                if (this->get_verbose_output())
-                  std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][i_derivative];
-              }
+            }
+            else
+            {
+              fraction = std::min(1., (this->vertex_min_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+              if (this->get_verbose_output())
+                std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][i_derivative];
+            }
 
-              correction_factor = std::min(correction_factor, fraction);
+            correction_factor = std::min(correction_factor, fraction);
           }
         }
 
@@ -645,7 +644,7 @@ namespace Hermes
         Hermes::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)
         {
-          if(markers[i] == HERMES_ANY)
+          if (markers[i] == HERMES_ANY)
           {
             assemble_everywhere = true;
             break;
@@ -712,7 +711,7 @@ namespace Hermes
 #endif
 
             Traverse::State* current_state = states[state_i];
-            if(!assemble_everywhere)
+            if (!assemble_everywhere)
             {
               bool target_marker = false;
               for (int i = 0; i < internal_markers.size(); i++)
@@ -733,11 +732,11 @@ namespace Hermes
             for (int i = 0; i < source_functions_size; i++)
             {
               if (current_state->e[i])
-                if (current_state->e[i]->used)
-                {
-                  source_functions_cloned[i]->set_active_element(current_state->e[i]);
-                  source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
-                }
+              if (current_state->e[i]->used)
+              {
+                source_functions_cloned[i]->set_active_element(current_state->e[i]);
+                source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
+              }
             }
 
             refmap->set_active_element(current_state->rep);
@@ -791,7 +790,7 @@ namespace Hermes
             delete[] jacobian_x_weights;
 
             for (int i = 0; i < source_functions_size; i++)
-            { 
+            {
               delete func_ord[i];
               delete func[i];
             }
@@ -844,7 +843,7 @@ namespace Hermes
         Hermes::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)
         {
-          if(markers[i] == HERMES_ANY)
+          if (markers[i] == HERMES_ANY)
           {
             assemble_everywhere = true;
             break;
@@ -915,11 +914,11 @@ namespace Hermes
             for (int i = 0; i < source_functions_size; i++)
             {
               if (current_state->e[i])
-                if (current_state->e[i]->used)
-                {
-                  source_functions_cloned[i]->set_active_element(current_state->e[i]);
-                  source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
-                }
+              if (current_state->e[i]->used)
+              {
+                source_functions_cloned[i]->set_active_element(current_state->e[i]);
+                source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
+              }
             }
 
             refmap->set_active_element(current_state->rep);
@@ -931,7 +930,7 @@ namespace Hermes
 #ifdef _DEBUG
               this->info("Thread %i, state %i, edge %i", thread_number, state_i, edge);
 #endif
-              if(!assemble_everywhere)
+              if (!assemble_everywhere)
               {
                 bool target_marker = false;
                 for (int i = 0; i < internal_markers.size(); i++)

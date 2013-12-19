@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
   // VTK output.
   if(VTK_VISUALIZATION) {
     // Output solution in VTK format.
-    Hermes::Hermes2D::Views::Linearizer lin(Views::FileExport);
+    Hermes::Hermes2D::Views::Linearizer lin(FileExport);
     bool mode_3D = true;
     //lin.save_solution_vtk(slnAf, "sln.vtk", "Temperature", mode_3D);
 
@@ -84,7 +84,8 @@ int main(int argc, char* argv[])
   // Visualize the solution.
   if(HERMES_VISUALIZATION) {
     Hermes::Hermes2D::Views::ScalarView view("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 440, 350));
-    view.show(sln, Hermes::Hermes2D::Views::HERMES_EPS_VERYHIGH);
+    view.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(2));
+    view.show(sln);
     Hermes::Hermes2D::Views::View::wait();
   }
 

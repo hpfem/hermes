@@ -14,7 +14,6 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "solution.h"
-#include "../views/linearizer.h"
 
 namespace Hermes
 {
@@ -49,17 +48,17 @@ namespace Hermes
     MeshFunction<Scalar>::MeshFunction()
       : Function<Scalar>()
     {
-      refmap = new RefMap;
-      this->element = nullptr;
-    }
+        refmap = new RefMap;
+        this->element = nullptr;
+      }
 
     template<typename Scalar>
     MeshFunction<Scalar>::MeshFunction(MeshSharedPtr mesh) :
       Function<Scalar>()
     {
-      this->mesh = mesh;
-      this->refmap = new RefMap;
-    }
+        this->mesh = mesh;
+        this->refmap = new RefMap;
+      }
 
     template<typename Scalar>
     MeshFunction<Scalar>::~MeshFunction()
@@ -71,7 +70,7 @@ namespace Hermes
     template<typename Scalar>
     std::string MeshFunction<Scalar>::getClassName() const
     {
-      return "MeshFunction"; 
+      return "MeshFunction";
     }
 
     template<typename Scalar>
@@ -90,15 +89,15 @@ namespace Hermes
     bool MeshFunction<Scalar>::isOkay() const
     {
       bool okay = true;
-      if(this->mesh == nullptr)
+      if (this->mesh == nullptr)
         okay = false;
       try
       {
-        if(this->mesh->get_max_element_id() < 0)
+        if (this->mesh->get_max_element_id() < 0)
           throw Hermes::Exceptions::Exception("Internal exception.");
         this->mesh->get_element(this->mesh->get_max_element_id() - 1);
       }
-      catch(std::exception& e)
+      catch (std::exception& e)
       {
         std::cout << e.what();
         okay = false;
@@ -141,7 +140,7 @@ namespace Hermes
       this->check();
 
       Quad2D *old_quad = this->get_quad_2d();
-      this->set_quad_2d(&Views::g_quad_lin);
+      this->set_quad_2d(&g_quad_lin);
 
       double max = std::numeric_limits<double>::min();
 
@@ -149,7 +148,7 @@ namespace Hermes
       int value_type = 0;
       int item = item_;
 
-      if(item >= 0x40)
+      if (item >= 0x40)
       {
         component = 1;
         item >>= 6;
@@ -171,7 +170,7 @@ namespace Hermes
         for (int i = 0; i < (e->is_triangle() ? 3 : 4); i++)
         {
           double v = val[i];
-          if(v > max)
+          if (v > max)
             max = v;
         }
       }
@@ -194,7 +193,7 @@ namespace Hermes
       this->check();
 
       Quad2D *old_quad = this->get_quad_2d();
-      this->set_quad_2d(&Views::g_quad_lin);
+      this->set_quad_2d(&g_quad_lin);
 
       double min = std::numeric_limits<double>::max();
 
@@ -202,7 +201,7 @@ namespace Hermes
       int value_type = 0;
       int item = item_;
 
-      if(item >= 0x40)
+      if (item >= 0x40)
       {
         component = 1;
         item >>= 6;
@@ -224,7 +223,7 @@ namespace Hermes
         for (int i = 0; i < (e->is_triangle() ? 3 : 4); i++)
         {
           double v = val[i];
-          if(v < min)
+          if (v < min)
             min = v;
         }
       }
@@ -256,7 +255,7 @@ namespace Hermes
     template<typename Scalar>
     RefMap* MeshFunction<Scalar>::get_refmap(bool update)
     {
-      if(update)
+      if (update)
         this->update_refmap();
       return refmap;
     }
@@ -271,7 +270,7 @@ namespace Hermes
     template<typename Scalar>
     void MeshFunction<Scalar>::set_quad_2d(Quad2D* quad_2d)
     {
-      if(quad_2d == nullptr) 
+      if (quad_2d == nullptr)
         throw Exceptions::NullException(1);
       Function<Scalar>::set_quad_2d(quad_2d);
       refmap->set_quad_2d(quad_2d);

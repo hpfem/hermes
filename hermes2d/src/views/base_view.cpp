@@ -47,7 +47,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void BaseView<Scalar>::show(SpaceSharedPtr<Scalar> space, double eps, int item)
+      void BaseView<Scalar>::show(SpaceSharedPtr<Scalar> space, int item)
       {
         this->space = space;
         free();
@@ -81,7 +81,7 @@ namespace Hermes
           Solution<double>::vector_to_solution(coeffs, space, sln, pss, true);
         }
 
-        ScalarView::show(sln, eps, item);
+        ScalarView::show(sln, item);
         update_title();
 
         delete [] coeffs;
@@ -103,7 +103,7 @@ namespace Hermes
 
 
         complex_filter = MeshFunctionSharedPtr<double>(new Hermes::Hermes2D::RealFilter(sln.get()));
-        ScalarView::show(complex_filter, eps, item);
+        ScalarView::show(complex_filter, item);
         update_title();
 
         delete [] coeffs;

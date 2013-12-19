@@ -21,6 +21,16 @@
 
 //#define DEBUG_LINEARIZER
 
+static const int default_allocation_multiplier_vertices = 10;
+static const int default_allocation_multiplier_triangles = 15;
+static const int default_allocation_multiplier_edges = 10;
+
+static const int default_allocation_minsize_vertices = 10000;
+static const int default_allocation_minsize_triangles = 15000;
+static const int default_allocation_minsize_edges = 10000;
+
+static const double vertex_relative_tolerance = 0.01;
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -28,7 +38,7 @@ namespace Hermes
     namespace Views
     {
       template<typename LinearizerDataDimensions>
-      ThreadLinearizerMultidimensional<LinearizerDataDimensions>::ThreadLinearizerMultidimensional(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer) : user_specified_max(false), user_specified_min(false)
+      ThreadLinearizerMultidimensional<LinearizerDataDimensions>::ThreadLinearizerMultidimensional(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer) : user_specified_max(false), user_specified_min(false), criterion(linearizer->criterion)
       {
         vertex_size = 0;
         triangle_size = 0;
@@ -52,7 +62,7 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::init_linearizer_data(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer)
       {
-        this->epsilon = linearizer->epsilon;
+        this->criterion = linearizer->criterion;
         this->curvature_epsilon = linearizer->curvature_epsilon;
         this->user_xdisp = linearizer->user_xdisp;
         this->user_ydisp = linearizer->user_ydisp;
@@ -172,14 +182,6 @@ namespace Hermes
         // Init storage data & counts.
         this->reallocate(sln[0]->get_mesh());
       }
-
-      static const int default_allocation_multiplier_vertices = 10;
-      static const int default_allocation_multiplier_triangles = 15;
-      static const int default_allocation_multiplier_edges = 10;
-
-      static const int default_allocation_minsize_vertices = 10000;
-      static const int default_allocation_minsize_triangles = 15000;
-      static const int default_allocation_minsize_edges = 10000;
 
       template<typename LinearizerDataDimensions>
       void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::reallocate(MeshSharedPtr mesh)
@@ -353,15 +355,10 @@ namespace Hermes
           split = 0;
         else
         {
-          if (this->epsilon >= 1.0)
-          {
-            // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
-            split = (level < epsilon);
-          }
-          else
-          {
+          if (this->criterion.adaptive)
             this->split_decision(split, iv0, iv1, iv2, 0, rep_element->get_mode(), values, physical_x, physical_y, vertex_indices);
-          }
+          else
+            split = (level < this->criterion.refinement_level);
         }
 
         // split the triangle if the error is too large, otherwise produce a linear triangle
@@ -477,15 +474,10 @@ namespace Hermes
           split = 0;
         else
         {
-          if (this->epsilon >= 1.0)
-          {
-            // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
-            split = (level < epsilon ? 3 : 0);
-          }
-          else
-          {
+          if (this->criterion.adaptive)
             this->split_decision(split, iv0, iv1, iv2, 0, rep_element->get_mode(), values, physical_x, physical_y, vertex_indices);
-          }
+          else
+            split = (level < this->criterion.refinement_level ? 3 : 0);
         }
 
         // split the quad if the error is too large, otherwise produce two linear triangles
@@ -587,10 +579,10 @@ namespace Hermes
         bool done = false;
         double max_value = std::max(std::max(this->vertices[iv0][2], this->vertices[iv1][2]), this->vertices[iv2][2]);
         if (mode == HERMES_MODE_QUAD)
-          max_value = std::max(max_value, this->vertices[iv3][2]);
+          max_value = std::max<float>(max_value, this->vertices[iv3][2]);
         double min_value = std::min(std::min(this->vertices[iv0][2], this->vertices[iv1][2]), this->vertices[iv2][2]);
         if (mode == HERMES_MODE_QUAD)
-          min_value = std::min(max_value, this->vertices[iv3][2]);
+          min_value = std::min<float>(max_value, this->vertices[iv3][2]);
 
         if (!finite(max_value))
           throw Exceptions::Exception("Infinite value detected in Linearizer.");
@@ -616,7 +608,7 @@ namespace Hermes
             error /= (3 + mode);
 
             double relative_error = error / this->max_value_approx;
-            split = relative_error > this->epsilon;
+            split = relative_error > this->criterion.error_tolerance;
 
             // Quads - division type
             if (mode == HERMES_MODE_QUAD && split)
@@ -777,7 +769,16 @@ namespace Hermes
             if ((this->info[i][0] == p1 && this->info[i][1] == p2)
               && (fabs(x - this->vertices[i][0]) < Hermes::HermesSqrtEpsilon)
               && (fabs(y - this->vertices[i][1]) < Hermes::HermesSqrtEpsilon))
-              return i;
+            {
+              bool check_value = true;
+              for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
+              {
+                if (fabs(value[k] - this->vertices[i][2 + k] / value[k]) > vertex_relative_tolerance)
+                  check_value = false;
+              }
+              if(check_value)
+                return i;
+            }
             // note that we won't return a vertex with a different value than the required one;
             // this takes care for discontinuities in the solution, where more vertices
             // with different values will be created
@@ -809,8 +810,8 @@ namespace Hermes
           this->vertices = realloc_with_check<ThreadLinearizerMultidimensional, typename LinearizerDataDimensions::vertex_t>(this->vertices, new_vertex_size, this);
           this->info = realloc_with_check<ThreadLinearizerMultidimensional, internal_vertex_info_t>(this->info, new_vertex_size, this);
           this->hash_table = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->hash_table, new_vertex_size, this);
-
           memset(this->hash_table + this->vertex_size, 0xff, sizeof(int)* (new_vertex_size - this->vertex_size));
+
 
           this->vertex_size = new_vertex_size;
         }
@@ -876,8 +877,10 @@ namespace Hermes
         this->triangle_markers[triangle_count++] = marker;
       }
 
-      template class HERMES_API ThreadLinearizerMultidimensional<ScalarLinearizerDataDimensions>;
-      template class HERMES_API ThreadLinearizerMultidimensional<VectorLinearizerDataDimensions>;
+      template class HERMES_API ThreadLinearizerMultidimensional<ScalarLinearizerDataDimensions<double> >;
+      template class HERMES_API ThreadLinearizerMultidimensional<VectorLinearizerDataDimensions<double> >;
+      template class HERMES_API ThreadLinearizerMultidimensional<ScalarLinearizerDataDimensions<float> >;
+      template class HERMES_API ThreadLinearizerMultidimensional<VectorLinearizerDataDimensions<float> >;
     }
   }
 }

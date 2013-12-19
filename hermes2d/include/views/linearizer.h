@@ -33,41 +33,28 @@ namespace Hermes
       const double HERMES_EPS_HIGH = 0.005;
       const double HERMES_EPS_VERYHIGH = 0.001;
 
-      //// linearization "quadrature" ////////////////////////////////////////////////////////////////////
-
-      /// The tables with index zero are for obtaining solution values at the element
-      /// vertices. Index one tables serve for the retrieval of interior values. Index one tables
-      /// are used for adaptive approximation of the solution by transforming their points to sub-elements.
-      /// Actually, the tables contain two levels of refinement -- this is an optimization to reduce
-      /// the number of calls to sln->get_values().
-      extern double3 lin_pts_0_tri[];
-
-      extern double3 lin_pts_0_quad[];
-
-      extern double3 lin_pts_1_tri[12];
-
-      extern double3 lin_pts_1_quad[21];
-
-      extern int quad_indices[9][5];
-
-      extern int tri_indices[5][3];
-
-      extern int lin_np_tri[2];
-      extern int lin_np_quad[2];
-      extern int* lin_np[2];
-
-      extern double3*  lin_tables_tri[2];
-      extern double3*  lin_tables_quad[2];
-      extern double3** lin_tables[2];
-
-      class Quad2DLin : public Quad2D
-      {
-      public:
-        Quad2DLin();
-      };
+#ifndef LINEARIZER_DATA_TYPE
+#define LINEARIZER_DATA_TYPE double
+#endif
 
       /// Typedefs used throughout the Linearizer functionality.
+      template<typename Scalar>
       struct ScalarLinearizerDataDimensions
+      {
+      };
+
+      template<>
+      struct ScalarLinearizerDataDimensions<float>
+      {
+        static const int dimension = 1;
+
+        typedef float3x3 triangle_t;
+        typedef float2x3 edge_t;
+        typedef float3 vertex_t;
+      };
+
+      template<>
+      struct ScalarLinearizerDataDimensions<double>
       {
         static const int dimension = 1;
 
@@ -76,7 +63,23 @@ namespace Hermes
         typedef double3 vertex_t;
       };
 
+      template<typename Scalar>
       struct VectorLinearizerDataDimensions
+      {
+      };
+
+      template<>
+      struct VectorLinearizerDataDimensions<float>
+      {
+        static const int dimension = 2;
+
+        typedef float3x4 triangle_t;
+        typedef float2x4 edge_t;
+        typedef float4 vertex_t;
+      };
+
+      template<>
+      struct VectorLinearizerDataDimensions<double>
       {
         static const int dimension = 2;
 
@@ -88,15 +91,32 @@ namespace Hermes
       typedef int3 internal_vertex_info_t;
       typedef int3 triangle_indices_t;
 
-      extern HERMES_API Quad2DLin g_quad_lin;
-
-      const int LIN_MAX_LEVEL = 5;
-
       template<typename LinearizerDataDimensions>
       class HERMES_API ThreadLinearizerMultidimensional;
 
-#define MAX_LINEARIZER_DIVISION_LEVEL 10
-      
+#define MAX_LINEARIZER_DIVISION_LEVEL 6
+
+      class HERMES_API LinearizerCriterion
+      {
+      public:
+        LinearizerCriterion(bool adaptive);
+        double error_tolerance;
+        int refinement_level;
+        bool adaptive;
+      };
+
+      class HERMES_API LinearizerCriterionAdaptive : public LinearizerCriterion
+      {
+      public:
+        LinearizerCriterionAdaptive(double error_tolerance);
+      };
+
+      class HERMES_API LinearizerCriterionFixed : public LinearizerCriterion
+      {
+      public:
+        LinearizerCriterionFixed(int refinement_level);
+      };
+
       /// LinearizerMultidimensional is a utility class which converts a higher-order FEM solution defined on
       /// a curvilinear, irregular mesh to a linear FEM solution defined on a straight-edged,
       /// regular mesh. This is done by adaptive refinement of the higher-order mesh and its
@@ -117,15 +137,16 @@ namespace Hermes
         /// Main method - processes the solution and stores the data obtained by the process.
         /// \param[in] sln the solution
         /// \param[in] item what item (function value, derivative wrt. x, ..) to use in the solution.
-        /// \param[in] eps - tolerance parameter controlling how fine the resulting linearized approximation of the solution is.
-        void process_solution(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
-        void process_solution(MeshFunctionSharedPtr<double>* sln, int* items, double eps = HERMES_EPS_NORMAL);
+        void process_solution(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0);
+        void process_solution(MeshFunctionSharedPtr<double>* sln, int* items);
 
         /// Save a MeshFunction (Solution, Filter) in VTK format.
-        void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D = true, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
-        void save_solution_vtk(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, const char* quantity_name, bool mode_3D = true, double eps = HERMES_EPS_NORMAL);
-        void save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
-        void save_solution_tecplot(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, Hermes::vector<std::string> quantity_names, double eps = HERMES_EPS_NORMAL);
+        void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D = true, int item = H2D_FN_VAL_0);
+        void save_solution_vtk(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, const char* quantity_name, bool mode_3D = true);
+        void save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item = H2D_FN_VAL_0);
+        void save_solution_tecplot(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, Hermes::vector<std::string> quantity_names);
+
+        void set_criterion(LinearizerCriterion criterion);
 
         /// Set the displacement, i.e. set two functions that will deform the domain for visualization, in the x-direction, and the y-direction.
         void set_displacement(MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult = 1.0);
@@ -180,6 +201,10 @@ namespace Hermes
         /// Free the instance.
         void free();
 
+        /// Assigned criterion.
+        /// Defaults to a fixed criterion with one level of refinement.
+        LinearizerCriterion criterion;
+
         /// Internal.
         void lock_data() const;
         void unlock_data() const;
@@ -198,12 +223,12 @@ namespace Hermes
         /// Assembly data.
         ThreadLinearizerMultidimensional<LinearizerDataDimensions>** threadLinearizerMultidimensional;
 
-        void init(MeshFunctionSharedPtr<double>* sln, int* item, double eps);
+        void init(MeshFunctionSharedPtr<double>* sln, int* item);
 
         Hermes::vector<MeshSharedPtr > meshes;
 
         /// Standard and curvature epsilon.
-        double epsilon, curvature_epsilon;
+        double curvature_epsilon;
 
         /// Information if user-supplied displacement functions have been provided.
         bool user_xdisp, user_ydisp;
@@ -235,8 +260,8 @@ namespace Hermes
         friend class ThreadLinearizerMultidimensional<LinearizerDataDimensions>;
       };
 
-      typedef LinearizerMultidimensional<ScalarLinearizerDataDimensions> Linearizer;
-      typedef LinearizerMultidimensional<VectorLinearizerDataDimensions> Vectorizer;
+      typedef LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> > Linearizer;
+      typedef LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> > Vectorizer;
     }
   }
 }

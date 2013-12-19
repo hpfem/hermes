@@ -50,13 +50,13 @@ namespace Hermes
         root = nullptr;
       }
 
-      void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps)
+      void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step)
       {
         if(this->vec == nullptr)
           this->vec = new Vectorizer;
         if(xsln == ysln)
           throw Hermes::Exceptions::Exception("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
-        show(xsln, ysln, marker, step, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
+        show(xsln, ysln, marker, step, H2D_FN_VAL_0, H2D_FN_VAL_0);
       }
 
       bool StreamView::is_in_triangle(int idx, double x, double y, double3& bar)
@@ -375,11 +375,11 @@ namespace Hermes
         delete [] bnd_edges;
       }
 
-      void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps, int xitem, int yitem)
+      void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, int xitem, int yitem)
       {
         if(vec == nullptr)
           vec = new Linearizer;
-        vec->process_solution(xsln, ysln, xitem, yitem, eps);
+        vec->process_solution(xsln, ysln, xitem, yitem);
 
         vec->lock_data();
         if(range_auto)

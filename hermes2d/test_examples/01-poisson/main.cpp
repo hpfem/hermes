@@ -35,8 +35,8 @@ const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refi
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
 const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
-const double VOLUME_HEAT_SRC = 5e2;        // Volume heat sources generated (for example) by electric current.
-const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
+const double VOLUME_HEAT_SRC = 5e-9;        // Volume heat sources generated (for example) by electric current.
+const double FIXED_BDY_TEMP = -20e-9;        // Fixed temperature on the boundary.
 
 class MyVolumetricIntegralCalculator : public PostProcessing::SurfaceIntegralCalculator<double>
 {
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
-    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(-VOLUME_HEAT_SRC));
+    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(VOLUME_HEAT_SRC));
 
   // Initialize the solution.
   MeshFunctionSharedPtr<double> sln(new Solution<double>);
@@ -102,16 +102,13 @@ int main(int argc, char* argv[])
     // Translate the solution vector into the previously initialized Solution.
     Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
 
-    MyVolumetricIntegralCalculator calc(sln, 1);
-    std::cout << calc.calculate(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"))[0];
-
     // VTK output.
     if(VTK_VISUALIZATION)
     {
       // Output solution in VTK format.
       Hermes::Hermes2D::Views::Linearizer lin(FileExport);
       bool mode_3D = false;
-      lin.save_solution_vtk(sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+      lin.save_solution_vtk(sln, "sln.vtk", "Temperature", mode_3D, 1);
 
       // Output mesh and element orders in VTK format.
       Hermes::Hermes2D::Views::Orderizer ord;
@@ -125,10 +122,8 @@ int main(int argc, char* argv[])
       // Visualize the solution.
       Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
       Hermes::Hermes2D::Views::OrderView viewSp("Space", new Hermes::Hermes2D::Views::WinGeom(0, 400, 500, 400));
-
-      viewS.show(sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+      viewS.show(sln);
       viewSp.show(space);
-
       viewS.wait_for_close();
     }
   }

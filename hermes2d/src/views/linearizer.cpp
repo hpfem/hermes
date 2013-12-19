@@ -25,98 +25,23 @@ namespace Hermes
   {
     namespace Views
     {
-      double3 lin_pts_0_tri[] =
+      LinearizerCriterion::LinearizerCriterion(bool adaptive) : adaptive(adaptive)
       {
-        { -1.0, -1.0, 0.0 },
-        { 1.0, -1.0, 0.0 },
-        { -1.0, 1.0, 0.0 }
-      };
+      }
 
-      double3 lin_pts_0_quad[] =
+      LinearizerCriterionAdaptive::LinearizerCriterionAdaptive(double error_tolerance) : LinearizerCriterion(true)
       {
-        { -1.0, -1.0, 0.0 },
-        { 1.0, -1.0, 0.0 },
-        { 1.0, 1.0, 0.0 },
-        { -1.0, 1.0, 0.0 }
-      };
+        this->error_tolerance = error_tolerance;
+      }
 
-      double3 lin_pts_1_tri[12] =
+      LinearizerCriterionFixed::LinearizerCriterionFixed(int refinement_level) : LinearizerCriterion(false)
       {
-        { 0.0, -1.0, 0.0 }, // 0
-        { 0.0, 0.0, 0.0 }, // 1
-        { -1.0, 0.0, 0.0 }, // 2
-        { -0.5, -1.0, 0.0 }, // 3
-        { -0.5, -0.5, 0.0 }, // 4
-        { -1.0, -0.5, 0.0 }, // 5
-        { 0.5, -1.0, 0.0 }, // 6
-        { 0.5, -0.5, 0.0 }, // 7
-        { 0.0, -0.5, 0.0 }, // 8
-        { -0.5, 0.0, 0.0 }, // 9
-        { -0.5, 0.5, 0.0 }, // 10
-        { -1.0, 0.5, 0.0 }  // 11
-      };
+        this->refinement_level = refinement_level;
+      }
 
-      double3 lin_pts_1_quad[21] =
-      {
-        { 0.0, -1.0, 0.0 }, // 0
-        { 1.0, 0.0, 0.0 }, // 1
-        { 0.0, 1.0, 0.0 }, // 2
-        { -1.0, 0.0, 0.0 }, // 3
-        { 0.0, 0.0, 0.0 }, // 4
-        { -0.5, -1.0, 0.0 }, // 5
-        { 0.0, -0.5, 0.0 }, // 6
-        { -0.5, 0.0, 0.0 }, // 7
-        { -1.0, -0.5, 0.0 }, // 8
-        { -0.5, -0.5, 0.0 }, // 9
-        { 0.5, -1.0, 0.0 }, // 10
-        { 1.0, -0.5, 0.0 }, // 11
-        { 0.5, 0.0, 0.0 }, // 12
-        { 0.5, -0.5, 0.0 }, // 13
-        { 1.0, 0.5, 0.0 }, // 14
-        { 0.5, 1.0, 0.0 }, // 15
-        { 0.0, 0.5, 0.0 }, // 16
-        { 0.5, 0.5, 0.0 }, // 17
-        { -0.5, 1.0, 0.0 }, // 18
-        { -1.0, 0.5, 0.0 }, // 19
-        { -0.5, 0.5, 0.0 }  // 20
-      };
-
-      int quad_indices[9][5] =
-      {
-        { 0, 1, 2, 3, 4 },
-        { 5, 6, 7, 8, 9 }, { 10, 11, 12, 6, 13 },
-        { 12, 14, 15, 16, 17 }, { 7, 16, 18, 19, 20 },
-        { 0, 11, 4, 8, 6 }, { 4, 14, 2, 19, 16 },
-        { 5, 4, 18, 3, 7 }, { 10, 1, 15, 4, 12 }
-      };
-
-      int tri_indices[5][3] =
-      {
-        { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 9, 10, 11 }, { 9, 4, 8 }
-      };
-
-      int lin_np_tri[2] = { 3, 12 };
-      int lin_np_quad[2] = { 4, 21 };
-      int* lin_np[2] = { lin_np_tri, lin_np_quad };
-
-      double3*  lin_tables_tri[2] = { lin_pts_0_tri, lin_pts_1_tri };
-      double3*  lin_tables_quad[2] = { lin_pts_0_quad, lin_pts_1_quad };
-      double3** lin_tables[2] = { lin_tables_tri, lin_tables_quad };
-
-
-      Quad2DLin g_quad_lin;
-
-      Quad2DLin::Quad2DLin()
-      {
-        max_order[0] = max_order[1] = 1;
-        num_tables[0] = num_tables[1] = 2;
-        tables = lin_tables;
-        np = lin_np;
-      }; 
-      
       template<typename LinearizerDataDimensions>
-      LinearizerMultidimensional<LinearizerDataDimensions>::LinearizerMultidimensional(LinearizerOutputType linearizerOutputType, bool auto_max) : 
-        states(nullptr), num_states(0), dmult(1.0), curvature_epsilon(1e-5), linearizerOutputType(linearizerOutputType)
+      LinearizerMultidimensional<LinearizerDataDimensions>::LinearizerMultidimensional(LinearizerOutputType linearizerOutputType, bool auto_max) :
+        states(nullptr), num_states(0), dmult(1.0), curvature_epsilon(1e-5), linearizerOutputType(linearizerOutputType), criterion(LinearizerCriterionFixed(1))
       {
         xdisp = nullptr;
         user_xdisp = false;
@@ -137,6 +62,12 @@ namespace Hermes
         pthread_mutex_init(&data_mutex, &attr);
         pthread_mutexattr_destroy(&attr);
 #endif
+      }
+
+      template<typename LinearizerDataDimensions>
+      void LinearizerMultidimensional<LinearizerDataDimensions>::set_criterion(LinearizerCriterion criterion)
+      {
+        this->criterion = criterion;
       }
 
       template<typename LinearizerDataDimensions>
@@ -177,13 +108,12 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::init(MeshFunctionSharedPtr<double>* sln, int* item_, double eps)
+      void LinearizerMultidimensional<LinearizerDataDimensions>::init(MeshFunctionSharedPtr<double>* sln, int* item_)
       {
         // Check.
         this->check_data(sln);
 
         // Basic storage.
-        this->epsilon = eps;
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
         {
           this->item[k] = item_[k];
@@ -225,7 +155,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::process_solution(MeshFunctionSharedPtr<double>* sln, int* item_, double eps)
+      void LinearizerMultidimensional<LinearizerDataDimensions>::process_solution(MeshFunctionSharedPtr<double>* sln, int* item_)
       {
         // Init the caught parallel exception message.
         this->exceptionMessageCaughtInParallelBlock.clear();
@@ -234,7 +164,7 @@ namespace Hermes
         lock_data();
 
         // Initialization of 'global' stuff.
-        this->init(sln, item_, eps);
+        this->init(sln, item_);
 
         // Parallelization.
         Traverse trav_master(ydisp == nullptr ? (xdisp == nullptr ? 1 : 2) : (xdisp == nullptr ? 2 : 3));
@@ -297,7 +227,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::process_solution(MeshFunctionSharedPtr<double> sln, int item_, double eps)
+      void LinearizerMultidimensional<LinearizerDataDimensions>::process_solution(MeshFunctionSharedPtr<double> sln, int item_)
       {
         MeshFunctionSharedPtr<double> slns[LinearizerDataDimensions::dimension];
         int items[LinearizerDataDimensions::dimension];
@@ -309,7 +239,7 @@ namespace Hermes
           items[k] = 0;
         }
 
-        this->process_solution(slns, items, eps);
+        this->process_solution(slns, items);
       }
 
       template<typename LinearizerDataDimensions>
@@ -434,12 +364,12 @@ namespace Hermes
 
       template<typename LinearizerDataDimensions>
       void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, const char *quantity_name,
-        bool mode_3D, double eps)
+        bool mode_3D)
       {
         if (this->linearizerOutputType != FileExport)
           throw Exceptions::Exception("This LinearizerMultidimensional is not meant to be used for file export, create a new one with appropriate linearizerOutputType.");
 
-        process_solution(&slns[0], &items[0], eps);
+        process_solution(&slns[0], &items[0]);
 
         FILE* f = fopen(filename, "wb");
         if (f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
@@ -507,23 +437,22 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D, int item, double eps)
+      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D, int item)
       {
         Hermes::vector<MeshFunctionSharedPtr<double> > slns;
         Hermes::vector<int> items;
         slns.push_back(sln);
         items.push_back(item);
-        LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(slns, items, filename, quantity_name, mode_3D, eps);
+        LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(slns, items, filename, quantity_name, mode_3D);
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, Hermes::vector<std::string> quantity_names,
-        double eps)
+      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, Hermes::vector<std::string> quantity_names)
       {
         if (this->linearizerOutputType != FileExport)
           throw Exceptions::Exception("This LinearizerMultidimensional is not meant to be used for file export, create a new one with appropriate linearizerOutputType.");
 
-        process_solution(&slns[0], &items[0], eps);
+        process_solution(&slns[0], &items[0]);
 
         FILE* f = fopen(filename, "wb");
         if (f == nullptr) throw Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
@@ -560,7 +489,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item, double eps)
+      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item)
       {
         Hermes::vector<MeshFunctionSharedPtr<double> > slns;
         Hermes::vector<int> items;
@@ -568,7 +497,7 @@ namespace Hermes
         items.push_back(item);
         Hermes::vector<std::string> quantity_names;
         quantity_names.push_back(quantity_name);
-        LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(slns, items, filename, quantity_names, eps);
+        LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(slns, items, filename, quantity_names);
       }
 
       template<typename LinearizerDataDimensions>
@@ -634,98 +563,98 @@ namespace Hermes
 
       template<>
       template<>
-      typename ScalarLinearizerDataDimensions::triangle_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<typename ScalarLinearizerDataDimensions::triangle_t>::get() const
+      typename ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<typename ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangles[this->current_thread_index];
       }
 
       template<>
       template<>
-      int& LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<typename ScalarLinearizerDataDimensions::triangle_t>::get_marker() const
+      int& LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<typename ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t>::get_marker() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_markers[this->current_thread_index];
       }
 
       template<>
       template<>
-      typename ScalarLinearizerDataDimensions::edge_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<typename ScalarLinearizerDataDimensions::edge_t>::get() const
+      typename ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<typename ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->edges[this->current_thread_index];
       }
 
       template<>
       template<>
-      int& LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<typename ScalarLinearizerDataDimensions::edge_t>::get_marker() const
+      int& LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<typename ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>::get_marker() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->edge_markers[this->current_thread_index];
       }
 
       template<>
       template<>
-      typename ScalarLinearizerDataDimensions::vertex_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<typename ScalarLinearizerDataDimensions::vertex_t>::get() const
+      typename ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<typename ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->vertices[this->current_thread_index];
       }
 
       template<>
       template<>
-      triangle_indices_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<triangle_indices_t>::get() const
+      triangle_indices_t& LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<triangle_indices_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_indices[this->current_thread_index];
       }
 
       template<>
       template<>
-      int& LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<triangle_indices_t>::get_marker() const
+      int& LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<triangle_indices_t>::get_marker() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_markers[this->current_thread_index];
       }
 
       template<>
       template<>
-      typename VectorLinearizerDataDimensions::triangle_t& LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<typename VectorLinearizerDataDimensions::triangle_t>::get() const
+      typename VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t& LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<typename VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangles[this->current_thread_index];
       }
 
       template<>
       template<>
-      int& LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<typename VectorLinearizerDataDimensions::triangle_t>::get_marker() const
+      int& LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<typename VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t>::get_marker() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_markers[this->current_thread_index];
       }
 
       template<>
       template<>
-      typename VectorLinearizerDataDimensions::edge_t& LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<typename VectorLinearizerDataDimensions::edge_t>::get() const
+      typename VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t& LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<typename VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->edges[this->current_thread_index];
       }
 
       template<>
       template<>
-      int& LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<typename VectorLinearizerDataDimensions::edge_t>::get_marker() const
+      int& LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<typename VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>::get_marker() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->edge_markers[this->current_thread_index];
       }
 
       template<>
       template<>
-      typename VectorLinearizerDataDimensions::vertex_t& LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<typename VectorLinearizerDataDimensions::vertex_t>::get() const
+      typename VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t& LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<typename VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->vertices[this->current_thread_index];
       }
 
       template<>
       template<>
-      triangle_indices_t& LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<triangle_indices_t>::get() const
+      triangle_indices_t& LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<triangle_indices_t>::get() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_indices[this->current_thread_index];
       }
 
       template<>
       template<>
-      int& LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<triangle_indices_t>::get_marker() const
+      int& LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<triangle_indices_t>::get_marker() const
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_markers[this->current_thread_index];
       }
@@ -824,15 +753,15 @@ namespace Hermes
         return count;
       }
 
-      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions>;
-      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<ScalarLinearizerDataDimensions::triangle_t>;
-      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<ScalarLinearizerDataDimensions::vertex_t>;
-      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions>::Iterator<ScalarLinearizerDataDimensions::edge_t>;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>>;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t>;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t>;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>;
 
-      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions>;
-      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<VectorLinearizerDataDimensions::triangle_t>;
-      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<VectorLinearizerDataDimensions::vertex_t>;
-      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions>::Iterator<VectorLinearizerDataDimensions::edge_t>;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t>;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t>;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE >>::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>;
     }
   }
 }

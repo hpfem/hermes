@@ -40,7 +40,7 @@ using namespace Hermes::Hermes2D;
 // tutorial for comparisons.
 const bool STOKES = false;
 
-const bool HERMES_VISUALIZATION = false;
+const bool HERMES_VISUALIZATION = true;
 
 #define PRESSURE_IN_L2
 
@@ -197,7 +197,8 @@ int main(int argc, char* argv[])
       vview.show(xvel_prev_time, yvel_prev_time);
       sprintf(title, "Pressure, time %g", current_time);
       pview.set_title(title);
-      pview.show(p_prev_time);
+      pview.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(1));
+      pview.show(p_prev_time, H2D_FN_DX_0);
     }
   }
 

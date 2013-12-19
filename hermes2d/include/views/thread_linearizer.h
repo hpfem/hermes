@@ -29,6 +29,8 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       class HERMES_API LinearizerMultidimensional;
 
+      class HERMES_API LinearizerCriterion;
+
       typedef int3 triangle_indices_t;
       typedef int3 internal_vertex_info_t;
       
@@ -88,6 +90,10 @@ namespace Hermes
         /// Thread-owned clones.
         MeshFunction<double>* fns[LinearizerDataDimensions::dimension + 2];
 
+        /// Assigned criterion.
+        /// Defaults to a fixed criterion with one level of refinement.
+        LinearizerCriterion criterion;
+
         // OpenGL part.
         typename LinearizerDataDimensions::triangle_t* triangles;
         typename LinearizerDataDimensions::edge_t* edges;
@@ -128,7 +134,7 @@ namespace Hermes
         bool user_xdisp, user_ydisp;
         double dmult;
         /// Standard and curvature epsilon.
-        double epsilon, curvature_epsilon;
+        double curvature_epsilon;
 
 
         /// Keep?
