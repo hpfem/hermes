@@ -48,6 +48,7 @@
 #include "data_structures/array.h"
 #include "data_structures/range.h"
 #include "util/qsort.h"
+#include "util/memory_handling.h"
 #include "ord.h"
 #include "mixins.h"
 #include "api.h"

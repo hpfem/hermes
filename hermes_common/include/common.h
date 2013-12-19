@@ -265,53 +265,6 @@ namespace Hermes
     };
   }
 
-  namespace Exceptions
-  {
-    class Exception;
-  }
-
-  template<typename Caller, typename ArrayItem>
-  ArrayItem* calloc_with_check(int size, Caller* const caller)
-  {
-    ArrayItem* new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
-    if (new_array)
-      return new_array;
-    else
-    {
-      caller->free();
-      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", size * sizeof(ArrayItem));
-      return nullptr;
-    }
-  }
-
-  template<typename Caller, typename ArrayItem>
-  ArrayItem* malloc_with_check(int size, Caller* const caller)
-  {
-    ArrayItem* new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
-    if (new_array)
-      return new_array;
-    else
-    {
-      caller->free();
-      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", size * sizeof(ArrayItem));
-      return nullptr;
-    }
-  }
-
-  template<typename Caller, typename ArrayItem>
-  ArrayItem* realloc_with_check(ArrayItem* original_array, int new_size, Caller* const caller)
-  {
-    ArrayItem* new_array = (ArrayItem*)realloc(original_array, new_size * sizeof(ArrayItem));
-    if (new_array)
-      return original_array = new_array;
-    else
-    {
-      caller->free();
-      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", new_size * sizeof(ArrayItem));
-      return nullptr;
-    }
-  }
-
   namespace BLAS
   {
 #ifdef WITH_BLAS
