@@ -17,6 +17,7 @@
 #define __H2D_LINEARIZER_H
 
 #include "thread_linearizer.h"
+#include "linearizer_utils.h"
 #include <pthread.h>
 #include "../function/solution.h"
 
@@ -26,97 +27,6 @@ namespace Hermes
   {
     namespace Views
     {
-      /// Standard "quality" defining constants.
-      const double HERMES_EPS_VERYLOW = 0.25;
-      const double HERMES_EPS_LOW = 0.05;
-      const double HERMES_EPS_NORMAL = 0.01;
-      const double HERMES_EPS_HIGH = 0.005;
-      const double HERMES_EPS_VERYHIGH = 0.001;
-
-#ifndef LINEARIZER_DATA_TYPE
-#define LINEARIZER_DATA_TYPE double
-#endif
-
-      /// Typedefs used throughout the Linearizer functionality.
-      template<typename Scalar>
-      struct ScalarLinearizerDataDimensions
-      {
-      };
-
-      template<>
-      struct ScalarLinearizerDataDimensions<float>
-      {
-        static const int dimension = 1;
-
-        typedef float3x3 triangle_t;
-        typedef float2x3 edge_t;
-        typedef float3 vertex_t;
-      };
-
-      template<>
-      struct ScalarLinearizerDataDimensions<double>
-      {
-        static const int dimension = 1;
-
-        typedef double3x3 triangle_t;
-        typedef double2x3 edge_t;
-        typedef double3 vertex_t;
-      };
-
-      template<typename Scalar>
-      struct VectorLinearizerDataDimensions
-      {
-      };
-
-      template<>
-      struct VectorLinearizerDataDimensions<float>
-      {
-        static const int dimension = 2;
-
-        typedef float3x4 triangle_t;
-        typedef float2x4 edge_t;
-        typedef float4 vertex_t;
-      };
-
-      template<>
-      struct VectorLinearizerDataDimensions<double>
-      {
-        static const int dimension = 2;
-
-        typedef double3x4 triangle_t;
-        typedef double2x4 edge_t;
-        typedef double4 vertex_t;
-      };
-
-      typedef int3 internal_vertex_info_t;
-      typedef int3 triangle_indices_t;
-
-      template<typename LinearizerDataDimensions>
-      class HERMES_API ThreadLinearizerMultidimensional;
-
-#define MAX_LINEARIZER_DIVISION_LEVEL 6
-
-      class HERMES_API LinearizerCriterion
-      {
-      public:
-        LinearizerCriterion(bool adaptive);
-        double error_tolerance;
-        int refinement_level;
-        bool adaptive;
-      };
-
-      class HERMES_API LinearizerCriterionAdaptive : public LinearizerCriterion
-      {
-      public:
-        LinearizerCriterionAdaptive(double error_tolerance);
-      };
-
-      class HERMES_API LinearizerCriterionFixed : public LinearizerCriterion
-      {
-      public:
-        LinearizerCriterionFixed(int refinement_level);
-      };
-
       /// LinearizerMultidimensional is a utility class which converts a higher-order FEM solution defined on
       /// a curvilinear, irregular mesh to a linear FEM solution defined on a straight-edged,
       /// regular mesh. This is done by adaptive refinement of the higher-order mesh and its
