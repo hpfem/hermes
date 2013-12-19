@@ -16,8 +16,7 @@
 #ifndef __H2D_LINEARIZER_UTILS_H
 #define __H2D_LINEARIZER_UTILS_H
 
-#include "common.h"
-#include "compat.h"
+#include "hermes_common.h"
 
 namespace Hermes
 {
