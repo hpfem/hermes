@@ -157,13 +157,13 @@ namespace Hermes
           Solution<double>* xdisp_solution = dynamic_cast<Solution<double>*>(linearizer->xdisp.get());
           if (xdisp_solution && xdisp_solution->get_type() == HERMES_SLN)
           {
-            fns[LinearizerDataDimensions::dimension + 1] = new Solution<double>();
-            fns[LinearizerDataDimensions::dimension + 1]->copy(linearizer->xdisp);
+            fns[LinearizerDataDimensions::dimension] = new Solution<double>();
+            fns[LinearizerDataDimensions::dimension]->copy(linearizer->xdisp);
           }
           else
-            fns[LinearizerDataDimensions::dimension + 1] = linearizer->xdisp->clone();
+            fns[LinearizerDataDimensions::dimension] = linearizer->xdisp->clone();
 
-          fns[LinearizerDataDimensions::dimension + 1]->set_quad_2d(&g_quad_lin);
+          fns[LinearizerDataDimensions::dimension]->set_quad_2d(&g_quad_lin);
         }
         if (user_ydisp)
         {
