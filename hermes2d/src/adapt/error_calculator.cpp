@@ -270,7 +270,12 @@ namespace Hermes
       }
 
       if (this->errorType == RelativeErrorToGlobalNorm || this->errorType == RelativeErrorToElementNorm)
-        errors_squared_sum /= norms_squared_sum;
+      {
+        if (norms_squared_sum < Hermes::HermesEpsilon)
+          errors_squared_sum = 0.;
+        else
+          errors_squared_sum /= norms_squared_sum;
+      }
     }
 
     template<typename Scalar>
