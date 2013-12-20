@@ -4,7 +4,7 @@
 
 int polynomialDegree = 2;
 int initialRefinementsCount = 5;
-const Algorithm algorithm = Both;
+const Algorithm algorithm = Multiscale;
 SolvedExample solvedExample = MovingPeak;
 static std::string SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
 std::string solvedExampleString = SolvedExampleString[solvedExample];

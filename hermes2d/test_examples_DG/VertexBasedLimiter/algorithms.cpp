@@ -333,23 +333,23 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
     std::stringstream ss_vtke;
     ss_vtk.precision(2);
     ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_vtk << "solution_" << "HSS_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".dat";
+    ss_vtk << "solution_" << "HSS(" << step << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".dat";
     ss_vtke.precision(2);
     ss_vtke.setf(std::ios_base::uppercase | std::ios_base::scientific);
     ss_vtke << "exact_solution_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".dat";
 
     ss_bmp.precision(2);
     ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_bmp << "solution_" << "HSS_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".bmp";
+    ss_bmp << "solution_" << "HSS(" << step << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".bmp";
     ss_bmpe.precision(2);
     ss_bmpe.setf(std::ios_base::uppercase | std::ios_base::scientific);
     ss_bmpe << "exact_solution_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".bmp";
     
     exact_view->show(exact_solution);
-    exact_view->save_screenshot(ss_bmpe.str().c_str(), true);
+    //exact_view->save_screenshot(ss_bmpe.str().c_str(), true);
     
     solution_view->show(solution);
-    solution_view->save_screenshot(ss_bmp.str().c_str(), true);
+    //solution_view->save_screenshot(ss_bmp.str().c_str(), true);
     
     solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution", 1, 2.0);
     solution_view->get_linearizer()->save_solution_tecplot(exact_solution, ss_vtke.str().c_str(), "exactSolution", 1, 2.0);
@@ -708,29 +708,17 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
     std::stringstream ss_vtke;
     ss_vtk.precision(2);
     ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_vtk << "solution_" << "MG(" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_CFL=" << cfl << ".dat";
-    ss_vtke.precision(2);
-    ss_vtke.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_vtke << "exact_solution_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_CFL=" << cfl << ".dat";
-    solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution");
-    solution_view->get_linearizer()->save_solution_tecplot(exact_solution, ss_vtke.str().c_str(), "exactSolution");
+    ss_vtk << "solution_" << "MG(" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".dat";
+    solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution", 1, 2.0);
 
     std::stringstream ss_bmp;
     std::stringstream ss_bmpe;
     ss_bmp.precision(2);
     ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_bmp << "solution_" << "MG(" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_CFL=" << cfl << ".bmp";
-    ss_bmpe.precision(2);
-    ss_bmpe.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_bmpe << "exact_solution_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_CFL=" << cfl << ".bmp";
-    solution_view->get_linearizer()->save_solution_tecplot(solution, ss_bmp.str().c_str(), "solution", 1, 2.0);
-    solution_view->get_linearizer()->save_solution_tecplot(exact_solution, ss_bmpe.str().c_str(), "exactSolution", 1, 2.0);
-
-    exact_view->show(exact_solution);
-    exact_view->save_screenshot(ss_bmpe.str().c_str(), true);
-
+    ss_bmp << "solution_" << "MG(" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".bmp";
+    
     solution_view->show(solution);
-    solution_view->save_screenshot(ss_bmp.str().c_str(), true);
+    //solution_view->save_screenshot(ss_bmp.str().c_str(), true);
 
     errorCalculator.calculate_errors(solution, exact_solution);
     logger.info("%f", std::sqrt(errorCalculator.get_total_error_squared()));
