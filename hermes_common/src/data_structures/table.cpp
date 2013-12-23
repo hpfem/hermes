@@ -706,6 +706,11 @@ namespace Hermes
     for (unsigned int j = 0; j < size; j++) this->C[j] = 0;
   }
 
+  ButcherTable::~ButcherTable()
+  {
+    this->free();
+  }
+
   void ButcherTable::free()
   {
     ::free(this->B);
