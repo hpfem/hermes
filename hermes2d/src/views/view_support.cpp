@@ -198,7 +198,7 @@ namespace Hermes
         return 0;
       }
 
-      /// Adds a new view. Function has to be called just from the inside of view thread with a locked sync_view.
+      /// Adds a new_ view. Function has to be called just from the inside of view thread with a locked sync_view.
       int add_view_in_thread(void* view_pars_ptr)
       {
         ViewParams& view_params = *((ViewParams*)view_pars_ptr);
@@ -235,7 +235,7 @@ namespace Hermes
         return view_id;
       }
 
-      /// Removes a new view. Function has to be called just from the inside of view thread with a locked sync_view.
+      /// Removes a new_ view. Function has to be called just from the inside of view thread with a locked sync_view.
       int remove_view_in_thread(void* remove_params_ptr)
       {
         RemoveParams& params = *(RemoveParams*)remove_params_ptr;

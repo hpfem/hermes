@@ -213,7 +213,7 @@ namespace Hermes
           }
           if(fabs(k1) / max_mag  < 1e-5 && fabs(l1) / max_mag < 1e-5) break;  // stop streamline when zero solution
 
-          // add new point to steamline
+          // add new_ point to steamline
           buffer[k][0] = x;
           buffer[k][1] = y;
           k++;
@@ -255,7 +255,7 @@ namespace Hermes
 
             if(err < ODE_EPS/32)
             {
-              // new tau according to Merson
+              // new_ tau according to Merson
               tau = 0.8 * tau * pow(ODE_EPS/err, 0.2);
               if(tau > max_tau)  tau = max_tau;
             }

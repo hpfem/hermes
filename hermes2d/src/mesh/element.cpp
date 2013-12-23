@@ -310,7 +310,7 @@ namespace Hermes
 
     Node* get_vertex_node(Node* v1, Node* v2)
     {
-      // initialize the new Node
+      // initialize the new_ Node
       Node* newnode = new Node();
       newnode->type = HERMES_TYPE_VERTEX;
       newnode->ref = 0;
@@ -325,7 +325,7 @@ namespace Hermes
 
     Node* get_edge_node()
     {
-      // initialize the new Node
+      // initialize the new_ Node
       Node* newnode = new Node();
       newnode->type = HERMES_TYPE_EDGE;
       newnode->ref = 0;

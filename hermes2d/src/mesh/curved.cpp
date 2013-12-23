@@ -915,7 +915,7 @@ namespace Hermes
         }
         ctm = ref_map_pss.get_ctm();
 
-        // calculation of new projection coefficients
+        // calculation of new_ projection coefficients
         // vertex part
         for (unsigned int i = 0; i < e->get_nvert(); i++)
         {

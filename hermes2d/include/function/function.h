@@ -218,7 +218,7 @@ namespace Hermes
 
       int cur_quad;     ///< active quadrature (index into 'quads')
 
-      Node* new_node(int mask, int num_points); ///< allocates a new Node structure
+      Node* new_node(int mask, int num_points); ///< allocates a new_ Node structure
 
       static void check_params(int component, Node* cur_node, int num_components);
 

@@ -82,7 +82,7 @@ double* Low_Order::solve_Low_Order(CSCMatrix<double> * lumped_matrix, double* u_
 
 }
 
-//(M_L/tau - theta (K+D)) u_new = (M_L/tau - theta (K+D)) u_n + flux_correction
+//(M_L/tau - theta (K+D)) u_new_ = (M_L/tau - theta (K+D)) u_n + flux_correction
 double* Low_Order::explicit_Correction(double* flux_correction )
 {
 			if((low_matrix==nullptr)||(lowmat_rhs==nullptr) )
@@ -97,7 +97,7 @@ double* Low_Order::explicit_Correction(double* flux_correction )
 			vec_rhs->add_vector(rhs);
 			vec_rhs->add_vector(flux_correction);
 			
-	// Solve the linear system and if successful, obtain the solution. (M_L/tau - theta (K+D)) u_new = rhs+flux_correction	
+	// Solve the linear system and if successful, obtain the solution. (M_L/tau - theta (K+D)) u_new_ = rhs+flux_correction	
 			UMFPackLinearMatrixSolver<double> * newSol = new UMFPackLinearMatrixSolver<double> (low_matrix,vec_rhs);
 			try{
 				newSol->solve();

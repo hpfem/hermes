@@ -54,7 +54,7 @@ namespace Hermes
       /// Returns false if there are no states to assemble.
       bool prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State**& states, int& num_states);
       
-      /// Sets new spaces for the instance.
+      /// Sets new_ spaces for the instance.
       void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       
       /// Set the weak forms.

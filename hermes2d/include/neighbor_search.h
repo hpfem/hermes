@@ -217,7 +217,7 @@ namespace Hermes
         /// Create assembly list for the extended shapeset by joining central and neighbor element's assembly lists.
         void combine_assembly_lists();
 
-        /// Update the extended shapeset when active segment or active edge is changed (i.e. there will be a new neighbor).
+        /// Update the extended shapeset when active segment or active edge is changed (i.e. there will be a new_ neighbor).
         ///
         /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
         /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
@@ -417,7 +417,7 @@ namespace Hermes
       ///
       bool neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment) const;
 
-      /// Cleaning of internal structures before a new edge is set as active.
+      /// Cleaning of internal structures before a new_ edge is set as active.
       void reset_neighb_info();
 
       /*** Quadrature on the active edge. ***/

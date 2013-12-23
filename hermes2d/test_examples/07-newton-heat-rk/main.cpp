@@ -134,13 +134,13 @@ int main(int argc, char* argv[])
 			e.print_msg();
 		}
 
-		// Show the new time level solution.
+		// Show the new_ time level solution.
 		char title[100];
 		sprintf(title, "Time %3.2f s", current_time);
 		Tview.set_title(title);
 		Tview.show(sln_time_new2);
 
-		// Copy solution for the new time step.
+		// Copy solution for the new_ time step.
 		sln_time_prev1->copy(sln_time_new1);
 		sln_time_prev2->copy(sln_time_new2);
 

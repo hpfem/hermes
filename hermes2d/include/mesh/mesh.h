@@ -189,7 +189,7 @@ namespace Hermes
       /// due to incompatible refinements, the element refinement hierarchy
       /// is removed and all elements become top-level elements. Also, total
       /// regularization does not work on curved elements.
-      /// Returns an array of new element parents which can be passed to
+      /// Returns an array of new_ element parents which can be passed to
       /// Space::distribute_orders(). The array must be deallocated with ::free().
       int* regularize(int n);
 
@@ -436,9 +436,9 @@ namespace Hermes
       Hermes::vector<std::pair<unsigned int, int> > refinements;
 
       /// Refines a quad element into four quads, or two quads (horizontally or
-      /// vertically. If mesh != nullptr, the new elements are incorporated into
+      /// vertically. If mesh != nullptr, the new_ elements are incorporated into
       /// the mesh. The option mesh == nullptr is used to perform adaptive numerical
-      /// quadrature. If sons_out != nullptr, pointers to the new elements will be
+      /// quadrature. If sons_out != nullptr, pointers to the new_ elements will be
       /// saved there.
       void refine_quad(Element* e, int refinement, Element** sons_out = nullptr);
       void refine_triangle_to_triangles(Element* e, Element** sons = nullptr);

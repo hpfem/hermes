@@ -224,7 +224,7 @@ namespace Hermes
       /// Internal.
       virtual void deinit_solving();
       
-      /// Calculates the new damping coefficient.
+      /// Calculates the new_ damping coefficient.
       bool calculate_damping_factor(unsigned int& successful_steps);
 
       /// Returns iff the damping factor condition is fulfilled.

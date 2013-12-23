@@ -149,10 +149,10 @@ namespace Hermes
       if(node != nullptr) 
         return node;
 
-      // not found - create a new one
+      // not found - create a new_ one
       Node* newnode = nodes.add();
 
-      // initialize the new Node
+      // initialize the new_ Node
       newnode->type = HERMES_TYPE_VERTEX;
       newnode->ref = 0;
       newnode->bnd = 0;
@@ -177,10 +177,10 @@ namespace Hermes
       Node* node = search_list(e_table[i], p1, p2);
       if(node != nullptr) return node;
 
-      // not found - create a new one
+      // not found - create a new_ one
       Node* newnode = nodes.add();
 
-      // initialize the new node
+      // initialize the new_ node
       newnode->type = HERMES_TYPE_EDGE;
       newnode->ref = 0;
       newnode->bnd = 0;

@@ -365,7 +365,7 @@ namespace Hermes
         edge = nullptr;
       }
 
-      // output new dof
+      // output new_ dof
       current->dof = min->dof;
       current->coef = min->coef * 0.5;
       last = current++;
@@ -438,7 +438,7 @@ namespace Hermes
       // the element has sons - update mid-edge constrained vertex nodes
       else
       {
-        // create new edge infos where we don't have them yet
+        // create new_ edge infos where we don't have them yet
         typename Space<Scalar>::EdgeInfo ei_data[4];
         for (unsigned int i = 0; i < e->get_nvert(); i++)
         {

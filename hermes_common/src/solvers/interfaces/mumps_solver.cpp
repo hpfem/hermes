@@ -573,7 +573,7 @@ namespace Hermes
       switch (eff_fact_scheme)
       {
       case HERMES_CREATE_STRUCTURE_FROM_SCRATCH:
-        // (Re)initialize new instance.
+        // (Re)initialize new_ instance.
         reinit();
 
         // Let MUMPS decide when and how to compute matrix reordering and scaling.
@@ -593,7 +593,7 @@ namespace Hermes
         break;
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
         // Perform scaling along with reordering during the symbolic analysis phase
-        // and then reuse it during subsequent factorizations. New instance of MUMPS
+        // and then reuse it during subsequent factorizations. new_ instance of MUMPS
         // has to be created before the analysis phase.
         if(param.INFOG(33) != -2)
         {

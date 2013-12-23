@@ -184,7 +184,7 @@ namespace Hermes
     template<typename Scalar>
     void PicardMatrixSolver<Scalar>::handle_previous_vectors()
     {
-      // If Anderson is used, store the new vector in the memory.
+      // If Anderson is used, store the new_ vector in the memory.
       if (anderson_is_on)
       {
         // If memory not full, just add the vector.
@@ -209,7 +209,7 @@ namespace Hermes
           // Calculate Anderson coefficients.
           this->calculate_anderson_coeffs();
 
-          // Calculate new vector and store it in this->Picard.
+          // Calculate new_ vector and store it in this->Picard.
           for (int i = 0; i < this->problem_size; i++)
           {
             this->previous_Anderson_sln_vector[i] = 0.;

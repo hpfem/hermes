@@ -31,7 +31,7 @@ namespace Hermes
   /// This class is a generic dynamic array for storing nodes and elements of a mesh.
   /// All items contained in the array are assigned a unique id number. Internally,
   /// a list of unused items is maintained. Unused items (and their id numbers) are
-  /// reused when new items are added to the array. The type 'TYPE' must contain the
+  /// reused when new_ items are added to the array. The type 'TYPE' must contain the
   /// members 'id' and 'unused' in order to be usable by this class.
   /// \todo Is this dimension independent?
 
@@ -130,7 +130,7 @@ namespace Hermes
       return ptr->id;
     }
 
-    /// Adds a new item to the array: either it is appended at the
+    /// Adds a new_ item to the array: either it is appended at the
     /// end or an unused item is reused.
     /// \return A reference to the newly allocated item of the array.
     /// The item is assigned an id and its used flag is set to 1.
@@ -336,7 +336,7 @@ namespace Hermes
       ::free(presence);
     }
 
-    /// Adds a new item to the array.
+    /// Adds a new_ item to the array.
     void add(TYPE item, unsigned int id)
     {
       TYPE* temp;

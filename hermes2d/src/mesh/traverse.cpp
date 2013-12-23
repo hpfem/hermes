@@ -323,8 +323,8 @@ namespace Hermes
         // The process starts here (at the beginning the stack is always empty, i.e. top == 0)
         if(top <= 0)
         {
-          // Push the state of a new base element.
-          // This function only allocates memory for the new state,
+          // Push the state of a new_ base element.
+          // This function only allocates memory for the new_ state,
           // with as many Elements* as there are meshes in this stage.
           s = push_state();
           s->cr = H2D_UNITY;
@@ -373,7 +373,7 @@ namespace Hermes
               s->bnd[i] = true;
         }
 
-        // Entering a new state, perform transformations.
+        // Entering a new_ state, perform transformations.
         s->visited = true;
         for (i = 0; i < num; i++)
         {
@@ -455,7 +455,7 @@ namespace Hermes
               }
             }
 
-            // Determine boundary flags and positions for the new state.
+            // Determine boundary flags and positions for the new_ state.
             if(son < 3)
             {
               memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));

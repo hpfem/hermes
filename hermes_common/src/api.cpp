@@ -104,7 +104,7 @@ namespace Hermes
     this->parameters.find(param)->second->user_set = true;
     this->parameters.find(param)->second->user_val = value;
 
-    // And now we might have to call some handler of the new value setting.
+    // And now we might have to call some handler of the new_ value setting.
     // First - generic.
     std::map<HermesCommonApiParam, SetterHandler>::iterator setter_handler_iterator = this->setter_handlers.find(param);
     if (setter_handler_iterator != this->setter_handlers.end())

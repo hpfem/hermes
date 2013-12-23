@@ -81,7 +81,7 @@ namespace Hermes
 
     /// Small class which contains information about the element on the other side of an interface.
     ///
-    /// It just appends three new parameters to an instance of Geom. During destruction, the wrapped
+    /// It just appends three new_ parameters to an instance of Geom. During destruction, the wrapped
     /// instance is not touched - it must be destroyed separately. You may call the overriden methods
     /// \c free or \c free_ord in order to do this via the instance of InterfaceGeom.
     ///

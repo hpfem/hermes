@@ -48,7 +48,7 @@ namespace Hermes
       class HERMES_API SettableSpaces
       {
       public:
-        /// Sets new spaces for the instance.
+        /// Sets new_ spaces for the instance.
         virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) = 0;
         virtual void set_space(SpaceSharedPtr<Scalar>& space);
         /// Get all spaces as a Hermes::vector.
@@ -479,7 +479,7 @@ namespace Hermes
       virtual void post_assign();
 
       /// Internal.
-      /// Returns a new Space according to the type provided.
+      /// Returns a new_ Space according to the type provided.
       /// Used in loading.
       static SpaceSharedPtr<Scalar> init_empty_space(SpaceType spaceType, MeshSharedPtr mesh, Shapeset* shapeset);
 

@@ -319,13 +319,13 @@ namespace Hermes
 
     Element* Mesh::create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm, int id)
     {
-      // create a new element
+      // create a new_ element
       Element* e = elements.add();
 
       if(id != -1)
         e->id = id;
 
-      // initialize the new element
+      // initialize the new_ element
       e->active = 1;
       e->marker = marker;
       e->nvert = 3;
@@ -354,13 +354,13 @@ namespace Hermes
     Element* Mesh::create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3,
       CurvMap* cm, int id)
     {
-      // create a new element
+      // create a new_ element
       Element* e = elements.add();
 
       if(id != -1)
         e->id = id;
 
-      // initialize the new element
+      // initialize the new_ element
       e->active = 1;
       e->marker = marker;
       e->nvert = 4;
@@ -435,7 +435,7 @@ namespace Hermes
       e->unref_all_nodes(this);
 
       // now the original edge nodes may no longer exist...
-      // set correct boundary status and markers for the new nodes
+      // set correct boundary status and markers for the new_ nodes
       sons[0]->en[0]->bnd = bnd[0];  sons[0]->en[0]->marker = mrk[0];
       sons[0]->en[2]->bnd = bnd[2];  sons[0]->en[2]->marker = mrk[2];
       sons[1]->en[0]->bnd = bnd[0];  sons[1]->en[0]->marker = mrk[0];
@@ -464,7 +464,7 @@ namespace Hermes
 
     Node* get_vertex_node(Node* v1, Node* v2)
     {
-      // initialize the new Node
+      // initialize the new_ Node
       Node* newnode = new Node();
       newnode->type = HERMES_TYPE_VERTEX;
       newnode->ref = 0;
@@ -479,7 +479,7 @@ namespace Hermes
 
     Node* get_edge_node()
     {
-      // initialize the new Node
+      // initialize the new_ Node
       Node* newnode = new Node();
       newnode->type = HERMES_TYPE_EDGE;
       newnode->ref = 0;
@@ -546,7 +546,7 @@ namespace Hermes
         // Increase the number of active elements by 4.
         this->nactive += H2D_MAX_ELEMENT_SONS;
 
-        // set correct boundary markers for the new edge nodes
+        // set correct boundary markers for the new_ edge nodes
         for (i = 0; i < H2D_MAX_NUMBER_EDGES; i++)
         {
           j = (i > 0) ? i-1 : 3;
@@ -1326,7 +1326,7 @@ namespace Hermes
         Node *e0 = &nodes[e->en[0]->id], *e1 = &nodes[e->en[1]->id], *e2 = &nodes[e->en[2]->id];
         if(e->is_triangle())
         {
-          // create a new element
+          // create a new_ element
           enew = elements.add();
           enew->active = 1;
           enew->marker = e->marker;
@@ -1344,7 +1344,7 @@ namespace Hermes
         }
         else
         {
-          // create a new element
+          // create a new_ element
           Node *v3 = &nodes[e->vn[3]->id];
           Node *e3 = &nodes[e->en[3]->id];
           enew = elements.add();
@@ -1738,7 +1738,7 @@ namespace Hermes
       }
       // now the original edge nodes may no longer exist...
 
-      // set correct boundary status and markers for the new nodes
+      // set correct boundary status and markers for the new_ nodes
       sons[0]->en[0]->bnd = bnd[0];  sons[0]->en[0]->marker = mrk[0];
       sons[0]->en[3]->bnd = bnd[2];  sons[0]->en[3]->marker = mrk[2];
       sons[1]->en[0]->bnd = bnd[0];  sons[1]->en[0]->marker = mrk[0];
@@ -1787,7 +1787,7 @@ namespace Hermes
       nactive--;
       e->unref_all_nodes(this);
 
-      bool bcheck = true;  ///< if bcheck is true, it is default add a new edge between
+      bool bcheck = true;  ///< if bcheck is true, it is default add a new_ edge between
       ///<  vn[0] and vn[2]
       double length_x_0_2 = (e->vn[0]->x - e->vn[2]->x)*(e->vn[0]->x - e->vn[2]->x);
       double length_x_1_3 = (e->vn[1]->x - e->vn[3]->x)*(e->vn[1]->x - e->vn[3]->x);
@@ -1929,7 +1929,7 @@ namespace Hermes
       }
       nactive += 2;
       // now the original edge nodes may no longer exist...
-      // set correct boundary status and markers for the new nodes
+      // set correct boundary status and markers for the new_ nodes
       if(bcheck == true)
       {
         sons[0]->en[0]->bnd = bnd[0];  sons[0]->en[0]->marker = mrk[0];
@@ -2263,7 +2263,7 @@ namespace Hermes
           }
       }
 
-      // create a new element.
+      // create a new_ element.
       Element* enew;
       Node *v0 = &nodes[e->vn[0]->id], *v1 = &nodes[e->vn[1]->id], *v2 = &nodes[e->vn[2]->id];
       enew = this->create_triangle(e->marker, v0, v1, v2, cm);
@@ -2274,7 +2274,7 @@ namespace Hermes
       }
 
       // now the original edge nodes may no longer exist...
-      // set correct boundary status and markers for the new nodes
+      // set correct boundary status and markers for the new_ nodes
       enew->en[0]->bnd = bnd[0];
       enew->en[1]->bnd = bnd[1];
       enew->en[2]->bnd = bnd[2];
@@ -2459,7 +2459,7 @@ namespace Hermes
           }
       }
 
-      // create a new element.
+      // create a new_ element.
       Element* enew;
       Node *v0 = &nodes[e->vn[0]->id], *v1 = &nodes[e->vn[1]->id], *v2 = &nodes[e->vn[2]->id],  *v3 = &nodes[e->vn[3]->id];
       enew = this->create_quad(e->marker, v0, v1, v2, v3, cm);
@@ -2470,7 +2470,7 @@ namespace Hermes
       }
 
       // now the original edge nodes may no longer exist...
-      // set correct boundary status and markers for the new nodes
+      // set correct boundary status and markers for the new_ nodes
       enew->en[0]->bnd = bnd[0];
       enew->en[1]->bnd = bnd[1];
       enew->en[2]->bnd = bnd[2];
@@ -2603,7 +2603,7 @@ namespace Hermes
         // create CurvMaps for sons.
         if((e->is_curved()) && (!e_inter))
         {
-          //bool create_new = false;
+          //bool create_new_ = false;
           for (unsigned int i = 0; i < e->get_nvert(); i++)
           {
             if(fabs(refinement_angle[i] - 0.0) > 1e-4)
@@ -2743,7 +2743,7 @@ namespace Hermes
         // Increase the number of active elements by 4.
         this->nactive += 4;
 
-        // set correct boundary markers for the new edge nodes
+        // set correct boundary markers for the new_ edge nodes
         for (i = 0; i < 4; i++)
         {
           j = (i > 0) ? i-1 : 3;
@@ -2816,7 +2816,7 @@ namespace Hermes
           t[0] = this->create_triangle(e->marker, e->vn[k], v4, e->vn[k2], nullptr);
           t[1] = this->create_triangle(e->marker, v4, e->vn[k1], e->vn[k2], nullptr);
 
-          // set correct boundary status and markers for the new nodes
+          // set correct boundary status and markers for the new_ nodes
           t[0]->en[2]->bnd = bnd[k2];
           t[1]->en[1]->bnd = bnd[k1];
           t[0]->en[2]->marker = mrk[k2];
@@ -2845,7 +2845,7 @@ namespace Hermes
           t[1] = this->create_triangle(e->marker, v4, v5, e->vn[k], nullptr);
           t[2] = this->create_triangle(e->marker, v4, e->vn[k2], v5, nullptr);
 
-          // set correct boundary status and markers for the new nodes
+          // set correct boundary status and markers for the new_ nodes
           t[0]->en[0]->bnd = bnd[k];
           t[0]->en[0]->marker = mrk[k];
 
@@ -2903,7 +2903,7 @@ namespace Hermes
           t[1] = this->create_triangle(e->marker, v4, e->vn[k1], e->vn[k2], nullptr);
           t[2] = this->create_triangle(e->marker, v4, e->vn[k2], e->vn[k3], nullptr);
 
-          // set correct boundary status and markers for the new nodes
+          // set correct boundary status and markers for the new_ nodes
           t[0]->en[2]->bnd = bnd[k3];
           t[1]->en[1]->bnd = bnd[k1];
           t[2]->en[1]->bnd = bnd[k2];

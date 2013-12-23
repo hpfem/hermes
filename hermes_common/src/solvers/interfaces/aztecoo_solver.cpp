@@ -234,9 +234,9 @@ namespace Hermes
           // the input matrix is not finalized (unlike the case of column permutation) - this may possibly be a bug in Trilinos.
           // Also, when doing a row permutation, all maps of the source matrix are set to a temporary permutation
           // map in order to export the values from the source matrix to the target matrix in a permuted way. Then,
-          // according to code documentation in EpetraExt_Permutation_impl.h, the row indexing for the new permuted
+          // according to code documentation in EpetraExt_Permutation_impl.h, the row indexing for the new_ permuted
           // matrix (specified by the target matrix' RowMap_) is set to the original indexing (the original matrix' 
-          // RowMap_). However, the other maps of the new matrix are not reset (and still point to the temporary
+          // RowMap_). However, the other maps of the new_ matrix are not reset (and still point to the temporary
           // permutation map), which causes another set of problems. Hence, replaceMap() implementation in EpetraExt_Permutation_impl.h
           // has to be changed to call FillComplete with correct maps as input (calling FillComplete here doesn't suffice, since it
           // does not prevent creating a non-trivial Exporter, which is the root cause of the problems (and which cannot be deleted
@@ -336,9 +336,9 @@ namespace Hermes
           // the input matrix is not finalized (unlike the case of column permutation) - this may possibly be a bug in Trilinos.
           // Also, when doing a row permutation, all maps of the source matrix are set to a temporary permutation
           // map in order to export the values from the source matrix to the target matrix in a permuted way. Then,
-          // according to code documentation in EpetraExt_Permutation_impl.h, the row indexing for the new permuted
+          // according to code documentation in EpetraExt_Permutation_impl.h, the row indexing for the new_ permuted
           // matrix (specified by the target matrix' RowMap_) is set to the original indexing (the original matrix' 
-          // RowMap_). However, the other maps of the new matrix are not reset (and still point to the temporary
+          // RowMap_). However, the other maps of the new_ matrix are not reset (and still point to the temporary
           // permutation map), which causes another set of problems. Hence, replaceMap() implementation in EpetraExt_Permutation_impl.h
           // has to be changed to call FillComplete with correct maps as input (calling FillComplete here doesn't suffice, since it
           // does not prevent creating a non-trivial Exporter, which is the root cause of the problems (and which cannot be deleted

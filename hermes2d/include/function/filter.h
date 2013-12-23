@@ -396,8 +396,8 @@ namespace Hermes
 
     /// @ingroup meshFunctions
     /// Linearization filter for use in nonlinear problems. From one or two previous
-    /// solution values it extrapolates an estimate of the new one.
-    /// With adaptive time step: tau_frac = tau_new / tau_old
+    /// solution values it extrapolates an estimate of the new_ one.
+    /// With adaptive time step: tau_frac = tau_new_ / tau_old
     template<typename Scalar>
     class HERMES_API LinearFilter : public Filter<Scalar>
     {

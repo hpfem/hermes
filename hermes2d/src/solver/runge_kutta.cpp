@@ -466,7 +466,7 @@ namespace Hermes
       Scalar* coeff_vec = new Scalar[ndof];
       OGProjection<Scalar>::project_global(spaces, slns_time_prev, coeff_vec);
 
-      // Calculate new time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
+      // Calculate new_ time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)
         for (unsigned int j = 0; j < num_stages; j++)
           coeff_vec[i] += this->time_step * bt->get_B(j) * K_vector[j * ndof + i];
@@ -566,7 +566,7 @@ namespace Hermes
       // Duplicate matrix volume forms, scale them according
       // to the Butcher's table, enhance them with additional
       // external solutions, and anter them as blocks to the
-      // new stage Jacobian. If block_diagonal_jacobian = true
+      // new_ stage Jacobian. If block_diagonal_jacobian = true
       // then only diagonal blocks are considered.
       for (unsigned int m = 0; m < mfvol_base.size(); m++)
       {
@@ -680,7 +680,7 @@ namespace Hermes
       // Duplicate matrix volume forms, scale them according
       // to the Butcher's table, enhance them with additional
       // external solutions, and anter them as blocks to the
-      // new stage Jacobian. If block_diagonal_jacobian = true
+      // new_ stage Jacobian. If block_diagonal_jacobian = true
       // then only diagonal blocks are considered.
       for (unsigned int m = 0; m < mfvol.size(); m++)
       {

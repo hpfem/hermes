@@ -40,7 +40,7 @@ namespace Hermes
       // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver,
       //          so don't forget to delete it!
       //          ( Amesos.cpp, line 88, called from factory.Create():
-      //            return new Amesos_Klu(LinearProblem); )
+      //            return new_ Amesos_Klu(LinearProblem); )
     }
 
     template<typename Scalar>

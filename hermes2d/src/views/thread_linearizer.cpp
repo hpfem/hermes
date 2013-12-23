@@ -786,7 +786,7 @@ namespace Hermes
           }
         }
 
-        // if not found, create a new one
+        // if not found, create a new_ one
         i = add_vertex();
 
         this->vertices[i][0] = x;

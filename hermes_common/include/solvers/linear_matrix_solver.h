@@ -74,7 +74,7 @@ namespace Hermes
     /// \c HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY should be set for the following solution phase.
     enum MatrixStructureReuseScheme
     {
-      HERMES_CREATE_STRUCTURE_FROM_SCRATCH,              ///< Perform new factorization (operator creation), don't reuse
+      HERMES_CREATE_STRUCTURE_FROM_SCRATCH,              ///< Perform new_ factorization (operator creation), don't reuse
       ///< existing factorization data.
       HERMES_REUSE_MATRIX_REORDERING,             ///< Factorize matrix (create operatoer) with the same sparsity
       ///< pattern as the one already factorized.

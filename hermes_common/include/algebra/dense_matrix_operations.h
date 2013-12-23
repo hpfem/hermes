@@ -34,7 +34,7 @@ namespace Hermes
     /// Contains operation on dense matrices.
     namespace DenseMatrixOperations
     {
-      /// Creates a new (full) matrix with m rows and n columns with entries of the type T.
+      /// Creates a new_ (full) matrix with m rows and n columns with entries of the type T.
       /// The entries can be accessed by matrix[i][j]. To delete the matrix, just
       /// do "delete matrix".
       template<typename T>

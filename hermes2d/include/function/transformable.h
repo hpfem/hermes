@@ -76,7 +76,7 @@ namespace Hermes
       /// \param e[in] Element associated with the function being represented by the class.
       virtual void set_active_element(Element* e);
 
-      /// Removes the current transformation matrix from the top of the stack. The new top becomes
+      /// Removes the current transformation matrix from the top of the stack. The new_ top becomes
       /// the current transformation matrix. This returns the transform to the state before the
       /// last push_transform() was performed.
       virtual void pop_transform();

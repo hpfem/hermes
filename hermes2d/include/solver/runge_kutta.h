@@ -41,7 +41,7 @@ namespace Hermes
     //     the K_vector should be improved (currently it is zero).
     //
     // (3) At the end of rk_time_step_newton(), the previous time level solution is
-    //     projected onto the space of the new time-level solution so that
+    //     projected onto the space of the new_ time-level solution so that
     //     it can be added to the stages. This projection is slow so we should
     //     find a way to do this differently. In any case, the projection
     //     is not necessary when no adaptivity in space takes place and the
@@ -143,7 +143,7 @@ namespace Hermes
 
       /// Takes a matrix M of size ndof times ndof, extends it (formally) to
       /// a num_stages*ndof times num_stages*ndof matrix that has M in diagonal blocks and
-      /// zero everywhere else, and multiplies the new matrix with the vector stage_coeff_vec
+      /// zero everywhere else, and multiplies the new_ matrix with the vector stage_coeff_vec
       /// which has length num_stages*ndof. The result is saved in vector_left which also
       /// has length num_stages*ndof.
       /// TODO: enable this for other types of matrices.

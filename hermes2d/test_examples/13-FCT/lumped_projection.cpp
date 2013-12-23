@@ -95,7 +95,7 @@ void Lumped_Projection::project_lumped( const  SpaceSharedPtr<double> space, Mes
 
   ProjectionLumpedMatrixFormVol* matrix_form =	new ProjectionLumpedMatrixFormVol(0, 0);
   ProjectionLumpedVectorFormVol* vector_form = new ProjectionLumpedVectorFormVol(0);  
-  //ProjectionLumpedVectorFormVol* vector_form = new ProjectionLumpedVectorFormVol(0, source_meshfn);  
+  //ProjectionLumpedVectorFormVol* vector_form = new_ ProjectionLumpedVectorFormVol(0, source_meshfn);  
   proj_wf->add_matrix_form(matrix_form);
   proj_wf->add_vector_form(vector_form);
   // Call main function.

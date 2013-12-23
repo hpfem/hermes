@@ -626,7 +626,7 @@ namespace Hermes
         if (current_order < 0)
           throw Hermes::Exceptions::Exception("Source space has an uninitialized order (element id = %d)", coarse_element_id);
 
-        // New order calculation.
+        // new_ order calculation.
         int new_order;
         if (e->is_triangle())
         {
@@ -645,7 +645,7 @@ namespace Hermes
           // - vertical.
           int current_order_quadrilateral_vertical = H2D_GET_V_ORDER(current_order);
 
-          // And now we have to create the new encoded order.
+          // And now we have to create the new_ encoded order.
           int new_order_quadrilateral_horizontal = current_order_quadrilateral_horizontal + this->order_increase;
           int new_order_quadrilateral_vertical = current_order_quadrilateral_vertical + this->order_increase;
           new_order = H2D_MAKE_QUAD_ORDER(new_order_quadrilateral_horizontal, new_order_quadrilateral_vertical);

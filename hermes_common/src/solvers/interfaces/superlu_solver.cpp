@@ -259,14 +259,14 @@ namespace Hermes
           for (unsigned int i = 0;i<m->get_nnz();i++)
             to_superlu(local_Ax[i], m->get_Ax()[i]);
 
-          // Create new general (non-symmetric), column-major, non-supernodal, size X size matrix.
+          // Create new_ general (non-symmetric), column-major, non-supernodal, size X size matrix.
           create_csc_matrix(&A, m->get_size(), m->get_size(), m->get_nnz(), local_Ax, local_Ai, local_Ap, SLU_NC, SLU_DTYPE, SLU_GE);
 
           has_A = true;
         }
       }
 
-      // Recreate the input rhs for the solver driver from a local copy of the new value array.
+      // Recreate the input rhs for the solver driver from a local copy of the new_ value array.
       free_rhs();
 
       if(local_rhs) delete [] local_rhs;
@@ -402,7 +402,7 @@ namespace Hermes
       switch (eff_fact_scheme)
       {
       case HERMES_CREATE_STRUCTURE_FROM_SCRATCH:
-        // This case should generally allow for solving a completely new system, i.e. for a change of
+        // This case should generally allow for solving a completely new_ system, i.e. for a change of
         // matrix and rhs size - for simplicity, we reallocate the structures every time.
 
         // Clear the structures emanating from previous factorization.

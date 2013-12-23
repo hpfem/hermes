@@ -83,7 +83,7 @@ namespace Hermes
       // If we are already in the leaf.
       if(transformation_count == 0)
         return;
-      // Both sons are null. We have to add a new Node. Let us do it for the left sone of node.
+      // Both sons are null. We have to add a new_ Node. Let us do it for the left sone of node.
       if(node->get_left_son() == nullptr && node->get_right_son() == nullptr)
       {
         node->set_left_son(new MultimeshDGNeighborTreeNode(node, transformations[0]));
@@ -144,7 +144,7 @@ namespace Hermes
       // If we are in a leaf.
       if(node->get_left_son() == nullptr && node->get_right_son() == nullptr)
       {
-        // Create a vector for the new neighbor.
+        // Create a vector for the new_ neighbor.
         Hermes::vector<unsigned int>* new_neighbor_transformations = new Hermes::vector<unsigned int>;
         // Copy there the whole path except for this leaf.
         for(unsigned int i = 0; i < running_transformations.back()->size(); i++)
@@ -242,14 +242,14 @@ namespace Hermes
 
       // Initialize the vector for central transformations->
       Hermes::vector<Hermes::vector<unsigned int>*> running_central_transformations;
-      // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_DOWN neighborhood).
+      // Prepare the first new_ neighbor's vector. Push back the current transformations (in case of GO_DOWN neighborhood).
       running_central_transformations.push_back(new Hermes::vector<unsigned int>);
       if(ith_neighbor < ns->central_transformations_alloc_size && ns->central_transformations[ith_neighbor])
         ns->central_transformations[ith_neighbor]->copy_to(running_central_transformations.back());
 
       // Initialize the vector for neighbor transformations->
       Hermes::vector<Hermes::vector<unsigned int>*> running_neighbor_transformations;
-      // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_UP/NO_TRF neighborhood).
+      // Prepare the first new_ neighbor's vector. Push back the current transformations (in case of GO_UP/NO_TRF neighborhood).
       running_neighbor_transformations.push_back(new Hermes::vector<unsigned int>);
       if(ith_neighbor < ns->neighbor_transformations_alloc_size && ns->neighbor_transformations[ith_neighbor])
         ns->neighbor_transformations[ith_neighbor]->copy_to(running_neighbor_transformations.back());
@@ -273,7 +273,7 @@ namespace Hermes
       delete running_neighbor_transformations.back();
       running_neighbor_transformations.pop_back();
 
-      // Insert new neighbors.
+      // Insert new_ neighbors.
       for(unsigned int i = 0; i < running_central_transformations.size(); i++)
       {
         ns->neighbors.push_back(neighbor);
@@ -309,7 +309,7 @@ namespace Hermes
       // If we are in a leaf.
       if(node->get_left_son() == nullptr && node->get_right_son() == nullptr)
       {
-        // Create vectors for the new neighbor.
+        // Create vectors for the new_ neighbor.
         Hermes::vector<unsigned int>* new_neighbor_central_transformations = new Hermes::vector<unsigned int>;
         Hermes::vector<unsigned int>* new_neighbor_neighbor_transformations = new Hermes::vector<unsigned int>;
 

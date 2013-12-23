@@ -102,7 +102,7 @@ namespace Hermes
         };
 #pragma pack(pop)
 
-        bool lin_updated; ///< true, if lin now contains new values
+        bool lin_updated; ///< true, if lin now contains new_ values
 
         int max_gl_verts; ///< A maximum allocated number of vertices
         int max_gl_tris; ///< A maximum allocated number of triangles

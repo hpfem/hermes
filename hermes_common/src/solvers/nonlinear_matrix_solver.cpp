@@ -574,7 +574,7 @@ namespace Hermes
             for (int i = 0; i < this->problem_size; i++)
               this->sln_vector[i] = this->previous_sln_vector[i] + (this->sln_vector[i] - this->previous_sln_vector[i]) / this->auto_damping_ratio;
 
-            // Add new solution norm.
+            // Add new_ solution norm.
             solution_norms.push_back(get_l2_norm(this->sln_vector, this->problem_size));
           }
         }

@@ -82,7 +82,7 @@ namespace Hermes
       void set_time(double time);
       void set_time_step(double time_step);
 
-      /// Sets new spaces for the instance.
+      /// Sets new_ spaces for the instance.
       void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       void set_space(SpaceSharedPtr<Scalar>& space);
 

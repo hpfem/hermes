@@ -171,8 +171,8 @@ namespace Hermes
       };
 
       const TimeMeasurable& reset(); ///< Resets accumulated time.
-      const TimeMeasurable& tick_reset(); ///< Starts a new period and resets accumulated time.
-      const TimeMeasurable& tick(TimeMeasurable::TimerPeriodTickType type = HERMES_ACCUMULATE); ///< Starts/ends a new period.
+      const TimeMeasurable& tick_reset(); ///< Starts a new_ period and resets accumulated time.
+      const TimeMeasurable& tick(TimeMeasurable::TimerPeriodTickType type = HERMES_ACCUMULATE); ///< Starts/ends a new_ period.
 
       /// Returns a name of the time period if any.
       const std::string& name() const;

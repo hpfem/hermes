@@ -54,7 +54,7 @@ namespace Hermes
       const char* preconditioner = "New Ifpack";           // Name of the preconditioner employed by AztecOO
       // Possibilities: None" - No preconditioning.
       // "AztecOO" - AztecOO internal preconditioner.
-      // "New Ifpack" - Ifpack internal preconditioner.
+      // "new_ Ifpack" - Ifpack internal preconditioner.
       // "ML" - Multi level preconditione
       unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::LinearSolverDetails;
       // NOX error messages, see NOX_Utils.h.

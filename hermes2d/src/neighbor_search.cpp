@@ -634,13 +634,13 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::Transformations::strip_initial_transformations(unsigned int number_of_stripped)
     {
-      // Create a new clear array for the remaining transformations.
+      // Create a new_ clear array for the remaining transformations.
       unsigned int shifted_trfs[max_level];
       memset(shifted_trfs, 0, max_level * sizeof(unsigned int));
-      // Move the old one to the new one.
+      // Move the old one to the new_ one.
       for(unsigned int k = number_of_stripped; k < num_levels; k++)
         shifted_trfs[k - number_of_stripped] = transf[k];
-      // Point to the new one.
+      // Point to the new_ one.
       memcpy(transf, shifted_trfs, max_level*sizeof(unsigned int));
       // We also have to store the information about length of the transformation array for this neighbor.
       num_levels -= number_of_stripped;
@@ -867,7 +867,7 @@ namespace Hermes
 
                 neighbor_edges.push_back(local_edge_info);
 
-                // Append the new neighbor.
+                // Append the new_ neighbor.
                 n_neighbors++;
                 neighbors.push_back(neighb_el);
             }

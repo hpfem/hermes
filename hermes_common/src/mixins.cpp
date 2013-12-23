@@ -104,7 +104,7 @@ namespace Hermes
       WORD console_attrs = 0;
       console_attrs |= console_attr_green;
 
-      //set new console settings
+      //set new_ console settings
       SetConsoleTextAttribute(h_console, console_attrs);
 
       //write text
@@ -158,7 +158,7 @@ namespace Hermes
       WORD console_attrs = 0;
       console_attrs |= console_attr_red | console_attr_green;
 
-      //set new console settings
+      //set new_ console settings
       SetConsoleTextAttribute(h_console, console_attrs);
 
       //write text
@@ -212,7 +212,7 @@ namespace Hermes
       WORD console_attrs = 0;
       console_attrs |= console_attr_red;
 
-      //set new console settings
+      //set new_ console settings
       SetConsoleTextAttribute(h_console, console_attrs);
 
       //write text
@@ -393,7 +393,7 @@ namespace Hermes
       default: throw Hermes::Exceptions::Exception("Unknown error code: '%c'", code);
       }
 
-      //set new console settings
+      //set new_ console settings
       SetConsoleTextAttribute(h_console, console_attrs);
 
       //write text
@@ -466,7 +466,7 @@ namespace Hermes
         //print the message
         if (!write_console(code, msg))
         printf("%s", msg);  //safe fallback
-        printf("\n");  //write a new line
+        printf("\n");  //write a new_ line
 
         HermesLogEventInfo* info = this->hermes_build_log_info(code);
 

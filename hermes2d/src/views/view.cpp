@@ -573,7 +573,7 @@ namespace Hermes
           do_set_title = false;
         view_sync.leave();
 
-        // If the window already exists, show the new title in its header.
+        // If the window already exists, show the new_ title in its header.
         if(do_set_title)
           set_view_title(output_id, text_contents);
 

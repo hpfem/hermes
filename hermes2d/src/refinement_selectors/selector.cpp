@@ -41,7 +41,7 @@ namespace Hermes
         if(this->max_order == H2DRS_DEFAULT_ORDER)
           max_allowed_order = H2DRS_MAX_ORDER;
 
-        //calculate new order
+        //calculate new_ order
         int order_h = H2D_GET_H_ORDER(order), order_v = H2D_GET_V_ORDER(order);
         int new_order_h = std::min(max_allowed_order, order_h + order_h_inc);
         int new_order_v = std::min(max_allowed_order, order_v + order_v_inc);
