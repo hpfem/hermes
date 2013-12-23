@@ -1637,12 +1637,12 @@ namespace Hermes
         this->num_coeffs = bson_iterator_int(&it_coeffs);
         this->num_elems = bson_iterator_int(&it_orders);
 
-        this->mono_coeffs = malloc_with_check(num_coeffs, this);
+        this->mono_coeffs = malloc_with_check<double>(num_coeffs);
 
         for(unsigned int component_i = 0; component_i < num_components; component_i++)
-          this->elem_coeffs[component_i] = malloc_with_check(num_elems, this);
+          this->elem_coeffs[component_i] = malloc_with_check<int>(num_elems);
 
-        this->elem_orders = malloc_with_check(num_elems, this);
+        this->elem_orders = malloc_with_check<int>(num_elems);
 
         // coeffs
         bson_find(&it_coeffs, &br, "coeffs");
@@ -1755,12 +1755,12 @@ namespace Hermes
         this->num_coeffs = bson_iterator_int(&it_coeffs);
         this->num_elems = bson_iterator_int(&it_orders);
 
-        this->mono_coeffs = malloc_with_check(num_coeffs, this);
+        this->mono_coeffs = malloc_with_check<std::complex<double> >(num_coeffs);
 
         for(unsigned int component_i = 0; component_i < num_components; component_i++)
-          this->elem_coeffs[component_i] = malloc_with_check(num_elems, this);
+          this->elem_coeffs[component_i] = malloc_with_check<int>(num_elems);
 
-        this->elem_orders = malloc_with_check(num_elems, this);
+        this->elem_orders = malloc_with_check<int>(num_elems);
 
         // coeffs.
         Hermes::vector<double> real_coeffs, imag_coeffs;
