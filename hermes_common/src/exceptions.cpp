@@ -21,6 +21,7 @@
 #include <string>
 #include "api.h"
 #include "callstack.h"
+#include "util/memory_handling.h"
 
 namespace Hermes
 {
@@ -51,7 +52,7 @@ namespace Hermes
 
     const char * Exception::what() const throw()
     {
-      char* messageWithReturn = new char[strlen(message)+2];
+      char* messageWithReturn = malloc_with_check<char>(strlen(message)+2);
       strcpy(messageWithReturn, message);
       sprintf(messageWithReturn + strlen(message), "\n");
       return messageWithReturn;
@@ -110,7 +111,7 @@ namespace Hermes
 
     NullException::NullException(const NullException & e)
     {
-      char * msg = new char[strlen(e.what())+1];
+      char * msg = malloc_with_check<char>(strlen(e.what())+1);
       strcpy(msg, e.what());
       message = msg;
       param_idx = e.get_param_idx();
@@ -158,7 +159,7 @@ namespace Hermes
 
     LengthException::LengthException(const LengthException&e) : Exception()
     {
-      char * msg = new char[strlen(e.what())+1];
+      char * msg = malloc_with_check<char>(strlen(e.what()) + 1);
       strcpy(msg, e.what());
       message = msg;
       this->fst_param_idx = e.get_first_param_idx();
@@ -174,7 +175,7 @@ namespace Hermes
 
     LinearMatrixSolverException::LinearMatrixSolverException(const char * reason, ...) : Exception()
     {
-      char* text = new char[2048];
+      char* text = malloc_with_check<char>(2048);
       sprintf(text, "Linear solver failed because: ");
 
       // print the message
@@ -234,7 +235,7 @@ namespace Hermes
 
     MethodNotOverridenException::MethodNotOverridenException(const char * name, ...) : Exception()
     {
-      char* text = new char[1024];
+      char* text = malloc_with_check<char>(1024);
       sprintf(text, "Method not overriden: ");
 
       // print the message
@@ -252,7 +253,7 @@ namespace Hermes
 
     MethodNotImplementedException::MethodNotImplementedException(const char * name, ...) : Exception()
     {
-      char* text = new char[1024];
+      char* text = malloc_with_check<char>(1024);
       sprintf(text, "Sorry, method not implemented so far: ");
 
       // print the message
@@ -270,7 +271,7 @@ namespace Hermes
 
     MeshLoadFailureException::MeshLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * text = new char[strlen(reason)+1];
+      char * text = malloc_with_check<char>(strlen(reason) + 1);
 
       // print the message
       va_list arglist;
@@ -288,7 +289,7 @@ namespace Hermes
 
     SpaceLoadFailureException::SpaceLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * text = new char[strlen(reason)+1];
+      char * text = malloc_with_check<char>(strlen(reason) + 1);
 
       // print the message
       va_list arglist;
@@ -306,7 +307,7 @@ namespace Hermes
 
     SolutionSaveFailureException::SolutionSaveFailureException(const char * reason, ...) : Exception()
     {
-      char * text = new char[strlen(reason)+1];
+      char * text = malloc_with_check<char>(strlen(reason) + 1);
 
       // print the message
       va_list arglist;
@@ -324,7 +325,7 @@ namespace Hermes
 
     SolutionLoadFailureException::SolutionLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * text = new char[strlen(reason)+1];
+      char * text = malloc_with_check<char>(strlen(reason) + 1);
 
       // print the message
       va_list arglist;

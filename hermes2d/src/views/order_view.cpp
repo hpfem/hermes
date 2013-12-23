@@ -121,7 +121,7 @@ namespace Hermes
         ord.lock_data();
         int i, nv = ord.get_num_vertices();
         double3* vert = ord.get_vertices();
-        double2* tvert = new double2[nv];
+        double2* tvert = malloc_with_check<double2>(nv);
         for (i = 0; i < nv; i++)
         {
           tvert[i][0] = transform_x(vert[i][0]);
@@ -180,7 +180,7 @@ namespace Hermes
             }
         }
 
-        delete [] tvert;
+        ::free(tvert);
         ord.unlock_data();
       }
 

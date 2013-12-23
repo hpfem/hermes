@@ -167,7 +167,7 @@ namespace Hermes
       {
         for (int i = 0; i < num; i++)
           ::free(unidata[i]);
-        delete [] unidata;
+        ::free(unidata);
       }
     }
 
@@ -1011,7 +1011,7 @@ namespace Hermes
 
     MeshFunction<double>* VonMisesFilter::clone() const
     {
-      MeshFunctionSharedPtr<double>* slns = new MeshFunctionSharedPtr<double>[num];
+      MeshFunctionSharedPtr<double>* slns = malloc_with_check<MeshFunctionSharedPtr<double> >(num);
       for(int i = 0; i < num; i++)
         slns[i] = sln[i]->clone();
       VonMisesFilter* filter = new VonMisesFilter(slns, num, lambda, mu, cyl, item1, item2);

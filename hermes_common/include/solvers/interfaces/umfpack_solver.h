@@ -55,6 +55,7 @@ namespace Hermes
       UMFPackLinearMatrixSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
       virtual ~UMFPackLinearMatrixSolver();
       virtual void solve();
+      virtual void free();
       virtual int get_matrix_size();
 
       /// Matrix to solve.

@@ -69,7 +69,7 @@ namespace Hermes
       int space_type = this->get_space_type();
       int component = (space_type == HERMES_HDIV_SPACE)? 1 : 0;
       double** a = new_matrix<double>(n, n);
-      double* b = new double[n];
+      double* b = malloc_with_check<double>(n);
       for (i = 0; i < n; i++)
       {
         // chebyshev point
@@ -88,13 +88,13 @@ namespace Hermes
 
       // solve the system
       double d;
-      int* iperm = new int[n];
+      int* iperm = malloc_with_check<int>(n);
       ludcmp(a, n, iperm, &d);
       lubksb(a, n, iperm, b);
 
       // cleanup
-      delete [] iperm;
-      delete [] a;
+      ::free(iperm);
+      ::free(a);
 
       return b;
     }
@@ -139,7 +139,7 @@ namespace Hermes
       {
         for (int i = 0; i < table_size; i++)
           if(comb_table[i] != nullptr)
-            delete [] comb_table[i];
+            ::free(comb_table[i]);
 
         free(comb_table);
         comb_table = nullptr;

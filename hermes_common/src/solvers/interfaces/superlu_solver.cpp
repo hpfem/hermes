@@ -188,10 +188,10 @@ namespace Hermes
       free_matrix();
       free_rhs();
 
-      if(local_Ai)  delete [] local_Ai;
-      if(local_Ap)  delete [] local_Ap;
-      if(local_Ax)  delete [] local_Ax;
-      if(local_rhs) delete [] local_rhs;
+      if(local_Ai)  ::free(local_Ai);
+      if(local_Ap)  ::free(local_Ap);
+      if(local_Ax)  ::free(local_Ax);
+      if(local_rhs) ::free(local_rhs);
     }
 
     template<typename Scalar>
@@ -246,16 +246,16 @@ namespace Hermes
         {
           // A will be created from the local copy of the value and index arrays, because these
           // may be modified by the solver driver.
-          if(local_Ai) delete [] local_Ai;
-          local_Ai = new int[m->get_nnz()];
+          if(local_Ai) ::free(local_Ai);
+          local_Ai = malloc_with_check(m->get_nnz(), this);
           memcpy(local_Ai, m->get_Ai(), m->get_nnz() * sizeof(int));
 
-          if(local_Ap) delete [] local_Ap;
-          local_Ap = new int[m->get_size() + 1];
+          if(local_Ap) ::free(local_Ap);
+          local_Ap = malloc_with_check(m->get_size() + 1, this);
           memcpy(local_Ap, m->get_Ap(), (m->get_size() + 1) * sizeof(int));
 
-          if(local_Ax) delete [] local_Ax;
-          local_Ax = new typename SuperLuType<Scalar>::Scalar[m->get_nnz()];
+          if(local_Ax) ::free(local_Ax);
+          local_Ax = malloc_with_check(m->get_nnz(), this);
           for (unsigned int i = 0;i<m->get_nnz();i++)
             to_superlu(local_Ax[i], m->get_Ax()[i]);
 
@@ -269,8 +269,8 @@ namespace Hermes
       // Recreate the input rhs for the solver driver from a local copy of the new_ value array.
       free_rhs();
 
-      if(local_rhs) delete [] local_rhs;
-      local_rhs = new typename SuperLuType<Scalar>::Scalar[rhs->get_size()];
+      if(local_rhs) ::free(local_rhs);
+      local_rhs = malloc_with_check(rhs->get_size(), this);
       for (unsigned int i = 0;i<rhs->get_size();i++)
         to_superlu(local_rhs[i], rhs->v[i]);
 
@@ -281,7 +281,7 @@ namespace Hermes
       // Initialize the solution variable.
       SuperMatrix X;
       typename SuperLuType<Scalar>::Scalar *x;
-      if( !(x = new typename SuperLuType<Scalar>::Scalar[m->get_size()]) )
+      if( !(x = malloc_with_check(m->get_size(), this)) )
         throw Hermes::Exceptions::Exception("Malloc fails for x[].");
       create_dense_matrix(&X, m->get_size(), 1, x, m->get_size(), SLU_DN, SLU_DTYPE, SLU_GE);
 
@@ -347,8 +347,8 @@ namespace Hermes
 
       if(factorized)
       {
-        delete [] this->sln;
-        this->sln = new Scalar[m->get_size()];
+        ::free(this->sln);
+        this->sln = malloc_with_check(m->get_size(), this);
 
         Scalar *sol = (Scalar*) ((DNformat*) X.Store)->nzval;
 

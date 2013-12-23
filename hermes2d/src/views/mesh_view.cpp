@@ -48,8 +48,8 @@ namespace Hermes
 
       MeshView::~MeshView()
       {
-        if(nodes != nullptr) delete [] nodes;
-        if(elems != nullptr) delete [] elems;
+        if(nodes != nullptr) ::free(nodes);
+        if(elems != nullptr) ::free(elems);
         if(lin != nullptr)
           delete this->lin;
       }
@@ -72,9 +72,9 @@ namespace Hermes
 
         int i;
 
-        if(elems != nullptr) delete [] elems;
+        if(elems != nullptr) ::free(elems);
         ne = mesh->get_max_element_id() + 1;
-        elems = new ObjInfo[ne];
+        elems = malloc_with_check<ObjInfo>(ne);
         for (i = 0; i < ne; i++)
           elems[i].id = -1;
 

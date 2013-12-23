@@ -21,6 +21,7 @@
 */
 #include "algebra_mixins.h"
 #include "vector.h"
+#include "util/memory_handling.h"
 #include "matrix.h"
 
 namespace Hermes
@@ -44,19 +45,19 @@ namespace Hermes
 
         if(this->output_matrixOn)
         {
-          char* fileName = new char[this->matrixFilename.length() + 5];
+          char* fileName = malloc_with_check<char>(this->matrixFilename.length() + 5);
           if(this->only_lastMatrixIteration)
             sprintf(fileName, "%s", this->matrixFilename.c_str());
           else if(this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration)
             sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
           else
           {
-            delete [] fileName;
+            ::free(fileName);
             return;
           }
 
           matrix->export_to_file(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
-          delete [] fileName;
+          ::free(fileName);
         }
       }
 
@@ -68,10 +69,10 @@ namespace Hermes
 
         if(this->output_matrixOn)
         {
-          char* fileName = new char[this->matrixFilename.length() + 5];
+          char* fileName = malloc_with_check<char>(this->matrixFilename.length() + 5);
           sprintf(fileName, "%s", this->matrixFilename.c_str());
           matrix->export_to_file(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
-          delete [] fileName;
+          ::free(fileName);
         }
       }
 
@@ -84,19 +85,19 @@ namespace Hermes
 
         if(this->output_rhsOn)
         {
-          char* fileName = new char[this->RhsFilename.length() + 5];
+          char* fileName = malloc_with_check<char>(this->RhsFilename.length() + 5);
           if(this->only_lastRhsIteration)
             sprintf(fileName, "%s", this->RhsFilename.c_str());
           else if(this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration)
             sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
           else
           {
-            delete [] fileName;
+            ::free(fileName);
             return;
           }
 
           rhs->export_to_file(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
-          delete [] fileName;
+          ::free(fileName);
         }
       }
 
@@ -108,10 +109,10 @@ namespace Hermes
 
         if(this->output_rhsOn)
         {
-          char* fileName = new char[this->RhsFilename.length() + 5];
+          char* fileName = malloc_with_check<char>(this->RhsFilename.length() + 5);
           sprintf(fileName, "%s", this->RhsFilename.c_str());
           rhs->export_to_file(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
-          delete [] fileName;
+          ::free(fileName);
         }
       }
 

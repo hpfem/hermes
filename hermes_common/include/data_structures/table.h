@@ -105,6 +105,8 @@ namespace Hermes
     ButcherTable();
     ButcherTable(unsigned int size);
     ButcherTable(ButcherTableType butcher_table);
+    ~ButcherTable();
+    virtual void free();
     virtual void alloc(unsigned int size);
     double get_B(unsigned int i);
     double get_B2(unsigned int i);

@@ -51,7 +51,7 @@ namespace Hermes
         // Threads
         // Local number of threads - to avoid calling it over and over again, and against faults caused by the
         // value being changed while assembling.
-        this->threadLinearizerMultidimensional = new ThreadLinearizerMultidimensional<LinearizerDataDimensions>*[this->num_threads_used];
+        this->threadLinearizerMultidimensional = malloc_with_check<LinearizerMultidimensional<LinearizerDataDimensions>, ThreadLinearizerMultidimensional<LinearizerDataDimensions>*>(this->num_threads_used, this);
         for (int i = 0; i < this->num_threads_used; i++)
           this->threadLinearizerMultidimensional[i] = new ThreadLinearizerMultidimensional<LinearizerDataDimensions>(this);
 
@@ -336,7 +336,7 @@ namespace Hermes
         free();
         for (int i = 0; i < this->num_threads_used; i++)
           delete this->threadLinearizerMultidimensional[i];
-        delete[] this->threadLinearizerMultidimensional;
+        ::free(this->threadLinearizerMultidimensional);
       }
 
       template<typename LinearizerDataDimensions>

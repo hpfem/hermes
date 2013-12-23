@@ -96,11 +96,11 @@ namespace Hermes
     template<typename Scalar>
     void MumpsMatrix<Scalar>::alloc_data()
     {
-      Ax = new typename mumps_type<Scalar>::mumps_Scalar[this->nnz];
+      Ax = malloc_with_check(this->nnz, this);
       memset(Ax, 0, sizeof(Scalar) * this->nnz);
 
-      irn = new int[this->nnz];
-      jcn = new int[this->nnz];
+      irn = malloc_with_check(this->nnz, this);
+      jcn = malloc_with_check(this->nnz, this);
       for (unsigned int i = 0; i < this->nnz; i++)
       {
         irn[i] = 1;
@@ -114,17 +114,17 @@ namespace Hermes
       CSCMatrix<Scalar>::free();
       if(Ax)
       {
-        delete [] Ax;
+        ::free(Ax);
         Ax = nullptr;
       }
       if(irn)
       {
-        delete [] irn;
+        ::free(irn);
         irn = nullptr;
       }
       if(jcn)
       {
-        delete [] jcn;
+        ::free(jcn);
         jcn = nullptr;
       }
     }
@@ -238,8 +238,8 @@ namespace Hermes
           }
           else
           {
-            Ax_re = new double[this->nnz];
-            Ax_im = new double[this->nnz];
+            Ax_re = malloc_with_check(this->nnz, this);
+            Ax_im = malloc_with_check(this->nnz, this);
             struct mat_complex_split_t z = {Ax_re, Ax_im};
 
             for(int i = 0; i < this->nnz; i++)
@@ -258,9 +258,9 @@ namespace Hermes
           }
 
           if(Ax_re)
-            delete [] Ax_re;
+            ::free(Ax_re);
           if(Ax_im)
-            delete [] Ax_im;
+            ::free(Ax_im);
           Mat_Close(mat);
 
           if(!matvar)
@@ -292,7 +292,7 @@ namespace Hermes
     void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar*& vector_out, bool vector_out_initialized) const
     {
       if(!vector_out_initialized)
-        vector_out = new Scalar[this->size];
+        vector_out = malloc_with_check(this->size, this);
 
       memset(vector_out, 0, sizeof(Scalar) * this->size);
 
@@ -318,11 +318,11 @@ namespace Hermes
     {
       this->nnz = nnz_;
       this->size = size;
-      this->Ap = new int[this->size + 1];
-      this->Ai = new int[this->nnz];
-      this->Ax = new typename mumps_type<Scalar>::mumps_Scalar[this->nnz];
-      irn = new int[this->nnz];
-      jcn = new int[this->nnz];
+      this->Ap = malloc_with_check(this->size + 1, this);
+      this->Ai = malloc_with_check(this->nnz, this);
+      this->Ax = malloc_with_check(this->nnz, this);
+      irn = malloc_with_check(this->nnz, this);
+      jcn = malloc_with_check(this->nnz, this);
 
       for (unsigned int i = 0; i < this->size; i++)
       {
@@ -346,11 +346,11 @@ namespace Hermes
 
       nmat->nnz = this->nnz;
       nmat->size = this->size;
-      nmat->Ap = new int[this->size + 1];
-      nmat->Ai = new int[this->nnz];
-      nmat->Ax = new typename mumps_type<Scalar>::mumps_Scalar[this->nnz];
-      nmat->irn = new int[this->nnz];
-      nmat->jcn = new int[this->nnz];
+      nmat->Ap = malloc_with_check(this->size + 1, this);
+      nmat->Ai = malloc_with_check(this->nnz, this);
+      nmat->Ax = malloc_with_check(this->nnz, this);
+      nmat->irn = malloc_with_check(this->nnz, this);
+      nmat->jcn = malloc_with_check(this->nnz, this);
       for (unsigned int i = 0; i <this->nnz; i++)
       {
         nmat->Ai[i] = this->Ai[i];
@@ -407,7 +407,7 @@ namespace Hermes
       }
 
       if(param.rhs != nullptr)
-        delete [] param.rhs;
+        ::free(param.rhs);
     }
 
    template<>
@@ -514,7 +514,7 @@ namespace Hermes
         throw Hermes::Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
 
       // Specify the right-hand side (will be replaced by the solution).
-      param.rhs = new typename mumps_type<Scalar>::mumps_Scalar[m->size];
+      param.rhs = malloc_with_check(m->size, this);
       memcpy(param.rhs, rhs->v, m->size * sizeof(typename mumps_type<Scalar>::mumps_Scalar));
 
       // Do the jobs specified in setup_factorization().
@@ -523,14 +523,14 @@ namespace Hermes
       // Throws appropriate exception.
       if(check_status())
       {
-        delete [] this->sln;
-        this->sln = new Scalar[m->size];
+        ::free(this->sln);
+        this->sln = malloc_with_check(m->size, this);
         for (unsigned int i = 0; i < rhs->get_size(); i++)
           this->sln[i] = mumps_to_Scalar(param.rhs[i]);
       }
       else
       {
-        delete [] param.rhs;
+        ::free(param.rhs);
 
         icntl_14 *= 2;
         if(icntl_14 > max_icntl_14)
@@ -556,7 +556,7 @@ namespace Hermes
       this->tick();
       this->time = this->accumulated();
 
-      delete [] param.rhs;
+      ::free(param.rhs);
       param.rhs = nullptr;
     }
 

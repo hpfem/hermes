@@ -33,7 +33,20 @@ namespace Hermes
     else
     {
       caller->free();
-      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", size * sizeof(ArrayItem));
+      throw Hermes::Exceptions::Exception("Hermes::calloc_with_check() failed to allocate.", size * sizeof(ArrayItem));
+      return nullptr;
+    }
+  }
+
+  template<typename ArrayItem>
+  ArrayItem* calloc_with_check(int size)
+  {
+    ArrayItem* new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
+    if (new_array)
+      return new_array;
+    else
+    {
+      throw Hermes::Exceptions::Exception("Hermes::calloc_with_check() failed to allocate.", size * sizeof(ArrayItem));
       return nullptr;
     }
   }
@@ -46,14 +59,28 @@ namespace Hermes
       return new_array;
     else
     {
-      caller->free();
-      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", size * sizeof(ArrayItem));
+      if(caller)
+        caller->free();
+      throw Hermes::Exceptions::Exception("Hermes::malloc_with_check() failed to allocate.", size * sizeof(ArrayItem));
+      return nullptr;
+    }
+  }
+
+  template<typename ArrayItem>
+  ArrayItem* malloc_with_check(int size)
+  {
+    ArrayItem* new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
+    if (new_array)
+      return new_array;
+    else
+    {
+      throw Hermes::Exceptions::Exception("Hermes::malloc_with_check() failed to allocate.", size * sizeof(ArrayItem));
       return nullptr;
     }
   }
 
   template<typename Caller, typename ArrayItem>
-  ArrayItem* realloc_with_check(ArrayItem* original_array, int new_size, Caller* const caller)
+  ArrayItem* realloc_with_check(ArrayItem*& original_array, int new_size, Caller* const caller)
   {
     ArrayItem* new_array = (ArrayItem*)realloc(original_array, new_size * sizeof(ArrayItem));
     if (new_array)

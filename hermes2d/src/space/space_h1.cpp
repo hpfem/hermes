@@ -263,7 +263,7 @@ namespace Hermes
     Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc)
     {
       assert(order >= 1);
-      Scalar* proj = new Scalar[order + 1];
+      Scalar* proj = malloc_with_check<H1Space<Scalar>, Scalar>(order + 1, this);
 
       if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
       {

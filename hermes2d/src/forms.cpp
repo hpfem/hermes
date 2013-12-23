@@ -185,9 +185,9 @@ namespace Hermes
         fn_neighbor = fn;
         if (reverse_neighbor_side)
         {
-          this->val_neighbor = new T[this->np];
-          this->dx_neighbor = new T[this->np];
-          this->dy_neighbor = new T[this->np];
+          this->val_neighbor = malloc_with_check<DiscontinuousFunc<T>, T>(this->np, this);
+          this->dx_neighbor = malloc_with_check<DiscontinuousFunc<T>, T>(this->np, this);
+          this->dy_neighbor = malloc_with_check<DiscontinuousFunc<T>, T>(this->np, this);
           for (int i = 0; i < this->np; i++)
           {
             this->val_neighbor[i] = fn->val[this->np - i - 1];
@@ -220,9 +220,9 @@ namespace Hermes
     {
       if (reverse_neighbor_side)
       {
-        this->val_neighbor = new T[this->np];
-        this->dx_neighbor = new T[this->np];
-        this->dy_neighbor = new T[this->np];
+        this->val_neighbor = malloc_with_check<DiscontinuousFunc<T>, T>(this->np, this);
+        this->dx_neighbor = malloc_with_check<DiscontinuousFunc<T>, T>(this->np, this);
+        this->dy_neighbor = malloc_with_check<DiscontinuousFunc<T>, T>(this->np, this);
         for (int i = 0; i < this->np; i++)
         {
           this->val_neighbor[i] = fn_neighbor->val[this->np - i - 1];
@@ -312,6 +312,12 @@ namespace Hermes
     template<typename T>
     DiscontinuousFunc<T>::~DiscontinuousFunc()
     {
+      free();
+    }
+
+    template<typename T>
+    void DiscontinuousFunc<T>::free()
+    {
       if (fn_central != nullptr)
       {
         delete fn_central;
@@ -321,9 +327,9 @@ namespace Hermes
       {
         if (reverse_neighbor_side)
         {
-          delete[] this->val_neighbor;
-          delete[] this->dx_neighbor;
-          delete[] this->dy_neighbor;
+          ::free(this->val_neighbor);
+          ::free(this->dx_neighbor);
+          ::free(this->dy_neighbor);
         }
         delete fn_neighbor;
         fn_neighbor = nullptr;
@@ -345,9 +351,13 @@ namespace Hermes
     template<typename T>
     void Geom<T>::free()
     {
-      delete[] x;    delete[] y;
-      delete[] tx;    delete[] ty;
-      delete[] nx;    delete[] ny;
+      ::free(x);
+      ::free(tx);
+      ::free(nx);
+
+      ::free(y);
+      ::free(ty);
+      ::free(ny);
     }
 
     template<>
@@ -473,8 +483,8 @@ namespace Hermes
       e->elem_marker = rm->get_active_element()->marker;
       Quad2D* quad = rm->get_quad_2d();
       int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
-      e->x = new double[np];
-      e->y = new double[np];
+      e->x = malloc_with_check<double>(np);
+      e->y = malloc_with_check<double>(np);
       double* x = rm->get_phys_x(order);
       double* y = rm->get_phys_y(order);
       for (int i = 0; i < np; i++)
@@ -499,12 +509,12 @@ namespace Hermes
 
       Quad2D* quad = rm->get_quad_2d();
       int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
-      e->x = new double[np];
-      e->y = new double[np];
-      e->tx = new double[np];
-      e->ty = new double[np];
-      e->nx = new double[np];
-      e->ny = new double[np];
+      e->x = malloc_with_check<double>(np);
+      e->y = malloc_with_check<double>(np);
+      e->tx = malloc_with_check<double>(np);
+      e->ty = malloc_with_check<double>(np);
+      e->nx = malloc_with_check<double>(np);
+      e->ny = malloc_with_check<double>(np);
       for (int i = 0; i < np; i++)
       {
         e->x[i] = x[i];

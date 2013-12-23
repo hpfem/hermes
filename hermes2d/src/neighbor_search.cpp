@@ -98,17 +98,23 @@ namespace Hermes
     template<typename Scalar>
     NeighborSearch<Scalar>::~NeighborSearch()
     {
+      this->free();
+    }
+
+    template<typename Scalar>
+    void NeighborSearch<Scalar>::free()
+    {
       neighbor_edges.clear();
       neighbors.clear();
       clear_supported_shapes();
 
-      for(unsigned int i = 0; i < central_transformations_alloc_size; i++)
-        if(this->central_transformations[i])
-          delete this->central_transformations[i];
+      for (unsigned int i = 0; i < central_transformations_alloc_size; i++)
+      if (this->central_transformations[i])
+        delete this->central_transformations[i];
       ::free(this->central_transformations);
-      for(unsigned int i = 0; i < neighbor_transformations_alloc_size; i++)
-        if(this->neighbor_transformations[i])
-          delete this->neighbor_transformations[i];
+      for (unsigned int i = 0; i < neighbor_transformations_alloc_size; i++)
+      if (this->neighbor_transformations[i])
+        delete this->neighbor_transformations[i];
       ::free(this->neighbor_transformations);
     }
 
@@ -231,7 +237,7 @@ namespace Hermes
             Element* parent = central_el->parent;
 
             // Array of middle-point vertices of the intermediate parent edges that we climb up to the correct parent element.
-            Node** par_mid_vertices = new Node*[Transformations::max_level];
+            Node** par_mid_vertices = malloc_with_check<NeighborSearch<Scalar>, Node*>(Transformations::max_level, this);
             // Number of visited intermediate parents.
             int n_parents = 0;
 
@@ -240,7 +246,7 @@ namespace Hermes
 
             find_act_elem_up(parent, orig_vertex_id, par_mid_vertices, n_parents);
 
-            delete [] par_mid_vertices;
+            ::free(par_mid_vertices);
           }
           else
           {
@@ -1052,7 +1058,7 @@ namespace Hermes
     {
       assert(central_al != nullptr && neighbor_al != nullptr);
       cnt = central_al->cnt + neighbor_al->cnt;
-      dof = new int[cnt];
+      dof = malloc_with_check<int>(cnt);
       memcpy(dof, central_al->dof, sizeof(int)*central_al->cnt);
       memcpy(dof + central_al->cnt, neighbor_al->dof, sizeof(int)*neighbor_al->cnt);
     }
@@ -1060,7 +1066,7 @@ namespace Hermes
     template<typename Scalar>
     NeighborSearch<Scalar>::ExtendedShapeset::~ExtendedShapeset()
     {
-      delete [] dof;
+      ::free(dof);
       delete neighbor_al;
     }
 
@@ -1073,7 +1079,7 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::ExtendedShapeset::update(NeighborSearch* neighborhood, SpaceSharedPtr<Scalar> space)
     {
-      delete [] this->dof;
+      ::free(this->dof);
       space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
       combine_assembly_lists();
     }

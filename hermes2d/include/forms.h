@@ -278,6 +278,7 @@ namespace Hermes
       DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false);
 
       virtual ~DiscontinuousFunc();
+      void free();
 
       using Func<T>::subtract;
       void subtract(const DiscontinuousFunc<T>& func);

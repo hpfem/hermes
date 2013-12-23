@@ -84,6 +84,8 @@ namespace Hermes
       /// Destructor.
       ~NeighborSearch();
 
+      void free();
+
       /*** Methods for changing active state for further calculations. ***/
 
       /// Set active edge and compute all information about the neighbors.

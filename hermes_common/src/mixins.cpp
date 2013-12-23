@@ -15,6 +15,7 @@
 #include "mixins.h"
 #include "common.h"
 #include "matrix.h"
+#include "util/memory_handling.h"
 #ifdef WIN32
 #include <Windows.h>
 #endif
@@ -44,9 +45,9 @@ namespace Hermes
     void Loggable::set_logFile_name(const char* filename)
     {
       if (this->logFileName)
-        delete[] this->logFileName;
+        ::free(this->logFileName);
       int strlength = std::strlen(filename);
-      this->logFileName = new char[strlength];
+      this->logFileName = malloc_with_check<char>(strlength);
       strcpy(this->logFileName, filename);
     }
 
@@ -58,9 +59,9 @@ namespace Hermes
     void Loggable::set_static_logFile_name(const char* filename)
     {
       if (Loggable::staticLogFileName)
-        delete[] Loggable::staticLogFileName;
+        ::free(Loggable::staticLogFileName);
       int strlength = std::strlen(filename);
-      Loggable::staticLogFileName = new char[strlength];
+      Loggable::staticLogFileName = malloc_with_check<char>(strlength);
       strcpy(Loggable::staticLogFileName, filename);
     }
 

@@ -182,7 +182,7 @@ namespace Hermes
           delete_tree(father->sons[0]);
           delete_tree(father->sons[1]);
         }
-        delete [] father;
+        ::free(father);
       }
 
       int StreamView::create_streamline(double x_start, double y_start, int idx)
@@ -193,7 +193,7 @@ namespace Hermes
         double y = y_start;
         int k = 0;
         const int buffer_length = 5000;
-        double2* buffer = new double2[buffer_length];
+        double2* buffer = malloc_with_check(buffer_length, this);
         bool tau_ok = false;
         bool end = false;
         bool almost_end_of_domain = false;
@@ -264,9 +264,9 @@ namespace Hermes
           if(end) break; // get out from both while cycles
         }
 
-        streamlines[idx] = new double2[k];
+        streamlines[idx] = malloc_with_check(k, this);
         memcpy(streamlines[idx], buffer, k*sizeof(double2));
-        delete [] buffer;
+        ::free(buffer);
 
         return k;
       }
@@ -324,7 +324,7 @@ namespace Hermes
 				int2* edges = vec->get_edges();
         int* edge_markers = vec->get_edge_markers();
         double4* vert = vec->get_vertices();
-        int3* bnd_edges = new int3[ne];
+        int3* bnd_edges = malloc_with_check(ne, this);
         for (int i = 0; i < ne; i++)
         {
           if(edge_markers[i] == marker)
@@ -343,7 +343,7 @@ namespace Hermes
 
         // create list of initial points
         int buffer_length = 1000;
-        initial_points = new double2[buffer_length];
+        initial_points = malloc_with_check(buffer_length, this);
         k = 0;
         int idx;
         while ((idx = find_initial_edge(num_edges, bnd_edges)) != -1)
@@ -372,7 +372,7 @@ namespace Hermes
         }
         num_stream = k;
 
-        delete [] bnd_edges;
+        ::free(bnd_edges);
       }
 
       void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, int xitem, int yitem)
@@ -416,7 +416,7 @@ namespace Hermes
         for (int i = 0; i < num_stream; i++)
           streamlength[i] =  create_streamline(initial_points[i][0], initial_points[i][1], i);
 
-        delete [] initial_points;
+        ::free(initial_points);
 
         vec->unlock_data();
 
@@ -455,7 +455,7 @@ namespace Hermes
         int i;
         int nv = vec->get_num_vertices();
         double4* vert = vec->get_vertices();
-        double2* tvert = new double2[nv];
+        double2* tvert = malloc_with_check(nv, this);
 
         for (i = 0; i < nv; i++)
         {
@@ -522,7 +522,7 @@ namespace Hermes
           glEnd();
         }
 
-        delete [] tvert;
+        ::free(tvert);
         vec->unlock_data();
       }
 
@@ -559,7 +559,7 @@ namespace Hermes
           if(num_stream > 0)
           {
             num_stream--;
-            delete [] streamlines[num_stream];
+            ::free(streamlines[num_stream]);
             refresh();
           }
           break;
@@ -609,9 +609,9 @@ namespace Hermes
       {
         delete_tree(root);
         for (int i = 0; i < num_stream; i++)
-          delete [] streamlines[i];
-        delete [] streamlines;
-        delete [] streamlength;
+          ::free(streamlines[i]);
+        ::free(streamlines);
+        ::free(streamlength);
         delete vec;
       }
     }

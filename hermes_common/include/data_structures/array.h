@@ -59,7 +59,7 @@ namespace Hermes
       {
         this->pages = (TYPE**)malloc(sizeof(TYPE*) * page_count);
         for (unsigned i = 0; i < this->page_count; i++)
-          this->pages[i] = new TYPE[HERMES_PAGE_SIZE];
+          this->pages[i] = malloc_with_check<Array<TYPE>, TYPE>(HERMES_PAGE_SIZE, this);
         this->unused = (int*)malloc(sizeof(int));
       }
       else
@@ -98,7 +98,7 @@ namespace Hermes
 
       for (unsigned i = 0; i < this->page_count; i++)
       {
-        TYPE* new_page = new TYPE[HERMES_PAGE_SIZE];
+        TYPE* new_page = malloc_with_check<Array<TYPE>, TYPE>(HERMES_PAGE_SIZE, this);
         memcpy(new_page, array.pages[i], sizeof(TYPE) * HERMES_PAGE_SIZE);
         this->pages[i] = new_page;
       }
@@ -108,7 +108,7 @@ namespace Hermes
     void free()
     {
       for (unsigned i = 0; i < this->page_count; i++)
-        delete [] pages[i];
+        ::free(pages[i]);
       size = nitems = nunused = page_count = unused_size = 0;
     }
 
@@ -141,8 +141,8 @@ namespace Hermes
       {
         if (!(size & HERMES_PAGE_MASK))
         {
-          this->pages = (TYPE**)realloc(this->pages, (this->page_count + 1) * sizeof(TYPE*));
-          TYPE* new_page = new TYPE[HERMES_PAGE_SIZE];
+          this->pages = realloc_with_check <Array<TYPE>, TYPE*>(this->pages, this->page_count + 1, this);
+          TYPE* new_page = malloc_with_check<Array<TYPE>, TYPE>(HERMES_PAGE_SIZE, this);
           pages[this->page_count++] = new_page;
         }
         item = pages[size >> HERMES_PAGE_BITS] + (size & HERMES_PAGE_MASK);
@@ -265,7 +265,7 @@ namespace Hermes
         this->page_count = std::max<int>(this->page_count + 1, (int)(this->page_count * 1.5));
         this->pages = realloc_with_check<Array, TYPE*>(this->pages, this->page_count, this);
         for(int new_i = local_page_count; new_i < this->page_count; new_i++)
-          pages[new_i] = new TYPE[HERMES_PAGE_SIZE];
+          pages[new_i] = malloc_with_check<Array, TYPE>(HERMES_PAGE_SIZE, this);
       }
       TYPE* item = pages[size >> HERMES_PAGE_BITS] + (size & HERMES_PAGE_MASK);
       item->id = size++;

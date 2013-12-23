@@ -45,7 +45,7 @@ namespace Hermes
       DiscreteProblemNOX<Scalar> dp(wf, space);
 
       // Initial coefficient vector for the Newton's method.
-      Scalar* coeff_vec = new Scalar[ndof];
+      Scalar* coeff_vec = malloc_with_check(ndof, this);
       memset(coeff_vec, 0, ndof*sizeof(Scalar));
 
       const char* iterative_method = "GMRES";           // Name of the iterative method employed by AztecOO (ignored
@@ -84,7 +84,7 @@ namespace Hermes
       // Perform Newton's iteration via NOX
       newton_nox.solve(coeff_vec);
 
-      delete [] coeff_vec;
+      ::free(coeff_vec);
 
       if(target_vec != nullptr)
         for (int i = 0; i < ndof; i++)
@@ -183,14 +183,14 @@ namespace Hermes
 
       // Calculate the coefficient vector.
       int ndof = space->get_num_dofs();
-      Scalar* target_vec = new Scalar[ndof];
+      Scalar* target_vec = malloc_with_check(ndof, this);
       project_global(space, source_sln, target_vec, proj_norm, newton_tol, newton_max_iter);
 
       // Translate coefficient vector into a Solution.
       Solution<Scalar>::vector_to_solution(target_vec, space, target_sln);
 
       // Clean up.
-      delete [] target_vec;
+      ::free(target_vec);
     }
 
     template<typename Scalar>

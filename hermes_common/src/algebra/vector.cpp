@@ -33,6 +33,7 @@
 #include "solvers/interfaces/paralution_solver.h"
 #include "qsort.h"
 #include "api.h"
+#include "util/memory_handling.h"
 
 namespace Hermes
 {
@@ -134,8 +135,8 @@ namespace Hermes
           }
           else
           {
-            v_re = new double[this->size];
-            v_im = new double[this->size];
+            v_re = malloc_with_check(this->size, this);
+            v_im = malloc_with_check(this->size, this);
             struct mat_complex_split_t z = {v_re, v_im};
 
             for(int i = 0; i < this->size; i++)
@@ -154,9 +155,9 @@ namespace Hermes
           }
 
           if(v_re)
-            delete [] v_re;
+            ::free(v_re);
           if(v_im)
-            delete [] v_im;
+            ::free(v_im);
           Mat_Close(mat);
 
           if(!matvar)
@@ -228,13 +229,13 @@ namespace Hermes
             memcpy(this->v, matvar->data, sizeof(Scalar)*this->size);
           else
           {
-            std::complex<double>* complex_data = new std::complex<double>[this->size];
+            std::complex<double>* complex_data = malloc_with_check(this->size, this);
             double* real_array = (double*)((mat_complex_split_t*)matvar->data)->Re;
             double* imag_array = (double*)((mat_complex_split_t*)matvar->data)->Im;
             for(int i = 0; i < this->size; i++)
               complex_data[i] = std::complex<double>(real_array[i], imag_array[i]);
             memcpy(this->v, complex_data, sizeof(Scalar)*this->size);
-            delete [] complex_data;
+            ::free(complex_data);
           }
         }
 
@@ -294,7 +295,7 @@ namespace Hermes
     {
       free();
       this->size = n;
-      this->v = new Scalar[n];
+      this->v = malloc_with_check<SimpleVector<Scalar>, Scalar>(n, this);
       zero();
     }
 
@@ -316,7 +317,7 @@ namespace Hermes
     void SimpleVector<Scalar>::free()
     {
       if (this->v)
-        delete [] this->v;
+        ::free(this->v);
       this->v = nullptr;
       this->size = 0;
     }

@@ -39,10 +39,10 @@ namespace Hermes
 
     void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], double y[])
     {
-      PetscScalar *py = new PetscScalar[ni];
+      PetscScalar *py = malloc_with_check(ni, this);
       VecGetValues(x, ni, ix, py);
       for (int i = 0;i<ni;i++)y[i] = py[i].real();
-      delete [] py;
+      ::free(py);
     }
 
     int remove_petsc_object()
@@ -102,11 +102,11 @@ namespace Hermes
       assert(this->pages != nullptr);
 
       // calc nnz
-      int *nnz_array = new int[this->size];
+      int *nnz_array = malloc_with_check(this->size, this);
 
       // fill in nnz_array
       int aisize = this->get_num_indices();
-      int *ai = new int[aisize];
+      int *ai = malloc_with_check(aisize, this);
 
       // sort the indices and remove duplicities, insert into ai
       int pos = 0;
@@ -117,15 +117,15 @@ namespace Hermes
       }
       // stote the number of nonzeros
       nnz = pos;
-      delete [] this->pages; this->pages = nullptr;
-      delete [] ai;
+      ::free(this->pages; this->pages = nullptr);
+      ::free(ai);
 
       //
       MatCreateSeqAIJ(PETSC_COMM_SELF, this->size, this->size, 0, nnz_array, &matrix);
       //  MatSetOption(matrix, MAT_ROW_ORIENTED);
       //  MatSetOption(matrix, MAT_ROWS_SORTED);
 
-      delete [] nnz_array;
+      ::free(nnz_array);
 
       inited = true;
     }
@@ -245,7 +245,7 @@ namespace Hermes
     {
       this->size = size;
       this->nnz = nnz;
-      PetscScalar* pax = new PetscScalar[nnz];
+      PetscScalar* pax = malloc_with_check(nnz, this);
       for (unsigned i = 0;i<nnz;i++)
         pax[i] = to_petsc(ax[i]);
       MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, size, size, ap, ai, pax, &matrix);
@@ -320,10 +320,10 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::extract(Scalar *v) const
     {
-      int *idx = new int[this->size];
+      int *idx = malloc_with_check(this->size, this);
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       vec_get_value(vec, this->size, idx, v);
-      delete [] idx;
+      ::free(idx);
     }
 
     template<typename Scalar>
@@ -335,14 +335,14 @@ namespace Hermes
     template<typename Scalar>
     Vector<Scalar>* PetscVector<Scalar>::change_sign()
     {
-      PetscScalar* y = new PetscScalar[this->size];
-      int *idx = new int[this->size];
+      PetscScalar* y = malloc_with_check(this->size, this);
+      int *idx = malloc_with_check(this->size, this);
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       VecGetValues(vec, this->size, idx, y);
       for (unsigned int i = 0; i < this->size; i++) y[i] *= -1.;
       VecSetValues(vec, this->size, idx, y, INSERT_VALUES);
-      delete [] y;
-      delete [] idx;
+      ::free(y);
+      ::free(idx);
       return this;
     }
 
@@ -453,17 +453,17 @@ namespace Hermes
       this->time = this->accumulated();
 
       // allocate memory for solution vector
-      delete [] this->sln;
-      this->sln = new Scalar[m->size];
+      ::free(this->sln);
+      this->sln = malloc_with_check(m->size, this);
       memset(this->sln, 0, m->size * sizeof(Scalar));
 
       // index map vector (basic serial code uses the map sln[i] = x[i] for all dofs.
-      int *idx = new int[m->size];
+      int *idx = malloc_with_check(m->size, this);
       for (unsigned int i = 0; i < m->size; i++) idx[i] = i;
 
       // copy solution to the output solution vector
       vec_get_value(x, m->size, idx, this->sln);
-      delete [] idx;
+      ::free(idx);
 
       KSPDestroy(ksp);
       VecDestroy(x);

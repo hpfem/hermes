@@ -198,7 +198,7 @@ namespace Hermes
     Scalar* HdivSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc)
     {
       assert(order >= 0);
-      Scalar* proj = new Scalar[order + 1];
+      Scalar* proj = malloc_with_check<HdivSpace<Scalar>, Scalar>(order + 1, this);
 
       Quad1DStd quad1d;
       Scalar* rhs = proj;

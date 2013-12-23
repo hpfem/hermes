@@ -21,6 +21,7 @@
 */
 #include "solvers/nonlinear_matrix_solver.h"
 #include "common.h"
+#include "util/memory_handling.h"
 
 using namespace Hermes::Algebra;
 
@@ -49,8 +50,14 @@ namespace Hermes
     template<typename Scalar>
     NonlinearMatrixSolver<Scalar>::~NonlinearMatrixSolver()
     {
+      this->free();
+    }
+
+    template<typename Scalar>
+    void NonlinearMatrixSolver<Scalar>::free()
+    {
       if (this->sln_vector)
-        delete[] this->sln_vector;
+        ::free(this->sln_vector);
     }
 
     template<typename Scalar>
@@ -93,11 +100,11 @@ namespace Hermes
 
       if(this->sln_vector != nullptr)
       {
-        delete [] this->sln_vector;
+        ::free(this->sln_vector);
         this->sln_vector = nullptr;
       }
 
-      this->sln_vector = new Scalar[this->problem_size];
+      this->sln_vector = malloc_with_check<NonlinearMatrixSolver<Scalar>, Scalar>(this->problem_size, this);
 
       if(coeff_vec == nullptr)
         memset(this->sln_vector, 0, this->problem_size*sizeof(Scalar));

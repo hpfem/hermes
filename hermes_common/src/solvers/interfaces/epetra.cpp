@@ -174,12 +174,12 @@ namespace Hermes
     template<typename Scalar>
     void EpetraMatrix<Scalar>::extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs)
     {
-      int* idxs_to_pass = new int[len];
+      int* idxs_to_pass = malloc_with_check(len, this);
       for (unsigned int i = 0; i < len; i++)
         idxs_to_pass[i] = idxs[i];
       int n_entries_to_pass = n_entries;
       mat->ExtractGlobalRowCopy(row, len, n_entries_to_pass, vals, idxs_to_pass);
-      delete[] idxs_to_pass;
+      ::free(idxs_to_pass);
     }
 
     template<>

@@ -179,8 +179,8 @@ namespace Hermes
       int j = 0, jc = 0;
       int k = 0, kc = 0;
 
-      this->row_perm = new int [ndof];
-      this->col_perm = new int [ndof];
+      this->row_perm = malloc_with_check(ndof, this);
+      this->col_perm = malloc_with_check(ndof, this);
 
       for (int i = 0; i < ndof; i++)
       {
@@ -290,8 +290,8 @@ namespace Hermes
       this->tick();
       this->time = this->accumulated();
 
-      delete [] this->sln;
-      this->sln = new double[final_matrix->size];
+      ::free(this->sln);
+      this->sln = malloc_with_check(final_matrix->size, this);
       memset(this->sln, 0, final_matrix->size * sizeof(double));
 
       // copy the solution into sln vector
@@ -403,8 +403,8 @@ namespace Hermes
       this->tick();
       this->time = this->accumulated();
 
-      delete [] this->sln;
-      this->sln = new double[final_matrix->size];
+      ::free(this->sln);
+      this->sln = malloc_with_check(final_matrix->size, this);
       memset(this->sln, 0, final_matrix->size * sizeof(double));
 
       // copy the solution into sln vector
@@ -439,8 +439,8 @@ namespace Hermes
 
       kp.ExtractSolution(xr, xi);
 
-      delete [] this->sln;
-      this->sln = new std::complex<double>[m->size];
+      ::free(this->sln);
+      this->sln = malloc_with_check(m->size, this);
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
       // copy the solution into sln vector
@@ -482,8 +482,8 @@ namespace Hermes
 
       kp.ExtractSolution(xr, xi);
 
-      delete [] this->sln;
-      this->sln = new std::complex<double>[m->size];
+      ::free(this->sln);
+      this->sln = malloc_with_check(m->size, this);
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
       // copy the solution into sln vector

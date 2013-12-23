@@ -187,6 +187,8 @@ namespace Hermes
 
       void set_type(SolutionType type) { sln_type = type; };
 
+      virtual void free();
+
       /// Monomial coefficient array
       Scalar* mono_coeffs;
       /// Stored element orders in the mathematical sense.
@@ -212,8 +214,6 @@ namespace Hermes
       void enable_transform(bool enable = true);
 
       virtual void init();
-
-      virtual void free();
 
       /// Converts a coefficient vector into a Solution.
       virtual void set_coeff_vector(SpaceSharedPtr<Scalar> space, const Vector<Scalar>* vec, bool add_dir_lift, int start_index);

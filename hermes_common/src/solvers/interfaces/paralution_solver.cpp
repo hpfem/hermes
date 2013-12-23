@@ -202,8 +202,8 @@ namespace Hermes
     {
       // Handle sln.
       if(this->sln && this->sln != initial_guess)
-        delete [] this->sln;
-      this->sln = new Scalar[this->get_matrix_size()];
+        ::free(this->sln);
+      this->sln = malloc_with_check(this->get_matrix_size(), this);
 
       // Create initial guess.
       if(initial_guess)
@@ -379,8 +379,8 @@ namespace Hermes
 
         // Set operator, smoother, build.
         int levels = AMG_solver->GetNumLevels();
-        paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >** smoothers = new paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >*[levels-1];
-        paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >** preconditioners = new paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >*[levels-1];
+        paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >** smoothers = malloc_with_check(levels-1, this);
+        paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >** preconditioners = malloc_with_check(levels-1, this);
 
         for (int i = 0; i < levels - 1; ++i)
         {

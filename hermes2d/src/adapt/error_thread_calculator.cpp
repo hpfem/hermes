@@ -29,8 +29,8 @@ namespace Hermes
     ErrorThreadCalculator<Scalar>::ErrorThreadCalculator(ErrorCalculator<Scalar>* errorCalculator) :
       errorCalculator(errorCalculator)
     {
-      slns = new Solution<Scalar>*[this->errorCalculator->component_count];
-      rslns = new Solution<Scalar>*[this->errorCalculator->component_count];
+      slns = malloc_with_check<ErrorThreadCalculator<Scalar>, Solution<Scalar>*>(this->errorCalculator->component_count, this);
+      rslns = malloc_with_check<ErrorThreadCalculator<Scalar>, Solution<Scalar>*>(this->errorCalculator->component_count, this);
 
       for (int j = 0; j < this->errorCalculator->component_count; j++)
       {
@@ -42,14 +42,20 @@ namespace Hermes
     template<typename Scalar>
     ErrorThreadCalculator<Scalar>::~ErrorThreadCalculator()
     {
+      this->free();
+    }
+
+    template<typename Scalar>
+    void ErrorThreadCalculator<Scalar>::free()
+    {
       for (int j = 0; j < this->errorCalculator->component_count; j++)
       {
         delete slns[j];
         delete rslns[j];
       }
 
-      delete [] slns;
-      delete [] rslns;
+      ::free(slns);
+      ::free(rslns);
     }
 
     template<typename Scalar>
@@ -107,7 +113,7 @@ namespace Hermes
     template<typename Scalar>
     void ErrorThreadCalculator<Scalar>::DGErrorCalculator::assemble_one_edge()
     {
-      this->neighbor_searches = new NeighborSearch<Scalar>*[this->current_state->num];
+      this->neighbor_searches = malloc_with_check<ErrorThreadCalculator<Scalar>::DGErrorCalculator, NeighborSearch<Scalar>*>(this->current_state->num, this);
 
       // If this edge is an inter-element one on all meshes.
       if(init_neighbors())
@@ -121,11 +127,11 @@ namespace Hermes
           this->assemble_one_neighbor(neighbor_i);
 
         if(dummy_processed)
-          delete [] dummy_processed;
+          ::free(dummy_processed);
       }
 
       // Deinit neighbors.
-      deinit_neighbors();
+      free();
     }
 
     template<typename Scalar>
@@ -163,7 +169,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void ErrorThreadCalculator<Scalar>::DGErrorCalculator::deinit_neighbors()
+    void ErrorThreadCalculator<Scalar>::DGErrorCalculator::free()
     {
       // Initialize the NeighborSearches.
       for(unsigned int i = 0; i < current_state->num; i++)
@@ -178,7 +184,7 @@ namespace Hermes
           if(!existing_ns)
             delete this->neighbor_searches[i];
       }
-      delete [] neighbor_searches;
+      ::free(neighbor_searches);
     }
 
     template<typename Scalar>
@@ -261,11 +267,11 @@ namespace Hermes
       }
       order_base = order;
 
-      RefMap** refmaps = new RefMap*[this->errorThreadCalculator->errorCalculator->component_count];
+      RefMap** refmaps = malloc_with_check<ErrorThreadCalculator<Scalar>::DGErrorCalculator, RefMap*>(this->errorThreadCalculator->errorCalculator->component_count, this);
       for(int i = 0; i < this->errorThreadCalculator->errorCalculator->component_count; i++)
         refmaps[i] = this->errorThreadCalculator->slns[i]->get_refmap();
       this->errorThreadCalculator->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorThreadCalculator->errorCalculator->component_count, order_base, current_state->isurf, current_state->rep->marker, this->errorThreadCalculator->geometry, this->errorThreadCalculator->jacobian_x_weights);
-      delete [] refmaps;
+      ::free(refmaps);
 
       for(int current_mfDG_i = 0; current_mfDG_i < this->errorThreadCalculator->errorCalculator->mfDG.size(); current_mfDG_i++)
       {
@@ -285,7 +291,7 @@ namespace Hermes
         this->errorThreadCalculator->deinitialize_error_and_norm_functions(mfs, error_func, norm_func);
       }
 
-      delete [] this->errorThreadCalculator->jacobian_x_weights;
+      ::free(this->errorThreadCalculator->jacobian_x_weights);
       this->errorThreadCalculator->geometry->free();
       delete this->errorThreadCalculator->geometry;
 
@@ -371,11 +377,11 @@ namespace Hermes
     void ErrorThreadCalculator<Scalar>::evaluate_volumetric_forms(Traverse::State* current_state, int order)
     {
       // initialize points & geometry & jacobian times weights.
-      RefMap** refmaps = new RefMap*[this->errorCalculator->component_count];
+      RefMap** refmaps = malloc_with_check<ErrorThreadCalculator<Scalar>, RefMap*>(this->errorCalculator->component_count, this);
       for(int i = 0; i < this->errorCalculator->component_count; i++)
         refmaps[i] = slns[i]->get_refmap();
       this->n_quadrature_points = init_geometry_points(refmaps, this->errorCalculator->component_count, order, this->geometry, this->jacobian_x_weights);
-      delete [] refmaps;
+      ::free(refmaps);
 
       for(int i = 0; i < this->errorCalculator->mfvol.size(); i++)
       {
@@ -394,17 +400,17 @@ namespace Hermes
       // deinitialize points & geometry & jacobian times weights
       geometry->free();
       delete geometry;
-      delete [] this->jacobian_x_weights;
+      ::free(this->jacobian_x_weights);
     }
 
     template<typename Scalar>
     void ErrorThreadCalculator<Scalar>::evaluate_surface_forms_one_edge(Traverse::State* current_state, int order)
     {
-      RefMap** refmaps = new RefMap*[this->errorCalculator->component_count];
+      RefMap** refmaps = malloc_with_check<ErrorThreadCalculator<Scalar>, RefMap*>(this->errorCalculator->component_count, this);
       for(int i = 0; i < this->errorCalculator->component_count; i++)
         refmaps[i] = slns[i]->get_refmap();
       this->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorCalculator->component_count, order, current_state->isurf, current_state->rep->marker, this->geometry, this->jacobian_x_weights);
-      delete [] refmaps;
+      ::free(refmaps);
 
       for(int i = 0; i < this->errorCalculator->mfsurf.size(); i++)
       {
@@ -454,7 +460,7 @@ namespace Hermes
       // deinitialize points & geometry & jacobian times weights
       geometry->free();
       delete geometry;
-      delete [] this->jacobian_x_weights;
+      ::free(this->jacobian_x_weights);
     }
 
     template<typename Scalar>

@@ -65,7 +65,7 @@ namespace Hermes
       template<>
       void VectorBaseView<double>::update_solution()
       {
-        double* coeffs = new double[ndof + 1];
+        double* coeffs = malloc_with_check<double>(ndof + 1);
         memset(coeffs, 0, sizeof(double) * (ndof + 1));
         if(base_index >= -1 && base_index < ndof)
           coeffs[base_index + 1] = 1.0;
@@ -75,13 +75,12 @@ namespace Hermes
         VectorView::show(sln, sln, H2D_FN_VAL_0, H2D_FN_VAL_1);
         update_title();
 
-        delete [] coeffs;
+        ::free(coeffs);
       }
       template<>
       void VectorBaseView<std::complex<double> >::update_solution()
       {
-        std::complex<double> * coeffs = new std::complex<double>[ndof + 1];
-        memset(coeffs, 0, sizeof(std::complex<double> ) * (ndof + 1));
+        std::complex<double>* coeffs = calloc_with_check<std::complex<double>>(ndof + 1);
         if(base_index >= -1 && base_index < ndof)
           coeffs[base_index + 1] = 1.0;
         Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss);
@@ -91,7 +90,7 @@ namespace Hermes
         this->VectorView::show(&filter, &filter, H2D_FN_VAL_0, H2D_FN_VAL_1);
         update_title();
 
-        delete [] coeffs;
+        ::free(coeffs);
       }
 
       template<typename Scalar>

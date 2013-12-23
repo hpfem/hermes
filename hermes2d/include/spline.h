@@ -36,6 +36,8 @@ namespace Hermes
       /// Destructor.
       ~CubicSpline();
 
+      void free();
+
       /// Calculates coefficients.
       void calculate_coeffs();
 

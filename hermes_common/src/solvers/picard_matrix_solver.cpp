@@ -19,6 +19,7 @@
 
 #include "picard_matrix_solver.h"
 #include "dense_matrix_operations.h"
+#include "util/memory_handling.h"
 
 using namespace Hermes::Algebra;
 using namespace Hermes::Algebra::DenseMatrixOperations;
@@ -83,7 +84,7 @@ namespace Hermes
     template<typename Scalar>
     double PicardMatrixSolver<Scalar>::calculate_residual_norm()
     {
-      Scalar* temp = new Scalar[this->problem_size];
+      Scalar* temp = malloc_with_check<PicardMatrixSolver<Scalar>, Scalar>(this->problem_size, this);
       if (this->previous_jacobian)
         this->previous_jacobian->multiply_with_vector(this->sln_vector, temp, true);
       else
@@ -93,7 +94,7 @@ namespace Hermes
         temp[i] = temp[i] - residual->get(i);
 
       double residual_norm = get_l2_norm(temp, this->problem_size);
-      delete[] temp;
+      ::free(temp);
 
       return residual_norm;
     }
@@ -158,11 +159,11 @@ namespace Hermes
     {
       if (anderson_is_on)
       {
-        previous_Anderson_sln_vector = new Scalar[this->problem_size];
-        previous_vectors = new Scalar*[num_last_vectors_used];
+        previous_Anderson_sln_vector = malloc_with_check<PicardMatrixSolver<Scalar>, Scalar>(this->problem_size, this);
+        previous_vectors = malloc_with_check<PicardMatrixSolver<Scalar>, Scalar*>(num_last_vectors_used, this);
         for (int i = 0; i < num_last_vectors_used; i++)
-          previous_vectors[i] = new Scalar[this->problem_size];
-        anderson_coeffs = new Scalar[num_last_vectors_used - 1];
+          previous_vectors[i] = malloc_with_check<PicardMatrixSolver<Scalar>, Scalar>(this->problem_size, this);
+        anderson_coeffs = malloc_with_check<PicardMatrixSolver<Scalar>, Scalar>(num_last_vectors_used - 1, this);
         memcpy(previous_vectors[0], this->sln_vector, this->problem_size*sizeof(Scalar));
         this->vec_in_memory = 1;
       }
@@ -173,11 +174,11 @@ namespace Hermes
     {
       if (anderson_is_on)
       {
-        delete[] previous_Anderson_sln_vector;
+        ::free(previous_Anderson_sln_vector);
         for (int i = 0; i < num_last_vectors_used; i++)
-          delete[] previous_vectors[i];
-        delete[] previous_vectors;
-        delete[] anderson_coeffs;
+          ::free(previous_vectors[i]);
+        ::free(previous_vectors);
+        ::free(anderson_coeffs);
       }
     }
 
@@ -236,7 +237,7 @@ namespace Hermes
 
       // Allocate the matrix system for the Anderson coefficients.
       Scalar** mat = new_matrix<Scalar>(n, n);
-      Scalar* rhs = new Scalar[n];
+      Scalar* rhs = malloc_with_check<PicardMatrixSolver<Scalar>, Scalar>(n, this);
       // Set up the matrix and rhs vector.
       for (int i = 0; i < n; i++)
       {
@@ -264,7 +265,7 @@ namespace Hermes
       }
       // Solve the matrix system.
       double d;
-      int* perm = new int[n];
+      int* perm = malloc_with_check<PicardMatrixSolver<Scalar>, int>(n, this);
       ludcmp(mat, n, perm, &d);
       lubksb<Scalar>(mat, n, perm, rhs);
       // Use the result to define the Anderson coefficients. Remember that
@@ -278,8 +279,8 @@ namespace Hermes
       anderson_coeffs[n] = 1.0 - sum;
 
       // Clean up.
-      delete[] mat;
-      delete[] rhs;
+      ::free(mat);
+      ::free(rhs);
     }
 
     template class HERMES_API PicardMatrixSolver<double>;

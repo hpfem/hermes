@@ -29,6 +29,7 @@
 #include "solvers/interfaces/paralution_solver.h"
 #include "api.h"
 #include "exceptions.h"
+#include "util/memory_handling.h"
 
 using namespace Hermes::Algebra;
 
@@ -49,7 +50,7 @@ namespace Hermes
     LinearMatrixSolver<Scalar>::~LinearMatrixSolver()
     {
       if(sln != nullptr)
-        delete [] sln;
+        ::free(sln);
     }
 
     template<typename Scalar>
@@ -404,7 +405,7 @@ namespace Hermes
       std::string resultFileName = this->command();
 
       // Handling of the result file.
-      this->sln = new Scalar[this->m->get_size()];
+      this->sln = malloc_with_check<Scalar>(this->m->get_size());
       SimpleVector<Scalar> temp;
       temp.alloc(this->m->get_size());
       temp.import_from_file((char*)resultFileName.c_str(), "x", EXPORT_FORMAT_PLAIN_ASCII );

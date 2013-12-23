@@ -20,6 +20,7 @@
 \brief Basic cs (Compressed sparse) matrix classes and operations.
 */
 #include "cs_matrix.h"
+#include "util/memory_handling.h"
 
 namespace Hermes
 {
@@ -84,9 +85,9 @@ namespace Hermes
       assert(this->pages != nullptr);
 
       // initialize the arrays Ap and Ai
-      Ap = new int[this->size + 1];
+      Ap = malloc_with_check<CSMatrix, int>(this->size + 1, this);
       int aisize = this->get_num_indices();
-      Ai = new int[aisize];
+      Ai = malloc_with_check<CSMatrix, int>(aisize, this);
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i;
@@ -98,7 +99,7 @@ namespace Hermes
       }
       Ap[i] = pos;
 
-      delete [] this->pages;
+      ::free(this->pages);
       this->pages = nullptr;
 
       nnz = Ap[this->size];
@@ -109,7 +110,7 @@ namespace Hermes
     template<typename Scalar>
     void CSMatrix<Scalar>::alloc_data()
     {
-      Ax = new Scalar[nnz];
+      Ax = malloc_with_check<CSMatrix, Scalar>(nnz, this);
       memset(Ax, 0, sizeof(Scalar) * nnz);
     }
 
@@ -119,17 +120,17 @@ namespace Hermes
       nnz = 0;
       if(Ap)
       {
-        delete [] Ap;
+        ::free(Ap);
         Ap = nullptr;
       }
       if(Ai)
       {
-        delete [] Ai;
+        ::free(Ai);
         Ai = nullptr;
       }
       if(Ax)
       {
-        delete [] Ax;
+        ::free(Ax);
         Ax = nullptr;
       }
     }
@@ -184,9 +185,9 @@ namespace Hermes
     {
       this->nnz = nnz;
       this->size = size;
-      this->Ap = new int[this->size + 1];
-      this->Ai = new int[nnz];
-      this->Ax = new Scalar[nnz];
+      this->Ap = malloc_with_check<CSMatrix, int>(this->size + 1, this);
+      this->Ai = malloc_with_check<CSMatrix, int>(nnz, this);
+      this->Ax = malloc_with_check<CSMatrix, Scalar>(nnz, this);
       memcpy(this->Ap, ap, (this->size + 1) * sizeof(int));
       memcpy(this->Ai, ai, this->nnz * sizeof(int));
       memcpy(this->Ax, ax, this->nnz * sizeof(Scalar));
@@ -197,9 +198,9 @@ namespace Hermes
     {
       // The variable names are so to reflect CSC -> CSR direction.
       // From the "Ap indexed by columns" to "Ap indexed by rows".
-      int* tempAp = new int[this->size + 1];
-      int* tempAi = new int[nnz];
-      Scalar* tempAx = new Scalar[nnz];
+      int* tempAp = malloc_with_check<CSMatrix, int>(this->size + 1, this);
+      int* tempAi = malloc_with_check<CSMatrix, int>(nnz, this);
+      Scalar* tempAx = malloc_with_check<CSMatrix, Scalar>(nnz, this);
 
       int run_i = 0;
       for(int target_row = 0; target_row < this->size; target_row++)
@@ -222,9 +223,9 @@ namespace Hermes
       memcpy(this->Ai, tempAi, sizeof(int) * nnz);
       memcpy(this->Ap, tempAp, sizeof(int) * (this->size + 1));
       memcpy(this->Ax, tempAx, sizeof(Scalar) * nnz);
-      delete [] tempAi;
-      delete [] tempAx;
-      delete [] tempAp;
+      ::free(tempAi);
+      ::free(tempAx);
+      ::free(tempAp);
     }
 
     template<typename Scalar>
@@ -356,7 +357,7 @@ namespace Hermes
     void CSCMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar*& vector_out, bool vector_out_initialized) const
     {
       if(!vector_out_initialized)
-        vector_out = new Scalar[this->size];
+        vector_out = malloc_with_check<Scalar>(this->size);
       memset(vector_out, 0, sizeof(Scalar) * this->size);
       {
         for(int i = 0; i < this->size; i++)
@@ -452,8 +453,8 @@ namespace Hermes
           else
           {
             // For complex.
-            Ax_re = new double[this->nnz];
-            Ax_im = new double[this->nnz];
+            Ax_re = malloc_with_check(this->nnz, this);
+            Ax_im = malloc_with_check(this->nnz, this);
             struct mat_complex_split_t z = {Ax_re, Ax_im};
 
             for(int i = 0; i < this->nnz; i++)
@@ -473,9 +474,9 @@ namespace Hermes
           if(invert_storage)
             this->switch_orientation();
           if(Ax_re)
-            delete [] Ax_re;
+            ::free(Ax_re);
           if(Ax_im)
-            delete [] Ax_im;
+            ::free(Ax_im);
           Mat_Close(mat);
 
           if(!matvar)
@@ -549,17 +550,17 @@ namespace Hermes
             mat_sparse_t *sparse = (mat_sparse_t *)matvar->data;
 
             this->nnz = sparse->nir;
-            this->Ax = new Scalar[this->nnz];
-            this->Ai = new int[this->nnz];
+            this->Ax = malloc_with_check(this->nnz, this);
+            this->Ai = malloc_with_check(this->nnz, this);
             this->size = sparse->njc - 1;
-            this->Ap = new int[this->size + 1];
+            this->Ap = malloc_with_check(this->size + 1, this);
 
             void* data = nullptr;
             if(Hermes::Helpers::TypeIsReal<Scalar>::value)
               data = sparse->data;
             else
             {
-              std::complex<double>* complex_data = new std::complex<double>[this->nnz];
+              std::complex<double>* complex_data = malloc_with_check(this->nnz, this);
               double* real_array = (double*)((mat_complex_split_t*)sparse->data)->Re;
               double* imag_array = (double*)((mat_complex_split_t*)sparse->data)->Im;
               for(int i = 0; i < this->nnz; i++)
@@ -568,7 +569,7 @@ namespace Hermes
             }
             memcpy(this->Ax, data, this->nnz * sizeof(Scalar));
             if(!Hermes::Helpers::TypeIsReal<Scalar>::value)
-              delete [] data;
+              ::free(data);
             memcpy(this->Ap, sparse->jc, (this->size + 1) * sizeof(Scalar));
             memcpy(this->Ai, sparse->ir, this->nnz * sizeof(int));
 

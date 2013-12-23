@@ -70,7 +70,7 @@ namespace Hermes
       MeshFunctionSharedPtr<Scalar> target_sln)
     {
       // Calculate the coefficient vector.
-      Scalar* target_vec = new Scalar[space->get_num_dofs()];
+      Scalar* target_vec = malloc_with_check<Scalar>(space->get_num_dofs());
 
       project_global(space, custom_projection_jacobian, custom_projection_residual, target_vec);
 
@@ -78,7 +78,7 @@ namespace Hermes
       Solution<Scalar>::vector_to_solution(target_vec, space, target_sln);
 
       // Clean up.
-      delete [] target_vec;
+      ::free(target_vec);
     }
 
     template<typename Scalar>
@@ -131,10 +131,10 @@ namespace Hermes
       if(target_vec->get_size() != space->get_num_dofs())
         throw Exceptions::ValueException("target_vec->size", target_vec->get_size(), space->get_num_dofs());
 
-      Scalar* vec = new Scalar[target_vec->get_size()];
+      Scalar* vec = malloc_with_check<Scalar>(target_vec->get_size());
       project_global(space, source_meshfn, vec, proj_norm);
       target_vec->set_vector(vec);
-      delete [] vec;
+      ::free(vec);
     }
 
     template<typename Scalar>
@@ -200,14 +200,14 @@ namespace Hermes
       }
 
       // Calculate the coefficient vector.
-      Scalar* target_vec = new Scalar[space->get_num_dofs()];
+      Scalar* target_vec = malloc_with_check<Scalar>(space->get_num_dofs());
       project_global(space, source_sln, target_vec, proj_norm);
 
       // Translate coefficient vector into a Solution.
       Solution<Scalar>::vector_to_solution(target_vec, space, target_sln);
 
       // Clean up.
-      delete [] target_vec;
+      ::free(target_vec);
     }
 
     template<typename Scalar>
@@ -242,10 +242,10 @@ namespace Hermes
       if(target_vec->get_size() != Space<Scalar>::get_num_dofs(spaces))
         throw Exceptions::ValueException("target_vec->size", target_vec->get_size(), Space<Scalar>::get_num_dofs(spaces));
 
-      Scalar* vec = new Scalar[target_vec->get_size()];
+      Scalar* vec = malloc_with_check<Scalar>(target_vec->get_size());
       project_global(spaces, source_slns, vec, proj_norms);
       target_vec->set_vector(vec);
-      delete [] vec;
+      ::free(vec);
     }
 
     template<typename Scalar>

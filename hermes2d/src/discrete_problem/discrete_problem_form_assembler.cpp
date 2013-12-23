@@ -141,7 +141,7 @@ namespace Hermes
       if(form->ext.size() > 0)
       {
         int local_ext_count = form->ext.size();
-        local_ext = new Func<Scalar>*[local_ext_count];
+        local_ext = malloc_with_check(local_ext_count, this);
         for(int ext_i = 0; ext_i < local_ext_count; ext_i++)
           if(form->ext[ext_i])
             local_ext[ext_i] = current_state->e[ext_i] == nullptr ? nullptr : init_fn(form->ext[ext_i].get(), order);
@@ -228,14 +228,14 @@ namespace Hermes
             local_ext[ext_i]->free_fn();
             delete local_ext[ext_i];
           }
-          delete [] local_ext;
+          ::free(local_ext);
       }
 
       if(rungeKutta)
         u_ext -= form->u_ext_offset;
 
       // Cleanup.
-      delete [] local_stiffness_matrix;
+      ::free(local_stiffness_matrix);
     }
 
     template<typename Scalar>
@@ -250,7 +250,7 @@ namespace Hermes
       if(form->ext.size() > 0)
       {
         int local_ext_count = form->ext.size();
-        local_ext = new Func<Scalar>*[local_ext_count];
+        local_ext = malloc_with_check(local_ext_count, this);
         for(int ext_i = 0; ext_i < local_ext_count; ext_i++)
           if(form->ext[ext_i])
             local_ext[ext_i] = init_fn(form->ext[ext_i].get(), order);
@@ -291,7 +291,7 @@ namespace Hermes
             local_ext[ext_i]->free_fn();
             delete local_ext[ext_i];
           }
-          delete [] local_ext;
+          ::free(local_ext);
       }
 
       if(rungeKutta)

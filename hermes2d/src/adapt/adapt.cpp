@@ -119,9 +119,15 @@ namespace Hermes
     template<typename Scalar>
     Adapt<Scalar>::~Adapt()
     {
-      if(elements_to_refine)
-        delete [] elements_to_refine;
+      this->free();
     }
+    
+    template<typename Scalar>
+      void Adapt<Scalar>::free()
+    {
+        if (elements_to_refine)
+          ::free(elements_to_refine);
+      }
 
     template<typename Scalar>
     void Adapt<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
@@ -207,7 +213,7 @@ namespace Hermes
 
       // Clearing.
       if(elements_to_refine)
-        delete [] elements_to_refine;
+        ::free(elements_to_refine);
 
       // Also handle the refinementInfoMeshFunctions.
       if(this->refinementInfoMeshFunctionGlobal)
@@ -266,10 +272,10 @@ namespace Hermes
 
       // List of indices of elements that are going to be processed
       this->elements_to_refine_count = attempted_element_refinements_count;
-      this->elements_to_refine = new ElementToRefine[elements_to_refine_count];
+      this->elements_to_refine = malloc_with_check<Adapt<Scalar>, ElementToRefine>(elements_to_refine_count, this);
 
       // Projected solutions obtaining.
-      MeshFunctionSharedPtr<Scalar>* rslns = new MeshFunctionSharedPtr<Scalar>[this->num];
+      MeshFunctionSharedPtr<Scalar>* rslns = malloc_with_check<Adapt<Scalar>, MeshFunctionSharedPtr<Scalar> >(this->num, this);
       OGProjection<Scalar> ogProjection;
 
       for(unsigned int i = 0; i < this->num; i++)
@@ -294,7 +300,7 @@ namespace Hermes
           end = attempted_element_refinements_count;
 
         // rslns cloning.
-        MeshFunctionSharedPtr<Scalar>* current_rslns = new MeshFunctionSharedPtr<Scalar>[this->num];
+        MeshFunctionSharedPtr<Scalar>* current_rslns = malloc_with_check<Adapt<Scalar>, MeshFunctionSharedPtr<Scalar> >(this->num, this);
         for(unsigned int i = 0; i < this->num; i++)
           current_rslns[i] = rslns[i]->clone();
 
@@ -327,10 +333,10 @@ namespace Hermes
           }
         }
 
-        delete [] current_rslns;
+        ::free(current_rslns);
       }
 
-      delete [] rslns;
+      ::free(rslns);
 
       if(!this->exceptionMessageCaughtInParallelBlock.empty())
       {
@@ -423,8 +429,7 @@ namespace Hermes
         MeshSharedPtr union_mesh(new Mesh);
         Traverse::construct_union_mesh(this->num, &this->meshes[0], union_mesh);
         // Allocate union mesh element count to info array.
-        int* info_array = new int[union_mesh->get_num_elements()];
-        memset(info_array, 0, sizeof(int) * union_mesh->get_num_elements());
+        int* info_array = calloc_with_check<Adapt<Scalar>, int>(union_mesh->get_num_elements(), this);
         // Traverse
         this->meshes.push_back(union_mesh);
         Traverse trav(this->meshes.size());
@@ -465,8 +470,7 @@ namespace Hermes
           return this->refinementInfoMeshFunction[component];
         else
         {
-          int* info_array = new int[this->spaces[component]->get_mesh()->get_num_elements()];
-          memset(info_array, 0, sizeof(int) * this->spaces[component]->get_mesh()->get_num_elements());
+          int* info_array = calloc_with_check<Adapt<Scalar>, int>(this->spaces[component]->get_mesh()->get_num_elements(), this);
           for(int i = 0; i < this->elements_to_refine_count; i++)
           {
             if(this->elements_to_refine[i].comp == component)
@@ -590,9 +594,9 @@ namespace Hermes
       // Adding the additions.
       if(new_elems_to_refine.size() > 0)
       {
-        ElementToRefine* new_elems_to_refine_array = new ElementToRefine[num_elem_to_proc + new_elems_to_refine.size()];
+        ElementToRefine* new_elems_to_refine_array = malloc_with_check<Adapt<Scalar>, ElementToRefine>(num_elem_to_proc + new_elems_to_refine.size(), this);
         memcpy(new_elems_to_refine_array, elems_to_refine, num_elem_to_proc * sizeof(ElementToRefine));
-        delete [] elems_to_refine;
+        ::free(elems_to_refine);
         elems_to_refine = new_elems_to_refine_array;
 
         for(int inx = 0; inx < new_elems_to_refine.size(); inx++)

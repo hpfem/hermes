@@ -21,6 +21,7 @@
 */
 #include "dense_matrix_operations.h"
 #include "exceptions.h"
+#include "util/memory_handling.h"
 
 namespace Hermes
 {
@@ -33,7 +34,7 @@ namespace Hermes
       {
         int i, imax = 0, j, k;
         T big, dum, sum, temp;
-        T *vv = new T[n];
+        T *vv = malloc_with_check<T>(n);
 
         *d = 1.0;
         for (i = 0; i < n; i++)
@@ -47,7 +48,7 @@ namespace Hermes
           }
           if(big == 0.0)
           {
-            delete [] vv;
+            ::free(vv);
             throw Exceptions::Exception("Singular matrix in routine LUDCMP!");
           }
           vv[i] = 1.0 / big;
@@ -92,7 +93,7 @@ namespace Hermes
             for (i = j + 1; i < n; i++) a[i][j] *= dum;
           }
         }
-        delete [] vv;
+        ::free(vv);
       }
 
       template<typename T, typename S>

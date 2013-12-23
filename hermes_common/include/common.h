@@ -227,9 +227,9 @@ namespace Hermes
 
     inline void fprint_num(FILE*f, std::complex<double> x, char* number_format)
     {
-      char* number_formatComplex = new char[20];
-      sprintf(number_formatComplex, "(%s, %s)", number_format, number_format); 
-      fprintf(f, number_formatComplex, x.real(), x.imag());
+      std::stringstream ss;
+      ss << "(" << number_format << ", " << number_format << ")";
+      fprintf(f, ss.str().c_str(), x.real(), x.imag());
     }
 
     template<typename Scalar>

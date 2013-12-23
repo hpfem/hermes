@@ -19,6 +19,7 @@
 #include "ogprojection.h"
 #include "api2d.h"
 #include "algebra/dense_matrix_operations.h"
+#include "util/memory_handling.h"
 
 namespace Hermes
 {
@@ -53,7 +54,7 @@ namespace Hermes
           for (k = 0; k <= 10; k++)
           {
             np[mode_i][k] = n = mode_i ? sqr(k + 1) : (k + 1)*(k + 2)/2;
-            tables[mode_i][k] = pt = new double3[n];
+            tables[mode_i][k] = pt = malloc_with_check<double3>(n);
 
             for (i = k, m = 0; i >= 0; i--)
               for (j = k; j >= (mode_i ? 0 : k-i); j--, m++) {
@@ -69,7 +70,7 @@ namespace Hermes
       {
         for (int mode_i = 0; mode_i <= 1; mode_i++)
           for (int k = 1; k <= 10; k++)
-            delete [] tables[mode_i][k];
+            ::free(tables[mode_i][k]);
       }
 
       virtual void dummy_fn() {}
@@ -194,16 +195,16 @@ namespace Hermes
       {
         num_coeffs = solution->num_coeffs;
         num_elems = solution->num_elems;
-        mono_coeffs = new Scalar[num_coeffs];
+        mono_coeffs = malloc_with_check<Solution<Scalar>, Scalar>(num_coeffs, this);
         memcpy(mono_coeffs, solution->mono_coeffs, sizeof(Scalar)* num_coeffs);
 
         for (int l = 0; l < this->num_components; l++)
         {
-          elem_coeffs[l] = new int[num_elems];
+          elem_coeffs[l] = malloc_with_check<Solution<Scalar>, int>(num_elems, this);
           memcpy(elem_coeffs[l], solution->elem_coeffs[l], sizeof(int)* num_elems);
         }
 
-        elem_orders = new int[num_elems];
+        elem_orders = malloc_with_check<Solution<Scalar>, int>(num_elems, this);
         memcpy(elem_orders, solution->elem_orders, sizeof(int)* num_elems);
         init_dxdy_buffer();
       }
@@ -236,15 +237,27 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::free()
     {
-      if(mono_coeffs  != nullptr) { delete [] mono_coeffs;   mono_coeffs = nullptr;  }
-      if(elem_orders != nullptr) { delete [] elem_orders;  elem_orders = nullptr; }
-      if(dxdy_buffer != nullptr) { delete [] dxdy_buffer;  dxdy_buffer = nullptr; }
+      if(mono_coeffs  != nullptr)
+      {
+        ::free(mono_coeffs);
+        mono_coeffs = nullptr;
+      }
+      if(elem_orders != nullptr)
+      {
+        ::free(elem_orders);
+        elem_orders = nullptr;
+      }
+      if(dxdy_buffer != nullptr)
+      {
+        ::free(dxdy_buffer);
+        dxdy_buffer = nullptr;
+      }
 
       for (int i = 0; i < this->num_components; i++)
       {
         if(elem_coeffs[i] != nullptr)
         {
-          delete [] elem_coeffs[i];
+          ::free(elem_coeffs[i]);
           elem_coeffs[i] = nullptr;
         }
       }
@@ -287,9 +300,9 @@ namespace Hermes
           for (int i = 0; i <= 10; i++)
           {
             if(mat[m][i])
-              delete [] mat[m][i];
+              ::free(mat[m][i]);
             if(perm[m][i])
-              delete [] perm[m][i];
+              ::free(perm[m][i]);
           }
         }
       }
@@ -323,7 +336,7 @@ namespace Hermes
 
         double d;
         if (mono_lu.perm[mode][o] == nullptr)
-          mono_lu.perm[mode][o] = new int[n];
+          mono_lu.perm[mode][o] = malloc_with_check<Solution<Scalar>, int>(n, this);
         ludcmp(mono_lu.mat[mode][o], n, mono_lu.perm[mode][o], &d);
       }
 
@@ -338,10 +351,10 @@ namespace Hermes
       if(vec == nullptr) throw Exceptions::NullException(2);
 
       space_type = space->get_type();
-      Scalar* coeffs = new Scalar[vec->get_size()];
+      Scalar* coeffs = malloc_with_check<Solution<Scalar>, Scalar>(vec->get_size(), this);
       vec->extract(coeffs);
       this->set_coeff_vector(space, coeffs, add_dir_lift, start_index);
-      delete [] coeffs;
+      ::free(coeffs);
     }
 
     template<typename Scalar>
@@ -392,14 +405,14 @@ namespace Hermes
       // Allocate the coefficient arrays.
       num_elems = this->mesh->get_max_element_id();
       if(elem_orders != nullptr)
-        delete [] elem_orders;
-      elem_orders = new int[num_elems];
+        ::free(elem_orders);
+      elem_orders = malloc_with_check<Solution<Scalar>, int>(num_elems, this);
       memset(elem_orders, 0, sizeof(int) * num_elems);
       for (int l = 0; l < this->num_components; l++)
       {
         if(elem_coeffs[l] != nullptr)
-          delete [] elem_coeffs[l];
-        elem_coeffs[l] = new int[num_elems];
+          ::free(elem_coeffs[l]);
+        elem_coeffs[l] = malloc_with_check<Solution<Scalar>, int>(num_elems, this);
         memset(elem_coeffs[l], 0, sizeof(int) * num_elems);
       }
 
@@ -428,8 +441,8 @@ namespace Hermes
       }
       num_coeffs *= this->num_components;
       if(mono_coeffs != nullptr)
-        delete [] mono_coeffs;
-      mono_coeffs = new Scalar[num_coeffs];
+        ::free(mono_coeffs);
+      mono_coeffs = malloc_with_check<Solution<Scalar>, Scalar>(num_coeffs, this);
 
       // Express the solution on elements as a linear combination of monomials.
       Quad2D* quad = &g_quad_2d_cheb;
@@ -722,12 +735,12 @@ namespace Hermes
     {
       space_type = space->get_type();
       int ndof = space->get_num_dofs();
-      Scalar *temp = new Scalar[ndof];
+      Scalar *temp = malloc_with_check<Solution<Scalar>, Scalar>(ndof, this);
       memset(temp, 0, sizeof(Scalar)*ndof);
       bool add_dir_lift = true;
       int start_index = 0;
       this->set_coeff_vector(space, pss, temp, add_dir_lift, start_index);
-      delete [] temp;
+      ::free(temp);
     }
 
     template<typename Scalar>
@@ -741,8 +754,8 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::add(MeshFunctionSharedPtr<Scalar> other_mesh_function, SpaceSharedPtr<Scalar> target_space)
     {
-      Scalar* base_vector = new Scalar[target_space->get_num_dofs()];
-      Scalar* added_vector = new Scalar[target_space->get_num_dofs()];
+      Scalar* base_vector = malloc_with_check<Solution<Scalar>, Scalar>(target_space->get_num_dofs(), this);
+      Scalar* added_vector = malloc_with_check<Solution<Scalar>, Scalar>(target_space->get_num_dofs(), this);
       OGProjection<Scalar>::project_global(target_space, this, base_vector);
       OGProjection<Scalar>::project_global(target_space, other_mesh_function, added_vector);
 
@@ -807,10 +820,10 @@ namespace Hermes
     {
       if(dxdy_buffer != nullptr)
       {
-        delete [] dxdy_buffer;
+        ::free(dxdy_buffer);
         dxdy_buffer = nullptr;
       }
-      dxdy_buffer = new Scalar[this->num_components * 5 * 121];
+      dxdy_buffer = malloc_with_check<Solution<Scalar>, Scalar>(this->num_components * 5 * 121, this);
     }
 
     template<typename Scalar>
@@ -1378,7 +1391,7 @@ namespace Hermes
       case 1:
         if(!complexness)
         {
-          double* coeff_vec = new double[space->get_num_dofs()];
+          double* coeff_vec = malloc_with_check<double>(space->get_num_dofs());
           MeshFunctionSharedPtr<double> sln(new ConstantSolution<double>(this->mesh, x_real));
           OGProjection<double>::project_global(space, sln, coeff_vec);
           this->set_coeff_vector(space, coeff_vec, true, 0);
@@ -1390,7 +1403,7 @@ namespace Hermes
       case 2:
         if(!complexness)
         {
-          double* coeff_vec = new double[space->get_num_dofs()];
+          double* coeff_vec = malloc_with_check<double>(space->get_num_dofs());
           MeshFunctionSharedPtr<double> sln(new ConstantSolutionVector<double>(this->mesh, x_real, y_real));
           OGProjection<double>::project_global(space, sln, coeff_vec);
           this->set_coeff_vector(space, coeff_vec, true, 0);
@@ -1411,7 +1424,7 @@ namespace Hermes
       case 1:
         if(complexness)
         {
-          std::complex<double>* coeff_vec = new std::complex<double>[space->get_num_dofs()];
+          std::complex<double>* coeff_vec = malloc_with_check<std::complex<double> >(space->get_num_dofs());
           MeshFunctionSharedPtr<std::complex<double> > sln(new ConstantSolution<std::complex<double> >(this->mesh, std::complex<double>(x_real, x_complex)));
           OGProjection<std::complex<double> >::project_global(space, sln, coeff_vec);
           this->set_coeff_vector(space, coeff_vec, true, 0);
@@ -1423,7 +1436,7 @@ namespace Hermes
       case 2:
         if(complexness == 1)
         {
-          std::complex<double>* coeff_vec = new std::complex<double>[space->get_num_dofs()];
+          std::complex<double>* coeff_vec = malloc_with_check<std::complex<double> >(space->get_num_dofs());
           MeshFunctionSharedPtr<std::complex<double> > sln(new ConstantSolutionVector<std::complex<double> >(this->mesh, std::complex<double>(x_real, x_complex), std::complex<double>(y_real, y_complex)));
           OGProjection<std::complex<double> >::project_global(space, sln, coeff_vec);
           this->set_coeff_vector(space, coeff_vec, true, 0);
@@ -1464,13 +1477,13 @@ namespace Hermes
           this->num_elems = parsed_xml_solution->nel();
           this->num_components = parsed_xml_solution->ncmp();
 
-          this->mono_coeffs = new double[num_coeffs];
+          this->mono_coeffs = malloc_with_check<Solution<double>, double>(num_coeffs, this);
           memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(double));
 
           for(unsigned int component_i = 0; component_i < num_components; component_i++)
-            elem_coeffs[component_i] = new int[num_elems];
+            elem_coeffs[component_i] = malloc_with_check<Solution<double>, int>(num_elems, this);
 
-          this->elem_orders = new int[num_elems];
+          this->elem_orders = malloc_with_check<Solution<double>, int>(num_elems, this);
 
           for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
             this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = parsed_xml_solution->mono_coeffs().at(coeffs_i).re();
@@ -1527,13 +1540,13 @@ namespace Hermes
           this->num_elems = parsed_xml_solution->nel();
           this->num_components = parsed_xml_solution->ncmp();
 
-          this->mono_coeffs = new std::complex<double>[num_coeffs];
+          this->mono_coeffs = malloc_with_check<Solution<std::complex<double> >, std::complex<double>>(num_coeffs, this);
           memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(std::complex<double>));
 
           for(unsigned int component_i = 0; component_i < num_components; component_i++)
-            elem_coeffs[component_i] = new int[num_elems];
+            elem_coeffs[component_i] = malloc_with_check<Solution<std::complex<double> >, int> (num_elems, this);
 
-          this->elem_orders = new int[num_elems];
+          this->elem_orders = malloc_with_check<Solution<std::complex<double> >, int> (num_elems, this);
 
           for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
             this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = std::complex<double>(parsed_xml_solution->mono_coeffs().at(coeffs_i).re(), parsed_xml_solution->mono_coeffs().at(coeffs_i).im().get());
@@ -1624,12 +1637,12 @@ namespace Hermes
         this->num_coeffs = bson_iterator_int(&it_coeffs);
         this->num_elems = bson_iterator_int(&it_orders);
 
-        this->mono_coeffs = new double[num_coeffs];
+        this->mono_coeffs = malloc_with_check(num_coeffs, this);
 
         for(unsigned int component_i = 0; component_i < num_components; component_i++)
-          this->elem_coeffs[component_i] = new int[num_elems];
+          this->elem_coeffs[component_i] = malloc_with_check(num_elems, this);
 
-        this->elem_orders = new int[num_elems];
+        this->elem_orders = malloc_with_check(num_elems, this);
 
         // coeffs
         bson_find(&it_coeffs, &br, "coeffs");
@@ -1742,12 +1755,12 @@ namespace Hermes
         this->num_coeffs = bson_iterator_int(&it_coeffs);
         this->num_elems = bson_iterator_int(&it_orders);
 
-        this->mono_coeffs = new std::complex<double>[num_coeffs];
+        this->mono_coeffs = malloc_with_check(num_coeffs, this);
 
         for(unsigned int component_i = 0; component_i < num_components; component_i++)
-          this->elem_coeffs[component_i] = new int[num_elems];
+          this->elem_coeffs[component_i] = malloc_with_check(num_elems, this);
 
-        this->elem_orders = new int[num_elems];
+        this->elem_orders = malloc_with_check(num_elems, this);
 
         // coeffs.
         Hermes::vector<double> real_coeffs, imag_coeffs;
@@ -1940,7 +1953,7 @@ namespace Hermes
 
       this->get_refmap()->untransform(e, x, y, x_ref, y_ref);
 
-      Scalar** toReturn = new Scalar*[2];
+      Scalar** toReturn = malloc_with_check<Solution<Scalar>, Scalar*>(2, this);
       double2x2 mat;
       double3x2 mat2;
       this->refmap->inv_ref_map_at_point(x_ref, y_ref, x_dummy, y_dummy, mat);
@@ -1948,7 +1961,7 @@ namespace Hermes
 
       if(this->num_components == 1)
       {
-        toReturn[0] = new Scalar[6];
+        toReturn[0] = malloc_with_check<Solution<Scalar>, Scalar>(6, this);
 
         int o = elem_orders[e->id];
 
@@ -1982,7 +1995,7 @@ namespace Hermes
       }
       else // vector solution
       {
-        toReturn[0] = new Scalar[1];
+        toReturn[0] = malloc_with_check<Solution<Scalar>, Scalar>(1, this);
 
         Scalar vx = get_ref_value(e, x_ref, y_ref, 0, 0);
         Scalar vy = get_ref_value(e, x_ref, y_ref, 1, 0);
@@ -2051,7 +2064,7 @@ namespace Hermes
             toReturn->dy[0] = m[1][0]*dx + m[1][1]*dy;
 
 #ifdef H2D_USE_SECOND_DERIVATIVES
-            toReturn->laplace = new Scalar[1];
+            toReturn->laplace = malloc_with_check(1, this);
             double2x2 mat;
             double3x2 mat2;
 

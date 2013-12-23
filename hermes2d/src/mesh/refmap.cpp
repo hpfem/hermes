@@ -250,8 +250,7 @@ namespace Hermes
     {
       int i, j, np = quad_2d->get_num_points(order, element->get_mode());
 
-      double3x2* k = new double3x2[np];
-      memset(k, 0, np * sizeof(double3x2));
+      double3x2* k = calloc_with_check<double3x2>(np);
       ref_map_pss.force_transform(sub_idx, ctm);
       for (i = 0; i < nc; i++)
       {
@@ -296,7 +295,7 @@ namespace Hermes
         mm[j][2][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
       }
 
-      delete[] k;
+      ::free(k);
 
       this->second_ref_map_calculated = order;
     }

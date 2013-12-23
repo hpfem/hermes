@@ -554,7 +554,7 @@ namespace Hermes
 
       void View::set_title(const char* msg, ...)
       {
-        char* text_contents = new char[BUF_SZ];
+        char* text_contents = malloc_with_check<char>(BUF_SZ);
 
         //print the message
         va_list arglist;
@@ -577,7 +577,7 @@ namespace Hermes
         if(do_set_title)
           set_view_title(output_id, text_contents);
 
-        delete [] text_contents;
+        ::free(text_contents);
       }
 
       void View::get_palette_color(double x, float* gl_color)

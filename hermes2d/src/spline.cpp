@@ -42,10 +42,15 @@ namespace Hermes
 
     CubicSpline::~CubicSpline() 
     {
-      coeffs.clear();  
+      free();
+    }
+
+    void CubicSpline::free()
+    {
+      coeffs.clear();
       points.clear();
       values.clear();
-    };
+    }
 
     double CubicSpline::value(double x) const
     {
@@ -269,7 +274,7 @@ namespace Hermes
           matrix[i][j] = 0;
         }
       }
-      double* rhs = new double[n];
+      double* rhs = malloc_with_check<CubicSpline, double>(n, this);
       for (int j = 0; j < n; j++)
       {
         rhs[j] = 0;
@@ -366,10 +371,10 @@ namespace Hermes
 
       // Solve the matrix problem.
       double d;
-      int* perm = new int[n];
+      int* perm = malloc_with_check<CubicSpline, int>(n, this);
       ludcmp(matrix, n, perm, &d);
       lubksb<double>(matrix, n, perm, rhs);
-      delete [] perm;
+      ::free(perm);
 
       // Copy the solution into the coeffs array.
       coeffs.clear();
@@ -394,8 +399,8 @@ namespace Hermes
       derivative_right = get_derivative_from_interval(point_right, points.size() - 2);
 
       // Free the matrix and rhs vector.
-      delete [] matrix;
-      delete [] rhs;
+      ::free(matrix);
+      ::free(rhs);
 
       return;
     }

@@ -18,6 +18,7 @@
 #include "table.h"
 #include "matrix.h"
 #include "dense_matrix_operations.h"
+#include "util/memory_handling.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 
@@ -82,13 +83,13 @@ namespace Hermes
   ButcherTable::ButcherTable(unsigned int size) : Table(size)
   {
     // B array.
-    this->B = new double[size];
+    this->B = malloc_with_check<ButcherTable, double>(size, this);
     for (unsigned int j = 0; j < size; j++) this->B[j] = 0;
     // B2 array.
-    this->B2 = new double[size];
+    this->B2 = malloc_with_check<ButcherTable, double>(size, this);
     for (unsigned int j = 0; j < size; j++) this->B2[j] = 0;
     // C array.
-    this->C = new double[size];
+    this->C = malloc_with_check<ButcherTable, double>(size, this);
     for (unsigned int j = 0; j < size; j++) this->C[j] = 0;
   }
 
@@ -695,14 +696,21 @@ namespace Hermes
       for (unsigned int j = 0; j < size; j++) this->A[i][j] = 0;
     }
     // B array.
-    this->B = new double[size];
+    this->B = malloc_with_check<ButcherTable, double>(size, this);
     for (unsigned int j = 0; j < size; j++) this->B[j] = 0;
     // B2 array.
-    this->B2 = new double[size];
+    this->B2 = malloc_with_check<ButcherTable, double>(size, this);
     for (unsigned int j = 0; j < size; j++) this->B2[j] = 0;
     // C array.
-    this->C = new double[size];
+    this->C = malloc_with_check<ButcherTable, double>(size, this);
     for (unsigned int j = 0; j < size; j++) this->C[j] = 0;
+  }
+
+  void ButcherTable::free()
+  {
+    ::free(this->B);
+    ::free(this->B2);
+    ::free(this->C);
   }
 
   double ButcherTable::get_B(unsigned int i)

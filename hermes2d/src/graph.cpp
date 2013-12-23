@@ -254,7 +254,7 @@ namespace Hermes
       fprintf(f, "%s", terminal_str.c_str());
 
       int len = strlen(filename);
-      char* outname = new char[len + 10];
+      char* outname = malloc_with_check<char>(len + 10);
       strcpy(outname, filename);
       char* slash = strrchr(outname, '/');
       if(slash != nullptr) strcpy(outname, ++slash);
@@ -263,7 +263,7 @@ namespace Hermes
       strcat(outname, ".eps");
 
       fprintf(f, "set output '%s'\n", (char*)outname);
-      delete [] outname;
+      ::free(outname);
 
       fprintf(f, "set size 0.8, 0.8\n");
 

@@ -41,10 +41,10 @@ namespace Hermes
       Matrix(unsigned int size = 0);
       virtual ~Matrix() {};
 
-      /// allocate the memory for stiffness matrix and right-hand side
+      /// allocate the memory for stiffness matrix
       virtual void alloc() = 0;
 
-      /// free the memory associated with stiffness matrix and right-hand side
+      /// free the memory associated with stiffness matrix
       virtual void free() = 0;
 
       /// Get the value from a position
@@ -111,6 +111,9 @@ namespace Hermes
       ///
       /// @param[in] n - number of unknowns
       virtual void prealloc(unsigned int n);
+
+      /// free the memory associated with stiffness matrix
+      virtual void free();
 
       /// add indices of nonzero matrix element
       ///

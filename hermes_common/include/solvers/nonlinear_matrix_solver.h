@@ -151,6 +151,9 @@ namespace Hermes
       void set_max_steps_with_reused_jacobian(unsigned int steps);
 #pragma endregion
 
+      /// Frees the instances.
+      virtual void free();
+
     protected:
       
 #pragma region damping-private

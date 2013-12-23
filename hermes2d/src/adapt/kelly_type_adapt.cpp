@@ -132,8 +132,8 @@ namespace Hermes
 
       this->have_coarse_solutions = true;
 
-      MeshSharedPtr* meshes = new MeshSharedPtr[this->num];
-      Transformable** fns = new Transformable*[this->num];
+      MeshSharedPtr* meshes = malloc_with_check(this->num, this);
+      Transformable** fns = malloc_with_check(this->num, this);
 
       this->num_act_elems = 0;
       for (int i = 0; i < this->num; i++)
@@ -144,8 +144,8 @@ namespace Hermes
         this->num_act_elems += meshes[i]->get_num_active_elements();
         int max = meshes[i]->get_max_element_id();
 
-        if(this->errors[i] != nullptr) delete [] this->errors[i];
-        this->errors[i] = new double[max];
+        if(this->errors[i] != nullptr) ::free(this->errors[i]);
+        this->errors[i] = malloc_with_check(max, this);
         memset(this->errors[i], 0, sizeof(double) * max);
       }
 
@@ -158,11 +158,11 @@ namespace Hermes
       double *norms = nullptr;
       if(calc_norm)
       {
-        norms = new double[this->num];
+        norms = malloc_with_check(this->num, this);
         memset(norms, 0, this->num * sizeof(double));
       }
 
-      double *errors_components = new double[this->num];
+      double *errors_components = malloc_with_check(this->num, this);
       memset(errors_components, 0, this->num * sizeof(double));
       this->errors_squared_sum = 0.0;
       double total_error = 0.0;
@@ -470,8 +470,8 @@ namespace Hermes
       this->have_errors = true;
 
       if(calc_norm)
-        delete [] norms;
-      delete [] errors_components;
+        ::free(norms);
+      ::free(errors_components);
 
       // Return error value.
       if((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
@@ -512,7 +512,7 @@ namespace Hermes
       // Initialize geometry and jacobian*weights.
       Geom<double>* e = init_geom_vol(rm, order);
       double* jac = rm->get_jacobian(order);
-      double* jwt = new double[np];
+      double* jwt = malloc_with_check(np, this);
       for(int i = 0; i < np; i++)
         jwt[i] = pt[i][2] * jac[i];
 
@@ -521,7 +521,7 @@ namespace Hermes
       Scalar res = form->value(np, jwt, nullptr, u, u, e, nullptr);
 
       e->free(); delete e;
-      delete [] jwt;
+      ::free(jwt);
       u->free_fn(); delete u;
 
       return std::abs(res);
@@ -534,12 +534,12 @@ namespace Hermes
       // Determine the integration order.
       int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
 
-      Func<Hermes::Ord>** oi = new Func<Hermes::Ord>*[this->num];
+      Func<Hermes::Ord>** oi = malloc_with_check(this->num, this);
       for (int i = 0; i < this->num; i++)
         oi[i] = init_fn_ord(this->sln[i]->get_fn_order() + inc);
 
       // Polynomial order of additional external functions.
-      Func<Hermes::Ord>** fake_ext_fn = new Func<Hermes::Ord>*[err_est_form->ext.size()];
+      Func<Hermes::Ord>** fake_ext_fn = malloc_with_check(err_est_form->ext.size(), this);
       for (int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i] = init_fn_ord(err_est_form->ext[i]->get_fn_order());
 
@@ -563,11 +563,11 @@ namespace Hermes
           delete oi[i];
         }
       }
-      delete [] oi;
+      ::free(oi);
       delete fake_e;
       for(int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i]->free_ord();
-      delete [] fake_ext_fn;
+      ::free(fake_ext_fn);
 
       // eval the form
       Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
@@ -577,17 +577,17 @@ namespace Hermes
       // Initialize geometry and jacobian*weights
       Geom<double>* e = init_geom_vol(rm, order);
       double* jac = rm->get_jacobian(order);
-      double* jwt = new double[np];
+      double* jwt = malloc_with_check(np, this);
       for(int i = 0; i < np; i++)
         jwt[i] = pt[i][2] * jac[i];
 
       // Function values.
-      Func<Scalar>** ui = new Func<Scalar>*[this->num];
+      Func<Scalar>** ui = malloc_with_check(this->num, this);
 
       for (int i = 0; i < this->num; i++)
         ui[i] = init_fn(this->sln[i], order);
 
-      Func<Scalar>** ext_fn = new Func<Scalar>*[err_est_form->ext.size()];
+      Func<Scalar>** ext_fn = malloc_with_check(err_est_form->ext.size(), this);
       for (unsigned i = 0; i < err_est_form->ext.size(); i++)
       {
         if(err_est_form->ext[i] != nullptr)
@@ -608,16 +608,16 @@ namespace Hermes
           delete ui[i];
         }
       }
-      delete [] ui;
+      ::free(ui);
 
       for(int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i]->free_fn();
-      delete [] fake_ext_fn;
+      ::free(fake_ext_fn);
 
       e->free();
       delete e;
 
-      delete [] jwt;
+      ::free(jwt);
 
       return std::abs(res);
     }
@@ -628,12 +628,12 @@ namespace Hermes
     {
       // Determine the integration order.
       int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
-      Func<Hermes::Ord>** oi = new Func<Hermes::Ord>*[this->num];
+      Func<Hermes::Ord>** oi = malloc_with_check(this->num, this);
       for (int i = 0; i < this->num; i++)
         oi[i] = init_fn_ord(this->sln[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
 
       // Polynomial order of additional external functions.
-      Func<Hermes::Ord>** fake_ext_fn = new Func<Hermes::Ord>*[err_est_form->ext.size()];
+      Func<Hermes::Ord>** fake_ext_fn = malloc_with_check(err_est_form->ext.size(), this);
       for (int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i] = init_fn_ord(err_est_form->ext[i]->get_fn_order());
 
@@ -654,11 +654,11 @@ namespace Hermes
           delete oi[i];
         }
 
-      delete [] oi;
+      ::free(oi);
       delete fake_e;
       for(int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i]->free_ord();
-      delete [] fake_ext_fn;
+      ::free(fake_ext_fn);
 
       // Evaluate the form.
       Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
@@ -669,16 +669,16 @@ namespace Hermes
       // Initialize geometry and jacobian*weights.
       double3* tan;
       Geom<double>* e = init_geom_surf(rm, surf_pos->surf_num, surf_pos->marker, eo, tan);
-      double* jwt = new double[np];
+      double* jwt = malloc_with_check(np, this);
       for(int i = 0; i < np; i++)
         jwt[i] = pt[i][2] * tan[i][2];
 
       // Function values
-      Func<Scalar>** ui = new Func<Scalar>*[this->num];
+      Func<Scalar>** ui = malloc_with_check(this->num, this);
       for (int i = 0; i < this->num; i++)
         ui[i] = init_fn(this->sln[i], eo);
 
-      Func<Scalar>** ext_fn = new Func<Scalar>*[err_est_form->ext.size()];
+      Func<Scalar>** ext_fn = malloc_with_check(err_est_form->ext.size(), this);
       for (unsigned i = 0; i < err_est_form->ext.size(); i++)
       {
         if(err_est_form->ext[i] != nullptr)
@@ -699,15 +699,15 @@ namespace Hermes
           delete ui[i];
         }
 
-      delete [] ui;
+      ::free(ui);
       for(int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i]->free_fn();
-      delete [] fake_ext_fn;
+      ::free(fake_ext_fn);
 
       e->free();
       delete e;
 
-      delete [] jwt;
+      ::free(jwt);
 
       return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
                                   // are defined in (-1, 1). Thus multiplying with 0.5 to correct
@@ -726,7 +726,7 @@ namespace Hermes
         slns.push_back(this->sln[i]);
 
       // Determine integration order.
-      Func<Hermes::Ord>** fake_ext_fns = new Func<Hermes::Ord>*[err_est_form->ext.size()];
+      Func<Hermes::Ord>** fake_ext_fns = malloc_with_check(err_est_form->ext.size(), this);
       for (unsigned int j = 0; j < err_est_form->ext.size(); j++)
       {
         int inc = (err_est_form->ext[j]->get_num_components() == 2) ? 1 : 0;
@@ -753,7 +753,7 @@ namespace Hermes
         fake_ext_fns[i]->free_ord();
         delete fake_ext_fns[i];
       }
-      delete [] fake_ext_fns;
+      ::free(fake_ext_fns);
 
       fake_e->free_ord();
       delete fake_e;
@@ -772,7 +772,7 @@ namespace Hermes
                                                   nbs->neighb_el->id,
                                                   nbs->neighb_el->get_diameter());
 
-      double* jwt = new double[np];
+      double* jwt = malloc_with_check(np, this);
       for(int i = 0; i < np; i++)
         jwt[i] = pt[i][2] * tan[i][2];
 
@@ -786,13 +786,13 @@ namespace Hermes
       {
         for(unsigned int i = 0; i < slns.size(); i++)
           ui[i]->free_fn();
-        delete [] ui;
+        ::free(ui);
       }
 
       e->free();
       delete e;
 
-      delete [] jwt;
+      ::free(jwt);
 
       return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
                                   // are defined in (-1, 1). Thus multiplying with 0.5 to correct

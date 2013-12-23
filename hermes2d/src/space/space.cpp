@@ -187,9 +187,9 @@ namespace Hermes
       free();
 
       if (this->proj_mat != nullptr)
-        delete[] this->proj_mat;
+        ::free(this->proj_mat);
       if (this->chol_p != nullptr)
-        delete[] this->chol_p;
+        ::free(this->chol_p);
 
       if (this->own_shapeset)
         delete this->shapeset;
@@ -852,7 +852,7 @@ namespace Hermes
     void Space<Scalar>::distribute_orders(MeshSharedPtr mesh, int* parents)
     {
       int num = mesh->get_max_element_id();
-      int* orders = new int[num + 1];
+      int* orders = malloc_with_check<Space<Scalar>, int>(num + 1, this);
       Element* e;
       for_all_active_elements(e, mesh)
       {
@@ -863,7 +863,7 @@ namespace Hermes
       }
       for_all_active_elements(e, mesh)
         set_element_order_internal(e->id, orders[e->id]);
-      delete[] orders;
+      ::free(orders);
     }
 
     template<typename Scalar>
@@ -1034,7 +1034,7 @@ namespace Hermes
         }
       }
 
-      p = new double[n];
+      p = malloc_with_check<Space<Scalar>, double>(n, this);
       choldc(mat, n, p);
     }
 
@@ -1090,7 +1090,7 @@ namespace Hermes
     void Space<Scalar>::free_bc_data()
     {
       for (unsigned int i = 0; i < bc_data_projections.size(); i++)
-        delete[] bc_data_projections[i];
+        ::free(bc_data_projections[i]);
       for (unsigned int i = 0; i < bc_data_base_components.size(); i++)
         ::free(bc_data_base_components[i]);
       bc_data_projections.clear();

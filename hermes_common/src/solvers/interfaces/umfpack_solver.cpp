@@ -23,6 +23,7 @@
 #ifdef WITH_UMFPACK
 #include "umfpack_solver.h"
 #include "common.h"
+#include "util/memory_handling.h"
 
 #define umfpack_real_symbolic umfpack_di_symbolic
 #define umfpack_real_numeric umfpack_di_numeric
@@ -51,6 +52,12 @@ namespace Hermes
 
     template<typename Scalar>
     UMFPackLinearMatrixSolver<Scalar>::~UMFPackLinearMatrixSolver()
+    {
+      free();
+    }
+
+    template<typename Scalar>
+    void UMFPackLinearMatrixSolver<Scalar>::free()
     {
       free_factorization_data();
     }
@@ -184,10 +191,10 @@ namespace Hermes
       if( !setup_factorization() )
         throw Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
 
-      if(sln != nullptr)
-        delete [] sln;
+      if(sln)
+        ::free(sln);
 
-      sln = new double[m->get_size()];
+      sln = malloc_with_check<typename UMFPackLinearMatrixSolver<double>, double>(m->get_size(), this);
       memset(sln, 0, m->get_size() * sizeof(double));
       int status = umfpack_real_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->v, numeric, nullptr, nullptr);
       if(status != UMFPACK_OK)
@@ -211,8 +218,8 @@ namespace Hermes
         this->warn("LU factorization could not be completed.");
 
       if(sln)
-        delete [] sln;
-      sln = new std::complex<double>[m->get_size()];
+        ::free(sln);
+      sln = malloc_with_check<UMFPackLinearMatrixSolver<std::complex<double> >, std::complex<double> >(m->get_size(), this);
 
       memset(sln, 0, m->get_size() * sizeof(std::complex<double>));
       int status = umfpack_complex_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), nullptr, (double*) sln, nullptr, (double *)rhs->v, nullptr, numeric, nullptr, nullptr);
@@ -229,7 +236,7 @@ namespace Hermes
     template<typename Scalar>
     char* UMFPackLinearMatrixSolver<Scalar>::check_status(const char *fn_name, int status)
     {
-      char* to_return = new char[100];
+      char* to_return = malloc_with_check<UMFPackLinearMatrixSolver<Scalar>, char>(100, this);
 
       switch (status)
       {

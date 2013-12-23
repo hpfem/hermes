@@ -31,6 +31,7 @@ namespace Hermes
     public:
       ErrorThreadCalculator(ErrorCalculator<Scalar>* errorCalculator);
       ~ErrorThreadCalculator();
+      void free();
       void evaluate_one_state(Traverse::State* current_state);
 
       class DGErrorCalculator
@@ -43,7 +44,7 @@ namespace Hermes
 
         /// Initialize neighbors.
         bool init_neighbors();
-        void deinit_neighbors();
+        void free();
 
         void assemble_one_neighbor(unsigned int neighbor_i);
       private:
