@@ -363,7 +363,7 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
 void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_sln,
   double diffusivity, double time_step_length,
   MeshFunctionSharedPtr<double> solution, MeshFunctionSharedPtr<double> exact_solution,
-  ScalarView* solution_view, ScalarView* exact_view, double s, double sigma, Hermes::Mixins::Loggable& logger, int steps, double cfl)
+  ScalarView* solution_view, ScalarView* exact_view, double s, double sigma, Hermes::Mixins::Loggable& logger, int steps, double cfl, int V_cycles_per_time_step)
 {
   // Spaces
   SpaceSharedPtr<double> space_2(new L2Space<double>(mesh, polynomialDegree, new L2ShapesetTaylor));
@@ -468,7 +468,6 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
   prev_sln_0.set_vector(cut_off_linear_part(prev_sln_1.v, space_0, space_1));
 
   double time = 0.;
-  int V_cycles_per_time_step = 1;
   int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 1);
   for (int time_step = 0; time_step < iteration_count; time_step++)
   {
@@ -708,17 +707,17 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
     std::stringstream ss_vtke;
     ss_vtk.precision(2);
     ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_vtk << "solution_" << "MG(" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".dat";
+    ss_vtk << "solution_" << "MG(" << V_cycles_per_time_step << "-" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".dat";
     solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution", 1, 2.0);
 
     std::stringstream ss_bmp;
     std::stringstream ss_bmpe;
     ss_bmp.precision(2);
     ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_bmp << "solution_" << "MG(" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".bmp";
+    ss_bmp << "solution_" << "MG(" << V_cycles_per_time_step << "-" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".bmp";
     
     solution_view->show(solution);
-    //solution_view->save_screenshot(ss_bmp.str().c_str(), true);
+    solution_view->save_screenshot(ss_bmp.str().c_str(), true);
 
     errorCalculator.calculate_errors(solution, exact_solution);
     logger.info("%f", std::sqrt(errorCalculator.get_total_error_squared()));

@@ -3,8 +3,8 @@
 #include "algorithms.h"
 
 int polynomialDegree = 2;
-int initialRefinementsCount = 5;
-const Algorithm algorithm = Multiscale;
+int initialRefinementsCount = 4;
+const Algorithm algorithm = pMultigrid;
 SolvedExample solvedExample = MovingPeak;
 static std::string SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
 std::string solvedExampleString = SolvedExampleString[solvedExample];
@@ -167,23 +167,27 @@ int main(int argc, char* argv[])
   if(algorithm == pMultigrid || algorithm == Both)
   {
     Hermes::vector<int> steps(1, 2);
+    Hermes::vector<int> V_steps(1, 2);
     for (int si = 0; si < steps.size(); si++)
     {
-      Hermes::Mixins::Loggable logger(true);
-      logger.set_timestamps(false);
-      logger.set_erase_on_beginning(true);
-      std::stringstream ss;
-      ss << "MG(" << steps[si] << ")_" << solvedExampleString << "_" << initialRefinementsCount << "_" << diffusivity << "_CFL=" << CFL << ".h2d";
-      logger.set_logFile_name(ss.str());
+      for (int siv = 0; siv < V_steps.size(); siv++)
+      {
+        Hermes::Mixins::Loggable logger(true);
+        logger.set_timestamps(false);
+        logger.set_erase_on_beginning(true);
+        std::stringstream ss;
+        ss << "MG(" << V_steps[siv] << "-" << steps[si] << ")_" << solvedExampleString << "_" << initialRefinementsCount << "_" << diffusivity << "_CFL=" << CFL << ".h2d";
+        logger.set_logFile_name(ss.str());
 
-      MeshFunctionSharedPtr<double> previous_solution_local(new ExactSolutionMovingPeak(mesh, MovingPeakDiffusivity, M_PI / 2.));
-      cpu_time.tick();
+        MeshFunctionSharedPtr<double> previous_solution_local(new ExactSolutionMovingPeak(mesh, MovingPeakDiffusivity, M_PI / 2.));
+        cpu_time.tick();
 
-      p_multigrid(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_solution_local, diffusivity, time_step_length,
-        solution, exact_solution, &solution_view, &exact_view, s, sigma, logger, steps[si], CFL);
-        
-      cpu_time.tick();
-      logger.info("%f", cpu_time.last());
+        p_multigrid(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_solution_local, diffusivity, time_step_length,
+          solution, exact_solution, &solution_view, &exact_view, s, sigma, logger, steps[si], CFL, V_steps[siv]);
+
+        cpu_time.tick();
+        logger.info("%f", cpu_time.last());
+      }
     }
   }
   
@@ -202,6 +206,6 @@ int main(int argc, char* argv[])
     */
   }
   
-  //View::wait();
+  View::wait();
   return 0;
 }
