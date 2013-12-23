@@ -167,6 +167,8 @@ namespace Hermes
       /// Utility.
       virtual int get_matrix_size();
 
+      void free();
+
     protected:
       /// Constructor of Abstract PARALUTION solver.
       /// @param[in] m pointer to matrix

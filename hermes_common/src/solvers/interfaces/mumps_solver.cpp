@@ -23,6 +23,7 @@
 #ifdef WITH_MUMPS
 #include "mumps_solver.h"
 #include "callstack.h"
+#include "util/memory_handling.h"
 
 namespace Hermes
 {
@@ -96,11 +97,11 @@ namespace Hermes
     template<typename Scalar>
     void MumpsMatrix<Scalar>::alloc_data()
     {
-      Ax = malloc_with_check(this->nnz, this);
+      this->Ax = malloc_with_check<MumpsMatrix<Scalar>, typename mumps_type<Scalar>::mumps_Scalar>(this->nnz, this);
       memset(Ax, 0, sizeof(Scalar) * this->nnz);
 
-      irn = malloc_with_check(this->nnz, this);
-      jcn = malloc_with_check(this->nnz, this);
+      irn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
+      jcn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
       for (unsigned int i = 0; i < this->nnz; i++)
       {
         irn[i] = 1;
@@ -238,8 +239,8 @@ namespace Hermes
           }
           else
           {
-            Ax_re = malloc_with_check(this->nnz, this);
-            Ax_im = malloc_with_check(this->nnz, this);
+            Ax_re = malloc_with_check<MumpsMatrix<Scalar>, double>(this->nnz, this);
+            Ax_im = malloc_with_check<MumpsMatrix<Scalar>, double>(this->nnz, this);
             struct mat_complex_split_t z = {Ax_re, Ax_im};
 
             for(int i = 0; i < this->nnz; i++)
@@ -292,7 +293,7 @@ namespace Hermes
     void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar*& vector_out, bool vector_out_initialized) const
     {
       if(!vector_out_initialized)
-        vector_out = malloc_with_check(this->size, this);
+        vector_out = malloc_with_check<Scalar>(this->size);
 
       memset(vector_out, 0, sizeof(Scalar) * this->size);
 
@@ -318,11 +319,11 @@ namespace Hermes
     {
       this->nnz = nnz_;
       this->size = size;
-      this->Ap = malloc_with_check(this->size + 1, this);
-      this->Ai = malloc_with_check(this->nnz, this);
-      this->Ax = malloc_with_check(this->nnz, this);
-      irn = malloc_with_check(this->nnz, this);
-      jcn = malloc_with_check(this->nnz, this);
+      this->Ap = malloc_with_check<MumpsMatrix<Scalar>, int>(this->size + 1, this);
+      this->Ai = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
+      this->Ax = malloc_with_check<MumpsMatrix<Scalar>, typename mumps_type<Scalar>::mumps_Scalar>(this->nnz, this);
+      irn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
+      jcn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
 
       for (unsigned int i = 0; i < this->size; i++)
       {
@@ -346,11 +347,11 @@ namespace Hermes
 
       nmat->nnz = this->nnz;
       nmat->size = this->size;
-      nmat->Ap = malloc_with_check(this->size + 1, this);
-      nmat->Ai = malloc_with_check(this->nnz, this);
-      nmat->Ax = malloc_with_check(this->nnz, this);
-      nmat->irn = malloc_with_check(this->nnz, this);
-      nmat->jcn = malloc_with_check(this->nnz, this);
+      nmat->Ap = malloc_with_check<MumpsMatrix<Scalar>, int>(this->size + 1, nmat);
+      nmat->Ai = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, nmat);
+      nmat->Ax = malloc_with_check<MumpsMatrix<Scalar>, typename mumps_type<Scalar>::mumps_Scalar>(this->nnz, nmat);
+      nmat->irn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, nmat);
+      nmat->jcn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, nmat);
       for (unsigned int i = 0; i <this->nnz; i++)
       {
         nmat->Ai[i] = this->Ai[i];
@@ -399,14 +400,20 @@ namespace Hermes
     template<typename Scalar>
     MumpsSolver<Scalar>::~MumpsSolver()
     {
+      free();
+    }
+
+    template<typename Scalar>
+    void MumpsSolver<Scalar>::free()
+    {
       // Terminate the current instance of MUMPS.
-      if(inited)
+      if (inited)
       {
         param.job = JOB_END;
         mumps_c(&param);
       }
 
-      if(param.rhs != nullptr)
+      if (param.rhs != nullptr)
         ::free(param.rhs);
     }
 
@@ -514,7 +521,7 @@ namespace Hermes
         throw Hermes::Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
 
       // Specify the right-hand side (will be replaced by the solution).
-      param.rhs = malloc_with_check(m->size, this);
+      param.rhs = malloc_with_check<MumpsSolver<Scalar>, typename mumps_type<Scalar>::mumps_Scalar>(m->size, this);
       memcpy(param.rhs, rhs->v, m->size * sizeof(typename mumps_type<Scalar>::mumps_Scalar));
 
       // Do the jobs specified in setup_factorization().
@@ -524,7 +531,7 @@ namespace Hermes
       if(check_status())
       {
         ::free(this->sln);
-        this->sln = malloc_with_check(m->size, this);
+        this->sln = malloc_with_check<MumpsSolver<Scalar>, Scalar>(m->size, this);
         for (unsigned int i = 0; i < rhs->get_size(); i++)
           this->sln[i] = mumps_to_Scalar(param.rhs[i]);
       }

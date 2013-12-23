@@ -135,8 +135,8 @@ namespace Hermes
           }
           else
           {
-            v_re = malloc_with_check(this->size, this);
-            v_im = malloc_with_check(this->size, this);
+            v_re = malloc_with_check<SimpleVector<Scalar>, double>(this->size, this);
+            v_im = malloc_with_check<SimpleVector<Scalar>, double>(this->size, this);
             struct mat_complex_split_t z = {v_re, v_im};
 
             for(int i = 0; i < this->size; i++)
@@ -229,7 +229,7 @@ namespace Hermes
             memcpy(this->v, matvar->data, sizeof(Scalar)*this->size);
           else
           {
-            std::complex<double>* complex_data = malloc_with_check(this->size, this);
+            std::complex<double>* complex_data = malloc_with_check<SimpleVector<Scalar>, std::complex<double> >(this->size, this);
             double* real_array = (double*)((mat_complex_split_t*)matvar->data)->Re;
             double* imag_array = (double*)((mat_complex_split_t*)matvar->data)->Im;
             for(int i = 0; i < this->size; i++)

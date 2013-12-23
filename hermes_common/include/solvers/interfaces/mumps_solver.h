@@ -124,6 +124,7 @@ namespace Hermes
       /// @param[in] rhs right hand side pointer
       MumpsSolver(MumpsMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
       virtual ~MumpsSolver();
+      void free();
 
       virtual void solve();
       virtual int get_matrix_size();

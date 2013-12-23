@@ -453,8 +453,8 @@ namespace Hermes
           else
           {
             // For complex.
-            Ax_re = malloc_with_check(this->nnz, this);
-            Ax_im = malloc_with_check(this->nnz, this);
+            Ax_re = malloc_with_check<CSMatrix<Scalar>, double>(this->nnz, this);
+            Ax_im = malloc_with_check<CSMatrix<Scalar>, double>(this->nnz, this);
             struct mat_complex_split_t z = {Ax_re, Ax_im};
 
             for(int i = 0; i < this->nnz; i++)
@@ -550,17 +550,17 @@ namespace Hermes
             mat_sparse_t *sparse = (mat_sparse_t *)matvar->data;
 
             this->nnz = sparse->nir;
-            this->Ax = malloc_with_check(this->nnz, this);
-            this->Ai = malloc_with_check(this->nnz, this);
+            this->Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(this->nnz, this);
+            this->Ai = malloc_with_check<CSMatrix<Scalar>, int>(this->nnz, this);
             this->size = sparse->njc - 1;
-            this->Ap = malloc_with_check(this->size + 1, this);
+            this->Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
 
             void* data = nullptr;
             if(Hermes::Helpers::TypeIsReal<Scalar>::value)
               data = sparse->data;
             else
             {
-              std::complex<double>* complex_data = malloc_with_check(this->nnz, this);
+              std::complex<double>* complex_data = malloc_with_check<CSMatrix<Scalar>, std::complex<double> >(this->nnz, this);
               double* real_array = (double*)((mat_complex_split_t*)sparse->data)->Re;
               double* imag_array = (double*)((mat_complex_split_t*)sparse->data)->Im;
               for(int i = 0; i < this->nnz; i++)

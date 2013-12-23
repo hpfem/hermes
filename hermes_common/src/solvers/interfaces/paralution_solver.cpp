@@ -22,6 +22,7 @@
 #include "config.h"
 #ifdef WITH_PARALUTION
 #include "paralution_solver.h"
+#include "util/memory_handling.h"
 
 namespace Hermes
 {
@@ -146,6 +147,12 @@ namespace Hermes
     template<typename Scalar>
     AbstractParalutionLinearMatrixSolver<Scalar>::~AbstractParalutionLinearMatrixSolver()
     {
+      this->free();
+    }
+
+    template<typename Scalar>
+    void AbstractParalutionLinearMatrixSolver<Scalar>::free()
+    {
       delete this->paralutionSolver;
       this->sln = nullptr;
     }
@@ -203,7 +210,7 @@ namespace Hermes
       // Handle sln.
       if(this->sln && this->sln != initial_guess)
         ::free(this->sln);
-      this->sln = malloc_with_check(this->get_matrix_size(), this);
+      this->sln = malloc_with_check<AbstractParalutionLinearMatrixSolver<Scalar>, Scalar>(this->get_matrix_size(), this);
 
       // Create initial guess.
       if(initial_guess)
@@ -379,8 +386,8 @@ namespace Hermes
 
         // Set operator, smoother, build.
         int levels = AMG_solver->GetNumLevels();
-        paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >** smoothers = malloc_with_check(levels-1, this);
-        paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >** preconditioners = malloc_with_check(levels-1, this);
+        paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >** smoothers = malloc_with_check<AMGParalutionLinearMatrixSolver<Scalar>, paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >*>(levels - 1, this);
+        paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >** preconditioners = malloc_with_check<AMGParalutionLinearMatrixSolver<Scalar>, paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >*>(levels - 1, this);
 
         for (int i = 0; i < levels - 1; ++i)
         {
