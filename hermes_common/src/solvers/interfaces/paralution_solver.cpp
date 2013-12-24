@@ -496,13 +496,14 @@ namespace Hermes
       case AIChebyshev:
         return new paralution::AIChebyshev<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
+#if __PARALUTION_VER >= 500
       case MultiElimination:
         return new paralution::MultiElimination<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case SaddlePoint:
         return new paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
-
+#endif
       default:
         throw Hermes::Exceptions::Exception("A wrong preconditioner type passed to ParalutionPrecond constructor.");
         return nullptr;
