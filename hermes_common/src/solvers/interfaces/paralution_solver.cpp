@@ -321,6 +321,7 @@ namespace Hermes
                        return new paralution::BiCGStab<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         }
           break;
+#if __PARALUTION_VER >= 500
         case CR:
         {
                  return new paralution::CR<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
@@ -331,6 +332,7 @@ namespace Hermes
                   return new paralution::IDR<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         }
           break;
+#endif
         default:
           throw Hermes::Exceptions::Exception("A wrong solver type detected in PARALUTION.");
           return nullptr;
