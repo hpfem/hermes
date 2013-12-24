@@ -256,7 +256,7 @@ namespace Hermes
           memcpy(local_Ap, m->get_Ap(), (m->get_size() + 1) * sizeof(int));
 
           free_with_check(local_Ax);
-          local_Ax = malloc_with_check<SuperLUSolver<Scalar>, Scalar>(m->get_nnz(), this);
+          local_Ax = malloc_with_check<SuperLUSolver<Scalar>, typename SuperLuType<Scalar>::Scalar>(m->get_nnz(), this);
           for (unsigned int i = 0;i<m->get_nnz();i++)
             to_superlu(local_Ax[i], m->get_Ax()[i]);
 
@@ -281,7 +281,7 @@ namespace Hermes
 
       // Initialize the solution variable.
       SuperMatrix X;
-      typename SuperLuType<Scalar>::Scalar*x = malloc_with_check<SuperLUSolver<Scalar>, typename SuperLuType<Scalar>::Scalar(m->get_size(), this);
+      typename SuperLuType<Scalar>::Scalar*x = malloc_with_check<SuperLUSolver<Scalar>, typename SuperLuType<Scalar>::Scalar>(m->get_size(), this);
       create_dense_matrix(&X, m->get_size(), 1, x, m->get_size(), SLU_DN, SLU_DTYPE, SLU_GE);
 
       // Solve the system.
