@@ -54,8 +54,8 @@ namespace Hermes
         delete rslns[j];
       }
 
-      ::free(slns);
-      ::free(rslns);
+      free_with_check(slns);
+      free_with_check(rslns);
     }
 
     template<typename Scalar>
@@ -271,7 +271,7 @@ namespace Hermes
       for(int i = 0; i < this->errorThreadCalculator->errorCalculator->component_count; i++)
         refmaps[i] = this->errorThreadCalculator->slns[i]->get_refmap();
       this->errorThreadCalculator->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorThreadCalculator->errorCalculator->component_count, order_base, current_state->isurf, current_state->rep->marker, this->errorThreadCalculator->geometry, this->errorThreadCalculator->jacobian_x_weights);
-      ::free(refmaps);
+      free_with_check(refmaps);
 
       for(int current_mfDG_i = 0; current_mfDG_i < this->errorThreadCalculator->errorCalculator->mfDG.size(); current_mfDG_i++)
       {
@@ -291,7 +291,7 @@ namespace Hermes
         this->errorThreadCalculator->deinitialize_error_and_norm_functions(mfs, error_func, norm_func);
       }
 
-      ::free(this->errorThreadCalculator->jacobian_x_weights);
+      free_with_check(this->errorThreadCalculator->jacobian_x_weights);
       this->errorThreadCalculator->geometry->free();
       delete this->errorThreadCalculator->geometry;
 
@@ -381,7 +381,8 @@ namespace Hermes
       for(int i = 0; i < this->errorCalculator->component_count; i++)
         refmaps[i] = slns[i]->get_refmap();
       this->n_quadrature_points = init_geometry_points(refmaps, this->errorCalculator->component_count, order, this->geometry, this->jacobian_x_weights);
-      ::free(refmaps);
+
+      free_with_check(refmaps);
 
       for(int i = 0; i < this->errorCalculator->mfvol.size(); i++)
       {
@@ -400,7 +401,7 @@ namespace Hermes
       // deinitialize points & geometry & jacobian times weights
       geometry->free();
       delete geometry;
-      ::free(this->jacobian_x_weights);
+      free_with_check(this->jacobian_x_weights);
     }
 
     template<typename Scalar>
@@ -410,7 +411,7 @@ namespace Hermes
       for(int i = 0; i < this->errorCalculator->component_count; i++)
         refmaps[i] = slns[i]->get_refmap();
       this->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorCalculator->component_count, order, current_state->isurf, current_state->rep->marker, this->geometry, this->jacobian_x_weights);
-      ::free(refmaps);
+      free_with_check(refmaps);
 
       for(int i = 0; i < this->errorCalculator->mfsurf.size(); i++)
       {

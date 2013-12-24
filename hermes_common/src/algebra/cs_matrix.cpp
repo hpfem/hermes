@@ -99,7 +99,7 @@ namespace Hermes
       }
       Ap[i] = pos;
 
-      ::free(this->pages);
+      free_with_check(this->pages);
       this->pages = nullptr;
 
       nnz = Ap[this->size];
@@ -118,21 +118,9 @@ namespace Hermes
     void CSMatrix<Scalar>::free()
     {
       nnz = 0;
-      if(Ap)
-      {
-        ::free(Ap);
-        Ap = nullptr;
-      }
-      if(Ai)
-      {
-        ::free(Ai);
-        Ai = nullptr;
-      }
-      if(Ax)
-      {
-        ::free(Ax);
-        Ax = nullptr;
-      }
+      free_with_check(Ap);
+      free_with_check(Ai);
+      free_with_check(Ax);
     }
 
     template<typename Scalar>

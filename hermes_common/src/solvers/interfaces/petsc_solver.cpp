@@ -42,7 +42,7 @@ namespace Hermes
       PetscScalar *py = malloc_with_check(ni, this);
       VecGetValues(x, ni, ix, py);
       for (int i = 0;i<ni;i++)y[i] = py[i].real();
-      ::free(py);
+      free_with_check(py);
     }
 
     int remove_petsc_object()
@@ -124,8 +124,7 @@ namespace Hermes
       MatCreateSeqAIJ(PETSC_COMM_SELF, this->size, this->size, 0, nnz_array, &matrix);
       //  MatSetOption(matrix, MAT_ROW_ORIENTED);
       //  MatSetOption(matrix, MAT_ROWS_SORTED);
-
-      ::free(nnz_array);
+      free_with_check(nnz_array);
 
       inited = true;
     }

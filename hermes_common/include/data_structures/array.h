@@ -57,10 +57,11 @@ namespace Hermes
 
       if(page_count)
       {
-        this->pages = (TYPE**)malloc(sizeof(TYPE*) * page_count);
+        this->pages = malloc_with_check<Array<TYPE>, TYPE*>(page_count, this, true);
         for (unsigned i = 0; i < this->page_count; i++)
           this->pages[i] = malloc_with_check<Array<TYPE>, TYPE>(HERMES_PAGE_SIZE, this);
         this->unused = (int*)malloc(sizeof(int));
+        this->unused = malloc_with_check<Array<TYPE>, int>(unused_size, this, true);
       }
       else
       {
@@ -75,8 +76,8 @@ namespace Hermes
     ~Array()
     {
       free();
-      ::free(this->pages);
-      ::free(this->unused);
+      free_with_check(this->pages);
+      free_with_check(this->unused);
     }
 
     /// Makes this array to hold a copy of another one.
@@ -108,7 +109,7 @@ namespace Hermes
     void free()
     {
       for (unsigned i = 0; i < this->page_count; i++)
-        ::free(pages[i]);
+        free_with_check(pages[i]);
       size = nitems = nunused = page_count = unused_size = 0;
     }
 
@@ -170,7 +171,7 @@ namespace Hermes
       if(nunused >= unused_size)
       {
         this->unused_size = std::max<int>(unused_size + 1, (int)(unused_size * 1.5));
-        this->unused = (int*)realloc(this->unused, this->unused_size * sizeof(int));
+        this->unused = realloc_with_check<Array, int>(this->unused, this->unused_size, this);
       }
       unused[nunused++] = id;
       nitems--;
@@ -302,8 +303,8 @@ namespace Hermes
     LightArray(unsigned int page_bits = 9, unsigned int default_page_count = 512) : page_bits(page_bits), page_size(1 << page_bits), page_mask((1 << page_bits) - 1), page_count(default_page_count)
     {
       size = 0;
-      pages = malloc_with_check<LightArray<TYPE>, TYPE*>(page_count, this);
-      presence = malloc_with_check<LightArray<TYPE>, bool*>(page_count, this);
+      pages = malloc_with_check<LightArray<TYPE>, TYPE*>(page_count, this, true);
+      presence = malloc_with_check<LightArray<TYPE>, bool*>(page_count, this, true);
 
       for(int i = 0; i < page_count; i++)
       {
@@ -329,11 +330,11 @@ namespace Hermes
     {
       for (unsigned int i = 0; i < page_count; i++)
       {
-        ::free(pages[i]);
-        ::free(presence[i]);
+        free_with_check(pages[i]);
+        free_with_check(presence[i]);
       }
-      ::free(pages);
-      ::free(presence);
+      free_with_check(pages);
+      free_with_check(presence);
     }
 
     /// Adds a new_ item to the array.

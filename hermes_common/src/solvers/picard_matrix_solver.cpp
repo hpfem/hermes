@@ -94,7 +94,7 @@ namespace Hermes
         temp[i] = temp[i] - residual->get(i);
 
       double residual_norm = get_l2_norm(temp, this->problem_size);
-      ::free(temp);
+      free_with_check(temp);
 
       return residual_norm;
     }
@@ -174,11 +174,11 @@ namespace Hermes
     {
       if (anderson_is_on)
       {
-        ::free(previous_Anderson_sln_vector);
+        free_with_check(previous_Anderson_sln_vector);
         for (int i = 0; i < num_last_vectors_used; i++)
-          ::free(previous_vectors[i]);
-        ::free(previous_vectors);
-        ::free(anderson_coeffs);
+          free_with_check(previous_vectors[i]);
+        free_with_check(previous_vectors);
+        free_with_check(anderson_coeffs);
       }
     }
 
@@ -279,8 +279,8 @@ namespace Hermes
       anderson_coeffs[n] = 1.0 - sum;
 
       // Clean up.
-      ::free(mat);
-      ::free(rhs);
+      free_with_check(mat);
+      free_with_check(rhs);
     }
 
     template class HERMES_API PicardMatrixSolver<double>;

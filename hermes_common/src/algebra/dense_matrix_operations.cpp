@@ -93,7 +93,7 @@ namespace Hermes
             for (i = j + 1; i < n; i++) a[i][j] *= dum;
           }
         }
-        ::free(vv);
+        free_with_check(vv);
       }
 
       template<typename T, typename S>

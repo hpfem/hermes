@@ -1011,10 +1011,10 @@ namespace Hermes
 
     MeshFunction<double>* VonMisesFilter::clone() const
     {
-      MeshFunctionSharedPtr<double>* slns = malloc_with_check<MeshFunctionSharedPtr<double> >(num);
-      for(int i = 0; i < num; i++)
-        slns[i] = sln[i]->clone();
-      VonMisesFilter* filter = new VonMisesFilter(slns, num, lambda, mu, cyl, item1, item2);
+      Hermes::vector<MeshFunctionSharedPtr<double> > slns;
+      for (int i = 0; i < num; i++)
+        slns.push_back(sln[i]->clone());
+      VonMisesFilter* filter = new VonMisesFilter(&slns[0], num, lambda, mu, cyl, item1, item2);
       return filter;
     }
 

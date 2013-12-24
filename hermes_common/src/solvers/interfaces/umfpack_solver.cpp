@@ -191,8 +191,7 @@ namespace Hermes
       if( !setup_factorization() )
         throw Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
 
-      if(sln)
-        ::free(sln);
+      free_with_check(sln);
 
       sln = malloc_with_check<typename UMFPackLinearMatrixSolver<double>, double>(m->get_size(), this);
       memset(sln, 0, m->get_size() * sizeof(double));
@@ -217,8 +216,7 @@ namespace Hermes
       if( !setup_factorization() )
         this->warn("LU factorization could not be completed.");
 
-      if(sln)
-        ::free(sln);
+      free_with_check(sln);
       sln = malloc_with_check<UMFPackLinearMatrixSolver<std::complex<double> >, std::complex<double> >(m->get_size(), this);
 
       memset(sln, 0, m->get_size() * sizeof(std::complex<double>));

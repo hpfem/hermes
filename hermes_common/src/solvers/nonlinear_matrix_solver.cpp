@@ -56,8 +56,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::free()
     {
-      if (this->sln_vector)
-        ::free(this->sln_vector);
+      free_with_check(this->sln_vector);
     }
 
     template<typename Scalar>
@@ -98,12 +97,7 @@ namespace Hermes
       // Number of DOFs.
       assert(this->problem_size > 0);
 
-      if(this->sln_vector != nullptr)
-      {
-        ::free(this->sln_vector);
-        this->sln_vector = nullptr;
-      }
-
+      free_with_check(this->sln_vector);
       this->sln_vector = malloc_with_check<NonlinearMatrixSolver<Scalar>, Scalar>(this->problem_size, this);
 
       if(coeff_vec == nullptr)
@@ -112,7 +106,7 @@ namespace Hermes
         memcpy(this->sln_vector, coeff_vec, this->problem_size*sizeof(Scalar));
 
       // previous_sln_vector
-      this->previous_sln_vector = (Scalar*)calloc(this->problem_size, sizeof(Scalar));
+      this->previous_sln_vector = calloc_with_check<NonlinearMatrixSolver<Scalar>, Scalar>(this->problem_size, this);
 
       // Backup vector for unsuccessful reuse of Jacobian.
       residual_back = create_vector<Scalar>();
@@ -383,7 +377,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::deinit_solving()
     {
-      ::free(this->previous_sln_vector);
+      free_with_check(this->previous_sln_vector);
       delete residual_back;
       this->problem_size = -1;
       if (this->previous_jacobian)

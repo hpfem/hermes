@@ -577,7 +577,7 @@ namespace Hermes
         if(do_set_title)
           set_view_title(output_id, text_contents);
 
-        ::free(text_contents);
+        free_with_check(text_contents);
       }
 
       void View::get_palette_color(double x, float* gl_color)

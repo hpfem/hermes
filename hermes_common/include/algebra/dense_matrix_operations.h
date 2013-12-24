@@ -41,7 +41,7 @@ namespace Hermes
       T **new_matrix(unsigned int m, unsigned int n = 0)
       {
         if(!n) n = m;
-        T **vec = (T **) malloc(sizeof(T *)* m + sizeof(T)* m * n);
+        T **vec = (T **) new char[sizeof(T *)* m + sizeof(T)* m * n];
         if (!vec)
           throw Exceptions::Exception("Malloc failed to allocate in new_matrix.");
         memset(vec, 0, sizeof(T *) * m + sizeof(T) * m * n);

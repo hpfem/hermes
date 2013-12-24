@@ -52,12 +52,12 @@ namespace Hermes
             sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
           else
           {
-            ::free(fileName);
+            free_with_check(fileName);
             return;
           }
 
           matrix->export_to_file(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
-          ::free(fileName);
+          free_with_check(fileName);
         }
       }
 
@@ -72,7 +72,7 @@ namespace Hermes
           char* fileName = malloc_with_check<char>(this->matrixFilename.length() + 5);
           sprintf(fileName, "%s", this->matrixFilename.c_str());
           matrix->export_to_file(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
-          ::free(fileName);
+          free_with_check(fileName);
         }
       }
 
@@ -92,12 +92,12 @@ namespace Hermes
             sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
           else
           {
-            ::free(fileName);
+            free_with_check(fileName);
             return;
           }
 
           rhs->export_to_file(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
-          ::free(fileName);
+          free_with_check(fileName);
         }
       }
 
@@ -112,7 +112,7 @@ namespace Hermes
           char* fileName = malloc_with_check<char>(this->RhsFilename.length() + 5);
           sprintf(fileName, "%s", this->RhsFilename.c_str());
           rhs->export_to_file(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
-          ::free(fileName);
+          free_with_check(fileName);
         }
       }
 

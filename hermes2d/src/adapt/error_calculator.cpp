@@ -37,7 +37,7 @@ namespace Hermes
     template<typename Scalar>
     ErrorCalculator<Scalar>::~ErrorCalculator()
     {
-      free();
+      this->free();
     }
 
     template<typename Scalar>
@@ -84,10 +84,8 @@ namespace Hermes
         this->num_act_elems += num_active_elements_i;
       }
 
-      // Create the array for references and initialize it.
-      if (this->element_references)
-        ::free(this->element_references);
-
+      // (Re-)create the array for references and initialize it.
+      free_with_check(this->element_references);
       this->element_references = malloc_with_check<ErrorCalculator<Scalar>, ElementReference>(this->num_act_elems, this);
 
       int running_count_total = 0;
@@ -111,14 +109,11 @@ namespace Hermes
     {
       for (int i = 0; i < this->component_count; i++)
       {
-        if (errors[i])
-          ::free(errors[i]);
-        if (norms[i])
-          ::free(norms[i]);
+        free_with_check(errors[i]);
+        free_with_check(norms[i]);
       }
 
-      if (this->element_references)
-        ::free(this->element_references);
+      free_with_check(this->element_references);
     }
 
     template<typename Scalar>

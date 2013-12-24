@@ -60,7 +60,7 @@ namespace Hermes
         mat->free();
         mat->prealloc(ndof);
 
-        AsmList<Scalar>* al = new AsmList<Scalar>[spaces_size];
+        AsmList<Scalar>* al = malloc_with_check<AsmList<Scalar> >(spaces_size);
         bool **blocks = this->wf->get_blocks(this->force_diagonal_blocks);
         
         // Loop through all elements.
@@ -192,8 +192,8 @@ namespace Hermes
           }
         }
 
-        delete [] al;
-        delete [] blocks;
+        free_with_check(al);
+        ::free(blocks);
 
         mat->alloc();
       }

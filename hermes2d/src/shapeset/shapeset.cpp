@@ -93,8 +93,8 @@ namespace Hermes
       lubksb(a, n, iperm, b);
 
       // cleanup
-      ::free(iperm);
-      ::free(a);
+      free_with_check(iperm);
+      delete [] a;
 
       return b;
     }
@@ -138,8 +138,7 @@ namespace Hermes
       if(comb_table != nullptr)
       {
         for (int i = 0; i < table_size; i++)
-          if(comb_table[i] != nullptr)
-            ::free(comb_table[i]);
+          free_with_check(comb_table[i]);
 
         free(comb_table);
         comb_table = nullptr;

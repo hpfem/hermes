@@ -125,9 +125,8 @@ namespace Hermes
     template<typename Scalar>
       void Adapt<Scalar>::free()
     {
-        if (elements_to_refine)
-          ::free(elements_to_refine);
-      }
+      free_with_check(elements_to_refine);
+    }
 
     template<typename Scalar>
     void Adapt<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
@@ -213,7 +212,7 @@ namespace Hermes
 
       // Clearing.
       if(elements_to_refine)
-        ::free(elements_to_refine);
+        free_with_check(elements_to_refine);
 
       // Also handle the refinementInfoMeshFunctions.
       if(this->refinementInfoMeshFunctionGlobal)
@@ -333,10 +332,10 @@ namespace Hermes
           }
         }
 
-        ::free(current_rslns);
+        free_with_check(current_rslns);
       }
 
-      ::free(rslns);
+      free_with_check(rslns);
 
       if(!this->exceptionMessageCaughtInParallelBlock.empty())
       {
@@ -370,7 +369,7 @@ namespace Hermes
     {
       // Free data.
       for (int j = 0; j < this->num; j++)
-        ::free(element_refinement_location[j]);
+        free_with_check(element_refinement_location[j]);
     }
 
     template<typename Scalar>
@@ -391,7 +390,7 @@ namespace Hermes
           for(int j = 0; j < this->num; j++)
             if(this->meshes[i]->get_seq() == this->meshes[j]->get_seq())
               this->spaces[j]->distribute_orders(meshes[i], parents);
-          ::free(parents);
+          free_with_check(parents);
         }
       }
 

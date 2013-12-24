@@ -59,6 +59,7 @@ project(hermes_common)
     include/util/compat.h
     include/util/callstack.h
     include/util/qsort.h
+    include/util/memory_handling.h
     include/algebra/algebra_utilities.h
     include/algebra/matrix.h
     include/algebra/vector.h
@@ -182,6 +183,7 @@ project(hermes_common)
   SOURCE_GROUP(
     "Header Files\\Utilities" FILES 
     include/util/compat.h
+    include/util/memory_handling.h
     include/util/callstack.h
     include/util/qsort.h
   )

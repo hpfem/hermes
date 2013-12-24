@@ -82,6 +82,7 @@ namespace Hermes
       /// A reference to an element.
       struct ElementReference {
         /// Constructor. It creates an invalid element reference.
+        ElementReference() : element_id(-1), comp(-1), error(nullptr), norm(nullptr) {};
         ElementReference(int comp, int element_id, double* error, double* norm) : element_id(element_id), comp(comp), error(error), norm(norm) {};
         
         int element_id; ///< An element ID. Invalid if below 0.

@@ -44,8 +44,7 @@ namespace Hermes
 
     void Loggable::set_logFile_name(const char* filename)
     {
-      if (this->logFileName)
-        ::free(this->logFileName);
+      free_with_check(this->logFileName);
       int strlength = std::strlen(filename);
       this->logFileName = malloc_with_check<char>(strlength);
       strcpy(this->logFileName, filename);
@@ -58,8 +57,7 @@ namespace Hermes
 
     void Loggable::set_static_logFile_name(const char* filename)
     {
-      if (Loggable::staticLogFileName)
-        ::free(Loggable::staticLogFileName);
+      free_with_check(Loggable::staticLogFileName);
       int strlength = std::strlen(filename);
       Loggable::staticLogFileName = malloc_with_check<char>(strlength);
       strcpy(Loggable::staticLogFileName, filename);

@@ -530,7 +530,7 @@ namespace Hermes
       // Throws appropriate exception.
       if(check_status())
       {
-        ::free(this->sln);
+        free_with_check(this->sln);
         this->sln = malloc_with_check<MumpsSolver<Scalar>, Scalar>(m->size, this);
         for (unsigned int i = 0; i < rhs->get_size(); i++)
           this->sln[i] = mumps_to_Scalar(param.rhs[i]);

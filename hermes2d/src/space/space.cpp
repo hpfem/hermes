@@ -189,7 +189,7 @@ namespace Hermes
       if (this->proj_mat != nullptr)
         ::free(this->proj_mat);
       if (this->chol_p != nullptr)
-        ::free(this->chol_p);
+        free_with_check(this->chol_p);
 
       if (this->own_shapeset)
         delete this->shapeset;
@@ -1090,9 +1090,9 @@ namespace Hermes
     void Space<Scalar>::free_bc_data()
     {
       for (unsigned int i = 0; i < bc_data_projections.size(); i++)
-        ::free(bc_data_projections[i]);
+        free_with_check(bc_data_projections[i]);
       for (unsigned int i = 0; i < bc_data_base_components.size(); i++)
-        ::free(bc_data_base_components[i]);
+        free_with_check(bc_data_base_components[i]);
       bc_data_projections.clear();
       bc_data_base_components.clear();
     }

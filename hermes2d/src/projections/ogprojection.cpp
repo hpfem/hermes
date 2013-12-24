@@ -207,7 +207,7 @@ namespace Hermes
       Solution<Scalar>::vector_to_solution(target_vec, space, target_sln);
 
       // Clean up.
-      ::free(target_vec);
+      free_with_check(target_vec);
     }
 
     template<typename Scalar>

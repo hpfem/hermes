@@ -49,8 +49,7 @@ namespace Hermes
     template<typename Scalar>
     LinearMatrixSolver<Scalar>::~LinearMatrixSolver()
     {
-      if(sln != nullptr)
-        ::free(sln);
+      free_with_check(sln);
     }
 
     template<typename Scalar>

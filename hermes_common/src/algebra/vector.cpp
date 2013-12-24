@@ -316,9 +316,7 @@ namespace Hermes
     template<typename Scalar>
     void SimpleVector<Scalar>::free()
     {
-      if (this->v)
-        ::free(this->v);
-      this->v = nullptr;
+      free_with_check(this->v);
       this->size = 0;
     }
 

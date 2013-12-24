@@ -290,7 +290,7 @@ namespace Hermes
       this->tick();
       this->time = this->accumulated();
 
-      ::free(this->sln);
+      free_with_check(this->sln);
       this->sln = malloc_with_check(final_matrix->size, this);
       memset(this->sln, 0, final_matrix->size * sizeof(double));
 
@@ -403,7 +403,7 @@ namespace Hermes
       this->tick();
       this->time = this->accumulated();
 
-      ::free(this->sln);
+      free_with_check(this->sln);
       this->sln = malloc_with_check(final_matrix->size, this);
       memset(this->sln, 0, final_matrix->size * sizeof(double));
 
@@ -439,7 +439,7 @@ namespace Hermes
 
       kp.ExtractSolution(xr, xi);
 
-      ::free(this->sln);
+      free_with_check(this->sln);
       this->sln = malloc_with_check(m->size, this);
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
@@ -482,7 +482,7 @@ namespace Hermes
 
       kp.ExtractSolution(xr, xi);
 
-      ::free(this->sln);
+      free_with_check(this->sln);
       this->sln = malloc_with_check(m->size, this);
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 

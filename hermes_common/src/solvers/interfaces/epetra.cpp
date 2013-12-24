@@ -179,7 +179,7 @@ namespace Hermes
         idxs_to_pass[i] = idxs[i];
       int n_entries_to_pass = n_entries;
       mat->ExtractGlobalRowCopy(row, len, n_entries_to_pass, vals, idxs_to_pass);
-      ::free(idxs_to_pass);
+      free_with_check(idxs_to_pass);
     }
 
     template<>

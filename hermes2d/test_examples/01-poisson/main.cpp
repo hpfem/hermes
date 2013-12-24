@@ -35,8 +35,8 @@ const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refi
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
 const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
-const double VOLUME_HEAT_SRC = 5e-9;        // Volume heat sources generated (for example) by electric current.
-const double FIXED_BDY_TEMP = -20e-9;        // Fixed temperature on the boundary.
+const double VOLUME_HEAT_SRC = 5;        // Volume heat sources generated (for example) by electric current.
+const double FIXED_BDY_TEMP = 20;        // Fixed temperature on the boundary.
 
 class MyVolumetricIntegralCalculator : public PostProcessing::SurfaceIntegralCalculator<double>
 {
@@ -62,6 +62,7 @@ public:
 
 int main(int argc, char* argv[])
 {
+  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;

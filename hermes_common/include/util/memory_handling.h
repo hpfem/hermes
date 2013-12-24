@@ -20,16 +20,24 @@
 #define __HERMES_COMMON_MEMORY_HANDLING_H
 
 #include "exceptions.h"
+#include <type_traits>
 
 namespace Hermes
 {
 
   template<typename Caller, typename ArrayItem>
-  ArrayItem* calloc_with_check(int size, Caller* const caller)
+  ArrayItem* calloc_with_check(int size, Caller* const caller, bool force_malloc = false)
   {
-    ArrayItem* new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
+    ArrayItem* new_array;
+    if (force_malloc && std::is_pod<ArrayItem>::value)
+      new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
+    else
+      new_array = new ArrayItem[size];
     if (new_array)
+    {
+      memset(new_array, 0, sizeof(ArrayItem)* size);
       return new_array;
+    }
     else
     {
       caller->free();
@@ -39,9 +47,16 @@ namespace Hermes
   }
 
   template<typename ArrayItem>
-  ArrayItem* calloc_with_check(int size)
+  ArrayItem* calloc_with_check(int size, bool force_malloc = false)
   {
-    ArrayItem* new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
+    ArrayItem* new_array;
+    if (force_malloc && std::is_pod<ArrayItem>::value)
+      new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
+    else
+    {
+      new_array = new ArrayItem[size];
+      memset(new_array, 0, sizeof(ArrayItem)* size);
+    }
     if (new_array)
       return new_array;
     else
@@ -52,9 +67,13 @@ namespace Hermes
   }
 
   template<typename Caller, typename ArrayItem>
-  ArrayItem* malloc_with_check(int size, Caller* const caller)
+  ArrayItem* malloc_with_check(int size, Caller* const caller, bool force_malloc = false)
   {
-    ArrayItem* new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
+    ArrayItem* new_array;
+    if (force_malloc && std::is_pod<ArrayItem>::value)
+      new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
+    else
+      new_array = new ArrayItem[size];
     if (new_array)
       return new_array;
     else
@@ -67,9 +86,13 @@ namespace Hermes
   }
 
   template<typename ArrayItem>
-  ArrayItem* malloc_with_check(int size)
+  ArrayItem* malloc_with_check(int size, bool force_malloc = false)
   {
-    ArrayItem* new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
+    ArrayItem* new_array;
+    if (force_malloc && std::is_pod<ArrayItem>::value)
+      new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
+    else
+      new_array = new ArrayItem[size];
     if (new_array)
       return new_array;
     else
@@ -82,6 +105,8 @@ namespace Hermes
   template<typename Caller, typename ArrayItem>
   ArrayItem* realloc_with_check(ArrayItem*& original_array, int new_size, Caller* const caller)
   {
+    static_assert(std::is_pod<ArrayItem>::value, "ArrayItem must be POD for reallocation.");
+
     ArrayItem* new_array = (ArrayItem*)realloc(original_array, new_size * sizeof(ArrayItem));
     if (new_array)
       return original_array = new_array;
@@ -90,6 +115,19 @@ namespace Hermes
       caller->free();
       throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", new_size * sizeof(ArrayItem));
       return nullptr;
+    }
+  }
+
+  template<typename ArrayItem>
+  void free_with_check(ArrayItem*& ptr, bool force_malloc = false)
+  {
+    if (ptr)
+    {
+      if (force_malloc && std::is_pod<ArrayItem>::value)
+        ::free(ptr);
+      else
+        delete[] ptr;
+      ptr = nullptr;
     }
   }
 }

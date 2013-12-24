@@ -237,29 +237,13 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::free()
     {
-      if(mono_coeffs  != nullptr)
-      {
-        ::free(mono_coeffs);
-        mono_coeffs = nullptr;
-      }
-      if(elem_orders != nullptr)
-      {
-        ::free(elem_orders);
-        elem_orders = nullptr;
-      }
-      if(dxdy_buffer != nullptr)
-      {
-        ::free(dxdy_buffer);
-        dxdy_buffer = nullptr;
-      }
+      free_with_check(mono_coeffs);
+      free_with_check(elem_orders);
+      free_with_check(dxdy_buffer);
 
       for (int i = 0; i < this->num_components; i++)
       {
-        if(elem_coeffs[i] != nullptr)
-        {
-          ::free(elem_coeffs[i]);
-          elem_coeffs[i] = nullptr;
-        }
+        free_with_check(elem_coeffs[i]);
       }
 
       e_last = nullptr;

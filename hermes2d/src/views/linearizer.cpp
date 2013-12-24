@@ -336,7 +336,7 @@ namespace Hermes
         free();
         for (int i = 0; i < this->num_threads_used; i++)
           delete this->threadLinearizerMultidimensional[i];
-        ::free(this->threadLinearizerMultidimensional);
+        free_with_check(this->threadLinearizerMultidimensional);
       }
 
       template<typename LinearizerDataDimensions>
@@ -346,6 +346,7 @@ namespace Hermes
           this->warn("Setting of maximum absolute value in LinearizerMultidimensional with a negative value");
         else
         {
+          this->max_val = max_abs;
         }
         return;
       }

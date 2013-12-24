@@ -58,8 +58,8 @@ namespace Hermes
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
 
-      central_transformations = (Transformations**)calloc(ns.central_transformations_alloc_size, sizeof(Transformations*));
-      neighbor_transformations = (Transformations**)calloc(ns.neighbor_transformations_alloc_size, sizeof(Transformations*));
+      central_transformations = calloc_with_check<NeighborSearch<Scalar>, Transformations*>(ns.central_transformations_alloc_size, this);
+      neighbor_transformations = calloc_with_check<NeighborSearch<Scalar>, Transformations*>(ns.neighbor_transformations_alloc_size, this);
 
       for(unsigned int j = 0; j < ns.central_transformations_alloc_size; j++)
       {
@@ -111,11 +111,11 @@ namespace Hermes
       for (unsigned int i = 0; i < central_transformations_alloc_size; i++)
       if (this->central_transformations[i])
         delete this->central_transformations[i];
-      ::free(this->central_transformations);
+      free_with_check(this->central_transformations);
       for (unsigned int i = 0; i < neighbor_transformations_alloc_size; i++)
       if (this->neighbor_transformations[i])
         delete this->neighbor_transformations[i];
-      ::free(this->neighbor_transformations);
+      free_with_check(this->neighbor_transformations);
     }
 
     template<typename Scalar>

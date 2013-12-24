@@ -327,9 +327,9 @@ namespace Hermes
       {
         if (reverse_neighbor_side)
         {
-          ::free(this->val_neighbor);
-          ::free(this->dx_neighbor);
-          ::free(this->dy_neighbor);
+          free_with_check(this->val_neighbor);
+          free_with_check(this->dx_neighbor);
+          free_with_check(this->dy_neighbor);
         }
         delete fn_neighbor;
         fn_neighbor = nullptr;
@@ -351,13 +351,13 @@ namespace Hermes
     template<typename T>
     void Geom<T>::free()
     {
-      ::free(x);
-      ::free(tx);
-      ::free(nx);
+      free_with_check(x);
+      free_with_check(tx);
+      free_with_check(nx);
 
-      ::free(y);
-      ::free(ty);
-      ::free(ny);
+      free_with_check(y);
+      free_with_check(ty);
+      free_with_check(ny);
     }
 
     template<>
