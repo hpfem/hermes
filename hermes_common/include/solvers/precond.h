@@ -47,7 +47,9 @@ namespace Hermes
       ILU = 2,
       MultiColoredILU = 3,
       IC = 4,
-      AIChebyshev = 5
+      AIChebyshev = 5,
+      MultiElimination = 6,
+      SaddlePoint = 7
     };
 
     /// \brief Abstract class to define interface for preconditioners.

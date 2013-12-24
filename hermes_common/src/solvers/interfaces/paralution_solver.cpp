@@ -29,10 +29,10 @@ namespace Hermes
   namespace Algebra
   {
     template<typename Scalar>
-    ParalutionMatrix<Scalar>::ParalutionMatrix(ParalutionMatrixType type) 
+    ParalutionMatrix<Scalar>::ParalutionMatrix(ParalutionMatrixType type)
       : CSRMatrix<Scalar>(), paralutionMatrixType(type)
     {
-    }
+      }
 
     template<typename Scalar>
     ParalutionMatrix<Scalar>::~ParalutionMatrix()
@@ -160,7 +160,7 @@ namespace Hermes
     template<typename Scalar>
     void AbstractParalutionLinearMatrixSolver<Scalar>::reset_internal_solver()
     {
-      if(this->paralutionSolver)
+      if (this->paralutionSolver)
         delete this->paralutionSolver;
       this->paralutionSolver = nullptr;
     }
@@ -176,18 +176,18 @@ namespace Hermes
     void AbstractParalutionLinearMatrixSolver<Scalar>::presolve_init()
     {
       // Reinit iff matrix has changed.
-      if(this->reuse_scheme != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
+      if (this->reuse_scheme != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
         this->reset_internal_solver();
       this->init_internal_solver();
 
       // Set verbose_level.
-      if(this->get_verbose_output())
+      if (this->get_verbose_output())
         this->paralutionSolver->Verbose(10);
       else
         this->paralutionSolver->Verbose(0);
 
       // Set tolerances.
-      switch(this->toleranceType)
+      switch (this->toleranceType)
       {
       case AbsoluteTolerance:
         paralutionSolver->InitTol(this->tolerance, 0., std::numeric_limits<Scalar>::max());
@@ -208,12 +208,12 @@ namespace Hermes
     void AbstractParalutionLinearMatrixSolver<Scalar>::solve(Scalar* initial_guess)
     {
       // Handle sln.
-      if(this->sln && this->sln != initial_guess)
+      if (this->sln && this->sln != initial_guess)
         ::free(this->sln);
       this->sln = malloc_with_check<AbstractParalutionLinearMatrixSolver<Scalar>, Scalar>(this->get_matrix_size(), this);
 
       // Create initial guess.
-      if(initial_guess)
+      if (initial_guess)
         memcpy(this->sln, initial_guess, this->get_matrix_size() * sizeof(Scalar));
       else
         memset(this->sln, Scalar(0), this->get_matrix_size() * sizeof(Scalar));
@@ -222,14 +222,14 @@ namespace Hermes
       x.SetDataPtr(&this->sln, "Initial guess", matrix->get_size());
 
       // Handle the situation when rhs == 0(vector).
-      if(std::abs(rhs->get_paralutionVector()->Norm()) < Hermes::HermesSqrtEpsilon)
+      if (std::abs(rhs->get_paralutionVector()->Norm()) < Hermes::HermesSqrtEpsilon)
         x.LeaveDataPtr(&this->sln);
 
       // (Re-)init.
       this->presolve_init();
 
       // Move to Accelerators.
-      if(HermesCommonApi.get_integral_param_value(useAccelerators))
+      if (HermesCommonApi.get_integral_param_value(useAccelerators))
       {
         this->paralutionSolver->MoveToAccelerator();
         this->matrix->get_paralutionMatrix().MoveToAccelerator();
@@ -289,7 +289,7 @@ namespace Hermes
     template<typename Scalar>
     IterativeParalutionLinearMatrixSolver<Scalar>::~IterativeParalutionLinearMatrixSolver()
     {
-      if(preconditioner)
+      if (preconditioner)
         delete preconditioner;
     }
 
@@ -304,39 +304,49 @@ namespace Hermes
     paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>*
       IterativeParalutionLinearMatrixSolver<Scalar>::return_paralutionSolver(IterSolverType type)
     {
-      switch(type)
-      {
-      case CG:
+        switch (type)
         {
-          return new paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
-        break;
-      case GMRES:
+        case CG:
         {
-          return new paralution::GMRES<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+                 return new paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         }
-        break;
-      case BiCGStab:
+          break;
+        case GMRES:
         {
-          return new paralution::BiCGStab<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+                    return new paralution::GMRES<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         }
-        break;
-      default:
-        throw Hermes::Exceptions::Exception("A wrong solver type detected in PARALUTION.");
-        return nullptr;
+          break;
+        case BiCGStab:
+        {
+                       return new paralution::BiCGStab<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        }
+          break;
+        case CR:
+        {
+                 return new paralution::CR<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        }
+          break;
+        case IDR:
+        {
+                  return new paralution::IDR<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        }
+          break;
+        default:
+          throw Hermes::Exceptions::Exception("A wrong solver type detected in PARALUTION.");
+          return nullptr;
+        }
       }
-    }
 
     template<typename Scalar>
     void IterativeParalutionLinearMatrixSolver<Scalar>::init_internal_solver()
     {
       // Create a solver according to the current type settings.
-      if(!this->paralutionSolver)
+      if (!this->paralutionSolver)
       {
         this->paralutionSolver = this->return_paralutionSolver(this->iterSolverType);
 
         // Set operator, preconditioner, build.
-        if(this->preconditioner)
+        if (this->preconditioner)
           this->paralutionSolver->SetPreconditioner(this->preconditioner->get_paralutionPreconditioner());
         this->paralutionSolver->SetOperator(this->matrix->get_paralutionMatrix());
         this->paralutionSolver->Build();
@@ -346,11 +356,11 @@ namespace Hermes
     template<typename Scalar>
     void IterativeParalutionLinearMatrixSolver<Scalar>::set_precond(Precond<Scalar> *pc)
     {
-      if(this->preconditioner)
+      if (this->preconditioner)
         delete this->preconditioner;
 
       Preconditioners::ParalutionPrecond<Scalar>* paralutionPreconditioner = dynamic_cast<Preconditioners::ParalutionPrecond<Scalar>*>(pc);
-      if(paralutionPreconditioner)
+      if (paralutionPreconditioner)
         this->preconditioner = paralutionPreconditioner;
       else
         throw Hermes::Exceptions::Exception("A wrong preconditioner type passed to Paralution.");
@@ -376,7 +386,7 @@ namespace Hermes
     void AMGParalutionLinearMatrixSolver<Scalar>::init_internal_solver()
     {
       // Create a solver according to the current type settings.
-      if(!this->paralutionSolver)
+      if (!this->paralutionSolver)
       {
         paralution::AMG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* AMG_solver;
         this->paralutionSolver = AMG_solver = new paralution::AMG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
@@ -395,7 +405,7 @@ namespace Hermes
           preconditioners[i] = ParalutionPrecond<Scalar>::return_paralutionPreconditioner(this->smootherPreconditionerType);
 
           smoothers[i]->SetPreconditioner(*preconditioners[i]);
-          if(this->get_verbose_output())
+          if (this->get_verbose_output())
             smoothers[i]->Verbose(10);
           else
             smoothers[i]->Verbose(0);
@@ -418,37 +428,37 @@ namespace Hermes
     template<typename Scalar>
     ParalutionPrecond<Scalar>::ParalutionPrecond(PreconditionerType preconditionerType) : Precond<Scalar>()
     {
-      switch(preconditionerType)
+      switch (preconditionerType)
       {
       case Jacobi:
-        {
-          this->paralutionPreconditioner = new paralution::Jacobi<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+      {
+                   this->paralutionPreconditioner = new paralution::Jacobi<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+      }
         break;
       case ILU:
-        {
-          this->paralutionPreconditioner = new paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+      {
+                this->paralutionPreconditioner = new paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+      }
         break;
       case MultiColoredILU:
-        {
-          this->paralutionPreconditioner = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+      {
+                            this->paralutionPreconditioner = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+      }
         break;
       case MultiColoredSGS:
-        {
-          this->paralutionPreconditioner = new paralution::MultiColoredSGS<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+      {
+                            this->paralutionPreconditioner = new paralution::MultiColoredSGS<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+      }
         break;
       case IC:
-        {
-          this->paralutionPreconditioner = new paralution::IC<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+      {
+               this->paralutionPreconditioner = new paralution::IC<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+      }
         break;
       case AIChebyshev:
-        {
-          this->paralutionPreconditioner = new paralution::AIChebyshev<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+      {
+                        this->paralutionPreconditioner = new paralution::AIChebyshev<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+      }
         break;
       default:
         throw Hermes::Exceptions::Exception("A wrong paralution preconditioner type passed to ParalutionPrecond constructor.");
@@ -464,38 +474,33 @@ namespace Hermes
     template<typename Scalar>
     paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* ParalutionPrecond<Scalar>::return_paralutionPreconditioner(PreconditionerType type)
     {
-      switch(type)
+      switch (type)
       {
       case Jacobi:
-        {
-          return new paralution::Jacobi<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+        return new paralution::Jacobi<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case ILU:
-        {
-          return new paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+        return new paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case MultiColoredILU:
-        {
-          return new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+        return new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case MultiColoredSGS:
-        {
-          return new paralution::MultiColoredSGS<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+        return new paralution::MultiColoredSGS<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case IC:
-        {
-          return new paralution::IC<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+        return new paralution::IC<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case AIChebyshev:
-        {
-          return new paralution::AIChebyshev<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
+        return new paralution::AIChebyshev<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
+      case MultiElimination:
+        return new paralution::MultiElimination<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        break;
+      case SaddlePoint:
+        return new paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        break;
+
       default:
         throw Hermes::Exceptions::Exception("A wrong preconditioner type passed to ParalutionPrecond constructor.");
         return nullptr;

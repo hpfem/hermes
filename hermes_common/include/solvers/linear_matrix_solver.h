@@ -275,7 +275,9 @@ namespace Hermes
     {
       CG = 0,
       GMRES = 1,
-      BiCGStab = 2
+      BiCGStab = 2,
+      CR = 3,
+      IDR = 4
     };
 
     /// \brief  Abstract class for defining interface for iterative solvers.
