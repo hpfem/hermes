@@ -185,14 +185,7 @@ namespace Hermes
     template<typename Scalar>
     SuperLUSolver<Scalar>::~SuperLUSolver()
     {
-      free_factorization_data();
-      free_matrix();
-      free_rhs();
-
-      free_with_check(local_Ai);
-      free_with_check(local_Ap);
-      free_with_check(local_Ax);
-      free_with_check(local_rhs);
+      this->free();
     }
 
     template<typename Scalar>
@@ -271,7 +264,7 @@ namespace Hermes
       free_rhs();
 
       free_with_check(local_rhs);
-      local_rhs = malloc_with_check<SuperLUSolver<Scalar>, Scalar>(rhs->get_size(), this);
+      local_rhs = malloc_with_check<SuperLUSolver<Scalar>, typename SuperLuType<Scalar>::Scalar>(rhs->get_size(), this);
       for (unsigned int i = 0;i<rhs->get_size();i++)
         to_superlu(local_rhs[i], rhs->v[i]);
 
@@ -494,6 +487,20 @@ namespace Hermes
         Destroy_SuperMatrix_Store(&B);
         has_B = false;
       }
+    }
+
+
+    template<typename Scalar>
+    void SuperLUSolver<Scalar>::free()
+    {
+      free_factorization_data();
+      free_matrix();
+      free_rhs();
+
+      free_with_check(local_Ai);
+      free_with_check(local_Ap);
+      free_with_check(local_Ax);
+      free_with_check(local_rhs);
     }
 
     template<typename Scalar>
