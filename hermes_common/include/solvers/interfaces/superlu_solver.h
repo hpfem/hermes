@@ -110,6 +110,7 @@ namespace Hermes
 
       virtual void solve();
       virtual int get_matrix_size();
+      void free();
 
     protected:
       /// Matrix to solve.
@@ -134,7 +135,6 @@ namespace Hermes
       typename SuperLuType<Scalar>::Scalar *local_Ax, *local_rhs;
 
       bool setup_factorization();
-      void free();
       void free_factorization_data();
       void free_matrix();
       void free_rhs();
