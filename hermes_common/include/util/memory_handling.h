@@ -28,6 +28,8 @@ namespace Hermes
   template<typename Caller, typename ArrayItem>
   ArrayItem* calloc_with_check(int size, Caller* const caller, bool force_malloc = false)
   {
+    if (size == 0)
+      return nullptr;
     ArrayItem* new_array;
     if (force_malloc && std::is_pod<ArrayItem>::value)
       new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
@@ -49,6 +51,8 @@ namespace Hermes
   template<typename ArrayItem>
   ArrayItem* calloc_with_check(int size, bool force_malloc = false)
   {
+    if (size == 0)
+      return nullptr;
     ArrayItem* new_array;
     if (force_malloc && std::is_pod<ArrayItem>::value)
       new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
@@ -69,6 +73,8 @@ namespace Hermes
   template<typename Caller, typename ArrayItem>
   ArrayItem* malloc_with_check(int size, Caller* const caller, bool force_malloc = false)
   {
+    if (size == 0)
+      return nullptr;
     ArrayItem* new_array;
     if (force_malloc && std::is_pod<ArrayItem>::value)
       new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
@@ -88,6 +94,8 @@ namespace Hermes
   template<typename ArrayItem>
   ArrayItem* malloc_with_check(int size, bool force_malloc = false)
   {
+    if (size == 0)
+      return nullptr;
     ArrayItem* new_array;
     if (force_malloc && std::is_pod<ArrayItem>::value)
       new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
@@ -105,6 +113,8 @@ namespace Hermes
   template<typename Caller, typename ArrayItem>
   ArrayItem* realloc_with_check(ArrayItem*& original_array, int new_size, Caller* const caller)
   {
+    if (new_size == 0)
+      return nullptr;
     static_assert(std::is_pod<ArrayItem>::value, "ArrayItem must be POD for reallocation.");
 
     ArrayItem* new_array = (ArrayItem*)realloc(original_array, new_size * sizeof(ArrayItem));

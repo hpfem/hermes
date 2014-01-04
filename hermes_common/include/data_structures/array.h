@@ -60,7 +60,6 @@ namespace Hermes
         this->pages = malloc_with_check<Array<TYPE>, TYPE*>(page_count, this, true);
         for (unsigned i = 0; i < this->page_count; i++)
           this->pages[i] = malloc_with_check<Array<TYPE>, TYPE>(HERMES_PAGE_SIZE, this);
-        this->unused = (int*)malloc(sizeof(int));
         this->unused = malloc_with_check<Array<TYPE>, int>(unused_size, this, true);
       }
       else
@@ -76,8 +75,8 @@ namespace Hermes
     ~Array()
     {
       free();
-      free_with_check(this->pages);
-      free_with_check(this->unused);
+      free_with_check(this->pages, true);
+      free_with_check(this->unused, true);
     }
 
     /// Makes this array to hold a copy of another one.
@@ -333,8 +332,8 @@ namespace Hermes
         free_with_check(pages[i]);
         free_with_check(presence[i]);
       }
-      free_with_check(pages);
-      free_with_check(presence);
+      free_with_check(pages, true);
+      free_with_check(presence, true);
     }
 
     /// Adds a new_ item to the array.
