@@ -70,7 +70,7 @@ namespace Hermes
       {
         for (int mode_i = 0; mode_i <= 1; mode_i++)
         for (int k = 1; k <= 10; k++)
-          ::free(tables[mode_i][k]);
+          free_with_check(tables[mode_i][k]);
       }
 
       virtual void dummy_fn() {}
@@ -284,9 +284,9 @@ namespace Hermes
           for (int i = 0; i <= 10; i++)
           {
             if (mat[m][i])
-              ::free(mat[m][i]);
+              delete[] mat[m][i];
             if (perm[m][i])
-              ::free(perm[m][i]);
+              delete[] perm[m][i];
           }
         }
       }
@@ -328,11 +328,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::set_coeff_vector(SpaceSharedPtr<Scalar> space, const Vector<Scalar>* vec,
-      bool add_dir_lift, int start_index)
+    void Solution<Scalar>::set_coeff_vector(SpaceSharedPtr<Scalar> space, const Vector<Scalar>* vec, bool add_dir_lift, int start_index)
     {
       // Sanity check.
-      if (vec == nullptr) throw Exceptions::NullException(2);
+      if (vec == nullptr)
+        throw Exceptions::NullException(2);
 
       space_type = space->get_type();
       Scalar* coeffs = malloc_with_check<Solution<Scalar>, Scalar>(vec->get_size(), this);

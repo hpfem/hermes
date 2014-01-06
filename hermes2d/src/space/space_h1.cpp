@@ -380,7 +380,7 @@ namespace Hermes
       if (edge != nullptr)
         max_result += this->ndata[edge->id].n;
 
-      typename Space<Scalar>::BaseComponent* result = (typename Space<Scalar>::BaseComponent*) malloc(max_result * sizeof(typename Space<Scalar>::BaseComponent));
+      typename Space<Scalar>::BaseComponent* result = malloc_with_check<typename Space<Scalar>::BaseComponent>(max_result);
       typename Space<Scalar>::BaseComponent* current = result;
       typename Space<Scalar>::BaseComponent* last = nullptr;
 

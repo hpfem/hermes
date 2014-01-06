@@ -186,9 +186,9 @@ namespace Hermes
     {
       free();
 
-      if (this->proj_mat != nullptr)
-        ::free(this->proj_mat);
-      if (this->chol_p != nullptr)
+      if(this->proj_mat)
+        delete [] this->proj_mat;
+      if (this->chol_p)
         free_with_check(this->chol_p);
 
       if (this->own_shapeset)
