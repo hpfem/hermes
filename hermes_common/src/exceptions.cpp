@@ -52,7 +52,7 @@ namespace Hermes
 
     void Exception::print_msg() const
     {
-      printf("Exception: %s\n", message);
+      printf("Exception: %s\n", message.str());
     }
 
     const char * Exception::what() const throw()
