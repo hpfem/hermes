@@ -59,9 +59,10 @@ namespace Hermes
       void print_msg() const;
       /// \brief get pointer to error message
       virtual const char * what() const throw();
-      std::string info() const;
+      std::string info() const ;
       /// \return name of function where exception was created.
       const char * get_func_name() const;
+      virtual ~Exception() throw() {};
 
     protected:
       std::stringstream message;
@@ -85,6 +86,7 @@ namespace Hermes
       IOException(ReadWrite readWrite, const char* filename);
       IOException(ReadWrite readWrite, std::string filename);
 
+      virtual ~IOException() throw() {};
       IOException(const IOException & e);
     private:
       ReadWrite readWrite;
@@ -108,6 +110,7 @@ namespace Hermes
       int get_param_idx() const;
       /// \return index of null item in array parameter. Returns -1 if bad parrameter is not array with null item.
       int get_item_idx() const;
+      virtual ~NullException() throw() {};
       NullException(const NullException & e);
     private:
       int param_idx, item_idx;
@@ -138,6 +141,7 @@ namespace Hermes
       int get_first_length() const;
       /// \return expected length of first parameter.
       int get_expected_length() const;
+      virtual ~LengthException() throw() {};
       LengthException(const LengthException & e);
     private:
       int fst_param_idx, snd_param_idx, wrong, right;
@@ -152,6 +156,7 @@ namespace Hermes
       /// Linear solver failed from spevific reason.
       /// \param[in] reason specification of solver fail.
       LinearMatrixSolverException(const char * reason, ...);
+      virtual ~LinearMatrixSolverException() throw() {};
       LinearMatrixSolverException(const LinearMatrixSolverException & e);
     };
 
@@ -176,6 +181,7 @@ namespace Hermes
       double get_value() const;
       /// return allowed value of variable.
       double get_allowed() const;
+      virtual ~ValueException() throw() {};
       ValueException(const ValueException & e);
     private:
       double value, allowed;
@@ -188,6 +194,7 @@ namespace Hermes
       /// Constructor
       /// \param[in] name Name of the function.
       MethodNotOverridenException(const char * msg, ...);
+      virtual  ~MethodNotOverridenException() throw() {};
       MethodNotOverridenException(const MethodNotOverridenException & e);
     };
 
@@ -198,6 +205,7 @@ namespace Hermes
       /// Constructor
       /// \param[in] name Name of the function.
       MethodNotImplementedException(const char * msg, ...);
+      virtual ~MethodNotImplementedException() throw() {};
       MethodNotImplementedException(const MethodNotImplementedException & e);
     };
 
@@ -209,6 +217,7 @@ namespace Hermes
       /// Constructor
       /// \param[in] name Name of the function.
       MeshLoadFailureException(const char * msg, ...);
+      ~MeshLoadFailureException() throw() {};
       MeshLoadFailureException(const MeshLoadFailureException & e);
     };
 
@@ -219,6 +228,7 @@ namespace Hermes
       /// Constructor
       /// \param[in] name Name of the function.
       SpaceLoadFailureException(const char * msg, ...);
+      virtual ~SpaceLoadFailureException() throw() {};
       SpaceLoadFailureException(const SpaceLoadFailureException & e);
     };
 
@@ -229,6 +239,7 @@ namespace Hermes
       /// Constructor
       /// \param[in] name Name of the function.
       SolutionSaveFailureException(const char * msg, ...);
+      virtual ~SolutionSaveFailureException() throw() {};
       SolutionSaveFailureException(const SolutionSaveFailureException & e);
     };
 
@@ -239,6 +250,7 @@ namespace Hermes
       /// Constructor
       /// \param[in] name Name of the function.
       SolutionLoadFailureException(const char * msg, ...);
+      virtual ~SolutionLoadFailureException() throw() {};
       SolutionLoadFailureException(const SolutionLoadFailureException & e);
     };
   }

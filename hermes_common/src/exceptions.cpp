@@ -22,6 +22,7 @@
 #include "api.h"
 #include "callstack.h"
 #include "util/memory_handling.h"
+#include "mixins.h"
 
 namespace Hermes
 {
@@ -54,10 +55,10 @@ namespace Hermes
       std::cout << "Exception: " << message.str() << std::endl;
     }
 
-    const char * Exception::what() const
+    const char * Exception::what() const throw()
     {
-      throw Hermes::Exceptions::Exception("Hermes::Exceptions::Exception does not support what(), use info() instead.");
-      return nullptr;
+      Hermes::Mixins::Loggable::Static::warn("Hermes::Exceptions::Exception does not support what(), use info() instead.");
+      return "Hermes::Exceptions::Exception does not support what(), use info() instead.";
     }
 
     std::string Exception::info() const
