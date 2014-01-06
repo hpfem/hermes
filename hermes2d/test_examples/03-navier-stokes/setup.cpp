@@ -65,5 +65,4 @@
   vview.fix_scale_width(80);
   //pview.set_min_max_range(-0.9, 1.0);
   pview.fix_scale_width(80);
-  if (HERMES_VISUALIZATION)
-    pview.show_mesh(true);
+  pview.show_mesh(true);

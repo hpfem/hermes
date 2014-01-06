@@ -1,6 +1,6 @@
 #include "hermes2d.h"
 
-#define USE_PARALUTION
+//#define USE_PARALUTION
 
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
@@ -68,7 +68,7 @@ double current_time = 0;
 const double STARTUP_TIME = 1.0;
 
 const double TAU = 0.1;                           // Time step.
-const double T_FINAL = 1.0;                      // Time interval length.
+const double T_FINAL = 100.0;                      // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const double H = 5;                               // Domain height (necessary to define the parabolic velocity profile at inlet).
 
@@ -95,13 +95,15 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::NewtonSolver<double> newton(&wf, spaces);
   // Verbose.
   newton.get_linear_matrix_solver()->set_verbose_output(true);
+
+#ifdef USE_PARALUTION
   // Relative tolerance of PARALUTION.
   newton.get_linear_matrix_solver()->as_IterSolver()->set_tolerance(1e-6, Solvers::LoopSolverToleranceType::RelativeTolerance);
   // Use GMRES.
   newton.get_linear_matrix_solver()->as_IterSolver()->set_solver_type(Solvers::IterSolverType::GMRES);
   // Use Saddle-point preconditioner.
   newton.get_linear_matrix_solver()->as_IterSolver()->set_precond(new Preconditioners::ParalutionPrecond<double>(Preconditioners::PreconditionerType::SaddlePoint));
-
+#endif
  
   // Newton method setup:
   // - max allowed iterations
