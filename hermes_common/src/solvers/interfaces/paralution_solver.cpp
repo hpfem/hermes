@@ -476,11 +476,13 @@ namespace Hermes
     template<typename Scalar>
     paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& ParalutionPrecond<Scalar>::get_paralutionPreconditioner()
     {
+#if __PARALUTION_VER >= 500
+
       paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePointPrecond =
         dynamic_cast<paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>*>(this->paralutionPreconditioner);
       if (saddlePointPrecond)
         saddlePointPrecond->Init(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
-
+#endif
       return (*this->paralutionPreconditioner);
     }
 
