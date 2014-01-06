@@ -29,7 +29,6 @@ namespace Hermes
   {
     Exception::Exception() : std::exception()
     {
-      this->message << "<unknown>";
     }
 
     Exception::Exception(const char * msg, ...) : std::exception()
@@ -55,12 +54,15 @@ namespace Hermes
       std::cout << "Exception: " << message.str() << std::endl;
     }
 
-    const char * Exception::what() const throw()
+    const char * Exception::what() const
     {
-      std::stringstream messageWithReturn;
-      messageWithReturn << this->message.str();
-      messageWithReturn << "\n";
-      return messageWithReturn.str().c_str();
+      throw Hermes::Exceptions::Exception("Hermes::Exceptions::Exception does not support what(), use info() instead.");
+      return nullptr;
+    }
+
+    std::string Exception::info() const
+    {
+      return this->message.str();
     }
 
 
@@ -76,7 +78,7 @@ namespace Hermes
       ::strcpy(this->filename, filename_.c_str());
     }
 
-    IOException::~IOException() throw()
+    IOException::~IOException()
     {
       if(this->filename)
         ::free(filename);
@@ -284,7 +286,7 @@ namespace Hermes
       vsprintf(text, reason, arglist);
       va_end(arglist);
 
-      this->message << "Mesh loading failed: " << text;
+      this->message << "Mesh loading failed: " << (std::string)text;
     }
 
     MeshLoadFailureException::MeshLoadFailureException(const MeshLoadFailureException&e)

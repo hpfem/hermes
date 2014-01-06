@@ -482,7 +482,7 @@ namespace Hermes
         dynamic_cast<paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>*>(this->paralutionPreconditioner);
       if (saddlePointPrecond)
         saddlePointPrecond->Init(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
-#endif
+#endif  
       return (*this->paralutionPreconditioner);
     }
 
