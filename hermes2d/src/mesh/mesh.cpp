@@ -2088,16 +2088,12 @@ namespace Hermes
 
     Mesh::CurvedException::CurvedException(int elementId) : elementId(elementId)
     {
-      char * msg = new char[150];
-      sprintf(msg, "Element id %i is curved, this is not supported in this method.", elementId);
-      message = msg;
+      this->message << "Element id " << elementId << " is curved, this is not supported in this method.";
     }
 
     Mesh::CurvedException::CurvedException(const CurvedException & e)
     {
-      char * msg = new char[strlen(e.what())+1];
-      strcpy(msg, e.what());
-      message = msg;
+      this->message << e.message.str();
       elementId = e.elementId;
     }
 

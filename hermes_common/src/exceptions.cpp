@@ -27,14 +27,14 @@ namespace Hermes
 {
   namespace Exceptions
   {
-    Exception::Exception() : std::exception(), message(new char[1000])
+    Exception::Exception() : std::exception()
     {
-      strcpy(message, "<unknown>");
+      this->message << "<unknown>";
     }
 
-    Exception::Exception(const char * msg, ...) : std::exception(), message(new char[1000])
+    Exception::Exception(const char * msg, ...) : std::exception()
     {
-      char text[1024];
+      char text[10000];
 
       // print the message
       va_list arglist;
@@ -42,7 +42,12 @@ namespace Hermes
       vsprintf(text, msg, arglist);
       va_end(arglist);
 
-      strcpy(message, text);
+      this->message << text;
+    }
+
+    Exception::Exception(const Exception& e)
+    {
+      this->message << e.message.str();
     }
 
     void Exception::print_msg() const
@@ -52,10 +57,10 @@ namespace Hermes
 
     const char * Exception::what() const throw()
     {
-      char* messageWithReturn = malloc_with_check<char>(strlen(message)+2);
-      strcpy(messageWithReturn, message);
-      sprintf(messageWithReturn + strlen(message), "\n");
-      return messageWithReturn;
+      std::stringstream messageWithReturn;
+      messageWithReturn << this->message.str();
+      messageWithReturn << "\n";
+      return messageWithReturn.str().c_str();
     }
 
 
@@ -89,14 +94,16 @@ namespace Hermes
     {
       this->param_idx = param_idx;
       this->item_idx = -1;
-      sprintf(this->message, "Parameter number %d is nullptr", param_idx);
+      this->message.clear();
+      this->message << "Parameter number " << param_idx << " is nullptr";
     }
 
     NullException::NullException(int param_idx, int item_idx) : Exception()
     {
       this->param_idx = param_idx;
       this->item_idx = item_idx;
-      sprintf(this->message, "Element number %d of parameter number %d is nullptr", item_idx, param_idx);
+      this->message.clear();
+      this->message << "Element number " << item_idx << " of parameter number " << param_idx << " is nullptr";
     }
 
     int NullException::get_param_idx() const
@@ -111,9 +118,8 @@ namespace Hermes
 
     NullException::NullException(const NullException & e)
     {
-      char * msg = malloc_with_check<char>(strlen(e.what())+1);
-      strcpy(msg, e.what());
-      message = msg;
+      this->message.clear();
+      this->message << e.message.str();
       param_idx = e.get_param_idx();
       item_idx = e.get_item_idx();
     }
@@ -124,7 +130,8 @@ namespace Hermes
       this->wrong = wrong;
       this->right = right;
       this->snd_param_idx = -1;
-      sprintf(this->message, "Parameter number %d have length %d and should have %d", fst_param_idx, wrong, right);
+      this->message.clear();
+      this->message << "Parameter number " << fst_param_idx << " have length " << wrong << " and should have " << right;
     }
 
     LengthException::LengthException(int fst_param_idx, int snd_param_idx, int first, int second) : Exception()
@@ -133,8 +140,8 @@ namespace Hermes
       this->snd_param_idx = snd_param_idx;
       this->wrong = first;
       this->right = second;
-      sprintf(this->message, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same",
-        fst_param_idx, wrong, snd_param_idx, right);
+      this->message.clear();
+      this->message << "Parameter number " << fst_param_idx << " have length " << wrong << " and parameter number " << snd_param_idx << " have length " << right << " The lengths should be same.";
     }
 
     int LengthException::get_first_param_idx() const
@@ -159,9 +166,7 @@ namespace Hermes
 
     LengthException::LengthException(const LengthException&e) : Exception()
     {
-      char * msg = malloc_with_check<char>(strlen(e.what()) + 1);
-      strcpy(msg, e.what());
-      message = msg;
+      this->message << e.message.str();
       this->fst_param_idx = e.get_first_param_idx();
       this->snd_param_idx = e.get_second_param_idx();
       this->wrong = e.get_first_length();
@@ -170,42 +175,42 @@ namespace Hermes
 
     LinearMatrixSolverException::LinearMatrixSolverException() : Exception()
     {
-      sprintf(this->message, "Linear solver failed.");
+      this->message << "Linear solver failed.";
     }
 
     LinearMatrixSolverException::LinearMatrixSolverException(const char * reason, ...) : Exception()
     {
-      char* text = malloc_with_check<char>(2048);
-      sprintf(text, "Linear solver failed because: ");
+      char text[10000];
 
       // print the message
       va_list arglist;
       va_start(arglist, reason);
-      vsprintf(text = text + strlen("Linear solver failed because: "), reason, arglist);
+      vsprintf(text, reason, arglist);
       va_end(arglist);
-      message = text - strlen("Linear solver failed because: ");
+
+      this->message << "Linear solver failed because: " << text;
     }
 
     LinearMatrixSolverException::LinearMatrixSolverException(const LinearMatrixSolverException&e) : Exception()
     {
-      strcpy(this->message, e.what());
+      this->message << e.message.str();
     }
 
     ValueException::ValueException(const char * name, double value, double allowed) : Exception()
     {
-      if(value>allowed)
-        sprintf(this->message, "Variable %s is %f but maximum allowed value is %f", name, value, allowed);
+      if (value > allowed)
+        this->message << "Variable " << name << " is " << value << " but maximum allowed value is " << allowed;
       else
-        sprintf(this->message, "Variable %s is %f but minimum allowed value is %f", name, value, allowed);
+        this->message << "Variable " << name << " is " << value << " but minimum allowed value is " << allowed;
       this->value = value;
       this->allowed = allowed;
     }
 
     ValueException::ValueException(const char * name, double value, double min, double max) : Exception()
     {
-      sprintf(this->message, "Variable %s is %f allowed range is %f -- %f", name, value, min, max);
+      this->message << "Variable " << name << " is " << value << " allowed range is " << min << " -- " << max;
       this->value = value;
-      if(value>min)
+      if(value > min)
         this->allowed = max;
       else
         this->allowed = min;
@@ -213,7 +218,7 @@ namespace Hermes
 
     ValueException::ValueException(const char * name, std::string passed) : Exception()
     {
-      sprintf(this->message, "Variable %s does not support value %s.", name, passed.c_str());
+      this->message << "Variable " << name << " does not support value " << passed;
     }
 
     double ValueException::get_value() const
@@ -228,50 +233,50 @@ namespace Hermes
 
     ValueException::ValueException(const ValueException&e)
     {
-      strcpy(this->message, e.what());
+      this->message << e.message.str();
       this->value = e.get_value();
       this->allowed = e.get_allowed();
     }
 
     MethodNotOverridenException::MethodNotOverridenException(const char * name, ...) : Exception()
     {
-      char* text = malloc_with_check<char>(1024);
-      sprintf(text, "Method not overriden: ");
+      char text [10000];
 
       // print the message
       va_list arglist;
       va_start(arglist, name);
-      vsprintf(text = text + strlen("Method not overriden: "), name, arglist);
+      vsprintf(text, name, arglist);
       va_end(arglist);
-      message = text - strlen("Method not overriden: ");
+
+      this->message << "Method not overriden: " << text;
     }
 
     MethodNotOverridenException::MethodNotOverridenException(const MethodNotOverridenException&e)
     {
-      strcpy(this->message, e.what());
+      this->message << e.message.str();
     }
 
     MethodNotImplementedException::MethodNotImplementedException(const char * name, ...) : Exception()
     {
-      char* text = malloc_with_check<char>(1024);
-      sprintf(text, "Sorry, method not implemented so far: ");
+      char text[10000];
 
       // print the message
       va_list arglist;
       va_start(arglist, name);
-      vsprintf(text = text + strlen("Sorry, method not implemented so far: "), name, arglist);
+      vsprintf(text, name, arglist);
       va_end(arglist);
-      message = text - strlen("Sorry, method not implemented so far: ");
+
+      this->message << "Sorry, method not implemented so far: " << text;
     }
 
     MethodNotImplementedException::MethodNotImplementedException(const MethodNotImplementedException&e)
     {
-      strcpy(this->message, e.what());
+      this->message << e.message.str();
     }
 
     MeshLoadFailureException::MeshLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * text = malloc_with_check<char>(strlen(reason) + 1);
+      char text[10000];
 
       // print the message
       va_list arglist;
@@ -279,17 +284,17 @@ namespace Hermes
       vsprintf(text, reason, arglist);
       va_end(arglist);
 
-      message = text;
+      this->message << "Mesh loading failed: " << text;
     }
 
     MeshLoadFailureException::MeshLoadFailureException(const MeshLoadFailureException&e)
     {
-      strcpy(this->message, e.what());
+      this->message << e.message.str();
     }
 
     SpaceLoadFailureException::SpaceLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * text = malloc_with_check<char>(strlen(reason) + 1);
+      char text[10000];
 
       // print the message
       va_list arglist;
@@ -297,17 +302,17 @@ namespace Hermes
       vsprintf(text, reason, arglist);
       va_end(arglist);
 
-      message = text;
+      this->message << "Space loading failed: " << text;
     }
 
     SpaceLoadFailureException::SpaceLoadFailureException(const SpaceLoadFailureException&e)
     {
-      strcpy(this->message, e.what());
+      this->message << e.message.str();
     }
 
     SolutionSaveFailureException::SolutionSaveFailureException(const char * reason, ...) : Exception()
     {
-      char * text = malloc_with_check<char>(strlen(reason) + 1);
+      char text[10000];
 
       // print the message
       va_list arglist;
@@ -315,17 +320,17 @@ namespace Hermes
       vsprintf(text, reason, arglist);
       va_end(arglist);
 
-      message = text;
+      this->message << "Solution saving failed: " << text;
     }
 
     SolutionSaveFailureException::SolutionSaveFailureException(const SolutionSaveFailureException&e)
     {
-      strcpy(this->message, e.what());
+      this->message << e.message.str();
     }
 
     SolutionLoadFailureException::SolutionLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * text = malloc_with_check<char>(strlen(reason) + 1);
+      char text[10000];
 
       // print the message
       va_list arglist;
@@ -333,12 +338,12 @@ namespace Hermes
       vsprintf(text, reason, arglist);
       va_end(arglist);
 
-      message = text;
+      this->message << "Solution loading failed: " << text;
     }
 
     SolutionLoadFailureException::SolutionLoadFailureException(const SolutionLoadFailureException&e)
     {
-      strcpy(this->message, e.what());
+      this->message << e.message.str();
     }
   }
 }

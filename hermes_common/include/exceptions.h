@@ -51,6 +51,7 @@ namespace Hermes
     public:
       /// \brief Init exception with default message.
       Exception();
+      Exception(const Exception& e);
       /// Init exception with message.
       /// \param[in] msg message
       Exception(const char * msg, ...);
@@ -60,10 +61,10 @@ namespace Hermes
       virtual const char * what() const throw();
       /// \return name of function where exception was created.
       const char * get_func_name() const;
-      virtual ~Exception() throw() { ::free(message); };
+      virtual ~Exception() throw() {};
 
     protected:
-      char * message;
+      std::stringstream message;
     };
 
     /// \brief IO exception.
@@ -206,8 +207,6 @@ namespace Hermes
       virtual ~MethodNotImplementedException() throw() {};
       MethodNotImplementedException(const MethodNotImplementedException & e);
     };
-
-
 
     /// \brief Mesh failed to load.
     /// Thrown by Hermes2D::MeshReaderH2DXML, MeshReaderH2D
