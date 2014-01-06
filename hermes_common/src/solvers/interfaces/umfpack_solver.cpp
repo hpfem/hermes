@@ -39,7 +39,7 @@ namespace Hermes
   {
     template<typename Scalar>
     void UMFPackLinearMatrixSolver<Scalar>::set_output_level(double level)
-    { 
+    {
       Control[UMFPACK_PRL] = level;
     }
 
@@ -47,8 +47,8 @@ namespace Hermes
     UMFPackLinearMatrixSolver<Scalar>::UMFPackLinearMatrixSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs)
       : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs), symbolic(nullptr), numeric(nullptr)
     {
-      umfpack_di_defaults(Control);
-    }
+        umfpack_di_defaults(Control);
+      }
 
     template<typename Scalar>
     UMFPackLinearMatrixSolver<Scalar>::~UMFPackLinearMatrixSolver()
@@ -72,33 +72,33 @@ namespace Hermes
     bool UMFPackLinearMatrixSolver<double>::setup_factorization()
     {
       // Perform both factorization phases for the first time.
-      if(reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH && symbolic == nullptr && numeric == nullptr)
+      if (reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH && symbolic == nullptr && numeric == nullptr)
         reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
       else
         reuse_scheme = reuse_scheme;
 
       int status;
-      switch(reuse_scheme)
+      switch (reuse_scheme)
       {
       case HERMES_CREATE_STRUCTURE_FROM_SCRATCH:
-        if(symbolic != nullptr)
+        if (symbolic != nullptr)
         {
           umfpack_di_free_symbolic(&symbolic);
           memset(Info, 0, 90 * sizeof(double));
-        } 
+        }
 
         // Factorizing symbolically.
         status = umfpack_real_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), m->get_Ax(), &symbolic, Control, Info);
-        if(status != UMFPACK_OK)
+        if (status != UMFPACK_OK)
         {
-          if(symbolic)
+          if (symbolic)
             umfpack_di_free_symbolic(&symbolic);
           throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK symbolic factorization", status));
         }
 
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
-        if(numeric != nullptr)
+        if (numeric != nullptr)
         {
           umfpack_di_free_numeric(&numeric);
           memset(Info + 0, 0, 90 * sizeof(double));
@@ -106,14 +106,14 @@ namespace Hermes
 
         // Factorizing numerically.
         status = umfpack_real_numeric(m->get_Ap(), m->get_Ai(), m->get_Ax(), symbolic, &numeric, Control, Info);
-        if(status != UMFPACK_OK)
+        if (status != UMFPACK_OK)
         {
-          if(numeric)
+          if (numeric)
             umfpack_di_free_numeric(&numeric);
           throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK numeric factorization", status));
         }
         else
-          umfpack_di_report_info (Control, Info);
+          umfpack_di_report_info(Control, Info);
       }
 
       return true;
@@ -124,35 +124,35 @@ namespace Hermes
     {
       // Perform both factorization phases for the first time.
       int eff_fact_scheme;
-      if(reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH && symbolic == nullptr && numeric == nullptr)
+      if (reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH && symbolic == nullptr && numeric == nullptr)
         eff_fact_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
       else
         eff_fact_scheme = reuse_scheme;
 
       int status;
-      switch(eff_fact_scheme)
+      switch (eff_fact_scheme)
       {
       case HERMES_CREATE_STRUCTURE_FROM_SCRATCH:
-        if(symbolic != nullptr)
+        if (symbolic != nullptr)
           umfpack_zi_free_symbolic(&symbolic);
 
         status = umfpack_complex_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), nullptr, &symbolic, nullptr, nullptr);
-        if(status != UMFPACK_OK)
+        if (status != UMFPACK_OK)
         {
-          if(symbolic)
+          if (symbolic)
             umfpack_zi_free_symbolic(&symbolic);
           throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK symbolic factorization", status));
         }
 
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
-        if(numeric != nullptr)
+        if (numeric != nullptr)
           umfpack_zi_free_numeric(&numeric);
 
-        status = umfpack_complex_numeric(m->get_Ap(), m->get_Ai(), (double *) m->get_Ax(), nullptr, symbolic, &numeric, nullptr, nullptr);
-        if(status != UMFPACK_OK)
+        status = umfpack_complex_numeric(m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), nullptr, symbolic, &numeric, nullptr, nullptr);
+        if (status != UMFPACK_OK)
         {
-          if(numeric)
+          if (numeric)
             umfpack_zi_free_numeric(&numeric);
           throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK numeric factorization", status));
         }
@@ -164,18 +164,18 @@ namespace Hermes
     template<>
     void UMFPackLinearMatrixSolver<double>::free_factorization_data()
     {
-      if(symbolic != nullptr) umfpack_di_free_symbolic(&symbolic);
+      if (symbolic != nullptr) umfpack_di_free_symbolic(&symbolic);
       symbolic = nullptr;
-      if(numeric != nullptr) umfpack_di_free_numeric(&numeric);
+      if (numeric != nullptr) umfpack_di_free_numeric(&numeric);
       numeric = nullptr;
     }
 
     template<>
     void UMFPackLinearMatrixSolver<std::complex<double> >::free_factorization_data()
     {
-      if(symbolic != nullptr) umfpack_zi_free_symbolic(&symbolic);
+      if (symbolic != nullptr) umfpack_zi_free_symbolic(&symbolic);
       symbolic = nullptr;
-      if(numeric != nullptr) umfpack_zi_free_numeric(&numeric);
+      if (numeric != nullptr) umfpack_zi_free_numeric(&numeric);
       numeric = nullptr;
     }
 
@@ -188,7 +188,7 @@ namespace Hermes
 
       this->tick();
 
-      if( !setup_factorization() )
+      if (!setup_factorization())
         throw Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
 
       free_with_check(sln);
@@ -196,7 +196,7 @@ namespace Hermes
       sln = malloc_with_check<UMFPackLinearMatrixSolver<double>, double>(m->get_size(), this);
       memset(sln, 0, m->get_size() * sizeof(double));
       int status = umfpack_real_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->v, numeric, nullptr, nullptr);
-      if(status != UMFPACK_OK)
+      if (status != UMFPACK_OK)
       {
         this->free_factorization_data();
         throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK solution", status));
@@ -213,15 +213,15 @@ namespace Hermes
       assert(m->get_size() == rhs->get_size());
 
       this->tick();
-      if( !setup_factorization() )
+      if (!setup_factorization())
         this->warn("LU factorization could not be completed.");
 
       free_with_check(sln);
       sln = malloc_with_check<UMFPackLinearMatrixSolver<std::complex<double> >, std::complex<double> >(m->get_size(), this);
 
       memset(sln, 0, m->get_size() * sizeof(std::complex<double>));
-      int status = umfpack_complex_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), nullptr, (double*) sln, nullptr, (double *)rhs->v, nullptr, numeric, nullptr, nullptr);
-      if(status != UMFPACK_OK)
+      int status = umfpack_complex_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), nullptr, (double*)sln, nullptr, (double *)rhs->v, nullptr, numeric, nullptr, nullptr);
+      if (status != UMFPACK_OK)
       {
         this->free_factorization_data();
         throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK solution", status));

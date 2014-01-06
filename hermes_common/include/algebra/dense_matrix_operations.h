@@ -40,12 +40,12 @@ namespace Hermes
       template<typename T>
       T **new_matrix(unsigned int m, unsigned int n = 0)
       {
-        if(!n) n = m;
+        if (!n) n = m;
         T **vec = (T **) new char[sizeof(T *)* m + sizeof(T)* m * n];
         if (!vec)
           throw Exceptions::Exception("Malloc failed to allocate in new_matrix.");
-        memset(vec, 0, sizeof(T *) * m + sizeof(T) * m * n);
-        T *row = (T *) (vec + m);
+        memset(vec, 0, sizeof(T *)* m + sizeof(T)* m * n);
+        T *row = (T *)(vec + m);
         for (unsigned int i = 0; i < m; i++, row += n)
           vec[i] = row;
         return vec;
@@ -54,10 +54,10 @@ namespace Hermes
       template<typename T>
       T **new_matrix_malloc(unsigned int m, unsigned int n = 0)
       {
-        if(!n) n = m;
-        T **vec = (T **) malloc(sizeof(T *) * m + sizeof(T) * m * n);
-        memset(vec, 0, sizeof(T *) * m + sizeof(T) * m * n);
-        T *row = (T *) (vec + m);
+        if (!n) n = m;
+        T **vec = (T **)malloc(sizeof(T *)* m + sizeof(T)* m * n);
+        memset(vec, 0, sizeof(T *)* m + sizeof(T)* m * n);
+        T *row = (T *)(vec + m);
         for (unsigned int i = 0; i < m; i++, row += n) vec[i] = row;
         return vec;
       }
@@ -67,8 +67,8 @@ namespace Hermes
       template<typename T>
       void copy_matrix(T** dest, T** src, unsigned int m, unsigned int n = 0)
       {
-        if(n == 0) n = m;
-        for(unsigned int i = 0; i < m; i++)
+        if (n == 0) n = m;
+        for (unsigned int i = 0; i < m; i++)
         {
           memcpy(dest[i], src[i], n*sizeof(T));
         }
@@ -83,16 +83,16 @@ namespace Hermes
       template<typename T>
       void save_matrix_octave(const std::string& matrix_name, T** matrix, unsigned int m, unsigned int n = 0, const std::string& filename = std::string())
       {
-        if(n == 0) n = m;
+        if (n == 0) n = m;
 
         //create filename
         std::string fname = filename;
-        if(fname.empty())
+        if (fname.empty())
           fname = matrix_name + ".mat";
 
         //open file
         std::ofstream fout(fname.c_str());
-        if(!fout.is_open())
+        if (!fout.is_open())
         {
           throw Hermes::Exceptions::Exception("Unable to save a matrix to a file \"%s\"", fname.c_str());
           return;
@@ -105,9 +105,9 @@ namespace Hermes
         fout << std::string("# columns: ") << n << std::endl;
 
         //write contents
-        for(unsigned int i = 0; i < m; i++)
+        for (unsigned int i = 0; i < m; i++)
         {
-          for(unsigned int k = 0; k < n; k++)
+          for (unsigned int k = 0; k < n; k++)
             fout << ' ' << matrix[i][k];
           fout << std::endl;
         }
@@ -123,12 +123,12 @@ namespace Hermes
       {
         // create filename
         std::string fname = filename;
-        if(fname.empty())
+        if (fname.empty())
           fname = matrix_name + ".mat";
 
         // open file
         std::ofstream fout(fname.c_str());
-        if(!fout.is_open())
+        if (!fout.is_open())
         {
           throw Hermes::Exceptions::Exception("Unable to save a matrix to a file \"%s\"", fname.c_str());
           return;
@@ -143,8 +143,8 @@ namespace Hermes
 
         // write contents
         for (int j = 0; j < m; j++)
-          for (int i = Ap[j]; i < Ap[j + 1]; i++)
-            fout << j + 1 << " " << Ai[i] + 1 << " " << Ax[i] << std::endl;
+        for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          fout << j + 1 << " " << Ai[i] + 1 << " " << Ax[i] << std::endl;
 
         // finish
         fout.close();
@@ -157,17 +157,17 @@ namespace Hermes
       {
         unsigned int min = std::min(m, n);
         for (unsigned int i = 0; i < min; i++)
-          for (unsigned int j = i + 1; j < min; j++)
-            std::swap(matrix[i][j], matrix[j][i]);
+        for (unsigned int j = i + 1; j < min; j++)
+          std::swap(matrix[i][j], matrix[j][i]);
 
-        if(m < n)
-          for (unsigned int i = 0; i < m; i++)
-            for (unsigned int j = m; j < n; j++)
-              matrix[j][i] = matrix[i][j];
-        else if(n < m)
-          for (unsigned int i = n; i < m; i++)
-            for (unsigned int j = 0; j < n; j++)
-              matrix[j][i] = matrix[i][j];
+        if (m < n)
+        for (unsigned int i = 0; i < m; i++)
+        for (unsigned int j = m; j < n; j++)
+          matrix[j][i] = matrix[i][j];
+        else if (n < m)
+        for (unsigned int i = n; i < m; i++)
+        for (unsigned int j = 0; j < n; j++)
+          matrix[j][i] = matrix[i][j];
       }
 
       /// Transposes an m by n matrix. If m != n, the array matrix in fact has to be
@@ -200,8 +200,8 @@ namespace Hermes
       void change_sign(T **matrix, unsigned int m, unsigned int n)
       {
         for (unsigned int i = 0; i < m; i++)
-          for (unsigned int j = 0; j < n; j++)
-            matrix[i][j] = -matrix[i][j];
+        for (unsigned int j = 0; j < n; j++)
+          matrix[i][j] = -matrix[i][j];
       }
       /// Changes the sign of an array
       template<typename T>
@@ -262,7 +262,7 @@ namespace Hermes
           x[i] = sum / p[i];
         }
 
-        for (i = n-1; i >= 0; i--)
+        for (i = n - 1; i >= 0; i--)
         {
           sum = x[i];
           k = i;

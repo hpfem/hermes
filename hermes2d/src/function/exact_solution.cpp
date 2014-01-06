@@ -39,7 +39,7 @@ namespace Hermes
     template<typename Scalar>
     void ExactSolution<Scalar>::save(const char* filename) const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
       {
         Solution<Scalar>::save(filename);
         return;
@@ -52,7 +52,7 @@ namespace Hermes
     template<typename Scalar>
     void ExactSolution<Scalar>::save_bson(const char* filename) const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
       {
         Solution<Scalar>::save_bson(filename);
         return;
@@ -70,9 +70,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    std::string ExactSolution<Scalar>::getClassName() const 
+    std::string ExactSolution<Scalar>::getClassName() const
     {
-      return "ExactSolution"; 
+      return "ExactSolution";
     }
 
     template<typename Scalar>
@@ -95,7 +95,7 @@ namespace Hermes
     template<typename Scalar, typename ValueType>
     ExactSolutionConstantArray<Scalar, ValueType>::~ExactSolutionConstantArray()
     {
-      if(this->deleteArray)
+      if (this->deleteArray)
         ::free(this->valueArray);
     }
 
@@ -106,7 +106,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename ValueType>
-    Scalar ExactSolutionConstantArray<Scalar, ValueType>::value (double x, double y) const
+    Scalar ExactSolutionConstantArray<Scalar, ValueType>::value(double x, double y) const
     {
       return this->valueArray[this->element->id];
     }
@@ -123,7 +123,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename ValueType>
-    void ExactSolutionConstantArray<Scalar, ValueType>::derivatives (double x, double y, Scalar& dx, Scalar& dy) const {
+    void ExactSolutionConstantArray<Scalar, ValueType>::derivatives(double x, double y, Scalar& dx, Scalar& dy) const {
       dx = 0;
       dy = 0;
     };
@@ -145,7 +145,7 @@ namespace Hermes
     template<>
     void ConstantSolution<double>::save(const char* filename) const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
       {
         Solution<double>::save(filename);
         return;
@@ -178,7 +178,7 @@ namespace Hermes
     template<>
     void ConstantSolution<std::complex<double> >::save(const char* filename) const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
       {
         Solution<std::complex<double> >::save(filename);
         return;
@@ -212,7 +212,7 @@ namespace Hermes
     template<>
     void ConstantSolution<double>::save_bson(const char* filename) const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
       {
         Solution<double>::save_bson(filename);
         return;
@@ -238,7 +238,7 @@ namespace Hermes
 
       FILE *fpw;
       fpw = fopen(filename, "wb");
-      const char *dataw = (const char *) bson_data(&bw);
+      const char *dataw = (const char *)bson_data(&bw);
       fwrite(dataw, bson_size(&bw), 1, fpw);
       fclose(fpw);
 
@@ -248,7 +248,7 @@ namespace Hermes
     template<>
     void ConstantSolution<std::complex<double> >::save_bson(const char* filename) const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
       {
         Solution<std::complex<double> >::save_bson(filename);
         return;
@@ -274,7 +274,7 @@ namespace Hermes
 
       FILE *fpw;
       fpw = fopen(filename, "wb");
-      const char *dataw = (const char *) bson_data(&bw);
+      const char *dataw = (const char *)bson_data(&bw);
       fwrite(dataw, bson_size(&bw), 1, fpw);
       fclose(fpw);
 
@@ -289,20 +289,20 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    Scalar ConstantSolution<Scalar>::value (double x, double y) const {
+    Scalar ConstantSolution<Scalar>::value(double x, double y) const {
       return constant;
     };
 
     template<typename Scalar>
     MeshFunction<Scalar>* ConstantSolution<Scalar>::clone() const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();
       return new ConstantSolution<Scalar>(this->mesh, this->constant);
     }
 
     template<typename Scalar>
-    void ConstantSolution<Scalar>::derivatives (double x, double y, Scalar& dx, Scalar& dy) const {
+    void ConstantSolution<Scalar>::derivatives(double x, double y, Scalar& dx, Scalar& dy) const {
       dx = 0;
       dy = 0;
     };
@@ -319,20 +319,20 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    Scalar ZeroSolution<Scalar>::value (double x, double y) const {
+    Scalar ZeroSolution<Scalar>::value(double x, double y) const {
       return 0.0;
     };
 
     template<typename Scalar>
     MeshFunction<Scalar>* ZeroSolution<Scalar>::clone() const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();
       return new ZeroSolution<Scalar>(this->mesh);
     }
 
     template<typename Scalar>
-    void ZeroSolution<Scalar>::derivatives (double x, double y, Scalar& dx, Scalar& dy) const {
+    void ZeroSolution<Scalar>::derivatives(double x, double y, Scalar& dx, Scalar& dy) const {
       dx = 0;
       dy = 0;
     };
@@ -346,7 +346,7 @@ namespace Hermes
     template<>
     void ConstantSolutionVector<double>::save(const char* filename) const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
       {
         Solution<double>::save(filename);
         return;
@@ -379,7 +379,7 @@ namespace Hermes
     template<>
     void ConstantSolutionVector<std::complex<double> >::save(const char* filename) const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
       {
         Solution<std::complex<double> >::save(filename);
         return;
@@ -423,19 +423,19 @@ namespace Hermes
     template<typename Scalar>
     MeshFunction<Scalar>* ConstantSolutionVector<Scalar>::clone() const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();
       ConstantSolutionVector<Scalar>* sln = new ConstantSolutionVector<Scalar>(this->mesh, this->constantX, this->constantY);
       return sln;
     }
 
     template<typename Scalar>
-    Scalar2<Scalar> ConstantSolutionVector<Scalar>::value (double x, double y) const {
+    Scalar2<Scalar> ConstantSolutionVector<Scalar>::value(double x, double y) const {
       return Scalar2<Scalar>(constantX, constantY);
     };
 
     template<typename Scalar>
-    void ConstantSolutionVector<Scalar>::derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
+    void ConstantSolutionVector<Scalar>::derivatives(double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
       dx = Scalar2<Scalar>(Scalar(0.0), Scalar(0.0));
       dy = Scalar2<Scalar>(Scalar(0.0), Scalar(0.0));
     };
@@ -449,7 +449,7 @@ namespace Hermes
     template<>
     void ConstantSolutionVector<double>::save_bson(const char* filename) const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
       {
         Solution<double>::save_bson(filename);
         return;
@@ -475,7 +475,7 @@ namespace Hermes
 
       FILE *fpw;
       fpw = fopen(filename, "wb");
-      const char *dataw = (const char *) bson_data(&bw);
+      const char *dataw = (const char *)bson_data(&bw);
       fwrite(dataw, bson_size(&bw), 1, fpw);
       fclose(fpw);
 
@@ -485,7 +485,7 @@ namespace Hermes
     template<>
     void ConstantSolutionVector<std::complex<double> >::save_bson(const char* filename) const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
       {
         Solution<std::complex<double> >::save_bson(filename);
         return;
@@ -511,7 +511,7 @@ namespace Hermes
 
       FILE *fpw;
       fpw = fopen(filename, "wb");
-      const char *dataw = (const char *) bson_data(&bw);
+      const char *dataw = (const char *)bson_data(&bw);
       fwrite(dataw, bson_size(&bw), 1, fpw);
       fclose(fpw);
 
@@ -526,12 +526,12 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    Scalar2<Scalar> ZeroSolutionVector<Scalar>::value (double x, double y) const {
+    Scalar2<Scalar> ZeroSolutionVector<Scalar>::value(double x, double y) const {
       return Scalar2<Scalar>(0.0, 0.0);
     };
 
     template<typename Scalar>
-    void ZeroSolutionVector<Scalar>::derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
+    void ZeroSolutionVector<Scalar>::derivatives(double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
       dx = Scalar2<Scalar>(0.0, 0.0);
       dy = Scalar2<Scalar>(0.0, 0.0);
     };
@@ -544,7 +544,7 @@ namespace Hermes
     template<typename Scalar>
     MeshFunction<Scalar>* ZeroSolutionVector<Scalar>::clone() const
     {
-      if(this->sln_type == HERMES_SLN)
+      if (this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();
       ZeroSolutionVector<Scalar>* sln = new ZeroSolutionVector<Scalar>(this->mesh);
       return sln;
@@ -562,13 +562,13 @@ namespace Hermes
       this->copy(sln.get());
     }
 
-    double ExactSolutionEggShell::value (double x, double y) const
+    double ExactSolutionEggShell::value(double x, double y) const
     {
       throw Exceptions::Exception("ExactSolutionEggShell::value should never be called.");
       return 0.;
     }
 
-    void ExactSolutionEggShell::derivatives (double x, double y, double& dx, double& dy) const
+    void ExactSolutionEggShell::derivatives(double x, double y, double& dx, double& dy) const
     {
       throw Exceptions::Exception("ExactSolutionEggShell::derivatives should never be called.");
     }
@@ -601,7 +601,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void UExtFunction<Scalar>::precalculate(int order, int mask) 
+    void UExtFunction<Scalar>::precalculate(int order, int mask)
     {
     }
 

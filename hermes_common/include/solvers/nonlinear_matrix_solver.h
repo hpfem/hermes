@@ -63,14 +63,14 @@ namespace Hermes
     };
 
     template<typename Scalar> class HERMES_API NonlinearConvergenceMeasurement;
-    
+
     /// \brief Base class for defining interface for nonlinear solvers.
     ///
     template <typename Scalar>
-    class NonlinearMatrixSolver : 
+    class NonlinearMatrixSolver :
       public virtual Hermes::Solvers::MatrixSolver<Scalar>,
       public virtual Hermes::Mixins::OutputAttachable,
-      public virtual Hermes::Mixins::StateQueryable, 
+      public virtual Hermes::Mixins::StateQueryable,
       public virtual Hermes::Mixins::TimeMeasurable
     {
     public:
@@ -96,10 +96,10 @@ namespace Hermes
       /// \param[in] handleMultipleTolerancesAnd If true, multiple tolerances defined will have to be all fulfilled in order to proclaim
       /// solution as a correct one. If false, only one will be enough.
       void set_tolerance(double newton_tol, NonlinearConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd = false);
-      
+
       /// Get the number of iterations.
       int get_num_iters() const;
-      
+
 #pragma region damping-public
       /// Sets minimum damping coefficient.
       /// Default: 1E-4
@@ -110,13 +110,13 @@ namespace Hermes
       /// \param[in] onOff on(true)-manual damping, off(false)-automatic damping.
       /// \param[in] coeff The (perpetual) damping coefficient in the case of manual damping. Ignored in the case of automatic damping.
       void set_manual_damping_coeff(bool onOff, double coeff);
-      
+
       /// Make the automatic damping start with this coefficient.
       /// This will also be the top bound for the coefficient.
       /// Default: 1.0
       /// \param[in] coeff The initial damping coefficient. Must be > 0 and <= 1.0.
       void set_initial_auto_damping_coeff(double coeff);
-      
+
       /// Set the ratio to the automatic damping.
       /// When the damping coefficient is decided to be descreased or increased, this is the ratio
       /// how it will be changed (this is the bigger ( > 1.0 ) of the two possible values).
@@ -155,7 +155,7 @@ namespace Hermes
       virtual void free();
 
     protected:
-      
+
 #pragma region damping-private
       /// Manual / auto.
       bool manual_damping;
@@ -173,7 +173,7 @@ namespace Hermes
       /// necessary number of steps to increase back the damping coeff.
       unsigned int necessary_successful_steps_to_increase;
       /// Minimum allowed damping coeff.
-      double min_allowed_damping_coeff;      
+      double min_allowed_damping_coeff;
 #pragma endregion
 
 #pragma region jacobian_recalculation-private
@@ -184,7 +184,7 @@ namespace Hermes
 
       double sufficient_improvement_factor_jacobian;
       unsigned int max_steps_with_reused_jacobian;
-      
+
       /// Backup vector for unsuccessful reuse of Jacobian.
       Vector<Scalar>* residual_back;
 #pragma endregion
@@ -192,7 +192,7 @@ namespace Hermes
       virtual void assemble_residual(bool store_previous_residual) = 0;
       virtual void assemble_jacobian(bool store_previous_jacobian) = 0;
       virtual void assemble(bool store_previous_jacobian, bool store_previous_residual) = 0;
-      
+
       /// \return Whether or not should the processing continue.
       virtual void on_damping_factor_updated();
       /// \return Whether or not should the processing continue.
@@ -213,7 +213,7 @@ namespace Hermes
 
       /// Initial step.
       bool do_initial_step_return_finished();
-      
+
       /// Solve the step's linear system.
       virtual void solve_linear_system();
 
@@ -226,7 +226,7 @@ namespace Hermes
 
       /// Internal.
       virtual void deinit_solving();
-      
+
       /// Calculates the new_ damping coefficient.
       bool calculate_damping_factor(unsigned int& successful_steps);
 
@@ -238,7 +238,7 @@ namespace Hermes
 
       /// Output info about the step.
       void step_info();
-      
+
       /// Norm for convergence.
       virtual double calculate_residual_norm();
 
@@ -285,7 +285,7 @@ namespace Hermes
       const OutputParameterDoubleVector& damping_factors() const { return this->p_damping_factors; };
       const OutputParameterBool& residual_norm_drop() const { return this->p_residual_norm_drop; };
       const OutputParameterBoolVector& iterations_with_recalculated_jacobian() const { return this->p_iterations_with_recalculated_jacobian; };
-    
+
       /// Parameters for OutputAttachable mixin.
       /// Should be private, but then it does not work.
       OutputParameterDoubleVector p_residual_norms;
@@ -299,7 +299,7 @@ namespace Hermes
       OutputParameterUnsignedInt p_iteration;
 #pragma endregion
 
-			Scalar* previous_sln_vector;
+      Scalar* previous_sln_vector;
       bool use_initial_guess_for_iterative_solvers;
       friend class NonlinearConvergenceMeasurement<Scalar>;
     };

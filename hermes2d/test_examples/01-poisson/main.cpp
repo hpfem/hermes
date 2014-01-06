@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
   mloader.load("domain.xml", mesh);
 
   // Refine all elements, do it INIT_REF_NUM-times.
-  for(unsigned int i = 0; i < INIT_REF_NUM; i++)
+  for (unsigned int i = 0; i < INIT_REF_NUM; i++)
     mesh->refine_all_elements();
 
   // Initialize essential boundary conditions.
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Initialize space->
-  SpaceSharedPtr<double> space( new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT));
+  SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT));
 
   std::cout << "Ndofs: " << space->get_num_dofs() << std::endl;
 
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
-  
+
   // Solve the linear problem.
   try
   {
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
 
     // VTK output.
-    if(VTK_VISUALIZATION)
+    if (VTK_VISUALIZATION)
     {
       // Output solution in VTK format.
       Hermes::Hermes2D::Views::Linearizer lin(FileExport);
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
       ord.save_markers_vtk(space, "markers.vtk");
     }
 
-    if(HERMES_VISUALIZATION)
+    if (HERMES_VISUALIZATION)
     {
       // Visualize the solution.
       Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
@@ -128,7 +128,11 @@ int main(int argc, char* argv[])
       viewS.wait_for_close();
     }
   }
-  catch(std::exception& e)
+  catch (Exceptions::Exception& e)
+  {
+    std::cout << e.info();
+  }
+  catch (std::exception& e)
   {
     std::cout << e.what();
   }

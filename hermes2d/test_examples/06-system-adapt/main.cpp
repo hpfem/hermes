@@ -87,8 +87,8 @@ int main(int argc, char* argv[])
     v_mesh->refine_towards_boundary("Bdy", INIT_REF_BDY);
 
   // Set exact solutions.
-  MeshFunctionSharedPtr<double> exact_u(new ExactSolutionFitzHughNagumo1 (u_mesh));
-  MeshFunctionSharedPtr<double> exact_v(new ExactSolutionFitzHughNagumo2 (MULTI ? v_mesh : u_mesh, K));
+  MeshFunctionSharedPtr<double> exact_u(new ExactSolutionFitzHughNagumo1(u_mesh));
+  MeshFunctionSharedPtr<double> exact_v(new ExactSolutionFitzHughNagumo2(MULTI ? v_mesh : u_mesh, K));
 
   // Define right-hand sides.
   CustomRightHandSide1 g1(K, D_u, SIGMA);
@@ -166,11 +166,11 @@ int main(int argc, char* argv[])
     {
       newton.solve();
     }
-    catch(Hermes::Exceptions::Exception& e)
+    catch (Hermes::Exceptions::Exception& e)
     {
-      std::cout << e.what();
+      std::cout << e.info();
     }
-    catch(std::exception& e)
+    catch (std::exception& e)
     {
       std::cout << e.what();
     }
@@ -211,25 +211,25 @@ int main(int argc, char* argv[])
 
     // Report results.
     Hermes::Mixins::Loggable::Static::info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
-                                           u_space->get_num_dofs(), u_ref_space->get_num_dofs());
+      u_space->get_num_dofs(), u_ref_space->get_num_dofs());
     Hermes::Mixins::Loggable::Static::info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0], err_exact_rel[0]);
     Hermes::Mixins::Loggable::Static::info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
-                                           v_space->get_num_dofs(), v_ref_space->get_num_dofs());
+      v_space->get_num_dofs(), v_ref_space->get_num_dofs());
     Hermes::Mixins::Loggable::Static::info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1], err_exact_rel[1]);
     Hermes::Mixins::Loggable::Static::info("ndof_coarse_total: %d, ndof_fine_total: %d",
-                                           Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space)),
-                                           Space<double>::get_num_dofs(ref_spaces_const));
+      Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space)),
+      Space<double>::get_num_dofs(ref_spaces_const));
     Hermes::Mixins::Loggable::Static::info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof_est.add_values(Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space)),
-                             err_est_rel_total);
+      err_est_rel_total);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
     graph_cpu_est.save("conv_cpu_est.dat");
 
     graph_dof_exact.add_values(Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space)),
-                               err_exact_rel_total);
+      err_exact_rel_total);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
     graph_cpu_exact.save("conv_cpu_exact.dat");
@@ -246,12 +246,11 @@ int main(int argc, char* argv[])
 
     // Increase counter.
     as++;
-  }
-  while (done == false);
+  } while (done == false);
 
   Hermes::Mixins::Loggable::Static::info("Total running time: %g s", cpu_time.accumulated());
 
   // Wait for all views to be closed.
-   Views::View::wait();
+  Views::View::wait();
   return 0;
 }

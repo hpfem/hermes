@@ -60,12 +60,12 @@ namespace Hermes
 
     CurvMapStatic::~CurvMapStatic()
     {
-      delete [] edge_proj_matrix;
-      delete [] bubble_proj_matrix_tri;
-      delete [] bubble_proj_matrix_quad;
-      delete [] edge_p;
-      delete [] bubble_tri_p;
-      delete [] bubble_quad_p;
+      delete[] edge_proj_matrix;
+      delete[] bubble_proj_matrix_tri;
+      delete[] bubble_proj_matrix_quad;
+      delete[] edge_p;
+      delete[] bubble_tri_p;
+      delete[] bubble_quad_p;
     }
 
     double** CurvMapStatic::calculate_bubble_projection_matrix(int* indices, ElementMode2D mode)
@@ -73,7 +73,7 @@ namespace Hermes
       int nb;
       double** mat;
 
-      if(mode == HERMES_MODE_TRIANGLE)
+      if (mode == HERMES_MODE_TRIANGLE)
       {
         mat = this->bubble_proj_matrix_tri;
         nb = this->tri_bubble_np;
@@ -130,15 +130,15 @@ namespace Hermes
       // *** quads ***
       // calculate projection matrix of maximum order
       {
-        Element e;
-        e.nvert = 4;
-        ref_map_pss.set_active_element(&e);
-        int *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
-        curvMapStatic.bubble_proj_matrix_quad = calculate_bubble_projection_matrix(indices, HERMES_MODE_QUAD);
+      Element e;
+      e.nvert = 4;
+      ref_map_pss.set_active_element(&e);
+      int *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
+      curvMapStatic.bubble_proj_matrix_quad = calculate_bubble_projection_matrix(indices, HERMES_MODE_QUAD);
 
-        // cholesky factorization of the matrix
-        choldc(curvMapStatic.bubble_proj_matrix_quad, this->quad_bubble_np, curvMapStatic.bubble_quad_p);
-      }
+      // cholesky factorization of the matrix
+      choldc(curvMapStatic.bubble_proj_matrix_quad, this->quad_bubble_np, curvMapStatic.bubble_quad_p);
+    }
     }
 
     void CurvMapStatic::precalculate_cholesky_projection_matrix_edge()
@@ -308,8 +308,8 @@ namespace Hermes
       if (toplevel)
       {
         for (int i = 0; i < 4; i++)
-          if (nurbs[i] != nullptr)
-            nurbs[i]->ref++;
+        if (nurbs[i] != nullptr)
+          nurbs[i]->ref++;
       }
     }
 
@@ -324,12 +324,12 @@ namespace Hermes
       if (toplevel)
       {
         for (int i = 0; i < 4; i++)
-          if (nurbs[i] != nullptr)
-          {
-            nurbs[i]->unref();
-            if (nurbs[i]->ref <= 0)
-              delete nurbs[i];
-          }
+        if (nurbs[i] != nullptr)
+        {
+          nurbs[i]->unref();
+          if (nurbs[i]->ref <= 0)
+            delete nurbs[i];
+        }
       }
     }
 
@@ -789,8 +789,8 @@ namespace Hermes
         vd = ref_map_pss.get_fn_values();
 
         for (int m = 0; m < 2; m++)   // part 0 or 1
-          for (int j = 0; j < np; j++)
-            old[m][j] += proj[k][m] * vd[j];
+        for (int j = 0; j < np; j++)
+          old[m][j] += proj[k][m] * vd[j];
 
         for (int ii = 0; ii < order - 1; ii++)
         {
@@ -802,8 +802,8 @@ namespace Hermes
           ed = ref_map_pss.get_fn_values();
 
           for (int m = 0; m < 2; m++)  //part 0 or 1
-            for (int j = 0; j < np; j++)
-              old[m][j] += proj[e->get_nvert() + k * (order - 1) + ii][m] * ed[j];
+          for (int j = 0; j < np; j++)
+            old[m][j] += proj[e->get_nvert() + k * (order - 1) + ii][m] * ed[j];
         }
       }
     }

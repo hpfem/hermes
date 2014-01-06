@@ -51,15 +51,15 @@ namespace Hermes
 
     inline ZMUMPS_COMPLEX& operator +=(ZMUMPS_COMPLEX &a, std::complex<double> b)
     {
-      a.r +=b.real();
-      a.i +=b.imag();
+      a.r += b.real();
+      a.i += b.imag();
       return a;
     }
 
     inline ZMUMPS_COMPLEX& operator +=(ZMUMPS_COMPLEX &a, ZMUMPS_COMPLEX b)
     {
-      a.r +=b.r;
-      a.i +=b.i;
+      a.r += b.r;
+      a.i += b.i;
       return a;
     }
 
@@ -98,7 +98,7 @@ namespace Hermes
     void MumpsMatrix<Scalar>::alloc_data()
     {
       this->Ax = malloc_with_check<MumpsMatrix<Scalar>, typename mumps_type<Scalar>::mumps_Scalar>(this->nnz, this);
-      memset(Ax, 0, sizeof(Scalar) * this->nnz);
+      memset(Ax, 0, sizeof(Scalar)* this->nnz);
 
       irn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
       jcn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
@@ -113,17 +113,17 @@ namespace Hermes
     void MumpsMatrix<Scalar>::free()
     {
       CSCMatrix<Scalar>::free();
-      if(Ax)
+      if (Ax)
       {
         ::free(Ax);
         Ax = nullptr;
       }
-      if(irn)
+      if (irn)
       {
         ::free(irn);
         irn = nullptr;
       }
-      if(jcn)
+      if (jcn)
       {
         ::free(jcn);
         jcn = nullptr;
@@ -136,7 +136,7 @@ namespace Hermes
       // Find m-th row in the n-th column.
       int mid = CSMatrix<Scalar>::find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
       // Return 0 if the entry has not been found.
-      if(mid < 0)
+      if (mid < 0)
         return 0.0;
       else
         mid += this->Ap[n];
@@ -156,7 +156,7 @@ namespace Hermes
       // Find m-th row in the n-th column.
       int pos = CSMatrix<double>::find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
       // Make sure we are adding to an existing non-zero entry.
-      if(pos < 0)
+      if (pos < 0)
         throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
       // Add offset to the n-th column.
       pos += this->Ap[n];
@@ -172,7 +172,7 @@ namespace Hermes
       // Find m-th row in the n-th column.
       int pos = CSMatrix<std::complex<double> >::find_position(this->Ai + this->Ap[n], this->Ap[n + 1] - this->Ap[n], m);
       // Make sure we are adding to an existing non-zero entry.
-      if(pos < 0)
+      if (pos < 0)
         throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
       // Add offset to the n-th column.
       pos += this->Ap[n];
@@ -188,114 +188,114 @@ namespace Hermes
       switch (fmt)
       {
       case EXPORT_FORMAT_MATRIX_MARKET:
-        {
-          FILE* file = fopen(filename, "w");
-          if(!file)
-            throw Exceptions::IOException(Exceptions::IOException::Write, filename);
-          fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real\n");
-          fprintf(file, "%d %d %d\n", this->size, this->size, this->nnz);
+      {
+                                        FILE* file = fopen(filename, "w");
+                                        if (!file)
+                                          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+                                        fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real\n");
+                                        fprintf(file, "%d %d %d\n", this->size, this->size, this->nnz);
 
-          for (unsigned int j = 0; j < this->size; j++)
-          {
-            for (int i = this->Ap[j]; i < this->Ap[j + 1]; i++)
-            {
-              Helpers::fprint_coordinate_num(file, irn[i]-1, jcn[i]-1, mumps_to_Scalar(Ax[i]), number_format);
-              fprintf(file, "\n");
-            }
-          }
+                                        for (unsigned int j = 0; j < this->size; j++)
+                                        {
+                                          for (int i = this->Ap[j]; i < this->Ap[j + 1]; i++)
+                                          {
+                                            Helpers::fprint_coordinate_num(file, irn[i] - 1, jcn[i] - 1, mumps_to_Scalar(Ax[i]), number_format);
+                                            fprintf(file, "\n");
+                                          }
+                                        }
 
-          fclose(file);
-        }
+                                        fclose(file);
+      }
         break;
 
       case EXPORT_FORMAT_MATLAB_MATIO:
-        {
+      {
 #ifdef WITH_MATIO
-          mat_sparse_t sparse;
-          sparse.nzmax = this->nnz;
+                                       mat_sparse_t sparse;
+                                       sparse.nzmax = this->nnz;
 
-          // For complex.
-          double* Ax_re = nullptr;
-          double* Ax_im = nullptr;
+                                       // For complex.
+                                       double* Ax_re = nullptr;
+                                       double* Ax_im = nullptr;
 
-          sparse.nir = this->nnz;
-          sparse.ir = this->Ai;
-          sparse.njc = this->size + 1;
-          sparse.jc = (int *) this->Ap;
-          sparse.ndata = this->nnz;
+                                       sparse.nir = this->nnz;
+                                       sparse.ir = this->Ai;
+                                       sparse.njc = this->size + 1;
+                                       sparse.jc = (int *) this->Ap;
+                                       sparse.ndata = this->nnz;
 
-          size_t dims[2];
-          dims[0] = this->size;
-          dims[1] = this->size;
+                                       size_t dims[2];
+                                       dims[0] = this->size;
+                                       dims[1] = this->size;
 
-          mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
+                                       mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
 
-          matvar_t *matvar;
+                                       matvar_t *matvar;
 
-          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
-          {
-            sparse.data = Ax;
-            matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
-          }
-          else
-          {
-            Ax_re = malloc_with_check<MumpsMatrix<Scalar>, double>(this->nnz, this);
-            Ax_im = malloc_with_check<MumpsMatrix<Scalar>, double>(this->nnz, this);
-            struct mat_complex_split_t z = {Ax_re, Ax_im};
+                                       if (Hermes::Helpers::TypeIsReal<Scalar>::value)
+                                       {
+                                         sparse.data = Ax;
+                                         matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
+                                       }
+                                       else
+                                       {
+                                         Ax_re = malloc_with_check<MumpsMatrix<Scalar>, double>(this->nnz, this);
+                                         Ax_im = malloc_with_check<MumpsMatrix<Scalar>, double>(this->nnz, this);
+                                         struct mat_complex_split_t z = { Ax_re, Ax_im };
 
-            for(int i = 0; i < this->nnz; i++)
-            {
-              Ax_re[i] = ((std::complex<double>)(mumps_to_Scalar(this->Ax[i]))).real();
-              Ax_im[i] = ((std::complex<double>)(mumps_to_Scalar(this->Ax[i]))).imag();
-              sparse.data = &z;
-            }
-            matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
-          }
+                                         for (int i = 0; i < this->nnz; i++)
+                                         {
+                                           Ax_re[i] = ((std::complex<double>)(mumps_to_Scalar(this->Ax[i]))).real();
+                                           Ax_im[i] = ((std::complex<double>)(mumps_to_Scalar(this->Ax[i]))).imag();
+                                           sparse.data = &z;
+                                         }
+                                         matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
+                                       }
 
-          if (matvar)
-          {
-            Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
-            Mat_VarFree(matvar);
-          }
+                                       if (matvar)
+                                       {
+                                         Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+                                         Mat_VarFree(matvar);
+                                       }
 
-          if(Ax_re)
-            ::free(Ax_re);
-          if(Ax_im)
-            ::free(Ax_im);
-          Mat_Close(mat);
+                                       if (Ax_re)
+                                         ::free(Ax_re);
+                                       if (Ax_im)
+                                         ::free(Ax_im);
+                                       Mat_Close(mat);
 
-          if(!matvar)
-            throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+                                       if (!matvar)
+                                         throw Exceptions::IOException(Exceptions::IOException::Write, filename);
 #endif
-        }
+      }
         break;
 
       case EXPORT_FORMAT_PLAIN_ASCII:
-        {
-          FILE* file = fopen(filename, "w");
-          if(!file)
-            throw Exceptions::IOException(Exceptions::IOException::Write, filename);
-          for (unsigned int j = 0; j < this->size; j++)
-          {
-            for (int i = this->Ap[j]; i < this->Ap[j + 1]; i++)
-            {
-              Helpers::fprint_coordinate_num(file, irn[i]-1, jcn[i]-1, mumps_to_Scalar(Ax[i]), number_format);
-              fprintf(file, "\n");
-            }
-          }
+      {
+                                      FILE* file = fopen(filename, "w");
+                                      if (!file)
+                                        throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+                                      for (unsigned int j = 0; j < this->size; j++)
+                                      {
+                                        for (int i = this->Ap[j]; i < this->Ap[j + 1]; i++)
+                                        {
+                                          Helpers::fprint_coordinate_num(file, irn[i] - 1, jcn[i] - 1, mumps_to_Scalar(Ax[i]), number_format);
+                                          fprintf(file, "\n");
+                                        }
+                                      }
 
-          fclose(file);
-        }
+                                      fclose(file);
+      }
       }
     }
 
     template<typename Scalar>
     void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar*& vector_out, bool vector_out_initialized) const
     {
-      if(!vector_out_initialized)
+      if (!vector_out_initialized)
         vector_out = malloc_with_check<Scalar>(this->size);
 
-      memset(vector_out, 0, sizeof(Scalar) * this->size);
+      memset(vector_out, 0, sizeof(Scalar)* this->size);
 
       Scalar a;
       for (unsigned int i = 0; i < this->nnz; i++)
@@ -308,7 +308,7 @@ namespace Hermes
     template<typename Scalar>
     void MumpsMatrix<Scalar>::multiply_with_Scalar(Scalar value)
     {
-      for(int i = 0; i < this->nnz; i++)
+      for (int i = 0; i < this->nnz; i++)
       {
         Ax[i] *= value;
       }
@@ -352,14 +352,14 @@ namespace Hermes
       nmat->Ax = malloc_with_check<MumpsMatrix<Scalar>, typename mumps_type<Scalar>::mumps_Scalar>(this->nnz, nmat);
       nmat->irn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, nmat);
       nmat->jcn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, nmat);
-      for (unsigned int i = 0; i <this->nnz; i++)
+      for (unsigned int i = 0; i < this->nnz; i++)
       {
         nmat->Ai[i] = this->Ai[i];
         nmat->Ax[i] = Ax[i];
         nmat->irn[i] = irn[i];
         nmat->jcn[i] = jcn[i];
       }
-      for (unsigned int i = 0;i<this->size + 1;i++)
+      for (unsigned int i = 0; i < this->size + 1; i++)
       {
         nmat->Ap[i] = this->Ap[i];
       }
@@ -386,16 +386,16 @@ namespace Hermes
 
     template<typename Scalar>
     MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) :
-    DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs), icntl_14(init_icntl_14)
+      DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs), icntl_14(init_icntl_14)
     {
-      inited = false;
+        inited = false;
 
-      // Initial values for some fields of the MUMPS_STRUC structure that may be accessed
-      // before MUMPS has been initialized.
-      param.rhs = nullptr;
-      param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
-      // in setup_factorization()
-    }
+        // Initial values for some fields of the MUMPS_STRUC structure that may be accessed
+        // before MUMPS has been initialized.
+        param.rhs = nullptr;
+        param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
+        // in setup_factorization()
+      }
 
     template<typename Scalar>
     MumpsSolver<Scalar>::~MumpsSolver()
@@ -417,7 +417,7 @@ namespace Hermes
         ::free(param.rhs);
     }
 
-   template<>
+    template<>
     void MumpsSolver<double>::mumps_c(mumps_type<double>::mumps_struct * param)
     {
       dmumps_c(param);
@@ -441,7 +441,7 @@ namespace Hermes
       case -5: throw Hermes::Exceptions::LinearMatrixSolverException("Problem of REAL or COMPLEX workspace allocation of size %i during analysis.", param.INFOG(2)); break;
       case -6: throw Hermes::Exceptions::LinearMatrixSolverException("Matrix is singular in structure."); break;
       case -7: throw Hermes::Exceptions::LinearMatrixSolverException("Problem of INTEGER workspace allocation of size %i during analysis.", param.INFOG(2)); break;
-      case -8: 
+      case -8:
       case -9: return false;
       case -10: throw Hermes::Exceptions::LinearMatrixSolverException("Numerically singular matrix."); break;
       default: Hermes::Exceptions::LinearMatrixSolverException("Non-detailed exception in MUMPS: INFOG(1) = %d", param.INFOG(1)); break;
@@ -451,7 +451,7 @@ namespace Hermes
     template<typename Scalar>
     bool MumpsSolver<Scalar>::reinit()
     {
-      if(inited)
+      if (inited)
       {
         // If there is already an instance of MUMPS running,
         // terminate it.
@@ -467,7 +467,7 @@ namespace Hermes
       mumps_c(&param);
       inited = check_status();
 
-      if(inited)
+      if (inited)
       {
         // No printings.
         param.ICNTL(1) = -1;
@@ -500,7 +500,7 @@ namespace Hermes
       return inited;
     }
 
-     template<typename Scalar>
+    template<typename Scalar>
     int MumpsSolver<Scalar>::get_matrix_size()
     {
       return m->size;
@@ -517,7 +517,7 @@ namespace Hermes
       // Prepare the MUMPS data structure with input for the solver driver
       // (according to the chosen factorization reuse strategy), as well as
       // the system matrix.
-      if( !setup_factorization() )
+      if (!setup_factorization())
         throw Hermes::Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
 
       // Specify the right-hand side (will be replaced by the solution).
@@ -528,7 +528,7 @@ namespace Hermes
       mumps_c(&param);
 
       // Throws appropriate exception.
-      if(check_status())
+      if (check_status())
       {
         free_with_check(this->sln);
         this->sln = malloc_with_check<MumpsSolver<Scalar>, Scalar>(m->size, this);
@@ -540,7 +540,7 @@ namespace Hermes
         ::free(param.rhs);
 
         icntl_14 *= 2;
-        if(icntl_14 > max_icntl_14)
+        if (icntl_14 > max_icntl_14)
           throw Hermes::Exceptions::LinearMatrixSolverException("MUMPS memory overflow - potentially singular matrix");
         else
         {
@@ -573,9 +573,9 @@ namespace Hermes
       // When called for the first time, all three phases (analysis, factorization,
       // solution) must be performed.
       int eff_fact_scheme = this->reuse_scheme;
-      if(!inited)
-        if( this->reuse_scheme == HERMES_REUSE_MATRIX_REORDERING || this->reuse_scheme == HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY )
-          eff_fact_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
+      if (!inited)
+      if (this->reuse_scheme == HERMES_REUSE_MATRIX_REORDERING || this->reuse_scheme == HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
+        eff_fact_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
 
       switch (eff_fact_scheme)
       {
@@ -602,7 +602,7 @@ namespace Hermes
         // Perform scaling along with reordering during the symbolic analysis phase
         // and then reuse it during subsequent factorizations. new_ instance of MUMPS
         // has to be created before the analysis phase.
-        if(param.INFOG(33) != -2)
+        if (param.INFOG(33) != -2)
         {
           reinit();
           param.ICNTL(6) = 5;

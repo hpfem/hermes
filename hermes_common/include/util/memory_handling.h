@@ -84,7 +84,7 @@ namespace Hermes
       return new_array;
     else
     {
-      if(caller)
+      if (caller)
         caller->free();
       throw Hermes::Exceptions::Exception("Hermes::malloc_with_check() failed to allocate.", size * sizeof(ArrayItem));
       return nullptr;

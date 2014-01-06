@@ -26,9 +26,9 @@ namespace Hermes
       Scalar* target_vec)
     {
       // Sanity check.
-      if(wf == nullptr)
+      if (wf == nullptr)
         throw Hermes::Exceptions::NullException(1);
-      if(target_vec == nullptr)
+      if (target_vec == nullptr)
         throw Exceptions::NullException(2);
 
       // Initialize DiscreteProblem.
@@ -90,17 +90,17 @@ namespace Hermes
       int n = spaces.size();
 
       // Sanity checks.
-      if(target_vec == nullptr) throw Exceptions::NullException(3);
+      if (target_vec == nullptr) throw Exceptions::NullException(3);
       if (n != custom_projection_jacobians.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
       if (n != custom_projection_residuals.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
 
       int start_index = 0;
-      for (int i = 0; i < n; i++) 
+      for (int i = 0; i < n; i++)
       {
 
         project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_vec + start_index);
 
-        start_index += spaces[i]->get_num_dofs();                       
+        start_index += spaces[i]->get_num_dofs();
       }
     }
 
@@ -117,7 +117,7 @@ namespace Hermes
       if (n != custom_projection_jacobians.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
       if (n != custom_projection_residuals.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
 
-      for (int i = 0; i < n; i++) 
+      for (int i = 0; i < n; i++)
       {
         project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_slns[i]);
       }
@@ -128,7 +128,7 @@ namespace Hermes
       MeshFunctionSharedPtr<Scalar> source_meshfn, Hermes::Algebra::Vector<Scalar>* target_vec,
       NormType proj_norm)
     {
-      if(target_vec->get_size() != space->get_num_dofs())
+      if (target_vec->get_size() != space->get_num_dofs())
         throw Exceptions::ValueException("target_vec->size", target_vec->get_size(), space->get_num_dofs());
 
       Scalar* vec = malloc_with_check<Scalar>(target_vec->get_size());
@@ -143,13 +143,13 @@ namespace Hermes
       NormType proj_norm)
     {
       // Sanity checks.
-      if(target_vec == nullptr) 
+      if (target_vec == nullptr)
         throw Exceptions::NullException(3);
 
       // If projection norm is not provided, set it
       // to match the type of the space.
       NormType norm = HERMES_UNSET_NORM;
-      if(proj_norm == HERMES_UNSET_NORM)
+      if (proj_norm == HERMES_UNSET_NORM)
       {
         SpaceType space_type = space->get_type();
         switch (space_type)
@@ -185,7 +185,7 @@ namespace Hermes
       MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar> target_sln,
       NormType proj_norm)
     {
-      if(proj_norm == HERMES_UNSET_NORM)
+      if (proj_norm == HERMES_UNSET_NORM)
       {
         SpaceType space_type = space->get_type();
         switch (space_type)
@@ -217,17 +217,17 @@ namespace Hermes
       int n = spaces.size();
 
       // Sanity checks.
-      if(n != source_slns.size()) 
+      if (n != source_slns.size())
         throw Exceptions::LengthException(1, 2, n, source_slns.size());
-      if(target_vec == nullptr) 
+      if (target_vec == nullptr)
         throw Exceptions::NullException(3);
-      if(!proj_norms.empty() && n != proj_norms.size()) 
+      if (!proj_norms.empty() && n != proj_norms.size())
         throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
       for (int i = 0; i < n; i++)
       {
-        if(proj_norms.empty())
+        if (proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_vec + start_index, HERMES_UNSET_NORM);
         else
           project_global(spaces[i], source_slns[i], target_vec + start_index, proj_norms[i]);
@@ -239,7 +239,7 @@ namespace Hermes
     void OGProjection<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
       Hermes::Algebra::Vector<Scalar>* target_vec, Hermes::vector<NormType> proj_norms)
     {
-      if(target_vec->get_size() != Space<Scalar>::get_num_dofs(spaces))
+      if (target_vec->get_size() != Space<Scalar>::get_num_dofs(spaces))
         throw Exceptions::ValueException("target_vec->size", target_vec->get_size(), Space<Scalar>::get_num_dofs(spaces));
 
       Scalar* vec = malloc_with_check<Scalar>(target_vec->get_size());
@@ -255,17 +255,17 @@ namespace Hermes
       int n = spaces.size();
 
       // Sanity checks.
-      if(n != source_slns.size()) 
+      if (n != source_slns.size())
         throw Exceptions::LengthException(1, 2, n, source_slns.size());
-      if(n != target_slns.size()) 
+      if (n != target_slns.size())
         throw Exceptions::LengthException(1, 2, n, target_slns.size());
-      if(!proj_norms.empty() && n != proj_norms.size()) 
+      if (!proj_norms.empty() && n != proj_norms.size())
         throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
       for (int i = 0; i < n; i++)
       {
-        if(proj_norms.empty())
+        if (proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_slns[i], HERMES_UNSET_NORM);
         else
           project_global(spaces[i], source_slns[i], target_slns[i], proj_norms[i]);

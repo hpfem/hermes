@@ -43,10 +43,10 @@ namespace Hermes
           for (j = 0; j < n; j++)
           {
             temp = a[i][j];
-            if(std::abs(temp) > std::abs(big))
+            if (std::abs(temp) > std::abs(big))
               big = temp;
           }
-          if(big == 0.0)
+          if (big == 0.0)
           {
             ::free(vv);
             throw Exceptions::Exception("Singular matrix in routine LUDCMP!");
@@ -58,23 +58,23 @@ namespace Hermes
           for (i = 0; i < j; i++)
           {
             sum = a[i][j];
-            for (k = 0; k < i; k++) sum -= a[i][k]*a[k][j];
+            for (k = 0; k < i; k++) sum -= a[i][k] * a[k][j];
             a[i][j] = sum;
           }
           big = 0.0;
           for (i = j; i < n; i++)
           {
             sum = a[i][j];
-            for (k = 0; k < j; k++) sum -= a[i][k]*a[k][j];
+            for (k = 0; k < j; k++) sum -= a[i][k] * a[k][j];
             a[i][j] = sum;
-            dum = vv[i]*std::abs(sum);
-            if(std::abs(dum) >= std::abs(big))
+            dum = vv[i] * std::abs(sum);
+            if (std::abs(dum) >= std::abs(big))
             {
               big = dum;
               imax = i;
             }
           }
-          if(j != imax)
+          if (j != imax)
           {
             for (k = 0; k < n; k++)
             {
@@ -86,8 +86,8 @@ namespace Hermes
             vv[imax] = vv[j];
           }
           indx[j] = imax;
-          if(a[j][j] == 0.0) a[j][j] = 1.0e-20;
-          if(j != n-1)
+          if (a[j][j] == 0.0) a[j][j] = 1.0e-20;
+          if (j != n - 1)
           {
             dum = 1.0 / (a[j][j]);
             for (i = j + 1; i < n; i++) a[i][j] *= dum;
@@ -108,14 +108,14 @@ namespace Hermes
           sum = b[ip];
           b[ip] = b[i];
           for (j = 0; j < i; j++)
-            sum = sum - a[i][j]*b[j];
+            sum = sum - a[i][j] * b[j];
           b[i] = sum;
         }
-        for (i = n-1; i >= 0; i--)
+        for (i = n - 1; i >= 0; i--)
         {
           sum = b[i];
           for (j = i + 1; j < n; j++)
-            sum -= a[i][j]*b[j];
+            sum -= a[i][j] * b[j];
           b[i] = sum / a[i][i];
         }
       }
@@ -131,9 +131,9 @@ namespace Hermes
             T sum = a[i][j];
             k = i;
             while (--k >= 0) sum -= a[i][k] * a[j][k];
-            if(i == j)
+            if (i == j)
             {
-              if((std::complex<double>(sum)).real() <= 0.0)
+              if ((std::complex<double>(sum)).real() <= 0.0)
                 throw Exceptions::Exception("CHOLDC failed!");
               else p[i] = sqrt(sum);
             }

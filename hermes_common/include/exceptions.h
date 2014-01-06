@@ -59,7 +59,7 @@ namespace Hermes
       void print_msg() const;
       /// \brief get pointer to error message
       virtual const char * what() const throw();
-      std::string info() const ;
+      std::string info() const;
       /// \return name of function where exception was created.
       const char * get_func_name() const;
       virtual ~Exception() throw() {};

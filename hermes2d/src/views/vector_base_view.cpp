@@ -44,11 +44,15 @@ namespace Hermes
 
       template<typename Scalar>
       VectorBaseView<Scalar>::VectorBaseView(const char* title, WinGeom* wg)
-        : VectorView(title, wg) { pss = nullptr; sln = nullptr; this->lines = false; basic_title.assign(title); }
+        : VectorView(title, wg) {
+        pss = nullptr; sln = nullptr; this->lines = false; basic_title.assign(title);
+      }
 
       template<typename Scalar>
       VectorBaseView<Scalar>::VectorBaseView(char* title, WinGeom* wg)
-        : VectorView(title, wg) { pss = nullptr; sln = nullptr; this->lines = false; basic_title.assign(title); }
+        : VectorView(title, wg) {
+        pss = nullptr; sln = nullptr; this->lines = false; basic_title.assign(title);
+      }
 
       template<typename Scalar>
       VectorBaseView<Scalar>::~VectorBaseView()
@@ -59,15 +63,15 @@ namespace Hermes
       template<typename Scalar>
       void VectorBaseView<Scalar>::free()
       {
-        if(pss != nullptr) { delete pss; pss = nullptr; }
+        if (pss != nullptr) { delete pss; pss = nullptr; }
       }
 
       template<>
       void VectorBaseView<double>::update_solution()
       {
         double* coeffs = malloc_with_check<double>(ndof + 1);
-        memset(coeffs, 0, sizeof(double) * (ndof + 1));
-        if(base_index >= -1 && base_index < ndof)
+        memset(coeffs, 0, sizeof(double)* (ndof + 1));
+        if (base_index >= -1 && base_index < ndof)
           coeffs[base_index + 1] = 1.0;
 
         Solution<double>::vector_to_solution(coeffs, space, sln, pss);
@@ -81,7 +85,7 @@ namespace Hermes
       void VectorBaseView<std::complex<double> >::update_solution()
       {
         std::complex<double>* coeffs = calloc_with_check<std::complex<double>>(ndof + 1);
-        if(base_index >= -1 && base_index < ndof)
+        if (base_index >= -1 && base_index < ndof)
           coeffs[base_index + 1] = 1.0;
         Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss);
 
@@ -98,7 +102,7 @@ namespace Hermes
       {
         std::stringstream str;
         str << basic_title << " - dof = " << base_index;
-        if(base_index < 0)
+        if (base_index < 0)
           str << " (Dirichlet lift)";
         View::set_title(str.str().c_str());
       }
@@ -109,12 +113,12 @@ namespace Hermes
         switch (key)
         {
         case GLUT_KEY_LEFT:
-          if(base_index > -1) base_index--;
+          if (base_index > -1) base_index--;
           update_solution();
           break;
 
         case GLUT_KEY_RIGHT:
-          if(base_index < ndof-1) base_index++;
+          if (base_index < ndof - 1) base_index++;
           update_solution();
           break;
 

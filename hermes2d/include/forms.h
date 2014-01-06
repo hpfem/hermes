@@ -148,7 +148,7 @@ namespace Hermes
         double dx[H2D_MAX_INTEGRATION_POINTS_COUNT];
         double val1[H2D_MAX_INTEGRATION_POINTS_COUNT];
       };
-      
+
       union
       {
         double dy[H2D_MAX_INTEGRATION_POINTS_COUNT];
@@ -324,7 +324,7 @@ namespace Hermes
       static Ord zero;              ///< Zero value used for the zero-extension.
     };
 
-    
+
     /// Init the function for calculation the integration order.
     HERMES_API Func<Hermes::Ord>* init_fn_ord(const int order);
 

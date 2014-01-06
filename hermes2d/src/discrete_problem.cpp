@@ -61,7 +61,7 @@ namespace Hermes
       // Local number of threads - to avoid calling it over and over again, and against faults caused by the
       // value being changed while assembling.
       this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>*[this->num_threads_used];
-      for(int i = 0; i < this->num_threads_used; i++)
+      for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i] = new DiscreteProblemThreadAssembler<Scalar>(&this->selectiveAssembler);
     }
 
@@ -69,7 +69,7 @@ namespace Hermes
     void DiscreteProblem<Scalar>::set_linear(bool to_set, bool dirichlet_lift_accordingly)
     {
       this->nonlinear = !to_set;
-      if(dirichlet_lift_accordingly)
+      if (dirichlet_lift_accordingly)
         this->add_dirichlet_lift = !this->nonlinear;
       else
         this->add_dirichlet_lift = this->nonlinear;
@@ -78,28 +78,28 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::~DiscreteProblem()
     {
-      
-      for(int i = 0; i < this->num_threads_used; i++)
+
+      for (int i = 0; i < this->num_threads_used; i++)
         delete this->threadAssembler[i];
-      delete [] this->threadAssembler;
+      delete[] this->threadAssembler;
     }
 
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::isOkay() const
     {
-      if(!this->wf)
+      if (!this->wf)
         return false;
 
-      if(this->spaces_size == 0)
+      if (this->spaces_size == 0)
         return false;
 
       // Initial check of meshes and spaces.
-      for(unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
         this->spaces[space_i]->check();
 
-      for(unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
-        if(!this->spaces[space_i]->is_up_to_date())
-          throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
+      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+      if (!this->spaces[space_i]->is_up_to_date())
+        throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
 
       return true;
     }
@@ -122,7 +122,7 @@ namespace Hermes
     {
       return this->spaces;
     }
-    
+
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_RK(int original_spaces_count, bool force_diagonal_blocks_, Table* block_weights_)
     {
@@ -130,10 +130,10 @@ namespace Hermes
 
       this->selectiveAssembler.set_RK(original_spaces_count, force_diagonal_blocks_, block_weights_);
 
-      for(int i = 0; i < this->num_threads_used; i++)
+      for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_RK(original_spaces_count, force_diagonal_blocks_, block_weights_);
     }
-      
+
     template<typename Scalar>
     void DiscreteProblem<Scalar>::invalidate_matrix()
     {
@@ -153,7 +153,7 @@ namespace Hermes
     void DiscreteProblem<Scalar>::set_matrix(SparseMatrix<Scalar>* mat)
     {
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_matrix(mat);
-      for(int i = 0; i < this->num_threads_used; i++)
+      for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_matrix(mat);
     }
 
@@ -161,19 +161,19 @@ namespace Hermes
     void DiscreteProblem<Scalar>::set_rhs(Vector<Scalar>* rhs)
     {
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_rhs(rhs);
-      for(int i = 0; i < this->num_threads_used; i++)
+      for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_rhs(rhs);
     }
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spacesToSet)
     {
-      if(this->spaces_size != spacesToSet.size() && this->spaces_size > 0)
+      if (this->spaces_size != spacesToSet.size() && this->spaces_size > 0)
         throw Hermes::Exceptions::LengthException(0, spacesToSet.size(), this->spaces_size);
 
-      for(unsigned int i = 0; i < spacesToSet.size(); i++)
+      for (unsigned int i = 0; i < spacesToSet.size(); i++)
       {
-        if(!spacesToSet[i])
+        if (!spacesToSet[i])
           throw Exceptions::NullException(0, i);
         spacesToSet[i]->check();
       }
@@ -183,7 +183,7 @@ namespace Hermes
 
       this->selectiveAssembler.set_spaces(spacesToSet);
 
-      for(int i = 0; i < this->num_threads_used; i++)
+      for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->init_spaces(spaces);
     }
 
@@ -218,11 +218,11 @@ namespace Hermes
     {
       Solution<Scalar>** u_ext_sln = nullptr;
 
-      if(this->nonlinear && coeff_vec)
+      if (this->nonlinear && coeff_vec)
       {
         u_ext_sln = new Solution<Scalar>*[spaces_size];
         int first_dof = 0;
-        for(int i = 0; i < this->spaces_size; i++)
+        for (int i = 0; i < this->spaces_size; i++)
         {
           u_ext_sln[i] = new Solution<Scalar>(spaces[i]->get_mesh());
           Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], u_ext_sln[i], !this->rungeKutta, first_dof);
@@ -232,11 +232,11 @@ namespace Hermes
 
       assemble(u_ext_sln, mat, rhs);
 
-      if(this->nonlinear && coeff_vec)
+      if (this->nonlinear && coeff_vec)
       {
-        for(int i = 0; i < this->spaces_size; i++)
+        for (int i = 0; i < this->spaces_size; i++)
           delete u_ext_sln[i];
-        delete [] u_ext_sln;
+        delete[] u_ext_sln;
       }
     }
 
@@ -244,26 +244,26 @@ namespace Hermes
     void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, Hermes::vector<MeshSharedPtr >& meshes)
     {
       // Vector of meshes.
-      for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+      for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
         meshes.push_back(spaces[space_i]->get_mesh());
-      for(unsigned int ext_i = 0; ext_i < this->wf->ext.size(); ext_i++)
+      for (unsigned int ext_i = 0; ext_i < this->wf->ext.size(); ext_i++)
         meshes.push_back(this->wf->ext[ext_i]->get_mesh());
-      for(unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
-        for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
-          if(this->wf->get_forms()[form_i]->ext[ext_i])
-            meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
+      for (unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
+      for (unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
+      if (this->wf->get_forms()[form_i]->ext[ext_i])
+        meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
 
-      if(this->nonlinear)
+      if (this->nonlinear)
       {
-        for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+        for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
           meshes.push_back(spaces[space_i]->get_mesh());
       }
-      
+
       // Important.
       // This must be here, because the weakforms may have changed since set_weak_formulation (where the following calls
       // used to be in development). And since the following clones the passed WeakForm, this has to be called
       // only after the weak forms are ready for calculation.
-      for(int i = 0; i < this->num_threads_used; i++)
+      for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_weak_formulation(this->wf);
 
       Traverse trav(this->spaces_size);
@@ -291,7 +291,7 @@ namespace Hermes
 
       // Creating matrix sparse structure.
       // If there are no states, return.
-      if(this->selectiveAssembler.prepare_sparse_structure(this->current_mat, this->current_rhs, this->spaces, states, num_states))
+      if (this->selectiveAssembler.prepare_sparse_structure(this->current_mat, this->current_rhs, this->spaces, states, num_states))
       {
         // Is this a DG assembling.
         bool is_DG = this->wf->is_DG();
@@ -301,7 +301,7 @@ namespace Hermes
           int thread_number = omp_get_thread_num();
           int start = (num_states / this->num_threads_used) * thread_number;
           int end = (num_states / this->num_threads_used) * (thread_number + 1);
-          if(thread_number == this->num_threads_used - 1)
+          if (thread_number == this->num_threads_used - 1)
             end = num_states;
 
           try
@@ -309,10 +309,10 @@ namespace Hermes
             this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear, this->add_dirichlet_lift);
 
             DiscreteProblemDGAssembler<Scalar>* dgAssembler;
-            if(is_DG)
+            if (is_DG)
               dgAssembler = new DiscreteProblemDGAssembler<Scalar>(this->threadAssembler[thread_number], this->spaces, meshes);
 
-            for(int state_i = start; state_i < end; state_i++)
+            for (int state_i = start; state_i < end; state_i++)
             {
               // Exception already thrown -> exit the loop.
               if (!this->exceptionMessageCaughtInParallelBlock.empty())
@@ -321,7 +321,7 @@ namespace Hermes
               Traverse::State* current_state = states[state_i];
 
               this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);
-              
+
               this->threadAssembler[thread_number]->assemble_one_state();
 
               if (is_DG)
@@ -333,15 +333,20 @@ namespace Hermes
               this->threadAssembler[thread_number]->deinit_assembling_one_state();
             }
 
-            if(is_DG)
+            if (is_DG)
               delete dgAssembler;
 
             this->threadAssembler[thread_number]->deinit_assembling();
           }
-          catch(std::exception& exception)
+          catch (Hermes::Exceptions::Exception& e)
           {
 #pragma omp critical (exceptionMessageCaughtInParallelBlock)
-              this->exceptionMessageCaughtInParallelBlock = exception.what();
+            this->exceptionMessageCaughtInParallelBlock = e.info();
+          }
+          catch (std::exception& e)
+          {
+#pragma omp critical (exceptionMessageCaughtInParallelBlock)
+            this->exceptionMessageCaughtInParallelBlock = e.what();
           }
         }
       }
@@ -350,19 +355,19 @@ namespace Hermes
       this->deinit_assembling(states, num_states);
 
       /// Finish the algebraic structures for solving.
-      if(this->current_mat)
+      if (this->current_mat)
         this->current_mat->finish();
-      if(this->current_rhs)
+      if (this->current_rhs)
         this->current_rhs->finish();
 
-      if(!this->exceptionMessageCaughtInParallelBlock.empty())
+      if (!this->exceptionMessageCaughtInParallelBlock.empty())
       {
         throw Hermes::Exceptions::Exception(this->exceptionMessageCaughtInParallelBlock.c_str());
         return;
       }
 
       Element* e;
-      for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+      for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
       {
         for_all_active_elements(e, spaces[space_i]->get_mesh())
         {
@@ -375,7 +380,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::deinit_assembling(Traverse::State** states, int num_states)
     {
-      for(int i = 0; i < num_states; i++)
+      for (int i = 0; i < num_states; i++)
         delete states[i];
       free(states);
     }

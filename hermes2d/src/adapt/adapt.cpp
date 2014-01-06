@@ -30,7 +30,7 @@ namespace Hermes
     template<typename Scalar>
     bool AdaptStoppingCriterionCumulative<Scalar>::add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i)
     {
-      if(processed_error_squared > (threshold*threshold) * error_calculator->get_total_error_squared())
+      if (processed_error_squared > (threshold*threshold) * error_calculator->get_total_error_squared())
         return false;
       else
         return true;
@@ -45,7 +45,7 @@ namespace Hermes
     bool AdaptStoppingCriterionSingleElement<Scalar>::add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i)
     {
       const typename ErrorCalculator<Scalar>::ElementReference& element_reference = error_calculator->get_element_reference(element_inspected_i);
-      if(*(element_reference.error) > (threshold*threshold) * max_error_squared)
+      if (*(element_reference.error) > (threshold*threshold) * max_error_squared)
         return true;
       else
         return false;
@@ -60,12 +60,12 @@ namespace Hermes
     bool AdaptStoppingCriterionLevels<Scalar>::add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i)
     {
       const typename ErrorCalculator<Scalar>::ElementReference& element_reference = error_calculator->get_element_reference(element_inspected_i);
-      if(element_inspected_i == 0)
+      if (element_inspected_i == 0)
         return true;
       else
       {
         const typename ErrorCalculator<Scalar>::ElementReference previous_element_reference = error_calculator->get_element_reference(element_inspected_i - 1);
-        if(*(element_reference.error) > (threshold*threshold) * *((previous_element_reference).error))
+        if (*(element_reference.error) > (threshold*threshold) * *((previous_element_reference).error))
           return true;
         else
           return false;
@@ -98,17 +98,17 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::init()
     {
-      if(!this->errorCalculator)
+      if (!this->errorCalculator)
         throw Exceptions::Exception("Error calculator must not be nullptr in Adapt::Adapt().");
 
       this->num = spaces.size();
 
-      if(this->num > H2D_MAX_COMPONENTS)
+      if (this->num > H2D_MAX_COMPONENTS)
         throw Exceptions::ValueException("components", this->num, 0, H2D_MAX_COMPONENTS);
 
-      for(unsigned int i = 0; i < this->num; i++)
+      for (unsigned int i = 0; i < this->num; i++)
       {
-        if(!spaces[i])
+        if (!spaces[i])
           throw Exceptions::NullException(0, i);
         spaces[i]->check();
       }
@@ -121,9 +121,9 @@ namespace Hermes
     {
       this->free();
     }
-    
+
     template<typename Scalar>
-      void Adapt<Scalar>::free()
+    void Adapt<Scalar>::free()
     {
       free_with_check(elements_to_refine);
     }
@@ -136,7 +136,7 @@ namespace Hermes
 
       // Meshes.
       this->meshes.clear();
-      for(int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->num; i++)
         this->meshes.push_back(this->spaces[i]->get_mesh());
     }
 
@@ -172,13 +172,13 @@ namespace Hermes
     template<typename Scalar>
     bool Adapt<Scalar>::isOkay() const
     {
-      if(!this->spaces.size())
+      if (!this->spaces.size())
       {
         this->info("\tAdaptivity: spaces are missing.");
         return false;
       }
 
-      if(!this->strategy)
+      if (!this->strategy)
       {
         this->info("\tAdaptivity: strategy is missing.");
         return false;
@@ -196,11 +196,11 @@ namespace Hermes
       this->check();
 
       // Checks.
-      if(!this->errorCalculator->elements_stored)
+      if (!this->errorCalculator->elements_stored)
         throw Exceptions::Exception("element errors have to be calculated first, call ErrorCalculator::calculate_errors().");
-      if(refinement_selectors.empty())
+      if (refinement_selectors.empty())
         throw Exceptions::NullException(1);
-      if(spaces.size() != refinement_selectors.size())
+      if (spaces.size() != refinement_selectors.size())
         throw Exceptions::LengthException(1, refinement_selectors.size(), spaces.size());
 
       // Get meshes
@@ -211,15 +211,15 @@ namespace Hermes
       }
 
       // Clearing.
-      if(elements_to_refine)
+      if (elements_to_refine)
         free_with_check(elements_to_refine);
 
       // Also handle the refinementInfoMeshFunctions.
-      if(this->refinementInfoMeshFunctionGlobal)
+      if (this->refinementInfoMeshFunctionGlobal)
         this->refinementInfoMeshFunctionGlobal.reset();
-      for(int i = 0; i < this->num; i++)
-        if(this->refinementInfoMeshFunction[i])
-          this->refinementInfoMeshFunction[i].reset();
+      for (int i = 0; i < this->num; i++)
+      if (this->refinementInfoMeshFunction[i])
+        this->refinementInfoMeshFunction[i].reset();
 
       // Init the caught parallel exception message.
       this->exceptionMessageCaughtInParallelBlock.clear();
@@ -237,13 +237,13 @@ namespace Hermes
 
       // For ALL elements on ALL meshes.
       // The stopping condition for this loop is the stopping condition for adaptivity.
-      for(int element_inspected_i = 0; element_inspected_i < this->errorCalculator->num_act_elems; element_inspected_i++)
+      for (int element_inspected_i = 0; element_inspected_i < this->errorCalculator->num_act_elems; element_inspected_i++)
       {
         // Get the element info from the error calculator.
         typename ErrorCalculator<Scalar>::ElementReference element_reference = this->errorCalculator->get_element_reference(element_inspected_i);
 
         // Ask the strategy if we should add this refinement or break the loop.
-        if(!this->strategy->add_refinement(this->errorCalculator, processed_error_squared, max_error_squared, element_inspected_i))
+        if (!this->strategy->add_refinement(this->errorCalculator, processed_error_squared, max_error_squared, element_inspected_i))
           break;
 
         processed_error_squared += *(element_reference.error);
@@ -277,7 +277,7 @@ namespace Hermes
       MeshFunctionSharedPtr<Scalar>* rslns = malloc_with_check<Adapt<Scalar>, MeshFunctionSharedPtr<Scalar> >(this->num, this);
       OGProjection<Scalar> ogProjection;
 
-      for(unsigned int i = 0; i < this->num; i++)
+      for (unsigned int i = 0; i < this->num; i++)
       {
         rslns[i] = MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>());
 
@@ -295,15 +295,15 @@ namespace Hermes
         int thread_number = omp_get_thread_num();
         int start = (attempted_element_refinements_count / this->num_threads_used) * thread_number;
         int end = (attempted_element_refinements_count / this->num_threads_used) * (thread_number + 1);
-        if(thread_number == this->num_threads_used - 1)
+        if (thread_number == this->num_threads_used - 1)
           end = attempted_element_refinements_count;
 
         // rslns cloning.
         MeshFunctionSharedPtr<Scalar>* current_rslns = malloc_with_check<Adapt<Scalar>, MeshFunctionSharedPtr<Scalar> >(this->num, this);
-        for(unsigned int i = 0; i < this->num; i++)
+        for (unsigned int i = 0; i < this->num; i++)
           current_rslns[i] = rslns[i]->clone();
 
-        for(int id_to_refine = start; id_to_refine < end; id_to_refine++)
+        for (int id_to_refine = start; id_to_refine < end; id_to_refine++)
         {
           try
           {
@@ -317,7 +317,7 @@ namespace Hermes
             ElementToRefine elem_ref(element_id, component);
 
             // Rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
-            if(refinement_selectors[component]->select_refinement(meshes[component]->get_element(element_id), current_order, current_rslns[component].get(), elem_ref))
+            if (refinement_selectors[component]->select_refinement(meshes[component]->get_element(element_id), current_order, current_rslns[component].get(), elem_ref))
             {
               // Put this refinement to the storage.
               elements_to_refine[id_to_refine] = elem_ref;
@@ -326,9 +326,15 @@ namespace Hermes
             else
               elements_to_refine[id_to_refine] = ElementToRefine(-1, -1);
           }
-          catch(std::exception& exception)
+          catch (Hermes::Exceptions::Exception& e)
           {
-            this->exceptionMessageCaughtInParallelBlock = exception.what();
+#pragma omp critical (exceptionMessageCaughtInParallelBlock)
+            this->exceptionMessageCaughtInParallelBlock = e.info();
+          }
+          catch (std::exception& e)
+          {
+#pragma omp critical (exceptionMessageCaughtInParallelBlock)
+            this->exceptionMessageCaughtInParallelBlock = e.what();
           }
         }
 
@@ -337,7 +343,7 @@ namespace Hermes
 
       free_with_check(rslns);
 
-      if(!this->exceptionMessageCaughtInParallelBlock.empty())
+      if (!this->exceptionMessageCaughtInParallelBlock.empty())
       {
         this->deinit_adapt(element_refinement_location);
         throw Hermes::Exceptions::Exception(this->exceptionMessageCaughtInParallelBlock.c_str());
@@ -376,9 +382,9 @@ namespace Hermes
     void Adapt<Scalar>::adapt_postprocess(MeshSharedPtr* meshes, int element_refinements_count)
     {
       // mesh regularization
-      if(this->regularization >= 0)
+      if (this->regularization >= 0)
       {
-        if(this->regularization == 0)
+        if (this->regularization == 0)
         {
           this->regularization = 1;
           this->warn("Total mesh regularization is not supported in adaptivity. 1-irregular mesh is used instead.");
@@ -387,15 +393,15 @@ namespace Hermes
         {
           int* parents;
           parents = meshes[i]->regularize(this->regularization);
-          for(int j = 0; j < this->num; j++)
-            if(this->meshes[i]->get_seq() == this->meshes[j]->get_seq())
-              this->spaces[j]->distribute_orders(meshes[i], parents);
+          for (int j = 0; j < this->num; j++)
+          if (this->meshes[i]->get_seq() == this->meshes[j]->get_seq())
+            this->spaces[j]->distribute_orders(meshes[i], parents);
           free_with_check(parents);
         }
       }
 
       // since space changed, assign dofs:
-      for(unsigned int i = 0; i < this->spaces.size(); i++)
+      for (unsigned int i = 0; i < this->spaces.size(); i++)
         this->spaces[i]->assign_dofs();
 
       Element* e;
@@ -406,7 +412,7 @@ namespace Hermes
       }
 
       // EXTREMELY important - set the changed_in_last_adaptation to changed elements.
-      for(int i = 0; i < element_refinements_count; i++)
+      for (int i = 0; i < element_refinements_count; i++)
       {
         typename ErrorCalculator<Scalar>::ElementReference element_reference = this->errorCalculator->get_element_reference(i);
         int element_id = element_reference.element_id;
@@ -418,10 +424,10 @@ namespace Hermes
     template<typename Scalar>
     MeshFunctionSharedPtr<double> Adapt<Scalar>::get_refinementInfoMeshFunction(int component)
     {
-      if(component == -1)
+      if (component == -1)
       {
         // The value is ready to be returned if it has been initialized and no other adaptivity run has been performed since.
-        if(refinementInfoMeshFunctionGlobal)
+        if (refinementInfoMeshFunctionGlobal)
           return refinementInfoMeshFunctionGlobal;
 
         // Union mesh preparation.
@@ -439,16 +445,16 @@ namespace Hermes
           int thread_number = omp_get_thread_num();
           int start = (num_states / this->num_threads_used) * thread_number;
           int end = (num_states / this->num_threads_used) * (thread_number + 1);
-          if(thread_number == this->num_threads_used - 1)
+          if (thread_number == this->num_threads_used - 1)
             end = num_states;
 
-          for(int state_i = start; state_i < end; state_i++)
+          for (int state_i = start; state_i < end; state_i++)
           {
             Traverse::State* current_state = states[state_i];
-            for(int i = 0; i < this->elements_to_refine_count; i++)
+            for (int i = 0; i < this->elements_to_refine_count; i++)
             {
               Element* current_element = current_state->e[this->elements_to_refine[i].comp];
-              if(this->elements_to_refine[i].id == current_element->id || (current_element->parent && this->elements_to_refine[i].id == current_element->parent->id))
+              if (this->elements_to_refine[i].id == current_element->id || (current_element->parent && this->elements_to_refine[i].id == current_element->parent->id))
                 info_array[current_state->e[this->num]->id] = this->elements_to_refine[i].split;
             }
           }
@@ -461,26 +467,26 @@ namespace Hermes
       }
       else
       {
-        if(component >= this->num)
+        if (component >= this->num)
           throw Exceptions::ValueException("component", component, this->num);
 
         // The value is ready to be returned if it has been initialized and no other adaptivity run has been performed since.
-        if(this->refinementInfoMeshFunction[component])
+        if (this->refinementInfoMeshFunction[component])
           return this->refinementInfoMeshFunction[component];
         else
         {
           int* info_array = calloc_with_check<Adapt<Scalar>, int>(this->spaces[component]->get_mesh()->get_num_elements(), this);
-          for(int i = 0; i < this->elements_to_refine_count; i++)
+          for (int i = 0; i < this->elements_to_refine_count; i++)
           {
-            if(this->elements_to_refine[i].comp == component)
+            if (this->elements_to_refine[i].comp == component)
             {
-              if(this->elements_to_refine[i].split == H2D_REFINEMENT_P)
+              if (this->elements_to_refine[i].split == H2D_REFINEMENT_P)
                 info_array[this->elements_to_refine[i].id] = 2;
               else
               {
-                for(int sons_i = 0; sons_i < H2D_MAX_ELEMENT_SONS; sons_i++)
-                  if(this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i])
-                    info_array[this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i]->id] = this->elements_to_refine[i].split == H2D_REFINEMENT_H ? 1 : 2;
+                for (int sons_i = 0; sons_i < H2D_MAX_ELEMENT_SONS; sons_i++)
+                if (this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i])
+                  info_array[this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i]->id] = this->elements_to_refine[i].split == H2D_REFINEMENT_H ? 1 : 2;
               }
             }
           }
@@ -493,7 +499,7 @@ namespace Hermes
     template<typename Scalar>
     bool Adapt<Scalar>::adapt(RefinementSelectors::Selector<Scalar>* refinement_selector)
     {
-      if(!refinement_selector)
+      if (!refinement_selector)
         throw Exceptions::NullException(1);
       Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
       refinement_selectors.push_back(refinement_selector);
@@ -504,36 +510,36 @@ namespace Hermes
     void Adapt<Scalar>::fix_shared_mesh_refinements(MeshSharedPtr* meshes, ElementToRefine*& elems_to_refine, int& num_elem_to_proc, ElementToRefine*** idx, RefinementSelectors::Selector<Scalar>** refinement_selectors)
     {
       // Simple returns.
-      if(this->num == 1)
+      if (this->num == 1)
         return;
 
       // For additions.
       std::vector<ElementToRefine> new_elems_to_refine;
 
-      for(int inx = 0; inx < num_elem_to_proc; inx++)
+      for (int inx = 0; inx < num_elem_to_proc; inx++)
       {
         ElementToRefine& elem_ref = elems_to_refine[inx];
-        if(elem_ref.id == -1)
+        if (elem_ref.id == -1)
           continue;
 
         //select a refinement used by all components that share a mesh which is about to be refined
         int selected_refinement = elem_ref.split;
         for (int j = 0; j < this->num; j++)
         {
-          if(selected_refinement == H2D_REFINEMENT_H)
+          if (selected_refinement == H2D_REFINEMENT_H)
             break; // iso refinement is max what can be recieved
 
           // if a mesh is shared
-          if(j != elem_ref.comp && meshes[j]->get_seq() == meshes[elem_ref.comp]->get_seq())
+          if (j != elem_ref.comp && meshes[j]->get_seq() == meshes[elem_ref.comp]->get_seq())
           {
             // and the sample element is about to be refined by another compoment
-            if(idx[j][elem_ref.id])
-            { 
+            if (idx[j][elem_ref.id])
+            {
               ElementToRefine* elem_ref_ii = idx[j][elem_ref.id];
               //select more complicated refinement
-              if((elem_ref_ii->split != selected_refinement) && (elem_ref_ii->split != H2D_REFINEMENT_P))
-              { 
-                if((elem_ref_ii->split == H2D_REFINEMENT_ANISO_H || elem_ref_ii->split == H2D_REFINEMENT_ANISO_V) && selected_refinement == H2D_REFINEMENT_P)
+              if ((elem_ref_ii->split != selected_refinement) && (elem_ref_ii->split != H2D_REFINEMENT_P))
+              {
+                if ((elem_ref_ii->split == H2D_REFINEMENT_ANISO_H || elem_ref_ii->split == H2D_REFINEMENT_ANISO_V) && selected_refinement == H2D_REFINEMENT_P)
                   selected_refinement = elem_ref_ii->split;
                 else
                   selected_refinement = H2D_REFINEMENT_H;
@@ -543,10 +549,10 @@ namespace Hermes
         }
 
         //fix other refinements according to the selected refinement
-        if(selected_refinement != H2D_REFINEMENT_P)
+        if (selected_refinement != H2D_REFINEMENT_P)
         {
           // change currently processed refinement
-          if(elem_ref.split != selected_refinement)
+          if (elem_ref.split != selected_refinement)
           {
             elem_ref.split = selected_refinement;
             ElementToRefine::copy_orders(elem_ref.refinement_polynomial_order, elem_ref.best_refinement_polynomial_order_type[selected_refinement]);
@@ -556,16 +562,16 @@ namespace Hermes
           for (int j = 0; j < this->num; j++)
           {
             // if components share the mesh
-            if(j != elem_ref.comp && meshes[j]->get_seq() == meshes[elem_ref.comp]->get_seq())
-            { 
+            if (j != elem_ref.comp && meshes[j]->get_seq() == meshes[elem_ref.comp]->get_seq())
+            {
               // change other refinements
-              if(idx[j][elem_ref.id])
+              if (idx[j][elem_ref.id])
               {
                 ElementToRefine* elem_ref_ii = idx[j][elem_ref.id];
-                if(elem_ref_ii->split != selected_refinement)
+                if (elem_ref_ii->split != selected_refinement)
                 {
                   elem_ref_ii->split = selected_refinement;
-                  if(elem_ref_ii->best_refinement_polynomial_order_type[selected_refinement])
+                  if (elem_ref_ii->best_refinement_polynomial_order_type[selected_refinement])
                     ElementToRefine::copy_orders(elem_ref_ii->refinement_polynomial_order, elem_ref_ii->best_refinement_polynomial_order_type[selected_refinement]);
                   else
                   {
@@ -591,14 +597,14 @@ namespace Hermes
       }
 
       // Adding the additions.
-      if(new_elems_to_refine.size() > 0)
+      if (new_elems_to_refine.size() > 0)
       {
         ElementToRefine* new_elems_to_refine_array = malloc_with_check<Adapt<Scalar>, ElementToRefine>(num_elem_to_proc + new_elems_to_refine.size(), this);
         memcpy(new_elems_to_refine_array, elems_to_refine, num_elem_to_proc * sizeof(ElementToRefine));
         ::free(elems_to_refine);
         elems_to_refine = new_elems_to_refine_array;
 
-        for(int inx = 0; inx < new_elems_to_refine.size(); inx++)
+        for (int inx = 0; inx < new_elems_to_refine.size(); inx++)
           elems_to_refine[num_elem_to_proc + inx] = new_elems_to_refine[inx];
         num_elem_to_proc += new_elems_to_refine.size();
       }
@@ -617,7 +623,7 @@ namespace Hermes
 
           for (int j = 0; j < this->num; j++)
           {
-            if((j != i) && (meshes[j]->get_seq() == meshes[i]->get_seq()))
+            if ((j != i) && (meshes[j]->get_seq() == meshes[i]->get_seq()))
             {
               int quad_order = this->spaces[j]->get_element_order(e->id);
               current_order_h = std::max(current_order_h, H2D_GET_H_ORDER(quad_order));
@@ -640,21 +646,21 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::apply_refinement(const ElementToRefine& elem_ref)
     {
-      if(elem_ref.id == -1)
+      if (elem_ref.id == -1)
         return;
 
       SpaceSharedPtr<Scalar>& space = this->spaces[elem_ref.comp];
 
       Element* e = space->get_mesh()->get_element(elem_ref.id);
 
-      if(elem_ref.split == H2D_REFINEMENT_P)
+      if (elem_ref.split == H2D_REFINEMENT_P)
       {
         space->set_element_order_internal(elem_ref.id, elem_ref.refinement_polynomial_order[0]);
         space->edata[elem_ref.id].changed_in_last_adaptation = true;
       }
-      else if(elem_ref.split == H2D_REFINEMENT_H)
+      else if (elem_ref.split == H2D_REFINEMENT_H)
       {
-        if(e->active)
+        if (e->active)
           space->get_mesh()->refine_element_id(elem_ref.id);
         for (int j = 0; j < 4; j++)
         {
@@ -664,14 +670,14 @@ namespace Hermes
       }
       else
       {
-        if(e->active)
+        if (e->active)
         {
           space->get_mesh()->refine_element_id(elem_ref.id, (elem_ref.split == H2D_REFINEMENT_ANISO_H ? 1 : 2));
         }
         for (int j = 0; j < 2; j++)
         {
-          space->set_element_order_internal(e->sons[ (elem_ref.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2 ]->id, elem_ref.refinement_polynomial_order[j]);
-          space->edata[e->sons[ (elem_ref.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2 ]->id].changed_in_last_adaptation = true;
+          space->set_element_order_internal(e->sons[(elem_ref.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2]->id, elem_ref.refinement_polynomial_order[j]);
+          space->edata[e->sons[(elem_ref.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2]->id].changed_in_last_adaptation = true;
         }
       }
     }

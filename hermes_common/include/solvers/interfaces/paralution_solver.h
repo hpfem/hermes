@@ -113,7 +113,7 @@ namespace Hermes
     private:
       /// Paralution preconditioner
       paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
-      
+
       /// Helper precond for saddle point.
       paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePoint_p_k;
       /// Helper precond for saddle point.
@@ -137,7 +137,7 @@ namespace Hermes
 
       static void set_threads_paralution()
       {
-        if(HermesCommonApi.get_integral_param_value(matrixSolverType) == SOLVER_PARALUTION_AMG || HermesCommonApi.get_integral_param_value(matrixSolverType) == SOLVER_PARALUTION_ITERATIVE)
+        if (HermesCommonApi.get_integral_param_value(matrixSolverType) == SOLVER_PARALUTION_AMG || HermesCommonApi.get_integral_param_value(matrixSolverType) == SOLVER_PARALUTION_ITERATIVE)
         {
           paralution::set_omp_threads_paralution(HermesCommonApi.get_integral_param_value(numThreads));
           paralution::info_paralution();

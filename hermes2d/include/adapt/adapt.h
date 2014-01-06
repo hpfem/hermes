@@ -74,7 +74,7 @@ namespace Hermes
       /// See comments above.
       double threshold;
     };
-    
+
     /// Stopping criterion based on maximum element error.
     /// The method add_refinement will return false as soon as the particular element carries lower error than AdaptStoppingCriterionSingleElement::threshold
     /// times the maximum element error.
@@ -92,7 +92,7 @@ namespace Hermes
       /// See comments above.
       double threshold;
     };
-    
+
     /// Stopping criterion based on refining elements with similar errors.
     /// The method add_refinement will return false as soon as the particular element carries significantly less error than the previous one in the descending sequence.
     /// Useful e.g. when we are more interested in overall solution quality than resolution of a steep singularity etc.
@@ -110,7 +110,7 @@ namespace Hermes
       /// See comments above.
       double threshold;
     };
-    
+
     /// Evaluation of an error between a (coarse) solution and a reference solution and adaptivity.
     /// \ingroup g_adapt
     /** The class provides basic functionality necessary to adaptively refine elements.
@@ -122,15 +122,15 @@ namespace Hermes
     class HERMES_API Adapt :
       public Hermes::Mixins::TimeMeasurable,
       public Hermes::Mixins::Loggable,
-      public Hermes::Mixins::StateQueryable, 
+      public Hermes::Mixins::StateQueryable,
       public Hermes::Hermes2D::Mixins::Parallel
     {
     public:
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
       /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
       Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
-			Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
-			Adapt(ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
+      Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
+      Adapt(ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
       void free();  ///< Deallocates allocated private data.
 
@@ -222,7 +222,7 @@ namespace Hermes
       /// Information about performed refinements.
       ElementToRefine* elements_to_refine;
       int elements_to_refine_count;
-      
+
       /// Mesh function for postprocessing the information about which elements have been refined - on component basis
       MeshFunctionSharedPtr<double> refinementInfoMeshFunction[H2D_MAX_COMPONENTS];
       /// Mesh function for postprocessing the information about which elements have been refined - for the whole system.

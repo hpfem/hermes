@@ -23,9 +23,9 @@ namespace Hermes
 
     template<typename Scalar>
     DiscreteProblemSelectiveAssembler<Scalar>::DiscreteProblemSelectiveAssembler()
-    : sp_seq(nullptr), 
+      : sp_seq(nullptr),
       spaces_size(0),
-      matrix_structure_reusable(false), 
+      matrix_structure_reusable(false),
       vector_structure_reusable(false)
     {
     }
@@ -33,8 +33,8 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblemSelectiveAssembler<Scalar>::~DiscreteProblemSelectiveAssembler()
     {
-      if(sp_seq)
-        delete [] sp_seq;
+      if (sp_seq)
+        delete[] sp_seq;
     }
 
     template<typename Scalar>
@@ -42,18 +42,18 @@ namespace Hermes
     {
       int ndof = Space<Scalar>::get_num_dofs(spaces);
 
-      if(matrix_structure_reusable && mat)
+      if (matrix_structure_reusable && mat)
         mat->zero();
 
-      if(vector_structure_reusable && rhs)
+      if (vector_structure_reusable && rhs)
       {
-        if(rhs->get_size() == 0)
+        if (rhs->get_size() == 0)
           rhs->alloc(ndof);
         else
           rhs->zero();
       }
 
-      if(!matrix_structure_reusable && mat)
+      if (!matrix_structure_reusable && mat)
       {
         // Spaces have changed: create the matrix from scratch.
         matrix_structure_reusable = true;
@@ -62,41 +62,41 @@ namespace Hermes
 
         AsmList<Scalar>* al = malloc_with_check<AsmList<Scalar> >(spaces_size);
         bool **blocks = this->wf->get_blocks(this->force_diagonal_blocks);
-        
+
         // Loop through all elements.
-        for(int state_i = 0; state_i < num_states; state_i++)
+        for (int state_i = 0; state_i < num_states; state_i++)
         {
           Traverse::State* current_state = states[state_i];
 
           // Obtain assembly lists for the element at all spaces.
           /// \todo do not get the assembly list again if the element was not changed.
           for (unsigned int i = 0; i < spaces_size; i++)
-            if(current_state->e[i])
-              spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
+          if (current_state->e[i])
+            spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
 
-          if(this->wf->is_DG() && !this->wf->mfDG.empty())
+          if (this->wf->is_DG() && !this->wf->mfDG.empty())
           {
             // Number of edges ( =  number of vertices).
             int num_edges = current_state->e[0]->nvert;
 
             // Allocation an array of arrays of neighboring elements for every mesh x edge.
             Element **** neighbor_elems_arrays = new Element ***[spaces_size];
-            for(unsigned int i = 0; i < spaces_size; i++)
+            for (unsigned int i = 0; i < spaces_size; i++)
               neighbor_elems_arrays[i] = new Element **[num_edges];
 
             // The same, only for number of elements
             int ** neighbor_elems_counts = new int *[spaces_size];
-            for(unsigned int i = 0; i < spaces_size; i++)
+            for (unsigned int i = 0; i < spaces_size; i++)
               neighbor_elems_counts[i] = new int[num_edges];
 
             // Get the neighbors.
-            for(unsigned int el = 0; el < spaces_size; el++)
+            for (unsigned int el = 0; el < spaces_size; el++)
             {
               NeighborSearch<Scalar> ns(current_state->e[el], spaces[el]->get_mesh());
 
-              for(int ed = 0; ed < num_edges; ed++)
+              for (int ed = 0; ed < num_edges; ed++)
               {
-                if(current_state->e[el]->en[ed]->bnd)
+                if (current_state->e[el]->en[ed]->bnd)
                   continue;
 
                 ns.set_active_edge(ed);
@@ -104,7 +104,7 @@ namespace Hermes
 
                 neighbor_elems_counts[el][ed] = ns.get_num_neighbors();
                 neighbor_elems_arrays[el][ed] = new Element *[neighbor_elems_counts[el][ed]];
-                for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++)
+                for (int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++)
                   neighbor_elems_arrays[el][ed][neigh] = (*neighbors)[neigh];
               }
             }
@@ -112,16 +112,16 @@ namespace Hermes
             // Pre-add into the stiffness matrix.
             for (unsigned int m = 0; m < spaces_size; m++)
             {
-              for(unsigned int el = 0; el < spaces_size; el++)
+              for (unsigned int el = 0; el < spaces_size; el++)
               {
-                for(int ed = 0; ed < num_edges; ed++)
+                for (int ed = 0; ed < num_edges; ed++)
                 {
-                  if(current_state->e[el]->en[ed]->bnd)
+                  if (current_state->e[el]->en[ed]->bnd)
                     continue;
 
-                  for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++)
+                  for (int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++)
                   {
-                    if((blocks[m][el] || blocks[el][m]) && current_state->e[m])
+                    if ((blocks[m][el] || blocks[el][m]) && current_state->e[m])
                     {
                       AsmList<Scalar>*am = &(al[m]);
                       AsmList<Scalar>*an = new AsmList<Scalar>;
@@ -131,14 +131,14 @@ namespace Hermes
                       // register nonzero elements
                       for (unsigned int i = 0; i < am->cnt; i++)
                       {
-                        if(am->dof[i] >= 0)
+                        if (am->dof[i] >= 0)
                         {
                           for (unsigned int j = 0; j < an->cnt; j++)
                           {
-                            if(an->dof[j] >= 0)
+                            if (an->dof[j] >= 0)
                             {
-                              if(blocks[m][el]) mat->pre_add_ij(am->dof[i], an->dof[j]);
-                              if(blocks[el][m]) mat->pre_add_ij(an->dof[j], am->dof[i]);
+                              if (blocks[m][el]) mat->pre_add_ij(am->dof[i], an->dof[j]);
+                              if (blocks[el][m]) mat->pre_add_ij(an->dof[j], am->dof[i]);
                             }
                           }
                         }
@@ -152,21 +152,21 @@ namespace Hermes
 
             // Deallocation an array of arrays of neighboring elements
             // for every mesh x edge.
-            for(unsigned int el = 0; el < spaces_size; el++)
+            for (unsigned int el = 0; el < spaces_size; el++)
             {
-              for(int ed = 0; ed < num_edges; ed++)
+              for (int ed = 0; ed < num_edges; ed++)
               {
-                if(!current_state->e[el]->en[ed]->bnd)
-                  delete [] neighbor_elems_arrays[el][ed];
+                if (!current_state->e[el]->en[ed]->bnd)
+                  delete[] neighbor_elems_arrays[el][ed];
               }
-              delete [] neighbor_elems_arrays[el];
+              delete[] neighbor_elems_arrays[el];
             }
-            delete [] neighbor_elems_arrays;
+            delete[] neighbor_elems_arrays;
 
             // The same, only for number of elements.
-            for(unsigned int el = 0; el < spaces_size; el++)
-              delete [] neighbor_elems_counts[el];
-            delete [] neighbor_elems_counts;
+            for (unsigned int el = 0; el < spaces_size; el++)
+              delete[] neighbor_elems_counts[el];
+            delete[] neighbor_elems_counts;
           }
 
           // Go through all equation-blocks of the local stiffness matrix.
@@ -174,7 +174,7 @@ namespace Hermes
           {
             for (unsigned int n = 0; n < spaces_size; n++)
             {
-              if(blocks[m][n] && current_state->e[m] && current_state->e[n])
+              if (blocks[m][n] && current_state->e[m] && current_state->e[n])
               {
                 AsmList<Scalar>*am = &(al[m]);
                 AsmList<Scalar>*an = &(al[n]);
@@ -182,10 +182,10 @@ namespace Hermes
                 // Pretend assembling of the element stiffness matrix.
                 for (unsigned int i = 0; i < am->cnt; i++)
                 {
-                  if(am->dof[i] >= 0)
-                    for (unsigned int j = 0; j < an->cnt; j++)
-                      if(an->dof[j] >= 0)
-                        mat->pre_add_ij(am->dof[i], an->dof[j]);
+                  if (am->dof[i] >= 0)
+                  for (unsigned int j = 0; j < an->cnt; j++)
+                  if (an->dof[j] >= 0)
+                    mat->pre_add_ij(am->dof[i], an->dof[j]);
                 }
               }
             }
@@ -200,7 +200,7 @@ namespace Hermes
 
       // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied
       // by previous vector before allocating
-      if(!vector_structure_reusable && rhs)
+      if (!vector_structure_reusable && rhs)
       {
         vector_structure_reusable = true;
         rhs->alloc(ndof);
@@ -212,20 +212,20 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemSelectiveAssembler<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spacesToSet)
     {
-      if(!sp_seq)
+      if (!sp_seq)
       {
         // Internal variables settings.
         this->spaces_size = spacesToSet.size();
         sp_seq = new int[spaces_size];
-        memset(sp_seq, -1, sizeof(int) * spaces_size);
+        memset(sp_seq, -1, sizeof(int)* spaces_size);
       }
       else
       {
-        for(unsigned int i = 0; i < spaces_size; i++)
+        for (unsigned int i = 0; i < spaces_size; i++)
         {
           int new_sp_seq = spacesToSet[i]->get_seq();
 
-          if(new_sp_seq != sp_seq[i])
+          if (new_sp_seq != sp_seq[i])
           {
             matrix_structure_reusable = false;
             vector_structure_reusable = false;
@@ -243,23 +243,23 @@ namespace Hermes
       this->matrix_structure_reusable = false;
       this->vector_structure_reusable = false;
 
-      if(spaces_size == 0)
+      if (spaces_size == 0)
         return;
     }
 
     template<typename Scalar>
     bool DiscreteProblemSelectiveAssembler<Scalar>::form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state)
     {
-      if(current_state->e[form->i] && current_state->e[form->j])
+      if (current_state->e[form->i] && current_state->e[form->j])
       {
-        if(fabs(form->scaling_factor) < Hermes::HermesSqrtEpsilon)
+        if (fabs(form->scaling_factor) < Hermes::HermesSqrtEpsilon)
           return false;
 
         // If a block scaling table is provided, and if the scaling coefficient
         // A_mn for this block is zero, then the form does not need to be assembled.
-        if(this->block_weights)
-          if(fabs(this->block_weights->get_A(form->i / this->RK_original_spaces_count, form->j / this->RK_original_spaces_count)) < Hermes::HermesSqrtEpsilon)
-            return false;
+        if (this->block_weights)
+        if (fabs(this->block_weights->get_A(form->i / this->RK_original_spaces_count, form->j / this->RK_original_spaces_count)) < Hermes::HermesSqrtEpsilon)
+          return false;
         return true;
       }
       return false;
@@ -268,16 +268,16 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblemSelectiveAssembler<Scalar>::form_to_be_assembled(MatrixFormVol<Scalar>* form, Traverse::State* current_state)
     {
-      if(!form_to_be_assembled((MatrixForm<Scalar>*)form, current_state))
+      if (!form_to_be_assembled((MatrixForm<Scalar>*)form, current_state))
         return false;
 
-      if(form->assembleEverywhere)
+      if (form->assembleEverywhere)
         return true;
 
       int this_marker = current_state->rep->marker;
       for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
-        if(form->areas_internal[ss] == this_marker)
-          return true;
+      if (form->areas_internal[ss] == this_marker)
+        return true;
 
       return false;
     }
@@ -285,19 +285,19 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblemSelectiveAssembler<Scalar>::form_to_be_assembled(MatrixFormSurf<Scalar>* form, Traverse::State* current_state)
     {
-      if(!form_to_be_assembled((MatrixForm<Scalar>*)form, current_state))
+      if (!form_to_be_assembled((MatrixForm<Scalar>*)form, current_state))
         return false;
 
-      if(current_state->rep->en[current_state->isurf]->marker == 0)
+      if (current_state->rep->en[current_state->isurf]->marker == 0)
         return false;
 
-      if(form->assembleEverywhere)
+      if (form->assembleEverywhere)
         return true;
 
       int this_marker = current_state->rep->en[current_state->isurf]->marker;
       for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
-        if(form->areas_internal[ss] == this_marker)
-          return true;
+      if (form->areas_internal[ss] == this_marker)
+        return true;
 
       return false;
     }
@@ -311,9 +311,9 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblemSelectiveAssembler<Scalar>::form_to_be_assembled(VectorForm<Scalar>* form, Traverse::State* current_state)
     {
-      if(!current_state->e[form->i])
+      if (!current_state->e[form->i])
         return false;
-      if(fabs(form->scaling_factor) < Hermes::HermesSqrtEpsilon)
+      if (fabs(form->scaling_factor) < Hermes::HermesSqrtEpsilon)
         return false;
 
       return true;
@@ -322,16 +322,16 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblemSelectiveAssembler<Scalar>::form_to_be_assembled(VectorFormVol<Scalar>* form, Traverse::State* current_state)
     {
-      if(!form_to_be_assembled((VectorForm<Scalar>*)form, current_state))
+      if (!form_to_be_assembled((VectorForm<Scalar>*)form, current_state))
         return false;
 
-      if(form->assembleEverywhere)
+      if (form->assembleEverywhere)
         return true;
 
       int this_marker = current_state->rep->marker;
       for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
-        if(form->areas_internal[ss] == this_marker)
-          return true;
+      if (form->areas_internal[ss] == this_marker)
+        return true;
 
       return false;
     }
@@ -339,19 +339,19 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblemSelectiveAssembler<Scalar>::form_to_be_assembled(VectorFormSurf<Scalar>* form, Traverse::State* current_state)
     {
-      if(!form_to_be_assembled((VectorForm<Scalar>*)form, current_state))
+      if (!form_to_be_assembled((VectorForm<Scalar>*)form, current_state))
         return false;
 
-      if(current_state->rep->en[current_state->isurf]->marker == 0)
+      if (current_state->rep->en[current_state->isurf]->marker == 0)
         return false;
 
-      if(form->assembleEverywhere)
+      if (form->assembleEverywhere)
         return true;
 
       int this_marker = current_state->rep->en[current_state->isurf]->marker;
       for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
-        if(form->areas_internal[ss] == this_marker)
-          return true;
+      if (form->areas_internal[ss] == this_marker)
+        return true;
 
       return false;
     }

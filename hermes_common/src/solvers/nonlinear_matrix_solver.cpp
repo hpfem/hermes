@@ -63,10 +63,10 @@ namespace Hermes
     bool NonlinearMatrixSolver<Scalar>::isOkay() const
     {
       bool toleranceSet = false;
-      for(int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
-        if(this->tolerance_set[i])
-          toleranceSet = true;
-      if(!toleranceSet)
+      for (int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
+      if (this->tolerance_set[i])
+        toleranceSet = true;
+      if (!toleranceSet)
       {
         throw Exceptions::Exception("No tolerance set in NonlinearMatrixSolver.");
         return false;
@@ -77,7 +77,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_max_allowed_iterations(int max_allowed_iterations_)
     {
-      if(max_allowed_iterations_ < 1)
+      if (max_allowed_iterations_ < 1)
         throw Exceptions::ValueException("max_allowed_iterations", max_allowed_iterations_, 1);
       this->max_allowed_iterations = max_allowed_iterations_;
     }
@@ -100,7 +100,7 @@ namespace Hermes
       free_with_check(this->sln_vector);
       this->sln_vector = malloc_with_check<NonlinearMatrixSolver<Scalar>, Scalar>(this->problem_size, this);
 
-      if(coeff_vec == nullptr)
+      if (coeff_vec == nullptr)
         memset(this->sln_vector, 0, this->problem_size*sizeof(Scalar));
       else
         memcpy(this->sln_vector, coeff_vec, this->problem_size*sizeof(Scalar));
@@ -123,52 +123,52 @@ namespace Hermes
     {
       this->handleMultipleTolerancesAnd = handleMultipleTolerancesAnd;
 
-      if(tolerance_ < 0.0)
+      if (tolerance_ < 0.0)
         throw Exceptions::ValueException("tolerance", tolerance_, 0.0);
 
-      switch(toleranceType)
+      switch (toleranceType)
       {
       case ResidualNormRelativeToInitial:
-        {
-          this->tolerance[0] = tolerance_;
-          this->tolerance_set[0] = true;
-        }
+      {
+                                          this->tolerance[0] = tolerance_;
+                                          this->tolerance_set[0] = true;
+      }
         break;
       case ResidualNormRelativeToPrevious:
-        {
-          this->tolerance[1] = tolerance_;
-          this->tolerance_set[1] = true;
-        }
+      {
+                                           this->tolerance[1] = tolerance_;
+                                           this->tolerance_set[1] = true;
+      }
         break;
       case ResidualNormRatioToInitial:
-        {
-          this->tolerance[2] = tolerance_;
-          this->tolerance_set[2] = true;
-        }
+      {
+                                       this->tolerance[2] = tolerance_;
+                                       this->tolerance_set[2] = true;
+      }
         break;
       case ResidualNormRatioToPrevious:
-        {
-          this->tolerance[3] = tolerance_;
-          this->tolerance_set[3] = true;
-        }
+      {
+                                        this->tolerance[3] = tolerance_;
+                                        this->tolerance_set[3] = true;
+      }
         break;
       case ResidualNormAbsolute:
-        {
-          this->tolerance[4] = tolerance_;
-          this->tolerance_set[4] = true;
-        }
+      {
+                                 this->tolerance[4] = tolerance_;
+                                 this->tolerance_set[4] = true;
+      }
         break;
       case SolutionChangeAbsolute:
-        {
-          this->tolerance[5] = tolerance_;
-          this->tolerance_set[5] = true;
-        }
+      {
+                                   this->tolerance[5] = tolerance_;
+                                   this->tolerance_set[5] = true;
+      }
         break;
       case SolutionChangeRelative:
-        {
-          this->tolerance[6] = tolerance_;
-          this->tolerance_set[6] = true;
-        }
+      {
+                                   this->tolerance[6] = tolerance_;
+                                   this->tolerance_set[6] = true;
+      }
         break;
       default:
         throw Exceptions::Exception("Unknown NonlinearConvergenceMeasurementType in NonlinearMatrixSolver::set_tolerance.");
@@ -178,7 +178,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set)
     {
-      if(max_allowed_residual_norm_to_set < 0.0)
+      if (max_allowed_residual_norm_to_set < 0.0)
         throw Exceptions::ValueException("max_allowed_residual_norm_to_set", max_allowed_residual_norm_to_set, 0.0);
       this->max_allowed_residual_norm = max_allowed_residual_norm_to_set;
     }
@@ -192,10 +192,10 @@ namespace Hermes
     template<typename Scalar>
     NonlinearConvergenceState NonlinearMatrixSolver<Scalar>::get_convergence_state()
     {
-      if(this->get_current_iteration_number() >= this->max_allowed_iterations)
+      if (this->get_current_iteration_number() >= this->max_allowed_iterations)
         return AboveMaxIterations;
 
-      if(NonlinearConvergenceMeasurement<Scalar>::converged(this))
+      if (NonlinearConvergenceMeasurement<Scalar>::converged(this))
         return Converged;
       else
         return NotConverged;
@@ -206,7 +206,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::clear_tolerances()
     {
-      for(int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
+      for (int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
         this->tolerance[i] = std::numeric_limits<double>::max();
       memset(this->tolerance_set, 0, sizeof(bool)*NonlinearConvergenceMeasurementTypeCount);
     }
@@ -214,7 +214,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_sufficient_improvement_factor_jacobian(double ratio)
     {
-      if(ratio < 0.0)
+      if (ratio < 0.0)
         throw Exceptions::ValueException("sufficient_improvement_factor_jacobian", sufficient_improvement_factor_jacobian, 0.0);
       this->sufficient_improvement_factor_jacobian = ratio;
     }
@@ -228,7 +228,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_min_allowed_damping_coeff(double min_allowed_damping_coeff_to_set)
     {
-      if(min_allowed_damping_coeff_to_set < 0.0)
+      if (min_allowed_damping_coeff_to_set < 0.0)
         throw Exceptions::ValueException("min_allowed_damping_coeff_to_set", min_allowed_damping_coeff_to_set, 0.0);
       this->min_allowed_damping_coeff = min_allowed_damping_coeff_to_set;
     }
@@ -236,9 +236,9 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_manual_damping_coeff(bool onOff, double coeff)
     {
-      if(coeff <= 0.0 || coeff > 1.0)
+      if (coeff <= 0.0 || coeff > 1.0)
         throw Exceptions::ValueException("coeff", coeff, 0.0, 1.0);
-      if(onOff)
+      if (onOff)
       {
         this->manual_damping = true;
         this->manual_damping_factor = coeff;
@@ -250,9 +250,9 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_initial_auto_damping_coeff(double coeff)
     {
-      if(coeff <= 0.0 || coeff > 1.0)
+      if (coeff <= 0.0 || coeff > 1.0)
         throw Exceptions::ValueException("coeff", coeff, 0.0, 1.0);
-      if(this->manual_damping)
+      if (this->manual_damping)
         this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
       else
         this->initial_auto_damping_factor = coeff;
@@ -261,9 +261,9 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_auto_damping_ratio(double ratio)
     {
-      if(ratio <= 1.0)
+      if (ratio <= 1.0)
         throw Exceptions::ValueException("ratio", ratio, 1.0);
-      if(this->manual_damping)
+      if (this->manual_damping)
         this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
       this->auto_damping_ratio = ratio;
     }
@@ -271,9 +271,9 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_sufficient_improvement_factor(double ratio)
     {
-      if(ratio <= 0.0)
+      if (ratio <= 0.0)
         throw Exceptions::ValueException("ratio", ratio, 0.0);
-      if(this->manual_damping)
+      if (this->manual_damping)
         this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
       this->sufficient_improvement_factor = ratio;
     }
@@ -281,9 +281,9 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_necessary_successful_steps_to_increase(unsigned int steps)
     {
-      if(steps < 1)
+      if (steps < 1)
         throw Exceptions::ValueException("necessary_successful_steps_to_increase", steps, 0.0);
-      if(this->manual_damping)
+      if (this->manual_damping)
         this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
       this->necessary_successful_steps_to_increase = steps;
     }
@@ -292,14 +292,14 @@ namespace Hermes
     bool NonlinearMatrixSolver<Scalar>::handle_convergence_state_return_finished(NonlinearConvergenceState state)
     {
       // If we have not converged and everything else is ok, we finish.
-      if(state == NotConverged)
+      if (state == NotConverged)
         return false;
 
       // And now the finishing states (both good and bad).
       this->finalize_solving();
 
       // Act upon the state.
-      switch(state)
+      switch (state)
       {
       case Converged:
         this->info("\tNonlinearSolver: done.\n");
@@ -330,15 +330,15 @@ namespace Hermes
     {
       Hermes::vector<double>& damping_factors_vector = this->get_parameter_value(p_damping_factors);
 
-      if(this->manual_damping)
+      if (this->manual_damping)
       {
         damping_factors_vector.push_back(this->manual_damping_factor);
         return true;
       }
-      
-      if(this->damping_factor_condition())
+
+      if (this->damping_factor_condition())
       {
-        if(++successful_steps >= this->necessary_successful_steps_to_increase)
+        if (++successful_steps >= this->necessary_successful_steps_to_increase)
         {
           double new_damping_factor = std::min(this->initial_auto_damping_factor, this->auto_damping_ratio * damping_factors_vector.back());
           this->info("\t\tstep successful, new damping factor: %g.", new_damping_factor);
@@ -357,7 +357,7 @@ namespace Hermes
         double current_damping_factor = damping_factors_vector.back();
         damping_factors_vector.pop_back();
         successful_steps = 0;
-        if(current_damping_factor <= this->min_allowed_damping_coeff)
+        if (current_damping_factor <= this->min_allowed_damping_coeff)
         {
           this->warn("\t\tNOT successful, damping factor at minimum level: %g.", min_allowed_damping_coeff);
           this->info("\t\tto decrease the minimum level, use set_min_allowed_damping_coeff()");
@@ -399,7 +399,7 @@ namespace Hermes
     template<typename Scalar>
     bool NonlinearMatrixSolver<Scalar>::force_reuse_jacobian_values(unsigned int& successful_steps_with_reused_jacobian)
     {
-      if(successful_steps_with_reused_jacobian >= this->max_steps_with_reused_jacobian)
+      if (successful_steps_with_reused_jacobian >= this->max_steps_with_reused_jacobian)
       {
         successful_steps_with_reused_jacobian = 0;
         return false;
@@ -415,7 +415,7 @@ namespace Hermes
       this->get_parameter_value(this->p_solution_norms).push_back(get_l2_norm(this->sln_vector, this->problem_size));
 
       // Assemble the system.
-      if(this->jacobian_reusable && this->constant_jacobian)
+      if (this->jacobian_reusable && this->constant_jacobian)
       {
         this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
         this->assemble_residual(false);
@@ -436,10 +436,10 @@ namespace Hermes
 
       this->solve_linear_system();
 
-      if(this->handle_convergence_state_return_finished(this->get_convergence_state()))
+      if (this->handle_convergence_state_return_finished(this->get_convergence_state()))
         return true;
 
-      if(this->on_initial_step_end() == false)
+      if (this->on_initial_step_end() == false)
       {
         this->info("\tNonlinearSolver: aborted.");
         this->finalize_solving();
@@ -517,14 +517,14 @@ namespace Hermes
 #pragma endregion
 
       // Does the initial step & checks the convergence & deallocates.
-      if(this->do_initial_step_return_finished())
+      if (this->do_initial_step_return_finished())
         return;
 
       // Main Nonlinear loop 
       while (true)
       {
         // Handle the event of step beginning.
-        if(!this->on_step_begin())
+        if (!this->on_step_begin())
         {
           this->info("\tNonlinearSolver: aborted.");
           this->finalize_solving();
@@ -543,7 +543,7 @@ namespace Hermes
 
           // Test convergence - if in this loop we found a solution.
           this->info("\t\t\tconvergence test");
-          if(this->handle_convergence_state_return_finished(this->get_convergence_state()))
+          if (this->handle_convergence_state_return_finished(this->get_convergence_state()))
             return;
 
           // Inspect the damping factor.
@@ -560,7 +560,7 @@ namespace Hermes
             return;
           }
 
-          if(!residual_norm_drop)
+          if (!residual_norm_drop)
           {
             // Delete the previous residual and solution norm.
             residual_norms.pop_back();
@@ -578,8 +578,7 @@ namespace Hermes
             // Add new_ solution norm.
             solution_norms.push_back(get_l2_norm(this->sln_vector, this->problem_size));
           }
-        }
-        while (!residual_norm_drop);
+        } while (!residual_norm_drop);
 #pragma endregion
 
         // Damping factor was updated, handle the event.
@@ -589,7 +588,7 @@ namespace Hermes
         this->info("\n\tNonlinearSolver: Jacobian handling:");
         // Loop until jacobian is not reusable anymore.
         // The whole loop is skipped if the jacobian is not suitable for being reused at all.
-        while(this->jacobian_reusable && (this->constant_jacobian || force_reuse_jacobian_values(successful_steps_jacobian)))
+        while (this->jacobian_reusable && (this->constant_jacobian || force_reuse_jacobian_values(successful_steps_jacobian)))
         {
           this->residual_back->set_vector(this->get_residual());
 
@@ -607,7 +606,7 @@ namespace Hermes
           this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
 
           // Test whether it was okay to reuse the jacobian.
-          if(!this->jacobian_reused_okay(successful_steps_jacobian))
+          if (!this->jacobian_reused_okay(successful_steps_jacobian))
           {
             this->warn("\t\treused Jacobian disapproved.");
             this->get_parameter_value(this->p_residual_norms).pop_back();
@@ -627,7 +626,7 @@ namespace Hermes
 
           // Handle the event of end of a step.
           this->on_reused_jacobian_step_end();
-          if(!this->on_step_end())
+          if (!this->on_step_end())
           {
             this->info("\tNonlinearSolver: aborted.");
             this->finalize_solving();
@@ -635,7 +634,7 @@ namespace Hermes
           }
 
           // Test convergence - if in this iteration we found a solution.
-          if(this->handle_convergence_state_return_finished(this->get_convergence_state()))
+          if (this->handle_convergence_state_return_finished(this->get_convergence_state()))
             return;
         }
 #pragma endregion
@@ -645,7 +644,7 @@ namespace Hermes
         this->assemble_jacobian(true);
 
         // Set factorization schemes.
-        if(this->jacobian_reusable)
+        if (this->jacobian_reusable)
           this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING);
         else
           this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
@@ -662,7 +661,7 @@ namespace Hermes
         this->step_info();
 
         // Handle the event of end of a step.
-        if(!this->on_step_end())
+        if (!this->on_step_end())
         {
           this->info("\tNonlinearSolver: aborted.");
           this->finalize_solving();
@@ -670,7 +669,7 @@ namespace Hermes
         }
 
         // Test convergence - if in this iteration we found a solution.
-        if(this->handle_convergence_state_return_finished(this->get_convergence_state()))
+        if (this->handle_convergence_state_return_finished(this->get_convergence_state()))
           return;
       }
     }
@@ -696,7 +695,7 @@ namespace Hermes
       double residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 1);
       double previous_residual_norm = *(this->get_parameter_value(this->p_residual_norms).end() - 2);
 
-      if((residual_norm / previous_residual_norm) > this->sufficient_improvement_factor_jacobian)
+      if ((residual_norm / previous_residual_norm) > this->sufficient_improvement_factor_jacobian)
       {
         successful_steps_with_reused_jacobian = 0;
         return false;

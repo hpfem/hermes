@@ -77,8 +77,8 @@
 #ifdef WITH_OPENMP
 #include <omp.h>
 #else
-inline int omp_get_num_threads( ) { return 1; }
-inline int omp_get_thread_num( ) { return 0; }
+inline int omp_get_num_threads() { return 1; }
+inline int omp_get_thread_num() { return 0; }
 #endif
 
 #ifdef WITH_PJLIB
@@ -175,13 +175,13 @@ namespace Hermes
 {
   const double HermesEpsilon = std::numeric_limits<double>::epsilon() * 10.;
   const double HermesSqrtEpsilon = std::sqrt(std::numeric_limits<double>::epsilon());
-  
+
   inline int sqr(int x) { return x*x; }
   inline double sqr(double x) { return x*x; }
   inline double sqrt(double x) { return std::sqrt(x); }
   inline double sqr(std::complex<double> x)   { return std::norm(x); }
   inline double magn(double x) { return fabs(x); }
-  inline double conj(double a) {  return a; }
+  inline double conj(double a) { return a; }
   inline double cos(double x) { return std::cos(x); }
   inline double sin(double x) { return std::sin(x); }
   inline double atan(double x) { return std::atan(x); }
@@ -281,7 +281,7 @@ namespace Hermes
 
       extern int dscal_(int *, double *, double *, int *);
       extern int daxpy_(int *, double *, double *, int *, double *, int *);
-      extern int dcopy_(int *,           double *, int *, double *, int *);
+      extern int dcopy_(int *, double *, int *, double *, int *);
 
 #ifdef __cplusplus
     }

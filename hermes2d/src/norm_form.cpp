@@ -89,7 +89,7 @@ namespace Hermes
     NormFormDG<Scalar>::NormFormDG(int i, int j) : NormForm(i, j)
     {
     }
-    
+
     template<typename Scalar>
     DefaultNormFormVol<Scalar>::DefaultNormFormVol(int i, int j, NormType normType) : NormFormVol<Scalar>(i, j), normType(normType)
     {
@@ -98,7 +98,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar DefaultNormFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const
     {
-      switch(this->normType)
+      switch (this->normType)
       {
       case HERMES_L2_NORM:
         return l2_norm<Scalar, Scalar>(n, wt, u, v);
@@ -123,7 +123,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar DefaultNormFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const
     {
-      switch(this->normType)
+      switch (this->normType)
       {
       case HERMES_L2_NORM:
         return l2_norm<Scalar, Scalar>(n, wt, u, v);
@@ -152,7 +152,7 @@ namespace Hermes
     Scalar MatrixDefaultNormFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
       Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
     {
-      switch(this->normType)
+      switch (this->normType)
       {
       case HERMES_L2_NORM:
         return l2_norm<double, double>(n, wt, u, v);
@@ -174,7 +174,7 @@ namespace Hermes
     Ord MatrixDefaultNormFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
       Geom<Ord> *e, Func<Ord> **ext) const
     {
-      switch(this->normType)
+      switch (this->normType)
       {
       case HERMES_L2_NORM:
         return l2_norm<Ord, Ord>(n, wt, u, v);
@@ -206,7 +206,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar VectorDefaultNormFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
     {
-      switch(this->normType)
+      switch (this->normType)
       {
       case HERMES_L2_NORM:
         return l2_norm<double, Scalar>(n, wt, ext[0], v);
@@ -228,7 +228,7 @@ namespace Hermes
     Ord VectorDefaultNormFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
       Geom<Ord> *e, Func<Ord> **ext) const
     {
-      switch(this->normType)
+      switch (this->normType)
       {
       case HERMES_L2_NORM:
         return l2_norm<Ord, Ord>(n, wt, ext[0], v);

@@ -136,7 +136,7 @@ namespace Hermes
 
       /// Set factorization scheme to default.
       virtual void set_reuse_scheme();
-      
+
       /// Set matrix ordering in the case of a system of PDEs.
       virtual void use_node_wise_ordering(unsigned int num_pdes);
       virtual void use_equations_wise_ordering();
@@ -159,10 +159,10 @@ namespace Hermes
 
       ///< Time spent on solving (in secs).
       double time;
-      
+
       /// Number of equations in a system of PDEs.
       unsigned int n_eq;
-      
+
       bool node_wise_ordering;
     };
 
@@ -232,7 +232,7 @@ namespace Hermes
       RelativeTolerance = 1,
       DivergenceTolerance = 2
     };
-    
+
     /// \brief Abstract middle-class for solvers that work in a loop of a kind (iterative, multigrid, ...)
     template <typename Scalar>
     class HERMES_API LoopSolver : public LinearMatrixSolver<Scalar>
@@ -242,7 +242,7 @@ namespace Hermes
 
       /// Get the number of iterations performed.
       virtual int get_num_iters() = 0;
-      
+
       /// Get the final residual.
       virtual double get_residual_norm() = 0;
 
@@ -268,7 +268,7 @@ namespace Hermes
       /// See the enum.
       LoopSolverToleranceType toleranceType;
     };
-    
+
     /// The solver type.
     /// Default: CG
     enum IterSolverType
@@ -294,15 +294,15 @@ namespace Hermes
       /// Set current solver type.
       /// This destroys the current solver (NOT the matrix, and rhs).
       void set_solver_type(IterSolverType iterSolverType);
-      
+
     protected:
       /// Whether the solver is preconditioned.
       bool precond_yes;
-      
+
       // Paralution solver type.
       IterSolverType iterSolverType;
     };
-    
+
     /// \brief  Abstract class for defining interface for Algebraic Multigrid solvers.
     /// Internal, though utilizable for defining interfaces to other algebraic packages.
     template <typename Scalar>
@@ -313,7 +313,7 @@ namespace Hermes
 
       /// Set smoother (an iterative linear matrix solver).
       virtual void set_smoother(IterSolverType solverType, PreconditionerType preconditionerType);
-     
+
     protected:
       /// Smoother.
       IterSolverType smootherSolverType;

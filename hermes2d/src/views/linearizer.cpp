@@ -201,10 +201,15 @@ namespace Hermes
             }
             this->threadLinearizerMultidimensional[thread_number]->deinit_processing();
           }
-          catch (std::exception& exception)
+          catch (Hermes::Exceptions::Exception& e)
           {
 #pragma omp critical (exceptionMessageCaughtInParallelBlock)
-            this->exceptionMessageCaughtInParallelBlock = exception.what();
+            this->exceptionMessageCaughtInParallelBlock = e.info();
+          }
+          catch (std::exception& e)
+          {
+#pragma omp critical (exceptionMessageCaughtInParallelBlock)
+            this->exceptionMessageCaughtInParallelBlock = e.what();
           }
         }
 

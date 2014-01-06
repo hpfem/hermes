@@ -65,7 +65,7 @@ int main(int argc, char* args[])
   mloader.load("../square.mesh", mesh);
 
   // Perform initial mesh refinement.
-  for (int i=0; i<INIT_REF; i++) 
+  for (int i = 0; i < INIT_REF; i++)
     mesh->refine_all_elements();
 
   // Create an L2 space->
@@ -107,7 +107,11 @@ int main(int argc, char* args[])
       linear_solver.solve();
       Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), ref_space, &ref_sln);
     }
-    catch(std::exception& e)
+    catch (Exceptions::Exception& e)
+    {
+      std::cout << e.info();
+    }
+    catch (std::exception& e)
     {
       std::cout << e.what();
     }
@@ -120,12 +124,12 @@ int main(int argc, char* args[])
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
     // If err_est_rel too large, adapt the mesh->
-    if(err_est_rel < ERR_STOP) done = true;
+    if (err_est_rel < ERR_STOP) done = true;
     else
     {
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      if(Space<double>::get_num_dofs(space) >= NDOF_STOP)
+      if (Space<double>::get_num_dofs(space) >= NDOF_STOP)
       {
         done = true;
         break;
@@ -134,15 +138,14 @@ int main(int argc, char* args[])
 
     // Clean up.
     delete adaptivity;
-    if(done == false)
+    if (done == false)
       delete ref_space->get_mesh();
     delete ref_space;
 
     as++;
-  }
-  while (done == false);
+  } while (done == false);
 
-  if(done)
+  if (done)
   {
     printf("Success!\n");
     return 0;

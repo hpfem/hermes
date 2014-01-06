@@ -35,7 +35,7 @@ namespace Hermes
     const int g_max_quad = 24;
     // Maximum integration order for global quadrature, for triangles.
     const int g_max_tri = 20;
-    
+
     // Maximum number of integration points.
 #define H2D_MAX_INTEGRATION_POINTS_COUNT 169
 
@@ -69,7 +69,7 @@ namespace Hermes
     public:
       inline int get_num_points(int order, ElementMode2D mode)  const { assert(order < num_tables[mode]); return np[mode][order]; };
       inline double3* get_points(int order, ElementMode2D mode) const { assert(order < num_tables[mode]); return tables[mode][order]; }
-      inline int get_edge_points(int edge, int order, ElementMode2D mode) {assert(order < num_tables[mode]);  return  max_order[mode]+1 + (3*(1-mode) + 4*mode)*order + edge;}
+      inline int get_edge_points(int edge, int order, ElementMode2D mode) { assert(order < num_tables[mode]);  return  max_order[mode] + 1 + (3 * (1 - mode) + 4 * mode)*order + edge; }
 
       inline int get_max_order(ElementMode2D mode) const { return max_order[mode]; }
       inline int get_safe_max_order(ElementMode2D mode) const { return safe_max_order[mode]; }

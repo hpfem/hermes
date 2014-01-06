@@ -48,12 +48,12 @@ namespace Hermes
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
       /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
       ErrorCalculator(CalculatedErrorType errorType);
-      
+
       /// Calculates the errors between coarse_solutions and fine_solutions.
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
       /// IMPORTANT: if the parameter is passed as false, this, and also any previous error calculations are lost and it is not possible to get back to them.
       void calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions, Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions, bool sort_and_store = true);
-      
+
       /// Calculates the errors between coarse_solutions and fine_solutions.
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
       void calculate_errors(MeshFunctionSharedPtr<Scalar>& coarse_solution, MeshFunctionSharedPtr<Scalar>& fine_solution, bool sort_and_store = true);
@@ -76,7 +76,7 @@ namespace Hermes
       double get_norm_squared(int component) const;
       double get_total_error_squared() const;
       double get_total_norm_squared() const;
-      
+
       int get_component_count() const { return this->component_count; }
 
       /// A reference to an element.
@@ -84,7 +84,7 @@ namespace Hermes
         /// Constructor. It creates an invalid element reference.
         ElementReference() : element_id(-1), comp(-1), error(nullptr), norm(nullptr) {};
         ElementReference(int comp, int element_id, double* error, double* norm) : element_id(element_id), comp(comp), error(error), norm(norm) {};
-        
+
         int element_id; ///< An element ID. Invalid if below 0.
         int comp; ///< A component which this element belongs to. Invalid if below 0.
         double* error;///< Pointer to the final error, respecting the errorType.
@@ -93,7 +93,7 @@ namespace Hermes
 
       /// A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
       const ElementReference& get_element_reference(unsigned int id) const;
-      
+
       /// Return the error mesh function - for visualization and other postprocessing of the element-wise error.
       /// \param component The component.
       MeshFunctionSharedPtr<double> get_errorMeshFunction(int component = 0);
@@ -105,7 +105,7 @@ namespace Hermes
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "ErrorCalculator"; }
-      
+
       /// Common check for data querying.
       bool data_prepared_for_querying() const;
 
@@ -119,7 +119,7 @@ namespace Hermes
       /// Data.
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions;
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions;
-      
+
       /// Absolute / Relative error.
       CalculatedErrorType errorType;
 
@@ -154,11 +154,11 @@ namespace Hermes
       /// This is for adaptivity, saying that the errors are the correct ones.
       bool elements_stored;
 
-      static int compareElementReference (const void * a, const void * b)
+      static int compareElementReference(const void * a, const void * b)
       {
         ElementReference* ref_a = (ElementReference*)(a);
         ElementReference* ref_b = (ElementReference*)(b);
-        if(*((*ref_a).error) > *((*ref_b).error))
+        if (*((*ref_a).error) > *((*ref_b).error))
           return -1;
         else
           return 1;
@@ -182,7 +182,7 @@ namespace Hermes
     public:
       DefaultNormCalculator(int component_count);
       virtual ~DefaultNormCalculator();
-      
+
       /// Norms calculation.
       double calculate_norms(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& solutions);
       /// Norms calculation.

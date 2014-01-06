@@ -81,8 +81,8 @@ namespace Hermes
       void set_output_level(double level);
 
       /// For reporting.
-      double Info [UMFPACK_INFO];
-      double Control [UMFPACK_CONTROL];
+      double Info[UMFPACK_INFO];
+      double Control[UMFPACK_CONTROL];
     };
   }
 }

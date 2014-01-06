@@ -87,7 +87,7 @@ namespace Hermes
       void add(unsigned int m, unsigned int n, Scalar v);
       using Matrix<Scalar>::export_to_file;
       void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
-      
+
       /// Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);
 
@@ -96,7 +96,7 @@ namespace Hermes
 
       /// Creates matrix using size, nnz, and the three arrays.
       void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
-      
+
       /// Duplicates a matrix (including allocation).
       CSMatrix<Scalar>* duplicate() const;
 
@@ -107,7 +107,7 @@ namespace Hermes
 
       friend class Solvers::MumpsSolver<Scalar>;
       template<typename T> friend SparseMatrix<T>*  create_matrix();
-		};
+    };
   }
 
   namespace Solvers
@@ -149,7 +149,7 @@ namespace Hermes
       bool reinit();
     private:
       void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
-      
+
       /// True if solver is inited.
       bool inited;
 

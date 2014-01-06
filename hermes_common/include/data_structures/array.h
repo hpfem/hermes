@@ -46,7 +46,7 @@ namespace Hermes
 
     static const int HERMES_PAGE_BITS = 8;
     static const int HERMES_PAGE_SIZE = 1 << HERMES_PAGE_BITS;
-    static const int HERMES_PAGE_MASK = HERMES_PAGE_SIZE-1;
+    static const int HERMES_PAGE_MASK = HERMES_PAGE_SIZE - 1;
   public:
 
     Array(int initial_page_count = 0)
@@ -55,7 +55,7 @@ namespace Hermes
       page_count = initial_page_count;
       unused_size = initial_page_count;
 
-      if(page_count)
+      if (page_count)
       {
         this->pages = malloc_with_check<Array<TYPE>, TYPE*>(page_count, this, true);
         for (unsigned i = 0; i < this->page_count; i++)
@@ -88,7 +88,7 @@ namespace Hermes
       this->unused = realloc_with_check<Array, int>(this->unused, array.unused_size, this);
 
       memcpy(this->unused, array.unused, array.unused_size * sizeof(int));
-      
+
       this->page_count = array.page_count;
       this->size = array.size;
       this->nitems = array.nitems;
@@ -99,7 +99,7 @@ namespace Hermes
       for (unsigned i = 0; i < this->page_count; i++)
       {
         TYPE* new_page = malloc_with_check<Array<TYPE>, TYPE>(HERMES_PAGE_SIZE, this);
-        memcpy(new_page, array.pages[i], sizeof(TYPE) * HERMES_PAGE_SIZE);
+        memcpy(new_page, array.pages[i], sizeof(TYPE)* HERMES_PAGE_SIZE);
         this->pages[i] = new_page;
       }
     }
@@ -167,7 +167,7 @@ namespace Hermes
     {
       TYPE* item = pages[id >> HERMES_PAGE_BITS] + (id & HERMES_PAGE_MASK);
       item->used = 0;
-      if(nunused >= unused_size)
+      if (nunused >= unused_size)
       {
         this->unused_size = std::max<int>(unused_size + 1, (int)(unused_size * 1.5));
         this->unused = realloc_with_check<Array, int>(this->unused, this->unused_size, this);
@@ -264,7 +264,7 @@ namespace Hermes
         int local_page_count = this->page_count;
         this->page_count = std::max<int>(this->page_count + 1, (int)(this->page_count * 1.5));
         this->pages = realloc_with_check<Array, TYPE*>(this->pages, this->page_count, this);
-        for(int new_i = local_page_count; new_i < this->page_count; new_i++)
+        for (int new_i = local_page_count; new_i < this->page_count; new_i++)
           pages[new_i] = malloc_with_check<Array, TYPE>(HERMES_PAGE_SIZE, this);
       }
       TYPE* item = pages[size >> HERMES_PAGE_BITS] + (size & HERMES_PAGE_MASK);
@@ -305,7 +305,7 @@ namespace Hermes
       pages = malloc_with_check<LightArray<TYPE>, TYPE*>(page_count, this, true);
       presence = malloc_with_check<LightArray<TYPE>, bool*>(page_count, this, true);
 
-      for(int i = 0; i < page_count; i++)
+      for (int i = 0; i < page_count; i++)
       {
         pages[i] = malloc_with_check<LightArray<TYPE>, TYPE>(page_size, this);
         presence[i] = calloc_with_check<LightArray<TYPE>, bool>(page_size, this);
@@ -314,7 +314,7 @@ namespace Hermes
 
     void clear()
     {
-      for(unsigned int i = 0; i < page_count; i++)
+      for (unsigned int i = 0; i < page_count; i++)
       {
         memset(presence[i], 0, page_size * sizeof(bool));
       }
@@ -341,14 +341,14 @@ namespace Hermes
     {
       TYPE* temp;
 
-      if(id >= page_count * page_size)
+      if (id >= page_count * page_size)
       {
         int new_page_count = page_count + ((id - (page_count * page_size)) / page_size) + 2;
 
         pages = realloc_with_check<LightArray<TYPE>, TYPE*>(pages, new_page_count, this);
         presence = realloc_with_check<LightArray<TYPE>, bool*>(presence, new_page_count, this);
 
-        for(int i = page_count; i < new_page_count; i++)
+        for (int i = page_count; i < new_page_count; i++)
         {
           pages[i] = malloc_with_check<LightArray<TYPE>, TYPE>(page_size, this);
           presence[i] = calloc_with_check<LightArray<TYPE>, bool>(page_size, this);
@@ -362,7 +362,7 @@ namespace Hermes
 
       presence[id >> page_bits][id & page_mask] = true;
 
-      if(id >= size)
+      if (id >= size)
         size = id + 1;
       return;
     }
@@ -375,7 +375,7 @@ namespace Hermes
     /// Checks the id position for presence.
     bool present(unsigned int id) const
     {
-      if(id >= size)
+      if (id >= size)
         return false;
       return presence[id >> page_bits][id & page_mask];
     }

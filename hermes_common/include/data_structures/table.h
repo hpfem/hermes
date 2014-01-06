@@ -99,7 +99,7 @@ namespace Hermes
   };
 
   /// \brief Butcher's tables for Runge-Kutta methods.
-  class HERMES_API ButcherTable: public Table
+  class HERMES_API ButcherTable : public Table
   {
   public:
     ButcherTable();

@@ -23,13 +23,13 @@ using namespace RefinementSelectors;
 //  The following parameters can be changed:
 
 // Initial polynomial degree.
-const int P_INIT = 2;                             
+const int P_INIT = 2;
 // Number of initial uniform mesh refinements.
-const int INIT_GLOB_REF_NUM = 3;                  
+const int INIT_GLOB_REF_NUM = 3;
 // Number of initial refinements towards boundary.
-const int INIT_BDY_REF_NUM = 5;                   
+const int INIT_BDY_REF_NUM = 5;
 // Value for custom constant initial condition.
-const double INIT_COND_CONST = 3.0;               
+const double INIT_COND_CONST = 3.0;
 // Matrix solver: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;
@@ -38,13 +38,13 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;
 // Number of last iterations used. 
 // 1... standard fixed point.
 // >1... Anderson acceleration.
-const int PICARD_NUM_LAST_ITER_USED = 4;          
+const int PICARD_NUM_LAST_ITER_USED = 4;
 // 0 <= beta <= 1... parameter for the Anderson acceleration. 
-const double PICARD_ANDERSON_BETA = 0.2;          
+const double PICARD_ANDERSON_BETA = 0.2;
 // Stopping criterion for the Picard's method.
 const double PICARD_TOL = 1e-3;
 // Maximum allowed number of Picard iterations.
-const int PICARD_MAX_ITER = 100;                  
+const int PICARD_MAX_ITER = 100;
 
 // Problem parameters.
 double heat_src = 1.0;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", mesh);
 
   // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_GLOB_REF_NUM; i++)
+  for (int i = 0; i < INIT_GLOB_REF_NUM; i++)
     mesh->refine_all_elements();
   mesh->refine_towards_boundary("Bdy", INIT_BDY_REF_NUM);
 
@@ -95,7 +95,11 @@ int main(int argc, char* argv[])
   {
     picard.solve(sln_prev_iter);
   }
-  catch(std::exception& e)
+  catch (Exceptions::Exception& e)
+  {
+    std::cout << e.info();
+  }
+  catch (std::exception& e)
   {
     std::cout << e.what();
   }
@@ -103,7 +107,7 @@ int main(int argc, char* argv[])
   // Translate the coefficient vector into a Solution. 
   MeshFunctionSharedPtr<double> sln(new Solution<double>);
   Solution<double>::vector_to_solution(picard.get_sln_vector(), space, sln);
-  
+
   // Visualise the solution and mesh.
   ScalarView s_view("Solution", new WinGeom(0, 0, 440, 350));
   s_view.show_mesh(false);

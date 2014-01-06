@@ -56,31 +56,31 @@ namespace Hermes
     int Graph::add_row(const char* name, const char* color, const char* line, const char* marker)
     {
       Row row;
-      if(name == nullptr) name = "";
+      if (name == nullptr) name = "";
       row.name = name;
       row.color = "k";
       row.line = "-";
       row.marker = "";
 
       rows.push_back(row);
-      set_row_style(rows.size()-1, color, line, marker);
-      return rows.size()-1;
+      set_row_style(rows.size() - 1, color, line, marker);
+      return rows.size() - 1;
     }
 
     void Graph::set_row_style(int row, const char* color, const char* line, const char* marker)
     {
-      if(!rows.size()) add_row(nullptr);
-      rows[row].color  = color;
-      rows[row].line   = line;
+      if (!rows.size()) add_row(nullptr);
+      rows[row].color = color;
+      rows[row].line = line;
       rows[row].marker = marker;
     }
 
     void Graph::add_values(int row, double x, double y)
     {
-      if(!rows.size()) add_row(nullptr);
-      if(fabs(x) < Hermes::HermesSqrtEpsilon) return;  // this is to avoid problems with plotting in log-log scale
+      if (!rows.size()) add_row(nullptr);
+      if (fabs(x) < Hermes::HermesSqrtEpsilon) return;  // this is to avoid problems with plotting in log-log scale
       // (sometimes the CPU time was zero and plotting crashed)
-      if(row < 0 || row >= (int)rows.size()) throw Hermes::Exceptions::Exception("Invalid row number.");
+      if (row < 0 || row >= (int)rows.size()) throw Hermes::Exceptions::Exception("Invalid row number.");
       Values xy = { x, y };
       rows[row].data.push_back(xy);
     }
@@ -88,8 +88,8 @@ namespace Hermes
     void Graph::add_values(double x, double y)
     {
       int row = 0;
-      if(!rows.size()) add_row(nullptr);
-      if(fabs(x) < Hermes::HermesSqrtEpsilon ) return;  // this is to avoid problems with plotting in log-log scale
+      if (!rows.size()) add_row(nullptr);
+      if (fabs(x) < Hermes::HermesSqrtEpsilon) return;  // this is to avoid problems with plotting in log-log scale
       // (sometimes the CPU time was zero and plotting crashed)
       Values xy = { x, y };
       rows[row].data.push_back(xy);
@@ -116,10 +116,10 @@ namespace Hermes
 
     void SimpleGraph::save(const char* filename)
     {
-      if(!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
+      if (!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if(f == nullptr) throw Hermes::Exceptions::Exception("Error writing to %s.", filename);
+      if (f == nullptr) throw Hermes::Exceptions::Exception("Error writing to %s.", filename);
 
       for (unsigned int i = 0; i < rows.size(); i++)
       {
@@ -137,16 +137,16 @@ namespace Hermes
     {
       int j, k;
 
-      if(!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
+      if (!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if(f == nullptr) throw Hermes::Exceptions::Exception("Error writing to %s", filename);
+      if (f == nullptr) throw Hermes::Exceptions::Exception("Error writing to %s", filename);
 
-      if(!logx && !logy)
+      if (!logx && !logy)
         fprintf(f, "plot(");
-      else if(logx && !logy)
+      else if (logx && !logy)
         fprintf(f, "semilogx(");
-      else if(!logx && logy)
+      else if (!logx && logy)
         fprintf(f, "semilogy(");
       else
         fprintf(f, "loglog(");
@@ -160,26 +160,26 @@ namespace Hermes
           for (j = 0; j < rsize; j++)
           {
             fprintf(f, "%.14g", k ? rows[i].data[j].y : rows[i].data[j].x);
-            if(j < rsize-1) fprintf(f, ", ");
+            if (j < rsize - 1) fprintf(f, ", ");
           }
           fprintf(f, (!k ? "],[" : "], '"));
         }
         fprintf(f, "%s%s%s'", rows[i].color.c_str(), rows[i].line.c_str(), rows[i].marker.c_str());
-        if(i < rows.size()-1) fprintf(f, ", ");
+        if (i < rows.size() - 1) fprintf(f, ", ");
       }
       fprintf(f, ");\n");
 
-      if(title.length()) fprintf(f, "title('%s');\n", title.c_str());
-      if(xname.length()) fprintf(f, "xlabel('%s');\n", xname.c_str());
-      if(yname.length()) fprintf(f, "ylabel('%s');\n", yname.c_str());
+      if (title.length()) fprintf(f, "title('%s');\n", title.c_str());
+      if (xname.length()) fprintf(f, "xlabel('%s');\n", xname.c_str());
+      if (yname.length()) fprintf(f, "ylabel('%s');\n", yname.c_str());
 
-      if(legend && (rows.size() > 1 || rows[0].name.length()))
+      if (legend && (rows.size() > 1 || rows[0].name.length()))
       {
         fprintf(f, "legend(");
         for (unsigned int i = 0; i < rows.size(); i++)
         {
           fprintf(f, "'%s'", rows[i].name.c_str());
-          if(i < rows.size()-1) fprintf(f, ", ");
+          if (i < rows.size() - 1) fprintf(f, ", ");
         }
         fprintf(f, ");\n");
       }
@@ -195,43 +195,43 @@ namespace Hermes
 
     static void get_style_types(std::string line, std::string mark, std::string col, int& lt, int& pt, int& ct)
     {
-      if(line == "-")
+      if (line == "-")
         lt = 1; // solid
-      else if(line == ":")
+      else if (line == ":")
         lt = 4; // dotted
-      else if(line == "-.")
+      else if (line == "-.")
         lt = 5; // dash dot
-      else if(line == "--")
+      else if (line == "--")
         lt = 2; // dashed
       else
         lt = 1;
 
-      if(mark == ".") pt = 7;  // full circle
-      else if(mark == "o") pt = 6;  // empty circle
-      else if(mark == "O") pt = 7;  // full circle
-      else if(mark == "x") pt = 2;  // cross
-      else if(mark == "+") pt = 1;  // cross
-      else if(mark == "*") pt = 3;  // star
-      else if(mark == "s") pt = 4;  // empty square
-      else if(mark == "S") pt = 5;  // full square
-      else if(mark == "d") pt = 10; // empty diamond
-      else if(mark == "D") pt = 11; // full diamond
-      else if(mark == "v") pt = 12; // empty triangle down
-      else if(mark == "V") pt = 13; // full triangle down
-      else if(mark == "^") pt = 9;  // full triangle up
-      else if(mark == "<") pt = 12; // empty triangle down
-      else if(mark == ">") pt = 8;  // empty triangle up
-      else if(mark == "p") pt = 14; // empty pentagon
-      else if(mark == "P") pt = 15; // full pentagon
+      if (mark == ".") pt = 7;  // full circle
+      else if (mark == "o") pt = 6;  // empty circle
+      else if (mark == "O") pt = 7;  // full circle
+      else if (mark == "x") pt = 2;  // cross
+      else if (mark == "+") pt = 1;  // cross
+      else if (mark == "*") pt = 3;  // star
+      else if (mark == "s") pt = 4;  // empty square
+      else if (mark == "S") pt = 5;  // full square
+      else if (mark == "d") pt = 10; // empty diamond
+      else if (mark == "D") pt = 11; // full diamond
+      else if (mark == "v") pt = 12; // empty triangle down
+      else if (mark == "V") pt = 13; // full triangle down
+      else if (mark == "^") pt = 9;  // full triangle up
+      else if (mark == "<") pt = 12; // empty triangle down
+      else if (mark == ">") pt = 8;  // empty triangle up
+      else if (mark == "p") pt = 14; // empty pentagon
+      else if (mark == "P") pt = 15; // full pentagon
       else pt = 0;
 
-      if(col == "k") ct = -1;  // black
-      else if(col == "b") ct = 3;   // blue
-      else if(col == "g") ct = 2;   // green
-      else if(col == "c") ct = 5;   // cyan
-      else if(col == "m") ct = 4;   // magenta
-      else if(col == "y") ct = 6;   // yellow
-      else if(col == "r") ct = 1;   // red
+      if (col == "k") ct = -1;  // black
+      else if (col == "b") ct = 3;   // blue
+      else if (col == "g") ct = 2;   // green
+      else if (col == "c") ct = 5;   // cyan
+      else if (col == "m") ct = 4;   // magenta
+      else if (col == "y") ct = 6;   // yellow
+      else if (col == "r") ct = 1;   // red
       else ct = -1;
     }
 
@@ -239,17 +239,17 @@ namespace Hermes
     {
       /// \todo check that input string is admissible for gnuplot 'set key' command
       legend_pos = posspec;
-      if(legend_pos.length() && !legend) legend = true;
+      if (legend_pos.length() && !legend) legend = true;
     }
 
     void GnuplotGraph::save(const char* filename)
     {
       int j;
 
-      if(!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
+      if (!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if(f == nullptr) throw Hermes::Exceptions::Exception("Error writing to %s", filename);
+      if (f == nullptr) throw Hermes::Exceptions::Exception("Error writing to %s", filename);
 
       fprintf(f, "%s", terminal_str.c_str());
 
@@ -257,9 +257,9 @@ namespace Hermes
       char* outname = malloc_with_check<char>(len + 10);
       strcpy(outname, filename);
       char* slash = strrchr(outname, '/');
-      if(slash != nullptr) strcpy(outname, ++slash);
+      if (slash != nullptr) strcpy(outname, ++slash);
       char* dot = strrchr(outname, '.');
-      if(dot != nullptr && dot > outname) *dot = 0;
+      if (dot != nullptr && dot > outname) *dot = 0;
       strcat(outname, ".eps");
 
       fprintf(f, "set output '%s'\n", (char*)outname);
@@ -267,22 +267,22 @@ namespace Hermes
 
       fprintf(f, "set size 0.8, 0.8\n");
 
-      if(logx && !logy)
+      if (logx && !logy)
         fprintf(f, "set logscale x\n");
-      else if(!logx && logy)
+      else if (!logx && logy)
         fprintf(f, "set logscale y\n");
-      else if(logx && logy)
+      else if (logx && logy)
       {
         fprintf(f, "set logscale x\n");
         fprintf(f, "set logscale y\n");
       }
 
-      if(grid) fprintf(f, "set grid\n");
+      if (grid) fprintf(f, "set grid\n");
 
-      if(title.length()) fprintf(f, "set title '%s'\n", title.c_str());
-      if(xname.length()) fprintf(f, "set xlabel '%s'\n", xname.c_str());
-      if(yname.length()) fprintf(f, "set ylabel '%s'\n", yname.c_str());
-      if(legend && legend_pos.length()) fprintf(f, "set key %s\n", legend_pos.c_str());
+      if (title.length()) fprintf(f, "set title '%s'\n", title.c_str());
+      if (xname.length()) fprintf(f, "set xlabel '%s'\n", xname.c_str());
+      if (yname.length()) fprintf(f, "set ylabel '%s'\n", yname.c_str());
+      if (legend && legend_pos.length()) fprintf(f, "set key %s\n", legend_pos.c_str());
 
       fprintf(f, "plot");
       for (unsigned int i = 0; i < rows.size(); i++)
@@ -290,21 +290,21 @@ namespace Hermes
         int ct, lt, pt;
         get_style_types(rows[i].line, rows[i].marker, rows[i].color, lt, pt, ct);
 
-        if(lt == 0)
+        if (lt == 0)
           fprintf(f, " '-' w p pointtype %d", pt);
-        else if(ct < 0)
+        else if (ct < 0)
           fprintf(f, " '-' w lp linewidth %g linetype %d pointtype %d", this->lw, lt, pt);
         else
           fprintf(f, " '-' w lp linewidth %g linecolor %d linetype %d pointtype %d", this->lw, ct, lt, pt);
 
-        if(legend)
+        if (legend)
           fprintf(f, " title '%s' ", rows[i].name.c_str());
         else
           fprintf(f, " notitle ");
 
-        if(i < rows.size() - 1) fprintf(f, ",\\\n     ");
+        if (i < rows.size() - 1) fprintf(f, ",\\\n     ");
       }
-      fprintf(f,"\n");
+      fprintf(f, "\n");
 
       for (unsigned int i = 0; i < rows.size(); i++)
       {
@@ -320,8 +320,8 @@ namespace Hermes
       this->info("Graph saved. Process the file '%s' with gnuplot.", filename);
     }
 
-    PNGGraph::PNGGraph( const char* title, const char* x_axis_name, const char* y_axis_name, const double lines_width,
-      double plot_width, double plot_height ) : GnuplotGraph(title, x_axis_name, y_axis_name, lines_width)
+    PNGGraph::PNGGraph(const char* title, const char* x_axis_name, const char* y_axis_name, const double lines_width,
+      double plot_width, double plot_height) : GnuplotGraph(title, x_axis_name, y_axis_name, lines_width)
     {
       std::stringstream sstm;
       sstm << "set terminal png font arial 12 size " << plot_width << "," << plot_height << " crop enhanced\n";

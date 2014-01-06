@@ -45,13 +45,13 @@ namespace Hermes
       double value(double x) const;
 
       /// One-dimensional function integration order.
-      Hermes::Ord value(Hermes::Ord x) const {return Hermes::Ord(3);};
+      Hermes::Ord value(Hermes::Ord x) const { return Hermes::Ord(3); };
 
       /// One-dimensional function derivative value.
       double derivative(double x) const;
 
       /// One-dimensional function derivative integration order.
-      Hermes::Ord derivative(Hermes::Ord x) const {return Hermes::Ord(2);};
+      Hermes::Ord derivative(Hermes::Ord x) const { return Hermes::Ord(2); };
 
       /// Plots the spline in format for Pylab (just pairs
       /// x-coordinate and value per line). The interval of definition

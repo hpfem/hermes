@@ -148,11 +148,11 @@ namespace Hermes
       for (int j = 0; j < num_components; j++)
       {
         for (int i = 0; i < 6; i++)
-          if (mask & idx2mask[i][j])
-          {
-            node->values[j][i] = data;
-            data += num_points;
-          }
+        if (mask & idx2mask[i][j])
+        {
+          node->values[j][i] = data;
+          data += num_points;
+        }
       }
 
       return node;

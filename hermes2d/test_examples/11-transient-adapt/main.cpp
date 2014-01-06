@@ -29,24 +29,24 @@ using namespace Views;
 const bool HERMES_VISUALIZATION = true;
 
 // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM = 3;                       
+const int INIT_REF_NUM = 3;
 // Initial polynomial degree of all mesh elements.
-const int P_INIT = 1;                             
+const int P_INIT = 1;
 // Time step. 
-double time_step = 0.05;                           
+double time_step = 0.05;
 // Time interval length.
-const double T_FINAL = 3.0;                       
+const double T_FINAL = 3.0;
 
 // Error calculation & adaptivity.
 // Every UNREF_FREQth time step the mesh is derefined.
-const int UNREF_FREQ = 2;                         
+const int UNREF_FREQ = 2;
 // 1... mesh reset to basemesh and poly degrees to P_INIT.   
 // 2... one ref. layer shaved off, poly degrees reset to P_INIT.
 // 3... one ref. layer shaved off, poly degrees decreased by one. 
-const int UNREF_METHOD = 3;                       
+const int UNREF_METHOD = 3;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
-const double THRESHOLD = 0.3;                     
+const double THRESHOLD = 0.3;
 DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
 // Stopping criterion for an adaptivity step.
 AdaptStoppingCriterionSingleElement<double> stoppingCriterion(THRESHOLD);
@@ -59,9 +59,9 @@ const double ERR_STOP = 5e-2;
 
 // Newton's method
 // Stopping criterion for Newton on fine mesh->
-const double NEWTON_TOL = 1e-5;                   
+const double NEWTON_TOL = 1e-5;
 // Maximum allowed number of Newton iterations.
-const int max_allowed_iterations = 20;                   
+const int max_allowed_iterations = 20;
 
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number
 // in the name of each method is its order. The one before last, if present, is the number of stages.
@@ -82,7 +82,7 @@ ButcherTableType butcher_table_type = Implicit_RK_1;
 
 // Problem parameters.
 // Parameter for nonlinear thermal conductivity.
-const double alpha = 4.0;                         
+const double alpha = 4.0;
 const double heat_src = 1.0;
 
 int main(int argc, char* argv[])
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", basemesh);
 
   // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_REF_NUM; i++) 
+  for (int i = 0; i < INIT_REF_NUM; i++)
     basemesh->refine_all_elements(0, true);
   mesh->copy(basemesh);
 
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
   int ndof_coarse = space->get_num_dofs();
 
   // Previous time level solution (initialized by initial condition).
-  MeshFunctionSharedPtr<double> sln_time_prev(new CustomInitialCondition (mesh));
+  MeshFunctionSharedPtr<double> sln_time_prev(new CustomInitialCondition(mesh));
 
   // Initialize the weak formulation
   CustomNonlinearity lambda(alpha);
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
   // Visualize initial condition.
   ScalarView view("Initial condition", new WinGeom(0, 0, 440, 350));
   OrderView ordview("Initial mesh", new WinGeom(445, 0, 410, 350));
-  if(HERMES_VISUALIZATION)
+  if (HERMES_VISUALIZATION)
   {
     view.show(sln_time_prev);
     ordview.show(space);
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
     if (ts > 1 && ts % UNREF_FREQ == 0)
     {
       Hermes::Mixins::Loggable::Static::info("Global mesh derefinement.");
-      switch (UNREF_METHOD) 
+      switch (UNREF_METHOD)
       {
       case 1: mesh->copy(basemesh);
         space->set_uniform_order(P_INIT);
@@ -186,7 +186,11 @@ int main(int argc, char* argv[])
         runge_kutta.set_tolerance(NEWTON_TOL);
         runge_kutta.rk_time_step_newton(sln_time_prev, sln_time_new);
       }
-      catch(Exceptions::Exception& e)
+      catch (Exceptions::Exception& e)
+      {
+        std::cout << e.info();
+      }
+      catch (std::exception& e)
       {
         std::cout << e.what();
       }
@@ -214,7 +218,7 @@ int main(int argc, char* argv[])
         as++;
       }
 
-      if(HERMES_VISUALIZATION)
+      if (HERMES_VISUALIZATION)
       {
         // Visualize the solution and mesh->
         char title[100];
@@ -226,19 +230,17 @@ int main(int argc, char* argv[])
         ordview.set_title(title);
         ordview.show(space);
       }
-    }
-    while (done == false);
+    } while (done == false);
 
     sln_time_prev->copy(sln_time_new);
 
     // Increase current time and counter of time steps.
     current_time += time_step;
     ts++;
-  }
-  while (current_time < T_FINAL);
+  } while (current_time < T_FINAL);
 
   // Wait for all views to be closed.
-  if(HERMES_VISUALIZATION)
+  if (HERMES_VISUALIZATION)
     View::wait();
   return 0;
 }

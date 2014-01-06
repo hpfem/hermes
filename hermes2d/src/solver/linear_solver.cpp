@@ -103,7 +103,7 @@ namespace Hermes
       Space<Scalar>::assign_dofs(this->dp->get_spaces());
 
       // Assemble the residual always and the Matrix when necessary (nonconstant jacobian, not reusable, ...).
-      if(this->jacobian_reusable && this->constant_jacobian)
+      if (this->jacobian_reusable && this->constant_jacobian)
       {
         this->info("\tLinearSolver: reusing Matrix, assembling RHS.");
         this->dp->assemble(coeff_vec, this->get_residual());
@@ -111,7 +111,7 @@ namespace Hermes
       }
       else
       {
-        if(this->jacobian_reusable)
+        if (this->jacobian_reusable)
           this->info("\tLinearSolver: recalculating a reusable Matrix.");
         else
           this->info("\tLinearSolver: calculating the Matrix.");

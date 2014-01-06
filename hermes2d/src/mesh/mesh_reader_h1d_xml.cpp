@@ -37,7 +37,7 @@ namespace Hermes
       try
       {
         ::xml_schema::flags parsing_flags = 0;
-        if(!this->validate)
+        if (!this->validate)
           parsing_flags = xml_schema::flags::dont_validate;
 
         std::auto_ptr<XMLMesh1D::mesh> parsed_xml_mesh(XMLMesh1D::mesh_(filename, parsing_flags));
@@ -47,9 +47,9 @@ namespace Hermes
         std::map<std::string, double> variables;
         for (unsigned int variables_i = 0; variables_i < variables_count; variables_i++)
 #ifdef _MSC_VER
-				variables.insert(std::pair<std::string, double>((std::string)parsed_xml_mesh->variables()->var().at(variables_i).name(), (double&&)parsed_xml_mesh->variables()->var().at(variables_i).value()));
+          variables.insert(std::pair<std::string, double>((std::string)parsed_xml_mesh->variables()->var().at(variables_i).name(), (double&&)parsed_xml_mesh->variables()->var().at(variables_i).value()));
 #else
-				variables.insert(std::pair<std::string, double>((std::string)parsed_xml_mesh->variables()->var().at(variables_i).name(), parsed_xml_mesh->variables()->var().at(variables_i).value()));
+          variables.insert(std::pair<std::string, double>((std::string)parsed_xml_mesh->variables()->var().at(variables_i).name(), parsed_xml_mesh->variables()->var().at(variables_i).value()));
 #endif
 
         // Vertices //
@@ -81,37 +81,37 @@ namespace Hermes
 
           // variables lookup.
           bool x_found = false;
-          if(variables.find(x) != variables.end())
+          if (variables.find(x) != variables.end())
           {
             x_value = variables.find(x)->second;
             x_found = true;
           }
 
           // test of value if no variable found.
-          if(!x_found)
-            if(std::strtod(x.c_str(), nullptr) != 0.0)
-              x_value = std::strtod(x.c_str(), nullptr);
-            else
-            {
-              // This is a hard part, to find out if it is really zero.
-              int dot_position = strchr(x.c_str(), '.') == nullptr ? -1 : strchr(x.c_str(), '.') - x.c_str();
-              for(int i = 0; i < dot_position; i++)
-                if(strncmp(x.c_str() + i, "0", 1) != 0)
-                  this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
-              for(int i = dot_position + 1; i < x.length(); i++)
-                if(strncmp(x.c_str() + i, "0", 1) != 0)
-                  this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
-              x_value = std::strtod(x.c_str(), nullptr);
-            }
+          if (!x_found)
+          if (std::strtod(x.c_str(), nullptr) != 0.0)
+            x_value = std::strtod(x.c_str(), nullptr);
+          else
+          {
+            // This is a hard part, to find out if it is really zero.
+            int dot_position = strchr(x.c_str(), '.') == nullptr ? -1 : strchr(x.c_str(), '.') - x.c_str();
+            for (int i = 0; i < dot_position; i++)
+            if (strncmp(x.c_str() + i, "0", 1) != 0)
+              this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
+            for (int i = dot_position + 1; i < x.length(); i++)
+            if (strncmp(x.c_str() + i, "0", 1) != 0)
+              this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
+            x_value = std::strtod(x.c_str(), nullptr);
+          }
 
           // assignment.
           node->x = x_value;
-          if(x_value > b)
+          if (x_value > b)
             b = x_value;
-          if(x_value < a)
+          if (x_value < a)
             a = x_value;
 
-          if(vertices_i < vertices_count)
+          if (vertices_i < vertices_count)
             node->y = 0;
           else
             node->y = 1;
@@ -120,10 +120,10 @@ namespace Hermes
 
         Node* node;
         for_all_nodes(node, mesh)
-          if(node->y == 0)
-            node->y = 0;
-          else
-            node->y = (b-a) / 100;
+        if (node->y == 0)
+          node->y = 0;
+        else
+          node->y = (b - a) / 100;
 
         // Elements //
         mesh->nbase = mesh->nactive = mesh->ninitial = vertices_count - 1;
@@ -134,7 +134,7 @@ namespace Hermes
           mesh->element_markers_conversion.insert_marker("H1DMarker");
 
           int element_marker;
-          if(parsed_xml_mesh->v().at(element_i % vertices_count).m().present())
+          if (parsed_xml_mesh->v().at(element_i % vertices_count).m().present())
           {
             mesh->element_markers_conversion.insert_marker(parsed_xml_mesh->v().at(element_i % vertices_count).m().get());
             element_marker = mesh->element_markers_conversion.get_internal_marker(parsed_xml_mesh->v().at(element_i % vertices_count).m().get()).marker;

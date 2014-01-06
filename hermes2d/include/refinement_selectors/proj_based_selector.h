@@ -98,7 +98,7 @@ namespace Hermes
             ::free(values);
             values = nullptr;
 
-            if(other.values == nullptr)
+            if (other.values == nullptr)
               throw Exceptions::Exception("Unable to assign a non-empty values. Use references instead.");
             return *this;
           }

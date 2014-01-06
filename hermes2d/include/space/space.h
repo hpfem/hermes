@@ -395,7 +395,7 @@ namespace Hermes
           };
           /// Number of dofs. Temporarily used during assignment
           /// of DOFs to indicate nodes which were not processed yet.
-          int n; 
+          int n;
         };
         struct // constrained vertex node
         {

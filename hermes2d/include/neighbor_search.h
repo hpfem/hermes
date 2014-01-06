@@ -43,7 +43,7 @@ namespace Hermes
     *      across the active edge. Hence, we "go down" in the central element in order to find a (virtual) sub-element
     *      matching the currently processed neighbor and store the corresponding transformations in the neighbor's field
     *      of the array \c transformations. This way, we obtain for each neighbor a set of transformations which have to
-      *      be applied on the central element to transform integration points to its correct part matching the neighbor.
+    *      be applied on the central element to transform integration points to its correct part matching the neighbor.
     *
     * There may be either one or more neighbors (see below). In the second case, each of the neighbors shares with the
     * central element a unique segment of the active edge. The next step is therefore a loop through all neighbors,
@@ -247,7 +247,7 @@ namespace Hermes
 
         int local_num_of_edge;  ///< Local number of the edge on neighbor element.
         bool orientation;        ///< Relative orientation of the neighbor edge with respect to the active edge
-                                ///< (0 - same orientation, 1 - reverse orientation).
+        ///< (0 - same orientation, 1 - reverse orientation).
       };
 
       /// When creating sparse structure of a matrix using this class, we want to ignore errors
@@ -283,7 +283,7 @@ namespace Hermes
       {
       public:
         static const int max_level = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
-                                                                       ///< in a go-down neighborhood) - see Transformable::push_transform.
+        ///< in a go-down neighborhood) - see Transformable::push_transform.
 
         unsigned int transf[max_level];   ///< Array holding the transformations at subsequent levels.
         unsigned int num_levels;          ///< Number of transformation levels actually used in \c transf.
@@ -322,8 +322,8 @@ namespace Hermes
       static const unsigned int H2D_INITIAL_NEIGHBOR_NUMBER_GUESS = 32;
 
       Transformations** central_transformations;  ///< Array of transformations of the central element to each neighbor
-                                                                    ///< (in a go-down neighborhood; stored as on \c Transformation structure
-                                                                    ///< for each neighbor).
+      ///< (in a go-down neighborhood; stored as on \c Transformation structure
+      ///< for each neighbor).
 
       void add_central_transformations(Transformations* to_add, int position, bool replace = false);
       unsigned int central_transformations_size;
@@ -334,7 +334,7 @@ namespace Hermes
       unsigned int neighbor_transformations_size;
       unsigned int neighbor_transformations_alloc_size;
       uint64_t original_central_el_transform;                  ///< Sub-element transformation of any function that comes from the
-                                                               ///< assembly, before transforms from \c transformations are pushed to it.
+      ///< assembly, before transforms from \c transformations are pushed to it.
 
       /*** Significant objects of the neighborhood. ***/
       Element* central_el;          ///< Central (currently assembled) element.
@@ -379,7 +379,7 @@ namespace Hermes
       /// \param[in] par_mid_vertices Array of vertices between those in \c orig_vertex_id visited on the way up.
       /// \param[in] n_parents        Number of intermediate parents visited on the way up.
       ///
-      void find_act_elem_up( Element* elem, int* orig_vertex_id, Node** par_mid_vertices, int n_parents);
+      void find_act_elem_up(Element* elem, int* orig_vertex_id, Node** par_mid_vertices, int n_parents);
 
       /// Find all neighbors to a bigger central element.
       ///
@@ -397,7 +397,7 @@ namespace Hermes
       ///                               \c transformations array corresponding to that neighbor.
       /// \param[in] n_sons             Number of sons that lead to the current neighbor's counterpart.
       ///
-      void find_act_elem_down( Node* vertex, int* bounding_verts_id, int* sons, unsigned int n_sons);
+      void find_act_elem_down(Node* vertex, int* bounding_verts_id, int* sons, unsigned int n_sons);
 
       /// Determine relative orientation of the neighbor edge w.r.t. the active edge.
       ///

@@ -73,15 +73,15 @@ namespace Hermes
     /// 'p' is the polynomial degree.
     ///
     template<typename Scalar>
-    class HERMES_API Solution : 
+    class HERMES_API Solution :
       public MeshFunction<Scalar>,
       public Hermes2D::Mixins::XMLParsing
     {
     public:
       Solution();
       Solution(MeshSharedPtr mesh);
-      Solution (SpaceSharedPtr<Scalar> s, Vector<Scalar>* coeff_vec);
-      Solution (SpaceSharedPtr<Scalar> s, Scalar* coeff_vec);
+      Solution(SpaceSharedPtr<Scalar> s, Vector<Scalar>* coeff_vec);
+      Solution(SpaceSharedPtr<Scalar> s, Scalar* coeff_vec);
       virtual ~Solution();
 
       /// State querying helpers.

@@ -127,7 +127,7 @@ namespace Hermes
       /// Add matrix
       /// @param mat matrix to add
       virtual void add_sparse_matrix(SparseMatrix<Scalar>* mat);
-      
+
       /// Add matrix to diagonal
       /// Matrices must be the same type of solver
       /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
@@ -139,7 +139,7 @@ namespace Hermes
       /// @param[in] j column in target matrix coresponding with lef column of added matrix
       /// @param[in] mat added matrix
       virtual void add_as_block(unsigned int i, unsigned int j, SparseMatrix<Scalar>* mat);
-      
+
       /// Return the number of entries in a specified row
       ///
       /// @param[in] row - index of the row
@@ -178,8 +178,8 @@ namespace Hermes
       /// Get fill-in.
       virtual double get_fill_in() const = 0;
 
-      unsigned row_storage:1; ///< \todo document
-      unsigned col_storage:1; ///< \todo document
+      unsigned row_storage : 1; ///< \todo document
+      unsigned col_storage : 1; ///< \todo document
 
       /// get number of nonzero numbers in matrix
       /// @return number of nonzero numbers in matrix

@@ -40,15 +40,15 @@ namespace Hermes
     class SuperLu
     {
     public:
-      void gsequ (SuperMatrix *A, double *r, double *c, double *rowcnd, double *colcnd, double *amax, int *info);
-      void laqgs (SuperMatrix *A, float *r, float *c, float rowcnd, float colcnd, float amax, char *equed);
-      int gstrf (superlu_options_t *options, int m, int n, double anorm, LUstruct_t *LUstruct, gridinfo_t *grid, SuperLUStat_t *stat, int *info);
-      float pivotGrowth (int ncols, SuperMatrix *A, int *perm_c, SuperMatrix *L, SuperMatrix *U);
-      float langs (char *norm, SuperMatrix *A);
-      void  gscon (char *norm, SuperMatrix *L, SuperMatrix *U, float anorm, float *rcond, SuperLUStat_t *stat, int *info);
-      void  gstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U, int *perm_c, int *perm_r, SuperMatrix *B, SuperLUStat_t *stat, int *info);
-      double lamch_ (char *cmach);
-      int querySpace (SuperMatrix *, SuperMatrix *, slu_memusage_t *);
+      void gsequ(SuperMatrix *A, double *r, double *c, double *rowcnd, double *colcnd, double *amax, int *info);
+      void laqgs(SuperMatrix *A, float *r, float *c, float rowcnd, float colcnd, float amax, char *equed);
+      int gstrf(superlu_options_t *options, int m, int n, double anorm, LUstruct_t *LUstruct, gridinfo_t *grid, SuperLUStat_t *stat, int *info);
+      float pivotGrowth(int ncols, SuperMatrix *A, int *perm_c, SuperMatrix *L, SuperMatrix *U);
+      float langs(char *norm, SuperMatrix *A);
+      void  gscon(char *norm, SuperMatrix *L, SuperMatrix *U, float anorm, float *rcond, SuperLUStat_t *stat, int *info);
+      void  gstrs(trans_t trans, SuperMatrix *L, SuperMatrix *U, int *perm_c, int *perm_r, SuperMatrix *B, SuperLUStat_t *stat, int *info);
+      double lamch_(char *cmach);
+      int querySpace(SuperMatrix *, SuperMatrix *, slu_memusage_t *);
     }
 #else //SLU_MT
 
@@ -149,12 +149,12 @@ namespace Hermes
 
     private:
 #ifndef SLU_MT
-      void create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, typename SuperLuType<Scalar>::Scalar *nzval, int *rowind, int *colptr,
+      void create_csc_matrix(SuperMatrix *A, int m, int n, int nnz, typename SuperLuType<Scalar>::Scalar *nzval, int *rowind, int *colptr,
         Stype_t stype, Dtype_t dtype, Mtype_t mtype);
-      void  solver_driver (superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R,
+      void  solver_driver(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R,
         double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X, double *recip_pivot_growth,
         double *rcond, double *ferr, double *berr, slu_memusage_t *mem_usage, SuperLUStat_t *stat, int *info);
-      void create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::Scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
+      void create_dense_matrix(SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::Scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
 #endif  //SLU_MT
 
 #ifndef SLU_MT

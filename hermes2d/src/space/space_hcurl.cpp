@@ -33,15 +33,15 @@ namespace Hermes
     HcurlSpace<Scalar>::HcurlSpace(MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs)
     {
-      init(shapeset, p_init);
-    }
+        init(shapeset, p_init);
+      }
 
     template<typename Scalar>
     HcurlSpace<Scalar>::HcurlSpace(MeshSharedPtr mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, nullptr)
     {
-      init(shapeset, p_init);
-    }
+        init(shapeset, p_init);
+      }
 
     template<typename Scalar>
     void HcurlSpace<Scalar>::init(Shapeset* shapeset, int p_init, bool assign_dofs_init)
@@ -105,21 +105,21 @@ namespace Hermes
           int ndofs = this->get_edge_order_internal(en) + 1;
           this->ndata[en->id].n = ndofs;
           if (en->bnd)
-            if (this->essential_bcs != nullptr)
-              if (this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(en->marker).marker) != nullptr)
-                this->ndata[en->id].dof = this->H2D_CONSTRAINED_DOF;
-              else
-              {
-                this->ndata[en->id].dof = this->next_dof;
-                this->next_dof += ndofs;
-                this->edge_functions_count += ndofs;
-              }
-            else
-            {
-              this->ndata[en->id].dof = this->next_dof;
-              this->next_dof += ndofs;
-              this->edge_functions_count += ndofs;
-            }
+          if (this->essential_bcs != nullptr)
+          if (this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(en->marker).marker) != nullptr)
+            this->ndata[en->id].dof = this->H2D_CONSTRAINED_DOF;
+          else
+          {
+            this->ndata[en->id].dof = this->next_dof;
+            this->next_dof += ndofs;
+            this->edge_functions_count += ndofs;
+          }
+          else
+          {
+            this->ndata[en->id].dof = this->next_dof;
+            this->next_dof += ndofs;
+            this->edge_functions_count += ndofs;
+          }
           else
           {
             this->ndata[en->id].dof = this->next_dof;

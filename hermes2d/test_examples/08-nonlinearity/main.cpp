@@ -15,15 +15,15 @@
 //  The following parameters can be changed:
 
 // Initial polynomial degree.
-const int P_INIT = 2;                             
+const int P_INIT = 2;
 // Stopping criterion for the Newton's method.
-const double NEWTON_TOL = 1e-8;                   
+const double NEWTON_TOL = 1e-8;
 // Maximum allowed number of Newton iterations.
-const int NEWTON_MAX_ITER = 100;                  
+const int NEWTON_MAX_ITER = 100;
 // Number of initial uniform mesh refinements.
-const int INIT_GLOB_REF_NUM = 3;                  
+const int INIT_GLOB_REF_NUM = 3;
 // Number of initial refinements towards boundary.
-const int INIT_BDY_REF_NUM = 4;                   
+const int INIT_BDY_REF_NUM = 4;
 
 // Problem parameters.
 double heat_src = 1.0;
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
   mloader.load("square.mesh", mesh);
 
   // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh->refine_all_elements();
+  for (int i = 0; i < INIT_GLOB_REF_NUM; i++) mesh->refine_all_elements();
   mesh->refine_towards_boundary("Bdy", INIT_BDY_REF_NUM);
 
   // Initialize boundary conditions.
@@ -64,14 +64,14 @@ int main(int argc, char* argv[])
   Hermes::Mixins::Loggable::Static::info("Projecting to obtain initial vector for the Newton's method.");
   double* coeff_vec = new double[ndof];
   MeshFunctionSharedPtr<double> init_sln(new CustomInitialCondition(mesh));
-  OGProjection<double> ogProjection; ogProjection.project_global(space, init_sln, coeff_vec); 
+  OGProjection<double> ogProjection; ogProjection.project_global(space, init_sln, coeff_vec);
 
   // Initialize Newton solver.
   NewtonSolver<double> newton(&dp);
   newton.set_tolerance(NEWTON_TOL, Hermes::Solvers::ResidualNormAbsolute);
   newton.set_max_allowed_residual_norm(1e99);
   newton.set_max_allowed_iterations(NEWTON_MAX_ITER);
-  
+
   // 1st - OK
   newton.set_sufficient_improvement_factor_jacobian(0.5);
   newton.set_max_steps_with_reused_jacobian(5);
@@ -83,13 +83,17 @@ int main(int argc, char* argv[])
   // newton.set_sufficient_improvement_factor_jacobian(0.9);
   // newton.set_max_steps_with_reused_jacobian(10);
   // newton.set_manual_damping_coeff(0.1);
-    
+
   // Perform Newton's iteration.
   try
   {
     newton.solve(coeff_vec);
   }
-  catch(std::exception& e)
+  catch (Exceptions::Exception& e)
+  {
+    std::cout << e.info();
+  }
+  catch (std::exception& e)
   {
     std::cout << e.what();
   }
@@ -102,7 +106,7 @@ int main(int argc, char* argv[])
   //dp.get_all_profiling_output(std::cout);
 
   // Clean up.
-  delete [] coeff_vec;
+  delete[] coeff_vec;
 
   // Visualise the solution and mesh.
   ScalarView s_view("Solution", new WinGeom(0, 0, 440, 350));

@@ -41,8 +41,8 @@ namespace Hermes
         part -= n;
 
       double n2 = 2.0 / n;
-      double hi = -((double) part * n2 - 1.0);
-      double lo = -((double) (part + 1) * n2 - 1.0);
+      double hi = -((double)part * n2 - 1.0);
+      double lo = -((double)(part + 1) * n2 - 1.0);
 
       int idx[16];
       ori = ori ? 0 : 1;
@@ -52,7 +52,7 @@ namespace Hermes
       // function values at the endpoints (for subtracting of the linear part in H1)
       double c = 1.0;
       double f_lo = 0.0, f_hi = 0.0;
-      if(ebias == 2)
+      if (ebias == 2)
       {
         f_lo = get_value(0, idx[order], lo, -1.0, 0, mode);
         f_hi = get_value(0, idx[order], hi, -1.0, 0, mode);
@@ -67,7 +67,7 @@ namespace Hermes
       // fill the matrix of the linear system
       n = order + 1 - ebias;
       int space_type = this->get_space_type();
-      int component = (space_type == HERMES_HDIV_SPACE)? 1 : 0;
+      int component = (space_type == HERMES_HDIV_SPACE) ? 1 : 0;
       double** a = new_matrix<double>(n, n);
       double* b = malloc_with_check<double>(n);
       for (i = 0; i < n; i++)
@@ -94,36 +94,36 @@ namespace Hermes
 
       // cleanup
       free_with_check(iperm);
-      delete [] a;
+      delete[] a;
 
       return b;
     }
 
     double* Shapeset::get_constrained_edge_combination(int order, int part, int ori, int& nitems, ElementMode2D mode)
     {
-      int index = 2*((max_order + 1 - ebias)*part + (order - ebias)) + ori;
+      int index = 2 * ((max_order + 1 - ebias)*part + (order - ebias)) + ori;
 
       // allocate/reallocate the array if necessary
-      if(comb_table == nullptr)
+      if (comb_table == nullptr)
       {
         table_size = 1024;
         while (table_size <= index) table_size *= 2;
-        comb_table = (double**) malloc(table_size * sizeof(double*));
+        comb_table = (double**)malloc(table_size * sizeof(double*));
         memset(comb_table, 0, table_size * sizeof(double*));
       }
-      else if(index >= table_size)
+      else if (index >= table_size)
       {
         // adjust table_size to accommodate the required depth
         int old_size = table_size;
         while (index >= table_size) table_size *= 2;
 
         // reallocate the table
-        comb_table = (double**) realloc(comb_table, table_size * sizeof(double*));
+        comb_table = (double**)realloc(comb_table, table_size * sizeof(double*));
         memset(comb_table + old_size, 0, (table_size - old_size) * sizeof(double*));
       }
 
       // do we have the required linear combination yet?
-      if(comb_table[index] == nullptr)
+      if (comb_table[index] == nullptr)
       {
         // no, calculate it
         comb_table[index] = calculate_constrained_edge_combination(order, part, ori, mode);
@@ -135,7 +135,7 @@ namespace Hermes
 
     void Shapeset::free_constrained_edge_combinations()
     {
-      if(comb_table != nullptr)
+      if (comb_table != nullptr)
       {
         for (int i = 0; i < table_size; i++)
           free_with_check(comb_table[i]);
@@ -149,7 +149,7 @@ namespace Hermes
     {
       index = -1 - index;
 
-      int part = (unsigned) index >> 7;
+      int part = (unsigned)index >> 7;
       int order = (index >> 3) & 15;
       int edge = (index >> 1) & 3;
       int ori = index & 1;
@@ -172,7 +172,7 @@ namespace Hermes
       return max_order;
     }
 
-    int Shapeset::get_min_order() const 
+    int Shapeset::get_min_order() const
     {
       return min_order;
     }
@@ -182,7 +182,7 @@ namespace Hermes
     int Shapeset::get_vertex_index(int vertex, ElementMode2D mode) const
     {
 #ifdef _DEBUG
-      if(mode == HERMES_MODE_TRIANGLE)
+      if (mode == HERMES_MODE_TRIANGLE)
         assert(vertex < 3);
       else
         assert(vertex < 4);
@@ -193,14 +193,14 @@ namespace Hermes
     int Shapeset::get_edge_index(int edge, int ori, int order, ElementMode2D mode) const
     {
 #ifdef _DEBUG
-      if(mode == HERMES_MODE_TRIANGLE)
+      if (mode == HERMES_MODE_TRIANGLE)
         assert(edge < 3);
       else
         assert(edge < 4);
       assert(order >= 0 && order <= max_order);
       assert(ori == 0 || ori == 1);
 #endif
-      return edge_indices[mode][edge][2*order + ori];
+      return edge_indices[mode][edge][2 * order + ori];
     }
 
     int* Shapeset::get_bubble_indices(int order, ElementMode2D mode) const
@@ -210,7 +210,7 @@ namespace Hermes
       assert(H2D_GET_V_ORDER(order) >= 0 && H2D_GET_V_ORDER(order) <= max_order);
 #endif
       int index = order;
-      if(mode == HERMES_MODE_QUAD) //tables of bubble indices are transposed
+      if (mode == HERMES_MODE_QUAD) //tables of bubble indices are transposed
         index = H2D_MAKE_QUAD_ORDER(H2D_GET_V_ORDER(order), H2D_GET_H_ORDER(order));
       return bubble_indices[mode][index];
     }
@@ -227,7 +227,7 @@ namespace Hermes
     int Shapeset::get_constrained_edge_index(int edge, int order, int ori, int part, ElementMode2D mode) const
     {
 #ifdef _DEBUG
-      if(mode == HERMES_MODE_TRIANGLE)
+      if (mode == HERMES_MODE_TRIANGLE)
         assert(edge < 3);
       else
         assert(edge < 4);
@@ -240,7 +240,7 @@ namespace Hermes
 
     int Shapeset::get_order(int index, ElementMode2D mode) const
     {
-      if(index >= 0) {
+      if (index >= 0) {
         return index_to_order[mode][index];
       }
       else return ((-1 - index) >> 3) & 15;
@@ -248,10 +248,10 @@ namespace Hermes
 
     double Shapeset::get_value(int n, int index, double x, double y, int component, ElementMode2D mode)
     {
-      if(index >= 0)
+      if (index >= 0)
       {
         Shapeset::shape_fn_t** shape_expansion = shape_table[n][mode];
-        if(shape_expansion == nullptr)
+        if (shape_expansion == nullptr)
         { // requested exansion (f, df/dx, df/dy, ddf/dxdx, ...) is not defined.
           //just to keep the number of warnings low: warn just once about a given combinations of n, mode, and index.
           static int warned_mode = -1, warned_index = -1, warned_n = 1;
@@ -268,9 +268,9 @@ namespace Hermes
         return get_constrained_value(n, index, x, y, component, mode);
     }
 
-    double Shapeset::get_fn_value (int index, double x, double y, int component, ElementMode2D mode)  { return get_value(0, index, x, y, component, mode); }
-    double Shapeset::get_dx_value (int index, double x, double y, int component, ElementMode2D mode)  { return get_value(1, index, x, y, component, mode); }
-    double Shapeset::get_dy_value (int index, double x, double y, int component, ElementMode2D mode)  { return get_value(2, index, x, y, component, mode); }
+    double Shapeset::get_fn_value(int index, double x, double y, int component, ElementMode2D mode)  { return get_value(0, index, x, y, component, mode); }
+    double Shapeset::get_dx_value(int index, double x, double y, int component, ElementMode2D mode)  { return get_value(1, index, x, y, component, mode); }
+    double Shapeset::get_dy_value(int index, double x, double y, int component, ElementMode2D mode)  { return get_value(2, index, x, y, component, mode); }
     double Shapeset::get_dxx_value(int index, double x, double y, int component, ElementMode2D mode)  { return get_value(3, index, x, y, component, mode); }
     double Shapeset::get_dyy_value(int index, double x, double y, int component, ElementMode2D mode)  { return get_value(4, index, x, y, component, mode); }
     double Shapeset::get_dxy_value(int index, double x, double y, int component, ElementMode2D mode) { return get_value(5, index, x, y, component, mode); }

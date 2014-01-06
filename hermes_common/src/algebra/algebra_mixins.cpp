@@ -43,12 +43,12 @@ namespace Hermes
         if (matrix == nullptr)
           return;
 
-        if(this->output_matrixOn)
+        if (this->output_matrixOn)
         {
           char* fileName = malloc_with_check<char>(this->matrixFilename.length() + 5);
-          if(this->only_lastMatrixIteration)
+          if (this->only_lastMatrixIteration)
             sprintf(fileName, "%s", this->matrixFilename.c_str());
-          else if(this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration)
+          else if (this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration)
             sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
           else
           {
@@ -67,7 +67,7 @@ namespace Hermes
         if (matrix == nullptr)
           return;
 
-        if(this->output_matrixOn)
+        if (this->output_matrixOn)
         {
           char* fileName = malloc_with_check<char>(this->matrixFilename.length() + 5);
           sprintf(fileName, "%s", this->matrixFilename.c_str());
@@ -83,12 +83,12 @@ namespace Hermes
           return;
 
 
-        if(this->output_rhsOn)
+        if (this->output_rhsOn)
         {
           char* fileName = malloc_with_check<char>(this->RhsFilename.length() + 5);
-          if(this->only_lastRhsIteration)
+          if (this->only_lastRhsIteration)
             sprintf(fileName, "%s", this->RhsFilename.c_str());
-          else if(this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration)
+          else if (this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration)
             sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
           else
           {
@@ -107,7 +107,7 @@ namespace Hermes
         if (rhs == nullptr)
           return;
 
-        if(this->output_rhsOn)
+        if (this->output_rhsOn)
         {
           char* fileName = malloc_with_check<char>(this->RhsFilename.length() + 5);
           sprintf(fileName, "%s", this->RhsFilename.c_str());

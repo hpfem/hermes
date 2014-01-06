@@ -186,10 +186,15 @@ namespace Hermes
           for (int state_i = start; state_i < end; state_i++)
             errorThreadCalculator.evaluate_one_state(states[state_i]);
         }
-        catch (std::exception& exception)
+        catch (Hermes::Exceptions::Exception& e)
         {
 #pragma omp critical (exceptionMessageCaughtInParallelBlock)
-          this->exceptionMessageCaughtInParallelBlock = exception.what();
+          this->exceptionMessageCaughtInParallelBlock = e.info();
+        }
+        catch (std::exception& e)
+        {
+#pragma omp critical (exceptionMessageCaughtInParallelBlock)
+          this->exceptionMessageCaughtInParallelBlock = e.what();
         }
       }
 

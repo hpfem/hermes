@@ -205,7 +205,7 @@ namespace Hermes
     {
       this->message << "Variable " << name << " is " << value << " allowed range is " << min << " -- " << max;
       this->value = value;
-      if(value > min)
+      if (value > min)
         this->allowed = max;
       else
         this->allowed = min;
@@ -235,7 +235,7 @@ namespace Hermes
 
     MethodNotOverridenException::MethodNotOverridenException(const char * name, ...) : Exception()
     {
-      char text [10000];
+      char text[10000];
 
       // print the message
       va_list arglist;

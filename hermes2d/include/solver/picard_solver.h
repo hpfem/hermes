@@ -69,7 +69,7 @@ namespace Hermes
     ///&nbsp;return -1;<br>
     /// }<br>
     template<typename Scalar>
-    class HERMES_API PicardSolver : 
+    class HERMES_API PicardSolver :
       public Hermes::Hermes2D::Solver<Scalar>,
       public Hermes::Solvers::PicardMatrixSolver<Scalar>
     {
@@ -83,14 +83,14 @@ namespace Hermes
 
       // See the base class for details, the following serves only for avoiding C++ name-hiding.
       using Solver<Scalar>::solve;
-      
+
       /// Basic solve method - in linear solvers it serves only as an initial guess for iterative solvers.
       /// \param[in] coeff_vec initiall guess.
       virtual void solve(Scalar* coeff_vec);
 
       /// Get sln vector.
       Scalar* get_sln_vector();
-      
+
       /// DiscreteProblemWeakForm helper.
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
 
@@ -100,7 +100,7 @@ namespace Hermes
       virtual void assemble_residual(bool store_previous_residual);
       virtual void assemble_jacobian(bool store_previous_jacobian);
       virtual void assemble(bool store_previous_jacobian, bool store_previous_residual);
-      
+
       /// Initialization - called at the beginning of solving.
       virtual void init_solving(Scalar* coeff_vec);
 

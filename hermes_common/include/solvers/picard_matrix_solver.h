@@ -56,7 +56,7 @@ namespace Hermes
 
       /// Initialization - called at the beginning of solving.
       virtual void init_solving(Scalar*& coeff_vec);
-      
+
       /// Internal.
       virtual void deinit_solving();
 

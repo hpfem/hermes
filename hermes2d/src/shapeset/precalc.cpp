@@ -23,7 +23,7 @@ namespace Hermes
   {
     PrecalcShapeset::PrecalcShapeset(Shapeset* shapeset) : Function<double>(), tables(6, 64)
     {
-      if(shapeset == nullptr)
+      if (shapeset == nullptr)
         throw Exceptions::NullException(0);
       this->shapeset = shapeset;
       num_components = shapeset->get_num_components();
@@ -46,9 +46,9 @@ namespace Hermes
     void PrecalcShapeset::set_active_shape(int index)
     {
       // Key creation.
-      unsigned key = cur_quad | (element->get_mode() << 3) | ((unsigned) (max_index[element->get_mode()] - index) << 4);
+      unsigned key = cur_quad | (element->get_mode() << 3) | ((unsigned)(max_index[element->get_mode()] - index) << 4);
 
-      if(!tables.present(key))
+      if (!tables.present(key))
         tables.add(new SubElementMap<LightArray<Node*> >, key);
       sub_tables = tables.get(key);
 
@@ -82,18 +82,18 @@ namespace Hermes
       {
         for (k = 0; k < 6; k++)
         {
-          if(newmask & idx2mask[k][j])
+          if (newmask & idx2mask[k][j])
           {
-            if(oldmask & idx2mask[k][j])
+            if (oldmask & idx2mask[k][j])
               memcpy(node->values[j][k], cur_node->values[j][k], np * sizeof(double));
             else
-              for (i = 0; i < np; i++)
-                node->values[j][k][i] = shapeset->get_value(k, index, ctm->m[0] * pt[i][0] + ctm->t[0],
-                ctm->m[1] * pt[i][1] + ctm->t[1], j, element->get_mode());
+            for (i = 0; i < np; i++)
+              node->values[j][k][i] = shapeset->get_value(k, index, ctm->m[0] * pt[i][0] + ctm->t[0],
+              ctm->m[1] * pt[i][1] + ctm->t[1], j, element->get_mode());
           }
         }
       }
-      if(nodes->present(order))
+      if (nodes->present(order))
       {
         assert(nodes->get(order) == cur_node);
         ::free(nodes->get(order));
@@ -105,12 +105,12 @@ namespace Hermes
 
     void PrecalcShapeset::free()
     {
-      for(unsigned int i = 0; i < tables.get_size(); i++)
-        if(tables.present(i))
-        {
-          tables.get(i)->run_for_all(Node::DeallocationFunction);
-          delete tables.get(i);
-        }
+      for (unsigned int i = 0; i < tables.get_size(); i++)
+      if (tables.present(i))
+      {
+        tables.get(i)->run_for_all(Node::DeallocationFunction);
+        delete tables.get(i);
+      }
 
     }
 
@@ -124,14 +124,14 @@ namespace Hermes
     void PrecalcShapeset::push_transform(int son)
     {
       Transformable::push_transform(son);
-      if(sub_tables != nullptr)
+      if (sub_tables != nullptr)
         update_nodes_ptr();
     }
 
     void PrecalcShapeset::pop_transform()
     {
       Transformable::pop_transform();
-      if(sub_tables != nullptr)
+      if (sub_tables != nullptr)
         update_nodes_ptr();
     }
 

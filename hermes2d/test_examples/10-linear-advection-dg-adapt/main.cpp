@@ -39,7 +39,7 @@ int main(int argc, char* args[])
   mloader.load("square.mesh", mesh);
 
   // Perform initial mesh refinement.
-  for (int i=0; i<INIT_REF; i++)
+  for (int i = 0; i < INIT_REF; i++)
     mesh->refine_all_elements();
 
   // Create an L2 space.
@@ -47,7 +47,7 @@ int main(int argc, char* args[])
 
   // Initialize refinement selector.
   L2ProjBasedSelector<double> selector(CAND_LIST);
-  selector.set_error_weights(1.,1.,1.);
+  selector.set_error_weights(1., 1., 1.);
 
   MeshFunctionSharedPtr<double> sln(new Solution<double>);
   MeshFunctionSharedPtr<double> refsln(new Solution<double>);
@@ -79,7 +79,7 @@ int main(int argc, char* args[])
       linear_solver.set_space(refspace);
       linear_solver.solve();
 
-      if(P_INIT < 3)
+      if (P_INIT < 3)
       {
         PostProcessing::VertexBasedLimiter limiter(refspace, linear_solver.get_sln_vector(), P_INIT);
         refsln = limiter.get_solution();
@@ -92,7 +92,11 @@ int main(int argc, char* args[])
       view1.show(refsln);
       OGProjection<double>::project_global(fine_space, refsln, sln, HERMES_L2_NORM);
     }
-    catch(std::exception& e)
+    catch (Exceptions::Exception& e)
+    {
+      std::cout << e.info();
+    }
+    catch (std::exception& e)
     {
       std::cout << e.what();
     }
@@ -104,13 +108,12 @@ int main(int argc, char* args[])
     std::cout << "Error: " << err_est_rel << "%." << std::endl;
 
     // If err_est_rel too large, adapt the mesh->
-    if(err_est_rel < ERR_STOP)
+    if (err_est_rel < ERR_STOP)
       done = true;
     else
       done = adaptivity.adapt(&selector);
     as++;
-  }
-  while (done == false);
+  } while (done == false);
 
   // Wait for keyboard or mouse input.
   View::wait();

@@ -67,7 +67,7 @@ namespace Hermes
     ///&nbsp;return -1;<br>
     /// }<br>
     template<typename Scalar>
-    class HERMES_API NewtonSolver : 
+    class HERMES_API NewtonSolver :
       public Hermes::Hermes2D::Solver<Scalar>,
       public Hermes::Solvers::NewtonMatrixSolver<Scalar>
     {
@@ -81,14 +81,14 @@ namespace Hermes
 
       // See the base class for details, the following serves only for avoiding C++ name-hiding.
       using Solver<Scalar>::solve;
-      
+
       /// Basic solve method - in linear solvers it serves only as an initial guess for iterative solvers.
       /// \param[in] coeff_vec initiall guess.
       virtual void solve(Scalar* coeff_vec);
 
       /// Get sln vector.
       Scalar* get_sln_vector();
-      
+
       /// DiscreteProblemWeakForm helper.
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
 

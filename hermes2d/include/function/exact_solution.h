@@ -71,15 +71,15 @@ namespace Hermes
       virtual unsigned int get_dimension() const;
 
       /// Function returning the value.
-      virtual Scalar value (double x, double y) const = 0;
+      virtual Scalar value(double x, double y) const = 0;
 
       /// Function returning the derivatives.
-      virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const = 0;
+      virtual void derivatives(double x, double y, Scalar& dx, Scalar& dy) const = 0;
 
       /// Function returning the value and derivatives.
-      Scalar exact_function (double x, double y, Scalar& dx, Scalar& dy) const {
-        derivatives (x, y, dx, dy);
-        return value (x, y);
+      Scalar exact_function(double x, double y, Scalar& dx, Scalar& dy) const {
+        derivatives(x, y, dx, dy);
+        return value(x, y);
       };
     };
 
@@ -99,11 +99,11 @@ namespace Hermes
       virtual MeshFunction<Scalar>* clone() const;
 
       /// Function returning the value.
-      virtual Scalar value (double x, double y) const;
+      virtual Scalar value(double x, double y) const;
       virtual Ord ord(double x, double y) const;
 
       /// Function returning the derivatives.
-      virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
+      virtual void derivatives(double x, double y, Scalar& dx, Scalar& dy) const;
 
       inline std::string getClassName() const { return "ExactSolutionConstantArray"; }
 
@@ -132,15 +132,15 @@ namespace Hermes
       virtual unsigned int get_dimension() const;
 
       /// Function returning the value.
-      virtual Scalar2<Scalar> value (double x, double y) const = 0;
+      virtual Scalar2<Scalar> value(double x, double y) const = 0;
 
       /// Function returning the derivatives.
-      virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const = 0;
+      virtual void derivatives(double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const = 0;
 
       /// Function returning the value and derivatives.
       virtual Scalar2<Scalar> exact_function(double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
-        derivatives (x, y, dx, dy);
-        return value (x, y);
+        derivatives(x, y, dx, dy);
+        return value(x, y);
       };
     };
 
@@ -152,9 +152,9 @@ namespace Hermes
       ConstantSolution(MeshSharedPtr mesh, Scalar constant);
       virtual ~ConstantSolution() {};
 
-      virtual Scalar value (double x, double y) const;
+      virtual Scalar value(double x, double y) const;
 
-      virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
+      virtual void derivatives(double x, double y, Scalar& dx, Scalar& dy) const;
 
       virtual Ord ord(double x, double y) const;
       virtual MeshFunction<Scalar>* clone() const;
@@ -177,9 +177,9 @@ namespace Hermes
       ZeroSolution(MeshSharedPtr mesh);
       virtual ~ZeroSolution() {};
 
-      virtual Scalar value (double x, double y) const;
+      virtual Scalar value(double x, double y) const;
 
-      virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
+      virtual void derivatives(double x, double y, Scalar& dx, Scalar& dy) const;
 
       virtual Ord ord(double x, double y) const;
       virtual MeshFunction<Scalar>* clone() const;
@@ -193,9 +193,9 @@ namespace Hermes
       ConstantSolutionVector(MeshSharedPtr mesh, Scalar constantX, Scalar constantY);
       virtual ~ConstantSolutionVector() {};
 
-      virtual Scalar2<Scalar> value (double x, double y) const;
+      virtual Scalar2<Scalar> value(double x, double y) const;
 
-      virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const;
+      virtual void derivatives(double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const;
 
       virtual Ord ord(double x, double y) const;
       virtual MeshFunction<Scalar>* clone() const;
@@ -218,9 +218,9 @@ namespace Hermes
       ZeroSolutionVector(MeshSharedPtr mesh);
       virtual ~ZeroSolutionVector() {};
 
-      virtual Scalar2<Scalar> value (double x, double y) const;
+      virtual Scalar2<Scalar> value(double x, double y) const;
 
-      virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const;
+      virtual void derivatives(double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const;
 
       virtual Ord ord(double x, double y) const;
       virtual MeshFunction<Scalar>* clone() const;
@@ -237,10 +237,10 @@ namespace Hermes
       virtual ~ExactSolutionEggShell() {};
 
       /// Function returning the value.
-      virtual double value (double x, double y) const;
+      virtual double value(double x, double y) const;
 
       /// Function returning the derivatives.
-      virtual void derivatives (double x, double y, double& dx, double& dy) const;
+      virtual void derivatives(double x, double y, double& dx, double& dy) const;
 
       /// Function returning the integration order that
       /// should be used when integrating the function.
@@ -261,7 +261,7 @@ namespace Hermes
       virtual ~UExtFunction() {};
 
       /// Function returning the value.
-      virtual void value (int n, Func<Scalar>** u_ext , Func<Scalar>* result, Geom<double>* geometry) const = 0;
+      virtual void value(int n, Func<Scalar>** u_ext, Func<Scalar>* result, Geom<double>* geometry) const = 0;
       virtual void ord(Func<Hermes::Ord>** u_ext, Func<Hermes::Ord>* result) const = 0;
 
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);

@@ -41,7 +41,7 @@ namespace Hermes
     {
       PetscScalar *py = malloc_with_check(ni, this);
       VecGetValues(x, ni, ix, py);
-      for (int i = 0;i<ni;i++)y[i] = py[i].real();
+      for (int i = 0; i < ni; i++)y[i] = py[i].real();
       free_with_check(py);
     }
 
@@ -50,11 +50,11 @@ namespace Hermes
       PetscTruth petsc_initialized, petsc_finalized;
       int ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
       ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
-      if(petsc_finalized == PETSC_TRUE || petsc_initialized == PETSC_FALSE)
+      if (petsc_finalized == PETSC_TRUE || petsc_initialized == PETSC_FALSE)
         // This should never happen here.
-          return -1;
+        return -1;
 
-      if(--num_petsc_objects == 0)
+      if (--num_petsc_objects == 0)
       {
         int ierr = PetscFinalize();
         CHKERRQ(ierr);
@@ -68,12 +68,12 @@ namespace Hermes
       PetscTruth petsc_initialized, petsc_finalized;
       ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
 
-      if(petsc_finalized == PETSC_TRUE)
+      if (petsc_finalized == PETSC_TRUE)
         throw Hermes::Exceptions::Exception("PETSc cannot be used once it has been finalized. You must restart the application.");
 
       ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
 
-      if(petsc_initialized != PETSC_TRUE)
+      if (petsc_initialized != PETSC_TRUE)
       {
         ierr = PetscInitializeNoArguments();
         CHKERRQ(ierr);
@@ -132,7 +132,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::free()
     {
-      if(inited) MatDestroy(matrix);
+      if (inited) MatDestroy(matrix);
       inited = false;
     }
 
@@ -148,7 +148,7 @@ namespace Hermes
     {
       double v = 0.0;
       PetscScalar pv;
-      MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &pv);
+      MatGetValues(matrix, 1, (PetscInt*)&m, 1, (PetscInt*)&n, &pv);
       v = pv.real();
       return v;
     }
@@ -157,7 +157,7 @@ namespace Hermes
     std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n) const
     {
       std::complex<double> v = 0.0;
-      MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &v);
+      MatGetValues(matrix, 1, (PetscInt*)&m, 1, (PetscInt*)&n, &v);
       return v;
     }
 
@@ -180,10 +180,10 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
     {
-      if(v != 0.0)
+      if (v != 0.0)
       {    // ignore zero values.
 #pragma omp critical (PetscMatrix_add)
-        MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
+        MatSetValue(matrix, (PetscInt)m, (PetscInt)n, to_petsc(v), ADD_VALUES);
       }
     }
 
@@ -212,7 +212,7 @@ namespace Hermes
     template<typename Scalar>
     double PetscMatrix<Scalar>::get_fill_in() const
     {
-      return (double) nnz / ((double)this->size*this->size);
+      return (double)nnz / ((double)this->size*this->size);
     }
 
     template<typename Scalar>
@@ -225,7 +225,7 @@ namespace Hermes
     void PetscMatrix<Scalar>::add_sparse_matrix(SparseMatrix<Scalar>* mat)
     {
       PetscMatrix<Scalar>* mat_petsc = (PetscMatrix<Scalar>*)mat;
-      if(mat_petsc)
+      if (mat_petsc)
         this->add_petsc_matrix(mat_petsc);
       else
         SparseMatrix<Scalar>::add_sparse_matrix(mat);
@@ -245,7 +245,7 @@ namespace Hermes
       this->size = size;
       this->nnz = nnz;
       PetscScalar* pax = malloc_with_check(nnz, this);
-      for (unsigned i = 0;i<nnz;i++)
+      for (unsigned i = 0; i < nnz; i++)
         pax[i] = to_petsc(ax[i]);
       MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, size, size, ap, ai, pax, &matrix);
       delete pax;
@@ -287,7 +287,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::free()
     {
-      if(inited) VecDestroy(vec);
+      if (inited) VecDestroy(vec);
       inited = false;
     }
 
@@ -303,7 +303,7 @@ namespace Hermes
     {
       double y = 0;
       PetscScalar py;
-      VecGetValues(vec, 1, (PetscInt*) &idx, &py);
+      VecGetValues(vec, 1, (PetscInt*)&idx, &py);
       y = py.real();
       return y;
     }
@@ -312,7 +312,7 @@ namespace Hermes
     std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) const
     {
       std::complex<double> y = 0;
-      VecGetValues(vec, 1, (PetscInt*) &idx, &y);
+      VecGetValues(vec, 1, (PetscInt*)&idx, &y);
       return y;
     }
 
@@ -412,8 +412,8 @@ namespace Hermes
     PetscLinearMatrixSolver<Scalar>::PetscLinearMatrixSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs)
       : DirectSolver<Scalar>(mat, rhs), m(mat), rhs(rhs)
     {
-      add_petsc_object();
-    }
+        add_petsc_object();
+      }
 
     template<typename Scalar>
     PetscLinearMatrixSolver<Scalar>::~PetscLinearMatrixSolver()
@@ -446,7 +446,7 @@ namespace Hermes
       VecDuplicate(rhs->vec, &x);
 
       ec = KSPSolve(ksp, rhs->vec, x);
-      if(ec) return false;
+      if (ec) return false;
 
       this->tick();
       this->time = this->accumulated();
