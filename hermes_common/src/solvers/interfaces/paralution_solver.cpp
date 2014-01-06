@@ -222,8 +222,11 @@ namespace Hermes
       x.SetDataPtr(&this->sln, "Initial guess", matrix->get_size());
 
       // Handle the situation when rhs == 0(vector).
-      if (std::abs(rhs->get_paralutionVector()->Norm()) < Hermes::HermesSqrtEpsilon)
+      if (std::abs(rhs->get_paralutionVector()->Norm()) < Hermes::HermesEpsilon)
+      {
         x.LeaveDataPtr(&this->sln);
+        return;
+      }
 
       // (Re-)init.
       this->presolve_init();
@@ -433,33 +436,34 @@ namespace Hermes
       switch (preconditionerType)
       {
       case Jacobi:
-      {
-                   this->paralutionPreconditioner = new paralution::Jacobi<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-      }
+        this->paralutionPreconditioner = new paralution::Jacobi<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case ILU:
-      {
-                this->paralutionPreconditioner = new paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-      }
+        this->paralutionPreconditioner = new paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case MultiColoredILU:
-      {
-                            this->paralutionPreconditioner = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-      }
+        this->paralutionPreconditioner = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case MultiColoredSGS:
-      {
-                            this->paralutionPreconditioner = new paralution::MultiColoredSGS<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-      }
+        this->paralutionPreconditioner = new paralution::MultiColoredSGS<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case IC:
-      {
-               this->paralutionPreconditioner = new paralution::IC<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-      }
+        this->paralutionPreconditioner = new paralution::IC<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         break;
       case AIChebyshev:
+        this->paralutionPreconditioner = new paralution::AIChebyshev<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        break;
+      case MultiElimination:
+        this->paralutionPreconditioner = new paralution::MultiElimination<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        break;
+      case SaddlePoint:
       {
-                        this->paralutionPreconditioner = new paralution::AIChebyshev<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+                        paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePointPrecond =
+                          new paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+                        this->saddlePoint_p_k = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>;
+                        this->saddlePoint_p_s = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>;
+                        saddlePointPrecond->Init(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
+                        this->paralutionPreconditioner = saddlePointPrecond;
       }
         break;
       default:
@@ -470,6 +474,11 @@ namespace Hermes
     template<typename Scalar>
     paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& ParalutionPrecond<Scalar>::get_paralutionPreconditioner()
     {
+      paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePointPrecond =
+        dynamic_cast<paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>*>(this->paralutionPreconditioner);
+      if (saddlePointPrecond)
+        saddlePointPrecond->Init(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
+
       return (*this->paralutionPreconditioner);
     }
 

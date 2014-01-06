@@ -100,7 +100,7 @@ namespace Hermes
     class HERMES_API LinearMatrixSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable
     {
     public:
-      LinearMatrixSolver(SparseMatrix<Scalar>* matrix, Vector<Scalar>* rhs);
+      LinearMatrixSolver(SparseMatrix<Scalar>* matrix, Hermes::Algebra::Vector<Scalar>* rhs);
       DirectSolver<Scalar>* as_DirectSolver() const;
       LoopSolver<Scalar>* as_LoopSolver() const;
       IterSolver<Scalar>* as_IterSolver() const;

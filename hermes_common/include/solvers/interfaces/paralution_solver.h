@@ -111,8 +111,13 @@ namespace Hermes
       paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& get_paralutionPreconditioner();
       static paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* return_paralutionPreconditioner(PreconditionerType preconditionerType);
     private:
-      // Paralution preconditioner
+      /// Paralution preconditioner
       paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
+      
+      /// Helper precond for saddle point.
+      paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePoint_p_k;
+      /// Helper precond for saddle point.
+      paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePoint_p_s;
     };
   }
 
