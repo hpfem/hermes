@@ -49,7 +49,7 @@ namespace Hermes
     static const int HERMES_PAGE_MASK = HERMES_PAGE_SIZE - 1;
   public:
 
-    Array(int initial_page_count = 0)
+    Array(int initial_page_count = 0) : pages(nullptr), unused(nullptr)
     {
       size = nitems = nunused = 0;
       page_count = initial_page_count;
@@ -299,7 +299,7 @@ namespace Hermes
 
   public:
 
-    LightArray(unsigned int page_bits = 9, unsigned int default_page_count = 512) : page_bits(page_bits), page_size(1 << page_bits), page_mask((1 << page_bits) - 1), page_count(default_page_count)
+    LightArray(unsigned int page_bits = 9, unsigned int default_page_count = 512) : page_bits(page_bits), page_size(1 << page_bits), page_mask((1 << page_bits) - 1), page_count(default_page_count), pages(nullptr), presence(nullptr)
     {
       size = 0;
       pages = malloc_with_check<LightArray<TYPE>, TYPE*>(page_count, this, true);
