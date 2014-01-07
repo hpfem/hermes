@@ -109,8 +109,8 @@ namespace Hermes
     {
       for (int i = 0; i < this->component_count; i++)
       {
-        free_with_check(errors[i]);
-        free_with_check(norms[i]);
+        free_with_check(errors[i], true);
+        free_with_check(norms[i], true);
       }
 
       free_with_check(this->element_references);

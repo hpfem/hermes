@@ -81,50 +81,16 @@ namespace Hermes
       void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::free()
       {
         // OpenGL part.
-        if (this->triangles)
-        {
-          ::free(triangles);
-          triangles = nullptr;
-        }
-        if (this->edges)
-        {
-          ::free(edges);
-          edges = nullptr;
-        }
-        if (this->edge_markers)
-        {
-          ::free(edge_markers);
-          edge_markers = nullptr;
-        }
-
+        free_with_check(this->triangles, true);
+        free_with_check(this->edges, true);
+        free_with_check(this->edge_markers, true);
         // FileExport part.
-        if (this->triangle_indices)
-        {
-          ::free(triangle_indices);
-          triangle_indices = nullptr;
-        }
-
+        free_with_check(this->triangle_indices, true);
         // Common part.
-        if (this->vertices)
-        {
-          ::free(vertices);
-          vertices = nullptr;
-        }
-        if (this->triangle_markers)
-        {
-          ::free(triangle_markers);
-          triangle_markers = nullptr;
-        }
-        if (this->hash_table)
-        {
-          ::free(hash_table);
-          hash_table = nullptr;
-        }
-        if (this->info)
-        {
-          ::free(info);
-          info = nullptr;
-        }
+        free_with_check(this->vertices, true);
+        free_with_check(this->triangle_markers, true);
+        free_with_check(this->hash_table, true);
+        free_with_check(this->info, true);
       }
 
       template<typename LinearizerDataDimensions>
@@ -209,16 +175,10 @@ namespace Hermes
         this->vertices = realloc_with_check<ThreadLinearizerMultidimensional, typename LinearizerDataDimensions::vertex_t>(this->vertices, this->vertex_size, this);
         this->triangle_markers = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->triangle_markers, this->triangle_size, this);
 
-        hash_table = (int*)malloc(sizeof(int)* this->vertex_size);
-        info = (internal_vertex_info_t*)malloc(sizeof(internal_vertex_info_t)* this->vertex_size);
-
-        if (!this->hash_table || !this->info)
-        {
-          this->free();
-          throw Exceptions::Exception("LinearizerMultidimensional out of memory!");
-        }
-
+        this->hash_table = malloc_with_check<ThreadLinearizerMultidimensional<LinearizerDataDimensions>, int>(this->vertex_size, this);
         memset(this->hash_table, 0xff, sizeof(int)* this->vertex_size);
+       
+        this->info = malloc_with_check<ThreadLinearizerMultidimensional<LinearizerDataDimensions>, internal_vertex_info_t>(this->vertex_size, this);
       }
 
       template<typename LinearizerDataDimensions>
@@ -226,6 +186,9 @@ namespace Hermes
       {
         for (unsigned int j = 0; j < (LinearizerDataDimensions::dimension + (this->user_xdisp ? 1 : 0) + (this->user_ydisp ? 1 : 0)); j++)
           delete fns[j];
+
+        free_with_check(this->hash_table, true);
+        free_with_check(this->info, true);
       }
 
       template<typename LinearizerDataDimensions>

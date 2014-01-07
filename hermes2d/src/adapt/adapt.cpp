@@ -207,7 +207,7 @@ namespace Hermes
       for (int j = 0; j < this->num; j++)
       {
         meshes[j] = this->meshes[j];
-        element_refinement_location[j] = (ElementToRefine**)calloc(meshes[j]->get_max_element_id() + 1, sizeof(ElementToRefine*));
+        element_refinement_location[j] = calloc_with_check<Adapt<Scalar>, ElementToRefine*> (meshes[j]->get_max_element_id() + 1, this);
       }
 
       // Clearing.
