@@ -192,7 +192,7 @@ namespace Hermes
                                         FILE* file = fopen(filename, "w");
                                         if (!file)
                                           throw Exceptions::IOException(Exceptions::IOException::Write, filename);
-                                        fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real\n");
+                                        fprintf(file, "%%%%MatrixMarket matrix coordinate real general\n");
                                         fprintf(file, "%d %d %d\n", this->size, this->size, this->nnz);
 
                                         for (unsigned int j = 0; j < this->size; j++)

@@ -383,9 +383,9 @@ namespace Hermes
                                         if (!file)
                                           throw Exceptions::IOException(Exceptions::IOException::Write, filename);
                                         if (Hermes::Helpers::TypeIsReal<Scalar>::value)
-                                          fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real\n");
+                                          fprintf(file, "%%%%MatrixMarket matrix coordinate real general\n");
                                         else
-                                          fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate complex\n");
+                                          fprintf(file, "%%%%MatrixMarket matrix coordinate complex general\n");
 
                                         fprintf(file, "%d %d %d\n", this->size, this->size, this->nnz);
 

@@ -31,9 +31,9 @@ namespace Hermes
     namespace Mixins
     {
       template<typename Scalar>
-      MatrixRhsOutput<Scalar>::MatrixRhsOutput() : output_matrixOn(false), output_matrixIterations(-1), matrixFilename("Matrix_"),
+      MatrixRhsOutput<Scalar>::MatrixRhsOutput() : output_matrixOn(false), output_matrixIterations(-1), matrixFilename("Matrix"),
         matrixVarname("A"), matrixFormat(Hermes::Algebra::EXPORT_FORMAT_PLAIN_ASCII), matrix_number_format("%lf"), output_rhsOn(false), output_rhsIterations(-1),
-        RhsFilename("Rhs_"), RhsVarname("b"), RhsFormat(Hermes::Algebra::EXPORT_FORMAT_PLAIN_ASCII), rhs_number_format("%lf")
+        RhsFilename("Rhs"), RhsVarname("b"), RhsFormat(Hermes::Algebra::EXPORT_FORMAT_PLAIN_ASCII), rhs_number_format("%lf")
       {
       }
 
@@ -49,7 +49,7 @@ namespace Hermes
           if (this->only_lastMatrixIteration)
             sprintf(fileName, "%s", this->matrixFilename.c_str());
           else if (this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration)
-            sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
+            sprintf(fileName, "%s_%i", this->matrixFilename.c_str(), iteration);
           else
           {
             free_with_check(fileName);
@@ -89,7 +89,7 @@ namespace Hermes
           if (this->only_lastRhsIteration)
             sprintf(fileName, "%s", this->RhsFilename.c_str());
           else if (this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration)
-            sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
+            sprintf(fileName, "%s_%i", this->RhsFilename.c_str(), iteration);
           else
           {
             free_with_check(fileName);
