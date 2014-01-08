@@ -1,6 +1,6 @@
 #include "hermes2d.h"
 
-//#define USE_PARALUTION
+#define USE_PARALUTION
 
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
@@ -93,12 +93,16 @@ int main(int argc, char* argv[])
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton(&wf, spaces);
+  newton.output_matrix();
+  newton.set_matrix_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);
+  newton.set_rhs_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);
+  newton.output_rhs();
   // Verbose.
   newton.get_linear_matrix_solver()->set_verbose_output(true);
 
 #ifdef USE_PARALUTION
   // Relative tolerance of PARALUTION.
-  newton.get_linear_matrix_solver()->as_IterSolver()->set_tolerance(1e-6, Solvers::LoopSolverToleranceType::RelativeTolerance);
+  newton.get_linear_matrix_solver()->as_IterSolver()->set_tolerance(1e-8, Solvers::LoopSolverToleranceType::RelativeTolerance);
   // Use GMRES.
   newton.get_linear_matrix_solver()->as_IterSolver()->set_solver_type(Solvers::IterSolverType::GMRES);
   // Use Saddle-point preconditioner.
