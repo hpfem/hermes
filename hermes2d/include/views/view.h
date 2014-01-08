@@ -239,9 +239,9 @@ namespace Hermes
       public:
 
         void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        View() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        View(const char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        View(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        View() {}
+        View(const char* title, WinGeom* wg = nullptr) {}
+        View(char* title, WinGeom* wg = nullptr) {}
 
         int  create() { throw Hermes::Exceptions::Exception("GLUT disabled."); return -1; }
         void close() { throw Hermes::Exceptions::Exception("GLUT disabled."); }

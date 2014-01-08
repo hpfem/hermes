@@ -68,8 +68,8 @@ namespace Hermes
       {
       public:
 
-        OrderView(const char* title = "OrderView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        OrderView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        OrderView(const char* title = "OrderView", WinGeom* wg = nullptr) {}
+        OrderView(char* title, WinGeom* wg = nullptr) {}
 
         template<typename Scalar>
         void show(SpaceSharedPtr<Scalar> space, bool show_edge_orders = true)  { throw Hermes::Exceptions::Exception("GLUT disabled."); }

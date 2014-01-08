@@ -18,7 +18,6 @@
 #define __H2D_MESH_VIEW_H
 #include "view.h"
 #include "linearizer.h"
-#include "../function/exact_solution.h"
 
 namespace Hermes
 {
@@ -72,14 +71,17 @@ namespace Hermes
         MeshSharedPtr mesh;
       };
 #else
+#pragma optimize( "g", off )
       class HERMES_API MeshView : public View
       {
       public:
-        MeshView(const char* title = "MeshView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        MeshView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        MeshView(const char* title = "MeshView", WinGeom* wg = nullptr) {}
+        MeshView(char* title, WinGeom* wg = nullptr) {}
+
         void show(MeshSharedPtr mesh) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_b_elem_mrk(bool set) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
+#pragma optimize( "g", on ) 
 #endif
     }
   }

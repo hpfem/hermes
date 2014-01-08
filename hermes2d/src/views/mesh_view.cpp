@@ -12,13 +12,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-// $Id: view4.cpp 1086 2008-10-21 09:05:44Z jakub $
-
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
 #include "global.h"
-#include "mesh_view.h"
+#include "../function/exact_solution.h"
 
 namespace Hermes
 {
@@ -270,4 +268,8 @@ namespace Hermes
     }
   }
 }
+#else
+#include "mesh_view.h"
+
+static Hermes::Hermes2D::Views::MeshView dummy_view;
 #endif // NOGLUT

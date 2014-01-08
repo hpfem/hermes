@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-// $Id: view.h 1086 2008-10-21 09:05:44Z jakub $
+// $Id: scalar_view.h 1086 2008-10-21 09:05:44Z jakub $
 
 #ifndef __H2D_SCALAR_VIEW_H
 #define __H2D_SCALAR_VIEW_H
@@ -180,8 +180,8 @@ class HERMES_API ScalarView : public View
       {
       public:
 				void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        ScalarView(const char* title = "ScalarView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        ScalarView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        ScalarView(const char* title = "ScalarView", WinGeom* wg = nullptr) {}
+        ScalarView(char* title, WinGeom* wg = nullptr) {}
 
         void show(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0,
           MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }

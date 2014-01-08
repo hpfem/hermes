@@ -71,8 +71,8 @@ namespace Hermes
       class HERMES_API VectorView : public View
       {
       public:
-        VectorView(const char* title = "VectorView", WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        VectorView(char* title, WinGeom* wg = nullptr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        VectorView(const char* title = "VectorView", WinGeom* wg = nullptr) {}
+        VectorView(char* title, WinGeom* wg = nullptr) {}
 
         void show(MeshFunctionSharedPtr<double> vsln) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
