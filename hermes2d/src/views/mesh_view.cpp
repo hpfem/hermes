@@ -17,6 +17,7 @@
 #include <GL/freeglut.h>
 #include "global.h"
 #include "../function/exact_solution.h"
+#include "mesh_view.h"
 
 namespace Hermes
 {
