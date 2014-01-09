@@ -461,8 +461,8 @@ namespace Hermes
       {
                         paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePointPrecond =
                           new paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-                        this->saddlePoint_p_k = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>;
-                        this->saddlePoint_p_s = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>;
+                        this->saddlePoint_p_k = new paralution::FSAI<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>;
+                        this->saddlePoint_p_s = new paralution::SPAI<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>;
                         saddlePointPrecond->Init(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
                         this->paralutionPreconditioner = saddlePointPrecond;
       }

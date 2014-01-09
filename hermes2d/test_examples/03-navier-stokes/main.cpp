@@ -104,7 +104,9 @@ int main(int argc, char* argv[])
   // Relative tolerance of PARALUTION.
   newton.get_linear_matrix_solver()->as_IterSolver()->set_tolerance(1e-8, Solvers::LoopSolverToleranceType::RelativeTolerance);
   // Use GMRES.
-  newton.get_linear_matrix_solver()->as_IterSolver()->set_solver_type(Solvers::IterSolverType::GMRES);
+  newton.get_linear_matrix_solver()->as_IterSolver()->set_solver_type(Solvers::IterSolverType::BiCGStab);
+  // Max iterations -> 10000
+  newton.get_linear_matrix_solver()->as_IterSolver()->set_max_iters(10000);
   // Use Saddle-point preconditioner.
   newton.get_linear_matrix_solver()->as_IterSolver()->set_precond(new Preconditioners::ParalutionPrecond<double>(Preconditioners::PreconditionerType::SaddlePoint));
 #endif
@@ -136,7 +138,6 @@ int main(int argc, char* argv[])
     vview.set_title("Velocity, time %g", current_time);
     vview.show(xvel_prev_time, yvel_prev_time);
     pview.set_title("Pressure, time %g", current_time);
-    pview.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(1));
     pview.show(p_prev_time);
   }
 
