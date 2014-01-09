@@ -286,82 +286,87 @@ namespace Hermes
               double mr, ml, lx, rx, xval, yval;
 
               double wh = output_height + gt, ww = output_width + gs;
-              if ((triangle[0][0] < -gs) && (triangle[1][0] < -gs) && (triangle[2][0] < -gs)) continue;
-              if ((triangle[0][0] >  ww) && (triangle[1][0] >  ww) && (triangle[2][0] >  ww)) continue;
-              if ((triangle[0][1] < -gt) && (triangle[1][1] < -gt) && (triangle[2][1] < -gt)) continue;
-              if ((triangle[0][1] >  wh) && (triangle[1][1] >  wh) && (triangle[2][1] >  wh)) continue;
+
+              double vert[3][2] = {
+                {
+                  triangle[0][0],
+                  triangle[0][1]
+                },
+                {
+                  triangle[1][0],
+                  triangle[1][1]
+                },
+                {
+                  triangle[2][0],
+                  triangle[2][1]
+                }
+              };
+
+              double tvert[3][2] = {
+                {
+                  transform_x(triangle[0][0]),
+                  transform_y(triangle[0][1])
+                },
+                {
+                  transform_x(triangle[1][0]),
+                  transform_y(triangle[1][1])
+                },
+                {
+                  transform_x(triangle[2][0]),
+                  transform_y(triangle[2][1])
+                }
+              };
+
+
+              if ((tvert[0][0] < -gs) && (tvert[1][0] < -gs) && (tvert[2][0] < -gs)) continue;
+              if ((tvert[0][0] >  ww) && (tvert[1][0] >  ww) && (tvert[2][0] >  ww)) continue;
+              if ((tvert[0][1] < -gt) && (tvert[1][1] < -gt) && (tvert[2][1] < -gt)) continue;
+              if ((tvert[0][1] >  wh) && (tvert[1][1] >  wh) && (tvert[2][1] >  wh)) continue;
 
               // find vertex with min y-coordinate
               for (k = 0; k < 3; k++)
-              if (triangle[k][1] < miny)
               {
-                idx = k;
-                miny = triangle[k][1];
+                if (tvert[k][1] < miny)
+                  miny = tvert[idx = k][1];
               }
               l1 = r1 = idx;
               l2 = n_vert(idx);
               r2 = p_vert(idx);
 
-              double tx_l1_0 = transform_x(triangle[l1][0]);
-              double tx_l1_1 = transform_x(triangle[l1][1]);
-
-              double tx_l2_0 = transform_x(triangle[l2][0]);
-              double tx_l2_1 = transform_x(triangle[l2][1]);
-
-              double tx_r1_0 = transform_x(triangle[r1][0]);
-              double tx_r1_1 = transform_x(triangle[r1][1]);
-
-              double tx_r2_0 = transform_x(triangle[r2][0]);
-              double tx_r2_1 = transform_x(triangle[r2][1]);
-
-              double ty_l1_0 = transform_y(triangle[l1][0]);
-              double ty_l1_1 = transform_y(triangle[l1][1]);
-
-              double ty_l2_0 = transform_y(triangle[l2][0]);
-              double ty_l2_1 = transform_y(triangle[l2][1]);
-
-              double ty_r1_0 = transform_y(triangle[r1][0]);
-              double ty_r1_1 = transform_y(triangle[r1][1]);
-
-              double ty_r2_0 = transform_y(triangle[r2][0]);
-              double ty_r2_1 = transform_y(triangle[r2][1]);
-
               // plane of x and y values on triangle
               double a[2], b[2], c[2], d[2];
               for (int n = 0; n < 2; n++)
               {
-                a[n] = (ty_l1_1-ty_l2_1) * (triangle[r1][2 + n] - triangle[r2][2 + n])
-                  - (triangle[l1][2 + n] - triangle[l2][2 + n]) * (ty_r1_1-ty_r2_1);
-                b[n] = (triangle[l1][2 + n] - triangle[l2][2 + n]) * (tx_r1_0-tx_r2_0)
-                  - (tx_l1_0-tx_l2_0) * (triangle[r1][2 + n] - triangle[r2][2 + n]);
-                c[n] = (tx_l1_0-tx_l2_0) * (ty_r1_1-ty_r2_1) - (ty_l1_1-ty_l2_1) * (tx_r1_0-tx_r2_0);
-                d[n] = -a[n] * tx_l1_0 - b[n] * ty_l1_1 - c[n] * triangle[l1][2 + n];
+                a[n] = (tvert[l1][1] - tvert[l2][1])*(vert[r1][2 + n] - vert[r2][2 + n]) - (vert[l1][2 + n] - vert[l2][2 + n])*(tvert[r1][1] - tvert[r2][1]);
+                b[n] = (vert[l1][2 + n] - vert[l2][2 + n])*(tvert[r1][0] - tvert[r2][0]) - (tvert[l1][0] - tvert[l2][0])*(vert[r1][2 + n] - vert[r2][2 + n]);
+                c[n] = (tvert[l1][0] - tvert[l2][0])*(tvert[r1][1] - tvert[r2][1]) - (tvert[l1][1] - tvert[l2][1])*(tvert[r1][0] - tvert[r2][0]);
+                d[n] = -a[n] * tvert[l1][0] - b[n] * tvert[l1][1] - c[n] * vert[l1][2 + n];
                 a[n] /= c[n]; b[n] /= c[n]; d[n] /= c[n];
               }
 
-              s = (int)ceil((ty_l1_1-gy) / gt);  // first step
+              s = (int)ceil((tvert[l1][1] - gy) / gt);  // first step
               lry = gy + s*gt;
               bool shift = hexa && (s & 1);
 
               // if there are two points with min y-coordinate, switch to the next segment
-              if (ty_l1_1 == ty_l2_1 || ty_r1_1 == ty_r2_1)
+              if ((tvert[l1][1] == tvert[l2][1]) || (tvert[r1][1] == tvert[r2][1]))
               {
-                if (ty_l1_1 == ty_l2_1)
+                if (tvert[l1][1] == tvert[l2][1])
                 {
                   l1 = l2; l2 = r2;
                 }
-                else if (ty_r1_1 == ty_r2_1)
+                else if (tvert[r1][1] == tvert[r2][1])
                 {
                   r1 = r2; r2 = l2;
                 }
               }
 
               // slope of the left and right segment
-              ml = (tx_l1_0-tx_l2_0) / (ty_l1_1-ty_l2_1);
-              mr = (tx_r1_0-tx_r2_0) / (ty_r1_1-ty_r2_1);
+              ml = (tvert[l1][0] - tvert[l2][0]) / (tvert[l1][1] - tvert[l2][1]);
+              mr = (tvert[r1][0] - tvert[r2][0]) / (tvert[r1][1] - tvert[r2][1]);
               // x-coordinates of the endpoints of the first line
-              lx = tx_l1_0 + ml * (lry - (ty_l1_1));
-              rx = tx_r1_0 + mr * (lry - (ty_r1_1));
+              lx = tvert[l1][0] + ml * (lry - (tvert[l1][1]));
+              rx = tvert[r1][0] + mr * (lry - (tvert[r1][1]));
 
               if (lry < -gt)
               {
@@ -372,10 +377,10 @@ namespace Hermes
               }
 
               // while we are in triangle
-              while (((lry < ty_l2_1) || (lry < ty_r2_1)) && (lry < wh))
+              while (((lry < tvert[l2][1]) || (lry < tvert[r2][1])) && (lry < wh))
               {
                 // while we are in the segment
-                while (((lry <= ty_l2_1) && (lry <= ty_r2_1)) && (lry < wh))
+                while (((lry <= tvert[l2][1]) && (lry <= tvert[r2][1])) && (lry < wh))
                 {
                   double gz = gx;
                   if (shift) gz -= 0.5*gs;
@@ -403,17 +408,17 @@ namespace Hermes
                   lry += gt;
                 }
                 // change segment
-                if (lry >= ty_l2_1)
+                if (lry >= tvert[l2][1])
                 {
                   l1 = l2; l2 = r2;
-                  ml = (tx_l1_0-tx_l2_0) / (ty_l1_1-ty_l2_1);
-                  lx = tx_l1_0 + ml * (lry - (ty_l1_1));
+                  ml = (tvert[l1][0] - tvert[l2][0]) / (tvert[l1][1] - tvert[l2][1]);
+                  lx = tvert[l1][0] + ml * (lry - (tvert[l1][1]));
                 }
                 else
                 {
                   r1 = r2; r2 = l2;
-                  mr = (tx_r1_0-tx_r2_0) / (ty_r1_1-ty_r2_1);
-                  rx = tx_r1_0 + mr * (lry - (ty_r1_1));
+                  mr = (tvert[r1][0] - tvert[r2][0]) / (tvert[r1][1] - tvert[r2][1]);
+                  rx = tvert[r1][0] + mr * (lry - (tvert[r1][1]));
                 }
               }
             }
