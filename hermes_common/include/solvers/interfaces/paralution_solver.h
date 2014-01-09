@@ -114,10 +114,12 @@ namespace Hermes
       /// Paralution preconditioner
       paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
 
+#if __PARALUTION_VER >= 500
       /// Helper precond for saddle point.
       paralution::FSAI<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePoint_p_k;
       /// Helper precond for saddle point.
       paralution::SPAI<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePoint_p_s;
+#endif
     };
   }
 
