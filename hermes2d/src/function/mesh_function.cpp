@@ -286,20 +286,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void MeshFunction<Scalar>::push_transform(int son)
-    {
-      Transformable::push_transform(son);
-      Function<Scalar>::update_nodes_ptr();
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::pop_transform()
-    {
-      Transformable::pop_transform();
-      Function<Scalar>::update_nodes_ptr();
-    }
-
-    template<typename Scalar>
     void MeshFunction<Scalar>::force_transform(MeshFunctionSharedPtr<Scalar> mf)
     {
       Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());

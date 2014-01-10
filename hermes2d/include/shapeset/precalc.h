@@ -68,23 +68,7 @@ namespace Hermes
       /// Returns the polynomial order of the active shape function on given edge.
       virtual int get_edge_fn_order(int edge);
 
-      /// See Transformable::push_transform.
-      virtual void push_transform(int son);
-
-      virtual void pop_transform();
-
       Shapeset* shapeset;
-
-      /// Main structure.
-      /// There is a 3-layer structure of the precalculated tables.
-      /// The first (the lowest) one is the layer where mapping of integral orders to
-      /// Function::Node takes place. See function.h for details.
-      /// The second one is the layer with mapping of sub-element transformation to
-      /// a table from the lowest layer.
-      /// The highest and most complicated one maps a key formed by
-      /// quadrature table selector (0-7), mode of the shape function (triangle/quad),
-      /// and shape function index to a table from the middle layer.
-      LightArray<SubElementMap<LightArray<Node*> >*> tables;
 
       int index;
 

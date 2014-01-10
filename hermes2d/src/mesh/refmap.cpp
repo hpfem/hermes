@@ -198,13 +198,13 @@ namespace Hermes
 
       for (i = 0; i < nc; i++)
       {
-        double *dx, *dy;
 
         double coeff_0 = coeffs[i][0];
         double coeff_1 = coeffs[i][1];
         ref_map_pss.set_active_shape(indices[i]);
-        ref_map_pss.set_quad_order(order);
-        ref_map_pss.get_dx_dy_values(dx, dy);
+        ref_map_pss.set_quad_order(order, H2D_FN_DX_0 | H2D_FN_DY_0);
+        const double *dx = ref_map_pss.get_dx_values();
+        const double *dy = ref_map_pss.get_dy_values();
         for (j = 0; j < np; j++)
         {
           double dx_ = dx[j];
@@ -254,12 +254,11 @@ namespace Hermes
       ref_map_pss.force_transform(sub_idx, ctm);
       for (i = 0; i < nc; i++)
       {
-        double *dxy, *dxx, *dyy;
         ref_map_pss.set_active_shape(indices[i]);
         ref_map_pss.set_quad_order(order, H2D_FN_ALL);
-        dxx = ref_map_pss.get_dxx_values();
-        dyy = ref_map_pss.get_dyy_values();
-        dxy = ref_map_pss.get_dxy_values();
+        const double *dxx = ref_map_pss.get_dxx_values();
+        const double *dyy = ref_map_pss.get_dyy_values();
+        const double *dxy = ref_map_pss.get_dxy_values();
         for (j = 0; j < np; j++)
         {
           k[j][0][0] += coeffs[i][0] * dxx[j];
@@ -336,8 +335,8 @@ namespace Hermes
       for (i = 0; i < nc; i++)
       {
         ref_map_pss.set_active_shape(indices[i]);
-        ref_map_pss.set_quad_order(order);
-        double* fn = ref_map_pss.get_fn_values();
+        ref_map_pss.set_quad_order(order, H2D_FN_VAL_0);
+        const double* fn = ref_map_pss.get_fn_values();
         for (j = 0; j < np; j++)
           x[j] += coeffs[i][0] * fn[j];
       }
@@ -354,8 +353,8 @@ namespace Hermes
       for (i = 0; i < nc; i++)
       {
         ref_map_pss.set_active_shape(indices[i]);
-        ref_map_pss.set_quad_order(order);
-        double* fn = ref_map_pss.get_fn_values();
+        ref_map_pss.set_quad_order(order, H2D_FN_VAL_0);
+        const double* fn = ref_map_pss.get_fn_values();
         for (j = 0; j < np; j++)
           y[j] += coeffs[i][1] * fn[j];
       }
@@ -392,10 +391,10 @@ namespace Hermes
         ref_map_pss.force_transform(sub_idx, ctm);
         for (i = 0; i < nc; i++)
         {
-          double *dx, *dy;
           ref_map_pss.set_active_shape(indices[i]);
           ref_map_pss.set_quad_order(eo);
-          ref_map_pss.get_dx_dy_values(dx, dy);
+          const double *dx = ref_map_pss.get_dx_values();
+          const double *dy = ref_map_pss.get_dy_values();
           for (j = 0; j < np; j++)
           {
             m[j][0][0] += coeffs[i][0] * dx[j];

@@ -106,39 +106,37 @@ namespace Hermes
       /// \brief Returns function values.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The values of the function at all points of the current integration rule.
-      Scalar* get_fn_values(int component = 0) const;
+      const Scalar* get_fn_values(int component = 0) const;
 
       /// \brief Returns the x partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The x partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dx_values(int component = 0) const;
+      const Scalar* get_dx_values(int component = 0) const;
 
       /// \brief Returns the y partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The y partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dy_values(int component = 0) const;
-
-      /// \brief Returns both x and y partial derivatives.
-      /// This function provides the both often-used dx and dy values in one call.
-      /// \param dx[out] Variable which receives the pointer to the first partial derivatives by x
-      /// \param dy[out] Variable which receives the pointer to the first partial derivatives by y
-      /// \param component[in] The component of the function (0 or 1).
-      void get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0) const;
+      const Scalar* get_dy_values(int component = 0) const;
 
       /// \brief Returns the second x partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The x second partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dxx_values(int component = 0) const;
+      const Scalar* get_dxx_values(int component = 0) const;
 
       /// \brief Returns the second y partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The y second partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dyy_values(int component = 0) const;
+      const Scalar* get_dyy_values(int component = 0) const;
 
       /// \brief Returns the second mixed derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The second mixed derivative of the function at all points of the current integration rule.
-      Scalar* get_dxy_values(int component = 0) const;
+      const Scalar* get_dxy_values(int component = 0) const;
+
+      /// \brief Returns function values.
+      /// \param component[in] The component of the function (0 or 1).
+      /// \return The values of the function at all points of the current integration rule.
+      Scalar* deep_copy_array(int component = 0, int item = 0) const;
 
       /// \brief Returns the current quadrature points.
       Quad2D* get_quad_2d() const;
@@ -156,6 +154,14 @@ namespace Hermes
       /// \brief Returns the polynomial degree of the function being represented by the class.
       virtual int get_fn_order() const;
 
+      /// See Transformable::push_transform.
+      /// Internal.
+      virtual void push_transform(int son);
+
+      /// See Transformable::pop_transform.
+      /// Internal.
+      virtual void pop_transform();
+
     protected:
       /// \brief Selects the quadrature points in which the function will be evaluated.
       /// \details It is possible to switch back and forth between different quadrature
@@ -169,22 +175,7 @@ namespace Hermes
 
       struct Node
       {
-        int mask;           ///< a combination of H2D_FN_XXX: specifies which tables are present
-
-        int size;           ///< size in bytes of this struct (for maintaining total_mem)
-
-        Scalar* values[H2D_MAX_SOLUTION_COMPONENTS][6]; ///< pointers to 'data'
-
-        Scalar data[1];       ///< value tables. The length may vary.
-
-      public:
-        static void DeallocationFunction(LightArray<Node*>* data)
-        {
-          for(unsigned int k = 0; k < data->get_size(); k++)
-            if(data->present(k))
-              ::free(data->get(k));
-          delete data;
-        }
+        Scalar values[H2D_MAX_SOLUTION_COMPONENTS][6][H2D_MAX_INTEGRATION_POINTS_COUNT];
       };
 
       /// \brief Returns the polynomial degree of the function at given edge. To be overridden in derived classes.
@@ -198,14 +189,8 @@ namespace Hermes
 
       int num_components; ///< number of vector components
 
-      /// Table of Node tables, for each possible transformation there can be a different Node table.
-      SubElementMap<LightArray<Node*> >* sub_tables;
-
-      /// Table of nodes.
-      LightArray<Node*>* nodes;
-
       /// Current Node.
-      Node* cur_node;
+      Node cur_node;
 
       /// With changed sub-element mapping, there comes the need for a change of the current
       /// Node table nodes.
@@ -218,11 +203,7 @@ namespace Hermes
 
       int cur_quad;     ///< active quadrature (index into 'quads')
 
-      Node* new_node(int mask, int num_points); ///< allocates a new_ Node structure
-
-      static void check_params(int component, Node* cur_node, int num_components);
-
-      static void check_table(int component, Node* cur_node, int n, const char* msg);
+      static void check_params(int component, int num_components);
 
       static int idx2mask[6][2];  ///< index to mask table
       template<typename T> friend class KellyTypeAdapt;

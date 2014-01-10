@@ -245,7 +245,7 @@ namespace Hermes
           rsln_sln->enable_transform(false);
 
         // obtain reference solution values on all four refined sons
-        Scalar** rval[H2D_MAX_ELEMENT_SONS];
+        const Scalar** rval[H2D_MAX_ELEMENT_SONS];
         Element* base_element = rsln->get_mesh()->get_element(e->id);
 
         // value on base element.
@@ -326,10 +326,10 @@ namespace Hermes
             Trf* sub_trfs[4] = { &trfs[0], &trfs[1], &trfs[2], &trfs[3] };
             Hermes::vector<TrfShapeExp>* p_trf_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
             Hermes::vector<TrfShapeExp>* p_trf_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
-            Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };;
+            const Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };;
             for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
             {
-              Scalar **sub_rval[1] = { rval[son] };
+              const Scalar **sub_rval[1] = { rval[son] };
               calc_error_cand_element(mode, gip_points, num_gip_points
                 , 1, &base_element, &sub_trfs[son], sub_rval
                 , &p_trf_svals[son], &p_trf_ortho_svals[son]
@@ -343,7 +343,7 @@ namespace Hermes
             Hermes::vector<TrfShapeExp>* p_trf_ortho_svals[1] = { &ortho_svals[H2D_TRF_IDENTITY] };
             for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
             {
-              Scalar **sub_rval[1] = { rval[son] };
+              const Scalar **sub_rval[1] = { rval[son] };
               calc_error_cand_element(mode, gip_points, num_gip_points
                 , 1, &base_element->sons[son], p_trf_identity, sub_rval
                 , p_trf_svals, p_trf_ortho_svals
@@ -362,7 +362,7 @@ namespace Hermes
             {
               Trf* sub_trfs[2] = { &trfs[tr[version][0]], &trfs[tr[version][1]] };
               Element* sub_domains[2] = { base_element, base_element };
-              Scalar **sub_rval[2] = { rval[tr[version][0]], rval[tr[version][1]] };
+              const Scalar **sub_rval[2] = { rval[tr[version][0]], rval[tr[version][1]] };
               Hermes::vector<TrfShapeExp>* sub_svals[2] = { &svals[tr[version][0]], &svals[tr[version][1]] };
               Hermes::vector<TrfShapeExp>* sub_ortho_svals[2] = { &ortho_svals[tr[version][0]], &ortho_svals[tr[version][1]] };
               calc_error_cand_element(mode, gip_points, num_gip_points
@@ -379,7 +379,7 @@ namespace Hermes
             { // 2 elements for vertical split, 2 elements for horizontal split
               Trf* sub_trfs[2] = { &trfs[tr[version][0]], &trfs[tr[version][1]] };
               Element* sub_domains[2] = { base_element->sons[sons[version][0]], base_element->sons[sons[version][1]] };
-              Scalar **sub_rval[2] = { rval[sons[version][0]], rval[sons[version][1]] };
+              const Scalar **sub_rval[2] = { rval[sons[version][0]], rval[sons[version][1]] };
               Hermes::vector<TrfShapeExp>* sub_svals[2] = { &svals[tr[version][0]], &svals[tr[version][1]] };
               Hermes::vector<TrfShapeExp>* sub_ortho_svals[2] = { &ortho_svals[tr[version][0]], &ortho_svals[tr[version][1]] };
               calc_error_cand_element(mode, gip_points, num_gip_points
@@ -396,7 +396,7 @@ namespace Hermes
           if (base_element->active)
           {
             Trf* sub_trfs[4] = { &trfs[0], &trfs[1], &trfs[2], &trfs[3] };
-            Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };
+            const Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };
             Hermes::vector<TrfShapeExp>* sub_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
             Hermes::vector<TrfShapeExp>* sub_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
             Element* sub_domains[4] = { base_element, base_element, base_element, base_element };
@@ -409,7 +409,7 @@ namespace Hermes
           else
           {
             Trf* sub_trfs[4] = { &trfs[0], &trfs[1], &trfs[2], &trfs[3] };
-            Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };
+            const Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };
             Hermes::vector<TrfShapeExp>* sub_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
             Hermes::vector<TrfShapeExp>* sub_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
 
@@ -431,7 +431,7 @@ namespace Hermes
       template<typename Scalar>
       void ProjBasedSelector<Scalar>::calc_error_cand_element(const ElementMode2D mode
         , double3* gip_points, int num_gip_points
-        , const int num_sub, Element** sub_domains, Trf** sub_trfs, Scalar*** sub_rvals
+        , const int num_sub, Element** sub_domains, Trf** sub_trfs, const Scalar*** sub_rvals
         , Hermes::vector<TrfShapeExp>** sub_nonortho_svals, Hermes::vector<TrfShapeExp>** sub_ortho_svals
         , const typename OptimumSelector<Scalar>::CandsInfo& info
         , CandElemProjError errors_squared

@@ -189,19 +189,19 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Scalar** HcurlProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order)
+      const Scalar** HcurlProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order)
       {
         const int num_gip = rsln->get_quad_2d()->get_num_points(intr_gip_order, rsln->get_active_element()->get_mode());
 
         //prepre for curl
         Scalar* curl = new Scalar[num_gip];
-        Scalar* d1dx = rsln->get_dx_values(1);
-        Scalar* d0dy = rsln->get_dy_values(0);
+        const Scalar* d1dx = rsln->get_dx_values(1);
+        const Scalar* d0dy = rsln->get_dy_values(0);
         for(int i = 0; i < num_gip; i++)
           curl[i] = d1dx[i] - d0dy[i];
 
         //fill with values
-        Scalar** rvals_son = new Scalar*[H2D_HCFE_NUM];
+        const Scalar** rvals_son = new const Scalar*[H2D_HCFE_NUM];
         rvals_son[H2D_HCFE_VALUE0] = rsln->get_fn_values(0);
         rvals_son[H2D_HCFE_VALUE1] = rsln->get_fn_values(1);
         rvals_son[H2D_HCFE_CURL] = curl;

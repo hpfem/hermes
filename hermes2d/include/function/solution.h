@@ -227,24 +227,11 @@ namespace Hermes
 
       bool transform;
 
-      /// Precalculated tables for last four used elements.
-      /// There is a 2-layer structure of the precalculated tables.
-      /// The first (the lowest) one is the layer where mapping of integral orders to
-      /// Function::Node takes place. See function.h for details.
-      /// The second one is the layer with mapping of sub-element transformation to
-      /// a table from the lowest layer.
-      /// The highest layer (in contrast to the PrecalcShapeset class) is represented
-      /// here only by this array.
-      SubElementMap<LightArray<struct Function<Scalar>::Node*> > tables[H2D_MAX_QUADRATURES][H2D_SOLUTION_ELEMENT_CACHE_SIZE];
-
-      Element* elems[H2D_MAX_QUADRATURES][H2D_SOLUTION_ELEMENT_CACHE_SIZE];
-      int cur_elem, oldest[H2D_SOLUTION_ELEMENT_CACHE_SIZE];
-
       int* elem_coeffs[H2D_MAX_SOLUTION_COMPONENTS];  ///< array of pointers into mono_coeffs
       int num_coeffs, num_elems;
       int num_dofs;
 
-      void transform_values(int order, struct Function<Scalar>::Node* node, int newmask, int oldmask, int np);
+      void transform_values(int order, int mask, int np);
 
       virtual void precalculate(int order, int mask);
 
@@ -255,10 +242,6 @@ namespace Hermes
       double** calc_mono_matrix(int mode, int o);
 
       void init_dxdy_buffer();
-
-      void free_tables();
-
-      Element* e_last; ///< last visited element when getting solution values at specific points
 
       /// Internal, checks the compliance of the passed space type and owned space type.
       void check_space_type_compliance(const char* space_type_to_check) const;

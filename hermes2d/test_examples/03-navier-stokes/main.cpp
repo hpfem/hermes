@@ -1,6 +1,6 @@
 #include "hermes2d.h"
 
-#define USE_PARALUTION
+//#define USE_PARALUTION
 
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
@@ -68,7 +68,7 @@ double current_time = 0;
 const double STARTUP_TIME = 1.0;
 
 const double TAU = 0.1;                           // Time step.
-const double T_FINAL = 100.0;                      // Time interval length.
+const double T_FINAL = 0.8;                      // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const double H = 5;                               // Domain height (necessary to define the parabolic velocity profile at inlet).
 
@@ -93,10 +93,10 @@ int main(int argc, char* argv[])
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton(&wf, spaces);
-  newton.output_matrix();
+  //newton.output_matrix();
   newton.set_matrix_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);
   newton.set_rhs_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);
-  newton.output_rhs();
+  //newton.output_rhs();
   // Verbose.
   newton.get_linear_matrix_solver()->set_verbose_output(true);
 
@@ -136,9 +136,14 @@ int main(int argc, char* argv[])
 
     // Visualization.
     vview.set_title("Velocity, time %g", current_time);
+    //vview.get_vectorizer()->set_criterion(Views::LinearizerCriterionFixed(2));
     vview.show(xvel_prev_time, yvel_prev_time);
+    std::cout << "Vectorizer done." << std::endl;
+    
     pview.set_title("Pressure, time %g", current_time);
+    //pview.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(2));
     pview.show(p_prev_time);
+    std::cout << "Linearizer done." << std::endl;
   }
 
   return 0;

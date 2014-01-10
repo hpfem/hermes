@@ -145,10 +145,6 @@ namespace Hermes
         }
       }
 
-      tables[this->cur_quad].run_for_all(Function<Scalar>::Node::DeallocationFunction);
-      tables[this->cur_quad].clear();
-
-      this->sub_tables = &tables[this->cur_quad];
       this->update_nodes_ptr();
 
       this->order = 20; // fixme
@@ -157,12 +153,6 @@ namespace Hermes
     template<typename Scalar>
     void Filter<Scalar>::free()
     {
-      for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
-      {
-        tables[i].run_for_all(Function<Scalar>::Node::DeallocationFunction);
-        tables[i].clear();
-      }
-
       if (unimesh)
       {
         for (int i = 0; i < num; i++)
@@ -265,7 +255,6 @@ namespace Hermes
 
       Quad2D* quad = this->quads[this->cur_quad];
       int np = quad->get_num_points(order, this->element->get_mode());
-      struct Function<Scalar>::Node* node = this->new_node(H2D_FN_VAL, np);
 
       // precalculate all solutions
       for (int i = 0; i < this->num; i++)
@@ -281,7 +270,8 @@ namespace Hermes
           if (mask >= 0x40) { a = 1; mask >>= 6; }
           while (!(mask & 1)) { mask >>= 1; b++; }
           tab[i] = this->sln[i]->get_values(this->num_components == 1 ? a : j, b);
-          if (tab[i] == nullptr) throw Hermes::Exceptions::Exception("Value of 'item%d' is incorrect in filter definition.", i + 1);
+          if (tab[i] == nullptr)
+            throw Hermes::Exceptions::Exception("Value of 'item%d' is incorrect in filter definition.", i + 1);
         }
 
         Hermes::vector<Scalar*> values;
@@ -289,16 +279,8 @@ namespace Hermes
           values.push_back(tab[i]);
 
         // apply the filter
-        filter_fn(np, values, node->values[j][0]);
+        filter_fn(np, values, this->cur_node.values[j][0]);
       }
-
-      if (this->nodes->present(order))
-      {
-        assert(this->nodes->get(order) == this->cur_node);
-        ::free(this->nodes->get(order));
-      }
-      this->nodes->add(node, order);
-      this->cur_node = node;
     }
 
     template<typename Scalar>
@@ -345,11 +327,6 @@ namespace Hermes
 
     void ComplexFilter::free()
     {
-      for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
-      {
-        tables[i].run_for_all(Function<double>::Node::DeallocationFunction);
-        tables[i].clear();
-      }
     }
 
     void ComplexFilter::set_quad_2d(Quad2D* quad_2d)
@@ -365,11 +342,6 @@ namespace Hermes
       this->sln_complex->set_active_element(e);
 
       memset(sln_sub, 0, sizeof(sln_sub));
-
-      tables[this->cur_quad].run_for_all(Function<double>::Node::DeallocationFunction);
-      tables[this->cur_quad].clear();
-
-      this->sub_tables = &tables[this->cur_quad];
 
       this->update_nodes_ptr();
 
@@ -395,22 +367,13 @@ namespace Hermes
 
       Quad2D* quad = this->quads[this->cur_quad];
       int np = quad->get_num_points(order, this->element->get_mode());
-      struct Function<double>::Node* node = this->new_node(H2D_FN_VAL, np);
 
       this->sln_complex->set_quad_order(order, H2D_FN_VAL);
 
       // obtain corresponding tables
-      filter_fn(np, this->sln_complex->get_values(0, 0), node->values[0][0]);
+      filter_fn(np, this->sln_complex->get_values(0, 0), this->cur_node.values[0][0]);
       if (num_components > 1)
-        filter_fn(np, this->sln_complex->get_values(1, 0), node->values[1][0]);
-
-      if (this->nodes->present(order))
-      {
-        assert(this->nodes->get(order) == this->cur_node);
-        ::free(this->nodes->get(order));
-      }
-
-      this->cur_node = node;
+        filter_fn(np, this->sln_complex->get_values(1, 0), this->cur_node.values[1][0]);
     }
 
     Func<double>* ComplexFilter::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)
@@ -474,7 +437,6 @@ namespace Hermes
     {
       Quad2D* quad = this->quads[this->cur_quad];
       int np = quad->get_num_points(order, this->element->get_mode());
-      struct Function<Scalar>::Node* node = this->new_node(H2D_FN_DEFAULT, np);
 
       // precalculate all solutions
       for (int i = 0; i < this->num; i++)
@@ -484,7 +446,7 @@ namespace Hermes
       {
         // obtain solution tables
         double *x, *y;
-        Scalar *val[H2D_MAX_COMPONENTS], *dx[H2D_MAX_COMPONENTS], *dy[H2D_MAX_COMPONENTS];
+        const Scalar *val[H2D_MAX_COMPONENTS], *dx[H2D_MAX_COMPONENTS], *dy[H2D_MAX_COMPONENTS];
         x = this->sln[0]->get_refmap()->get_phys_x(order);
         y = this->sln[0]->get_refmap()->get_phys_y(order);
 
@@ -495,9 +457,9 @@ namespace Hermes
           dy[i] = this->sln[i]->get_dy_values(j);
         }
 
-        Hermes::vector<Scalar *> values_vector;
-        Hermes::vector<Scalar *> dx_vector;
-        Hermes::vector<Scalar *> dy_vector;
+        Hermes::vector<const Scalar *> values_vector;
+        Hermes::vector<const Scalar *> dx_vector;
+        Hermes::vector<const Scalar *> dy_vector;
 
         for (int i = 0; i < this->num; i++)
         {
@@ -507,16 +469,8 @@ namespace Hermes
         }
 
         // apply the filter
-        filter_fn(np, x, y, values_vector, dx_vector, dy_vector, node->values[j][0], node->values[j][1], node->values[j][2]);
+        filter_fn(np, x, y, values_vector, dx_vector, dy_vector, this->cur_node.values[j][0], this->cur_node.values[j][1], this->cur_node.values[j][2]);
       }
-
-      if (this->nodes->present(order))
-      {
-        assert(this->nodes->get(order) == this->cur_node);
-        ::free(this->nodes->get(order));
-      }
-      this->nodes->add(node, order);
-      this->cur_node = node;
     }
 
     template<typename Scalar>
@@ -944,15 +898,15 @@ namespace Hermes
 
       Quad2D* quad = this->quads[this->cur_quad];
       int np = quad->get_num_points(order, this->element->get_mode());
-      Filter<double>::Node* node = new_node(H2D_FN_VAL_0, np);
 
       this->sln[0]->set_quad_order(order, H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY);
       this->sln[1]->set_quad_order(order, H2D_FN_DX | H2D_FN_DY);
 
-      double *dudx, *dudy, *dvdx, *dvdy;
-      this->sln[0]->get_dx_dy_values(dudx, dudy);
-      this->sln[1]->get_dx_dy_values(dvdx, dvdy);
-      double *uval = this->sln[0]->get_fn_values();
+      const double *dudx = this->sln[0]->get_dx_values();
+      const double *dudy = this->sln[0]->get_dy_values();
+      const double *dvdx = this->sln[1]->get_dx_values();
+      const double *dvdy = this->sln[1]->get_dy_values();
+      const double *uval = this->sln[0]->get_fn_values();
       update_refmap();
       double *x = refmap->get_phys_x(order);
 
@@ -966,16 +920,8 @@ namespace Hermes
         double txy = mu*(dudy[i] + dvdx[i]);
 
         // Von Mises stress
-        node->values[0][0][i] = 1.0 / sqrt(2.0) * sqrt(sqr(tx - ty) + sqr(ty - tz) + sqr(tz - tx) + 6 * sqr(txy));
+        this->cur_node.values[0][0][i] = 1.0 / sqrt(2.0) * sqrt(sqr(tx - ty) + sqr(ty - tz) + sqr(tz - tx) + 6 * sqr(txy));
       }
-
-      if (this->nodes->present(order))
-      {
-        assert(this->nodes->get(order) == cur_node);
-        ::free(this->nodes->get(order));
-      }
-      this->nodes->add(node, order);
-      cur_node = node;
     }
 
     Func<double>* VonMisesFilter::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)

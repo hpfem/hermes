@@ -218,8 +218,8 @@ namespace Hermes
           val[k] = fns[k]->get_values(component[k], value_type[k]);
         }
 
-        double *dx = nullptr;
-        double *dy = nullptr;
+        const double *dx = nullptr;
+        const double *dy = nullptr;
 
         if (user_xdisp)
         {
@@ -291,14 +291,14 @@ namespace Hermes
           if (user_xdisp)
           {
             fns[LinearizerDataDimensions::dimension]->set_quad_order(1, H2D_FN_VAL);
-            double* dx = fns[LinearizerDataDimensions::dimension]->get_fn_values();
+            const double* dx = fns[LinearizerDataDimensions::dimension]->get_fn_values();
             for (int i = 0; i < lin_np_tri[1]; i++)
               physical_x[i] += dmult*dx[i];
           }
           if (user_ydisp)
           {
             fns[LinearizerDataDimensions::dimension + (this->user_xdisp ? 1 : 0)]->set_quad_order(1, H2D_FN_VAL);
-            double* dy = fns[LinearizerDataDimensions::dimension + (this->user_xdisp ? 1 : 0)]->get_fn_values();
+            const double* dy = fns[LinearizerDataDimensions::dimension + (this->user_xdisp ? 1 : 0)]->get_fn_values();
             for (int i = 0; i < lin_np_tri[1]; i++)
               physical_y[i] += dmult*dy[i];
           }
@@ -402,14 +402,14 @@ namespace Hermes
           if (user_xdisp)
           {
             fns[LinearizerDataDimensions::dimension]->set_quad_order(1, H2D_FN_VAL);
-            double* dx = fns[LinearizerDataDimensions::dimension]->get_fn_values();
+            const double* dx = fns[LinearizerDataDimensions::dimension]->get_fn_values();
             for (int i = 0; i < lin_np_tri[1]; i++)
               physical_x[i] += dmult*dx[i];
           }
           if (user_ydisp)
           {
             fns[LinearizerDataDimensions::dimension + (this->user_xdisp ? 1 : 0)]->set_quad_order(1, H2D_FN_VAL);
-            double* dy = fns[LinearizerDataDimensions::dimension + (this->user_xdisp ? 1 : 0)]->get_fn_values();
+            const double* dy = fns[LinearizerDataDimensions::dimension + (this->user_xdisp ? 1 : 0)]->get_fn_values();
             for (int i = 0; i < lin_np_tri[1]; i++)
               physical_y[i] += dmult*dy[i];
           }

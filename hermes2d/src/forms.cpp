@@ -594,14 +594,14 @@ namespace Hermes
       // H1 & L2 space.
       if (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE)
       {
-        double *fn = fu->get_fn_values();
-        double *dx = fu->get_dx_values();
-        double *dy = fu->get_dy_values();
+        const double *fn = fu->get_fn_values();
+        const double *dx = fu->get_dx_values();
+        const double *dy = fu->get_dy_values();
 
 #ifdef H2D_USE_SECOND_DERIVATIVES
-        double *dxx = fu->get_dxx_values();
-        double *dxy = fu->get_dxy_values();
-        double *dyy = fu->get_dyy_values();
+        const double *dxx = fu->get_dxx_values();
+        const double *dxy = fu->get_dxy_values();
+        const double *dyy = fu->get_dyy_values();
 #endif
 
         if (rm->is_jacobian_const())
@@ -667,10 +667,10 @@ namespace Hermes
       // Hcurl space.
       else if (space_type == HERMES_HCURL_SPACE)
       {
-        double *fn0 = fu->get_fn_values(0);
-        double *fn1 = fu->get_fn_values(1);
-        double *dx1 = fu->get_dx_values(1);
-        double *dy0 = fu->get_dy_values(0);
+        const double *fn0 = fu->get_fn_values(0);
+        const double *fn1 = fu->get_fn_values(1);
+        const double *dx1 = fu->get_dx_values(1);
+        const double *dy0 = fu->get_dy_values(0);
         if (rm->is_jacobian_const())
         {
           double const_inv_ref_map00 = rm->get_const_inv_ref_map()[0][0][0];
@@ -699,10 +699,10 @@ namespace Hermes
       // Hdiv space.
       else if (space_type == HERMES_HDIV_SPACE)
       {
-        double *fn0 = fu->get_fn_values(0);
-        double *fn1 = fu->get_fn_values(1);
-        double *dx0 = fu->get_dx_values(0);
-        double *dy1 = fu->get_dy_values(1);
+        const double *fn0 = fu->get_fn_values(0);
+        const double *fn1 = fu->get_fn_values(1);
+        const double *dx0 = fu->get_dx_values(0);
+        const double *dy1 = fu->get_dy_values(1);
         if (rm->is_jacobian_const())
         {
           double const_inv_ref_map00 = rm->get_const_inv_ref_map()[0][0][0];
@@ -783,13 +783,13 @@ namespace Hermes
         memcpy(u->val0, fu->get_fn_values(0), np * sizeof(Scalar));
         memcpy(u->val1, fu->get_fn_values(1), np * sizeof(Scalar));
 
-        Scalar *dx1 = fu->get_dx_values(1);
-        Scalar *dy0 = fu->get_dy_values(0);
+        const Scalar *dx1 = fu->get_dx_values(1);
+        const Scalar *dy0 = fu->get_dy_values(0);
         for (int i = 0; i < np; i++)
           u->curl[i] = dx1[i] - dy0[i];
 
-        Scalar *dx0 = fu->get_dx_values(0);
-        Scalar *dy1 = fu->get_dy_values(1);
+        const Scalar *dx0 = fu->get_dx_values(0);
+        const Scalar *dy1 = fu->get_dy_values(1);
         for (int i = 0; i < np; i++)
           u->div[i] = dx0[i] + dy1[i];
       }

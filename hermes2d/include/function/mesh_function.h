@@ -118,14 +118,6 @@ namespace Hermes
       /// Internal.
       virtual void set_active_element(Element* e);
 
-      /// See Transformable::push_transform.
-      /// Internal.
-      virtual void push_transform(int son);
-
-      /// See Transformable::pop_transform.
-      /// Internal.
-      virtual void pop_transform();
-
       /// Set the reference mapping.
       /// Internal.
       void set_refmap(RefMap* refmap_to_set);

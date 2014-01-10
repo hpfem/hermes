@@ -94,16 +94,19 @@ namespace Hermes
 
           ref_map_pss.set_active_shape(ii);
           ref_map_pss.set_quad_order(o, H2D_FN_VAL);
-          double* fni = ref_map_pss.get_fn_values();
+          double* fni = ref_map_pss.deep_copy_array();
 
           ref_map_pss.set_active_shape(ij);
           ref_map_pss.set_quad_order(o, H2D_FN_VAL);
-          double* fnj = ref_map_pss.get_fn_values();
+          double* fnj = ref_map_pss.deep_copy_array();
 
           double3* pt = g_quad_2d_std.get_points(o, mode);
           double val = 0.0;
           for (int k = 0; k < g_quad_2d_std.get_num_points(o, mode); k++)
             val += pt[k][2] * (fni[k] * fnj[k]);
+
+          free_with_check(fni);
+          free_with_check(fnj);
 
           mat[i][j] = mat[j][i] = val;
         }
@@ -782,11 +785,10 @@ namespace Hermes
       for (unsigned int k = 0; k < e->get_nvert(); k++) // loop over vertices
       {
         // vertex basis functions in all integration points
-        double* vd;
         int index_v = ref_map_shapeset.get_vertex_index(k, e->get_mode());
         ref_map_pss.set_active_shape(index_v);
-        ref_map_pss.set_quad_order(mo2);
-        vd = ref_map_pss.get_fn_values();
+        ref_map_pss.set_quad_order(mo2, H2D_FN_VAL_0);
+        const double* vd = ref_map_pss.get_fn_values();
 
         for (int m = 0; m < 2; m++)   // part 0 or 1
         for (int j = 0; j < np; j++)
@@ -795,11 +797,10 @@ namespace Hermes
         for (int ii = 0; ii < order - 1; ii++)
         {
           // edge basis functions in all integration points
-          double* ed;
           int index_e = ref_map_shapeset.get_edge_index(k, 0, ii + 2, e->get_mode());
           ref_map_pss.set_active_shape(index_e);
-          ref_map_pss.set_quad_order(mo2);
-          ed = ref_map_pss.get_fn_values();
+          ref_map_pss.set_quad_order(mo2, H2D_FN_VAL_0);
+          const double* ed = ref_map_pss.get_fn_values();
 
           for (int m = 0; m < 2; m++)  //part 0 or 1
           for (int j = 0; j < np; j++)
@@ -850,11 +851,10 @@ namespace Hermes
         for (i = 0; i < nb; i++) // loop over bubble basis functions
         {
           // bubble basis functions in all integration points
-          double *bfn;
           int index_i = ref_map_shapeset.get_bubble_indices(qo, e->get_mode())[i];
           ref_map_pss.set_active_shape(index_i);
-          ref_map_pss.set_quad_order(mo2);
-          bfn = ref_map_pss.get_fn_values();
+          ref_map_pss.set_quad_order(mo2, H2D_FN_VAL_0);
+          const double *bfn = ref_map_pss.get_fn_values();
 
           for (j = 0; j < np; j++) // over all integration points
             rhside[k][i] += pt[j][2] * (bfn[j] * (fn[j][k] - old[k][j]));

@@ -70,19 +70,6 @@ namespace Hermes
 
       uint64_t sln_sub[H2D_MAX_COMPONENTS];
 
-      /// There is a 2-layer structure of the precalculated tables.
-      /// The first (the lowest) one is the layer where mapping of integral orders to
-      /// Function::Node takes place. See function.h for details.
-      /// The second one is the layer with mapping of sub-element transformation to
-      /// a table from the lowest layer.
-      /// The highest layer (in contrast to the PrecalcShapeset class) is represented
-      /// here only by this array.
-#ifdef _MSC_VER // For Visual Studio compiler the latter does not compile.
-      SubElementMap<LightArray<Node*> > tables[H2D_MAX_QUADRATURES];
-#else
-      SubElementMap<LightArray<struct Filter<Scalar>::Node*> > tables[H2D_MAX_QUADRATURES];
-#endif
-
       bool unimesh;
 
       SpaceType space_type;
@@ -182,7 +169,7 @@ namespace Hermes
 
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
 
-      virtual void filter_fn (int n, double* x, double* y, Hermes::vector<Scalar *> values, Hermes::vector<Scalar *> dx, Hermes::vector<Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
+      virtual void filter_fn(int n, double* x, double* y, Hermes::vector<const Scalar *> values, Hermes::vector<const Scalar *> dx, Hermes::vector<const Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
 
       void init_components();
 
