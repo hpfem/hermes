@@ -25,6 +25,7 @@ project(hermes_common)
     src/algebra/algebra_mixins.cpp
     src/algebra/dense_matrix_operations.cpp
     src/algebra/cs_matrix.cpp
+    src/util/memory_handling.cpp 
     src/util/callstack.cpp
     src/util/qsort.cpp
     src/data_structures/range.cpp
@@ -133,6 +134,7 @@ project(hermes_common)
   SOURCE_GROUP(
     "Source Files\\Utilities" FILES 
     src/util/callstack.cpp
+    src/util/memory_handling.cpp
     src/util/qsort.cpp
   )
   
@@ -240,11 +242,18 @@ project(hermes_common)
       ${CLAPACK_LIBRARY}
       ${BLAS_LIBRARY}
       ${F2C_LIBRARY}
+      ${PJLIB_LIBRARY}
       ${BSON_LIBRARY}
       ${MATIO_LIBRARY}
       ${WINBLAS_LIBRARY} 
       ${ADDITIONAL_LIBS}
     )
+    
+    if(MSVC)
+      if(WITH_PJLIB)
+        TARGET_LINK_LIBRARIES(${HERMES_COMMON_LIB} Ws2_32 wsock32)
+      endif(WITH_PJLIB)
+    endif(MSVC)
 
     if(NOT MSVC)
       IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
