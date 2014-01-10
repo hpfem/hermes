@@ -175,10 +175,10 @@ namespace Hermes
         this->vertices = realloc_with_check<ThreadLinearizerMultidimensional, typename LinearizerDataDimensions::vertex_t>(this->vertices, this->vertex_size, this);
         this->triangle_markers = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->triangle_markers, this->triangle_size, this);
 
-        this->hash_table = malloc_with_check<ThreadLinearizerMultidimensional<LinearizerDataDimensions>, int>(this->vertex_size, this);
+        this->hash_table = malloc_with_check<ThreadLinearizerMultidimensional<LinearizerDataDimensions>, int>(this->vertex_size, this, true);
         memset(this->hash_table, 0xff, sizeof(int)* this->vertex_size);
        
-        this->info = malloc_with_check<ThreadLinearizerMultidimensional<LinearizerDataDimensions>, internal_vertex_info_t>(this->vertex_size, this);
+        this->info = malloc_with_check<ThreadLinearizerMultidimensional<LinearizerDataDimensions>, internal_vertex_info_t>(this->vertex_size, this, true);
       }
 
       template<typename LinearizerDataDimensions>

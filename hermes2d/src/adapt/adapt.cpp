@@ -274,12 +274,12 @@ namespace Hermes
       this->elements_to_refine = malloc_with_check<Adapt<Scalar>, ElementToRefine>(elements_to_refine_count, this);
 
       // Projected solutions obtaining.
-      MeshFunctionSharedPtr<Scalar>* rslns = malloc_with_check<Adapt<Scalar>, MeshFunctionSharedPtr<Scalar> >(this->num, this);
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslns;
       OGProjection<Scalar> ogProjection;
 
       for (unsigned int i = 0; i < this->num; i++)
       {
-        rslns[i] = MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>());
+        rslns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>()));
 
         typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->meshes[i]);
         MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
@@ -299,9 +299,9 @@ namespace Hermes
           end = attempted_element_refinements_count;
 
         // rslns cloning.
-        MeshFunctionSharedPtr<Scalar>* current_rslns = malloc_with_check<Adapt<Scalar>, MeshFunctionSharedPtr<Scalar> >(this->num, this);
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > current_rslns;
         for (unsigned int i = 0; i < this->num; i++)
-          current_rslns[i] = rslns[i]->clone();
+          current_rslns.push_back(rslns[i]->clone());
 
         for (int id_to_refine = start; id_to_refine < end; id_to_refine++)
         {
@@ -337,11 +337,7 @@ namespace Hermes
             this->exceptionMessageCaughtInParallelBlock = e.what();
           }
         }
-
-        free_with_check(current_rslns);
       }
-
-      free_with_check(rslns);
 
       if (!this->exceptionMessageCaughtInParallelBlock.empty())
       {

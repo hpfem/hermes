@@ -63,6 +63,10 @@ namespace Hermes
     const int H2D_FN_COMPONENT_0 = H2D_FN_VAL_0 | H2D_FN_DX_0 | H2D_FN_DY_0 | H2D_FN_DXX_0 | H2D_FN_DYY_0 | H2D_FN_DXY_0;
     const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN_DXX_1 | H2D_FN_DYY_1 | H2D_FN_DXY_1;
 
+    const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
+    const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
+    const int H2D_CURL = H2D_FN_DX | H2D_FN_DY;
+
     /// @ingroup meshFunctions
     /// \brief Represents an arbitrary function defined on an element.
     ///
