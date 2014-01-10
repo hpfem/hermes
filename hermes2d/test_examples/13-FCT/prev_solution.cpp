@@ -32,14 +32,4 @@
       for (int i = 0; i < this->num_components; i++)
         if(elem_coeffs[i] != nullptr)
         { delete [] elem_coeffs[i];  elem_coeffs[i] = nullptr; }
-        
- 				
-        e_last = nullptr;
-
-        free_tables();
     }
-
-
-
-
-  
