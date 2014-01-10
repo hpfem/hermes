@@ -382,7 +382,7 @@ namespace Hermes
     {
       for (int i = 0; i < num_states; i++)
         delete states[i];
-      free(states);
+      free_with_check(states);
     }
 
     template class HERMES_API DiscreteProblem<double>;

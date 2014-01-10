@@ -303,7 +303,7 @@ namespace Hermes
       for (int i = 0; i < meshes_count; i++)
       if (meshes[i]->get_num_active_elements() > predictedCount)
         predictedCount = meshes[i]->get_num_active_elements();
-      State** states = (State**)malloc(sizeof(State*)*predictedCount);
+      State** states = malloc_with_check<State*>(predictedCount);
 
       this->begin(num);
 

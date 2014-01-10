@@ -180,7 +180,7 @@ namespace Hermes
           }
         }
 
-        ::free(tvert);
+        free_with_check(tvert);
         ord.unlock_data();
       }
 

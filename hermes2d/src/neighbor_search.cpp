@@ -246,7 +246,7 @@ namespace Hermes
 
             find_act_elem_up(parent, orig_vertex_id, par_mid_vertices, n_parents);
 
-            ::free(par_mid_vertices);
+            free_with_check(par_mid_vertices);
           }
           else
           {
@@ -1066,7 +1066,7 @@ namespace Hermes
     template<typename Scalar>
     NeighborSearch<Scalar>::ExtendedShapeset::~ExtendedShapeset()
     {
-      ::free(dof);
+      free_with_check(dof);
       delete neighbor_al;
     }
 

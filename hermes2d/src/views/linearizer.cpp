@@ -219,7 +219,7 @@ namespace Hermes
           for (int i = 0; i < this->num_states; i++)
             delete states[i];
 
-          ::free(this->states);
+          free_with_check(this->states);
           this->states = nullptr;
           this->num_states = 0;
         }

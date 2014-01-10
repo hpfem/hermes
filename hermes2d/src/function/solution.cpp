@@ -265,8 +265,7 @@ namespace Hermes
           {
             if (mat[m][i])
               delete[] mat[m][i];
-            if (perm[m][i])
-              delete[] perm[m][i];
+            free_with_check(perm[m][i]);
           }
         }
       }
@@ -368,16 +367,12 @@ namespace Hermes
 
       // Allocate the coefficient arrays.
       num_elems = this->mesh->get_max_element_id();
-      if (elem_orders != nullptr)
-        ::free(elem_orders);
-      elem_orders = malloc_with_check<Solution<Scalar>, int>(num_elems, this);
-      memset(elem_orders, 0, sizeof(int)* num_elems);
+      free_with_check(elem_orders);
+      elem_orders = calloc_with_check<Solution<Scalar>, int>(num_elems, this);
       for (int l = 0; l < this->num_components; l++)
       {
-        if (elem_coeffs[l] != nullptr)
-          ::free(elem_coeffs[l]);
-        elem_coeffs[l] = malloc_with_check<Solution<Scalar>, int>(num_elems, this);
-        memset(elem_coeffs[l], 0, sizeof(int)* num_elems);
+        free_with_check(elem_coeffs[l]);
+        elem_coeffs[l] = calloc_with_check<Solution<Scalar>, int>(num_elems, this);
       }
 
       // Obtain element orders, allocate mono_coeffs.
@@ -404,8 +399,7 @@ namespace Hermes
         elem_orders[e->id] = o;
       }
       num_coeffs *= this->num_components;
-      if (mono_coeffs != nullptr)
-        ::free(mono_coeffs);
+      free_with_check(mono_coeffs);
       mono_coeffs = malloc_with_check<Solution<Scalar>, Scalar>(num_coeffs, this);
 
       // Express the solution on elements as a linear combination of monomials.
@@ -782,11 +776,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::init_dxdy_buffer()
     {
-      if (dxdy_buffer != nullptr)
-      {
-        ::free(dxdy_buffer);
-        dxdy_buffer = nullptr;
-      }
+      free_with_check(dxdy_buffer);
       dxdy_buffer = malloc_with_check<Solution<Scalar>, Scalar>(this->num_components * 5 * 121, this);
     }
 
@@ -801,8 +791,6 @@ namespace Hermes
 
       MeshFunction<Scalar>::set_active_element(e);
 
-      // try finding an existing table for e
-
       if (sln_type == HERMES_SLN)
       {
         int o = this->order = elem_orders[this->element->id];
@@ -815,9 +803,11 @@ namespace Hermes
 
           make_dx_coeffs(this->mode, o, mono, dxdy_coeffs[i][1] = dxdy_buffer + m);  m += n;
           make_dy_coeffs(this->mode, o, mono, dxdy_coeffs[i][2] = dxdy_buffer + m);  m += n;
+#ifdef H2D_USE_SECOND_DERIVATIVES
           make_dx_coeffs(this->mode, o, dxdy_coeffs[i][1], dxdy_coeffs[i][3] = dxdy_buffer + m);  m += n;
           make_dy_coeffs(this->mode, o, dxdy_coeffs[i][2], dxdy_coeffs[i][4] = dxdy_buffer + m);  m += n;
           make_dx_coeffs(this->mode, o, dxdy_coeffs[i][2], dxdy_coeffs[i][5] = dxdy_buffer + m);  m += n;
+#endif
         }
       }
       else if (sln_type == HERMES_EXACT)
@@ -852,10 +842,6 @@ namespace Hermes
       for (int i = 0; i < n; i++)
         y[i] = y[i] * x[i] + z[i];
     }
-
-    static const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
-    static const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
-    static const int H2D_CURL = H2D_FN_DX | H2D_FN_DY;
 
     template<typename Scalar>
     void Solution<Scalar>::transform_values(int order, int mask, int np)

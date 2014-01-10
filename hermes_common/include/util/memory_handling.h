@@ -39,12 +39,24 @@ namespace Hermes
       pj_init();
       pj_caching_pool_init(&HermesCommonMemoryPoolCache, NULL, 1024 * 1024 * 1024);
 
+      pj_thread_desc rtpdesc;
+      pj_thread_t *thread;
+      pj_bzero(rtpdesc, sizeof(rtpdesc));
+      if (!pj_thread_is_registered())
+        pj_thread_register(NULL, rtpdesc, &thread);
+
       this->globalPool = pj_pool_create(&HermesCommonMemoryPoolCache.factory, // the factory
         "pool-Global", // pool's name
         100000000, // initial size
         10000000, // increment size
         NULL);
     };
+
+    ~GlobalPoolCache()
+    {
+      pj_pool_release(this->globalPool);
+      pj_caching_pool_destroy(&HermesCommonMemoryPoolCache);
+    }
 
     inline void* pool_calloc(pj_size_t count, pj_size_t elem)
     {
@@ -75,7 +87,7 @@ namespace Hermes
       new_array = (ArrayItem*)hermesCommonGlobalPoolCache.pool_calloc(size, sizeof(ArrayItem));
 #else
       new_array = new ArrayItem[size];
-      memset(new_array, 0, sizeof(ArrayItem) * size);
+      memset(new_array, 0, sizeof(ArrayItem)* size);
 #endif
     }
     if (new_array)
@@ -102,7 +114,7 @@ namespace Hermes
       new_array = (ArrayItem*)hermesCommonGlobalPoolCache.pool_calloc(size, sizeof(ArrayItem));
 #else
       new_array = new ArrayItem[size];
-      memset(new_array, 0, sizeof(ArrayItem) * size);
+      memset(new_array, 0, sizeof(ArrayItem)* size);
 #endif
     }
     if (new_array)
@@ -186,12 +198,17 @@ namespace Hermes
     if (ptr)
     {
       if (force_malloc && std::is_pod<ArrayItem>::value)
+      {
         ::free(ptr);
+        ptr = nullptr;
+      }
       else
+      {
 #ifndef WITH_PJLIB
         delete[] ptr;
+        ptr = nullptr;
 #endif
-      ptr = nullptr;
+      }
     }
   }
 }
