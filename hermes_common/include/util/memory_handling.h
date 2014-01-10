@@ -19,11 +19,47 @@
 #ifndef __HERMES_COMMON_MEMORY_HANDLING_H
 #define __HERMES_COMMON_MEMORY_HANDLING_H
 
+#ifdef WITH_PJLIB
+#include "pjlib.h"
+#endif
+
 #include "exceptions.h"
+#include "api.h"
 #include <type_traits>
 
 namespace Hermes
 {
+#ifdef WITH_PJLIB
+  static pj_caching_pool HermesCommonMemoryPoolCache;
+  class GlobalPoolCache
+  {
+  public:
+    GlobalPoolCache()
+    {
+      pj_init();
+      pj_caching_pool_init(&HermesCommonMemoryPoolCache, NULL, 1024 * 1024 * 1024);
+
+      this->globalPool = pj_pool_create(&HermesCommonMemoryPoolCache.factory, // the factory
+        "pool-Global", // pool's name
+        100000000, // initial size
+        10000000, // increment size
+        NULL);
+    };
+
+    inline void* pool_calloc(pj_size_t count, pj_size_t elem)
+    {
+      return pj_pool_calloc(globalPool, count, elem);
+    };
+
+    inline void* pool_alloc(pj_size_t size)
+    {
+      return pj_pool_alloc(globalPool, size);
+    };
+
+    pj_pool_t* globalPool;
+  };
+  static GlobalPoolCache hermesCommonGlobalPoolCache;
+#endif
 
   template<typename Caller, typename ArrayItem>
   ArrayItem* calloc_with_check(int size, Caller* const caller, bool force_malloc = false)
@@ -34,12 +70,9 @@ namespace Hermes
     if (force_malloc && std::is_pod<ArrayItem>::value)
       new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
     else
-      new_array = new ArrayItem[size];
+      new_array = (ArrayItem*)hermesCommonGlobalPoolCache.pool_calloc(size, sizeof(ArrayItem));
     if (new_array)
-    {
-      memset(new_array, 0, sizeof(ArrayItem)* size);
       return new_array;
-    }
     else
     {
       caller->free();
@@ -57,10 +90,7 @@ namespace Hermes
     if (force_malloc && std::is_pod<ArrayItem>::value)
       new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
     else
-    {
-      new_array = new ArrayItem[size];
-      memset(new_array, 0, sizeof(ArrayItem)* size);
-    }
+      new_array = (ArrayItem*)hermesCommonGlobalPoolCache.pool_calloc(size, sizeof(ArrayItem));
     if (new_array)
       return new_array;
     else
@@ -79,7 +109,7 @@ namespace Hermes
     if (force_malloc && std::is_pod<ArrayItem>::value)
       new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
     else
-      new_array = new ArrayItem[size];
+      new_array = (ArrayItem*)hermesCommonGlobalPoolCache.pool_alloc(size * sizeof(ArrayItem));
     if (new_array)
       return new_array;
     else
@@ -100,7 +130,7 @@ namespace Hermes
     if (force_malloc && std::is_pod<ArrayItem>::value)
       new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
     else
-      new_array = new ArrayItem[size];
+      new_array = (ArrayItem*)hermesCommonGlobalPoolCache.pool_alloc(size * sizeof(ArrayItem));
     if (new_array)
       return new_array;
     else
