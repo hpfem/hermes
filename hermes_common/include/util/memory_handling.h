@@ -30,7 +30,7 @@
 namespace Hermes
 {
 #ifdef WITH_PJLIB
-  static pj_caching_pool HermesCommonMemoryPoolCache;
+  HERMES_COMMON_API extern pj_caching_pool HermesCommonMemoryPoolCache;
   class GlobalPoolCache
   {
   public:
@@ -58,7 +58,7 @@ namespace Hermes
 
     pj_pool_t* globalPool;
   };
-  static GlobalPoolCache hermesCommonGlobalPoolCache;
+  HERMES_COMMON_API extern GlobalPoolCache hermesCommonGlobalPoolCache;
 #endif
 
   template<typename Caller, typename ArrayItem>
@@ -188,7 +188,9 @@ namespace Hermes
       if (force_malloc && std::is_pod<ArrayItem>::value)
         ::free(ptr);
       else
+#ifndef WITH_PJLIB
         delete[] ptr;
+#endif
       ptr = nullptr;
     }
   }
