@@ -176,6 +176,41 @@ ExactWeakForm::ExactWeakForm(SolvedExample solvedExample, bool add_inlet, std::s
   }
 }
 
+ExactWeakFormTimedep::ExactWeakFormTimedep(SolvedExample solvedExample, bool add_inlet, std::string inlet, double diffusivity, double s, double sigma, MeshFunctionSharedPtr<double> exact_solution) : WeakForm<double>(1)
+{
+  initialization(solvedExample);
+
+  add_matrix_form(new DefaultMatrixFormVol<double>(0, 0));
+  add_vector_form(new CustomVectorFormVol(0, 0, 1.));
+
+  // A_tilde  
+  add_matrix_form(new CustomMatrixFormVolConvection(0, 0));
+  add_matrix_form_DG(new CustomMatrixFormInterfaceConvection(0, 0, false));
+  // A_tilde_surf
+  this->add_matrix_form_surf(new CustomMatrixFormSurfConvection(0, 0));
+
+  if (std::abs(diffusivity) > 1e-7)
+  {
+    add_matrix_form(new CustomMatrixFormVolDiffusion(0, 0, diffusivity));
+    add_matrix_form_DG(new CustomMatrixFormInterfaceDiffusion(0, 0, false, diffusivity, s, sigma));
+    if (add_inlet)
+      this->add_matrix_form_surf(new CustomMatrixFormSurfDiffusion(0, 0, diffusivity, s, sigma, inlet));
+  }
+
+  // b
+  if (add_inlet)
+  {
+    this->add_vector_form_surf(new CustomVectorFormSurfConvection(0, 0, true, false));
+    this->vfsurf.back()->set_ext(exact_solution);
+
+    if (std::abs(diffusivity) > 1e-7)
+    {
+      this->add_vector_form_surf(new CustomVectorFormSurfDiffusion(0, 0, diffusivity, s, sigma, inlet, false, 1.));
+      this->vfsurf.back()->set_ext(exact_solution);
+    }
+  }
+}
+
 TimeDepWeakForm::TimeDepWeakForm(SolvedExample solvedExample, bool add_inlet, std::string inlet, double diffusivity, double s, double sigma, MeshFunctionSharedPtr<double> exact_solution) :   ExactWeakForm(solvedExample, add_inlet, inlet, diffusivity, s, sigma, exact_solution)
 {
   add_matrix_form(new DefaultMatrixFormVol<double>(0, 0));

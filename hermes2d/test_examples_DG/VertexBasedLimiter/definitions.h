@@ -52,6 +52,12 @@ public:
   ExactWeakForm(SolvedExample solvedExample, bool add_inlet = false, std::string inlet = "", double diffusivity = 0., double s = 0., double sigma = 0., MeshFunctionSharedPtr<double> exact_solution = NULL);
 };
 
+class ExactWeakFormTimedep : public WeakForm<double>
+{
+public:
+  ExactWeakFormTimedep(SolvedExample solvedExample, bool add_inlet = false, std::string inlet = "", double diffusivity = 0., double s = 0., double sigma = 0., MeshFunctionSharedPtr<double> exact_solution = NULL);
+};
+
 class TimeDepWeakForm : public ExactWeakForm
 {
 public:

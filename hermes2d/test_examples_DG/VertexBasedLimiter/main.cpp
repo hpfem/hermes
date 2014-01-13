@@ -4,7 +4,7 @@
 
 int polynomialDegree = 2;
 int initialRefinementsCount = 4;
-const Algorithm algorithm = Multiscale;
+const Algorithm algorithm = pMultigrid;
 SolvedExample solvedExample = MovingPeak;
 static std::string SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
 std::string solvedExampleString = SolvedExampleString[solvedExample];
@@ -12,7 +12,7 @@ double MovingPeakDiffusivity = 1e-3;
 
 double diffusivity = 1e-2;
 double s = -1;
-double CFL = 5e-1;
+double CFL = 1e-1;
 
 Hermes::vector<int> iter_per_time_step_HSS;
 Hermes::vector<int> smoothing_steps_per_V_cycle;
@@ -27,7 +27,6 @@ int main(int argc, char* argv[])
   if (argc > 2)
   {
     diffusivity = (double)atof(argv[2]);
-    MovingPeakDiffusivity = diffusivity;
   }
   if (argc > 3)
   {
@@ -88,7 +87,7 @@ int main(int argc, char* argv[])
     mloader.load("domain.xml", mesh);
     for(int i = 0; i < initialRefinementsCount; i++)
       mesh->refine_all_elements();
-    mesh_size = 2.;
+    mesh_size = 2.4;
     break;
   case Benchmark:
     mloader.load("domain_benchmark.xml", mesh);
@@ -155,11 +154,16 @@ int main(int argc, char* argv[])
   
   // Exact solver solution
   SpaceSharedPtr<double> space(new L2Space<double>(mesh, polynomialDegree, new L2ShapesetTaylor));
-  if(!is_timedep(solvedExample))
+  if (!is_timedep(solvedExample))
     solve_exact(solvedExample, space, diffusivity, s, sigma, exact_solution, initial_sln, time_step_length, polynomialDegree, initialRefinementsCount);
+  else
+    exact_solver_timedep(mesh, solvedExample, polynomialDegree, initialRefinementsCount, diffusivity, s, sigma, time_step_length, initial_sln, exact_solution, &exact_view, CFL);
   
   Hermes::Mixins::TimeMeasurable cpu_time;
-  if(algorithm == Multiscale || algorithm == Both)
+  Hermes::Mixins::Loggable logger_global(true, NULL, true);
+  logger_global.set_logFile_name(solvedExampleString.append(".h2d"));
+  logger_global.set_timestamps(false);
+  if (algorithm == Multiscale || algorithm == Both)
   {
     for (int si = 0; si < iter_per_time_step_HSS.size(); si++)
     {
@@ -177,11 +181,21 @@ int main(int argc, char* argv[])
       logger_details.set_logFile_name(ssd.str());
 
       cpu_time.tick();
-      int iteration_count = multiscale_decomposition(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_mean_values, previous_derivatives, diffusivity, s, sigma, time_step_length,
+      std::string outString = multiscale_decomposition(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_mean_values, previous_derivatives, diffusivity, s, sigma, time_step_length,
         initial_sln, solution, exact_solution, &solution_view, &exact_view, logger, logger_details, CFL, iter_per_time_step_HSS[si]);
 
       cpu_time.tick();
-      logger.info("%f|%i", cpu_time.last(), iteration_count);
+
+      logger.info("%f|%s", cpu_time.last(), outString.c_str());
+
+      std::stringstream ss_global;
+      ss_global << initialRefinementsCount << "|"
+        << diffusivity << "|"
+        << CFL << "|"
+        << "HSS(" << iter_per_time_step_HSS[si] << ")" << "|"
+        << cpu_time.last() << "|"
+        << outString;
+      logger_global.info(ss_global.str().c_str());
     }
   }
 
@@ -201,15 +215,23 @@ int main(int argc, char* argv[])
         MeshFunctionSharedPtr<double> previous_solution_local(new ExactSolutionMovingPeak(mesh, MovingPeakDiffusivity, M_PI / 2.));
         cpu_time.tick();
 
-        int v_cycle_count = p_multigrid(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_solution_local, diffusivity, time_step_length,
+        std::string outString = p_multigrid(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_solution_local, diffusivity, time_step_length,
           solution, exact_solution, &solution_view, &exact_view, s, sigma, logger, smoothing_steps_per_V_cycle[si], CFL, V_cycles_per_time_step[siv]);
 
         cpu_time.tick();
-        logger.info("%f|%i", cpu_time.last(), v_cycle_count);
-      }
+        logger.info("%f|%s", cpu_time.last(), outString.c_str());
+
+        std::stringstream ss_global;
+        ss_global << initialRefinementsCount << "|"
+          << diffusivity << "|"
+          << CFL << "|"
+          << "MG(" << V_cycles_per_time_step[siv] << "-" << smoothing_steps_per_V_cycle[si] << ")" << "|"
+          << cpu_time.last() << "|"
+          << outString;
+        logger_global.info(ss_global.str().c_str());
+     }
     }
   }
   
-  View::wait();
   return 0;
 }

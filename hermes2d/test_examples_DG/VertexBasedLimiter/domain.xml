@@ -5,11 +5,10 @@
   xsi:schemaLocation="XMLMesh ../../xml_schemas/mesh_h2d_xml.xsd">
   
   <vertices>
-  <!-- Contains all examples how it is possible to write a zero. -->
-    <v x="-1" y="-1" i="0"/>
-    <v x="1" y="-1" i="1"/>
-    <v x="1" y="1" i="2"/>
-    <v x="-1" y="1" i="3"/>
+    <v x="-1.2" y="-1.2" i="0"/>
+    <v x="1.2" y="-1.2" i="1"/>
+    <v x="1.2" y="1.2" i="2"/>
+    <v x="-1.2" y="1.2" i="3"/>
   </vertices>
 
   <elements>

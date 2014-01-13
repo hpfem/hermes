@@ -504,13 +504,6 @@ namespace Hermes
             {
               //first write, write delimited to a file
               (const_cast<Loggable*>(this))->log_file_written = true;
-              if (!this->erase_on_beginning)
-              {
-                fprintf(file, "\n");
-                for (int i = 0; i < HERMES_LOG_FILE_DELIM_SIZE; i++)
-                  fprintf(file, "-");
-                fprintf(file, "\n\n");
-              }
             }
 
             if (print_timestamps)
