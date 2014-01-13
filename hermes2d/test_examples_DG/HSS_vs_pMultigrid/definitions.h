@@ -40,12 +40,6 @@ public:
   SmoothingWeakForm(SolvedExample solvedExample, bool local, int explicitSchemeStep = 1, bool add_inlet = false, std::string inlet = "", double diffusivity = 0., double s = 0., double sigma = 0., bool add_rhs = true);
 };
 
-class SmoothingWeakFormResidual  : public WeakForm<double>     
-{
-public:
-  SmoothingWeakFormResidual(SolvedExample solvedExample, int explicitSchemeStep = 1, bool add_inlet = false, std::string inlet = "", double diffusivity = 0., double s = 0., double sigma = 0., bool add_rhs = true);
-};
-
 class ExactWeakForm : public WeakForm<double>
 {
 public:
@@ -76,28 +70,10 @@ public:
   ExplicitWeakFormOffDiag(SolvedExample solvedExample, bool add_inlet = false, std::string inlet = "", double diffusivity = 0., double s = 0., double sigma = 0.);
 };
 
-class ErrorWeakForm  : public WeakForm<double>     
-{
-public:
-  ErrorWeakForm(SolvedExample solvedExample);
-};
-
 class MassWeakForm  : public WeakForm<double>     
 {
 public:
   MassWeakForm();
-};
-
-class ImplicitWeakForm : public WeakForm<double>
-{
-public:
-  ImplicitWeakForm(SolvedExample solvedExample, bool add_inlet = false, std::string inlet = "", double diffusivity = 0., double s = 0., double sigma = 0.);
-};
-
-class ExplicitWeakForm  : public WeakForm<double>     
-{
-public:
-  ExplicitWeakForm(SolvedExample solvedExample, bool add_inlet = false, std::string inlet = "", double diffusivity = 0., double s = 0., double sigma = 0.);
 };
 
 #pragma endregion
@@ -238,17 +214,5 @@ Hermes::Algebra::SimpleVector<double>* cut_off_ders(double* src_vector, SpaceSha
 
 void add_means(Hermes::Algebra::SimpleVector<double>* src, Hermes::Algebra::SimpleVector<double>* target, SpaceSharedPtr<double> space_coarse, SpaceSharedPtr<double> space_fine);
 void add_ders(Hermes::Algebra::SimpleVector<double>* src, Hermes::Algebra::SimpleVector<double>* target, SpaceSharedPtr<double> space_coarse, SpaceSharedPtr<double> space_fine);
-
-class MyErrorCalculator : public ErrorCalculator<double>
-{
-public:
-  MyErrorCalculator(CalculatedErrorType errorType, int component_count) : ErrorCalculator<double>(errorType)
-  {
-    DefaultNormFormSurf<double>* form = new DefaultNormFormSurf<double>(0, 0, HERMES_L2_NORM);
-    form->set_area("Outlet");
-    this->add_error_form(form);
-  }
-  virtual ~MyErrorCalculator() {}
-};
 
 #endif

@@ -1,4 +1,4 @@
-project(VertexBasedLimiter)
+project(HSS_vs_pMultigrid)
 
 add_executable(${PROJECT_NAME} main.cpp definitions.cpp test.cpp ../euler_util.cpp algorithms.cpp)
 

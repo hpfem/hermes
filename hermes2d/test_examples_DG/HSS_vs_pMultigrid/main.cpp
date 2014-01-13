@@ -6,28 +6,36 @@ int polynomialDegree = 2;
 int initialRefinementsCount = 4;
 const Algorithm algorithm = pMultigrid;
 SolvedExample solvedExample = MovingPeak;
-static std::string SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
-std::string solvedExampleString = SolvedExampleString[solvedExample];
-double MovingPeakDiffusivity = 1e-3;
-
+// For the initial shape of the peak.
+const double MovingPeakDiffusivity = 1e-3;
 double diffusivity = 1e-2;
-double s = -1;
+double s = -1.;
+double sigma_star = 10.;
 double CFL = 1e-1;
 
 Hermes::vector<int> iter_per_time_step_HSS;
 Hermes::vector<int> smoothing_steps_per_V_cycle;
 Hermes::vector<int> V_cycles_per_time_step;
 
+static std::string SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
+std::string solvedExampleString = SolvedExampleString[solvedExample];
+Hermes::Mixins::TimeMeasurable cpu_time;
+
+// Arguments (optional)
+// 1 - Initial refinements
+// 2 - diffusivity
+// 3 - example (index in the array SolvedExampleString)
+// 4 - CFL number
 int main(int argc, char* argv[])
 {
+  // Use one thread
   HermesCommonApi.set_integral_param_value(numThreads, 1);
 
+  // Read the input arguments.
   if (argc > 1)
     initialRefinementsCount = atoi(argv[1]);
   if (argc > 2)
-  {
     diffusivity = (double)atof(argv[2]);
-  }
   if (argc > 3)
   {
     solvedExample = (SolvedExample)atoi(argv[3]);
@@ -36,6 +44,7 @@ int main(int argc, char* argv[])
   if (argc > 4)
     CFL = atof(argv[4]);
 
+  // Testing variants of HSS & Multigrid
   if (is_timedep(solvedExample))
   {
     iter_per_time_step_HSS.push_back(1);
@@ -56,10 +65,11 @@ int main(int argc, char* argv[])
     smoothing_steps_per_V_cycle.push_back(15);
     V_cycles_per_time_step.push_back(1);
   }
-    
-  double sigma = std::pow(2., (double)(initialRefinementsCount)) * (s == -1 ? 10.0 : (s == 1 ? 10. : 0.));
 
-  // Load the mesh.
+  // Sigma - needs to know initialRefinementsCount
+  double sigma = std::pow(2., (double)(initialRefinementsCount)) * sigma_star;
+
+  // Load the mesh & set mesh size for CFL -> time step length calculation.
   double mesh_size;
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2DXML mloader;
@@ -148,7 +158,7 @@ int main(int argc, char* argv[])
   MeshFunctionSharedPtr<double> exact_solution(exact_sln);
   MeshFunctionSharedPtr<double> initial_sln(initial_solution);
 
-  // Visualization.
+  // Visualization classes.
   ScalarView solution_view("Solution", new WinGeom(0, 0, 600, 350));
   ScalarView exact_view("Exact solution", new WinGeom(610, 0, 600, 350));
   
@@ -159,14 +169,18 @@ int main(int argc, char* argv[])
   else
     exact_solver_timedep(mesh, solvedExample, polynomialDegree, initialRefinementsCount, diffusivity, s, sigma, time_step_length, initial_sln, exact_solution, &exact_view, CFL);
   
-  Hermes::Mixins::TimeMeasurable cpu_time;
+  // Global logger
   Hermes::Mixins::Loggable logger_global(true, NULL, true);
   logger_global.set_logFile_name(solvedExampleString.append(".h2d"));
   logger_global.set_timestamps(false);
+
+  // HSS
   if (algorithm == Multiscale || algorithm == Both)
   {
+    // All variants
     for (int si = 0; si < iter_per_time_step_HSS.size(); si++)
     {
+      // Set up loggers.
       Hermes::Mixins::Loggable logger(true, NULL, false);
       logger.set_timestamps(false);
       logger.set_erase_on_beginning(true);
@@ -180,14 +194,16 @@ int main(int argc, char* argv[])
       ssd << "HSS_detail(" << iter_per_time_step_HSS[si] << ")_" << solvedExampleString << "_" << initialRefinementsCount << "_" << diffusivity << ".h2d";
       logger_details.set_logFile_name(ssd.str());
 
+      // Start measuring CPU time.
       cpu_time.tick();
+      // Calculate & return what to put in the log.
       std::string outString = multiscale_decomposition(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_mean_values, previous_derivatives, diffusivity, s, sigma, time_step_length,
         initial_sln, solution, exact_solution, &solution_view, &exact_view, logger, logger_details, CFL, iter_per_time_step_HSS[si]);
-
+      // Stop measuring time.
       cpu_time.tick();
 
+      // Fill the logs.
       logger.info("%f|%s", cpu_time.last(), outString.c_str());
-
       std::stringstream ss_global;
       ss_global << initialRefinementsCount << "|"
         << diffusivity << "|"
@@ -199,12 +215,14 @@ int main(int argc, char* argv[])
     }
   }
 
+  // p-Multigrid
   if(algorithm == pMultigrid || algorithm == Both)
   {
     for (int si = 0; si < smoothing_steps_per_V_cycle.size(); si++)
     {
      for (int siv = 0; siv < V_cycles_per_time_step.size(); siv++)
       {
+        // Set up loggers.
         Hermes::Mixins::Loggable logger(true, NULL, false);
         logger.set_timestamps(false);
         logger.set_erase_on_beginning(true);
@@ -213,14 +231,16 @@ int main(int argc, char* argv[])
         logger.set_logFile_name(ss.str());
 
         MeshFunctionSharedPtr<double> previous_solution_local(new ExactSolutionMovingPeak(mesh, MovingPeakDiffusivity, M_PI / 2.));
+        // Start measuring CPU time.
         cpu_time.tick();
-
+        // Calculate & return what to put in the log.
         std::string outString = p_multigrid(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_solution_local, diffusivity, time_step_length,
           solution, exact_solution, &solution_view, &exact_view, s, sigma, logger, smoothing_steps_per_V_cycle[si], CFL, V_cycles_per_time_step[siv]);
-
+        // Stop measuring time.
         cpu_time.tick();
+        
+        // Fill the logs.
         logger.info("%f|%s", cpu_time.last(), outString.c_str());
-
         std::stringstream ss_global;
         ss_global << initialRefinementsCount << "|"
           << diffusivity << "|"

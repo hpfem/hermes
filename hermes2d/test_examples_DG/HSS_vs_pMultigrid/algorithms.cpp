@@ -1,74 +1,23 @@
 #include "algorithms.h"
+
+// Relative tolerance drop (1e-4 == 4 orders of magnitude drop)
+static const double tolerance = 1e-4;
+
+// Utilities
 static std::string SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
 static double exact_solver_error;
-static const double tolerance = 1e-4;
-double initial_error = -1;
+double initial_error;
 MeshFunctionSharedPtr<double> es(new Solution<double>());
 double* es_v;
+
+// Uncomment to have OpenGL output throughout calculation.
 //#define SHOW_OUTPUT
 
+// Under relaxation in Multiscale
+#define OMEGA 1.0
+
+// Static logging for output in terminal.
 static Hermes::Mixins::Loggable static_log(true);
-
-bool add_inlet(SolvedExample solvedExample)
-{
-  switch (solvedExample)
-  {
-  case SolidBodyRotation:
-  case AdvectedCube:
-  case MovingPeak:
-    return false;
-  case CircularConvection:
-  case Benchmark:
-    return true;
-  }
-}
-
-bool is_timedep(SolvedExample solvedExample)
-{
-  switch (solvedExample)
-  {
-  case CircularConvection:
-  case Benchmark:
-    return false;
-  case MovingPeak:
-  case AdvectedCube:
-  case SolidBodyRotation:
-    return true;
-  }
-}
-
-double end_time(SolvedExample solvedExample)
-{
-  switch (solvedExample)
-  {
-  case CircularConvection:
-  case Benchmark:
-    return 9999999999.;
-  case MovingPeak:
-    return M_PI * 2.;
-  case AdvectedCube:
-    return 1.;
-  case SolidBodyRotation:
-    return M_PI * 2.;
-  }
-}
-
-double calc_l2_error(SolvedExample solvedExample, MeshSharedPtr mesh, MeshFunctionSharedPtr<double> fn_1, MeshFunctionSharedPtr<double> fn_2, Hermes::Mixins::Loggable& logger)
-{
-  ErrorWeakForm wf(solvedExample);
-  SpaceSharedPtr<double> mspace(new L2Space<double>(mesh, 0, new L2ShapesetTaylor));
-  wf.set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(fn_1, fn_2));
-  DiscreteProblem<double>* dp = new DiscreteProblem<double>(&wf, mspace);
-  SimpleVector<double> vector;
-  dp->assemble(&vector);
-  double result = 0.;
-  for (int i = 0; i < vector.get_size(); i++)
-    result += vector.get(i);
-  result = std::sqrt(result);
-  //logger.info("L2 Error: %g.", result);
-  delete dp;
-  return result;
-}
 
 double calc_l2_error_algebraic(SpaceSharedPtr<double> space, double* v1, double* v2, Hermes::Mixins::Loggable* logger = NULL, int iteration = 0, int init_refs = 0, double D = 0.)
 {
@@ -79,11 +28,6 @@ double calc_l2_error_algebraic(SpaceSharedPtr<double> space, double* v1, double*
   if (logger)
     logger->info("%d,%f,%d,%f", init_refs, D, iteration, result);
   return result;
-}
-
-bool error_condition(double error)
-{
-  return std::abs(error) < tolerance;
 }
 
 bool error_reduction_condition(double error)
@@ -127,7 +71,6 @@ void solve_exact(SolvedExample solvedExample, SpaceSharedPtr<double> space, doub
   exact_solver_view->get_linearizer()->save_solution_tecplot(es, ss_vtk.str().c_str(), "solution");
 }
 
-#define USE_PREDICTOR_STEP
 std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_mean_values,
   MeshFunctionSharedPtr<double> previous_derivatives, double diffusivity, double s, double sigma, double time_step_length,
   MeshFunctionSharedPtr<double> previous_solution, MeshFunctionSharedPtr<double> solution, MeshFunctionSharedPtr<double> exact_solution,
@@ -233,7 +176,7 @@ std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExa
     {
       iterations++;
       static_log.info("- iteration: %i.", iter_i);
-#ifdef USE_PREDICTOR_STEP
+      
       // 1. predictor
       // M
       if(is_timedep(solvedExample))
@@ -300,50 +243,6 @@ std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExa
           sln_der_k.set(i, (OMEGA * solver_der.get_sln_vector()[i]) + ((1. - OMEGA) * sln_der_k.get(i)));
       }
       merged_sln = merge_slns(sln_means_k.v, const_space, sln_der_k.v, space, full_space);
-#else
-      matrix_M_means.multiply_with_vector(sln_means.v, vector_A_means.v, true);
-      if (polynomialDegree)
-      {
-        add_means(&sln_der_k, &sln_der_long, space, full_space);
-        matrix_A_full.multiply_with_vector(sln_der_long.v, sln_der_long_temp.v, true);
-        SimpleVector<double>* temp_1 = (SimpleVector<double>*)cut_off_ders(sln_der_long_temp.v, const_space, full_space)->change_sign();
-        vector_A_means.add_vector(temp_1);
-        delete temp_1;
-      }
-      vector_A_means.add_vector(&vector_b_means);
-      solver_means.solve();
-      sln_means_k.set_vector(solver_means.get_sln_vector());
-
-      if (polynomialDegree)
-      {
-        num_fine++;
-
-        matrix_M_der.multiply_with_vector(sln_der.v, vector_A_der.v, true);
-        add_ders(&sln_means_k, &sln_means_long, const_space, full_space);
-        matrix_A_full.multiply_with_vector(sln_means_long.v, sln_means_long_temp.v, true);
-        SimpleVector<double>* temp_2 = (SimpleVector<double>*)cut_off_means(sln_means_long_temp.v, space, full_space)->change_sign();
-        vector_A_der.add_vector(temp_2);
-        delete temp_2;
-
-        matrix_A_offdiag.multiply_with_vector(sln_der_k.v, sln_der_offdiag.v, true);
-        vector_A_der.add_vector(sln_der_offdiag.change_sign());
-
-        vector_A_der.add_vector(&vector_b_der);
-        solver_der.solve();
-        if (iteration == 1 || OMEGA >= 0.99)
-          sln_der_k.set_vector(solver_der.get_sln_vector());
-        else
-        {
-          for (int i = 0; i < ndofs; i++)
-            sln_der_k.set(i, (OMEGA * solver_der.get_sln_vector()[i]) + ((1. - OMEGA) * sln_der_k.get(i)));
-        }
-        merged_sln = merge_slns(sln_means_k.v, const_space, sln_der_k.v, space, full_space);
-      }
-      else
-      {
-        merged_sln = sln_means.v;
-      }
-#endif
     }
     sln_means.set_vector(&sln_means_k);
     sln_der.set_vector(&sln_der_k);
@@ -516,7 +415,6 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
   SimpleVector<double> util_1(ndofs_1), util_11(ndofs_2);
   SimpleVector<double> util_0(ndofs_0), util_01(ndofs_2);
 
-  double initial_residual_norm;
   // Reports.
   int num_coarse = 0;
   int num_2 = 0;
@@ -591,9 +489,6 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
 
       for (int iteration = 1; iteration <= steps; iteration++)
       {
-        // Solve for increment.
-        SimpleVector<double>* rhs;
-
         // A(u_K) - done after the first step.
         matrix_A_1.multiply_with_vector(sln_1.v, vector_A_1.v, true);
 
@@ -786,80 +681,6 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
   return outStream.str();
 }
 
-void smoothing(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, MeshFunctionSharedPtr<double> previous_sln,
-  double diffusivity, double time_step_length,
-  MeshFunctionSharedPtr<double> solution, MeshFunctionSharedPtr<double> exact_solution,
-  ScalarView* solution_view, ScalarView* exact_view, double s, double sigma, Hermes::Mixins::Loggable& logger, Hermes::Mixins::Loggable& logger_details, int steps)
-{
-  // Spaces
-  SpaceSharedPtr<double> space_2(new L2Space<double>(mesh, polynomialDegree, new L2ShapesetTaylor));
-  int ndofs_2 = space_2->get_num_dofs();
-
-  // Matrices A, vectors b.
-  ExactWeakForm weakform_exact(solvedExample, add_inlet(solvedExample), "Inlet", diffusivity, s, sigma, exact_solution);
-  weakform_exact.set_current_time_step(time_step_length);
-  CSCMatrix<double> matrix_A_2;
-  SimpleVector<double> vector_b_2;
-
-  // Matrices (M+A_tilde), vectors -A(u_K)
-  SmoothingWeakForm weakform_smoother(solvedExample, false, 1, add_inlet(solvedExample), "Inlet", diffusivity, s, sigma);
-  SmoothingWeakForm weakform_smoother_coarse(solvedExample, false, 1, add_inlet(solvedExample), "Inlet", diffusivity, s, sigma);
-  weakform_smoother.set_current_time_step(time_step_length);
-  weakform_smoother.set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(previous_sln, exact_solution));
-  weakform_smoother_coarse.set_current_time_step(time_step_length);
-  weakform_smoother_coarse.set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(previous_sln, exact_solution));
-  CSCMatrix<double> matrix_MA_tilde_2;
-  SimpleVector<double> vector_A_2(ndofs_2);
-
-  // Assembler.
-  DiscreteProblem<double> dp;
-  // Level 2.
-  dp.set_space(space_2);
-  dp.set_weak_formulation(&weakform_exact);
-  dp.assemble(&matrix_A_2, &vector_b_2);
-  dp.set_weak_formulation(&weakform_smoother);
-  dp.assemble(&matrix_MA_tilde_2);
-
-  UMFPackLinearMatrixSolver<double> solver_2(&matrix_MA_tilde_2, &vector_A_2);
-  solver_2.setup_factorization();
-  solver_2.set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
-
-  // Utils.
-  double* residual_2 = new double[ndofs_2];
-  SimpleVector<double> sln_2(ndofs_2);
-  sln_2.zero();
-
-  double initial_residual_norm;
-
-  // Reports.
-  int v_cycles = 0;
-
-  for (int step = 1;; step++)
-  {
-    logger_details.info("V-cycle %i.", step);
-    v_cycles++;
-
-    // Solve for increment.
-    matrix_A_2.multiply_with_vector(sln_2.v, vector_A_2.v, true);
-    vector_A_2.change_sign()->add_vector(&vector_b_2);
-    solver_2.solve();
-    sln_2.add_vector(solver_2.get_sln_vector());
-
-    // Make solution
-    Solution<double>::vector_to_solution(&sln_2, space_2, previous_sln);
-
-    // Residual check.
-    // residual_condition(&matrix_A_2, &vector_b_2, sln_2.v, residual_2, logger_details, step, true);
-
-    // Error & exact solution display.
-    //solution_view->show(->show(previous_sln);
-
-    if (error_condition(calc_l2_error(solvedExample, mesh, previous_sln, es, logger_details)))
-      break;
-  }
-  logger.info("%i", v_cycles);
-}
-
 void exact_solver_timedep(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, double diffusivity, double s, double sigma, double time_step_length,
   MeshFunctionSharedPtr<double> previous_solution, MeshFunctionSharedPtr<double> exact_solution, ScalarView* exact_view, double cfl)
 {
@@ -930,4 +751,49 @@ void exact_solver_timedep(MeshSharedPtr mesh, SolvedExample solvedExample, int p
   exact_view->save_screenshot(ss_bmpe.str().c_str(), true);
 
   exact_view->get_linearizer()->save_solution_tecplot(es, ss_vtke.str().c_str(), "exactSolution", 1, 2.0);
+}
+
+// Utilities.
+bool add_inlet(SolvedExample solvedExample)
+{
+  switch (solvedExample)
+  {
+  case SolidBodyRotation:
+  case AdvectedCube:
+  case MovingPeak:
+    return false;
+  case CircularConvection:
+  case Benchmark:
+    return true;
+  }
+}
+
+bool is_timedep(SolvedExample solvedExample)
+{
+  switch (solvedExample)
+  {
+  case CircularConvection:
+  case Benchmark:
+    return false;
+  case MovingPeak:
+  case AdvectedCube:
+  case SolidBodyRotation:
+    return true;
+  }
+}
+
+double end_time(SolvedExample solvedExample)
+{
+  switch (solvedExample)
+  {
+  case CircularConvection:
+  case Benchmark:
+    return 9999999999.;
+  case MovingPeak:
+    return M_PI * 2.;
+  case AdvectedCube:
+    return 1.;
+  case SolidBodyRotation:
+    return M_PI * 2.;
+  }
 }
