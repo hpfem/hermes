@@ -66,7 +66,7 @@ namespace Hermes
       typedef void(*callbackFn)(const char*);
 
     public:
-      Loggable(bool verbose_output = false, callbackFn verbose_callback = NULL);
+      Loggable(bool verbose_output = false, callbackFn verbose_callback = NULL, bool add_newline = true);
 
       /// Sets the addition of a time stamp on each line in the log file. By default it is on.
       void set_timestamps(bool onOff);
@@ -163,6 +163,8 @@ namespace Hermes
 
       /// Internal.
       bool log_file_written;
+
+      bool add_newline;
     };
 
     /// \brief Class using time measurement

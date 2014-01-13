@@ -126,7 +126,7 @@ void solve_exact(SolvedExample solvedExample, SpaceSharedPtr<double> space, doub
   exact_solver_view->get_linearizer()->save_solution_tecplot(es, ss_vtk.str().c_str(), "solution");
 }
 
-void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_mean_values,
+int multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_mean_values,
   MeshFunctionSharedPtr<double> previous_derivatives, double diffusivity, double s, double sigma, double time_step_length,
   MeshFunctionSharedPtr<double> previous_solution, MeshFunctionSharedPtr<double> solution, MeshFunctionSharedPtr<double> exact_solution,
   ScalarView* solution_view, ScalarView* exact_view, Hermes::Mixins::Loggable& logger, Hermes::Mixins::Loggable& logger_details, double cfl, int step)
@@ -357,10 +357,11 @@ void multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, i
     errorCalculator.calculate_errors(solution, exact_solution);
     logger.info("%f", std::sqrt(errorCalculator.get_total_error_squared()));
   }
-  logger.info("%i", iterations);
+
+  return iterations;
 }
 
-void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_sln,
+int p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_sln,
   double diffusivity, double time_step_length,
   MeshFunctionSharedPtr<double> solution, MeshFunctionSharedPtr<double> exact_solution,
   ScalarView* solution_view, ScalarView* exact_view, double s, double sigma, Hermes::Mixins::Loggable& logger, int steps, double cfl, int V_cycles_per_time_step)
@@ -722,7 +723,8 @@ void p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomial
     errorCalculator.calculate_errors(solution, exact_solution);
     logger.info("%f", std::sqrt(errorCalculator.get_total_error_squared()));
   }
-  logger.info("%i", v_cycles);
+
+  return v_cycles;
 }
 
 void smoothing(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, MeshFunctionSharedPtr<double> previous_sln,

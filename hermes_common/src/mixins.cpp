@@ -35,13 +35,14 @@ namespace Hermes
 
     char* Loggable::staticLogFileName = NULL;
 
-    Loggable::Loggable(bool verbose_output, callbackFn verbose_callback) :
+    Loggable::Loggable(bool verbose_output, callbackFn verbose_callback, bool add_newline) :
       verbose_output(verbose_output),
       verbose_callback(verbose_callback),
       logFileName(NULL),
       print_timestamps(true),
       erase_on_beginning(false),
-      log_file_written(false)
+      log_file_written(false),
+      add_newline(add_newline)
     {
     }
 
@@ -521,10 +522,13 @@ namespace Hermes
               char time_buf[BUF_SZ];
               strftime(time_buf, BUF_SZ, "%y%m%d-%H:%M", now_tm);
               //write
-              fprintf(file, "%s\t%s\n", time_buf, msg);
+              fprintf(file, "%s\t%s", time_buf, msg);
             }
             else
-              fprintf(file, "%s\n", msg);
+              fprintf(file, "%s", msg);
+
+            if (this->add_newline)
+              fprintf(file, "\n");
 
             fclose(file);
 
