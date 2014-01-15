@@ -189,21 +189,18 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void HcurlProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order, const Scalar** returned_data)
+      void HcurlProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order)
       {
         const int num_gip = rsln->get_quad_2d()->get_num_points(intr_gip_order, rsln->get_active_element()->get_mode());
 
-        //prepre for curl
-        Scalar* curl = new Scalar[num_gip];
+        memcpy(this->rval[inx_son][H2D_HCFE_VALUE0], rsln->get_fn_values(0), num_gip * sizeof(Scalar));
+        memcpy(this->rval[inx_son][H2D_HCFE_VALUE1], rsln->get_fn_values(1), num_gip * sizeof(Scalar));
+
+        // prepare for curl
         const Scalar* d1dx = rsln->get_dx_values(1);
         const Scalar* d0dy = rsln->get_dy_values(0);
-        for(int i = 0; i < num_gip; i++)
-          curl[i] = d1dx[i] - d0dy[i];
-
-        //fill with values
-        returned_data[H2D_HCFE_VALUE0] = rsln->get_fn_values(0);
-        returned_data[H2D_HCFE_VALUE1] = rsln->get_fn_values(1);
-        returned_data[H2D_HCFE_CURL] = curl;
+        for (int i = 0; i < num_gip; i++)
+          this->rval[inx_son][H2D_HCFE_CURL][i] = d1dx[i] - d0dy[i];
       }
 
       template<typename Scalar>
@@ -247,7 +244,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Scalar HcurlProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemSubShapeFunc& sub_shape)
+      Scalar HcurlProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemSubShapeFunc& sub_shape)
       {
         double coef_curl = std::abs(sub_trf.coef_mx * sub_trf.coef_my);
         Scalar total_value = 0;
@@ -262,9 +259,9 @@ namespace Hermes
           Scalar shape_curl = sub_shape.svals[H2D_HCFE_CURL][gip_inx];
 
           //get value of ref. solution
-          Scalar ref_value0 = sub_trf.coef_mx * sub_gip.rvals[H2D_HCFE_VALUE0][gip_inx];
-          Scalar ref_value1 = sub_trf.coef_my * sub_gip.rvals[H2D_HCFE_VALUE1][gip_inx];
-          Scalar ref_curl = coef_curl * sub_gip.rvals[H2D_HCFE_CURL][gip_inx]; //coef_curl * curl
+          Scalar ref_value0 = sub_trf.coef_mx * this->rval[son][H2D_HCFE_VALUE0][gip_inx];
+          Scalar ref_value1 = sub_trf.coef_my * this->rval[son][H2D_HCFE_VALUE1][gip_inx];
+          Scalar ref_curl = coef_curl * this->rval[son][H2D_HCFE_CURL][gip_inx]; //coef_curl * curl
 
           //evaluate a right-hand value
           Scalar value = (shape_value0 * ref_value0)
@@ -277,7 +274,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      double HcurlProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj)
+      double HcurlProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj)
       {
         double total_error_squared = 0;
         double coef_curl = std::abs(sub_trf.coef_mx * sub_trf.coef_my);
@@ -298,9 +295,9 @@ namespace Hermes
 
           {
             //get value of ref. solution
-            Scalar ref_value0 = sub_trf.coef_mx * sub_gip.rvals[H2D_HCFE_VALUE0][gip_inx];
-            Scalar ref_value1 = sub_trf.coef_my * sub_gip.rvals[H2D_HCFE_VALUE1][gip_inx];
-            Scalar ref_curl = coef_curl * sub_gip.rvals[H2D_HCFE_CURL][gip_inx]; //coef_curl * curl
+            Scalar ref_value0 = sub_trf.coef_mx * this->rval[son][H2D_HCFE_VALUE0][gip_inx];
+            Scalar ref_value1 = sub_trf.coef_my * this->rval[son][H2D_HCFE_VALUE1][gip_inx];
+            Scalar ref_curl = coef_curl * this->rval[son][H2D_HCFE_CURL][gip_inx]; //coef_curl * curl
 
             //evaluate error
             double error_squared = sqr(proj_value0 - ref_value0)
