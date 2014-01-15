@@ -159,7 +159,7 @@ namespace Hermes
 
     double inline imag(std::complex<double> x)
     {
-      return x.imag();;
+      return x.imag();
     }
 
     template<typename Scalar>
