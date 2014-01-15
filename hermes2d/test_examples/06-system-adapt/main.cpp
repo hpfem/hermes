@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
     // View the coarse mesh solution and polynomial orders.
     s_view_0.show(u_sln);
     o_view_0.show(u_space);
-    s_view_1.show(v_sln, H2D_FN_DX_0);
+    s_view_1.show(v_sln);
     o_view_1.show(v_space);
 
     // Calculate element errors.
