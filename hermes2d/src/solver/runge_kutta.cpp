@@ -506,7 +506,7 @@ namespace Hermes
     template<typename Scalar>
     void RungeKutta<Scalar>::rk_time_step_newton(MeshFunctionSharedPtr<Scalar>  sln_time_prev, MeshFunctionSharedPtr<Scalar>  sln_time_new)
     {
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev;;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev;
       slns_time_prev.push_back(sln_time_prev);
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new;
       slns_time_new.push_back(sln_time_new);

@@ -68,7 +68,7 @@ static const int H2D_TRF_IDENTITY = H2D_TRF_QUAD_NUM;
 # define H2DRS_DEFAULT_ERR_WEIGHT_H 2.0 ///< A default multiplicative coefficient of an error of a H-candidate. \ingroup g_selectors
 # define H2DRS_DEFAULT_ERR_WEIGHT_P 1.0 ///< A default multiplicative coefficient of an error of a P-candidate. \ingroup g_selectors
 # define H2DRS_DEFAULT_ERR_WEIGHT_ANISO 1.414214 ///< A default multiplicative coefficient of an error of a ANISO-candidate. \ingroup g_selectors
-
+# define MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS 3
 namespace Hermes
 {
   /// Namespace containing definitions specific for Hermes2D.

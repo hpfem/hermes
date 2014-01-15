@@ -245,7 +245,7 @@ namespace Hermes
           rsln_sln->enable_transform(false);
 
         // obtain reference solution values on all four refined sons
-        const Scalar** rval[H2D_MAX_ELEMENT_SONS];
+        const Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS];
         Element* base_element = rsln->get_mesh()->get_element(e->id);
 
         // value on base element.
@@ -259,7 +259,7 @@ namespace Hermes
             rsln->push_transform(son);
 
             //obtain precalculated values
-            rval[son] = precalc_ref_solution(son, rsln, e, H2DRS_INTR_GIP_ORDER);
+            precalc_ref_solution(son, rsln, e, H2DRS_INTR_GIP_ORDER, rval[son]);
           }
         }
         else
@@ -273,7 +273,7 @@ namespace Hermes
             rsln->set_quad_order(H2DRS_INTR_GIP_ORDER);
 
             //obtain precalculated values
-            rval[son] = precalc_ref_solution(son, rsln, e, H2DRS_INTR_GIP_ORDER);
+            precalc_ref_solution(son, rsln, e, H2DRS_INTR_GIP_ORDER, rval[son]);
           }
         }
 
@@ -326,7 +326,7 @@ namespace Hermes
             Trf* sub_trfs[4] = { &trfs[0], &trfs[1], &trfs[2], &trfs[3] };
             Hermes::vector<TrfShapeExp>* p_trf_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
             Hermes::vector<TrfShapeExp>* p_trf_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
-            const Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };;
+            const Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };
             for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
             {
               const Scalar **sub_rval[1] = { rval[son] };
@@ -420,12 +420,9 @@ namespace Hermes
           }
         }
         const HcurlProjBasedSelector<Scalar>* hcurl_casted = dynamic_cast<const HcurlProjBasedSelector<Scalar>*>(this);
+        if (hcurl_casted)
         for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
-        {
-          if (hcurl_casted)
-            delete[] rval[son][HcurlProjBasedSelector<Scalar>::H2D_HCFE_CURL];
-          ::free(rval[son]);
-        }
+          delete[] rval[son][HcurlProjBasedSelector<Scalar>::H2D_HCFE_CURL];
       }
 
       template<typename Scalar>
