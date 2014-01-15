@@ -180,10 +180,10 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void L2ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order, const Scalar** returned_data)
+      void L2ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order)
       {
-        // fill with values
-        returned_data[H2D_L2FE_VALUE] = rsln->get_fn_values(0);
+        const int num_gip = rsln->get_quad_2d()->get_num_points(intr_gip_order, rsln->get_active_element()->get_mode());
+        memcpy(this->rval[inx_son][H2D_L2FE_VALUE], rsln->get_fn_values(0), num_gip * sizeof(Scalar));
       }
 
       template<typename Scalar>
@@ -221,7 +221,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Scalar L2ProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemSubShapeFunc& sub_shape)
+      Scalar L2ProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemSubShapeFunc& sub_shape)
       {
         Scalar total_value = 0;
         for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
@@ -234,7 +234,7 @@ namespace Hermes
 
           //get value of ref. solution
           Scalar ref_value;
-          ref_value = sub_gip.rvals[H2D_L2FE_VALUE][gip_inx];
+          ref_value = this->rval[son][H2D_L2FE_VALUE][gip_inx];
 
           //evaluate a right-hand value
           Scalar value = (shape_value * ref_value);
@@ -245,7 +245,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      double L2ProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj)
+      double L2ProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj)
       {
         double total_error_squared = 0;
         for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
@@ -262,7 +262,7 @@ namespace Hermes
           }
 
           //get value of ref. solution
-          Scalar ref_value = sub_gip.rvals[H2D_L2FE_VALUE][gip_inx];
+          Scalar ref_value = this->rval[son][H2D_L2FE_VALUE][gip_inx];
 
           //evaluate error
           double error_squared = sqr(proj_value - ref_value);

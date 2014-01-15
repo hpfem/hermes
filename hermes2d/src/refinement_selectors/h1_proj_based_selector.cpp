@@ -188,12 +188,13 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void H1ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order, const Scalar** returned_data)
+      void H1ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order)
       {
-        //fill with values
-        returned_data[H2D_H1FE_VALUE] = rsln->get_fn_values(0);
-        returned_data[H2D_H1FE_DX] = rsln->get_dx_values(0);
-        returned_data[H2D_H1FE_DY] = rsln->get_dy_values(0);
+        const int num_gip = rsln->get_quad_2d()->get_num_points(intr_gip_order, rsln->get_active_element()->get_mode());
+
+        memcpy(this->rval[inx_son][H2D_H1FE_VALUE], rsln->get_fn_values(0), num_gip * sizeof(Scalar));
+        memcpy(this->rval[inx_son][H2D_H1FE_DX], rsln->get_dx_values(0), num_gip * sizeof(Scalar));
+        memcpy(this->rval[inx_son][H2D_H1FE_DY], rsln->get_dy_values(0), num_gip * sizeof(Scalar));
       }
 
       template<typename Scalar>
@@ -234,7 +235,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Scalar H1ProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemSubShapeFunc& sub_shape)
+      Scalar H1ProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemSubShapeFunc& sub_shape)
       {
         Scalar total_value = 0;
         for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
@@ -249,9 +250,9 @@ namespace Hermes
           
           //get value of ref. solution
           Scalar ref_value[H2D_H1FE_NUM];
-          ref_value[H2D_H1FE_VALUE] = sub_gip.rvals[H2D_H1FE_VALUE][gip_inx];
-          ref_value[H2D_H1FE_DX] = sub_trf.coef_mx * sub_gip.rvals[H2D_H1FE_DX][gip_inx];
-          ref_value[H2D_H1FE_DY] = sub_trf.coef_my * sub_gip.rvals[H2D_H1FE_DY][gip_inx];
+          ref_value[H2D_H1FE_VALUE] = this->rval[son][H2D_H1FE_VALUE][gip_inx];
+          ref_value[H2D_H1FE_DX] = sub_trf.coef_mx * this->rval[son][H2D_H1FE_DX][gip_inx];
+          ref_value[H2D_H1FE_DY] = sub_trf.coef_my * this->rval[son][H2D_H1FE_DY][gip_inx];
 
           //evaluate a right-hand value
           Scalar value = (shape_value[H2D_H1FE_VALUE] * ref_value[H2D_H1FE_VALUE])
@@ -264,7 +265,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      double H1ProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj)
+      double H1ProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj)
       {
         double total_error_squared = 0;
         for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
@@ -284,9 +285,9 @@ namespace Hermes
           {
             //get value of ref. solution
             Scalar ref_value[3];
-            ref_value[H2D_H1FE_VALUE] = sub_gip.rvals[H2D_H1FE_VALUE][gip_inx];
-            ref_value[H2D_H1FE_DX] = sub_trf.coef_mx * sub_gip.rvals[H2D_H1FE_DX][gip_inx];
-            ref_value[H2D_H1FE_DY] = sub_trf.coef_my * sub_gip.rvals[H2D_H1FE_DY][gip_inx];
+            ref_value[H2D_H1FE_VALUE] = this->rval[son][H2D_H1FE_VALUE][gip_inx];
+            ref_value[H2D_H1FE_DX] = sub_trf.coef_mx * this->rval[son][H2D_H1FE_DX][gip_inx];
+            ref_value[H2D_H1FE_DY] = sub_trf.coef_my * this->rval[son][H2D_H1FE_DY][gip_inx];
 
             //evaluate error
             double error_squared = sqr(proj_value[H2D_H1FE_VALUE] - ref_value[H2D_H1FE_VALUE])
