@@ -253,10 +253,9 @@ namespace Hermes
         {
           for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
           {
-            //set element
             rsln->set_active_element(base_element);
-            rsln->set_quad_order(H2DRS_INTR_GIP_ORDER);
             rsln->push_transform(son);
+            rsln->set_quad_order(H2DRS_INTR_GIP_ORDER);
 
             //obtain precalculated values
             precalc_ref_solution(son, rsln, e, H2DRS_INTR_GIP_ORDER, rval[son]);
@@ -266,10 +265,7 @@ namespace Hermes
         {
           for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
           {
-            //set element
-            Element* e = base_element->sons[son];
-            assert(e != nullptr);
-            rsln->set_active_element(e);
+            rsln->set_active_element(base_element->sons[son]);
             rsln->set_quad_order(H2DRS_INTR_GIP_ORDER);
 
             //obtain precalculated values
@@ -326,7 +322,7 @@ namespace Hermes
             Trf* sub_trfs[4] = { &trfs[0], &trfs[1], &trfs[2], &trfs[3] };
             Hermes::vector<TrfShapeExp>* p_trf_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
             Hermes::vector<TrfShapeExp>* p_trf_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
-            const Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };
+            const Scalar **sub_rval[4] = { rval[0], rval[1], rval[2], rval[3] };;
             for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
             {
               const Scalar **sub_rval[1] = { rval[son] };

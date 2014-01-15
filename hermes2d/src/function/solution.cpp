@@ -783,12 +783,6 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::set_active_element(Element* e)
     {
-      if (e == this->element)
-        return;
-
-      if (!e->active)
-        throw Hermes::Exceptions::Exception("Cannot select inactive element. Wrong mesh?");
-
       MeshFunction<Scalar>::set_active_element(e);
 
       if (sln_type == HERMES_SLN)
@@ -846,6 +840,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::transform_values(int order, int mask, int np)
     {
+      this->cur_node_dirty = true;
       double2x2 *mat, *m;
       int i, mstep = 0;
 
@@ -937,6 +932,8 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::precalculate(int order, int mask)
     {
+      this->cur_node_dirty = true;
+
       int i, j, k, l;
       Quad2D* quad = this->quads[this->cur_quad];
       int np = quad->get_num_points(order, this->mode);

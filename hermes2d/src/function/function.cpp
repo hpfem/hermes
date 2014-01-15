@@ -33,7 +33,7 @@ namespace Hermes
     {
       order = 0;
       memset(quads, 0, H2D_MAX_QUADRATURES*sizeof(Quad2D*));
-
+      cur_node_dirty = true;
     }
 
     template<typename Scalar>
@@ -58,6 +58,12 @@ namespace Hermes
     {
       precalculate(order, mask);
       this->order = order;
+    }
+
+    template<typename Scalar>
+    void Function<Scalar>::set_active_element(Element* e)
+    {
+      Transformable::set_active_element(e);
     }
 
     template<typename Scalar>
@@ -125,11 +131,15 @@ namespace Hermes
     template<typename Scalar>
     void Function<Scalar>::update_nodes_ptr()
     {
-      int sizeofScalar = sizeof(Scalar);
-      for (int i = 0; i < this->num_components; i++)
+      if (cur_node_dirty)
       {
-        for (int j = 0; j < 6; j++)
-          memset(this->cur_node.values[i][j], 0, H2D_MAX_INTEGRATION_POINTS_COUNT * sizeofScalar);
+        int sizeofScalar = sizeof(Scalar);
+        for (int i = 0; i < this->num_components; i++)
+        {
+          for (int j = 0; j < 6; j++)
+            memset(this->cur_node.values[i][j], 0, H2D_MAX_INTEGRATION_POINTS_COUNT * sizeofScalar);
+        }
+        cur_node_dirty = false;
       }
     }
 

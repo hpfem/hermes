@@ -279,10 +279,12 @@ namespace Hermes
     template<typename Scalar>
     void MeshFunction<Scalar>::set_active_element(Element* e)
     {
-      Transformable::set_active_element(e);
+      if (e && !e->active)
+        throw Hermes::Exceptions::Exception("Cannot select inactive element. Wrong mesh?");
+
+      Function::set_active_element(e);
       mode = e->get_mode();
       refmap->set_active_element(e);
-      Function<Scalar>::reset_transform();
     }
 
     template<typename Scalar>

@@ -188,12 +188,12 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void H1ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order, const Scalar** returnedData)
+      void H1ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order, const Scalar** returned_data)
       {
         //fill with values
-        returnedData[H2D_H1FE_VALUE] = rsln->get_fn_values(0);
-        returnedData[H2D_H1FE_DX] = rsln->get_dx_values(0);
-        returnedData[H2D_H1FE_DY] = rsln->get_dy_values(0);
+        returned_data[H2D_H1FE_VALUE] = rsln->get_fn_values(0);
+        returned_data[H2D_H1FE_DX] = rsln->get_dx_values(0);
+        returned_data[H2D_H1FE_DY] = rsln->get_dy_values(0);
       }
 
       template<typename Scalar>
