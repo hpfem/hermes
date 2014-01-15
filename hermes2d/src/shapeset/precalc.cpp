@@ -60,6 +60,7 @@ namespace Hermes
 
     void PrecalcShapeset::precalculate(int order, int mask)
     {
+      this->cur_node_dirty = true;
       int i, j, k;
 
       int np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());

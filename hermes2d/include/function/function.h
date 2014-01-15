@@ -166,6 +166,8 @@ namespace Hermes
       /// Internal.
       virtual void pop_transform();
 
+      virtual void set_active_element(Element* e);
+
     protected:
       /// \brief Selects the quadrature points in which the function will be evaluated.
       /// \details It is possible to switch back and forth between different quadrature
@@ -195,6 +197,7 @@ namespace Hermes
 
       /// Current Node.
       Node cur_node;
+      bool cur_node_dirty;
 
       /// With changed sub-element mapping, there comes the need for a change of the current
       /// Node table nodes.

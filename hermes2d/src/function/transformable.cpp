@@ -75,8 +75,14 @@ namespace Hermes
 
     void Transformable::set_active_element(Element* e)
     {
-      if(e==nullptr) throw Exceptions::NullException(1);
-      element = e;
+      if (e == this->element)
+        return;
+
+      if (e == nullptr)
+        throw Exceptions::NullException(1);
+      
+      this->element = e;
+
       this->reset_transform();
     }
 

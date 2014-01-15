@@ -180,10 +180,10 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void L2ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order, const Scalar** returnedData)
+      void L2ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order, const Scalar** returned_data)
       {
         // fill with values
-        returnedData[H2D_L2FE_VALUE] = rsln->get_fn_values(0);
+        returned_data[H2D_L2FE_VALUE] = rsln->get_fn_values(0);
       }
 
       template<typename Scalar>
