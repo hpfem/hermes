@@ -253,30 +253,39 @@ namespace Hermes
 
     void Element::get_center(double& x, double& y)
     {
-      if(center_set)
+      if (!this->center_set)
+      {
+#pragma omp critical
+        {
+          if (!this->center_set)
+          {
+            // x - coordinate
+            this->x_center = this->vn[0]->x + this->vn[1]->x + this->vn[2]->x;
+            this->y_center = this->vn[0]->y + this->vn[1]->y + this->vn[2]->y;
+            if (this->is_quad())
+            {
+              this->x_center += this->vn[3]->x;
+              this->x_center = this->x_center / 4.0;
+              this->y_center += this->vn[3]->y;
+              this->y_center = this->y_center / 4.0;
+            }
+            else
+            {
+              this->x_center = this->x_center / 3.0;
+              this->y_center = this->y_center / 3.0;
+            }
+            x = this->x_center;
+            y = this->y_center;
+            this->center_set = true;
+          }
+        }
+      }
+      else
       {
         x = this->x_center;
         y = this->y_center;
         return;
       }
-
-      // x - coordinate
-      this->x_center = this->vn[0]->x + this->vn[1]->x + this->vn[2]->x;
-      this->y_center = this->vn[0]->y + this->vn[1]->y + this->vn[2]->y;
-      if(this->is_quad())
-      {
-        this->x_center += this->vn[3]->x;
-        this->x_center = this->x_center / 4.0;
-        this->y_center += this->vn[3]->y;
-        this->y_center = this->y_center / 4.0;
-      }
-      else
-      {
-        this->x_center = this->x_center / 3.0;
-        this->y_center = this->y_center / 3.0;
-      }
-      x = this->x_center;
-      y = this->y_center;
     }
 
     double Element::get_diameter()

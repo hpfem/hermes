@@ -37,8 +37,8 @@ namespace Hermes
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
 
-      central_transformations = (Transformations**)calloc(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS, sizeof(Transformations*));
-      neighbor_transformations = (Transformations**)calloc(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS, sizeof(Transformations*));
+      central_transformations = calloc_with_check<NeighborSearch<Scalar>, Transformations*>(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS, this);
+      neighbor_transformations = calloc_with_check<NeighborSearch<Scalar>, Transformations*>(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS, this);
 
       ignore_errors = false;
       n_neighbors = 0;

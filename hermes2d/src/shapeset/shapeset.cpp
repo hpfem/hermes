@@ -104,29 +104,45 @@ namespace Hermes
       int index = 2 * ((max_order + 1 - ebias)*part + (order - ebias)) + ori;
 
       // allocate/reallocate the array if necessary
-      if (comb_table == nullptr)
+      if (!this->comb_table)
       {
-        table_size = 1024;
-        while (table_size <= index) table_size *= 2;
-        comb_table = (double**)malloc(table_size * sizeof(double*));
-        memset(comb_table, 0, table_size * sizeof(double*));
+#pragma omp critical
+        {
+          if (!this->comb_table)
+          {
+            table_size = 1024;
+            while (table_size <= index)
+              table_size *= 2;
+            comb_table = calloc_with_check<double*>(table_size);
+          }
+        }
       }
       else if (index >= table_size)
       {
-        // adjust table_size to accommodate the required depth
-        int old_size = table_size;
-        while (index >= table_size) table_size *= 2;
+#pragma omp critical
+        {
+          // adjust table_size to accommodate the required depth
+          int old_size = table_size;
+          while (index >= table_size)
+            table_size *= 2;
 
-        // reallocate the table
-        comb_table = (double**)realloc(comb_table, table_size * sizeof(double*));
-        memset(comb_table + old_size, 0, (table_size - old_size) * sizeof(double*));
+          // reallocate the table
+          comb_table = realloc_with_check<double*>(comb_table, table_size);
+          memset(comb_table + old_size, 0, (table_size - old_size) * sizeof(double*));
+        }
       }
 
       // do we have the required linear combination yet?
-      if (comb_table[index] == nullptr)
+      if (!comb_table[index])
       {
-        // no, calculate it
-        comb_table[index] = calculate_constrained_edge_combination(order, part, ori, mode);
+#pragma omp critical
+        {
+          if (!comb_table[index])
+          {
+            // no, calculate it
+            comb_table[index] = calculate_constrained_edge_combination(order, part, ori, mode);
+          }
+        }
       }
 
       nitems = order + 1 - ebias;

@@ -193,6 +193,23 @@ namespace Hermes
   }
 
   template<typename ArrayItem>
+  ArrayItem* realloc_with_check(ArrayItem*& original_array, int new_size)
+  {
+    if (new_size == 0)
+      return nullptr;
+    static_assert(std::is_pod<ArrayItem>::value, "ArrayItem must be POD for reallocation.");
+
+    ArrayItem* new_array = (ArrayItem*)realloc(original_array, new_size * sizeof(ArrayItem));
+    if (new_array)
+      return original_array = new_array;
+    else
+    {
+      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", new_size * sizeof(ArrayItem));
+      return nullptr;
+    }
+  }
+
+  template<typename ArrayItem>
   void free_with_check(ArrayItem*& ptr, bool force_malloc = false)
   {
     if (ptr)
