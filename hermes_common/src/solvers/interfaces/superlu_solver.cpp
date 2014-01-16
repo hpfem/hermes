@@ -354,8 +354,8 @@ namespace Hermes
 
       // Free temporary local variables.
       StatFree(&stat);
-      //SUPERLU_FREE (x);
-      delete x;
+
+      free_with_check(x);
       Destroy_SuperMatrix_Store(&X);
 
       this->tick();

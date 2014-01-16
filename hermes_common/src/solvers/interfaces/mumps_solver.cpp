@@ -113,21 +113,9 @@ namespace Hermes
     void MumpsMatrix<Scalar>::free()
     {
       CSCMatrix<Scalar>::free();
-      if (Ax)
-      {
-        ::free(Ax);
-        Ax = nullptr;
-      }
-      if (irn)
-      {
-        ::free(irn);
-        irn = nullptr;
-      }
-      if (jcn)
-      {
-        ::free(jcn);
-        jcn = nullptr;
-      }
+      free_with_check(Ax);
+      free_with_check(irn);
+      free_with_check(jcn);
     }
 
     template<typename Scalar>
@@ -414,7 +402,7 @@ namespace Hermes
       }
 
       if (param.rhs != nullptr)
-        ::free(param.rhs);
+        free_with_check(param.rhs);
     }
 
     template<>
@@ -537,7 +525,7 @@ namespace Hermes
       }
       else
       {
-        ::free(param.rhs);
+        free_with_check(param.rhs);
 
         icntl_14 *= 2;
         if (icntl_14 > max_icntl_14)
@@ -563,7 +551,7 @@ namespace Hermes
       this->tick();
       this->time = this->accumulated();
 
-      ::free(param.rhs);
+      free_with_check(param.rhs);
       param.rhs = nullptr;
     }
 
