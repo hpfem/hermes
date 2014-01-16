@@ -418,7 +418,8 @@ namespace Hermes
         }
 #pragma endregion
 
-
+        for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
+          this->free_ref_solution_data(son, rval);
       }
 
       template<typename Scalar>
