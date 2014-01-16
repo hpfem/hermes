@@ -282,7 +282,7 @@ namespace Hermes
       if (e && !e->active)
         throw Hermes::Exceptions::Exception("Cannot select inactive element. Wrong mesh?");
 
-      Function::set_active_element(e);
+      Function<Scalar>::set_active_element(e);
       mode = e->get_mode();
       refmap->set_active_element(e);
     }
