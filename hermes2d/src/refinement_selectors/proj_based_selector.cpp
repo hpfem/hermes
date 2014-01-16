@@ -491,8 +491,17 @@ namespace Hermes
           //calculate projection matrix iff no ortho is used
           if (!use_ortho)
           {
-            if (proj_matrices[order_h][order_v] == nullptr)
-              proj_matrices[order_h][order_v] = build_projection_matrix(gip_points, num_gip_points, shape_inxs, num_shapes, mode);
+            if (!proj_matrices[order_h][order_v])
+            {
+#pragma omp critical
+              {
+                if (!proj_matrices[order_h][order_v])
+                {
+                  proj_matrices[order_h][order_v] = build_projection_matrix(gip_points, num_gip_points, shape_inxs, num_shapes, mode);
+                }
+              }
+            }
+
             copy_matrix(proj_matrix, proj_matrices[order_h][order_v], num_shapes, num_shapes); //copy projection matrix because original matrix will be modified
           }
 
