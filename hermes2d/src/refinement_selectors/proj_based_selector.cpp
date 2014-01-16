@@ -240,6 +240,8 @@ namespace Hermes
         int num_gip_points = quad->get_num_points(H2DRS_INTR_GIP_ORDER, mode);
 
         // everything is done on the reference domain
+        Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS];
+
         Solution<Scalar>* rsln_sln = dynamic_cast<Solution<Scalar>*>(rsln);
         if (rsln_sln != nullptr)
           rsln_sln->enable_transform(false);
@@ -257,7 +259,7 @@ namespace Hermes
             rsln->set_quad_order(H2DRS_INTR_GIP_ORDER);
 
             //obtain precalculated values
-            precalc_ref_solution(son, rsln, e, H2DRS_INTR_GIP_ORDER);
+            precalc_ref_solution(son, rsln, e, H2DRS_INTR_GIP_ORDER, rval);
           }
         }
         else
@@ -268,7 +270,7 @@ namespace Hermes
             rsln->set_quad_order(H2DRS_INTR_GIP_ORDER);
 
             //obtain precalculated values
-            precalc_ref_solution(son, rsln, e, H2DRS_INTR_GIP_ORDER);
+            precalc_ref_solution(son, rsln, e, H2DRS_INTR_GIP_ORDER, rval);
           }
         }
 
@@ -313,6 +315,7 @@ namespace Hermes
         TrfShape& svals = cached_shape_vals[mode];
         TrfShape& ortho_svals = cached_shape_ortho_vals[mode];
 
+#pragma region candidatesEvaluation
         //H-candidates
         if (!info_h.is_empty())
         {
@@ -327,7 +330,7 @@ namespace Hermes
               calc_error_cand_element(mode, gip_points, num_gip_points
                 , 1, &base_element, &sub_trfs[son], sub_rval
                 , &p_trf_svals[son], &p_trf_ortho_svals[son]
-                , info_h, herr[son]);
+                , info_h, herr[son], rval);
             }
           }
           else
@@ -341,7 +344,7 @@ namespace Hermes
               calc_error_cand_element(mode, gip_points, num_gip_points
                 , 1, &base_element->sons[son], p_trf_identity, sub_rval
                 , p_trf_svals, p_trf_ortho_svals
-                , info_h, herr[son]);
+                , info_h, herr[son], rval);
             }
           }
         }
@@ -362,7 +365,7 @@ namespace Hermes
               calc_error_cand_element(mode, gip_points, num_gip_points
                 , 2, sub_domains, sub_trfs, sub_rval
                 , sub_svals, sub_ortho_svals
-                , info_aniso, anisoerr[version]);
+                , info_aniso, anisoerr[version], rval);
             }
           }
           else
@@ -379,7 +382,7 @@ namespace Hermes
               calc_error_cand_element(mode, gip_points, num_gip_points
                 , 2, sub_domains, sub_trfs, sub_rval
                 , sub_svals, sub_ortho_svals
-                , info_aniso, anisoerr[version]);
+                , info_aniso, anisoerr[version], rval);
             }
           }
         }
@@ -398,7 +401,7 @@ namespace Hermes
             calc_error_cand_element(mode, gip_points, num_gip_points
               , 4, sub_domains, sub_trfs, sub_rval
               , sub_svals, sub_ortho_svals
-              , info_p, perr);
+              , info_p, perr, rval);
           }
           else
           {
@@ -410,9 +413,12 @@ namespace Hermes
             calc_error_cand_element(mode, gip_points, num_gip_points
               , 4, base_element->sons, sub_trfs, sub_rval
               , sub_svals, sub_ortho_svals
-              , info_p, perr);
+              , info_p, perr, rval);
           }
         }
+#pragma endregion
+
+
       }
 
       template<typename Scalar>
@@ -421,7 +427,7 @@ namespace Hermes
         , const int num_sub, Element** sub_domains, Trf** sub_trfs, int* sons
         , Hermes::vector<TrfShapeExp>** sub_nonortho_svals, Hermes::vector<TrfShapeExp>** sub_ortho_svals
         , const typename OptimumSelector<Scalar>::CandsInfo& info
-        , CandElemProjError errors_squared
+        , CandElemProjError errors_squared, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]
         )
       {
         //allocate space
@@ -506,7 +512,7 @@ namespace Hermes
               {
                 TrfShapeExp empty_sub_vals;
                 ElemSubShapeFunc this_sub_shape = { shape_inx, this_sub_svals.empty() ? empty_sub_vals : this_sub_svals[shape_inx] };
-                shape_rhs_cache.set(shape_rhs_cache.get() + evaluate_rhs_subdomain(this_sub_domain, this_sub_gip, sons[inx_sub], this_sub_trf, this_sub_shape));
+                shape_rhs_cache.set(shape_rhs_cache.get() + evaluate_rhs_subdomain(this_sub_domain, this_sub_gip, sons[inx_sub], this_sub_trf, this_sub_shape, rval));
               }
             }
           }
@@ -535,7 +541,7 @@ namespace Hermes
             ElemGIP this_sub_gip = { gip_points, num_gip_points };
             ElemProj elem_proj = { shape_inxs, num_shapes, *(sub_svals[inx_sub]), right_side, quad_order };
 
-            error_squared += evaluate_error_squared_subdomain(this_sub_domain, this_sub_gip, sons[inx_sub], this_sub_trf, elem_proj);
+            error_squared += evaluate_error_squared_subdomain(this_sub_domain, this_sub_gip, sons[inx_sub], this_sub_trf, elem_proj, rval);
           }
           errors_squared[order_h][order_v] = error_squared * sub_area_corr_coef; //apply area correction coefficient
         } while (order_perm.next());
