@@ -161,6 +161,8 @@ namespace Hermes
 
       static bool is_parallelogram(Element* e);
 
+      static void set_element_iro_cache(Element* element);
+
     private:
       /// re-init the storage
       void reinit_storage();
