@@ -23,7 +23,6 @@
 #include "quad_all.h"
 #include "matrix.h"
 #include "algebra/dense_matrix_operations.h"
-#include "mesh/refmap.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 
@@ -933,8 +932,6 @@ namespace Hermes
 
         //bubble part
         calc_bubble_projection(e, nurbs, order, coeffs);
-
-        RefMap::set_element_iro_cache(e);
       }
     }
 

@@ -329,7 +329,7 @@ namespace Hermes
       e->active = 1;
       e->marker = marker;
       e->nvert = 3;
-      e->iro_cache = 0;
+      e->iro_cache = -1;
       e->cm = cm;
       e->parent = nullptr;
       e->visited = false;
@@ -364,7 +364,7 @@ namespace Hermes
       e->active = 1;
       e->marker = marker;
       e->nvert = 4;
-      e->iro_cache = 0;
+      e->iro_cache = -1;
       e->cm = cm;
       e->parent = nullptr;
       e->visited = false;

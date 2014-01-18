@@ -60,10 +60,7 @@ namespace Hermes
           nurbs_rev->ref++;
         }
       }
-      if (!nurbs->ref)
-        delete nurbs;
-
-
+      if (!nurbs->ref) delete nurbs;
     }
 
     Nurbs* MeshUtil::reverse_nurbs(Nurbs* nurbs)

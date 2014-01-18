@@ -128,32 +128,31 @@ namespace Hermes
         nc = e->cm->nc;
       }
 
-      this->inv_ref_order = this->element->iro_cache;
+      // calculate the order of the inverse reference map
+      int& element_iro_cache = element->iro_cache;
+      int iro_cache;
+
+      // Critical section - read
+#pragma omp critical (element_iro_cache_setting)
+      iro_cache = element_iro_cache;
+
+      if (is_const)
+        iro_cache = 0;
+      else
+      if (iro_cache == -1)
+        iro_cache = calc_inv_ref_order();
+
+      this->inv_ref_order = iro_cache;
+
+      // Critical section - write
+#pragma omp critical (element_iro_cache_setting)
+      element_iro_cache = iro_cache;
 
       // constant inverse reference map
       if (is_const)
         calc_const_inv_ref_map();
       else
         const_jacobian = 0.0;
-    }
-
-    void RefMap::set_element_iro_cache(Element* element)
-    {
-      bool is_const = !element->is_curved() && (element->is_triangle() || is_parallelogram(element));
-
-      if (is_const)
-      {
-#ifdef _DEBUG
-        assert(element->iro_cache == 0);
-#endif
-        return;
-      }
-#pragma omp critical (element_iro_cache_setting)
-      {
-        RefMap rm;
-        rm.set_active_element(element);
-        element->iro_cache = rm.calc_inv_ref_order();
-      }
     }
 
     void RefMap::reinit_storage()
