@@ -596,7 +596,7 @@ namespace Hermes
           {
             double error = sqr(physical_x[vertex_indices[i]] - midval[0][i])
               + sqr(physical_y[vertex_indices[i]] - midval[1][i]);
-            double diameter = sqr(fns[0]->get_active_element()->get_diameter());
+            double diameter = sqr(fns[0]->get_active_element()->diameter);
 
             split = (error / diameter) > this->curvature_epsilon;
             if (split)

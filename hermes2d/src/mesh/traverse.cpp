@@ -615,7 +615,7 @@ namespace Hermes
           areas[counter] = 0.0;
         else
         {
-          areas[counter] = e->get_area();
+          areas[counter] = e->area;
           if (areas[counter] < min_elem_area)
             min_elem_area = areas[counter];
         }
@@ -634,7 +634,7 @@ namespace Hermes
         for_all_base_elements_incl_inactive(e, meshes[i])
         {
           if (e->used)
-          if (fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] > Hermes::HermesSqrtEpsilon)
+          if (fabs(areas[counter] - e->area) > tolerance && areas[counter] > Hermes::HermesSqrtEpsilon)
           {
             throw Hermes::Exceptions::Exception("An element is probably too distorted, try different meshing.");
           }

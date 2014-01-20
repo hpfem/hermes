@@ -107,11 +107,10 @@ namespace Hermes
       /// Calculates the area of the element.
       /// \param[in] precise_for_curvature If curved elements should be evaluated exactly. \
       /// This takes much longer.
-      double get_area(bool precise_for_curvature = false);
+      void calc_area(bool precise_for_curvature = false);
 
-      /// Returns the length of the longest edge for triangles, and the
-      /// length of the longer diagonal for quads. Ignores element curvature.
-      double get_diameter();
+      /// Calculates the diameter.
+      void calc_diameter();
 
       /// Returns the center of gravity.
       void get_center(double& x, double& y);
@@ -151,15 +150,11 @@ namespace Hermes
 
       CurvMap* cm; ///< curved mapping, nullptr if not curvilinear
       /// Serves for saving the once calculated area of this element.
-      bool areaCalculated;
-      /// Serves for saving the once calculated area of this element.
       double area;
 
       bool center_set;
       double x_center, y_center;
 
-      /// Serves for saving the once calculated diameter of this element.
-      bool diameterCalculated;
       /// Serves for saving the once calculated diameter of this element.
       double diameter;
 

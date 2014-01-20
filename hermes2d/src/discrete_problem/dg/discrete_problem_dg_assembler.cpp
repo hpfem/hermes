@@ -245,7 +245,7 @@ namespace Hermes
         current_neighbor_searches[i]->set_quad_order(order);
         order_base = order;
         n_quadrature_points = init_surface_geometry_points(refmaps, this->spaces_size, order_base, current_state->isurf, current_state->rep->marker, geometry[i], jacobian_x_weights[i]);
-        e[i] = new InterfaceGeom<double>(geometry[i], current_neighbor_searches[i]->neighb_el->marker, current_neighbor_searches[i]->neighb_el->id, current_neighbor_searches[i]->neighb_el->get_diameter());
+        e[i] = new InterfaceGeom<double>(geometry[i], current_neighbor_searches[i]->neighb_el->marker, current_neighbor_searches[i]->neighb_el->id, current_neighbor_searches[i]->neighb_el->diameter);
 
         if (current_mat && DG_matrix_forms_present && !edge_processed)
         {

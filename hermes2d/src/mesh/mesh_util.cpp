@@ -425,7 +425,8 @@ namespace Hermes
       {
         if (elem->marker == marker)
         {
-          area += elem->get_area(true);
+          elem->calc_area(true);
+          area += elem->area;
         }
       }
     }
