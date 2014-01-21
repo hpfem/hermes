@@ -271,7 +271,7 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_triangle(int iv0, int iv1, int iv2, int level)
       {
-        double* values[LinearizerDataDimensions::dimension];
+        const double* values[LinearizerDataDimensions::dimension];
         double* physical_x;
         double* physical_y;
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
@@ -381,7 +381,7 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_quad(int iv0, int iv1, int iv2, int iv3, int level)
       {
-        double* values[LinearizerDataDimensions::dimension];
+        const double* values[LinearizerDataDimensions::dimension];
         double* physical_x;
         double* physical_y;
         int* vertex_indices = quad_indices[0];
@@ -536,7 +536,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double** values, double* physical_x, double* physical_y, int* vertex_indices) const
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, const double** values, double* physical_x, double* physical_y, int* vertex_indices) const
       {
         split = 0;
         bool done = false;
@@ -618,7 +618,7 @@ namespace Hermes
           fns[k]->set_active_element(current_state->e[k]);
           fns[k]->set_transform(current_state->sub_idx[k]);
           fns[k]->set_quad_order(0, this->item[k]);
-          double* val = fns[k]->get_values(component[k], value_type[k]);
+          const double* val = fns[k]->get_values(component[k], value_type[k]);
 
           for (unsigned int i = 0; i < current_state->e[k]->get_nvert(); i++)
           {

@@ -166,7 +166,7 @@ namespace Hermes
       {
         this->set_active_element(e);
         this->set_quad_order(1, item);
-        double* val = this->get_values(component, value_type);
+        const double* val = this->get_values(component, value_type);
         for (int i = 0; i < (e->is_triangle() ? 3 : 4); i++)
         {
           double v = val[i];
@@ -219,7 +219,7 @@ namespace Hermes
       {
         this->set_active_element(e);
         this->set_quad_order(1, item);
-        double* val = this->get_values(component, value_type);
+        const double* val = this->get_values(component, value_type);
         for (int i = 0; i < (e->is_triangle() ? 3 : 4); i++)
         {
           double v = val[i];
@@ -288,22 +288,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void MeshFunction<Scalar>::force_transform(MeshFunctionSharedPtr<Scalar> mf)
-    {
-      Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());
-    }
-
-    template<typename Scalar>
     void MeshFunction<Scalar>::update_refmap()
     {
       refmap->force_transform(this->sub_idx, this->ctm);
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::force_transform(uint64_t sub_idx, Trf* ctm)
-    {
-      this->sub_idx = sub_idx;
-      this->ctm = ctm;
     }
 
     template class HERMES_API MeshFunction<double>;

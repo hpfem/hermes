@@ -27,7 +27,6 @@ namespace Hermes
         throw Exceptions::NullException(0);
       this->shapeset = shapeset;
       num_components = shapeset->get_num_components();
-      assert(num_components == 1 || num_components == 2);
       update_max_index();
       set_quad_2d(&g_quad_2d_std);
     }
@@ -46,36 +45,35 @@ namespace Hermes
     void PrecalcShapeset::set_active_shape(int index)
     {
       // Update the Node table.
-      update_nodes_ptr();
+      this->invalidate_values();
 
       this->index = index;
-
       this->order = std::max(H2D_GET_H_ORDER(shapeset->get_order(index, element->get_mode())), H2D_GET_V_ORDER(shapeset->get_order(index, element->get_mode())));
-    }
-
-    void PrecalcShapeset::set_active_element(Element* e)
-    {
-      Transformable::set_active_element(e);
     }
 
     void PrecalcShapeset::precalculate(int order, int mask)
     {
-      this->cur_node_dirty = true;
-      int i, j, k;
-
+      Function<double>::precalculate(order, mask);
+      
       int np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
       double3* pt = this->quads[cur_quad]->get_points(order, this->element->get_mode());
 
-      // precalculate all required tables
+      // Correct points.
+      for (short i = 0; i < np; i++)
+      {
+        ref_points[i][0] = ctm->m[0] * pt[i][0] + ctm->t[0];
+        ref_points[i][1] = ctm->m[1] * pt[i][1] + ctm->t[1];
+      }
+
+      int i, j, k;
       for (j = 0; j < num_components; j++)
       {
-        for (k = 0; k < 6; k++)
+        for (k = 0; k < H2D_NUM_FUNCTION_VALUES; k++)
         {
           if (mask & idx2mask[k][j])
           {
             for (i = 0; i < np; i++)
-              cur_node.values[j][k][i] = shapeset->get_value(k, index, ctm->m[0] * pt[i][0] + ctm->t[0],
-              ctm->m[1] * pt[i][1] + ctm->t[1], j, element->get_mode());
+              this->values[j][k][i] = shapeset->get_value(k, index, ref_points[i][0], ref_points[i][1], j, element->get_mode());
           }
         }
       }
@@ -110,12 +108,6 @@ namespace Hermes
     int PrecalcShapeset::get_edge_fn_order(int edge)
     {
       return H2D_MAKE_EDGE_ORDER(element->get_mode(), edge, shapeset->get_order(index, element->get_mode()));
-    }
-
-    void PrecalcShapeset::force_transform(uint64_t sub_idx, Trf* ctm)
-    {
-      this->sub_idx = sub_idx;
-      this->ctm = ctm;
     }
   }
 }
