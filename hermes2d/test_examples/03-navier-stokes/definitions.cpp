@@ -12,7 +12,7 @@ public:
   {
   }
   
-  virtual void value (int n, Func<double>** u_ext, Func<double>* result, Geom<double>* geometry) const
+  virtual void value(int n, Func<double>** ext, Func<double>** u_ext, Func<double>* result, Geom<double>* geometry) const
   {
     for(int i = 0; i < n; i++)
     {
@@ -22,7 +22,7 @@ public:
     }
   };
 
-  virtual void ord(Func<Hermes::Ord>** u_ext, Func<Hermes::Ord>* result) const
+  virtual void ord(Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext, Func<Hermes::Ord>* result) const
   {
     result->val[0] = u_ext[index]->val[0];
   };
