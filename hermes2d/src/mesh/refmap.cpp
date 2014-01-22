@@ -229,9 +229,9 @@ namespace Hermes
         double ij = 1.0 / jac[i];
 
         if (!finite(ij))
-          throw Hermes::Exceptions::Exception("1/jac[%d] is infinity when calculating inv. ref. map for order %d (jac = %g)", i, order);
+          throw Hermes::Exceptions::Exception("1/jac[%d] is infinity when calculating inv. ref. map on element %d for order %d (jac = %g)", i, this->element->id, order, ij);
         if (ij != ij)
-          throw Hermes::Exceptions::Exception("1/jac[%d] is NaN when calculating inv. ref. map for order %d (jac = %g)", i, order);
+          throw Hermes::Exceptions::Exception("1/jac[%d] is NaN when calculating inv. ref. map on element %d for order %d (jac = %g)", i, this->element->id, order, ij);
 
         // invert and transpose the matrix
         irm[i][0][0] = m_11[i] * ij;
