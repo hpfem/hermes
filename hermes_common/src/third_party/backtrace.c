@@ -207,7 +207,7 @@ namespace Hermes
         len = total;
       }
       while (naddr) {
-        if (state == (int)Print)
+        if (stateI == (int)Print)
           ret_buf[naddr - 1] = buf;
         pc = addr[naddr - 1];
 
@@ -235,7 +235,7 @@ namespace Hermes
             line, name) + 1;
 
         }
-        if (state == (int)Print) {
+        if (stateI == (int)Print) {
           /* set buf just past the end of string */
           buf = buf + total + 1;
         }

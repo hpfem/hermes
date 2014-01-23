@@ -34,6 +34,13 @@ namespace Hermes
 #ifdef __GNUC__
   void hdl(int sig, siginfo_t *siginfo, void *context)
   {
+    printf("Signal Handler Exception Caught: Hermes::Exceptions::Exception -- signal : %d.");
+
+    sigset_t x;
+    sigemptyset (&x);
+    sigaddset(&x, SIGSEGV);
+    sigprocmask(SIG_UNBLOCK, &x, NULL);
+
     void *array[100];
     size_t size;
 
@@ -43,7 +50,7 @@ namespace Hermes
     // print out all the frames to stderr
     Hermes::backtrace_symbols_fd(array, size, STDERR_FILENO);
 
-    throw Hermes::Exceptions::Exception("Error-signal. PID: %ld, UID: %ld\n", (long)siginfo->si_pid, (long)siginfo->si_uid);
+    throw Hermes::Exceptions::Exception("signal caught");
   }
 #endif
 
