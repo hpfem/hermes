@@ -26,15 +26,18 @@
 #include "matrix.h"
 #include "solvers/interfaces/paralution_solver.h"
 #ifdef __GNUC__
-#include <execinfo.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#include "third_party/backtrace.c"
 #endif
 namespace Hermes
 {
 #ifdef __GNUC__
+
+
   static void handler(int sig)
   {
     void *array[10];
