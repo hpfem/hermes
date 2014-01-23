@@ -42,6 +42,7 @@ namespace std
   public:
     static const bool value = true;
   };
+#define static_assert(expr, msg) true
 #endif
 }
 namespace Hermes
