@@ -34,7 +34,7 @@ namespace Hermes
 #ifdef __GNUC__
   void hdl(int sig, siginfo_t *siginfo, void *context)
   {
-    printf("Signal Handler Exception Caught: Hermes::Exceptions::Exception -- signal : %d\n.");
+    printf("Signal handler exception caught, Signal [number, error_number, code]: [%i, %i, %i].\n.", siginfo->si_signo, siginfo->si_errno, siginfo->si_code);
 
     void *array[100];
     size_t size;
