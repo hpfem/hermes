@@ -27,16 +27,13 @@
 #include "solvers/interfaces/paralution_solver.h"
 #ifdef __GNUC__
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 
-#include "third_party/backtrace.c"
 #endif
 namespace Hermes
 {
 #ifdef __GNUC__
 
+#include "third_party/backtrace.c"
 
   static void handler(int sig)
   {

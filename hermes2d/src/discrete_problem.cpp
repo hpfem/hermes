@@ -298,6 +298,8 @@ namespace Hermes
 
 #pragma omp parallel num_threads(this->num_threads_used)
         {
+     int*a = (int*)(-1);
+ printf("%d", *a);
           int thread_number = omp_get_thread_num();
           int start = (num_states / this->num_threads_used) * thread_number;
           int end = (num_states / this->num_threads_used) * (thread_number + 1);

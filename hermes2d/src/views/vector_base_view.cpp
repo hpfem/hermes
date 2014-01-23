@@ -84,7 +84,7 @@ namespace Hermes
       template<>
       void VectorBaseView<std::complex<double> >::update_solution()
       {
-        std::complex<double>* coeffs = calloc_with_check<std::complex<double>>(ndof + 1);
+        std::complex<double>* coeffs = calloc_with_check<std::complex<double> >(ndof + 1);
         if (base_index >= -1 && base_index < ndof)
           coeffs[base_index + 1] = 1.0;
         Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss);

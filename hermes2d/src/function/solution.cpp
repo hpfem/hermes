@@ -1443,7 +1443,7 @@ namespace Hermes
           this->num_elems = parsed_xml_solution->nel();
           this->num_components = parsed_xml_solution->ncmp();
 
-          this->mono_coeffs = malloc_with_check<Solution<std::complex<double> >, std::complex<double>>(num_coeffs, this);
+          this->mono_coeffs = malloc_with_check<Solution<std::complex<double> >, std::complex<double> >(num_coeffs, this);
           memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(std::complex<double>));
 
           for (unsigned int component_i = 0; component_i < num_components; component_i++)

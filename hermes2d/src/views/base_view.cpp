@@ -89,7 +89,7 @@ namespace Hermes
       template<>
       void BaseView<std::complex<double> >::update_solution()
       {
-        std::complex<double>* coeffs = malloc_with_check<std::complex<double>>(ndof);
+        std::complex<double>* coeffs = malloc_with_check<std::complex<double> >(ndof);
         memset(coeffs, 0, sizeof(std::complex<double>) * ndof);
         if (base_index >= 0)
         {
