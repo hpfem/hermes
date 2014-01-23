@@ -25,9 +25,31 @@
 #include "exceptions.h"
 #include "matrix.h"
 #include "solvers/interfaces/paralution_solver.h"
-
+#ifdef __GNUC__
+#include <execinfo.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#endif
 namespace Hermes
 {
+#ifdef __GNUC__
+  static void handler(int sig)
+  {
+    void *array[10];
+    size_t size;
+
+    // get void*'s for all entries on the stack
+    size = backtrace(array, 10);
+
+    // print out all the frames to stderr
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+
+    throw Hermes::Exceptions::Exception("Error: signal %d:\n", sig);
+  }
+#endif
+
   Api::Parameter::Parameter(int default_val)
   {
     this->default_val = default_val;
@@ -36,6 +58,10 @@ namespace Hermes
 
   Api::Api()
   {
+#ifdef __GNUC__
+    signal(SIGSEGV, handler);
+#endif
+
     // Insert parameters.
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::numThreads, new Parameter(NUM_THREADS)));
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::matrixSolverType, new Parameter(SOLVER_UMFPACK)));
