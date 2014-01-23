@@ -58,6 +58,7 @@ namespace Hermes
 #ifdef __GNUC__
     act.sa_sigaction = &hdl;
     act.sa_flags = SA_SIGINFO;
+    sigaction(SIGSEGV, &this->act, 0);
 #endif
 
     // Insert parameters.
