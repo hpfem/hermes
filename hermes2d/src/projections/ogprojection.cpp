@@ -262,14 +262,12 @@ namespace Hermes
       if (!proj_norms.empty() && n != proj_norms.size())
         throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
-      int start_index = 0;
       for (int i = 0; i < n; i++)
       {
         if (proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_slns[i], HERMES_UNSET_NORM);
         else
           project_global(spaces[i], source_slns[i], target_slns[i], proj_norms[i]);
-        start_index += spaces[i]->get_num_dofs();
       }
     }
 

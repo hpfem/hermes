@@ -171,7 +171,6 @@ namespace Hermes
         {
           // 0 - prepare data structures.
           int eo = g_quad_2d_std.get_edge_points(isurf, this->get_mode() == HERMES_MODE_TRIANGLE ? g_max_tri : g_max_quad, this->get_mode());
-          double3* pt = g_quad_2d_std.get_points(eo, this->get_mode());
           int np = g_quad_2d_std.get_num_points(eo, this->get_mode());
           double* x_curv = new double[np];
           double* y_curv = new double[np];
@@ -195,7 +194,6 @@ namespace Hermes
           delete geometry;
 
           // 3. - compare the two, get the updated area.
-          bool previous_add_or_subtract;
           double previous_distance;
           for (int i = 0; i < np; i++)
           {
@@ -231,7 +229,6 @@ namespace Hermes
             else
               area -= area_delta;
 
-            previous_add_or_subtract = add;
             previous_distance = distance_i;
           }
 

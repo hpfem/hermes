@@ -508,7 +508,6 @@ namespace Hermes
     {
 #pragma omp critical (debug_DG)
       {
-        int id = 0;
         bool pass = true;
         if (DEBUG_DG_ASSEMBLING_ELEMENT != -1)
         {
@@ -526,6 +525,7 @@ namespace Hermes
 
         if (!pass)
         {
+          int id = 0;
           for (unsigned int i = 0; i < this->current_state->num; i++)
           {
             NeighborSearch<Scalar>* ns = neighbor_searches[current_state->isurf][i];

@@ -363,10 +363,7 @@ namespace Hermes
         this->current_rhs->finish();
 
       if (!this->exceptionMessageCaughtInParallelBlock.empty())
-      {
         throw Hermes::Exceptions::Exception(this->exceptionMessageCaughtInParallelBlock.c_str());
-        return;
-      }
 
       Element* e;
       for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)

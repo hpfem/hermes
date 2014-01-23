@@ -402,7 +402,7 @@ namespace Hermes
           if (count > predictedCount - 1)
           {
             predictedCount *= 1.5;
-            states = (State**)realloc(states, sizeof(State*)* predictedCount);
+            states = realloc_with_check<State*>(states, predictedCount);
           }
 
           set_boundary_info(s);

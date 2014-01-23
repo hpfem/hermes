@@ -183,8 +183,8 @@ namespace Hermes
     std::complex<double> MeshFunction<std::complex<double> >::get_approx_max_value(int item_)
     {
       this->check();
-      return std::numeric_limits<std::complex<double> >::min();
       this->warn("Asked for a max value of a complex function.");
+      return std::numeric_limits<std::complex<double> >::min();
     }
 
     template<>
@@ -236,8 +236,8 @@ namespace Hermes
     std::complex<double> MeshFunction<std::complex<double> >::get_approx_min_value(int item_)
     {
       this->check();
-      return std::numeric_limits<std::complex<double> >::max();
       this->warn("Asked for a min value of a complex function.");
+      return std::numeric_limits<std::complex<double> >::max();
     }
 
     template<typename Scalar>

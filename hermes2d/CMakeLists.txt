@@ -153,10 +153,7 @@ project(hermes2d)
     src/mesh/mesh_data.cpp
 
     src/shapeset/shapeset.cpp
-    src/shapeset/shapeset_h1_ortho.cpp
     src/shapeset/shapeset_h1_jacobi.cpp
-    src/shapeset/shapeset_h1_quad.cpp
-    src/shapeset/shapeset_hc_legendre.cpp
     src/shapeset/shapeset_hc_gradleg.cpp
     src/shapeset/shapeset_hd_legendre.cpp
     src/shapeset/shapeset_l2_legendre.cpp
@@ -296,10 +293,7 @@ project(hermes2d)
   SOURCE_GROUP(
     "Source Files\\Space" FILES 
     src/shapeset/shapeset.cpp
-    src/shapeset/shapeset_h1_ortho.cpp
     src/shapeset/shapeset_h1_jacobi.cpp
-    src/shapeset/shapeset_h1_quad.cpp
-    src/shapeset/shapeset_hc_legendre.cpp
     src/shapeset/shapeset_hc_gradleg.cpp
     src/shapeset/shapeset_hd_legendre.cpp
     src/shapeset/shapeset_l2_legendre.cpp
@@ -406,7 +400,6 @@ project(hermes2d)
 
     include/shapeset/shapeset.h
     include/shapeset/shapeset_h1_all.h
-    include/shapeset/shapeset_h1_quad.h
     include/shapeset/shapeset_hc_all.h
     include/shapeset/shapeset_hd_all.h
     include/shapeset/shapeset_l2_all.h
@@ -549,7 +542,6 @@ project(hermes2d)
     "Header Files\\Space" FILES 
     include/shapeset/shapeset.h
     include/shapeset/shapeset_h1_all.h
-    include/shapeset/shapeset_h1_quad.h
     include/shapeset/shapeset_hc_all.h
     include/shapeset/shapeset_hd_all.h
     include/shapeset/shapeset_l2_all.h

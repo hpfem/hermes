@@ -91,8 +91,6 @@ namespace Hermes
       template<typename Scalar>
       bool Limiter<Scalar>::isOkay() const
       {
-        bool okay = true;
-
         return true;
       }
 

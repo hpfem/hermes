@@ -195,15 +195,15 @@ namespace Hermes
         load(parsed_xml_domain, global_mesh, vertex_is, element_is, edge_is);
 
         int max_vertex_i = -1;
-        for (std::map<int, int>::iterator it = vertex_is.begin(); it != vertex_is.end(); it++)
+        for (std::map<int, int>::iterator it = vertex_is.begin(); it != vertex_is.end(); ++it)
         if (it->first > max_vertex_i)
           max_vertex_i = it->first;
         int max_element_i = -1;
-        for (std::map<int, int>::iterator it = element_is.begin(); it != element_is.end(); it++)
+        for (std::map<int, int>::iterator it = element_is.begin(); it != element_is.end(); ++it)
         if (it->first > max_element_i)
           max_element_i = it->first;
         int max_edge_i = -1;
-        for (std::map<int, int>::iterator it = edge_is.begin(); it != edge_is.end(); it++)
+        for (std::map<int, int>::iterator it = edge_is.begin(); it != edge_is.end(); ++it)
         if (it->first > max_edge_i)
           max_edge_i = it->first;
 
@@ -1308,7 +1308,6 @@ namespace Hermes
       XMLMesh::NURBS nurbs_xml(p1, p2, nurbs->degree);
 
       int inner = nurbs->np - 2;
-      int outer = nurbs->nk - inner;
 
       for (int i = 1; i < nurbs->np - 1; i++)
         nurbs_xml.inner_point().push_back(XMLMesh::inner_point(nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2]));

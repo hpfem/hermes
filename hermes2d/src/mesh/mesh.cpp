@@ -1859,7 +1859,6 @@ namespace Hermes
               nurbs->degree = 2;
 
               int inner = 1, outer;
-              inner = 1;
               nurbs->np = inner + 2;
               nurbs->pt = new double3[nurbs->np];
 

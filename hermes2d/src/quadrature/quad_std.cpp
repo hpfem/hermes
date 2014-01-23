@@ -2548,7 +2548,6 @@ namespace Hermes
         for (j = 0; j < 4; j++)
         {
           k = max_order[1] + 1 + 4 * i + j;
-          l = j < 3 ? j + 1 : 0;
           ::free(std_tables_2d_quad[k]);
         }
       }

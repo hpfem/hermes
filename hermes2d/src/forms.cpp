@@ -248,19 +248,10 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Invalid arguments to DiscontinuousFunc constructor.");
       if (support_on_neighbor)
       {
-        fn_neighbor = fn;
-        if (reverse_neighbor_side)
-        {
-          this->val_neighbor = fn->val;
-          this->dx_neighbor = fn->dx;
-          this->dy_neighbor = fn->dy;
-        }
-        else
-        {
-          this->val_neighbor = fn->val;
-          this->dx_neighbor = fn->dx;
-          this->dy_neighbor = fn->dy;
-        }
+        this->fn_neighbor = fn;
+        this->val_neighbor = fn->val;
+        this->dx_neighbor = fn->dx;
+        this->dy_neighbor = fn->dy;      
       }
       else
       {
@@ -274,18 +265,9 @@ namespace Hermes
     DiscontinuousFunc<Ord>::DiscontinuousFunc(Func<Ord>* fn_c, Func<Ord>* fn_n, bool reverse) : Func<Ord>(),
       fn_central(fn_c), fn_neighbor(fn_n), reverse_neighbor_side(reverse)
     {
-      if (reverse_neighbor_side)
-      {
-        this->val_neighbor = fn_neighbor->val;
-        this->dx_neighbor = fn_neighbor->dx;
-        this->dy_neighbor = fn_neighbor->dy;
-      }
-      else
-      {
-        this->val_neighbor = fn_neighbor->val;
-        this->dx_neighbor = fn_neighbor->dx;
-        this->dy_neighbor = fn_neighbor->dy;
-      }
+      this->val_neighbor = fn_neighbor->val;
+      this->dx_neighbor = fn_neighbor->dx;
+      this->dy_neighbor = fn_neighbor->dy;
 
       this->val = fn_central->val;
       this->dx = fn_central->dx;
@@ -815,7 +797,6 @@ namespace Hermes
       if (quad == nullptr)
         quad = &g_quad_2d_std;
 
-      double3* pt = quad->get_points(order, mode);
       int np = quad->get_num_points(order, mode);
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 

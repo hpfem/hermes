@@ -24,20 +24,6 @@ namespace Hermes
   namespace Hermes2D
   {
     /// @ingroup spaces
-    /// H1 shapeset with orthogonalized bubble functions for improved conditioning.
-    class HERMES_API H1ShapesetOrtho : public Shapeset
-    {
-    public:
-      H1ShapesetOrtho();
-      virtual Shapeset* clone() { return new H1ShapesetOrtho(*this); };
-      virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
-      virtual int get_max_index(ElementMode2D mode);
-      virtual int get_id() const { return 0; }
-
-      static const int max_index[H2D_NUM_MODES];
-    };
-
-    /// @ingroup spaces
     /// Shape functions based on integrated Jacobi polynomials.
     class HERMES_API H1ShapesetJacobi : public Shapeset
     {
