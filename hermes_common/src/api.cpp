@@ -27,14 +27,11 @@
 #include "solvers/interfaces/paralution_solver.h"
 #ifdef __GNUC__
 #include <signal.h>
-
+#include "third_party/backtrace.c"
 #endif
 namespace Hermes
 {
 #ifdef __GNUC__
-
-#include "third_party/backtrace.c"
-
   static void handler(int sig)
   {
     void *array[10];
@@ -44,7 +41,7 @@ namespace Hermes
     size = backtrace(array, 10);
 
     // print out all the frames to stderr
-    backtrace_symbols_fd(array, size, STDERR_FILENO);
+    Hermes::backtrace_symbols_fd(array, size, STDERR_FILENO);
 
     throw Hermes::Exceptions::Exception("Error: signal %d:\n", sig);
   }
