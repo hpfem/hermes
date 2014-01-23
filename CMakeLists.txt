@@ -247,7 +247,11 @@ project(hermes)
 
   if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # Disable all warnings and turn on only important ones:
+  IF(DEFINED OLD_GCC)
+    set(CMAKE_CXX_FLAGS "-w ${CMAKE_CXX_FLAGS} -fPIC")
+  ELSE()
     set(CMAKE_CXX_FLAGS "-w ${CMAKE_CXX_FLAGS} -fPIC -std=c++11")
+  ENDIF()
     set(CMAKE_CXX_FLAGS "-Wuninitialized -Wvla -Wsign-compare ${CMAKE_CXX_FLAGS}")
 
     set(HERMES_RELEASE_FLAGS "${CMAKE_CXX_FLAGS} -DNDEBUG -O3")
