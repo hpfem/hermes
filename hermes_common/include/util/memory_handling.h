@@ -25,8 +25,25 @@
 
 #include "exceptions.h"
 #include "api.h"
+#include <cstddef>
 #include <type_traits>
 
+// If C++ 11 is not supported
+namespace std
+{
+#if defined(__GNUC__) && ((__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || (__GNUC__ >= 5))
+# define HACK_GCC_ITS_CPP0X 1
+#endif
+#if defined(nullptr_t) || (__cplusplus >= 199711L) || defined(HACK_GCC_ITS_CPP0X)
+#else
+  template<typename ArrayItem>
+  class is_pod<ArrayItem>
+  {
+  public:
+    static const bool value = true;
+  };
+#endif
+}
 namespace Hermes
 {
 #ifdef WITH_PJLIB
