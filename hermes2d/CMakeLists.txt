@@ -154,6 +154,7 @@ project(hermes2d)
 
     src/shapeset/shapeset.cpp
     src/shapeset/shapeset_h1_jacobi.cpp
+    src/shapeset/shapeset_h1_quad.cpp
     src/shapeset/shapeset_hc_gradleg.cpp
     src/shapeset/shapeset_hd_legendre.cpp
     src/shapeset/shapeset_l2_legendre.cpp
@@ -294,6 +295,7 @@ project(hermes2d)
     "Source Files\\Space" FILES 
     src/shapeset/shapeset.cpp
     src/shapeset/shapeset_h1_jacobi.cpp
+    src/shapeset/shapeset_h1_quad.cpp
     src/shapeset/shapeset_hc_gradleg.cpp
     src/shapeset/shapeset_hd_legendre.cpp
     src/shapeset/shapeset_l2_legendre.cpp
