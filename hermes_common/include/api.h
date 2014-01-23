@@ -24,6 +24,7 @@
 
 #include "util/compat.h"
 #include "common.h"
+#include "signal.h"
 
 namespace Hermes
 {
@@ -90,6 +91,8 @@ namespace Hermes
   public:
     int get_integral_param_value(HermesCommonApiParam);
     void set_integral_param_value(HermesCommonApiParam, int value);
+
+    struct sigaction act;
   };
 
   /// Global instance used inside Hermes which is also accessible to users.

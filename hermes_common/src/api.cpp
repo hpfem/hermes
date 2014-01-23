@@ -32,18 +32,18 @@
 namespace Hermes
 {
 #ifdef __GNUC__
-  static void handler(int sig)
+  void hdl(int sig, siginfo_t *siginfo, void *context)
   {
-    void *array[10];
+    void *array[100];
     size_t size;
 
     // get void*'s for all entries on the stack
-    size = backtrace(array, 10);
+    size = backtrace(array, 100);
 
     // print out all the frames to stderr
     Hermes::backtrace_symbols_fd(array, size, STDERR_FILENO);
 
-    throw Hermes::Exceptions::Exception("Error: signal %d:\n", sig);
+    throw Hermes::Exceptions::Exception("Error-signal. PID: %ld, UID: %ld\n", (long)siginfo->si_pid, (long)siginfo->si_uid);
   }
 #endif
 
@@ -56,7 +56,8 @@ namespace Hermes
   Api::Api()
   {
 #ifdef __GNUC__
-    signal(SIGSEGV, handler);
+    act.sa_sigaction = &hdl;
+    act.sa_flags = SA_SIGINFO;
 #endif
 
     // Insert parameters.
