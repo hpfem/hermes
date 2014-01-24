@@ -194,7 +194,7 @@ protected:
 class MachNumberFilter : public Hermes::Hermes2D::SimpleFilter<double>
 {
 public: 
-  MachNumberFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, double kappa) : SimpleFilter<double>(solutions), kappa(kappa) {};
+  MachNumberFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, double kappa) : Hermes::Hermes2D::SimpleFilter<double>(solutions), kappa(kappa) {};
   ~MachNumberFilter() 
   {
   };
@@ -228,7 +228,7 @@ protected:
 class PressureFilter : public Hermes::Hermes2D::SimpleFilter<double>
 {
 public: 
-  PressureFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, double kappa) : SimpleFilter<double>(solutions), kappa(kappa) {};
+  PressureFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, double kappa) : Hermes::Hermes2D::SimpleFilter<double>(solutions), kappa(kappa) {};
   ~PressureFilter() 
   {
   };
@@ -261,7 +261,7 @@ class VelocityFilter : public Hermes::Hermes2D::SimpleFilter<double>
 {
 public:
   // Vector of solutions: 0-th position - density, 1-st position - velocity component.
-  VelocityFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions) : SimpleFilter<double>(solutions) {};
+  VelocityFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions) : Hermes::Hermes2D::SimpleFilter<double>(solutions) {};
   ~VelocityFilter() 
   {
   };
@@ -291,7 +291,7 @@ protected:
 class EntropyFilter : public Hermes::Hermes2D::SimpleFilter<double>
 {
 public: 
-  EntropyFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, double kappa, double rho_ext, double p_ext) : SimpleFilter<double>(solutions), kappa(kappa), rho_ext(rho_ext), p_ext(p_ext) {};
+  EntropyFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, double kappa, double rho_ext, double p_ext) : Hermes::Hermes2D::SimpleFilter<double>(solutions), kappa(kappa), rho_ext(rho_ext), p_ext(p_ext) {};
   ~EntropyFilter() 
   {
   };
