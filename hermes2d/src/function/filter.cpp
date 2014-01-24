@@ -154,8 +154,8 @@ namespace Hermes
       if (unimesh)
       {
         for (int i = 0; i < num; i++)
-          ::free(unidata[i]);
-        ::free(unidata);
+          free_with_check(unidata[i]);
+        free_with_check(unidata);
       }
     }
 
@@ -1012,7 +1012,7 @@ namespace Hermes
       if (this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::free(this->nodes->get(order));
+        free_with_check(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       this->cur_node = node;

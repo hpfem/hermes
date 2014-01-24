@@ -690,16 +690,16 @@ namespace Hermes
 #ifdef _DEBUG
           this->info("Thread %i, states %i - %i", thread_number, start, end);
 #endif
-          Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
-          Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(source_functions_size * sizeof(Func<Hermes::Ord>*));
+          Hermes::Ord* orders = malloc_with_check<Hermes::Ord>(this->number_of_integrals);
+          Func<Hermes::Ord>** func_ord = malloc_with_check<Func<Hermes::Ord>*>(source_functions_size);
 
-          MeshFunction<Scalar>** source_functions_cloned = new MeshFunction<Scalar>*[source_functions_size];
+          MeshFunction<Scalar>** source_functions_cloned = malloc_with_check<MeshFunction<Scalar>*>(source_functions_size);
           for (int i = 0; i < source_functions_size; i++)
             source_functions_cloned[i] = this->source_functions[i]->clone();
-          Func<Scalar>** func = (Func<Scalar>**)malloc(source_functions_size * sizeof(Func<Scalar>*));
+          Func<Scalar>** func = malloc_with_check<Func<Scalar>*>(source_functions_size);
 
-          Scalar* result_thread_local = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
-          Scalar* result_local = (Scalar*)malloc(this->number_of_integrals * sizeof(Scalar));
+          Scalar* result_thread_local = calloc_with_check<Scalar>(this->number_of_integrals);
+          Scalar* result_local = malloc_with_check<Scalar>(this->number_of_integrals);
           double* jacobian_x_weights;
 
           for (int state_i = start; state_i < end; state_i++)
@@ -798,15 +798,15 @@ namespace Hermes
           }
 
           this->add_results(result_thread_local, result);
-          ::free(result_thread_local);
+          free_with_check(result_thread_local);
 
           for (int i = 0; i < source_functions_size; i++)
             delete source_functions_cloned[i];
-          delete[] source_functions_cloned;
-          delete[] orders;
-          ::free(func_ord);
-          ::free(func);
-          ::free(result_local);
+          free_with_check(source_functions_cloned);
+          free_with_check(orders);
+          free_with_check(func_ord);
+          free_with_check(func);
+          free_with_check(result_local);
           delete refmap;
         }
 
@@ -888,16 +888,16 @@ namespace Hermes
           this->info("Thread %i, states %i - %i", thread_number, start, end);
 #endif
 
-          Hermes::Ord* orders = new Hermes::Ord[this->number_of_integrals];
-          Func<Hermes::Ord>** func_ord = (Func<Hermes::Ord>**)malloc(source_functions_size * sizeof(Func<Hermes::Ord>*));
+          Hermes::Ord* orders = malloc_with_check<Hermes::Ord>(this->number_of_integrals);
+          Func<Hermes::Ord>** func_ord = malloc_with_check<Func<Hermes::Ord>*>(source_functions_size);
 
-          MeshFunction<Scalar>** source_functions_cloned = new MeshFunction<Scalar>*[source_functions_size];
+          MeshFunction<Scalar>** source_functions_cloned = malloc_with_check<MeshFunction<Scalar>*>(source_functions_size);
           for (int i = 0; i < source_functions_size; i++)
             source_functions_cloned[i] = this->source_functions[i]->clone();
-          Func<Scalar>** func = (Func<Scalar>**)malloc(source_functions_size * sizeof(Func<Scalar>*));
+          Func<Scalar>** func = malloc_with_check<Func<Scalar>*>(source_functions_size);
 
-          Scalar* result_thread_local = (Scalar*)calloc(this->number_of_integrals, sizeof(Scalar));
-          Scalar* result_local = (Scalar*)malloc(this->number_of_integrals * sizeof(Scalar));
+          Scalar* result_thread_local = calloc_with_check<Scalar>(this->number_of_integrals);
+          Scalar* result_local = malloc_with_check<Scalar>(this->number_of_integrals);
           double* jacobian_x_weights;
 
           for (int state_i = start; state_i < end; state_i++)
@@ -993,21 +993,21 @@ namespace Hermes
           }
 
           this->add_results(result_thread_local, result);
-          ::free(result_thread_local);
+          free_with_check(result_thread_local);
 
           for (int i = 0; i < source_functions_size; i++)
             delete source_functions_cloned[i];
-          delete[] source_functions_cloned;
-          delete[] orders;
-          ::free(func_ord);
-          ::free(func);
-          ::free(result_local);
+          free_with_check(source_functions_cloned);
+          free_with_check(orders);
+          free_with_check(func_ord);
+          free_with_check(func);
+          free_with_check(result_local);
           delete refmap;
         }
 
         for (int i = 0; i < num_states; i++)
           delete states[i];
-        free(states);
+        free_with_check(states);
 
         return result;
       }

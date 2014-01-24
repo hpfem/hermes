@@ -317,7 +317,7 @@ namespace Hermes
       Scalar* coeffs = malloc_with_check<Solution<Scalar>, Scalar>(vec->get_size(), this);
       vec->extract(coeffs);
       this->set_coeff_vector(space, coeffs, add_dir_lift, start_index);
-      ::free(coeffs);
+      free_with_check(coeffs);
     }
 
     template<typename Scalar>
@@ -329,7 +329,8 @@ namespace Hermes
       if (space->shapeset == nullptr)
         throw Exceptions::Exception("Space->shapeset == nullptr in Solution<Scalar>::set_coeff_vector().");
       PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
-      if (pss == nullptr) throw Exceptions::Exception("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
+      if (pss == nullptr)
+        throw Exceptions::Exception("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
       set_coeff_vector(space, pss, coeffs, add_dir_lift, start_index);
       delete pss;
     }
@@ -345,8 +346,10 @@ namespace Hermes
       if (space->get_mesh() == nullptr)
         throw Exceptions::Exception("Mesh == nullptr in Solution<Scalar>::set_coeff_vector().");
       if (pss == nullptr) throw Exceptions::NullException(2);
-      if (coeff_vec == nullptr) throw Exceptions::NullException(3);
-      if (coeff_vec == nullptr) throw Exceptions::Exception("Coefficient vector == nullptr in Solution<Scalar>::set_coeff_vector().");
+      if (coeff_vec == nullptr)
+        throw Exceptions::NullException(3);
+      if (coeff_vec == nullptr)
+        throw Exceptions::Exception("Coefficient vector == nullptr in Solution<Scalar>::set_coeff_vector().");
       if (!space->is_up_to_date())
         throw Exceptions::Exception("Provided 'space' is not up to date.");
       if (space->shapeset != pss->shapeset)
@@ -698,7 +701,7 @@ namespace Hermes
       bool add_dir_lift = true;
       int start_index = 0;
       this->set_coeff_vector(space, pss, temp, add_dir_lift, start_index);
-      ::free(temp);
+      free_with_check(temp);
     }
 
     template<typename Scalar>
@@ -1487,7 +1490,7 @@ namespace Hermes
       rewind(fpr);
 
       // allocate memory to contain the whole file:
-      char *datar = (char*)malloc(sizeof(char)*size);
+      char *datar = malloc_with_check<char>(size);
       fread(datar, size, 1, fpr);
       fclose(fpr);
 
@@ -1584,7 +1587,7 @@ namespace Hermes
       }
 
       bson_destroy(&br);
-      ::free(datar);
+      free_with_check(datar);
 
       init_dxdy_buffer();
     }
@@ -1605,7 +1608,7 @@ namespace Hermes
       rewind(fpr);
 
       // allocate memory to contain the whole file:
-      char *datar = (char*)malloc(sizeof(char)*size);
+      char *datar = malloc_with_check<char>(size);
       fread(datar, size, 1, fpr);
       fclose(fpr);
 
@@ -1711,7 +1714,7 @@ namespace Hermes
       }
 
       bson_destroy(&br);
-      ::free(datar);
+      free_with_check(datar);
 
       init_dxdy_buffer();
     }

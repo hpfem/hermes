@@ -84,7 +84,7 @@ namespace Hermes
         ScalarView::show(sln, item);
         update_title();
 
-        ::free(coeffs);
+        free_with_check(coeffs);
       }
       template<>
       void BaseView<std::complex<double> >::update_solution()
@@ -106,7 +106,7 @@ namespace Hermes
         ScalarView::show(complex_filter, item);
         update_title();
 
-        ::free(coeffs);
+        free_with_check(coeffs);
       }
 
       template<typename Scalar>

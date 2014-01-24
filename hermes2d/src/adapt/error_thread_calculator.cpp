@@ -126,8 +126,7 @@ namespace Hermes
         for (unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++)
           this->assemble_one_neighbor(neighbor_i);
 
-        if (dummy_processed)
-          ::free(dummy_processed);
+        free_with_check(dummy_processed);
       }
 
       // Deinit neighbors.
@@ -184,7 +183,7 @@ namespace Hermes
         if (!existing_ns)
           delete this->neighbor_searches[i];
       }
-      ::free(neighbor_searches);
+      free_with_check(neighbor_searches);
     }
 
     template<typename Scalar>
@@ -461,7 +460,7 @@ namespace Hermes
       // deinitialize points & geometry & jacobian times weights
       geometry->free();
       delete geometry;
-      ::free(this->jacobian_x_weights);
+      free_with_check(this->jacobian_x_weights);
     }
 
     template<typename Scalar>

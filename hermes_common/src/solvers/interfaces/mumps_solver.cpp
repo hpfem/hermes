@@ -246,10 +246,8 @@ namespace Hermes
                                          Mat_VarFree(matvar);
                                        }
 
-                                       if (Ax_re)
-                                         ::free(Ax_re);
-                                       if (Ax_im)
-                                         ::free(Ax_im);
+                                        free_with_check(Ax_re);
+                                        free_with_check(Ax_im);
                                        Mat_Close(mat);
 
                                        if (!matvar)

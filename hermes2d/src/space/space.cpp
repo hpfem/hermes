@@ -112,15 +112,13 @@ namespace Hermes
       free_bc_data();
       if (nsize)
       {
-        ::free(ndata);
+        free_with_check(ndata);
         nsize = 0;
-        ndata = nullptr;
       }
       if (esize)
       {
-        ::free(edata);
+        free_with_check(edata);
         esize = 0;
-        edata = nullptr;
       }
       this->seq = -1;
     }
@@ -217,7 +215,7 @@ namespace Hermes
           nsize = 1024;
         while (nsize < mesh->get_max_node_id())
           nsize = nsize * 3 / 2;
-        ndata = (NodeData*)realloc(ndata, sizeof(NodeData)* nsize);
+        ndata = realloc_with_check<Space<Scalar>, NodeData>(ndata, nsize, this);
         for (int i = oldsize; i < nsize; i++)
         {
           ndata[i].edge_bc_proj = nullptr;
@@ -233,7 +231,7 @@ namespace Hermes
           esize = 1024;
         while (esize < mesh->get_max_element_id())
           esize = esize * 3 / 2;
-        edata = (ElementData*)realloc(edata, sizeof(ElementData)* esize);
+        edata = realloc_with_check<Space<Scalar>, ElementData>(edata, nsize, this);
         for (int i = oldsize; i < esize; i++)
         {
           edata[i].order = -1;
@@ -863,7 +861,7 @@ namespace Hermes
       }
       for_all_active_elements(e, mesh)
         set_element_order_internal(e->id, orders[e->id]);
-      ::free(orders);
+      free_with_check(orders);
     }
 
     template<typename Scalar>
@@ -1451,7 +1449,7 @@ namespace Hermes
         space->edata[index_coeff++].changed_in_last_adaptation = bson_iterator_int(&it);
 
       bson_destroy(&br);
-      ::free(datar);
+      free_with_check(datar);
 
       space->seq = g_space_seq++;
 
@@ -1472,7 +1470,7 @@ namespace Hermes
       rewind(fpr);
 
       // allocate memory to contain the whole file:
-      char *datar = (char*)malloc(sizeof(char)*size);
+      char *datar = malloc_with_check<char>(size);
       fread(datar, size, 1, fpr);
       fclose(fpr);
 
@@ -1524,7 +1522,7 @@ namespace Hermes
         this->edata[index_coeff++].changed_in_last_adaptation = bson_iterator_int(&it);
 
       bson_destroy(&br);
-      ::free(datar);
+      free_with_check(datar);
 
       this->seq = g_space_seq++;
 

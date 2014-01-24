@@ -46,8 +46,6 @@ namespace Hermes
       spaces(spaces),
       meshes(meshes)
     {
-      this->local_stiffness_matrix = (Scalar*)malloc(sizeof(Scalar)* H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_LOCAL_BASIS_SIZE * 4);
-
       this->DG_matrix_forms_present = false;
       this->DG_vector_forms_present = false;
       if (this->wf)
@@ -93,7 +91,6 @@ namespace Hermes
         delete[] npss;
         delete[] nrefmaps;
       }
-      ::free(this->local_stiffness_matrix);
     }
 
     template<typename Scalar>

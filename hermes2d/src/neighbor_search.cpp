@@ -1076,7 +1076,7 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::ExtendedShapeset::update(NeighborSearch* neighborhood, SpaceSharedPtr<Scalar> space)
     {
-      ::free(this->dof);
+      free_with_check(this->dof);
       space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
       combine_assembly_lists();
     }

@@ -377,7 +377,7 @@ namespace Hermes
       int* perm = malloc_with_check<CubicSpline, int>(n, this);
       ludcmp(matrix, n, perm, &d);
       lubksb<double>(matrix, n, perm, rhs);
-      ::free(perm);
+      free_with_check(perm);
 
       // Copy the solution into the coeffs array.
       coeffs.clear();
@@ -402,8 +402,8 @@ namespace Hermes
       derivative_right = get_derivative_from_interval(point_right, points.size() - 2);
 
       // Free the matrix and rhs vector.
-      ::free(matrix);
-      ::free(rhs);
+      free_with_check(matrix);
+      free_with_check(rhs);
 
       return;
     }

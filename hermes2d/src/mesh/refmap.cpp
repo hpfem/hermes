@@ -474,7 +474,7 @@ namespace Hermes
         mm[j][2][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
       }
 
-      ::free(k);
+      free_with_check(k);
 
       this->second_ref_map_calculated = order;
     }

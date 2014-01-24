@@ -3040,7 +3040,7 @@ namespace Hermes
       }
 
       parents_size = 2 * get_max_element_id();
-      parents = (int*)malloc(sizeof(int)* parents_size);
+      parents = malloc_with_check<int>(parents_size);
       for_all_active_elements(e, this)
         parents[e->id] = e->id;
 
@@ -3146,7 +3146,7 @@ namespace Hermes
       get_egg_shell_structures(target_mesh, elements, n_elements, markers, levels, n_element_guess);
       make_egg_shell_mesh(target_mesh, elements, n_elements);
 
-      ::free(elements);
+      free_with_check(elements);
 
       fix_markers(target_mesh, mesh);
 
@@ -3175,12 +3175,12 @@ namespace Hermes
 
       // Initial allocation
       int n_elements_alloc = n_element_guess == -1 ? (int)std::sqrt((double)target_mesh->get_num_active_elements()) : n_element_guess;
-      elements = (Element**)malloc(n_elements_alloc * sizeof(Element*));
+      elements = malloc_with_check<Element*>(n_elements_alloc);
       n_elements = 0;
 
       // Initial setup.
-      int* neighbors_target = (int*)calloc(target_mesh->get_max_element_id(), sizeof(int));
-      int* neighbors_target_local = (int*)calloc(target_mesh->get_max_element_id(), sizeof(int));
+      int* neighbors_target = calloc_with_check<int>(target_mesh->get_max_element_id());
+      int* neighbors_target_local = calloc_with_check<int>(target_mesh->get_max_element_id());
       Element* e;
       for_all_active_elements(e, target_mesh)
       {
@@ -3245,8 +3245,8 @@ namespace Hermes
           }
         }
       }
-      ::free(neighbors_target);
-      ::free(neighbors_target_local);
+      free_with_check(neighbors_target);
+      free_with_check(neighbors_target_local);
     }
 
     void EggShell::make_egg_shell_mesh(MeshSharedPtr target_mesh, Element** elements, int n_elements)

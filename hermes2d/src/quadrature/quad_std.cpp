@@ -2538,17 +2538,17 @@ namespace Hermes
         {
           k = max_order[0] + 1 + 3 * i + j;
           l = j < 2 ? j + 1 : 0;
-          ::free(std_tables_2d_tri[k]);
+          free_with_check(std_tables_2d_tri[k]);
         }
       }
 
       for (i = 0; i <= max_order[1]; i++)
       {
-        ::free(std_tables_2d_quad[i]);
+        free_with_check(std_tables_2d_quad[i]);
         for (j = 0; j < 4; j++)
         {
           k = max_order[1] + 1 + 4 * i + j;
-          ::free(std_tables_2d_quad[k]);
+          free_with_check(std_tables_2d_quad[k]);
         }
       }
     }

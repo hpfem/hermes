@@ -96,7 +96,7 @@ namespace Hermes
     ExactSolutionConstantArray<Scalar, ValueType>::~ExactSolutionConstantArray()
     {
       if (this->deleteArray)
-        ::free(this->valueArray);
+        free_with_check(this->valueArray);
     }
 
     template<typename Scalar, typename ValueType>

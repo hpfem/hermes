@@ -78,7 +78,7 @@ namespace Hermes
       Solution<Scalar>::vector_to_solution(target_vec, space, target_sln);
 
       // Clean up.
-      ::free(target_vec);
+      free_with_check(target_vec);
     }
 
     template<typename Scalar>
@@ -134,7 +134,7 @@ namespace Hermes
       Scalar* vec = malloc_with_check<Scalar>(target_vec->get_size());
       project_global(space, source_meshfn, vec, proj_norm);
       target_vec->set_vector(vec);
-      ::free(vec);
+      free_with_check(vec);
     }
 
     template<typename Scalar>
@@ -245,7 +245,7 @@ namespace Hermes
       Scalar* vec = malloc_with_check<Scalar>(target_vec->get_size());
       project_global(spaces, source_slns, vec, proj_norms);
       target_vec->set_vector(vec);
-      ::free(vec);
+      free_with_check(vec);
     }
 
     template<typename Scalar>

@@ -79,7 +79,7 @@ namespace Hermes
         VectorView::show(sln, sln, H2D_FN_VAL_0, H2D_FN_VAL_1);
         update_title();
 
-        ::free(coeffs);
+        free_with_check(coeffs);
       }
       template<>
       void VectorBaseView<std::complex<double> >::update_solution()
@@ -94,7 +94,7 @@ namespace Hermes
         this->VectorView::show(&filter, &filter, H2D_FN_VAL_0, H2D_FN_VAL_1);
         update_title();
 
-        ::free(coeffs);
+        free_with_check(coeffs);
       }
 
       template<typename Scalar>

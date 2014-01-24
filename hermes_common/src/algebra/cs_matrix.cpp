@@ -211,9 +211,9 @@ namespace Hermes
       memcpy(this->Ai, tempAi, sizeof(int)* nnz);
       memcpy(this->Ap, tempAp, sizeof(int)* (this->size + 1));
       memcpy(this->Ax, tempAx, sizeof(Scalar)* nnz);
-      ::free(tempAi);
-      ::free(tempAx);
-      ::free(tempAp);
+      free_with_check(tempAi);
+      free_with_check(tempAx);
+      free_with_check(tempAp);
     }
 
     template<typename Scalar>
@@ -461,10 +461,8 @@ namespace Hermes
                                        }
                                        if (invert_storage)
                                          this->switch_orientation();
-                                       if (Ax_re)
-                                         ::free(Ax_re);
-                                       if (Ax_im)
-                                         ::free(Ax_im);
+                                        free_with_check(Ax_re);
+                                        free_with_check(Ax_im);
                                        Mat_Close(mat);
 
                                        if (!matvar)
@@ -557,7 +555,7 @@ namespace Hermes
                                          }
                                          memcpy(this->Ax, data, this->nnz * sizeof(Scalar));
                                          if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
-                                           ::free(data);
+                                           free_with_check(data);
                                          memcpy(this->Ap, sparse->jc, (this->size + 1) * sizeof(Scalar));
                                          memcpy(this->Ai, sparse->ir, this->nnz * sizeof(int));
 

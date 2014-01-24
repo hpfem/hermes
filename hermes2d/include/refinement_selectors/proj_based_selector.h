@@ -95,7 +95,7 @@ namespace Hermes
           /// Assignment operator. Prevent unauthorized copying of the pointer.
           const TrfShapeExp& operator = (const TrfShapeExp& other)
           {
-            ::free(values);
+            free_with_check(values);
             values = nullptr;
 
             if (other.values == nullptr)

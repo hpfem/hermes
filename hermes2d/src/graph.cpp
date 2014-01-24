@@ -263,7 +263,7 @@ namespace Hermes
       strcat(outname, ".eps");
 
       fprintf(f, "set output '%s'\n", (char*)outname);
-      ::free(outname);
+      free_with_check(outname);
 
       fprintf(f, "set size 0.8, 0.8\n");
 

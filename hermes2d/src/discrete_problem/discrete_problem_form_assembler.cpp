@@ -228,14 +228,14 @@ namespace Hermes
             local_ext[ext_i]->free_fn();
             delete local_ext[ext_i];
           }
-          ::free(local_ext);
+          free_with_check(local_ext);
       }
 
       if(rungeKutta)
         u_ext -= form->u_ext_offset;
 
       // Cleanup.
-      ::free(local_stiffness_matrix);
+      free_with_check(local_stiffness_matrix);
     }
 
     template<typename Scalar>
@@ -291,7 +291,7 @@ namespace Hermes
             local_ext[ext_i]->free_fn();
             delete local_ext[ext_i];
           }
-          ::free(local_ext);
+          free_with_check(local_ext);
       }
 
       if(rungeKutta)

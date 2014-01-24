@@ -113,7 +113,7 @@ namespace Hermes
     else
     {
       caller->free();
-      throw Hermes::Exceptions::Exception("Hermes::calloc_with_check() failed to allocate.", size * sizeof(ArrayItem));
+      throw Hermes::Exceptions::Exception("Hermes::calloc_with_check() failed to allocate %i bytes.", size * sizeof(ArrayItem));
       return nullptr;
     }
   }
@@ -139,7 +139,7 @@ namespace Hermes
       return new_array;
     else
     {
-      throw Hermes::Exceptions::Exception("Hermes::calloc_with_check() failed to allocate.", size * sizeof(ArrayItem));
+      throw Hermes::Exceptions::Exception("Hermes::calloc_with_check() failed to allocate %i bytes.", size * sizeof(ArrayItem));
       return nullptr;
     }
   }
@@ -164,7 +164,7 @@ namespace Hermes
     {
       if (caller)
         caller->free();
-      throw Hermes::Exceptions::Exception("Hermes::malloc_with_check() failed to allocate.", size * sizeof(ArrayItem));
+      throw Hermes::Exceptions::Exception("Hermes::malloc_with_check() failed to allocate %i bytes.", size * sizeof(ArrayItem));
       return nullptr;
     }
   }
@@ -187,7 +187,27 @@ namespace Hermes
       return new_array;
     else
     {
-      throw Hermes::Exceptions::Exception("Hermes::malloc_with_check() failed to allocate.", size * sizeof(ArrayItem));
+      throw Hermes::Exceptions::Exception("Hermes::malloc_with_check() failed to allocate %i bytes.", size * sizeof(ArrayItem));
+      return nullptr;
+    }
+  }
+
+  template<typename ArrayItem>
+  ArrayItem* malloc_with_check_direct_size(int size)
+  {
+    if (size == 0)
+      return nullptr;
+    ArrayItem* new_array;
+#ifdef WITH_PJLIB
+      new_array = (ArrayItem*)hermesCommonGlobalPoolCache.pool_alloc(size * sizeof(ArrayItem));
+#else
+    new_array = (ArrayItem*)malloc(size);
+#endif
+    if (new_array)
+      return new_array;
+    else
+    {
+      throw Hermes::Exceptions::Exception("Hermes::malloc_with_check_direct_size() failed to allocate %i bytes.", size);
       return nullptr;
     }
   }
@@ -197,7 +217,6 @@ namespace Hermes
   {
     if (new_size == 0)
       return nullptr;
-    static_assert(std::is_pod<ArrayItem>::value, "ArrayItem must be POD for reallocation.");
 
     ArrayItem* new_array = (ArrayItem*)realloc(original_array, new_size * sizeof(ArrayItem));
     if (new_array)
@@ -205,7 +224,7 @@ namespace Hermes
     else
     {
       caller->free();
-      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", new_size * sizeof(ArrayItem));
+      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate %i bytes.", new_size * sizeof(ArrayItem));
       return nullptr;
     }
   }
@@ -215,14 +234,13 @@ namespace Hermes
   {
     if (new_size == 0)
       return nullptr;
-    static_assert(std::is_pod<ArrayItem>::value, "ArrayItem must be POD for reallocation.");
 
     ArrayItem* new_array = (ArrayItem*)realloc(original_array, new_size * sizeof(ArrayItem));
     if (new_array)
       return original_array = new_array;
     else
     {
-      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate.", new_size * sizeof(ArrayItem));
+      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate %i bytes.", new_size * sizeof(ArrayItem));
       return nullptr;
     }
   }

@@ -30,7 +30,6 @@ namespace Hermes
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
       ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0)
     {
-      this->local_stiffness_matrix = (Scalar*)malloc(sizeof(Scalar)* H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_LOCAL_BASIS_SIZE);
     }
 
     template<typename Scalar>
@@ -46,8 +45,8 @@ namespace Hermes
 
       this->spaces_size = spaces.size();
 
-      pss = new PrecalcShapeset*[spaces_size];
-      refmaps = new RefMap*[spaces_size];
+      pss = malloc_with_check<PrecalcShapeset*>(spaces_size);
+      refmaps = malloc_with_check<RefMap*>(spaces_size);
 
       for (unsigned int j = 0; j < spaces_size; j++)
       {
@@ -72,7 +71,7 @@ namespace Hermes
       assert(this->spaces_size == spaces.size() && this->pss);
 
       free_u_ext();
-      u_ext = new Solution<Scalar>*[spaces_size];
+      u_ext = malloc_with_check<Solution<Scalar>*>(spaces_size);
 
       for (unsigned int j = 0; j < spaces_size; j++)
       {
@@ -223,10 +222,7 @@ namespace Hermes
         if (local_ext_size + local_u_ext_fns_size > ext_funcs_local_allocated_size)
         {
           ext_funcs_local_allocated_size = local_ext_size + local_u_ext_fns_size;
-          if (ext_funcs_local)
-            ext_funcs_local = (Func<Scalar>**)realloc(ext_funcs_local, ext_funcs_local_allocated_size * sizeof(Func<Scalar>*));
-          else
-            ext_funcs_local = (Func<Scalar>**)malloc(ext_funcs_local_allocated_size * sizeof(Func<Scalar>*));
+          ext_funcs_local = realloc_with_check<DiscreteProblemThreadAssembler<Scalar>, Func<Scalar>*>(ext_funcs_local, ext_funcs_local_allocated_size, this);
         }
 
         // Initializaton of form-(local-)ext funcs
@@ -710,12 +706,8 @@ namespace Hermes
       this->free_weak_formulation();
       this->free_u_ext();
 
-      if (this->ext_funcs)
-        ::free(ext_funcs);
-      if (this->ext_funcs_local)
-        ::free(ext_funcs_local);
-
-      ::free(this->local_stiffness_matrix);
+      free_with_check(ext_funcs, true);
+      free_with_check(ext_funcs_local, true);
     }
 
     template<typename Scalar>
@@ -726,12 +718,11 @@ namespace Hermes
 
       for (unsigned int j = 0; j < spaces_size; j++)
         delete pss[j];
-      delete[] pss;
-      pss = nullptr;
+      free_with_check(pss);
 
       for (unsigned int j = 0; j < spaces_size; j++)
         delete refmaps[j];
-      delete[] refmaps;
+      free_with_check(refmaps);
     }
 
     template<typename Scalar>
@@ -752,7 +743,7 @@ namespace Hermes
       {
         for (unsigned int j = 0; j < spaces_size; j++)
           delete u_ext[j];
-        delete[] u_ext;
+        free_with_check(u_ext);
       }
     }
 
