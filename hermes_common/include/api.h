@@ -24,7 +24,7 @@
 
 #include "util/compat.h"
 #include "common.h"
-#ifdef __GNUC__ && HAVE_BFD
+#if defined __GNUC__ && defined HAVE_BFD
 #include "signal.h"
 #endif
 namespace Hermes
@@ -93,7 +93,7 @@ namespace Hermes
     int get_integral_param_value(HermesCommonApiParam);
     void set_integral_param_value(HermesCommonApiParam, int value);
 
-#ifdef __GNUC__ && HAVE_BFD
+#if defined __GNUC__ && defined HAVE_BFD
     struct sigaction act;
 #endif
   };

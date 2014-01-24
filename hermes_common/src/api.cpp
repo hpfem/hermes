@@ -25,13 +25,13 @@
 #include "exceptions.h"
 #include "matrix.h"
 #include "solvers/interfaces/paralution_solver.h"
-#ifdef __GNUC__ && HAVE_BFD
+#if defined __GNUC__ && defined HAVE_BFD
 #include <signal.h>
 #include "third_party/backtrace.c"
 #endif
 namespace Hermes
 {
-#ifdef __GNUC__ && HAVE_BFD
+#if defined __GNUC__ && defined HAVE_BFD
   void hdl(int sig, siginfo_t *siginfo, void *context)
   {
     printf("Signal handler exception caught, Signal [number, error_number, code]: [%i, %i, %i].\n.", siginfo->si_signo, siginfo->si_errno, siginfo->si_code);
@@ -57,7 +57,7 @@ namespace Hermes
 
   Api::Api()
   {
-#ifdef __GNUC__ && HAVE_BFD
+#if defined __GNUC__ && defined HAVE_BFD
     act.sa_sigaction = &hdl;
     act.sa_flags = SA_SIGINFO;
     sigaction(SIGSEGV, &this->act, 0);

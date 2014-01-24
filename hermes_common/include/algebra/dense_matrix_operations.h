@@ -24,6 +24,7 @@
 
 #include "common.h"
 #include "util/compat.h"
+#include "util/memory_handling.h"
 #include "exceptions.h"
 
 namespace Hermes
@@ -41,7 +42,7 @@ namespace Hermes
       T **new_matrix(unsigned int m, unsigned int n = 0)
       {
         if (!n) n = m;
-        T **vec = calloc_with_check_direct_size<char>(sizeof(T *)* m + sizeof(T)* m * n);
+        T **vec = (T**)calloc_with_check_direct_size<char>(sizeof(T *)* m + sizeof(T)* m * n);
         T *row = (T *)(vec + m);
         for (unsigned int i = 0; i < m; i++, row += n)
           vec[i] = row;
