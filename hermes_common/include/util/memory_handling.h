@@ -212,6 +212,28 @@ namespace Hermes
     }
   }
 
+  template<typename ArrayItem>
+  ArrayItem* calloc_with_check_direct_size(int size)
+  {
+    if (size == 0)
+      return nullptr;
+    ArrayItem* new_array;
+#ifdef WITH_PJLIB
+    new_array = (ArrayItem*)hermesCommonGlobalPoolCache.pool_calloc(size * sizeof(ArrayItem));
+#else
+    new_array = (ArrayItem*)malloc(size);
+    if (new_array)
+      memset(new_array, 0, size);
+#endif
+    if (new_array)
+      return new_array;
+    else
+    {
+      throw Hermes::Exceptions::Exception("Hermes::malloc_with_check_direct_size() failed to allocate %i bytes.", size);
+      return nullptr;
+    }
+  }
+
   template<typename Caller, typename ArrayItem>
   ArrayItem* realloc_with_check(ArrayItem*& original_array, int new_size, Caller* const caller)
   {
