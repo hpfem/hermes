@@ -54,28 +54,36 @@ namespace Hermes
     void PrecalcShapeset::precalculate(int order, int mask)
     {
       Function<double>::precalculate(order, mask);
-      
+
       int np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
       double3* pt = this->quads[cur_quad]->get_points(order, this->element->get_mode());
 
-      // Correct points.
-      for (short i = 0; i < np; i++)
-      {
-        ref_points[i][0] = ctm->m[0] * pt[i][0] + ctm->t[0];
-        ref_points[i][1] = ctm->m[1] * pt[i][1] + ctm->t[1];
-      }
-
       int i, j, k;
-      for (j = 0; j < num_components; j++)
+
+      ElementMode2D mode = element->get_mode();
+
+      // Correction of points for sub-element mappings.
+      if (this->sub_idx != 0)
       {
-        for (k = 0; k < H2D_NUM_FUNCTION_VALUES; k++)
+        for (short i = 0; i < np; i++)
         {
-          if (mask & idx2mask[k][j])
-          {
-            for (i = 0; i < np; i++)
-              this->values[j][k][i] = shapeset->get_value(k, index, ref_points[i][0], ref_points[i][1], j, element->get_mode());
-          }
+          ref_points[i][0] = ctm->m[0] * pt[i][0] + ctm->t[0];
+          ref_points[i][1] = ctm->m[1] * pt[i][1] + ctm->t[1];
         }
+
+        for (j = 0; j < num_components; j++)
+        for (k = 0; k < H2D_NUM_FUNCTION_VALUES; k++)
+        if (mask & idx2mask[k][j])
+        for (i = 0; i < np; i++)
+          this->values[j][k][i] = shapeset->get_value(k, index, ref_points[i][0], ref_points[i][1], j, mode);
+      }
+      else
+      {
+        for (j = 0; j < num_components; j++)
+        for (k = 0; k < H2D_NUM_FUNCTION_VALUES; k++)
+        if (mask & idx2mask[k][j])
+        for (i = 0; i < np; i++)
+          this->values[j][k][i] = shapeset->get_value(k, index, pt[i][0], pt[i][1], j, mode);
       }
     }
 

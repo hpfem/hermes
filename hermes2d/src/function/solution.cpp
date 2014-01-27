@@ -263,8 +263,7 @@ namespace Hermes
         {
           for (int i = 0; i <= 10; i++)
           {
-            if (mat[m][i])
-              delete[] mat[m][i];
+            free_with_check(mat[m][i], true);
             free_with_check(perm[m][i]);
           }
         }

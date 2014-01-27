@@ -42,18 +42,18 @@ namespace Hermes
 
       // Edges.
       this->edge_proj_matrix = new_matrix<double>(edge_proj_matrix_size, edge_proj_matrix_size);
-      edge_p = new double[edge_proj_matrix_size];
+      edge_p = malloc_with_check<double>(edge_proj_matrix_size);
 
       // Bubbles - triangles.
       this->tri_bubble_np = ref_map_shapeset.get_num_bubbles(order, HERMES_MODE_TRIANGLE);
       bubble_proj_matrix_tri = new_matrix<double>(tri_bubble_np, tri_bubble_np);
-      bubble_tri_p = new double[tri_bubble_np];
+      bubble_tri_p = malloc_with_check<double>(tri_bubble_np);
 
       // Bubbles - quads.
       order = H2D_MAKE_QUAD_ORDER(order, order);
       this->quad_bubble_np = ref_map_shapeset.get_num_bubbles(order, HERMES_MODE_QUAD);
       bubble_proj_matrix_quad = new_matrix<double>(quad_bubble_np, quad_bubble_np);
-      bubble_quad_p = new double[quad_bubble_np];
+      bubble_quad_p = malloc_with_check<double>(quad_bubble_np);
 
       this->precalculate_cholesky_projection_matrices_bubble();
       this->precalculate_cholesky_projection_matrix_edge();
@@ -61,12 +61,12 @@ namespace Hermes
 
     CurvMapStatic::~CurvMapStatic()
     {
-      delete[] edge_proj_matrix;
-      delete[] bubble_proj_matrix_tri;
-      delete[] bubble_proj_matrix_quad;
-      delete[] edge_p;
-      delete[] bubble_tri_p;
-      delete[] bubble_quad_p;
+      free_with_check(edge_proj_matrix, true);
+      free_with_check(bubble_proj_matrix_tri, true);
+      free_with_check(bubble_proj_matrix_quad, true);
+      free_with_check(edge_p);
+      free_with_check(bubble_tri_p);
+      free_with_check(bubble_quad_p);
     }
 
     double** CurvMapStatic::calculate_bubble_projection_matrix(int* indices, ElementMode2D mode)

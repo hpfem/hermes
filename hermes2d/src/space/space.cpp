@@ -112,12 +112,12 @@ namespace Hermes
       free_bc_data();
       if (nsize)
       {
-        free_with_check(ndata);
+        free_with_check(ndata, true);
         nsize = 0;
       }
       if (esize)
       {
-        free_with_check(edata);
+        free_with_check(edata, true);
         esize = 0;
       }
       this->seq = -1;
@@ -183,11 +183,8 @@ namespace Hermes
     Space<Scalar>::~Space()
     {
       free();
-
-      if(this->proj_mat)
-        delete [] this->proj_mat;
-      if (this->chol_p)
-        free_with_check(this->chol_p);
+      free_with_check(this->proj_mat, true);
+      free_with_check(this->chol_p);
 
       if (this->own_shapeset)
         delete this->shapeset;

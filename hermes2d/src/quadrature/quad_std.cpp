@@ -2428,7 +2428,7 @@ namespace Hermes
       // product of 1D quadrature points...
 
       np = Hermes::sqr(std_np_1d[order]);
-      double3* result = (double3*)malloc(np * sizeof(double3));
+      double3* result = malloc_with_check<double3>(np);
       double2* table = std_tables_1d[order];
 
       for (int i = 0, n = 0; i < std_np_1d[order]; i++)
@@ -2447,7 +2447,7 @@ namespace Hermes
     static double3* make_edge_table(double2& v1, double2& v2, int& np, int order)
     {
       np = std_np_1d[order];
-      double3* result = (double3*)malloc(np * sizeof(double3));
+      double3* result = malloc_with_check<double3>(np);
       double2* table = std_tables_1d[order];
 
       for (int i = 0; i < np; i++)
