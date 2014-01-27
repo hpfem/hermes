@@ -375,14 +375,14 @@ namespace Hermes
 
       void Orderizer::free()
       {
-          free_with_check(verts);
-          free_with_check(lvert);
-          free_with_check(ltext);
-          free_with_check(lbox);
-          free_with_check(tris);
-          free_with_check(tri_markers);
-          free_with_check(edges);
-          free_with_check(edge_markers);
+          free_with_check(verts, true);
+          free_with_check(lvert, true);
+          free_with_check(ltext, true);
+          free_with_check(lbox, true);
+          free_with_check(tris, true);
+          free_with_check(tri_markers, true);
+          free_with_check(edges, true);
+          free_with_check(edge_markers, true);
       }
 
       template<typename Scalar>
