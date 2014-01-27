@@ -3331,10 +3331,9 @@ namespace Hermes
       int marker = target_mesh->get_element_markers_conversion().get_internal_marker(eggShellMarker).marker;
       for (int i = 0; i < n_elements; i++)
       {
-        Element* elem = elements[i];
-        for (int e = 0; e < elem->nvert; e++)
+        for (int e = 0; e < elements[i]->nvert; e++)
         {
-          Node* edge = elem->en[e];
+          Node* edge = elements[i]->en[e];
           if (edge->bnd)
             continue;
 
@@ -3344,7 +3343,7 @@ namespace Hermes
             // eliminate go-down (smaller neighbor)
             if (!target_mesh->peek_vertex_node(edge->p1, edge->p2))
             {
-              assert(elem->parent);
+              Element* elem = elements[i];
               bool processed = false;
               while (elem->parent)
               {
