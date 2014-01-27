@@ -272,7 +272,7 @@ namespace Hermes
   {
     if (ptr)
     {
-      if (force_malloc && std::is_pod<ArrayItem>::value)
+      if (force_malloc)
       {
         ::free(ptr);
         ptr = nullptr;

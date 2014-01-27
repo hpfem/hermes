@@ -112,12 +112,12 @@ namespace Hermes
       free_bc_data();
       if (nsize)
       {
-        free_with_check(ndata);
+        free_with_check(ndata, true);
         nsize = 0;
       }
       if (esize)
       {
-        free_with_check(edata);
+        free_with_check(edata, true);
         esize = 0;
       }
       this->seq = -1;
