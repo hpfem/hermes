@@ -275,13 +275,19 @@ namespace Hermes
 
     void Nurbs::unref()
     {
-      if (!--this->ref)
-      {
-        delete[] pt;
-        pt = nullptr;
-        delete[] kv;
-        kv = nullptr;
-      }
+        if (!--this->ref)
+        {
+            if(pt)
+            {
+                delete[] pt;
+                pt = nullptr;
+            }
+            if(kv)
+            {
+                delete[] kv;
+                kv = nullptr;
+            }
+        }
     }
 
     static double lambda_0(double x, double y)
@@ -332,7 +338,10 @@ namespace Hermes
         {
           nurbs[i]->unref();
           if (nurbs[i]->ref <= 0)
+          {
             delete nurbs[i];
+            nurbs[i] = nullptr;
+          }
         }
       }
     }
