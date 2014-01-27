@@ -197,7 +197,6 @@ namespace Hermes
         }
       }
 
-
       // calculate the jacobian and inverted matrix
       double trj = get_transform_jacobian();
       double2x2* irm = this->inv_ref_map;

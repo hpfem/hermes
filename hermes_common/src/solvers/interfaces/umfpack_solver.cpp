@@ -193,8 +193,7 @@ namespace Hermes
 
       free_with_check(sln);
 
-      sln = malloc_with_check<UMFPackLinearMatrixSolver<double>, double>(m->get_size(), this);
-      memset(sln, 0, m->get_size() * sizeof(double));
+      sln = calloc_with_check<UMFPackLinearMatrixSolver<double>, double>(m->get_size(), this);
       int status = umfpack_real_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->v, numeric, nullptr, nullptr);
       if (status != UMFPACK_OK)
       {

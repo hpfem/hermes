@@ -16,6 +16,7 @@
 #include "mesh.h"
 #include "api2d.h"
 #include "mesh_reader_h2d_xml.h"
+#include "refmap.h"
 
 using namespace std;
 
@@ -556,8 +557,11 @@ namespace Hermes
 
             // update refmap coeffs of curvilinear elements
             for_all_used_elements(e, meshes[subdomains_i])
-            if (e->cm != nullptr)
-              e->cm->update_refmap_coeffs(e);
+            {
+              if (e->cm != nullptr)
+                e->cm->update_refmap_coeffs(e);
+              RefMap::set_element_iro_cache(e);
+            }
 
             // refinements.
             if (parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements().present() && parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->ref().size() > 0)
@@ -987,8 +991,11 @@ namespace Hermes
 
         // update refmap coeffs of curvilinear elements
         for_all_used_elements(e, mesh)
-        if (e->cm != nullptr)
-          e->cm->update_refmap_coeffs(e);
+        {
+          if (e->cm != nullptr)
+            e->cm->update_refmap_coeffs(e);
+          RefMap::set_element_iro_cache(e);
+        }
       }
       catch (const xml_schema::exception& e)
       {
@@ -1223,8 +1230,11 @@ namespace Hermes
 
         // update refmap coeffs of curvilinear elements
         for_all_used_elements(e, mesh)
-        if (e->cm != nullptr)
-          e->cm->update_refmap_coeffs(e);
+        {
+          if (e->cm != nullptr)
+            e->cm->update_refmap_coeffs(e);
+          RefMap::set_element_iro_cache(e);
+        }
       }
       catch (const xml_schema::exception& e)
       {

@@ -15,6 +15,7 @@
 
 #include "mesh.h"
 #include "mesh_reader_h2d.h"
+#include "refmap.h"
 
 namespace Hermes
 {
@@ -331,8 +332,11 @@ namespace Hermes
       // update refmap coeffs of curvilinear elements
       Element* e;
       for_all_used_elements(e, mesh)
-        if(e->cm != nullptr)
+      {
+        if (e->cm != nullptr)
           e->cm->update_refmap_coeffs(e);
+        RefMap::set_element_iro_cache(e);
+      }
 
       //// refinements /////////////////////////////////////////////////////////////
       if(m.n_ref > 0)

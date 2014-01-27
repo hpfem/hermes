@@ -18,6 +18,7 @@
 #ifdef WITH_BSON
 
 #include "mesh.h"
+#include "refmap.h"
 #include "api2d.h"
 
 using namespace std;
@@ -304,8 +305,11 @@ namespace Hermes
 
       // update refmap coeffs of curvilinear elements
       for_all_used_elements(e, mesh)
-        if(e->cm != nullptr)
+      {
+        if (e->cm != nullptr)
           e->cm->update_refmap_coeffs(e);
+        RefMap::set_element_iro_cache(e);
+      }
 
       delete [] p1s;
       delete [] p2s;
@@ -1025,8 +1029,11 @@ namespace Hermes
 
           // update refmap coeffs of curvilinear elements
           for_all_used_elements(e, meshes[subdomains_i])
-            if(e->cm != nullptr)
+          {
+            if (e->cm != nullptr)
               e->cm->update_refmap_coeffs(e);
+            RefMap::set_element_iro_cache(e);
+          }
 
           // refinements.
           if(!subdomains.at(subdomains_i).refinements.empty() && subdomains.at(subdomains_i).refinements.size() > 0)
@@ -1252,8 +1259,11 @@ namespace Hermes
 
       // update refmap coeffs of curvilinear elements
       for_all_used_elements(e, mesh)
-        if(e->cm != nullptr)
+      {
+        if (e->cm != nullptr)
           e->cm->update_refmap_coeffs(e);
+        RefMap::set_element_iro_cache(e);
+      }
     }
   }
 }

@@ -385,6 +385,7 @@ namespace Hermes
       // register in the nodes
       e->ref_all_nodes();
 
+
       return e;
     }
 
@@ -631,18 +632,16 @@ namespace Hermes
 
       // update coefficients of curved reference mapping
       for (i = 0; i < 4; i++)
-      if (sons[i] != nullptr && sons[i]->cm != nullptr)
-        sons[i]->cm->update_refmap_coeffs(sons[i]);
-
-      // optimization: iro never gets worse
-      if (e->iro_cache == 0)
-      for (i = 0; i < 4; i++)
-      if (sons[i] != nullptr)
-        sons[i]->iro_cache = 0;
+      if (sons[i])
+      {
+        if(sons[i]->cm)
+          sons[i]->cm->update_refmap_coeffs(sons[i]);
+      }
 
       // set pointers to parent element for sons
       for (int i = 0; i < 4; i++)
-      if (sons[i] != nullptr) sons[i]->parent = e;
+      if (sons[i] != nullptr)
+        sons[i]->parent = e;
 
       // copy son pointers (could not have been done earlier because of the union)
       memcpy(e->sons, sons, sizeof(sons));
@@ -721,6 +720,10 @@ namespace Hermes
         }
       }
       else refine_quad(e, refinement);
+
+      for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
+        if(e->sons[i])
+          e->sons[i]->iro_cache = e->iro_cache;
 
       this->seq = g_mesh_seq++;
     }
@@ -1333,7 +1336,7 @@ namespace Hermes
           enew->active = 1;
           enew->marker = e->marker;
           enew->nvert = 3;
-          enew->iro_cache = -1;
+          enew->iro_cache = e->iro_cache;
           enew->cm = e->cm;
 
           // set vertex and edge node pointers
@@ -1353,7 +1356,7 @@ namespace Hermes
           enew->active = 1;
           enew->marker = e->marker;
           enew->nvert = 4;
-          enew->iro_cache = -1;
+          enew->iro_cache = e->iro_cache;
           enew->cm = e->cm;
           enew->parent = nullptr;
           enew->visited = false;
