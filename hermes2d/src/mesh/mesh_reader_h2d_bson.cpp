@@ -297,10 +297,10 @@ namespace Hermes
         p2 = p2s[curves_i];
         angle = angles[curves_i];
 
-        nurbs = MeshUtil::load_arc(mesh, curves_i, &en, p1, p2, angle);
+        curve = MeshUtil::load_arc(mesh, curves_i, &en, p1, p2, angle);
 
         // assign the arc to the elements sharing the edge node
-        MeshUtil::assign_curve(en, nurbs, p1, p2);
+        MeshUtil::assign_curve(en, curve, p1, p2);
       }
 
       // update refmap coeffs of curvilinear elements
@@ -465,7 +465,7 @@ namespace Hermes
         if(e->is_curved())
           for (unsigned i = 0; i < e->get_nvert(); i++)
             if(e->cm->curves[i] != nullptr)
-              if(e->cm->curves[i]->arc)
+              if(e->cm->curves[i]->type == ArcType)
                 arc_count++;
       }
       bson_append_int(&bw, "arc-count", arc_count);
@@ -477,7 +477,7 @@ namespace Hermes
           for (unsigned i = 0; i < e->get_nvert(); i++)
             if(e->cm->curves[i] != nullptr)
             {
-              if(!e->cm->curves[i]->arc)
+              if(e->cm->curves[i]->type != ArcType)
                 continue;
               bson_append_int(&bw, "c", e->vn[i]->id);
             }
@@ -491,7 +491,7 @@ namespace Hermes
           for (unsigned i = 0; i < e->get_nvert(); i++)
             if(e->cm->curves[i] != nullptr)
             {
-              if(!e->cm->curves[i]->arc)
+              if(e->cm->curves[i]->type != ArcType)
                 continue;
               bson_append_int(&bw, "c", e->vn[e->next_vert(i)]->id);
             }
@@ -505,9 +505,9 @@ namespace Hermes
           for (unsigned i = 0; i < e->get_nvert(); i++)
             if(e->cm->curves[i] != nullptr)
             {
-              if(!e->cm->curves[i]->arc)
+              if(e->cm->curves[i]->type != ArcType)
                 continue;
-              bson_append_int(&bw, "c", e->cm->curves[i]->angle);
+              bson_append_int(&bw, "c", ((Arc*)e->cm->curves[i])->angle);
             }
       }
       bson_append_finish_array(&bw);
@@ -518,7 +518,7 @@ namespace Hermes
         if(e->is_curved())
           for (unsigned i = 0; i < e->get_nvert(); i++)
             if(e->cm->curves[i] != nullptr)
-              if(!e->cm->curves[i]->arc)
+              if(e->cm->curves[i]->type != ArcType)
                 throw Exceptions::Exception("BSON mesh loader can not operate with general NURBS so far.");
 
       // Save refinements
@@ -670,8 +670,8 @@ namespace Hermes
               if(e->cm->curves[i] != nullptr)
                 if(vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
                 {
-                  if(e->cm->curves[i]->arc)
-                    arcs.push_back(arc_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, e->cm->curves[i]->angle));
+                  if(e->cm->curves[i]->type == ArcType)
+                    arcs.push_back(arc_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, ((Arc*)e->cm->curves[i])->angle));
                   else
                     throw Exceptions::Exception("BSON mesh loader can not operate with general NURBS so far.");
 
@@ -1018,13 +1018,13 @@ namespace Hermes
               p1 = vertex_vertex_numbers.find(arcs.at(curves_i).p1)->second;
               p2 = vertex_vertex_numbers.find(arcs.at(curves_i).p2)->second;
 
-              nurbs = MeshUtil::load_arc(meshes[subdomains_i], curves_i, &en, p1, p2, arcs.at(curves_i).angle, true);
-              if(nurbs == nullptr)
+              curve = MeshUtil::load_arc(meshes[subdomains_i], curves_i, &en, p1, p2, arcs.at(curves_i).angle, true);
+              if(curve == nullptr)
                 continue;
             }
 
             // assign the arc to the elements sharing the edge node
-            MeshUtil::assign_curve(en, nurbs, p1, p2);
+            MeshUtil::assign_curve(en, curve, p1, p2);
           }
 
           // update refmap coeffs of curvilinear elements
@@ -1251,10 +1251,10 @@ namespace Hermes
         p1 = arcs[curves_i].p1;
         p2 = arcs[curves_i].p2;
 
-        nurbs = MeshUtil::load_arc(mesh, curves_i, &en, p1, p2, arcs[curves_i].angle);
+        curve = MeshUtil::load_arc(mesh, curves_i, &en, p1, p2, arcs[curves_i].angle);
 
         // assign the arc to the elements sharing the edge node
-        MeshUtil::assign_curve(en, nurbs, p1, p2);
+        MeshUtil::assign_curve(en, curve, p1, p2);
       }
 
       // update refmap coeffs of curvilinear elements
