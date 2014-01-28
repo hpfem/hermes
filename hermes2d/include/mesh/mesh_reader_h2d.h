@@ -56,10 +56,12 @@ namespace Hermes
       }
 
     protected:
-      Nurbs* load_nurbs(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2);
+      Curve* load_curve(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2);
+      Arc* load_arc(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2, Arc* arc);
+      Nurbs* load_nurbs(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2, Nurbs* nurbs);
 
       void save_refinements(MeshSharedPtr mesh, FILE* f, Element* e, int id, bool& first);
-      void save_nurbs(MeshSharedPtr mesh, FILE* f, int p1, int p2, Nurbs* nurbs);
+      void save_curve(MeshSharedPtr mesh, FILE* f, int p1, int p2, Curve* curve);
     };
   }
 }

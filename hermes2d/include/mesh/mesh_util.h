@@ -64,13 +64,13 @@ namespace Hermes
     {
     public:
       /// For internal use.
-      static void assign_nurbs(Node* en, Nurbs* nurbs, int p1, int p2);
+      static void assign_curve(Node* en, Curve* curve, int p1, int p2);
 
       /// Returns a NURBS curve with reversed control points and inverted knot vector.
       /// Used for curved edges inside a mesh, where two mirror Nurbs have to be created
       /// for the adjacent elements
       ///
-      static Nurbs* reverse_nurbs(Nurbs* nurbs);
+      static Curve* reverse_curve(Curve* curve);
 
       /// For internal use.
       static Node* get_base_edge_node(Element* base, int edge);
@@ -81,7 +81,7 @@ namespace Hermes
       /// Mesh loading.
       /// Loads one circular arc.
       /// \param[in] skip_check Skip check that the edge exists, in case of subdomains.
-      static Nurbs* load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check = false);
+      static Arc* load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check = false);
     };
 
     class MeshHashGrid

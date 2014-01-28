@@ -94,10 +94,10 @@ namespace Hermes
       Nurbs* load_nurbs(MeshSharedPtr mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check = false);
 
       /// Saves one circular arc.
-      void save_arc(MeshSharedPtr mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves);
+      void save_arc(MeshSharedPtr mesh, int p1, int p2, Arc* curve, XMLMesh::curves_type & curves);
 
       /// Saves one general NURBS curve.
-      void save_nurbs(MeshSharedPtr mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves);
+      void save_nurbs(MeshSharedPtr mesh, int p1, int p2, Nurbs* curve, XMLMesh::curves_type & curves);
     };
   }
 }

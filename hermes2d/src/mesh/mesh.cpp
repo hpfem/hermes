@@ -1489,68 +1489,18 @@ namespace Hermes
       if (e->is_curved() && (!e_inter))
       {
         // for base element.
-        if (e->cm->toplevel == true)
+        Element* e_temp = e;
+        double multiplier = 1.0;
+        while (!e_temp->cm->toplevel)
         {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if (e->cm->nurbs[n] != nullptr)
-            {
-              //this->info("angle = %f", e->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->cm->nurbs[n]->angle;
-            }
-          }
+          e_temp = e_temp->parent;
+          multiplier *= 2.0;
         }
-        else
-          // one level refinement.
-        if (e->parent->cm->toplevel == true)
+
+        for (unsigned int n = 0; n < e->get_nvert(); n++)
         {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if (e->parent->cm->nurbs[n] != nullptr)
-            {
-              //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
-            }
-          }
-        }
-        else
-          // two level refinements.
-        if (e->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if (e->parent->parent->cm->nurbs[n] != nullptr)
-            {
-              //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
-            }
-          }
-        }
-        else
-          // three level refinements.
-        if (e->parent->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if (e->parent->parent->parent->cm->nurbs[n] != nullptr)
-            {
-              //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
-            }
-          }
-        }
-        else
-          // four level refinements.
-        if (e->parent->parent->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if (e->parent->parent->parent->parent->cm->nurbs[n] != nullptr)
-            {
-              //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
-            }
-          }
+          if (e_temp->cm->curves[n] != nullptr && e_temp->cm->curves[n]->type == ArcType)
+            refinement_angle[n] = ((Arc*)e_temp->cm->curves[n])->angle / multiplier;
         }
       }
 
@@ -1561,7 +1511,7 @@ namespace Hermes
       {
         for (idx = 0; idx < 2; idx++)
         {
-          if (e->cm->nurbs[idx] != nullptr)
+          if (e->cm->curves[idx] != nullptr)
           {
             cm[idx] = new CurvMap;
             memset(cm[idx], 0, sizeof(CurvMap));
@@ -1571,7 +1521,7 @@ namespace Hermes
         }
 
         idx = 0;
-        if (e->cm->nurbs[idx] != nullptr)
+        if (e->cm->curves[idx] != nullptr)
         {
           angle2 = refinement_angle[0] / 2;
           Node* node_temp = this->get_vertex_node(e->vn[idx % 3]->id, e->vn[(idx + 1) % 3]->id);
@@ -1599,57 +1549,34 @@ namespace Hermes
               if (idx == 2) idx2 = 0;
             }
 
-            Nurbs* nurbs = new Nurbs;
-            bool cricle = true;
-
-            nurbs->arc = cricle;
-            nurbs->degree = 2;
+            Arc* curve = new Arc(angle2);
 
             int inner = 1, outer = 0;
-            nurbs->np = inner + 2;
-            nurbs->pt = new double3[nurbs->np];
 
-            nurbs->pt[0][0] = nodes[p1].x;
-            nurbs->pt[0][1] = nodes[p1].y;
-            nurbs->pt[0][2] = 1.0;
+            curve->pt[0][0] = nodes[p1].x;
+            curve->pt[0][1] = nodes[p1].y;
+            curve->pt[0][2] = 1.0;
 
-            nurbs->pt[inner + 1][0] = nodes[p2].x;
-            nurbs->pt[inner + 1][1] = nodes[p2].y;
-            nurbs->pt[inner + 1][2] = 1.0;
+            curve->pt[2][0] = nodes[p2].x;
+            curve->pt[2][1] = nodes[p2].y;
+            curve->pt[2][2] = 1.0;
 
-            double angle = angle2;
-            double a = (180.0 - angle) / 180.0 * M_PI;
-            nurbs->angle = angle;
+            double a = (180.0 - angle2) / 180.0 * M_PI;
 
             // generate one control point
             double x = 1.0 / tan(a * 0.5);
-            nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-            nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-            nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
+            curve->pt[1][0] = 0.5*((curve->pt[2][0] + curve->pt[0][0]) + (curve->pt[2][1] - curve->pt[0][1]) * x);
+            curve->pt[1][1] = 0.5*((curve->pt[2][1] + curve->pt[0][1]) - (curve->pt[2][0] - curve->pt[0][0]) * x);
+            curve->pt[1][2] = cos((M_PI - a) * 0.5);
 
-            int i = 0;
-            inner = 0;
-            nurbs->nk = nurbs->degree + nurbs->np + 1;
-            outer = nurbs->nk - inner;
-
-            // knot vector is completed by 0.0 on the left and by 1.0 on the right
-            nurbs->kv = new double[nurbs->nk];
-
-            for (i = 0; i < outer / 2; i++)
-              nurbs->kv[i] = 0.0;
-            for (i = outer / 2 + inner; i < nurbs->nk; i++)
-              nurbs->kv[i] = 1.0;
-            nurbs->ref = 0;
-
-            cm[idx]->toplevel = 1;
+            cm[idx]->toplevel = true;
             cm[idx]->order = 4;
-            cm[idx]->nurbs[idx2] = nurbs;
-            nurbs->ref++;
+            cm[idx]->curves[idx2] = curve;
           }
         }
 
         idx = 1;
-        if (e->cm->nurbs[idx] != nullptr)
+        if (e->cm->curves[idx] != nullptr)
         {
           angle2 = refinement_angle[1] / 2;
           Node* node_temp = this->get_vertex_node(e->vn[idx % 3]->id, e->vn[(idx + 1) % 3]->id);
@@ -1675,50 +1602,29 @@ namespace Hermes
               if (idx == 2) idx2 = 0;
             }
 
-            Nurbs* nurbs = new Nurbs;
-            bool cricle = true;
-
-            nurbs->arc = cricle;
-            nurbs->degree = 2;
+            Arc* curve = new Arc(angle2);
+            
             int inner = 1, outer = 0;
-            nurbs->np = inner + 2;
-            nurbs->pt = new double3[nurbs->np];
+            
+            curve->pt[0][0] = nodes[p1].x;
+            curve->pt[0][1] = nodes[p1].y;
+            curve->pt[0][2] = 1.0;
 
-            nurbs->pt[0][0] = nodes[p1].x;
-            nurbs->pt[0][1] = nodes[p1].y;
-            nurbs->pt[0][2] = 1.0;
+            curve->pt[inner + 1][0] = nodes[p2].x;
+            curve->pt[inner + 1][1] = nodes[p2].y;
+            curve->pt[inner + 1][2] = 1.0;
 
-            nurbs->pt[inner + 1][0] = nodes[p2].x;
-            nurbs->pt[inner + 1][1] = nodes[p2].y;
-            nurbs->pt[inner + 1][2] = 1.0;
-
-            double angle = angle2;
-            double a = (180.0 - angle) / 180.0 * M_PI;
-            nurbs->angle = angle;
+            double a = (180.0 - angle2) / 180.0 * M_PI;
 
             // generate one control point
             double x = 1.0 / tan(a * 0.5);
-            nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-            nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-            nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
+            curve->pt[1][0] = 0.5*((curve->pt[2][0] + curve->pt[0][0]) + (curve->pt[2][1] - curve->pt[0][1]) * x);
+            curve->pt[1][1] = 0.5*((curve->pt[2][1] + curve->pt[0][1]) - (curve->pt[2][0] - curve->pt[0][0]) * x);
+            curve->pt[1][2] = cos((M_PI - a) * 0.5);
 
-            int i = 0;
-            inner = 0;
-            nurbs->nk = nurbs->degree + nurbs->np + 1;
-            outer = nurbs->nk - inner;
-
-            // knot vector is completed by 0.0 on the left and by 1.0 on the right
-            nurbs->kv = new double[nurbs->nk];
-            for (i = 0; i < outer / 2; i++)
-              nurbs->kv[i] = 0.0;
-            for (i = outer / 2 + inner; i < nurbs->nk; i++)
-              nurbs->kv[i] = 1.0;
-            nurbs->ref = 0;
-
-            cm[idx]->toplevel = 1;
+            cm[idx]->toplevel = true;
             cm[idx]->order = 4;
-            cm[idx]->nurbs[idx2] = nurbs;
-            nurbs->ref++;
+            cm[idx]->curves[idx2] = curve;
           }
         }
       }
@@ -1754,7 +1660,8 @@ namespace Hermes
       //set pointers to parent element for sons
       for (int i = 0; i < 3; i++)
       {
-        if (sons[i] != nullptr) sons[i]->parent = e;
+        if (sons[i] != nullptr)
+          sons[i]->parent = e;
       }
 
       // copy son pointers (could not have been done earlier because of the union)
@@ -1816,12 +1723,12 @@ namespace Hermes
         int i_case2 = 0;
         if (bcheck == true)
         {
-          if ((e->cm->nurbs[0] != nullptr) || (e->cm->nurbs[1] != nullptr))
+          if ((e->cm->curves[0] != nullptr) || (e->cm->curves[1] != nullptr))
           {
             cm[0] = new CurvMap;
             memset(cm[0], 0, sizeof(CurvMap));
           }
-          if ((e->cm->nurbs[2] != nullptr) || (e->cm->nurbs[3] != nullptr))
+          if ((e->cm->curves[2] != nullptr) || (e->cm->curves[3] != nullptr))
           {
             cm[1] = new CurvMap;
             memset(cm[1], 0, sizeof(CurvMap));
@@ -1829,12 +1736,12 @@ namespace Hermes
         }
         else if (bcheck == false)
         {
-          if ((e->cm->nurbs[1] != nullptr) || (e->cm->nurbs[2] != nullptr))
+          if ((e->cm->curves[1] != nullptr) || (e->cm->curves[2] != nullptr))
           {
             cm[0] = new CurvMap;
             memset(cm[0], 0, sizeof(CurvMap));
           }
-          if ((e->cm->nurbs[3] != nullptr) || (e->cm->nurbs[0] != nullptr))
+          if ((e->cm->curves[3] != nullptr) || (e->cm->curves[0] != nullptr))
           {
             cm[1] = new CurvMap;
             memset(cm[1], 0, sizeof(CurvMap));
@@ -1846,61 +1753,36 @@ namespace Hermes
         {
           for (idx = 0 + 2 * k; idx < 2 + 2 * k; idx++)
           {
-            if (e->cm->nurbs[(idx + i_case2) % 4] != nullptr)
+            if (e->cm->curves[(idx + i_case2) % 4] != nullptr)
             {
-              angle2 = e->cm->nurbs[(idx + i_case2) % 4]->angle;
+              angle2 = ((Arc*)e->cm->curves[(idx + i_case2) % 4])->angle;
 
               int p1, p2;
 
               p1 = e->vn[(idx + i_case2) % 4]->id;
               p2 = e->vn[(idx + i_case2 + 1) % 4]->id;  //node_temp->id;
 
-              Nurbs* nurbs = new Nurbs;
-              bool cricle = true;
+              Arc* curve = new Arc(angle2);
 
-              nurbs->arc = cricle;
-              nurbs->degree = 2;
+              curve->pt[0][0] = nodes[p1].x;
+              curve->pt[0][1] = nodes[p1].y;
+              curve->pt[0][2] = 1.0;
 
-              int inner = 1, outer;
-              nurbs->np = inner + 2;
-              nurbs->pt = new double3[nurbs->np];
+              curve->pt[2][0] = nodes[p2].x;
+              curve->pt[2][1] = nodes[p2].y;
+              curve->pt[2][2] = 1.0;
 
-              nurbs->pt[0][0] = nodes[p1].x;
-              nurbs->pt[0][1] = nodes[p1].y;
-              nurbs->pt[0][2] = 1.0;
-
-              nurbs->pt[inner + 1][0] = nodes[p2].x;
-              nurbs->pt[inner + 1][1] = nodes[p2].y;
-              nurbs->pt[inner + 1][2] = 1.0;
-
-              double angle = angle2;
-              double a = (180.0 - angle) / 180.0 * M_PI;
-              nurbs->angle = angle;
+              double a = (180.0 - angle2) / 180.0 * M_PI;
 
               // generate one control point
               double x = 1.0 / tan(a * 0.5);
-              nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-              nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-              nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
+              curve->pt[1][0] = 0.5*((curve->pt[2][0] + curve->pt[0][0]) + (curve->pt[2][1] - curve->pt[0][1]) * x);
+              curve->pt[1][1] = 0.5*((curve->pt[2][1] + curve->pt[0][1]) - (curve->pt[2][0] - curve->pt[0][0]) * x);
+              curve->pt[1][2] = cos((M_PI - a) * 0.5);
 
-              int i;
-              inner = 0;
-              nurbs->nk = nurbs->degree + nurbs->np + 1;
-              outer = nurbs->nk - inner;
-
-              // knot vector is completed by 0.0 on the left and by 1.0 on the right
-              nurbs->kv = new double[nurbs->nk];
-
-              for (i = 0; i < outer / 2; i++)
-                nurbs->kv[i] = 0.0;
-              for (i = outer / 2 + inner; i < nurbs->nk; i++)
-                nurbs->kv[i] = 1.0;
-              nurbs->ref = 0;
-
-              cm[k]->toplevel = 1;
+              cm[k]->toplevel = true;
               cm[k]->order = 4;
-              cm[k]->nurbs[idx % 2] = nurbs;
-              nurbs->ref++;
+              cm[k]->curves[idx % 2] = curve;
             }
           }
         }
@@ -2125,68 +2007,18 @@ namespace Hermes
       if (e->is_curved() && (!e_inter))
       {
         // for base element.
-        if (e->cm->toplevel == true)
+        Element* e_temp = e;
+        double multiplier = 1.0;
+        while (!e_temp->cm->toplevel)
         {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if (e->cm->nurbs[n] != nullptr)
-            {
-              //this->info("angle = %f", e->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->cm->nurbs[n]->angle;
-            }
-          }
+          e_temp = e_temp->parent;
+          multiplier *= 2.0;
         }
-        else
-          // one level refinement.
-        if (e->parent->cm->toplevel == true)
+
+        for (unsigned int n = 0; n < e->get_nvert(); n++)
         {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if (e->parent->cm->nurbs[n] != nullptr)
-            {
-              //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
-            }
-          }
-        }
-        else
-          // two level refinements.
-        if (e->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if (e->parent->parent->cm->nurbs[n] != nullptr)
-            {
-              //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
-            }
-          }
-        }
-        else
-          // three level refinements.
-        if (e->parent->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if (e->parent->parent->parent->cm->nurbs[n] != nullptr)
-            {
-              //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
-            }
-          }
-        }
-        else
-          // four level refinements.
-        if (e->parent->parent->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if (e->parent->parent->parent->parent->cm->nurbs[n] != nullptr)
-            {
-              //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
-            }
-          }
+          if (e_temp->cm->curves[n] != nullptr && e_temp->cm->curves[n]->type == ArcType)
+            refinement_angle[n] = ((Arc*)e_temp->cm->curves[n])->angle / multiplier;
         }
       }
 
@@ -2206,7 +2038,7 @@ namespace Hermes
         memset(cm, 0, sizeof(CurvMap));
 
         for (idx = 0; idx < 3; idx++)
-        if ((e->cm->nurbs[idx] != nullptr) && (bnd[idx] == 1))
+        if ((e->cm->curves[idx] != nullptr) && (bnd[idx] == 1))
         {
           angle2 = refinement_angle[idx];
           int p1, p2;
@@ -2214,52 +2046,27 @@ namespace Hermes
           p2 = e->en[idx]->p2;
           if (p1 > p2) std::swap(p1, p2);
 
-          Nurbs* nurbs = new Nurbs;
-          bool cricle = true;
+          Arc* curve = new Arc(angle2);
 
-          nurbs->arc = cricle;
-          nurbs->degree = 2;
+          curve->pt[0][0] = nodes[p1].x;
+          curve->pt[0][1] = nodes[p1].y;
+          curve->pt[0][2] = 1.0;
 
-          int inner = 1, outer = 0;
-          nurbs->np = inner + 2;
-          nurbs->pt = new double3[nurbs->np];
+          curve->pt[2][0] = nodes[p2].x;
+          curve->pt[2][1] = nodes[p2].y;
+          curve->pt[2][2] = 1.0;
 
-          nurbs->pt[0][0] = nodes[p1].x;
-          nurbs->pt[0][1] = nodes[p1].y;
-          nurbs->pt[0][2] = 1.0;
-
-          nurbs->pt[inner + 1][0] = nodes[p2].x;
-          nurbs->pt[inner + 1][1] = nodes[p2].y;
-          nurbs->pt[inner + 1][2] = 1.0;
-
-          double angle = angle2;
-          double a = (180.0 - angle) / 180.0 * M_PI;
-          nurbs->angle = angle;
+          double a = (180.0 - angle2) / 180.0 * M_PI;
 
           // generate one control point
           double x = 1.0 / tan(a * 0.5);
-          nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-          nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-          nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
+          curve->pt[1][0] = 0.5*((curve->pt[2][0] + curve->pt[0][0]) + (curve->pt[2][1] - curve->pt[0][1]) * x);
+          curve->pt[1][1] = 0.5*((curve->pt[2][1] + curve->pt[0][1]) - (curve->pt[2][0] - curve->pt[0][0]) * x);
+          curve->pt[1][2] = cos((M_PI - a) * 0.5);
 
-          int i = 0;
-          inner = 0;
-          nurbs->nk = nurbs->degree + nurbs->np + 1;
-          outer = nurbs->nk - inner;
-
-          // knot vector is completed by 0.0 on the left and by 1.0 on the right
-          nurbs->kv = new double[nurbs->nk];
-
-          for (i = 0; i < outer / 2; i++)
-            nurbs->kv[i] = 0.0;
-          for (i = outer / 2 + inner; i < nurbs->nk; i++)
-            nurbs->kv[i] = 1.0;
-          nurbs->ref = 0;
-
-          cm->toplevel = 1;
+          cm->toplevel = true;
           cm->order = 4;
-          cm->nurbs[idx] = nurbs;
-          nurbs->ref++;
+          cm->curves[idx] = curve;
         }
       }
 
@@ -2303,68 +2110,18 @@ namespace Hermes
       if (e->is_curved() && (!e_inter))
       {
         // for base element.
-        if (e->cm->toplevel == true)
+        Element* e_temp = e;
+        double multiplier = 1.0;
+        while (!e_temp->cm->toplevel)
         {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if ((e->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
-            {
-              //this->info("angle = %f", e->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->cm->nurbs[n]->angle;
-            }
-          }
+          e_temp = e_temp->parent;
+          multiplier *= 2.0;
         }
-        else
-          // one level refinement.
-        if (e->parent->cm->toplevel == true)
+
+        for (unsigned int n = 0; n < e->get_nvert(); n++)
         {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if ((e->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
-            {
-              //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
-            }
-          }
-        }
-        else
-          // two level refinements.
-        if (e->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if ((e->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
-            {
-              //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
-            }
-          }
-        }
-        else
-          // three level refinements.
-        if (e->parent->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if ((e->parent->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
-            {
-              //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
-            }
-          }
-        }
-        else
-          // four level refinements.
-        if (e->parent->parent->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if ((e->parent->parent->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
-            {
-              //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
-            }
-          }
+          if (e_temp->cm->curves[n] != nullptr && e_temp->cm->curves[n]->type == ArcType && (bnd[n] == 1))
+            refinement_angle[n] = ((Arc*)e_temp->cm->curves[n])->angle / multiplier;
         }
       }
 
@@ -2410,52 +2167,27 @@ namespace Hermes
           p2 = e->en[idx]->p2;
           if (p1 > p2) std::swap(p1, p2);
 
-          Nurbs* nurbs = new Nurbs;
-          bool cricle = true;
+          Arc* curve = new Arc(angle2);
+          
+          curve->pt[0][0] = nodes[p1].x;
+          curve->pt[0][1] = nodes[p1].y;
+          curve->pt[0][2] = 1.0;
 
-          nurbs->arc = cricle;
-          nurbs->degree = 2;
+          curve->pt[2][0] = nodes[p2].x;
+          curve->pt[2][1] = nodes[p2].y;
+          curve->pt[2][2] = 1.0;
 
-          int inner = 1, outer = 0;
-          nurbs->np = inner + 2;
-          nurbs->pt = new double3[nurbs->np];
-
-          nurbs->pt[0][0] = nodes[p1].x;
-          nurbs->pt[0][1] = nodes[p1].y;
-          nurbs->pt[0][2] = 1.0;
-
-          nurbs->pt[inner + 1][0] = nodes[p2].x;
-          nurbs->pt[inner + 1][1] = nodes[p2].y;
-          nurbs->pt[inner + 1][2] = 1.0;
-
-          double angle = angle2;
-          double a = (180.0 - angle) / 180.0 * M_PI;
-          nurbs->angle = angle;
+          double a = (180.0 - angle2) / 180.0 * M_PI;
 
           // generate one control point
           double x = 1.0 / tan(a * 0.5);
-          nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-          nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-          nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
+          curve->pt[1][0] = 0.5*((curve->pt[2][0] + curve->pt[0][0]) + (curve->pt[2][1] - curve->pt[0][1]) * x);
+          curve->pt[1][1] = 0.5*((curve->pt[2][1] + curve->pt[0][1]) - (curve->pt[2][0] - curve->pt[0][0]) * x);
+          curve->pt[1][2] = cos((M_PI - a) * 0.5);
 
-          int i = 0;
-          inner = 0;
-          nurbs->nk = nurbs->degree + nurbs->np + 1;
-          outer = nurbs->nk - inner;
-
-          // knot vector is completed by 0.0 on the left and by 1.0 on the right
-          nurbs->kv = new double[nurbs->nk];
-
-          for (i = 0; i < outer / 2; i++)
-            nurbs->kv[i] = 0.0;
-          for (i = outer / 2 + inner; i < nurbs->nk; i++)
-            nurbs->kv[i] = 1.0;
-          nurbs->ref = 0;
-
-          cm->toplevel = 1;
+          cm->toplevel = true;
           cm->order = 4;
-          cm->nurbs[idx] = nurbs;
-          nurbs->ref++;
+          cm->curves[idx] = curve;
         }
       }
 
@@ -2501,68 +2233,18 @@ namespace Hermes
       if (e->is_curved() && (!e_inter))
       {
         // for base element.
-        if (e->cm->toplevel == true)
+        Element* e_temp = e;
+        double multiplier = 1.0;
+        while (!e_temp->cm->toplevel)
         {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if ((e->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
-            {
-              //this->info("angle = %f", e->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->cm->nurbs[n]->angle;
-            }
-          }
+          e_temp = e_temp->parent;
+          multiplier *= 2.0;
         }
-        else
-          // one level refinement.
-        if (e->parent->cm->toplevel == true)
+
+        for (unsigned int n = 0; n < e->get_nvert(); n++)
         {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if ((e->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
-            {
-              //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
-            }
-          }
-        }
-        else
-          // two level refinements.
-        if (e->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if ((e->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
-            {
-              //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
-            }
-          }
-        }
-        else
-          // three level refinements.
-        if (e->parent->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if ((e->parent->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
-            {
-              //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
-            }
-          }
-        }
-        else
-          // four level refinements.
-        if (e->parent->parent->parent->parent->cm->toplevel == true)
-        {
-          for (unsigned int n = 0; n < e->get_nvert(); n++)
-          {
-            if ((e->parent->parent->parent->parent->cm->nurbs[n] != nullptr) && (bnd[n] == 1))
-            {
-              //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
-              refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
-            }
-          }
+          if (e_temp->cm->curves[n] != nullptr && e_temp->cm->curves[n]->type == ArcType && (bnd[n] == 1))
+            refinement_angle[n] = ((Arc*)e_temp->cm->curves[n])->angle / multiplier;
         }
       }
 
@@ -2627,52 +2309,27 @@ namespace Hermes
               p1 = e->vn[(idx) % 4]->id;
               p2 = node_temp->id;
 
-              Nurbs* nurbs = new Nurbs;
-              bool cricle = true;
+              Arc* curve = new Arc(angle2);
 
-              nurbs->arc = cricle;
-              nurbs->degree = 2;
+              curve->pt[0][0] = nodes[p1].x;
+              curve->pt[0][1] = nodes[p1].y;
+              curve->pt[0][2] = 1.0;
 
-              int inner = 1, outer = 0;
-              nurbs->np = inner + 2;
-              nurbs->pt = new double3[nurbs->np];
+              curve->pt[2][0] = nodes[p2].x;
+              curve->pt[2][1] = nodes[p2].y;
+              curve->pt[2][2] = 1.0;
 
-              nurbs->pt[0][0] = nodes[p1].x;
-              nurbs->pt[0][1] = nodes[p1].y;
-              nurbs->pt[0][2] = 1.0;
-
-              nurbs->pt[inner + 1][0] = nodes[p2].x;
-              nurbs->pt[inner + 1][1] = nodes[p2].y;
-              nurbs->pt[inner + 1][2] = 1.0;
-
-              double angle = angle2;
-              double a = (180.0 - angle) / 180.0 * M_PI;
-              nurbs->angle = angle;
+              double a = (180.0 - angle2) / 180.0 * M_PI;
 
               // generate one control point
               double x = 1.0 / tan(a * 0.5);
-              nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-              nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-              nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
-
-              int i = 0;
-              inner = 0;
-              nurbs->nk = nurbs->degree + nurbs->np + 1;
-              outer = nurbs->nk - inner;
-
-              // knot vector is completed by 0.0 on the left and by 1.0 on the right
-              nurbs->kv = new double[nurbs->nk];
-
-              for (i = 0; i < outer / 2; i++)
-                nurbs->kv[i] = 0.0;
-              for (i = outer / 2 + inner; i < nurbs->nk; i++)
-                nurbs->kv[i] = 1.0;
-              nurbs->ref = 0;
-
-              cm[idx]->toplevel = 1;
+              curve->pt[1][0] = 0.5*((curve->pt[2][0] + curve->pt[0][0]) + (curve->pt[2][1] - curve->pt[0][1]) * x);
+              curve->pt[1][1] = 0.5*((curve->pt[2][1] + curve->pt[0][1]) - (curve->pt[2][0] - curve->pt[0][0]) * x);
+              curve->pt[1][2] = cos((M_PI - a) * 0.5);
+              
+              cm[idx]->toplevel = true;
               cm[idx]->order = 4;
-              cm[idx]->nurbs[idx % 4] = nurbs;
-              nurbs->ref++;
+              cm[idx]->curves[idx % 4] = curve;
             }
 
             if ((fabs(refinement_angle[(idx + 3) % 4] - 0.0) > 1e-4))
@@ -2684,52 +2341,27 @@ namespace Hermes
               p1 = e->vn[(idx) % 4]->id;
               p2 = node_temp->id;
 
-              Nurbs* nurbs = new Nurbs;
-              bool cricle = true;
+              Arc* curve = new Arc(angle2);
 
-              nurbs->arc = cricle;
-              nurbs->degree = 2;
+              curve->pt[0][0] = nodes[p1].x;
+              curve->pt[0][1] = nodes[p1].y;
+              curve->pt[0][2] = 1.0;
 
-              int inner = 1, outer = 0;
-              nurbs->np = inner + 2;
-              nurbs->pt = new double3[nurbs->np];
+              curve->pt[2][0] = nodes[p2].x;
+              curve->pt[2][1] = nodes[p2].y;
+              curve->pt[2][2] = 1.0;
 
-              nurbs->pt[0][0] = nodes[p1].x;
-              nurbs->pt[0][1] = nodes[p1].y;
-              nurbs->pt[0][2] = 1.0;
-
-              nurbs->pt[inner + 1][0] = nodes[p2].x;
-              nurbs->pt[inner + 1][1] = nodes[p2].y;
-              nurbs->pt[inner + 1][2] = 1.0;
-
-              double angle = angle2;
-              double a = (180.0 - angle) / 180.0 * M_PI;
-              nurbs->angle = angle;
+              double a = (180.0 - angle2) / 180.0 * M_PI;
 
               // generate one control point
               double x = 1.0 / tan(a * 0.5);
-              nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-              nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-              nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
+              curve->pt[1][0] = 0.5*((curve->pt[2][0] + curve->pt[0][0]) + (curve->pt[2][1] - curve->pt[0][1]) * x);
+              curve->pt[1][1] = 0.5*((curve->pt[2][1] + curve->pt[0][1]) - (curve->pt[2][0] - curve->pt[0][0]) * x);
+              curve->pt[1][2] = cos((M_PI - a) * 0.5);
 
-              int i = 0;
-              inner = 0;
-              nurbs->nk = nurbs->degree + nurbs->np + 1;
-              outer = nurbs->nk - inner;
-
-              // knot vector is completed by 0.0 on the left and by 1.0 on the right
-              nurbs->kv = new double[nurbs->nk];
-
-              for (i = 0; i < outer / 2; i++)
-                nurbs->kv[i] = 0.0;
-              for (i = outer / 2 + inner; i < nurbs->nk; i++)
-                nurbs->kv[i] = 1.0;
-              nurbs->ref = 0;
-
-              cm[idx]->toplevel = 1;
+              cm[idx]->toplevel = true;
               cm[idx]->order = 4;
-              cm[idx]->nurbs[(idx + 3) % 4] = nurbs;
-              nurbs->ref++;
+              cm[idx]->curves[(idx + 3) % 4] = curve;
             }
           }
         }

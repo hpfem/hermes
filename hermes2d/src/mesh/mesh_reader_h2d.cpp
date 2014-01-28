@@ -31,48 +31,71 @@ namespace Hermes
     {
     }
 
-    Nurbs* MeshReaderH2D::load_nurbs(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2)
+    Arc* MeshReaderH2D::load_arc(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2, Arc* arc)
     {
-      double dummy_dbl;
-
-      Nurbs* nurbs = new Nurbs;
-
-      // Decide if curve is a circular arc or a general nurbs curve
-      bool circle = (m->curv_nurbs[id] == false);
-      nurbs->arc = circle;
-
       // read the end point indices
       p1 = m->curv_first[id];
       p2 = m->curv_second[id];
 
       *en = mesh->peek_edge_node(p1, p2);
-      if(*en == nullptr)
+      if (*en == nullptr)
         throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
 
-      // degree of curved edge
-      nurbs->degree = 2;
-      if(!circle)
-      {
-        nurbs->degree = m->curv_third[id];
-      }
+      // get the number of control points
+      std::vector<double> vCP;
+
+      // edge endpoints are also control points, with weight 1.0
+      arc->pt[0][0] = mesh->nodes[p1].x;
+      arc->pt[0][1] = mesh->nodes[p1].y;
+      arc->pt[0][2] = 1.0;
+      arc->pt[2][0] = mesh->nodes[p2].x;
+      arc->pt[2][1] = mesh->nodes[p2].y;
+      arc->pt[2][2] = 1.0;
+
+      // read the arc angle
+      arc->angle = m->curv_third[id];
+      double a = (180.0 - arc->angle) / 180.0 * M_PI;
+
+      // generate one control point
+      double x = 1.0 / tan(a * 0.5);
+      arc->pt[1][0] = 0.5*((arc->pt[2][0] + arc->pt[0][0]) + (arc->pt[2][1] - arc->pt[0][1]) * x);
+      arc->pt[1][1] = 0.5*((arc->pt[2][1] + arc->pt[0][1]) - (arc->pt[2][0] - arc->pt[0][0]) * x);
+      arc->pt[1][2] = cos((M_PI - a) * 0.5);
+
+      // get the number of knot vector points
+      std::vector<double> vKnots;
+
+      return arc;
+    }
+
+    Nurbs* MeshReaderH2D::load_nurbs(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2, Nurbs* nurbs)
+    {
+      // read the end point indices
+      p1 = m->curv_first[id];
+      p2 = m->curv_second[id];
+
+      *en = mesh->peek_edge_node(p1, p2);
+      if (*en == nullptr)
+        throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
+
+      nurbs->degree = m->curv_third[id];
 
       // get the number of control points
       std::vector<double> vCP;
 
       int inner = 1, outer;
-      if(!circle)
+      for (unsigned int i = 0; i < m->vars_[m->curv_inner_pts[id]].size(); ++i)
       {
-        for (unsigned int i = 0; i < m->vars_[m->curv_inner_pts[id]].size(); ++i)
-        {
-          std::istringstream istr(m->vars_[m->curv_inner_pts[id]][i]);
+        std::istringstream istr(m->vars_[m->curv_inner_pts[id]][i]);
 
-          if(!(istr >> dummy_dbl))
-            vCP.push_back(atof(m->vars_[m->vars_[m->curv_inner_pts[id]][i]][0].c_str()));
-          else
-            vCP.push_back(atof(m->vars_[m->curv_inner_pts[id]][i].c_str()));
-        }
-        inner = vCP.size()/3;
+        double dummy_dbl;
+        if (!(istr >> dummy_dbl))
+          vCP.push_back(atof(m->vars_[m->vars_[m->curv_inner_pts[id]][i]][0].c_str()));
+        else
+          vCP.push_back(atof(m->vars_[m->curv_inner_pts[id]][i].c_str()));
       }
+      inner = vCP.size() / 3;
+      
       nurbs->np = inner + 2;
 
       // edge endpoints are also control points, with weight 1.0
@@ -80,75 +103,62 @@ namespace Hermes
       nurbs->pt[0][0] = mesh->nodes[p1].x;
       nurbs->pt[0][1] = mesh->nodes[p1].y;
       nurbs->pt[0][2] = 1.0;
-      nurbs->pt[inner+1][0] = mesh->nodes[p2].x;
-      nurbs->pt[inner+1][1] = mesh->nodes[p2].y;
-      nurbs->pt[inner+1][2] = 1.0;
-
-      if(!circle)
+      nurbs->pt[inner + 1][0] = mesh->nodes[p2].x;
+      nurbs->pt[inner + 1][1] = mesh->nodes[p2].y;
+      nurbs->pt[inner + 1][2] = 1.0;
+      
+    // read inner control points
+      for (int i = 0; i < inner; i++)
       {
-        // read inner control points
-        for (int i = 0; i < inner; i++)
-        {
-          for (int j = 0; j < 3; ++j)
-          {
-            nurbs->pt[i + 1][j] = vCP[3*i + j];
-          }
-        }
-      }
-      else
-      {
-        // read the arc angle
-        nurbs->angle = m->curv_third[id];
-        double a = (180.0 - nurbs->angle) / 180.0 * M_PI;
-
-        // generate one control point
-        double x = 1.0 / tan(a * 0.5);
-        nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-        nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-        nurbs->pt[1][2] = cos((M_PI - a) * 0.5);
+        for (int j = 0; j < 3; ++j)
+          nurbs->pt[i + 1][j] = vCP[3 * i + j];
       }
 
       // get the number of knot vector points
       std::vector<double> vKnots;
 
       inner = 0;
-      if(!circle)
+      for (unsigned int i = 0; i < m->vars_[m->curv_knots[id]].size(); ++i)
       {
-        for (unsigned int i = 0; i < m->vars_[m->curv_knots[id]].size(); ++i)
-        {
-          std::istringstream istr(m->vars_[m->curv_knots[id]][i]);
+        std::istringstream istr(m->vars_[m->curv_knots[id]][i]);
+        double dummy_dbl;
 
-          if(!(istr >> dummy_dbl))
-            vKnots.push_back(atof(m->vars_[m->vars_[m->curv_knots[id]][i]][0].c_str()));
-          else
-            vKnots.push_back(atof(m->vars_[m->curv_knots[id]][i].c_str()));
-        }
-        inner = vKnots.size();
+        if (!(istr >> dummy_dbl))
+          vKnots.push_back(atof(m->vars_[m->vars_[m->curv_knots[id]][i]][0].c_str()));
+        else
+          vKnots.push_back(atof(m->vars_[m->curv_knots[id]][i].c_str()));
       }
+      inner = vKnots.size();
 
       nurbs->nk = nurbs->degree + nurbs->np + 1;
       outer = nurbs->nk - inner;
-      if((outer & 1) == 1)
+      if ((outer & 1) == 1)
         throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: incorrect number of knot points.", id);
 
       // knot vector is completed by 0.0 on the left and by 1.0 on the right
       nurbs->kv = new double[nurbs->nk];
 
-      for (int i = 0; i < outer/2; i++)
+      for (int i = 0; i < outer / 2; i++)
         nurbs->kv[i] = 0.0;
 
-      if(inner) {
-        for (int i = outer/2; i < inner + outer/2; i++) {
-          nurbs->kv[i] = vKnots[i - (outer/2)];
+      if (inner) {
+        for (int i = outer / 2; i < inner + outer / 2; i++) {
+          nurbs->kv[i] = vKnots[i - (outer / 2)];
         }
       }
 
-      for (int i = outer/2 + inner; i < nurbs->nk; i++)
+      for (int i = outer / 2 + inner; i < nurbs->nk; i++)
         nurbs->kv[i] = 1.0;
 
-      nurbs->ref = 0;
-
       return nurbs;
+    }
+
+    Curve* MeshReaderH2D::load_curve(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2)
+    {
+      if (m->curv_nurbs[id])
+        return load_nurbs(mesh, m, id, en, p1, p2, new Nurbs);
+      else
+        return load_arc(mesh, m, id, en, p1, p2, new Arc);
     }
 
     void MeshReaderH2D::load(const char *filename, MeshSharedPtr mesh)
@@ -322,10 +332,10 @@ namespace Hermes
           Node* en;
           int p1, p2;
 
-          Nurbs* nurbs = load_nurbs(mesh, &m, i, &en, p1, p2);
+          Curve* curve = load_curve(mesh, &m, i, &en, p1, p2);
 
           // assign the arc to the elements sharing the edge node
-          MeshUtil::assign_nurbs(en, nurbs, p1, p2);
+          MeshUtil::assign_curve(en, curve, p1, p2);
         }
       }
 
@@ -387,26 +397,26 @@ namespace Hermes
       }
     }
 
-    void MeshReaderH2D::save_nurbs(MeshSharedPtr mesh, FILE* f, int p1, int p2, Nurbs* nurbs)
+    void MeshReaderH2D::save_curve(MeshSharedPtr mesh, FILE* f, int p1, int p2, Curve* curve)
     {
-      if(nurbs->arc)
+      if(curve->type == ArcType)
       {
-        fprintf(f, " [ %d, %d, %.16g ]", p1, p2, nurbs->angle);
+        fprintf(f, " [ %d, %d, %.16g ]", p1, p2, ((Arc*)curve)->angle);
       }
       else
       {
-        int inner = nurbs->np - 2;
-        int outer = nurbs->nk - inner;
-        fprintf(f, "  ú %d, %d, %d, ú ", p1, p2, nurbs->degree);
-        for (int i = 1; i < nurbs->np-1; i++)
+        int inner = ((Nurbs*)curve)->np - 2;
+        int outer = ((Nurbs*)curve)->nk - inner;
+        fprintf(f, "  ú %d, %d, %d, ú ", p1, p2, ((Nurbs*)curve)->degree);
+        for (int i = 1; i < ((Nurbs*)curve)->np - 1; i++)
           fprintf(f, "ú %.16g, %.16g, %.16g ]%s ",
-          nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2],
-          i < nurbs->np-2 ? "," : "");
+          ((Nurbs*)curve)->pt[i][0], ((Nurbs*)curve)->pt[i][1], ((Nurbs*)curve)->pt[i][2],
+          i < ((Nurbs*)curve)->np - 2 ? "," : "");
 
         fprintf(f, "],[ ");
-        int max = nurbs->nk - (nurbs->degree+1);
-        for (int i = nurbs->degree+1; i < max; i++)
-          fprintf(f, "%.16g%s", nurbs->kv[i], i < max-1 ? "," : "");
+        int max = ((Nurbs*)curve)->nk - (((Nurbs*)curve)->degree + 1);
+        for (int i = ((Nurbs*)curve)->degree + 1; i < max; i++)
+          fprintf(f, "%.16g%s", ((Nurbs*)curve)->kv[i], i < max - 1 ? "," : "");
         fprintf(f, "] ]");
       }
     }
@@ -462,10 +472,10 @@ namespace Hermes
         if(e->is_curved())
         {
           for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->nurbs[i] != nullptr && !is_twin_nurbs(e, i))
+            if(e->cm->curves[i] != nullptr)
             {
               fprintf(f, first ? "curves =\n[\n" : ",\n");  first = false;
-              save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
+              save_curve(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->curves[i]);
             }
             if(!first) fprintf(f, "\n]\n\n");
         }
