@@ -96,7 +96,7 @@ namespace Hermes
       this->tick();
       this->time = this->accumulated();
 
-      ::free(this->sln);
+      free_with_check(this->sln);
       this->sln = malloc_with_check(m->size, this);
       // copy the solution into sln vector
       memset(this->sln, 0, m->size * sizeof(double));
@@ -125,7 +125,7 @@ namespace Hermes
       this->tick();
       this->time = this->accumulated();
 
-      ::free(this->sln);
+      free_with_check(this->sln);
       this->sln = malloc_with_check(m->size, this);
       // copy the solution into sln vector
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));

@@ -597,7 +597,7 @@ namespace Hermes
       {
         ElementToRefine* new_elems_to_refine_array = malloc_with_check<Adapt<Scalar>, ElementToRefine>(num_elem_to_proc + new_elems_to_refine.size(), this);
         memcpy(new_elems_to_refine_array, elems_to_refine, num_elem_to_proc * sizeof(ElementToRefine));
-        ::free(elems_to_refine);
+        free_with_check(elems_to_refine);
         elems_to_refine = new_elems_to_refine_array;
 
         for (int inx = 0; inx < new_elems_to_refine.size(); inx++)

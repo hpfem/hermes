@@ -50,7 +50,7 @@ namespace Hermes
 
       /// Sets the current transform at once as if it was created by multiple calls to push_transform().
       /// \param idx[in] The number of the sub-element, as returned by get_transform().
-      void set_transform(uint64_t idx);
+      virtual void set_transform(uint64_t idx);
 
       /// \return The current transform index.
       uint64_t get_transform() const;
@@ -62,6 +62,11 @@ namespace Hermes
       /// points will then be transformed to this sub-element. This process can be repeated.
       /// \param son[in] Son element number in the range[0-3] for triangles and[0-7] for quads.
       virtual void push_transform(int son);
+
+      /// Removes the current transformation matrix from the top of the stack. The new_ top becomes
+      /// the current transformation matrix. This returns the transform to the state before the
+      /// last push_transform() was performed.
+      virtual void pop_transform();
 
       /// If this changes, NeighborSearch::H2D_MAX_NEIGHBORS must change too.
       static const unsigned int H2D_MAX_TRN_LEVEL = 15;
@@ -76,19 +81,17 @@ namespace Hermes
       /// \param e[in] Element associated with the function being represented by the class.
       virtual void set_active_element(Element* e);
 
-      /// Removes the current transformation matrix from the top of the stack. The new_ top becomes
-      /// the current transformation matrix. This returns the transform to the state before the
-      /// last push_transform() was performed.
-      virtual void pop_transform();
-
       /// Empties the stack, loads identity transform.
-      void reset_transform();
+      virtual void reset_transform();
 
       /// \return The jacobian of the current transformation matrix.
       inline double get_transform_jacobian() const { return ctm->m[0] * ctm->m[1]; }
 
       /// \return The current transformation matrix.
       inline Trf* get_ctm() const { return ctm; }
+
+      /// For internal use only.
+      virtual void force_transform(uint64_t sub_idx, Trf* ctm);
 
       /// \return The depth of the current transformation.
       inline unsigned int get_depth() const { return top; }

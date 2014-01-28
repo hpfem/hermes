@@ -103,7 +103,7 @@ namespace Hermes
       /// Currently assembled state.
       Traverse::State* current_state;
       /// Current local matrix.
-      Scalar* local_stiffness_matrix;
+      Scalar local_stiffness_matrix[H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_LOCAL_BASIS_SIZE * 4];
 
       /// Integration orders for the currently assembled state.
       /// - calculator

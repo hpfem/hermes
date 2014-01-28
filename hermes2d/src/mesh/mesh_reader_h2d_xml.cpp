@@ -16,6 +16,7 @@
 #include "mesh.h"
 #include "api2d.h"
 #include "mesh_reader_h2d_xml.h"
+#include "refmap.h"
 
 using namespace std;
 
@@ -129,11 +130,11 @@ namespace Hermes
       for_all_base_elements(e, mesh)
       if (e->is_curved())
       for (unsigned i = 0; i < e->get_nvert(); i++)
-      if (e->cm->nurbs[i] != nullptr && !is_twin_nurbs(e, i))
-      if (e->cm->nurbs[i]->arc)
-        save_arc(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i], curves);
+      if (e->cm->curves[i] != nullptr)
+      if (e->cm->curves[i]->type == ArcType)
+        save_arc(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, (Arc*)e->cm->curves[i], curves);
       else
-        save_nurbs(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i], curves);
+        save_nurbs(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, (Nurbs*)e->cm->curves[i], curves);
 
       // save refinements
       XMLMesh::refinements_type refinements;
@@ -195,15 +196,15 @@ namespace Hermes
         load(parsed_xml_domain, global_mesh, vertex_is, element_is, edge_is);
 
         int max_vertex_i = -1;
-        for (std::map<int, int>::iterator it = vertex_is.begin(); it != vertex_is.end(); it++)
+        for (std::map<int, int>::iterator it = vertex_is.begin(); it != vertex_is.end(); ++it)
         if (it->first > max_vertex_i)
           max_vertex_i = it->first;
         int max_element_i = -1;
-        for (std::map<int, int>::iterator it = element_is.begin(); it != element_is.end(); it++)
+        for (std::map<int, int>::iterator it = element_is.begin(); it != element_is.end(); ++it)
         if (it->first > max_element_i)
           max_element_i = it->first;
         int max_edge_i = -1;
-        for (std::map<int, int>::iterator it = edge_is.begin(); it != edge_is.end(); it++)
+        for (std::map<int, int>::iterator it = edge_is.begin(); it != edge_is.end(); ++it)
         if (it->first > max_edge_i)
           max_edge_i = it->first;
 
@@ -516,7 +517,7 @@ namespace Hermes
               int p1, p2;
 
               // first do arcs, then NURBSs.
-              Nurbs* nurbs;
+              Curve* curve;
               if (curves_i < arc_count)
               {
                 if (vertex_vertex_numbers.find(parsed_xml_domain->curves()->arc().at(curves_i).v1()) == vertex_vertex_numbers.end() ||
@@ -528,8 +529,8 @@ namespace Hermes
                   p1 = vertex_vertex_numbers.find(parsed_xml_domain->curves()->arc().at(curves_i).v1())->second;
                   p2 = vertex_vertex_numbers.find(parsed_xml_domain->curves()->arc().at(curves_i).v2())->second;
 
-                  nurbs = MeshUtil::load_arc(meshes[subdomains_i], curves_i, &en, p1, p2, parsed_xml_domain->curves()->arc().at(curves_i).angle(), true);
-                  if (nurbs == nullptr)
+                  curve = MeshUtil::load_arc(meshes[subdomains_i], curves_i, &en, p1, p2, parsed_xml_domain->curves()->arc().at(curves_i).angle(), true);
+                  if (curve == nullptr)
                     continue;
                 }
               }
@@ -544,20 +545,23 @@ namespace Hermes
                   p1 = vertex_vertex_numbers.find(parsed_xml_domain->curves()->NURBS().at(curves_i - arc_count).v1())->second;
                   p2 = vertex_vertex_numbers.find(parsed_xml_domain->curves()->NURBS().at(curves_i - arc_count).v2())->second;
 
-                  nurbs = load_nurbs(meshes[subdomains_i], parsed_xml_domain, curves_i - arc_count, &en, p1, p2, true);
-                  if (nurbs == nullptr)
+                  curve = load_nurbs(meshes[subdomains_i], parsed_xml_domain, curves_i - arc_count, &en, p1, p2, true);
+                  if (curve == nullptr)
                     continue;
                 }
               }
 
               // assign the arc to the elements sharing the edge node
-              MeshUtil::assign_nurbs(en, nurbs, p1, p2);
+              MeshUtil::assign_curve(en, curve, p1, p2);
             }
 
             // update refmap coeffs of curvilinear elements
             for_all_used_elements(e, meshes[subdomains_i])
-            if (e->cm != nullptr)
-              e->cm->update_refmap_coeffs(e);
+            {
+              if (e->cm != nullptr)
+                e->cm->update_refmap_coeffs(e);
+              RefMap::set_element_iro_cache(e);
+            }
 
             // refinements.
             if (parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements().present() && parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->ref().size() > 0)
@@ -728,13 +732,13 @@ namespace Hermes
         {
           if (e->is_curved())
           for (unsigned i = 0; i < e->get_nvert(); i++)
-          if (e->cm->nurbs[i] != nullptr && !is_twin_nurbs(e, i))
+          if (e->cm->curves[i] != nullptr)
           if (vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
           {
-            if (e->cm->nurbs[i]->arc)
-              save_arc(meshes[meshes_i], vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, e->cm->nurbs[i], curves);
+            if (e->cm->curves[i]->type == ArcType)
+              save_arc(meshes[meshes_i], vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, (Arc*)e->cm->curves[i], curves);
             else
-              save_nurbs(meshes[meshes_i], vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, e->cm->nurbs[i], curves);
+              save_nurbs(meshes[meshes_i], vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, (Nurbs*)e->cm->curves[i], curves);
             vertices_to_curves.insert(std::pair<std::pair<unsigned int, unsigned int>, bool>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), true));
           }
         }
@@ -965,30 +969,33 @@ namespace Hermes
           int p1, p2;
 
           // first do arcs, then NURBSs.
-          Nurbs* nurbs;
+          Curve* curve;
           if (curves_i < arc_count)
           {
             // read the end point indices
             p1 = vertex_is.find(parsed_xml_mesh->curves()->arc().at(curves_i).v1())->second;
             p2 = vertex_is.find(parsed_xml_mesh->curves()->arc().at(curves_i).v2())->second;
 
-            nurbs = MeshUtil::load_arc(mesh, curves_i, &en, p1, p2, parsed_xml_mesh->curves()->arc().at(curves_i).angle());
+            curve = MeshUtil::load_arc(mesh, curves_i, &en, p1, p2, parsed_xml_mesh->curves()->arc().at(curves_i).angle());
           }
           else
           {
             // read the end point indices
             p1 = vertex_is.find(parsed_xml_mesh->curves()->NURBS().at(curves_i - arc_count).v1())->second;
             p2 = vertex_is.find(parsed_xml_mesh->curves()->NURBS().at(curves_i - arc_count).v2())->second;
-            nurbs = load_nurbs(mesh, parsed_xml_mesh, curves_i - arc_count, &en, p1, p2);
+            curve = load_nurbs(mesh, parsed_xml_mesh, curves_i - arc_count, &en, p1, p2);
           }
 
-          MeshUtil::assign_nurbs(en, nurbs, p1, p2);
+          MeshUtil::assign_curve(en, curve, p1, p2);
         }
 
         // update refmap coeffs of curvilinear elements
         for_all_used_elements(e, mesh)
-        if (e->cm != nullptr)
-          e->cm->update_refmap_coeffs(e);
+        {
+          if (e->cm != nullptr)
+            e->cm->update_refmap_coeffs(e);
+          RefMap::set_element_iro_cache(e);
+        }
       }
       catch (const xml_schema::exception& e)
       {
@@ -1200,31 +1207,34 @@ namespace Hermes
           int p1, p2;
 
           // first do arcs, then NURBSs.
-          Nurbs* nurbs;
+          Curve* curve;
           if (curves_i < arc_count)
           {
             // read the end point indices
             p1 = parsed_xml_domain->curves()->arc().at(curves_i).v1();
             p2 = parsed_xml_domain->curves()->arc().at(curves_i).v2();
 
-            nurbs = MeshUtil::load_arc(mesh, curves_i, &en, p1, p2, parsed_xml_domain->curves()->arc().at(curves_i).angle());
+            curve = MeshUtil::load_arc(mesh, curves_i, &en, p1, p2, parsed_xml_domain->curves()->arc().at(curves_i).angle());
           }
           else
           {
             // read the end point indices
             p1 = parsed_xml_domain->curves()->NURBS().at(curves_i - arc_count).v1();
             p2 = parsed_xml_domain->curves()->NURBS().at(curves_i - arc_count).v2();
-            nurbs = load_nurbs(mesh, parsed_xml_domain, curves_i - arc_count, &en, p1, p2);
+            curve = load_nurbs(mesh, parsed_xml_domain, curves_i - arc_count, &en, p1, p2);
           }
 
           // assign the arc to the elements sharing the edge node
-          MeshUtil::assign_nurbs(en, nurbs, p1, p2);
+          MeshUtil::assign_curve(en, curve, p1, p2);
         }
 
         // update refmap coeffs of curvilinear elements
         for_all_used_elements(e, mesh)
-        if (e->cm != nullptr)
-          e->cm->update_refmap_coeffs(e);
+        {
+          if (e->cm != nullptr)
+            e->cm->update_refmap_coeffs(e);
+          RefMap::set_element_iro_cache(e);
+        }
       }
       catch (const xml_schema::exception& e)
       {
@@ -1236,7 +1246,6 @@ namespace Hermes
     Nurbs* MeshReaderH2DXML::load_nurbs(MeshSharedPtr mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check)
     {
       Nurbs* nurbs = new Nurbs;
-      nurbs->arc = false;
 
       *en = mesh->peek_edge_node(p1, p2);
 
@@ -1293,29 +1302,26 @@ namespace Hermes
       for (int i = outer / 2 + inner; i < nurbs->nk; i++)
         nurbs->kv[i] = 1.0;
 
-      nurbs->ref = 0;
-
       return nurbs;
     }
 
-    void MeshReaderH2DXML::save_arc(MeshSharedPtr mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
+    void MeshReaderH2DXML::save_arc(MeshSharedPtr mesh, int p1, int p2, Arc* curve, XMLMesh::curves_type & curves)
     {
-      curves.arc().push_back(XMLMesh::arc(p1, p2, nurbs->angle));
+      curves.arc().push_back(XMLMesh::arc(p1, p2, curve->angle));
     }
 
-    void MeshReaderH2DXML::save_nurbs(MeshSharedPtr mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
+    void MeshReaderH2DXML::save_nurbs(MeshSharedPtr mesh, int p1, int p2, Nurbs* curve, XMLMesh::curves_type & curves)
     {
-      XMLMesh::NURBS nurbs_xml(p1, p2, nurbs->degree);
+      XMLMesh::NURBS nurbs_xml(p1, p2, curve->degree);
 
-      int inner = nurbs->np - 2;
-      int outer = nurbs->nk - inner;
+      int inner = curve->np - 2;
 
-      for (int i = 1; i < nurbs->np - 1; i++)
-        nurbs_xml.inner_point().push_back(XMLMesh::inner_point(nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2]));
+      for (int i = 1; i < curve->np - 1; i++)
+        nurbs_xml.inner_point().push_back(XMLMesh::inner_point(curve->pt[i][0], curve->pt[i][1], curve->pt[i][2]));
 
-      int max = nurbs->nk - (nurbs->degree + 1);
-      for (int i = nurbs->degree + 1; i < max; i++)
-        nurbs_xml.knot().push_back(XMLMesh::knot(nurbs->kv[i]));
+      int max = curve->nk - (curve->degree + 1);
+      for (int i = curve->degree + 1; i < max; i++)
+        nurbs_xml.knot().push_back(XMLMesh::knot(curve->kv[i]));
     }
   }
 }

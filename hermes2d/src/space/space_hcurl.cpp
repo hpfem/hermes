@@ -217,8 +217,8 @@ namespace Hermes
           {
             // Find out the (x, y) coordinate.
             double x, y, n_x, n_y, t_x, t_y;
-            Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : nullptr;
-            CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
+            Curve* curve = surf_pos->base->is_curved() ? surf_pos->base->cm->curves[surf_pos->surf_num] : nullptr;
+            CurvMap::nurbs_edge(surf_pos->base, curve, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
             // Calculate.
             rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())
               * bc->value(x, y, n_x, n_y, t_x, t_y) * el;

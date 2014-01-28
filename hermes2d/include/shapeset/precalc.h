@@ -43,10 +43,6 @@ namespace Hermes
       /// Destructor.
       virtual ~PrecalcShapeset();
 
-      /// Ensures subsequent calls to get_active_element() will be returning 'e'.
-      /// Switches the class to the appropriate mode (triangle, quad).
-      virtual void set_active_element(Element* e);
-
       /// Activates a shape function given by its index. The values of the shape function
       /// can then be obtained by setting the required integration rule order by calling
       /// set_quad_order() and after that calling get_values(), get_dx_values(), etc.
@@ -74,13 +70,12 @@ namespace Hermes
 
       int max_index[H2D_NUM_MODES];
 
+      /// Transformed points to the reference domain, used by precalculate.
+      double2 ref_points[H2D_MAX_INTEGRATION_POINTS_COUNT];
+
       virtual void precalculate(int order, int mask);
 
       void update_max_index();
-
-      /// Forces a transform without using push_transform() etc.
-      /// Used by the Solution class.
-      void force_transform(uint64_t sub_idx, Trf* ctm);
 
       friend class RefMap;
       template<typename T> friend class KellyTypeAdapt;

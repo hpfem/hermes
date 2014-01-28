@@ -160,7 +160,7 @@ namespace Hermes
         for (unsigned int i = 0; i < this->size; i++)
         if (pages[i])
           delete pages[i];
-        ::free(pages);
+        free_with_check(pages);
       }
     }
 

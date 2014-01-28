@@ -57,8 +57,8 @@ namespace Hermes
 
     const char * Exception::what() const throw()
     {
-      Hermes::Mixins::Loggable::Static::warn("Hermes::Exceptions::Exception does not support what(), use info() instead.");
-      return "Hermes::Exceptions::Exception does not support what(), use info() instead.";
+      sprintf(const_cast<char*>(this->message_char), "%s", this->message.str().c_str());
+      return const_cast<const char*>(this->message_char);
     }
 
     std::string Exception::info() const

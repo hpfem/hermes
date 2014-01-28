@@ -25,9 +25,30 @@
 #include "exceptions.h"
 #include "matrix.h"
 #include "solvers/interfaces/paralution_solver.h"
-
+#if defined __GNUC__ && defined HAVE_BFD
+#include <signal.h>
+#include "third_party/backtrace.c"
+#endif
 namespace Hermes
 {
+#if defined __GNUC__ && defined HAVE_BFD
+  void hdl(int sig, siginfo_t *siginfo, void *context)
+  {
+    printf("Signal handler exception caught, Signal [number, error_number, code]: [%i, %i, %i].\n.", siginfo->si_signo, siginfo->si_errno, siginfo->si_code);
+
+    void *array[100];
+    size_t size;
+
+    // get void*'s for all entries on the stack
+    size = backtrace(array, 100);
+
+    // print out all the frames to stderr
+    Hermes::backtrace_symbols_fd(array, size, STDERR_FILENO);
+
+    throw Hermes::Exceptions::Exception("signal caught");
+  }
+#endif
+
   Api::Parameter::Parameter(int default_val)
   {
     this->default_val = default_val;
@@ -36,6 +57,12 @@ namespace Hermes
 
   Api::Api()
   {
+#if defined __GNUC__ && defined HAVE_BFD
+    act.sa_sigaction = &hdl;
+    act.sa_flags = SA_SIGINFO;
+    sigaction(SIGSEGV, &this->act, 0);
+#endif
+
     // Insert parameters.
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::numThreads, new Parameter(NUM_THREADS)));
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::matrixSolverType, new Parameter(SOLVER_UMFPACK)));

@@ -209,7 +209,7 @@ namespace Hermes
     {
       // Handle sln.
       if (this->sln && this->sln != initial_guess)
-        ::free(this->sln);
+        free_with_check(this->sln);
       this->sln = malloc_with_check<AbstractParalutionLinearMatrixSolver<Scalar>, Scalar>(this->get_matrix_size(), this);
 
       // Create initial guess.

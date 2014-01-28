@@ -101,7 +101,7 @@ namespace Hermes
       
       Traverse::State* current_state;
       /// Current local matrix.
-      Scalar* local_stiffness_matrix;
+      Scalar local_stiffness_matrix[H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_LOCAL_BASIS_SIZE * 4];
 
       const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces;
       const Hermes::vector<MeshSharedPtr>& meshes;

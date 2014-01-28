@@ -154,10 +154,8 @@ namespace Hermes
                                          Mat_VarFree(matvar);
                                        }
 
-                                       if (v_re)
-                                         ::free(v_re);
-                                       if (v_im)
-                                         ::free(v_im);
+                                        free_with_check(v_re);
+                                        free_with_check(v_im);
                                        Mat_Close(mat);
 
                                        if (!matvar)
@@ -235,7 +233,7 @@ namespace Hermes
             for (int i = 0; i < this->size; i++)
               complex_data[i] = std::complex<double>(real_array[i], imag_array[i]);
             memcpy(this->v, complex_data, sizeof(Scalar)*this->size);
-            ::free(complex_data);
+            free_with_check(complex_data);
           }
         }
 

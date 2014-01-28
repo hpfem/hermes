@@ -45,4 +45,7 @@
 // GLUT
 #cmakedefine NOGLUT
 
+// BFD
+#cmakedefine HAVE_BFD
+
 #endif

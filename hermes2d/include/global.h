@@ -36,6 +36,11 @@
 #define H2D_SOLUTION_ELEMENT_CACHE_SIZE 4 ///< An internal parameter.
 #define H2D_MAX_NODE_ID 10000000
 #define H2D_MAX_SOLUTION_COMPONENTS 2
+#ifdef H2D_USE_SECOND_DERIVATIVES
+#define H2D_NUM_FUNCTION_VALUES 6
+#else
+#define H2D_NUM_FUNCTION_VALUES 3
+#endif
 static const std::string H2D_DG_INNER_EDGE = "-1234567";
 
 /// Centroid of the reference quadrilateral.
