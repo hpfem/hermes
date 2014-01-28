@@ -43,7 +43,7 @@ namespace Hermes
     size = backtrace(array, 100);
 
     // print out all the frames to stderr
-    Hermes::backtrace_symbols_fd(array, size, STDERR_FILENO);
+    Hermes::backtrace_symbols_fd(array, size, 0);
 
     throw Hermes::Exceptions::Exception("signal caught");
   }

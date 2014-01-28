@@ -239,7 +239,7 @@ project(hermes_common)
       ${BLAS_LIBRARY}
       ${F2C_LIBRARY}
       ${PJLIB_LIBRARY}
-      ${LIBBFD_LIBRARY}
+      ${BFD_LIBRARY}
       ${BSON_LIBRARY}
       ${MATIO_LIBRARY}
       ${WINBLAS_LIBRARY} 
