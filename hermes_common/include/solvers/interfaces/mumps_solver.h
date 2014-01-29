@@ -84,9 +84,18 @@ namespace Hermes
       void free();
       Scalar get(unsigned int m, unsigned int n) const;
       void zero();
+
       void add(unsigned int m, unsigned int n, Scalar v);
-      using Matrix<Scalar>::export_to_file;
+
+      /// Matrix export method.
+      /// Utility version
+      /// \See MatrixRhsImportExport<Scalar>::export_to_file.
       void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
+
+      /// Reading matrix
+      /// Utility version
+      /// \See Matrix<Scalar>::import_from_file.
+      void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt);
 
       /// Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);

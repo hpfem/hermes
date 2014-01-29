@@ -416,7 +416,7 @@ namespace Hermes
 
                                        sparse.nir = this->nnz;
                                        sparse.ir = Ai;
-                                       sparse.njc = this->size + 1;
+                                       sparse.njc = this->size;
                                        sparse.jc = (int *)Ap;
                                        sparse.ndata = this->nnz;
 
@@ -524,10 +524,7 @@ namespace Hermes
                                        matfp = Mat_Open(filename, MAT_ACC_RDONLY);
 
                                        if (!matfp)
-                                       {
                                          throw Exceptions::IOException(Exceptions::IOException::Read, filename);
-                                         return;
-                                       }
 
                                        matvar = Mat_VarRead(matfp, var_name);
 
@@ -538,7 +535,7 @@ namespace Hermes
                                          this->nnz = sparse->nir;
                                          this->Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(this->nnz, this);
                                          this->Ai = malloc_with_check<CSMatrix<Scalar>, int>(this->nnz, this);
-                                         this->size = sparse->njc - 1;
+                                         this->size = sparse->njc;
                                          this->Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
 
                                          void* data = nullptr;
@@ -556,7 +553,8 @@ namespace Hermes
                                          memcpy(this->Ax, data, this->nnz * sizeof(Scalar));
                                          if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
                                            free_with_check(data);
-                                         memcpy(this->Ap, sparse->jc, (this->size + 1) * sizeof(Scalar));
+                                         memcpy(this->Ap, sparse->jc, this->size * sizeof(Scalar));
+                                         this->Ap[this->size] = this->nnz;
                                          memcpy(this->Ai, sparse->ir, this->nnz * sizeof(int));
 
                                          if (invert_storage)
