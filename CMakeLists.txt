@@ -269,6 +269,8 @@ project(hermes)
 
     if (BFD_LIBRARY AND BFD_WORKS)
       set( HAVE_BFD YES )
+    else()
+      set(BFD_LIBRARY "")
     endif()
   endif()
 
