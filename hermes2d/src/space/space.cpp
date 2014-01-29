@@ -1385,7 +1385,7 @@ namespace Hermes
       rewind(fpr);
 
       // allocate memory to contain the whole file:
-      char *datar = (char*)malloc(sizeof(char)*size);
+      char *datar = malloc_with_check<char>(size);
       fread(datar, size, 1, fpr);
       fclose(fpr);
 
