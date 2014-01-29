@@ -343,7 +343,7 @@ namespace Hermes
                                          memcpy(this->Ax, data, this->nnz * sizeof(Scalar));
                                          if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
                                            free_with_check(data);
-                                         memcpy(this->Ap, sparse->jc, this->size * sizeof(Scalar));
+                                         memcpy(this->Ap, sparse->jc, this->size * sizeof(int));
                                          this->Ap[this->size] = this->nnz;
                                          memcpy(this->Ai, sparse->ir, this->nnz * sizeof(int));
                                          memcpy(this->irn, this->Ai, this->nnz * sizeof(int));
