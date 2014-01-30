@@ -198,6 +198,7 @@ namespace Hermes
                                       }
                                       fclose(file);
       }
+        break;
 
 #ifdef WITH_BSON
       case EXPORT_FORMAT_BSON:
@@ -303,6 +304,7 @@ namespace Hermes
         break;
       case EXPORT_FORMAT_MATRIX_MARKET:
         throw Hermes::Exceptions::MethodNotImplementedException("SimpleVector<Scalar>::import_from_file - Matrix Market");
+        break;
 #ifdef WITH_BSON
       case EXPORT_FORMAT_BSON:
       {
@@ -350,6 +352,7 @@ namespace Hermes
                                bson_destroy(&br);
                                free_with_check(datar);
       }
+        break;
 #endif
       }
 

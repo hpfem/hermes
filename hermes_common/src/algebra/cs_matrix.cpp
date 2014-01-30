@@ -492,7 +492,7 @@ namespace Hermes
 
                                       fclose(file);
       }
-
+        break;
 #ifdef WITH_BSON
       case EXPORT_FORMAT_BSON:
       {
@@ -547,6 +547,7 @@ namespace Hermes
 
         bson_destroy(&bw);
       }
+        break;
 #endif
       }
     }

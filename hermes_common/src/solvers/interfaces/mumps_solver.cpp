@@ -316,6 +316,7 @@ namespace Hermes
 
                                       fclose(file);
       }
+        break;
 
 #ifdef WITH_BSON
       case EXPORT_FORMAT_BSON:
@@ -371,6 +372,7 @@ namespace Hermes
 
                                bson_destroy(&bw);
       }
+        break;
 #endif
       }
     }
@@ -428,12 +430,13 @@ namespace Hermes
                                          memcpy(this->Ap, sparse->jc, this->size * sizeof(int));
                                          this->Ap[this->size] = this->nnz;
                                          memcpy(this->Ai, sparse->ir, this->nnz * sizeof(int));
-                                         memcpy(this->irn, this->Ai, this->nnz * sizeof(int));
 
+                                         for (unsigned int i = 0; i < this->nnz; i++)
+                                           this->irn[i] = this->Ai[i] + 1;
                                          for (unsigned int i = 0; i < this->size; i++)
                                          {
                                            for (int j = this->Ap[i]; j < this->Ap[i + 1]; j++)
-                                             jcn[j] = i;
+                                             jcn[j] = i + 1;
                                          }
 
                                          if (invert_storage)
@@ -519,12 +522,12 @@ namespace Hermes
                                    this->Ax[index_coeff++] += bson_iterator_double(&it);
                                }
 
-                               memcpy(this->irn, this->Ai, this->nnz * sizeof(int));
-
+                               for (unsigned int i = 0; i < this->nnz; i++)
+                                 this->irn[i] = this->Ai[i] + 1;
                                for (unsigned int i = 0; i < this->size; i++)
                                {
                                  for (int j = this->Ap[i]; j < this->Ap[i + 1]; j++)
-                                   jcn[j] = i;
+                                   jcn[j] = i + 1;
                                }
 
                                if (invert_storage)
