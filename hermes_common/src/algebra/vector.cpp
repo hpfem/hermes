@@ -39,6 +39,26 @@ namespace Hermes
 {
   namespace Algebra
   {
+    double inline real(double x)
+    {
+      return x;
+    }
+
+    double inline imag(double x)
+    {
+      return 0;
+    }
+
+    double inline real(std::complex<double> x)
+    {
+      return x.real();
+    }
+
+    double inline imag(std::complex<double> x)
+    {
+      return x.imag();
+    }
+
     template<typename Scalar>
     Vector<Scalar>::Vector() : size(0)
     {
@@ -178,6 +198,43 @@ namespace Hermes
                                       }
                                       fclose(file);
       }
+
+#ifdef WITH_BSON
+      case EXPORT_FORMAT_BSON:
+      {
+                               // Init bson
+                               bson bw;
+                               bson_init(&bw);
+
+                               // Matrix size.
+                               bson_append_int(&bw, "size", this->size);
+
+                               bson_append_start_array(&bw, "v");
+                               for (unsigned int i = 0; i < this->size; i++)
+                                 bson_append_double(&bw, "v_i", real(this->v[i]));
+                               bson_append_finish_array(&bw);
+
+                               if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+                               {
+                                 bson_append_start_array(&bw, "v-imag");
+                                 for (unsigned int i = 0; i < this->size; i++)
+                                   bson_append_double(&bw, "v_i", imag(this->v[i]));
+                                 bson_append_finish_array(&bw);
+                               }
+                               
+                               // Done.
+                               bson_finish(&bw);
+
+                               // Write to disk.
+                               FILE *fpw;
+                               fpw = fopen(filename, "wb");
+                               const char *dataw = (const char *)bson_data(&bw);
+                               fwrite(dataw, bson_size(&bw), 1, fpw);
+                               fclose(fpw);
+
+                               bson_destroy(&bw);
+      }
+#endif
       }
     }
 
@@ -246,6 +303,54 @@ namespace Hermes
         break;
       case EXPORT_FORMAT_MATRIX_MARKET:
         throw Hermes::Exceptions::MethodNotImplementedException("SimpleVector<Scalar>::import_from_file - Matrix Market");
+#ifdef WITH_BSON
+      case EXPORT_FORMAT_BSON:
+      {
+                               FILE *fpr;
+                               fpr = fopen(filename, "rb");
+
+                               // file size:
+                               fseek(fpr, 0, SEEK_END);
+                               int size = ftell(fpr);
+                               rewind(fpr);
+
+                               // allocate memory to contain the whole file:
+                               char *datar = malloc_with_check<char>(size);
+                               fread(datar, size, 1, fpr);
+                               fclose(fpr);
+
+                               bson br;
+                               bson_init_finished_data(&br, datar, 0);
+
+                               bson_iterator it;
+                               bson sub;
+                               bson_find(&it, &br, "size");
+                               this->size = bson_iterator_int(&it);
+
+                               this->v = malloc_with_check<SimpleVector<Scalar>, Scalar>(this->size, this);
+
+                               bson_iterator it_coeffs;
+                               bson_find(&it_coeffs, &br, "v");
+                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                               bson_iterator_init(&it, &sub);
+                               int index_coeff = 0;
+                               while (bson_iterator_next(&it))
+                                 this->v[index_coeff++] = bson_iterator_double(&it);
+
+                               if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+                               {
+                                 bson_find(&it_coeffs, &br, "v-imag");
+                                 bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                                 bson_iterator_init(&it, &sub);
+                                 index_coeff = 0;
+                                 while (bson_iterator_next(&it))
+                                   ((std::complex<double>)this->v[index_coeff++]).imag(bson_iterator_double(&it));
+                               }
+
+                               bson_destroy(&br);
+                               free_with_check(datar);
+      }
+#endif
       }
 
     }

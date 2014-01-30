@@ -29,6 +29,36 @@ namespace Hermes
 {
   namespace Algebra
   {
+    inline double mumps_to_Scalar(double x)
+    {
+      return x;
+    }
+
+    inline std::complex<double> mumps_to_Scalar(ZMUMPS_COMPLEX x)
+    {
+      return std::complex<double>(x.r, x.i);
+    }
+
+    double inline real(double x)
+    {
+      return x;
+    }
+
+    double inline imag(double x)
+    {
+      return 0;
+    }
+
+    double inline real(ZMUMPS_COMPLEX x)
+    {
+      return mumps_to_Scalar(x).real();
+    }
+
+    double inline imag(ZMUMPS_COMPLEX x)
+    {
+      return mumps_to_Scalar(x).imag();
+    }
+
     extern "C"
     {
 #ifndef _WINDOWS
@@ -39,14 +69,10 @@ namespace Hermes
 
 #define USE_COMM_WORLD  -987654
 
-    inline double mumps_to_Scalar(double x)
+    inline ZMUMPS_COMPLEX& operator +=(ZMUMPS_COMPLEX &a, double b)
     {
-      return x;
-    }
-
-    inline std::complex<double> mumps_to_Scalar(ZMUMPS_COMPLEX x)
-    {
-      return std::complex<double>(x.r, x.i);
+      a.i += b;
+      return a;
     }
 
     inline ZMUMPS_COMPLEX& operator +=(ZMUMPS_COMPLEX &a, std::complex<double> b)
@@ -290,6 +316,62 @@ namespace Hermes
 
                                       fclose(file);
       }
+
+#ifdef WITH_BSON
+      case EXPORT_FORMAT_BSON:
+      {
+                               // Init bson
+                               bson bw;
+                               bson_init(&bw);
+
+                               // Matrix size.
+                               bson_append_int(&bw, "size", this->size);
+                               // Nonzeros.
+                               bson_append_int(&bw, "nnz", this->nnz);
+
+                               if (invert_storage)
+                                 this->switch_orientation();
+
+                               bson_append_start_array(&bw, "Ap");
+                               for (unsigned int i = 0; i < this->size; i++)
+                                 bson_append_int(&bw, "p", this->Ap[i]);
+                               bson_append_finish_array(&bw);
+
+                               bson_append_start_array(&bw, "Ai");
+                               for (unsigned int i = 0; i < this->nnz; i++)
+                                 bson_append_int(&bw, "i", this->Ai[i]);
+                               bson_append_finish_array(&bw);
+
+                               bson_append_start_array(&bw, "Ax");
+                               for (unsigned int i = 0; i < this->nnz; i++)
+                                 bson_append_double(&bw, "x", real(this->Ax[i]));
+                               bson_append_finish_array(&bw);
+
+                               if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+                               {
+                                 bson_append_start_array(&bw, "Ax-imag");
+                                 for (unsigned int i = 0; i < this->nnz; i++)
+                                   bson_append_double(&bw, "x-i", imag(this->Ax[i]));
+                                 bson_append_finish_array(&bw);
+                               }
+                               bson_append_finish_array(&bw);
+
+                               if (invert_storage)
+                                 this->switch_orientation();
+
+                               // Done.
+                               bson_finish(&bw);
+
+                               // Write to disk.
+                               FILE *fpw;
+                               fpw = fopen(filename, "wb");
+                               const char *dataw = (const char *)bson_data(&bw);
+                               fwrite(dataw, bson_size(&bw), 1, fpw);
+                               fclose(fpw);
+
+                               bson_destroy(&bw);
+      }
+#endif
       }
     }
 
@@ -325,8 +407,8 @@ namespace Hermes
                                          this->Ap = malloc_with_check<MumpsMatrix<Scalar>, int>(this->size + 1, this);
                                          this->Ai = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
                                          this->Ax = malloc_with_check<MumpsMatrix<Scalar>, typename mumps_type<Scalar>::mumps_Scalar>(this->nnz, this);
-                                         irn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
-                                         jcn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
+                                         this->irn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
+                                         this->jcn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
 
                                          void* data = nullptr;
                                          if (Hermes::Helpers::TypeIsReal<Scalar>::value)
@@ -371,6 +453,87 @@ namespace Hermes
       case EXPORT_FORMAT_PLAIN_ASCII:
         throw Exceptions::MethodNotOverridenException("CSMatrix<Scalar>::import_from_file - Simple format");
         break;
+#ifdef WITH_BSON
+      case EXPORT_FORMAT_BSON:
+      {
+                               FILE *fpr;
+                               fpr = fopen(filename, "rb");
+
+                               // file size:
+                               fseek(fpr, 0, SEEK_END);
+                               int size = ftell(fpr);
+                               rewind(fpr);
+
+                               // allocate memory to contain the whole file:
+                               char *datar = malloc_with_check<char>(size);
+                               fread(datar, size, 1, fpr);
+                               fclose(fpr);
+
+                               bson br;
+                               bson_init_finished_data(&br, datar, 0);
+
+                               bson_iterator it;
+                               bson sub;
+                               bson_find(&it, &br, "size");
+                               this->size = bson_iterator_int(&it);
+                               bson_find(&it, &br, "nnz");
+                               this->nnz = bson_iterator_int(&it);
+
+                               this->Ap = malloc_with_check<MumpsMatrix<Scalar>, int>(this->size + 1, this);
+                               this->Ai = malloc_with_check<MumpsMatrix<Scalar>, int>(nnz, this);
+                               this->Ax = malloc_with_check<MumpsMatrix<Scalar>, typename mumps_type<Scalar>::mumps_Scalar>(this->nnz, this);
+                               this->irn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
+                               this->jcn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
+
+                               // coeffs
+                               bson_iterator it_coeffs;
+                               bson_find(&it_coeffs, &br, "Ap");
+                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                               bson_iterator_init(&it, &sub);
+                               int index_coeff = 0;
+                               while (bson_iterator_next(&it))
+                                 this->Ap[index_coeff++] = bson_iterator_int(&it);
+                               this->Ap[this->size] = this->nnz;
+
+                               bson_find(&it_coeffs, &br, "Ai");
+                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                               bson_iterator_init(&it, &sub);
+                               index_coeff = 0;
+                               while (bson_iterator_next(&it))
+                                 this->Ai[index_coeff++] = bson_iterator_int(&it);
+
+                               bson_find(&it_coeffs, &br, "Ax");
+                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                               bson_iterator_init(&it, &sub);
+                               index_coeff = 0;
+                               while (bson_iterator_next(&it))
+                                 mumps_assign_Scalar(this->Ax[index_coeff++], bson_iterator_double(&it));
+
+                               if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+                               {
+                                 bson_find(&it_coeffs, &br, "Ax-imag");
+                                 bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                                 bson_iterator_init(&it, &sub);
+                                 index_coeff = 0;
+                                 while (bson_iterator_next(&it))
+                                   this->Ax[index_coeff++] += bson_iterator_double(&it);
+                               }
+
+                               memcpy(this->irn, this->Ai, this->nnz * sizeof(int));
+
+                               for (unsigned int i = 0; i < this->size; i++)
+                               {
+                                 for (int j = this->Ap[i]; j < this->Ap[i + 1]; j++)
+                                   jcn[j] = i;
+                               }
+
+                               if (invert_storage)
+                                 this->switch_orientation();
+
+                               bson_destroy(&br);
+                               free_with_check(datar);
+      }
+#endif
       }
     }
 
@@ -531,6 +694,7 @@ namespace Hermes
       case -10: throw Hermes::Exceptions::LinearMatrixSolverException("Numerically singular matrix."); break;
       default: Hermes::Exceptions::LinearMatrixSolverException("Non-detailed exception in MUMPS: INFOG(1) = %d", param.INFOG(1)); break;
       }
+      return false;
     }
 
     template<typename Scalar>
