@@ -480,7 +480,7 @@ namespace Hermes
                                this->nnz = bson_iterator_int(&it);
 
                                this->Ap = malloc_with_check<MumpsMatrix<Scalar>, int>(this->size + 1, this);
-                               this->Ai = malloc_with_check<MumpsMatrix<Scalar>, int>(nnz, this);
+                               this->Ai = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
                                this->Ax = malloc_with_check<MumpsMatrix<Scalar>, typename mumps_type<Scalar>::mumps_Scalar>(this->nnz, this);
                                this->irn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
                                this->jcn = malloc_with_check<MumpsMatrix<Scalar>, int>(this->nnz, this);
