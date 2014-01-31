@@ -240,7 +240,7 @@ namespace Hermes
 
                                        sparse.nir = this->nnz;
                                        sparse.ir = this->Ai;
-                                       sparse.njc = this->size;
+                                       sparse.njc = this->size + 1;
                                        sparse.jc = (int *)this->Ap;
                                        sparse.ndata = this->nnz;
 
