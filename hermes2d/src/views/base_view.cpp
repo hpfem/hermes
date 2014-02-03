@@ -84,12 +84,12 @@ namespace Hermes
         ScalarView::show(sln, item);
         update_title();
 
-        ::free(coeffs);
+        free_with_check(coeffs);
       }
       template<>
       void BaseView<std::complex<double> >::update_solution()
       {
-        std::complex<double>* coeffs = malloc_with_check<std::complex<double>>(ndof);
+        std::complex<double>* coeffs = malloc_with_check<std::complex<double> >(ndof);
         memset(coeffs, 0, sizeof(std::complex<double>) * ndof);
         if (base_index >= 0)
         {
@@ -106,7 +106,7 @@ namespace Hermes
         ScalarView::show(complex_filter, item);
         update_title();
 
-        ::free(coeffs);
+        free_with_check(coeffs);
       }
 
       template<typename Scalar>

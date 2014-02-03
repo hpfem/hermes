@@ -78,7 +78,7 @@ namespace Hermes
 
       /// Matrix export method.
       /// Utility version
-      /// \See Matrix<Scalar>::export_to_file.
+      /// \See MatrixRhsImportExport<Scalar>::export_to_file.
       void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf", bool invert_storage = false);
       
       /// Reading matrix
@@ -147,8 +147,8 @@ namespace Hermes
 
       void multiply_with_vector(Scalar* vector_in, Scalar*& vector_out, bool vector_out_initialized) const;
 
-      void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
-      void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt);
+      virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
+      virtual void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt);
 
       /// Duplicates a matrix (including allocation).
       virtual CSMatrix<Scalar>* duplicate() const;

@@ -181,19 +181,13 @@ namespace Hermes
         this->label_size = std::max(this->label_size, number_of_elements + 10);
         this->label_count = 0;
 
-        this->verts = (double3*)realloc(this->verts, sizeof(double3)* this->vertex_size);
+        this->verts = realloc_with_check<Orderizer, double3>(this->verts, this->vertex_size, this);
 
-        this->lvert = (int*)realloc(this->lvert, sizeof(int)* label_size);
+        this->lvert = realloc_with_check<Orderizer, int>(this->lvert, label_size, this);
 
-        ltext = (char**)realloc(this->ltext, sizeof(char*)* label_size);
+        ltext = realloc_with_check<Orderizer, char *>(this->ltext, label_size, this);
 
-        lbox = (double2*)realloc(this->lbox, sizeof(double2)* label_size);
-
-        if ((!this->lbox) || (!this->ltext) || (!this->verts) || (!this->lvert))
-        {
-          free();
-          throw Exceptions::Exception("Orderizer out of memory!");
-        }
+        lbox = realloc_with_check<Orderizer, double2>(this->lbox, label_size, this);
       }
 
       Orderizer::~Orderizer()
@@ -381,44 +375,14 @@ namespace Hermes
 
       void Orderizer::free()
       {
-        if (verts != nullptr)
-        {
-          ::free(verts);
-          verts = nullptr;
-        }
-
-        if (lvert != nullptr)
-        {
-          ::free(lvert);
-          lvert = nullptr;
-        }
-
-        if (ltext != nullptr)
-        {
-          ::free(ltext);
-          ltext = nullptr;
-        }
-
-        if (lbox != nullptr)
-        {
-          ::free(lbox);
-          lbox = nullptr;
-        }
-
-        if (tris != nullptr)
-        {
-          ::free(tris);
-          tris = nullptr;
-          ::free(tri_markers);
-          tri_markers = nullptr;
-        }
-        if (edges != nullptr)
-        {
-          ::free(edges);
-          edges = nullptr;
-          ::free(edge_markers);
-          edge_markers = nullptr;
-        }
+          free_with_check(verts, true);
+          free_with_check(lvert, true);
+          free_with_check(ltext, true);
+          free_with_check(lbox, true);
+          free_with_check(tris, true);
+          free_with_check(tri_markers, true);
+          free_with_check(edges, true);
+          free_with_check(edge_markers, true);
       }
 
       template<typename Scalar>

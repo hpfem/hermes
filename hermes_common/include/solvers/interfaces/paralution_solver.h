@@ -119,6 +119,8 @@ namespace Hermes
       paralution::FSAI<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePoint_p_k;
       /// Helper precond for saddle point.
       paralution::SPAI<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePoint_p_s;
+      /// Helper precond for Multi elimination precond.
+      paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >* mcilu_p;
 #endif
     };
   }

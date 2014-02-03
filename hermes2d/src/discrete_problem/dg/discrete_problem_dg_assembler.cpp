@@ -46,8 +46,6 @@ namespace Hermes
       spaces(spaces),
       meshes(meshes)
     {
-      this->local_stiffness_matrix = (Scalar*)malloc(sizeof(Scalar)* H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_LOCAL_BASIS_SIZE * 4);
-
       this->DG_matrix_forms_present = false;
       this->DG_vector_forms_present = false;
       if (this->wf)
@@ -61,8 +59,8 @@ namespace Hermes
 
       if (DG_matrix_forms_present)
       {
-        npss = new PrecalcShapeset*[spaces_size];
-        nrefmaps = new RefMap*[spaces_size];
+        npss = malloc_with_check<PrecalcShapeset*>(spaces_size);
+        nrefmaps = malloc_with_check<RefMap*>(spaces_size);
 
         for (unsigned int j = 0; j < spaces_size; j++)
         {
@@ -90,10 +88,9 @@ namespace Hermes
           delete npss[j];
           delete nrefmaps[j];
         }
-        delete[] npss;
-        delete[] nrefmaps;
+        free_with_check(npss);
+        free_with_check(nrefmaps);
       }
-      ::free(this->local_stiffness_matrix);
     }
 
     template<typename Scalar>
@@ -168,13 +165,12 @@ namespace Hermes
     {
       for (int i = 0; i < this->current_state->rep->nvert; i++)
       {
-        delete[] neighbor_searches[i];
-        if (processed[i])
-          delete[] processed[i];
+        free_with_check(neighbor_searches[i]);
+        free_with_check(processed[i]);
       }
-      delete[] neighbor_searches;
-      delete[] num_neighbors;
-      delete[] processed;
+      free_with_check(neighbor_searches);
+      free_with_check(num_neighbors);
+      free_with_check(processed);
     }
 
     template<typename Scalar>
@@ -232,10 +228,10 @@ namespace Hermes
       // The computation takes place here.
       typename NeighborSearch<Scalar>::ExtendedShapeset** ext_asmlist = new typename NeighborSearch<Scalar>::ExtendedShapeset*[this->spaces_size];
       int n_quadrature_points;
-      Geom<double>** geometry = new Geom<double>*[this->spaces_size];
-      double** jacobian_x_weights = new double*[this->spaces_size];
-      Geom<double>** e = new Geom<double>*[this->spaces_size];
-      DiscontinuousFunc<double>*** testFunctions = new DiscontinuousFunc<double>**[this->spaces_size];
+      Geom<double>** geometry = malloc_with_check<Geom<double>*>(this->spaces_size);
+      double** jacobian_x_weights = malloc_with_check<double*>(this->spaces_size);
+      Geom<double>** e = malloc_with_check<Geom<double>*>(this->spaces_size);
+      DiscontinuousFunc<double>*** testFunctions = malloc_with_check<DiscontinuousFunc<double>**>(this->spaces_size);
 
       // Create the extended shapeset on the union of the central element and its current neighbor.
       int order = DiscreteProblemDGAssembler<Scalar>::dg_order;
@@ -245,12 +241,12 @@ namespace Hermes
         current_neighbor_searches[i]->set_quad_order(order);
         order_base = order;
         n_quadrature_points = init_surface_geometry_points(refmaps, this->spaces_size, order_base, current_state->isurf, current_state->rep->marker, geometry[i], jacobian_x_weights[i]);
-        e[i] = new InterfaceGeom<double>(geometry[i], current_neighbor_searches[i]->neighb_el->marker, current_neighbor_searches[i]->neighb_el->id, current_neighbor_searches[i]->neighb_el->get_diameter());
+        e[i] = new InterfaceGeom<double>(geometry[i], current_neighbor_searches[i]->neighb_el->marker, current_neighbor_searches[i]->neighb_el->id, current_neighbor_searches[i]->neighb_el->diameter);
 
         if (current_mat && DG_matrix_forms_present && !edge_processed)
         {
           ext_asmlist[i] = current_neighbor_searches[i]->create_extended_asmlist(spaces[i], &als[i]);
-          testFunctions[i] = new DiscontinuousFunc<double>*[ext_asmlist[i]->cnt];
+          testFunctions[i] = malloc_with_check<DiscontinuousFunc<double>*>(ext_asmlist[i]->cnt);
           for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
           {
             if (ext_asmlist[i]->dof[func_i] < 0)
@@ -273,7 +269,7 @@ namespace Hermes
 
       DiscontinuousFunc<Scalar>** ext = init_ext_fns(wf->ext, current_neighbor_searches, order);
 
-      DiscontinuousFunc<Scalar>** u_ext_func = new DiscontinuousFunc<Scalar>*[this->spaces_size];
+      DiscontinuousFunc<Scalar>** u_ext_func = malloc_with_check<DiscontinuousFunc<Scalar>*>(this->spaces_size);
       if (this->nonlinear)
       {
         if (u_ext)
@@ -351,11 +347,11 @@ namespace Hermes
             delete testFunctions[i][func_i];
           }
           delete ext_asmlist[i];
-          delete[] testFunctions[i];
+          free_with_check(testFunctions[i]);
         }
       }
-      delete[] testFunctions;
-      delete[] ext_asmlist;
+      free_with_check(testFunctions);
+      free_with_check(ext_asmlist);
 
       if (current_rhs && DG_vector_forms_present)
       {
@@ -420,9 +416,9 @@ namespace Hermes
         delete e[i];
       }
 
-      delete[] geometry;
-      delete[] jacobian_x_weights;
-      delete[] e;
+      free_with_check(geometry);
+      free_with_check(jacobian_x_weights);
+      free_with_check(e);
 
       // This is just cleaning after ourselves.
       // Clear the transformations from the RefMaps and all functions.
@@ -508,7 +504,6 @@ namespace Hermes
     {
 #pragma omp critical (debug_DG)
       {
-        int id = 0;
         bool pass = true;
         if (DEBUG_DG_ASSEMBLING_ELEMENT != -1)
         {
@@ -526,6 +521,7 @@ namespace Hermes
 
         if (!pass)
         {
+          int id = 0;
           for (unsigned int i = 0; i < this->current_state->num; i++)
           {
             NeighborSearch<Scalar>* ns = neighbor_searches[current_state->isurf][i];

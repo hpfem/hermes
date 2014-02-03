@@ -213,10 +213,7 @@ namespace Hermes
       }
 
       if (!this->exceptionMessageCaughtInParallelBlock.empty())
-      {
         throw Hermes::Exceptions::Exception(this->exceptionMessageCaughtInParallelBlock.c_str());
-        return;
-      }
 
       // Sums calculation & error postprocessing.
       this->postprocess_error();

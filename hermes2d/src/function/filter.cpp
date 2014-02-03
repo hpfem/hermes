@@ -145,8 +145,6 @@ namespace Hermes
         }
       }
 
-      this->update_nodes_ptr();
-
       this->order = 20; // fixme
     }
 
@@ -156,8 +154,8 @@ namespace Hermes
       if (unimesh)
       {
         for (int i = 0; i < num; i++)
-          ::free(unidata[i]);
-        ::free(unidata);
+          free_with_check(unidata[i]);
+        free_with_check(unidata);
       }
     }
 
@@ -250,8 +248,12 @@ namespace Hermes
     template<typename Scalar>
     void SimpleFilter<Scalar>::precalculate(int order, int mask)
     {
+#ifdef H2D_USE_SECOND_DERIVATIVES
       if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
-        throw Hermes::Exceptions::Exception("Filter not defined for derivatives.");
+#else
+      if (mask & (H2D_FN_DX | H2D_FN_DY))
+#endif
+        throw Hermes::Exceptions::Exception("SimpleFilter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
       int np = quad->get_num_points(order, this->element->get_mode());
@@ -269,7 +271,7 @@ namespace Hermes
           int a = 0, b = 0, mask = item[i];
           if (mask >= 0x40) { a = 1; mask >>= 6; }
           while (!(mask & 1)) { mask >>= 1; b++; }
-          tab[i] = this->sln[i]->get_values(this->num_components == 1 ? a : j, b);
+          tab[i] = const_cast<Scalar*>(this->sln[i]->get_values(this->num_components == 1 ? a : j, b));
           if (tab[i] == nullptr)
             throw Hermes::Exceptions::Exception("Value of 'item%d' is incorrect in filter definition.", i + 1);
         }
@@ -279,7 +281,7 @@ namespace Hermes
           values.push_back(tab[i]);
 
         // apply the filter
-        filter_fn(np, values, this->cur_node.values[j][0]);
+        filter_fn(np, values, this->values[j][0]);
       }
     }
 
@@ -343,8 +345,6 @@ namespace Hermes
 
       memset(sln_sub, 0, sizeof(sln_sub));
 
-      this->update_nodes_ptr();
-
       this->order = 20; // fixme
     }
 
@@ -362,7 +362,11 @@ namespace Hermes
 
     void ComplexFilter::precalculate(int order, int mask)
     {
+#ifdef H2D_USE_SECOND_DERIVATIVES
       if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
+#else
+      if (mask & (H2D_FN_DX | H2D_FN_DY))
+#endif
         throw Hermes::Exceptions::Exception("Filter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
@@ -371,9 +375,9 @@ namespace Hermes
       this->sln_complex->set_quad_order(order, H2D_FN_VAL);
 
       // obtain corresponding tables
-      filter_fn(np, this->sln_complex->get_values(0, 0), this->cur_node.values[0][0]);
+      filter_fn(np, const_cast<std::complex<double>*>(this->sln_complex->get_values(0, 0)), this->values[0][0]);
       if (num_components > 1)
-        filter_fn(np, this->sln_complex->get_values(1, 0), this->cur_node.values[1][0]);
+        filter_fn(np, const_cast<std::complex<double>*>(this->sln_complex->get_values(1, 0)), this->values[1][0]);
     }
 
     Func<double>* ComplexFilter::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)
@@ -469,7 +473,7 @@ namespace Hermes
         }
 
         // apply the filter
-        filter_fn(np, x, y, values_vector, dx_vector, dy_vector, this->cur_node.values[j][0], this->cur_node.values[j][1], this->cur_node.values[j][2]);
+        filter_fn(np, x, y, values_vector, dx_vector, dy_vector, this->values[j][0], this->values[j][1], this->values[j][2]);
       }
     }
 
@@ -893,7 +897,11 @@ namespace Hermes
 
     void VonMisesFilter::precalculate(int order, int mask)
     {
+#ifdef H2D_USE_SECOND_DERIVATIVES
       if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
+#else
+      if (mask & (H2D_FN_DX | H2D_FN_DY))
+#endif
         throw Hermes::Exceptions::Exception("VonMisesFilter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
@@ -920,7 +928,7 @@ namespace Hermes
         double txy = mu*(dudy[i] + dvdx[i]);
 
         // Von Mises stress
-        this->cur_node.values[0][0][i] = 1.0 / sqrt(2.0) * sqrt(sqr(tx - ty) + sqr(ty - tz) + sqr(tz - tx) + 6 * sqr(txy));
+        this->values[0][0][i] = 1.0 / sqrt(2.0) * sqrt(sqr(tx - ty) + sqr(ty - tz) + sqr(tz - tx) + 6 * sqr(txy));
       }
     }
 
@@ -1004,7 +1012,7 @@ namespace Hermes
       if (this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::free(this->nodes->get(order));
+        free_with_check(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       this->cur_node = node;

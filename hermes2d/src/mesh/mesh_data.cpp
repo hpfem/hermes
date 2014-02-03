@@ -151,9 +151,7 @@ namespace Hermes
 
     void MeshData::parse_mesh(void)
     {
-      std::vector<std::string> varlist;
-
-      int dummy_int;
+     int dummy_int;
       double dummy_dbl;
 
       std::ifstream inFile(mesh_file_.c_str());

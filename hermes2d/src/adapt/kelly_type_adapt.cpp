@@ -144,7 +144,7 @@ namespace Hermes
         this->num_act_elems += meshes[i]->get_num_active_elements();
         int max = meshes[i]->get_max_element_id();
 
-        if(this->errors[i] != nullptr) ::free(this->errors[i]);
+        if(this->errors[i] != nullptr) free_with_check(this->errors[i]);
         this->errors[i] = malloc_with_check(max, this);
         memset(this->errors[i], 0, sizeof(double) * max);
       }
@@ -470,8 +470,8 @@ namespace Hermes
       this->have_errors = true;
 
       if(calc_norm)
-        ::free(norms);
-      ::free(errors_components);
+        free_with_check(norms);
+      free_with_check(errors_components);
 
       // Return error value.
       if((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
@@ -521,7 +521,7 @@ namespace Hermes
       Scalar res = form->value(np, jwt, nullptr, u, u, e, nullptr);
 
       e->free(); delete e;
-      ::free(jwt);
+      free_with_check(jwt);
       u->free_fn(); delete u;
 
       return std::abs(res);
@@ -563,11 +563,11 @@ namespace Hermes
           delete oi[i];
         }
       }
-      ::free(oi);
+      free_with_check(oi);
       delete fake_e;
       for(int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i]->free_ord();
-      ::free(fake_ext_fn);
+      free_with_check(fake_ext_fn);
 
       // eval the form
       Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
@@ -608,16 +608,16 @@ namespace Hermes
           delete ui[i];
         }
       }
-      ::free(ui);
+      free_with_check(ui);
 
       for(int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i]->free_fn();
-      ::free(fake_ext_fn);
+      free_with_check(fake_ext_fn);
 
       e->free();
       delete e;
 
-      ::free(jwt);
+      free_with_check(jwt);
 
       return std::abs(res);
     }
@@ -654,11 +654,11 @@ namespace Hermes
           delete oi[i];
         }
 
-      ::free(oi);
+      free_with_check(oi);
       delete fake_e;
       for(int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i]->free_ord();
-      ::free(fake_ext_fn);
+      free_with_check(fake_ext_fn);
 
       // Evaluate the form.
       Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
@@ -699,15 +699,15 @@ namespace Hermes
           delete ui[i];
         }
 
-      ::free(ui);
+      free_with_check(ui);
       for(int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i]->free_fn();
-      ::free(fake_ext_fn);
+      free_with_check(fake_ext_fn);
 
       e->free();
       delete e;
 
-      ::free(jwt);
+      free_with_check(jwt);
 
       return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
                                   // are defined in (-1, 1). Thus multiplying with 0.5 to correct
@@ -753,7 +753,7 @@ namespace Hermes
         fake_ext_fns[i]->free_ord();
         delete fake_ext_fns[i];
       }
-      ::free(fake_ext_fns);
+      free_with_check(fake_ext_fns);
 
       fake_e->free_ord();
       delete fake_e;
@@ -786,13 +786,13 @@ namespace Hermes
       {
         for(unsigned int i = 0; i < slns.size(); i++)
           ui[i]->free_fn();
-        ::free(ui);
+        free_with_check(ui);
       }
 
       e->free();
       delete e;
 
-      ::free(jwt);
+      free_with_check(jwt);
 
       return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
                                   // are defined in (-1, 1). Thus multiplying with 0.5 to correct

@@ -102,13 +102,13 @@ namespace Hermes
       template<typename Scalar>
       ProjBasedSelector<Scalar>::TrfShapeExp::~TrfShapeExp()
       {
-        delete[] values;
+        free_with_check(values, true);
       }
 
       template<typename Scalar>
       void ProjBasedSelector<Scalar>::TrfShapeExp::allocate(int num_expansion, int num_gip)
       {
-        delete[] values;
+        free_with_check(values, true);
         values = new_matrix<double>(num_expansion, num_gip);
         this->num_expansion = num_expansion;
         this->num_gip = num_gip;
@@ -556,7 +556,7 @@ namespace Hermes
           errors_squared[order_h][order_v] = error_squared * sub_area_corr_coef; //apply area correction coefficient
         } while (order_perm.next());
 
-        delete[] proj_matrix;
+        free_with_check(proj_matrix, true);
         delete[] right_side;
         delete[] shape_inxs;
         delete[] indx;

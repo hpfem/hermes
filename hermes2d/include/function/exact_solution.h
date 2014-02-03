@@ -261,8 +261,8 @@ namespace Hermes
       virtual ~UExtFunction() {};
 
       /// Function returning the value.
-      virtual void value(int n, Func<Scalar>** u_ext, Func<Scalar>* result, Geom<double>* geometry) const = 0;
-      virtual void ord(Func<Hermes::Ord>** u_ext, Func<Hermes::Ord>* result) const = 0;
+      virtual void value(int n, Func<Scalar>** ext, Func<Scalar>** u_ext, Func<Scalar>* result, Geom<double>* geometry) const = 0;
+      virtual void ord(Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext, Func<Hermes::Ord>* result) const = 0;
 
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
       void free(void);

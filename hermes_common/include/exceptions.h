@@ -66,6 +66,8 @@ namespace Hermes
 
     protected:
       std::stringstream message;
+      /// To be compatible with what().
+      char message_char[10000];
     };
 
     /// \brief IO exception.

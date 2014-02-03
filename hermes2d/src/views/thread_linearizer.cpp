@@ -177,7 +177,7 @@ namespace Hermes
 
         this->hash_table = malloc_with_check<ThreadLinearizerMultidimensional<LinearizerDataDimensions>, int>(this->vertex_size, this, true);
         memset(this->hash_table, 0xff, sizeof(int)* this->vertex_size);
-       
+
         this->info = malloc_with_check<ThreadLinearizerMultidimensional<LinearizerDataDimensions>, internal_vertex_info_t>(this->vertex_size, this, true);
       }
 
@@ -271,7 +271,7 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_triangle(int iv0, int iv1, int iv2, int level)
       {
-        double* values[LinearizerDataDimensions::dimension];
+        const double* values[LinearizerDataDimensions::dimension];
         double* physical_x;
         double* physical_y;
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
@@ -381,7 +381,7 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::process_quad(int iv0, int iv1, int iv2, int iv3, int level)
       {
-        double* values[LinearizerDataDimensions::dimension];
+        const double* values[LinearizerDataDimensions::dimension];
         double* physical_x;
         double* physical_y;
         int* vertex_indices = quad_indices[0];
@@ -536,7 +536,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double** values, double* physical_x, double* physical_y, int* vertex_indices) const
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, const double** values, double* physical_x, double* physical_y, int* vertex_indices) const
       {
         split = 0;
         bool done = false;
@@ -557,54 +557,50 @@ namespace Hermes
           return;
 
         // Core of the decision - calculate the approximate error of linearizing the normalized solution
-          for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
+        for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
+        {
+          // Errors in edge midpoints summed up.
+          double error = fabs(values[k][vertex_indices[0]] - midval[2 + k][0])
+            + fabs(values[k][vertex_indices[1]] - midval[2 + k][1])
+            + fabs(values[k][vertex_indices[2]] - midval[2 + k][2]);
+
+          if (mode == HERMES_MODE_QUAD)
+            error += fabs(values[k][vertex_indices[3]] - midval[2 + k][3]);
+
+          // Divide by the edge count.
+          error /= (3 + mode);
+
+          double relative_error = error / this->max_value_approx;
+
+          // We put 3 here so that it is easier to test 'full split' both for quads && triangles.
+          split = (relative_error > this->criterion.error_tolerance) ? 3 : 0;
+
+          // Quads - division type
+          if (mode == HERMES_MODE_QUAD && split)
           {
-            // Errors in edge midpoints summed up.
-            double error = fabs(values[k][vertex_indices[0]] - midval[2 + k][0])
-              + fabs(values[k][vertex_indices[1]] - midval[2 + k][1])
-              + fabs(values[k][vertex_indices[2]] - midval[2 + k][2]);
+            double horizontal_error = fabs(values[k][vertex_indices[1]] - midval[2 + k][1]) + fabs(values[k][vertex_indices[3]] - midval[2 + k][3]);
+            double vertical_error = fabs(values[k][vertex_indices[0]] - midval[2 + k][0]) + fabs(values[k][vertex_indices[2]] - midval[2 + k][2]);
 
-            if (mode == HERMES_MODE_QUAD)
-              error += fabs(values[k][vertex_indices[3]] - midval[2 + k][3]);
-
-            // Divide by the edge count.
-            error /= (3 + mode);
-
-            double relative_error = error / this->max_value_approx;
-            split = relative_error > this->criterion.error_tolerance;
-
-            // Quads - division type
-            if (mode == HERMES_MODE_QUAD && split)
-            {
-              double horizontal_error = fabs(values[k][vertex_indices[1]] - midval[2 + k][1]) + fabs(values[k][vertex_indices[3]] - midval[2 + k][3]);
-              double vertical_error = fabs(values[k][vertex_indices[0]] - midval[2 + k][0]) + fabs(values[k][vertex_indices[2]] - midval[2 + k][2]);
-
-              // decide whether to split horizontally or vertically only
-              if (horizontal_error > 5 * vertical_error)
-                split = 1; // h-split
-              else if (vertical_error > 5 * horizontal_error)
-                split = 2; // v-split
-              else
-                split = 3;
-            }
+            // decide whether to split horizontally or vertically only
+            if (horizontal_error > 5 * vertical_error)
+              split = 1; // h-split
+            else if (vertical_error > 5 * horizontal_error)
+              split = 2; // v-split
+            else
+              split = 3;
+          }
         }
 
         // do the same for the curvature
-        if (curved)
+        if (curved && split != 3)
         {
           for (int i = 0; i < 3 + mode; i++)
           {
             double error = sqr(physical_x[vertex_indices[i]] - midval[0][i])
               + sqr(physical_y[vertex_indices[i]] - midval[1][i]);
-            double diameter = sqr(fns[0]->get_active_element()->get_diameter());
+            double diameter = sqr(fns[0]->get_active_element()->diameter);
 
-            split = (error / diameter) > this->curvature_epsilon;
-            if (split)
-            {
-              if (mode == HERMES_MODE_QUAD)
-                split = 3;
-              break;
-            }
+            split = (error / diameter) > this->curvature_epsilon ? 3 : split;
           }
         }
       }
@@ -618,7 +614,7 @@ namespace Hermes
           fns[k]->set_active_element(current_state->e[k]);
           fns[k]->set_transform(current_state->sub_idx[k]);
           fns[k]->set_quad_order(0, this->item[k]);
-          double* val = fns[k]->get_values(component[k], value_type[k]);
+          const double* val = fns[k]->get_values(component[k], value_type[k]);
 
           for (unsigned int i = 0; i < current_state->e[k]->get_nvert(); i++)
           {
@@ -739,7 +735,7 @@ namespace Hermes
                 if (fabs(value[k] - this->vertices[i][2 + k] / value[k]) > vertex_relative_tolerance)
                   check_value = false;
               }
-              if(check_value)
+              if (check_value)
                 return i;
             }
             // note that we won't return a vertex with a different value than the required one;

@@ -117,8 +117,8 @@ namespace Hermes
       }
       // stote the number of nonzeros
       nnz = pos;
-      ::free(this->pages; this->pages = nullptr);
-      ::free(ai);
+      free_with_check(this->pages; this->pages = nullptr);
+      free_with_check(ai);
 
       //
       MatCreateSeqAIJ(PETSC_COMM_SELF, this->size, this->size, 0, nnz_array, &matrix);
@@ -322,7 +322,7 @@ namespace Hermes
       int *idx = malloc_with_check(this->size, this);
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       vec_get_value(vec, this->size, idx, v);
-      ::free(idx);
+      free_with_check(idx);
     }
 
     template<typename Scalar>
@@ -340,8 +340,8 @@ namespace Hermes
       VecGetValues(vec, this->size, idx, y);
       for (unsigned int i = 0; i < this->size; i++) y[i] *= -1.;
       VecSetValues(vec, this->size, idx, y, INSERT_VALUES);
-      ::free(y);
-      ::free(idx);
+      free_with_check(y);
+      free_with_check(idx);
       return this;
     }
 
@@ -452,7 +452,7 @@ namespace Hermes
       this->time = this->accumulated();
 
       // allocate memory for solution vector
-      ::free(this->sln);
+      free_with_check(this->sln);
       this->sln = malloc_with_check(m->size, this);
       memset(this->sln, 0, m->size * sizeof(Scalar));
 
@@ -462,7 +462,7 @@ namespace Hermes
 
       // copy solution to the output solution vector
       vec_get_value(x, m->size, idx, this->sln);
-      ::free(idx);
+      free_with_check(idx);
 
       KSPDestroy(ksp);
       VecDestroy(x);

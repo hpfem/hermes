@@ -100,6 +100,12 @@ namespace Hermes
         push_transform(son[k]);
     }
 
+    void Transformable::force_transform(uint64_t sub_idx, Trf* ctm)
+    {
+      this->sub_idx = sub_idx;
+      this->ctm = ctm;
+    }
+
     void Transformable::push_transform(int son)
     {
       assert(element != nullptr);

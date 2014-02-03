@@ -713,9 +713,9 @@ namespace Hermes
 
   void ButcherTable::free()
   {
-    ::free(this->B);
-    ::free(this->B2);
-    ::free(this->C);
+    free_with_check(this->B);
+    free_with_check(this->B2);
+    free_with_check(this->C);
   }
 
   double ButcherTable::get_B(unsigned int i)

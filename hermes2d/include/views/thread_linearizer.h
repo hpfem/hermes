@@ -67,7 +67,7 @@ namespace Hermes
 
         void process_quad(int iv0, int iv1, int iv2, int iv3, int level);
 
-        void split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, double** val, double* phx, double* phy, int* indices) const;
+        void split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, const double** val, double* phx, double* phy, int* indices) const;
 
         bool quad_flip(int iv0, int iv1, int iv2, int iv3) const;
 
@@ -120,7 +120,7 @@ namespace Hermes
         double midval[LinearizerDataDimensions::dimension + 2][5];
         Element* rep_element;
         bool curved;
-        double* val[LinearizerDataDimensions::dimension];
+        const double* val[LinearizerDataDimensions::dimension];
         
         /// From LinearizerMultidimensional - for convenience & speed.
         LinearizerOutputType linearizerOutputType;

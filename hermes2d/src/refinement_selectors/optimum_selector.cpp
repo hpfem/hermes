@@ -434,20 +434,20 @@ namespace Hermes
       template<typename Scalar>
       void OptimumSelector<Scalar>::update_cands_info(Hermes::vector<Cand>& candidates, CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const
       {
-        typename Hermes::vector<Cand>::const_iterator cand = candidates.begin();
-        while (cand != candidates.end())
+        for(int i = 0; i < candidates.size(); i++)
         {
           CandsInfo* info = nullptr;
-          if(cand->split == H2D_REFINEMENT_H) info = &info_h;
-          else if(cand->split == H2D_REFINEMENT_P) info = &info_p;
-          else if(cand->split == H2D_REFINEMENT_ANISO_H || cand->split == H2D_REFINEMENT_ANISO_V) info = &info_aniso;
-          else { throw Hermes::Exceptions::Exception("Invalid candidate type: %d.", cand->split); };
+          Cand& cand = candidates[i];
+          if(cand.split == H2D_REFINEMENT_H) info = &info_h;
+          else if(cand.split == H2D_REFINEMENT_P) info = &info_p;
+          else if(cand.split == H2D_REFINEMENT_ANISO_H || cand.split == H2D_REFINEMENT_ANISO_V) info = &info_aniso;
+          else { throw Hermes::Exceptions::Exception("Invalid candidate type: %d.", cand.split); };
 
           //evaluate elements of candidates
-          const int num_elems = cand->get_num_elems();
+          const int num_elems = cand.get_num_elems();
           for(int i = 0; i < num_elems; i++)
           {
-            int elem_order_h = H2D_GET_H_ORDER(cand->p[i]), elem_order_v = H2D_GET_V_ORDER(cand->p[i]);
+            int elem_order_h = H2D_GET_H_ORDER(cand.p[i]), elem_order_v = H2D_GET_V_ORDER(cand.p[i]);
             if(elem_order_h != elem_order_v)
               info->uniform_orders = false;
             if(info->min_quad_order < 0 || info->max_quad_order < 0)
@@ -458,9 +458,6 @@ namespace Hermes
               info->max_quad_order = H2D_MAKE_QUAD_ORDER(std::max(H2D_GET_H_ORDER(info->max_quad_order), elem_order_h), std::max(H2D_GET_V_ORDER(info->max_quad_order), elem_order_v));
             }
           }
-
-          //next candidate
-          cand++;
         }
       }
 

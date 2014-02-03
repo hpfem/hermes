@@ -42,18 +42,18 @@ namespace Hermes
 
       // Edges.
       this->edge_proj_matrix = new_matrix<double>(edge_proj_matrix_size, edge_proj_matrix_size);
-      edge_p = new double[edge_proj_matrix_size];
+      edge_p = malloc_with_check<double>(edge_proj_matrix_size);
 
       // Bubbles - triangles.
       this->tri_bubble_np = ref_map_shapeset.get_num_bubbles(order, HERMES_MODE_TRIANGLE);
       bubble_proj_matrix_tri = new_matrix<double>(tri_bubble_np, tri_bubble_np);
-      bubble_tri_p = new double[tri_bubble_np];
+      bubble_tri_p = malloc_with_check<double>(tri_bubble_np);
 
       // Bubbles - quads.
       order = H2D_MAKE_QUAD_ORDER(order, order);
       this->quad_bubble_np = ref_map_shapeset.get_num_bubbles(order, HERMES_MODE_QUAD);
       bubble_proj_matrix_quad = new_matrix<double>(quad_bubble_np, quad_bubble_np);
-      bubble_quad_p = new double[quad_bubble_np];
+      bubble_quad_p = malloc_with_check<double>(quad_bubble_np);
 
       this->precalculate_cholesky_projection_matrices_bubble();
       this->precalculate_cholesky_projection_matrix_edge();
@@ -61,12 +61,12 @@ namespace Hermes
 
     CurvMapStatic::~CurvMapStatic()
     {
-      delete[] edge_proj_matrix;
-      delete[] bubble_proj_matrix_tri;
-      delete[] bubble_proj_matrix_quad;
-      delete[] edge_p;
-      delete[] bubble_tri_p;
-      delete[] bubble_quad_p;
+      free_with_check(edge_proj_matrix, true);
+      free_with_check(bubble_proj_matrix_tri, true);
+      free_with_check(bubble_proj_matrix_quad, true);
+      free_with_check(edge_p);
+      free_with_check(bubble_tri_p);
+      free_with_check(bubble_quad_p);
     }
 
     double** CurvMapStatic::calculate_bubble_projection_matrix(int* indices, ElementMode2D mode)
@@ -250,16 +250,35 @@ namespace Hermes
 
     CurvMapStatic curvMapStatic;
 
-    Curve::Curve()
-    {
-      ref = 0; twin = false;
-    }
-
-    void Curve::unref()
+    Curve::Curve(CurvType type) : type(type)
     {
     }
 
-    Nurbs::Nurbs()
+    Curve::~Curve()
+    {
+    }
+
+    Arc::Arc() : Curve(ArcType)
+    {
+      kv[0] = kv[1] = kv[2] = 0;
+      kv[3] = kv[4] = kv[5] = 1;
+    }
+
+    Arc::Arc(double angle) : Curve(ArcType), angle(angle)
+    {
+      kv[0] = kv[1] = kv[2] = 0;
+      kv[3] = kv[4] = kv[5] = 1;
+    }
+
+    Arc::Arc(const Arc* other) : Curve(ArcType)
+    {
+      this->angle = other->angle;
+
+      memcpy(this->kv, other->kv, 6 * sizeof(double));
+      memcpy(this->pt, other->pt, 3 * sizeof(double3));
+    }
+
+    Nurbs::Nurbs() : Curve(NurbsType)
     {
       pt = nullptr;
       kv = nullptr;
@@ -267,21 +286,17 @@ namespace Hermes
 
     Nurbs::~Nurbs()
     {
-      if (pt)
-        delete[] pt;
-      if (kv)
-        delete[] kv;
+      free_with_check(pt);
+      free_with_check(kv);
     };
 
-    void Nurbs::unref()
+    Nurbs::Nurbs(const Nurbs* other) : Curve(NurbsType)
     {
-      if (!--this->ref)
-      {
-        delete[] pt;
-        pt = nullptr;
-        delete[] kv;
-        kv = nullptr;
-      }
+      this->degree = other->degree;
+      this->nk = other->nk;
+      this->np = other->np;
+      this->kv = malloc_with_check<double>(nk);
+      this->pt = malloc_with_check<double3>(np);
     }
 
     static double lambda_0(double x, double y)
@@ -301,38 +316,58 @@ namespace Hermes
     {
       coeffs = nullptr;
       ctm = nullptr;
+      memset(curves, 0, sizeof(Curve*)* H2D_MAX_NUMBER_EDGES);
     }
 
-    CurvMap::CurvMap(CurvMap* cm)
+    CurvMap::CurvMap(const CurvMap* cm)
     {
-      memcpy(this, cm, sizeof(CurvMap));
-      coeffs = new double2[nc];
+      this->nc = cm->nc;
+      this->order = cm->order;
+      /// \todo Find out if this is safe.
+      this->ctm = cm->ctm;
+      this->coeffs = new double2[nc];
       memcpy(coeffs, cm->coeffs, sizeof(double2)* nc);
 
-      if (toplevel)
+      this->toplevel = cm->toplevel;
+      if (this->toplevel)
       {
         for (int i = 0; i < 4; i++)
-        if (nurbs[i] != nullptr)
-          nurbs[i]->ref++;
+        {
+          if (cm->curves[i])
+          {
+            if (cm->curves[i]->type == NurbsType)
+              this->curves[i] = new Nurbs((Nurbs*)cm->curves[i]);
+            else
+              this->curves[i] = new Arc((Arc*)cm->curves[i]);
+          }
+          else
+            this->curves[i] = nullptr;
+        }
+      }
+      else
+      {
+        memset(curves, 0, sizeof(Curve*)* H2D_MAX_NUMBER_EDGES);
+        this->parent = cm->parent;
+        this->sub_idx = cm->sub_idx;
       }
     }
 
     CurvMap::~CurvMap()
     {
-      if (coeffs != nullptr)
-      {
-        delete[] coeffs;
-        coeffs = nullptr;
-      }
+      this->free();
+    }
+
+    void CurvMap::free()
+    {
+      free_with_check(this->coeffs);
 
       if (toplevel)
       {
         for (int i = 0; i < 4; i++)
-        if (nurbs[i] != nullptr)
+        if (curves[i])
         {
-          nurbs[i]->unref();
-          if (nurbs[i]->ref <= 0)
-            delete nurbs[i];
+          delete curves[i];
+          curves[i] = nullptr;
         }
       }
     }
@@ -363,7 +398,7 @@ namespace Hermes
       }
     }
 
-    void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x,
+    void CurvMap::nurbs_edge(Element* e, Curve* curve, int edge, double t, double& x,
       double& y, double& n_x, double& n_y, double& t_x, double& t_y)
     {
       // Nurbs curves are parametrized from 0 to 1.
@@ -383,7 +418,7 @@ namespace Hermes
       double abs_v = sqrt(sqr(v[0]) + sqr(v[1]));
 
       // Straight line.
-      if (nurbs == nullptr)
+      if (!curve)
       {
         x = A[0] + t * v[0];
         y = A[1] + t * v[1];
@@ -395,15 +430,15 @@ namespace Hermes
       else
       {
         // Circular arc.
-        if (nurbs->arc)
+        if (curve->type == ArcType)
         {
-          double3* cp = nurbs->pt;
+          double3* cp = ((Arc*)curve)->pt;
           x = y = 0.0;
           double sum = 0.0;  // sum of basis fns and weights
 
-          for (int i = 0; i < nurbs->np; i++)
+          for (int i = 0; i < ((Arc*)curve)->np; i++)
           {
-            double basis = nurbs_basis_fn(i, nurbs->degree, t, nurbs->kv);
+            double basis = nurbs_basis_fn(i, ((Arc*)curve)->degree, t, ((Arc*)curve)->kv);
             sum += cp[i][2] * basis;
             double x_i = cp[i][0];
             double y_i = cp[i][1];
@@ -436,7 +471,7 @@ namespace Hermes
           // Distance L between M and center of circle S
           // can be calculated using a right-angle triangle
           // whose one angle is alpha/2.
-          double alpha_rad = nurbs->angle * M_PI / 180.;
+          double alpha_rad = ((Arc*)curve)->angle * M_PI / 180.;
           double L = 0.5 * abs_v / tan(0.5 * alpha_rad);
           //printf("***** L = %g\n", L);
 
@@ -517,7 +552,7 @@ namespace Hermes
 
           // Correcting sign so that the normal points outside
           // if the angle is negative.
-          if (nurbs->angle < 0)
+          if (((Arc*)curve)->angle < 0)
           {
             n_x *= -1;
             n_y *= -1;
@@ -529,13 +564,13 @@ namespace Hermes
         // FIXME - calculation of normal and tangential vectors needs to be added.
         else
         {
-          double3* cp = nurbs->pt;
+          double3* cp = ((Nurbs*)curve)->pt;
           x = y = 0.0;
           double sum = 0.0;  // sum of basis fns and weights
 
-          for (int i = 0; i < nurbs->np; i++)
+          for (int i = 0; i < ((Nurbs*)curve)->np; i++)
           {
-            double basis = nurbs_basis_fn(i, nurbs->degree, t, nurbs->kv);
+            double basis = nurbs_basis_fn(i, ((Nurbs*)curve)->degree, t, ((Nurbs*)curve)->kv);
             sum += cp[i][2] * basis;
             double x_i = cp[i][0];
             double y_i = cp[i][1];
@@ -566,11 +601,11 @@ namespace Hermes
       { { -1.0, -1.0 }, { 1.0, -1.0 }, { 1.0, 1.0 }, { -1.0, 1.0 } }
     };
 
-    void CurvMap::nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y)
+    void CurvMap::nurbs_edge_0(Element* e, Curve* curve, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y)
     {
       int va = edge;
       int vb = e->next_vert(edge);
-      nurbs_edge(e, nurbs, edge, t, x, y, n_x, n_y, t_x, t_y);
+      nurbs_edge(e, curve, edge, t, x, y, n_x, n_y, t_x, t_y);
 
       x -= 0.5 * ((1 - t) * (e->vn[va]->x) + (1 + t) * (e->vn[vb]->x));
       y -= 0.5 * ((1 - t) * (e->vn[va]->y) + (1 + t) * (e->vn[vb]->y));
@@ -580,7 +615,7 @@ namespace Hermes
       y *= k;
     }
 
-    void CurvMap::calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double& x, double& y)
+    void CurvMap::calc_ref_map_tri(Element* e, Curve** curve, double xi_1, double xi_2, double& x, double& y)
     {
       double  fx, fy;
       x = y = 0.0;
@@ -627,23 +662,23 @@ namespace Hermes
           // edge part
           double t = l_b - l_a;
           double n_x, n_y, t_x, t_y;
-          nurbs_edge_0(e, nurbs[j], j, t, fx, fy, n_x, n_y, t_x, t_y);
+          nurbs_edge_0(e, curve[j], j, t, fx, fy, n_x, n_y, t_x, t_y);
           x += fx * l_a  * l_b;
           y += fy * l_a  * l_b;
         }
       }
     }
 
-    void CurvMap::calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,
+    void CurvMap::calc_ref_map_quad(Element* e, Curve** curve, double xi_1, double xi_2,
       double& x, double& y)
     {
       double ex[H2D_MAX_NUMBER_EDGES], ey[H2D_MAX_NUMBER_EDGES];
 
       double n_x, n_y, t_x, t_y;
-      nurbs_edge(e, nurbs[0], 0, xi_1, ex[0], ey[0], n_x, n_y, t_x, t_y);
-      nurbs_edge(e, nurbs[1], 1, xi_2, ex[1], ey[1], n_x, n_y, t_x, t_y);
-      nurbs_edge(e, nurbs[2], 2, -xi_1, ex[2], ey[2], n_x, n_y, t_x, t_y);
-      nurbs_edge(e, nurbs[3], 3, -xi_2, ex[3], ey[3], n_x, n_y, t_x, t_y);
+      nurbs_edge(e, curve[0], 0, xi_1, ex[0], ey[0], n_x, n_y, t_x, t_y);
+      nurbs_edge(e, curve[1], 1, xi_2, ex[1], ey[1], n_x, n_y, t_x, t_y);
+      nurbs_edge(e, curve[2], 2, -xi_1, ex[2], ey[2], n_x, n_y, t_x, t_y);
+      nurbs_edge(e, curve[3], 3, -xi_2, ex[3], ey[3], n_x, n_y, t_x, t_y);
 
       x = (1 - xi_2) / 2.0 * ex[0] + (1 + xi_1) / 2.0 * ex[1] +
         (1 + xi_2) / 2.0 * ex[2] + (1 - xi_1) / 2.0 * ex[3] -
@@ -656,12 +691,12 @@ namespace Hermes
         (1 + xi_1)*(1 + xi_2) / 4.0 * e->vn[2]->y - (1 - xi_1)*(1 + xi_2) / 4.0 * e->vn[3]->y;
     }
 
-    void CurvMap::calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f)
+    void CurvMap::calc_ref_map(Element* e, Curve** curve, double xi_1, double xi_2, double2& f)
     {
       if (e->get_mode() == HERMES_MODE_QUAD)
-        calc_ref_map_quad(e, nurbs, xi_1, xi_2, f[0], f[1]);
+        calc_ref_map_quad(e, curve, xi_1, xi_2, f[0], f[1]);
       else
-        calc_ref_map_tri(e, nurbs, xi_1, xi_2, f[0], f[1]);
+        calc_ref_map_tri(e, curve, xi_1, xi_2, f[0], f[1]);
     }
 
     void CurvMap::edge_coord(Element* e, int edge, double t, double2& x, double2& v) const
@@ -682,7 +717,7 @@ namespace Hermes
       v[0] /= lenght; v[1] /= lenght;
     }
 
-    void CurvMap::calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj) const
+    void CurvMap::calc_edge_projection(Element* e, int edge, Curve** nurbs, int order, double2* proj) const
     {
       int i, j, k;
       int mo1 = g_quad_1d_std.get_max_order();
@@ -810,7 +845,7 @@ namespace Hermes
       }
     }
 
-    void CurvMap::calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj) const
+    void CurvMap::calc_bubble_projection(Element* e, Curve** curve, int order, double2* proj) const
     {
       ref_map_pss.set_active_element(e);
 
@@ -843,7 +878,7 @@ namespace Hermes
         double2 a;
         a[0] = ctm->m[0] * pt[j][0] + ctm->t[0];
         a[1] = ctm->m[1] * pt[j][1] + ctm->t[1];
-        calc_ref_map(e, nurbs, a[0], a[1], fn[j]);
+        calc_ref_map(e, curve, a[0], a[1], fn[j]);
       }
 
       double2* result = proj + e->get_nvert() + e->get_nvert() * (order - 1);
@@ -902,17 +937,17 @@ namespace Hermes
         // WARNING: do not change the format of the array 'coeffs'. If it changes,
         // RefMap::set_active_element() has to be changed too.
 
-        Nurbs** nurbs;
+        Curve** curves;
         if (toplevel == false)
         {
           ref_map_pss.set_active_element(e);
           ref_map_pss.set_transform(this->sub_idx);
-          nurbs = parent->cm->nurbs;
+          curves = parent->cm->curves;
         }
         else
         {
           ref_map_pss.reset_transform();
-          nurbs = e->cm->nurbs;
+          curves = e->cm->curves;
         }
         ctm = ref_map_pss.get_ctm();
 
@@ -929,10 +964,10 @@ namespace Hermes
 
         // edge part
         for (int edge = 0; edge < e->get_nvert(); edge++)
-          calc_edge_projection(e, edge, nurbs, order, coeffs);
+          calc_edge_projection(e, edge, curves, order, coeffs);
 
         //bubble part
-        calc_bubble_projection(e, nurbs, order, coeffs);
+        calc_bubble_projection(e, curves, order, coeffs);
 
         RefMap::set_element_iro_cache(e);
       }
@@ -940,7 +975,7 @@ namespace Hermes
 
     void CurvMap::get_mid_edge_points(Element* e, double2* pt, int n)
     {
-      Nurbs** nurbs = this->nurbs;
+      Curve** curves = this->curves;
       Transformable tran;
       tran.set_active_element(e);
 
@@ -948,7 +983,7 @@ namespace Hermes
       {
         tran.set_transform(this->sub_idx);
         e = e->cm->parent;
-        nurbs = e->cm->nurbs;
+        curves = e->cm->curves;
       }
 
       ctm = tran.get_ctm();
@@ -957,7 +992,7 @@ namespace Hermes
       {
         xi_1 = ctm->m[0] * pt[i][0] + ctm->t[0];
         xi_2 = ctm->m[1] * pt[i][1] + ctm->t[1];
-        calc_ref_map(e, nurbs, xi_1, xi_2, pt[i]);
+        calc_ref_map(e, curves, xi_1, xi_2, pt[i]);
       }
     }
 

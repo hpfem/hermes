@@ -42,30 +42,41 @@ namespace Hermes
     enum
     {
       H2D_FN_VAL_0 = 0x0001, H2D_FN_VAL_1 = 0x0040, // Function values
-      H2D_FN_DX_0  = 0x0002, H2D_FN_DX_1  = 0x0080, // First derivative
-      H2D_FN_DY_0  = 0x0004, H2D_FN_DY_1  = 0x0100, // First derivative
+      H2D_FN_DX_0 = 0x0002, H2D_FN_DX_1 = 0x0080, // First derivative
+      H2D_FN_DY_0 = 0x0004, H2D_FN_DY_1 = 0x0100, // First derivative
+#ifdef H2D_USE_SECOND_DERIVATIVES
       H2D_FN_DXX_0 = 0x0008, H2D_FN_DXX_1 = 0x0200, // Second derivative
       H2D_FN_DYY_0 = 0x0010, H2D_FN_DYY_1 = 0x0400, // Second derivative
       H2D_FN_DXY_0 = 0x0020, H2D_FN_DXY_1 = 0x0800  // Second mixed derivative
+#endif
     };
 
     /// Both components are usually requested together...
     const int H2D_FN_VAL = H2D_FN_VAL_0 | H2D_FN_VAL_1;
-    const int H2D_FN_DX  = H2D_FN_DX_0  | H2D_FN_DX_1;
-    const int H2D_FN_DY  = H2D_FN_DY_0  | H2D_FN_DY_1;
+    const int H2D_FN_DX = H2D_FN_DX_0 | H2D_FN_DX_1;
+    const int H2D_FN_DY = H2D_FN_DY_0 | H2D_FN_DY_1;
+    const int H2D_FN_DEFAULT = H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY;            ///< default precalculation mask
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+    const int H2D_FN_COMPONENT_0 = H2D_FN_VAL_0 | H2D_FN_DX_0 | H2D_FN_DY_0 | H2D_FN_DXX_0 | H2D_FN_DYY_0 | H2D_FN_DXY_0;
+    const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN_DXX_1 | H2D_FN_DYY_1 | H2D_FN_DXY_1;
+#else
+    const int H2D_FN_COMPONENT_0 = H2D_FN_VAL_0 | H2D_FN_DX_0 | H2D_FN_DY_0;
+    const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1;
+#endif
+
+    const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
+    const int H2D_CURL = H2D_FN_DX | H2D_FN_DY;
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
     const int H2D_FN_DXX = H2D_FN_DXX_0 | H2D_FN_DXX_1;
     const int H2D_FN_DYY = H2D_FN_DYY_0 | H2D_FN_DYY_1;
     const int H2D_FN_DXY = H2D_FN_DXY_0 | H2D_FN_DXY_1;
 
-    const int H2D_FN_DEFAULT = H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY;            ///< default precalculation mask
-    const int H2D_FN_ALL = H2D_FN_DEFAULT | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY; ///< precalculate everything
-
-    const int H2D_FN_COMPONENT_0 = H2D_FN_VAL_0 | H2D_FN_DX_0 | H2D_FN_DY_0 | H2D_FN_DXX_0 | H2D_FN_DYY_0 | H2D_FN_DXY_0;
-    const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN_DXX_1 | H2D_FN_DYY_1 | H2D_FN_DXY_1;
-
-    const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
     const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
-    const int H2D_CURL = H2D_FN_DX | H2D_FN_DY;
+
+    const int H2D_FN_ALL = H2D_FN_DEFAULT | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY; ///< precalculate everything
+#endif
 
     /// @ingroup meshFunctions
     /// \brief Represents an arbitrary function defined on an element.
@@ -122,6 +133,7 @@ namespace Hermes
       /// \return The y partial derivative of the function at all points of the current integration rule.
       const Scalar* get_dy_values(int component = 0) const;
 
+#ifdef H2D_USE_SECOND_DERIVATIVES
       /// \brief Returns the second x partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The x second partial derivative of the function at all points of the current integration rule.
@@ -136,6 +148,7 @@ namespace Hermes
       /// \param component[in] The component of the function (0 or 1).
       /// \return The second mixed derivative of the function at all points of the current integration rule.
       const Scalar* get_dxy_values(int component = 0) const;
+#endif
 
       /// \brief Returns function values.
       /// \param component[in] The component of the function (0 or 1).
@@ -148,12 +161,10 @@ namespace Hermes
       /// Activates an integration rule of the specified order. Subsequent calls to
       /// get_values(), get_dx_values() etc. will be returning function values at these points.
       /// \param order[in] Integration rule order.
-      /// \param mask[in] A combination of one or more of the constants H2D_FN_VAL, H2D_FN_DX, H2D_FN_DY,
-      ///   H2D_FN_DXX, H2D_FN_DYY, H2D_FN_DXY specifying the values which should be precalculated. The default is
-      ///   H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY. You can also use H2D_FN_ALL to precalculate everything.
+      /// \param mask[in] A combination of one or more of the constants H2D_FN_VAL, H2D_FN_DX, H2D_FN_DY, ...
       void set_quad_order(unsigned int order, int mask = H2D_FN_DEFAULT);
 
-      Scalar* get_values(int a, int b);
+      const Scalar* get_values(int a, int b) const;
 
       /// \brief Returns the polynomial degree of the function being represented by the class.
       virtual int get_fn_order() const;
@@ -166,7 +177,12 @@ namespace Hermes
       /// Internal.
       virtual void pop_transform();
 
+      /// Sets the active element
       virtual void set_active_element(Element* e);
+
+      /// Sets the current transform at once as if it was created by multiple calls to push_transform().
+      /// \param idx[in] The number of the sub-element, as returned by get_transform().
+      virtual void set_transform(uint64_t idx);
 
     protected:
       /// \brief Selects the quadrature points in which the function will be evaluated.
@@ -176,43 +192,45 @@ namespace Hermes
       /// \param quad_2d[in] The quadrature points.
       virtual void set_quad_2d(Quad2D* quad_2d);
 
+      /// Empties the stack, loads identity transform.
+      virtual void reset_transform();
+      /// For internal use only.
+      virtual void force_transform(uint64_t sub_idx, Trf* ctm);
+
       /// \brief Frees all precalculated tables.
       virtual void free() = 0;
 
-      struct Node
-      {
-        Scalar values[H2D_MAX_SOLUTION_COMPONENTS][6][H2D_MAX_INTEGRATION_POINTS_COUNT];
-      };
+      /// The data.
+      Scalar values[H2D_MAX_SOLUTION_COMPONENTS][H2D_NUM_FUNCTION_VALUES][H2D_MAX_INTEGRATION_POINTS_COUNT];
+      /// Flag that the data are not 'dirty'
+      bool values_valid;
 
       /// \brief Returns the polynomial degree of the function at given edge. To be overridden in derived classes.
       /// \param edge[in] Edge at which the order should be evaluated. (0-3)
       virtual int get_edge_fn_order(int edge) const;
 
       /// precalculates the current function at the current integration points.
-      virtual void precalculate(int order, int mask) = 0;
+      virtual void precalculate(int order, int mask);
 
-      int order;          ///< current function polynomial order
+      /// Current function polynomial order
+      int order;
 
-      int num_components; ///< number of vector components
+      /// Number of vector components
+      int num_components;
 
-      /// Current Node.
-      Node cur_node;
-      bool cur_node_dirty;
+      /// With changed sub-element mapping, or an element, or anything else there comes the need for a change of the current values.
+      /// This invalidates the current values.
+      /// See values_valid
+      void invalidate_values();
 
-      /// With changed sub-element mapping, there comes the need for a change of the current
-      /// Node table nodes.
-      void update_nodes_ptr();
+      /// List of available quadratures
+      Quad2D* quads[H2D_MAX_QUADRATURES];
+      /// Active quadrature (index into 'quads')
+      int cur_quad;
 
-      /// For internal use only.
-      void force_transform(uint64_t sub_idx, Trf* ctm);
+      /// Index to mask table
+      static int idx2mask[H2D_NUM_FUNCTION_VALUES][2];
 
-      Quad2D* quads[H2D_MAX_QUADRATURES]; ///< list of available quadratures
-
-      int cur_quad;     ///< active quadrature (index into 'quads')
-
-      static void check_params(int component, int num_components);
-
-      static int idx2mask[6][2];  ///< index to mask table
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class RefinementSelectors::H1ProjBasedSelector;
       template<typename T> friend class RefinementSelectors::L2ProjBasedSelector;

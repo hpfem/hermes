@@ -182,7 +182,7 @@ namespace Hermes
           delete_tree(father->sons[0]);
           delete_tree(father->sons[1]);
         }
-        ::free(father);
+        free_with_check(father);
       }
 
       int StreamView::create_streamline(double x_start, double y_start, int idx)
@@ -266,7 +266,7 @@ namespace Hermes
 
         streamlines[idx] = malloc_with_check(k, this);
         memcpy(streamlines[idx], buffer, k*sizeof(double2));
-        ::free(buffer);
+        free_with_check(buffer);
 
         return k;
       }
@@ -372,7 +372,7 @@ namespace Hermes
         }
         num_stream = k;
 
-        ::free(bnd_edges);
+        free_with_check(bnd_edges);
       }
 
       void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, int xitem, int yitem)
@@ -416,7 +416,7 @@ namespace Hermes
         for (int i = 0; i < num_stream; i++)
           streamlength[i] =  create_streamline(initial_points[i][0], initial_points[i][1], i);
 
-        ::free(initial_points);
+        free_with_check(initial_points);
 
         vec->unlock_data();
 
@@ -522,7 +522,7 @@ namespace Hermes
           glEnd();
         }
 
-        ::free(tvert);
+        free_with_check(tvert);
         vec->unlock_data();
       }
 
@@ -559,7 +559,7 @@ namespace Hermes
           if(num_stream > 0)
           {
             num_stream--;
-            ::free(streamlines[num_stream]);
+            free_with_check(streamlines[num_stream]);
             refresh();
           }
           break;
@@ -609,9 +609,9 @@ namespace Hermes
       {
         delete_tree(root);
         for (int i = 0; i < num_stream; i++)
-          ::free(streamlines[i]);
-        ::free(streamlines);
-        ::free(streamlength);
+          free_with_check(streamlines[i]);
+        free_with_check(streamlines);
+        free_with_check(streamlength);
         delete vec;
       }
     }

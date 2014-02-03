@@ -48,7 +48,7 @@ namespace Hermes
           }
           if (big == 0.0)
           {
-            ::free(vv);
+            free_with_check(vv);
             throw Exceptions::Exception("Singular matrix in routine LUDCMP!");
           }
           vv[i] = 1.0 / big;

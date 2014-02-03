@@ -248,19 +248,10 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Invalid arguments to DiscontinuousFunc constructor.");
       if (support_on_neighbor)
       {
-        fn_neighbor = fn;
-        if (reverse_neighbor_side)
-        {
-          this->val_neighbor = fn->val;
-          this->dx_neighbor = fn->dx;
-          this->dy_neighbor = fn->dy;
-        }
-        else
-        {
-          this->val_neighbor = fn->val;
-          this->dx_neighbor = fn->dx;
-          this->dy_neighbor = fn->dy;
-        }
+        this->fn_neighbor = fn;
+        this->val_neighbor = fn->val;
+        this->dx_neighbor = fn->dx;
+        this->dy_neighbor = fn->dy;      
       }
       else
       {
@@ -274,18 +265,9 @@ namespace Hermes
     DiscontinuousFunc<Ord>::DiscontinuousFunc(Func<Ord>* fn_c, Func<Ord>* fn_n, bool reverse) : Func<Ord>(),
       fn_central(fn_c), fn_neighbor(fn_n), reverse_neighbor_side(reverse)
     {
-      if (reverse_neighbor_side)
-      {
-        this->val_neighbor = fn_neighbor->val;
-        this->dx_neighbor = fn_neighbor->dx;
-        this->dy_neighbor = fn_neighbor->dy;
-      }
-      else
-      {
-        this->val_neighbor = fn_neighbor->val;
-        this->dx_neighbor = fn_neighbor->dx;
-        this->dy_neighbor = fn_neighbor->dy;
-      }
+      this->val_neighbor = fn_neighbor->val;
+      this->dx_neighbor = fn_neighbor->dx;
+      this->dy_neighbor = fn_neighbor->dy;
 
       this->val = fn_central->val;
       this->dx = fn_central->dx;
@@ -796,7 +778,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode)
+    void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode)
     {
       // Sanity check.
       if (fu == nullptr)
@@ -805,7 +787,7 @@ namespace Hermes
       Quad2D* quad = &g_quad_2d_std;
       int np = quad->get_num_points(order, mode);
 
-      fu->value(np, u_ext, u, geometry);
+      fu->value(np, ext, u_ext, u, geometry);
     }
 
 
@@ -815,7 +797,6 @@ namespace Hermes
       if (quad == nullptr)
         quad = &g_quad_2d_std;
 
-      double3* pt = quad->get_points(order, mode);
       int np = quad->get_num_points(order, mode);
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
@@ -836,7 +817,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode)
+    Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode)
     {
       int nc = 1;
       Quad2D* quad = &g_quad_2d_std;
@@ -848,7 +829,7 @@ namespace Hermes
       if (fu == nullptr)
         throw Hermes::Exceptions::Exception("nullptr UExtFunction in Func<Scalar>*::init_fn().");
 
-      fu->value(np, u_ext, u, geometry);
+      fu->value(np, ext, u_ext, u, geometry);
 
       return u;
     }
@@ -862,15 +843,15 @@ namespace Hermes
     template HERMES_API void init_fn_preallocated(Func<double>* u, MeshFunction<double>* fu, const int order);
     template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, MeshFunction<std::complex<double> >* fu, const int order);
 
-    template HERMES_API void init_fn_preallocated(Func<double>* u, UExtFunction<double>* fu, Func<double>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
-    template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
+    template HERMES_API void init_fn_preallocated(Func<double>* u, UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext,const int order, Geom<double>* geometry, ElementMode2D mode);
+    template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
 
 
     template HERMES_API Func<double>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);
     template HERMES_API Func<std::complex<double> >* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);
 
-    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
-    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
+    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
+    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
 
     template class HERMES_API DiscontinuousFunc<double>;
     template class HERMES_API DiscontinuousFunc<std::complex<double> >;

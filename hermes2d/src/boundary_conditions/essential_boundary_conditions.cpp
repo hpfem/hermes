@@ -203,8 +203,8 @@ namespace Hermes
       this->markers.clear();
       this->BCs.clear();
       EssentialBoundaryCondition<Scalar>* any_set = nullptr;
-      for(this->iterator = begin(); iterator != end(); iterator++)
-        for(Hermes::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); it++)
+      for(this->iterator = begin(); iterator != end(); ++iterator)
+          for(Hermes::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); ++it)
         {
           if(hermes_any_set)
             throw Hermes::Exceptions::Exception("Attempt to define a BC on HERMES_ANY together with a BC on a specific part: '%s'.", it->c_str());
