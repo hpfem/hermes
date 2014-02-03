@@ -4072,7 +4072,7 @@ namespace Hermes
       simple_quad_index_to_order
     };
 
-    int H1ShapesetJacobi::get_max_index(ElementMode2D mode) { return max_index[mode]; }
+    int H1ShapesetJacobi::get_max_index(ElementMode2D mode) const { return max_index[mode]; }
 
     H1ShapesetJacobi::H1ShapesetJacobi()
     {

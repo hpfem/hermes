@@ -18,6 +18,7 @@
 
 #include "../global.h"
 #include "../shapeset/shapeset_common.h"
+#include "../shapeset/precalc.h"
 
 namespace Hermes
 {
@@ -118,6 +119,8 @@ namespace Hermes
       int order;
 
     private:
+      PrecalcShapeset ref_map_pss;
+
       /// Transformation (2x2) matrix.
       Trf* ctm;
 
@@ -162,8 +165,8 @@ namespace Hermes
       void calc_edge_projection(Element* e, int edge, Curve** nurbs, int order, double2* proj) const;
 
       //// Bubble part of projection based interpolation /////////////////////////////////////////////////
-      void old_projection(Element* e, int order, double2* proj, double* old[2]) const;
-      void calc_bubble_projection(Element* e, Curve** nurbs, int order, double2* proj) const;
+      void old_projection(Element* e, int order, double2* proj, double* old[2]);
+      void calc_bubble_projection(Element* e, Curve** nurbs, int order, double2* proj);
 
       static CurvMap* create_son_curv_map(Element* e, int son);
 

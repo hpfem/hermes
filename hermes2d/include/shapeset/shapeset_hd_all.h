@@ -30,7 +30,7 @@ namespace Hermes
       HdivShapesetLegendre();
       virtual Shapeset* clone() { return new HdivShapesetLegendre(*this); };
       virtual SpaceType get_space_type() const { return HERMES_HDIV_SPACE; }
-      virtual int get_max_index(ElementMode2D mode);
+      virtual int get_max_index(ElementMode2D mode) const;
       virtual int get_id() const { return 20; }
       
       static const int max_index[H2D_NUM_MODES];

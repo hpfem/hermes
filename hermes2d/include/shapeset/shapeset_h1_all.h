@@ -31,7 +31,7 @@ namespace Hermes
       H1ShapesetJacobi();
       virtual Shapeset* clone() { return new H1ShapesetJacobi(*this); };
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
-      virtual int get_max_index(ElementMode2D mode);
+      virtual int get_max_index(ElementMode2D mode) const;
       
       virtual int get_id() const { return 1; }
       

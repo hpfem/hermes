@@ -8190,7 +8190,7 @@ namespace Hermes
       leg_quad_index_to_order
     };
 
-    int L2ShapesetLegendre::get_max_index(ElementMode2D mode) { return max_index[mode]; }
+    int L2ShapesetLegendre::get_max_index(ElementMode2D mode) const { return max_index[mode]; }
 
     L2ShapesetLegendre::L2ShapesetLegendre()
     {

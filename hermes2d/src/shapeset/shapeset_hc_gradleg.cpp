@@ -15802,7 +15802,7 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Bad index of last bubble");
     }
 
-    int HcurlShapesetGradLeg::get_max_index(ElementMode2D mode) { return max_index[mode]; }
+    int HcurlShapesetGradLeg::get_max_index(ElementMode2D mode) const { return max_index[mode]; }
 
     HcurlShapesetGradLeg::HcurlShapesetGradLeg()
     {

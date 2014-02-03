@@ -46,7 +46,7 @@ namespace Hermes
       L2ShapesetTaylor(bool contains_means = true);
       virtual Shapeset* clone() { return new L2ShapesetTaylor(*this); };
       virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
-      virtual int get_max_index(ElementMode2D mode);
+      virtual int get_max_index(ElementMode2D mode) const;
       virtual int get_id() const { return 31; }
 
       /// Returns a complete set of indices of bubble functions for an element of the given order.

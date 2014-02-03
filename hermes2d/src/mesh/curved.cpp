@@ -31,8 +31,8 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    H1ShapesetJacobi ref_map_shapeset;
-    PrecalcShapeset ref_map_pss(&ref_map_shapeset);
+    static H1ShapesetJacobi ref_map_shapeset;
+    static PrecalcShapeset ref_map_pss_static(&ref_map_shapeset);
 
     CurvMapStatic::CurvMapStatic()
     {
@@ -93,13 +93,13 @@ namespace Hermes
           int o = ref_map_shapeset.get_order(ii, mode) + ref_map_shapeset.get_order(ij, mode);
           o = std::max(H2D_GET_V_ORDER(o), H2D_GET_H_ORDER(o));
 
-          ref_map_pss.set_active_shape(ii);
-          ref_map_pss.set_quad_order(o, H2D_FN_VAL);
-          double* fni = ref_map_pss.deep_copy_array();
+          ref_map_pss_static.set_active_shape(ii);
+          ref_map_pss_static.set_quad_order(o, H2D_FN_VAL);
+          double* fni = ref_map_pss_static.deep_copy_array();
 
-          ref_map_pss.set_active_shape(ij);
-          ref_map_pss.set_quad_order(o, H2D_FN_VAL);
-          double* fnj = ref_map_pss.deep_copy_array();
+          ref_map_pss_static.set_active_shape(ij);
+          ref_map_pss_static.set_quad_order(o, H2D_FN_VAL);
+          double* fnj = ref_map_pss_static.deep_copy_array();
 
           double3* pt = g_quad_2d_std.get_points(o, mode);
           double val = 0.0;
@@ -123,7 +123,7 @@ namespace Hermes
       {
         Element e;
         e.nvert = 3;
-        ref_map_pss.set_active_element(&e);
+        ref_map_pss_static.set_active_element(&e);
         int* indices = ref_map_shapeset.get_bubble_indices(ref_map_shapeset.get_max_order(), HERMES_MODE_TRIANGLE);
         curvMapStatic.bubble_proj_matrix_tri = calculate_bubble_projection_matrix(indices, HERMES_MODE_TRIANGLE);
 
@@ -136,7 +136,7 @@ namespace Hermes
       {
       Element e;
       e.nvert = 4;
-      ref_map_pss.set_active_element(&e);
+      ref_map_pss_static.set_active_element(&e);
       int *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
       curvMapStatic.bubble_proj_matrix_quad = calculate_bubble_projection_matrix(indices, HERMES_MODE_QUAD);
 
@@ -312,14 +312,14 @@ namespace Hermes
       return  0.5 * (y + 1);
     }
 
-    CurvMap::CurvMap()
+    CurvMap::CurvMap() : ref_map_pss(PrecalcShapeset(&ref_map_shapeset))
     {
       coeffs = nullptr;
       ctm = nullptr;
       memset(curves, 0, sizeof(Curve*)* H2D_MAX_NUMBER_EDGES);
     }
 
-    CurvMap::CurvMap(const CurvMap* cm)
+    CurvMap::CurvMap(const CurvMap* cm) : ref_map_pss(PrecalcShapeset(&ref_map_shapeset))
     {
       this->nc = cm->nc;
       this->order = cm->order;
@@ -813,7 +813,7 @@ namespace Hermes
       }
     }
 
-    void CurvMap::old_projection(Element* e, int order, double2* proj, double* old[2]) const
+    void CurvMap::old_projection(Element* e, int order, double2* proj, double* old[2])
     {
       int mo2 = g_quad_2d_std.get_max_order(e->get_mode());
       int np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
@@ -845,7 +845,7 @@ namespace Hermes
       }
     }
 
-    void CurvMap::calc_bubble_projection(Element* e, Curve** curve, int order, double2* proj) const
+    void CurvMap::calc_bubble_projection(Element* e, Curve** curve, int order, double2* proj)
     {
       ref_map_pss.set_active_element(e);
 
@@ -916,55 +916,52 @@ namespace Hermes
 
     void CurvMap::update_refmap_coeffs(Element* e)
     {
-//#pragma omp critical (updating_coeffs_shared_refmap)
+      ref_map_pss.set_quad_2d(&g_quad_2d_std);
+      ref_map_pss.set_active_element(e);
+
+      // allocate projection coefficients
+      int nv = e->get_nvert();
+      int ne = order - 1;
+      int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
+      int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
+      nc = nv + nv*ne + nb;
+      this->coeffs = realloc_with_check<double2>(this->coeffs, nc);
+
+      // WARNING: do not change the format of the array 'coeffs'. If it changes,
+      // RefMap::set_active_element() has to be changed too.
+      Curve** curves;
+      if (toplevel == false)
       {
-        ref_map_pss.set_quad_2d(&g_quad_2d_std);
         ref_map_pss.set_active_element(e);
-
-        // allocate projection coefficients
-        int nv = e->get_nvert();
-        int ne = order - 1;
-        int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
-        int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
-        nc = nv + nv*ne + nb;
-        this->coeffs = realloc_with_check<double2>(this->coeffs, nc);
-
-        // WARNING: do not change the format of the array 'coeffs'. If it changes,
-        // RefMap::set_active_element() has to be changed too.
-        Curve** curves;
-        if (toplevel == false)
-        {
-          ref_map_pss.set_active_element(e);
-          ref_map_pss.set_transform(this->sub_idx);
-          curves = parent->cm->curves;
-        }
-        else
-        {
-          ref_map_pss.reset_transform();
-          curves = e->cm->curves;
-        }
-        ctm = ref_map_pss.get_ctm();
-
-        // calculation of new_ projection coefficients
-        // vertex part
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
-        {
-          coeffs[i][0] = e->vn[i]->x;
-          coeffs[i][1] = e->vn[i]->y;
-        }
-
-        if (e->cm->toplevel == false)
-          e = e->cm->parent;
-
-        // edge part
-        for (int edge = 0; edge < e->get_nvert(); edge++)
-          calc_edge_projection(e, edge, curves, order, coeffs);
-
-        //bubble part
-        calc_bubble_projection(e, curves, order, coeffs);
-
-        RefMap::set_element_iro_cache(e);
+        ref_map_pss.set_transform(this->sub_idx);
+        curves = parent->cm->curves;
       }
+      else
+      {
+        ref_map_pss.reset_transform();
+        curves = e->cm->curves;
+      }
+      ctm = ref_map_pss.get_ctm();
+
+      // calculation of new_ projection coefficients
+      // vertex part
+      for (unsigned int i = 0; i < e->get_nvert(); i++)
+      {
+        coeffs[i][0] = e->vn[i]->x;
+        coeffs[i][1] = e->vn[i]->y;
+      }
+
+      if (e->cm->toplevel == false)
+        e = e->cm->parent;
+
+      // edge part
+      for (int edge = 0; edge < e->get_nvert(); edge++)
+        calc_edge_projection(e, edge, curves, order, coeffs);
+
+      //bubble part
+      calc_bubble_projection(e, curves, order, coeffs);
+
+      RefMap::set_element_iro_cache(e);
     }
 
     void CurvMap::get_mid_edge_points(Element* e, double2* pt, int n)

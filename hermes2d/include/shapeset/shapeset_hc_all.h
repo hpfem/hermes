@@ -29,7 +29,7 @@ namespace Hermes
     public:
       HcurlShapesetGradLeg();
       virtual Shapeset* clone() { return new HcurlShapesetGradLeg(*this); };
-      virtual int get_max_index(ElementMode2D mode);
+      virtual int get_max_index(ElementMode2D mode) const;
       virtual int get_id() const { return 13; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
       
