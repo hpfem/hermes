@@ -325,7 +325,7 @@ namespace Hermes
       this->order = cm->order;
       /// \todo Find out if this is safe.
       this->ctm = cm->ctm;
-      this->coeffs = new double2[nc];
+      this->coeffs = malloc_with_check<double2>(nc, true);
       memcpy(coeffs, cm->coeffs, sizeof(double2)* nc);
 
       this->toplevel = cm->toplevel;
@@ -359,7 +359,7 @@ namespace Hermes
 
     void CurvMap::free()
     {
-      free_with_check(this->coeffs);
+      free_with_check(this->coeffs, true);
 
       if (toplevel)
       {
@@ -916,7 +916,7 @@ namespace Hermes
 
     void CurvMap::update_refmap_coeffs(Element* e)
     {
-#pragma omp critical (updating_coeffs_shared_refmap)
+//#pragma omp critical (updating_coeffs_shared_refmap)
       {
         ref_map_pss.set_quad_2d(&g_quad_2d_std);
         ref_map_pss.set_active_element(e);
@@ -927,16 +927,10 @@ namespace Hermes
         int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
         int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
         nc = nv + nv*ne + nb;
-        if (coeffs != nullptr)
-        {
-          delete[] coeffs;
-          coeffs = nullptr;
-        }
-        coeffs = new double2[nc];
+        this->coeffs = realloc_with_check<double2>(this->coeffs, nc);
 
         // WARNING: do not change the format of the array 'coeffs'. If it changes,
         // RefMap::set_active_element() has to be changed too.
-
         Curve** curves;
         if (toplevel == false)
         {

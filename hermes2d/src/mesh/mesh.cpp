@@ -337,6 +337,13 @@ namespace Hermes
       // set vertex and edge node pointers
       if (v0 == v1 || v1 == v2 || v2 == v0)
         throw Hermes::Exceptions::MeshLoadFailureException("Some of the vertices of element #%d are identical which is impossible.", e->id);
+
+      if (v0->x == v1->x && v0->x == v2->x)
+        throw Hermes::Exceptions::MeshLoadFailureException("Vertices in element %i share coordinates: [%i, %i, %i].", e->id, v0->id, v1->id, v2->id);
+
+      if (v0->y == v1->y && v0->y == v2->y)
+        throw Hermes::Exceptions::MeshLoadFailureException("Vertices in element %i share coordinates: [%i, %i, %i].", e->id, v0->id, v1->id, v2->id);
+
       e->vn[0] = v0;
       e->vn[1] = v1;
       e->vn[2] = v2;
