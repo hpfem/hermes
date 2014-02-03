@@ -216,7 +216,7 @@ namespace Hermes
       if (initial_guess)
         memcpy(this->sln, initial_guess, this->get_matrix_size() * sizeof(Scalar));
       else
-        memset(this->sln, Scalar(0), this->get_matrix_size() * sizeof(Scalar));
+        memset(this->sln, 0, this->get_matrix_size() * sizeof(Scalar));
 
       paralution::LocalVector<Scalar> x;
       x.SetDataPtr(&this->sln, "Initial guess", matrix->get_size());
