@@ -13,7 +13,7 @@ MeshFunctionSharedPtr<double> es(new Solution<double>());
 double* es_v;
 
 // Uncomment to have OpenGL output throughout calculation.
-#define SHOW_OUTPUT
+//#define SHOW_OUTPUT
 
 // Under relaxation in Multiscale
 #define OMEGA 1.0
