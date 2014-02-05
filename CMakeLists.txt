@@ -249,6 +249,11 @@ project(hermes)
 
     set(HERMES_RELEASE_FLAGS "${CMAKE_CXX_FLAGS} -DNDEBUG -O3")
     set(HERMES_DEBUG_FLAGS   "${CMAKE_CXX_FLAGS} -g -D_DEBUG")
+    if(H2D_DEBUG)
+      set(HERMES_FLAGS ${HERMES_DEBUG_FLAGS})
+    else()
+      set(HERMES_FLAGS ${HERMES_RELEASE_FLAGS})
+    endif()
   endif()
 
   # This overrides CXX flags for MSVC
