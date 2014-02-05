@@ -278,9 +278,9 @@ std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExa
         time_step_length = end_time(solvedExample) - time;
         time = end_time(solvedExample);
       }
+      else
+        time += time_step_length;
     }
-
-    time += time_step_length;
 
     bool finish_timedep = is_timedep(solvedExample) && (iteration == iteration_count - 1);
 
@@ -650,9 +650,9 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
         time_step_length = end_time(solvedExample) - time;
         time = end_time(solvedExample);
       }
+      else
+        time += time_step_length;
     }
-
-    time += time_step_length;
 
     prev_sln_2.set_vector(&sln_2);
     prev_sln_1.set_vector(&sln_1);
@@ -740,9 +740,9 @@ void exact_solver_timedep(MeshSharedPtr mesh, SolvedExample solvedExample, int p
         time_step_length = end_time(solvedExample) - time;
         time = end_time(solvedExample);
       }
+      else
+        time += time_step_length;
     }
-
-    time += time_step_length;
   }
   Solution<double>::vector_to_solution(solver.get_sln_vector(), full_space, es);
 
