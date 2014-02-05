@@ -244,6 +244,9 @@ namespace Hermes
       choldc(this->edge_proj_matrix, this->edge_proj_matrix_size, this->edge_p);
     }
 
+    HERMES_API Quad1DStd g_quad_1d_std;
+    HERMES_API Quad2DStd g_quad_2d_std;
+
     CurvMapStatic curvMapStatic;
 
     Curve::Curve()
