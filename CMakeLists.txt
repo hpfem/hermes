@@ -91,7 +91,7 @@ project(hermes)
     #
     # Enable OpenMP for shared memory processing.
     #
-    set(WITH_OPENMP             YES)
+    set(WITH_OPENMP             NO)
 
     # If MPI is enabled, the MPI library installed on the system should be found by
     # CMake automatically. If the found library doesn't match the one used to compile the
