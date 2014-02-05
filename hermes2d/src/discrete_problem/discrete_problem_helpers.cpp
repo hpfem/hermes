@@ -79,15 +79,17 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void DiscreteProblemMatrixVector<Scalar>::set_matrix(SparseMatrix<Scalar>* mat)
+      bool DiscreteProblemMatrixVector<Scalar>::set_matrix(SparseMatrix<Scalar>* mat)
       {
         this->current_mat = mat;
+        return true;
       }
 
       template<typename Scalar>
-      void DiscreteProblemMatrixVector<Scalar>::set_rhs(Vector<Scalar>* rhs)
+      bool DiscreteProblemMatrixVector<Scalar>::set_rhs(Vector<Scalar>* rhs)
       {
         this->current_rhs = rhs;
+        return true;
       }
 
       template class HERMES_API DiscreteProblemRungeKutta<double>;

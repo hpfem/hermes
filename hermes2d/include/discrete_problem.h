@@ -64,19 +64,19 @@ namespace Hermes
       void set_linear(bool to_set = true, bool dirichlet_lift_accordingly = true);
 
       /// Assembling.
-      void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = nullptr);
+      bool assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = nullptr);
       /// Assembling.
       /// Without the matrix.
-      void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = nullptr);
+      bool assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = nullptr);
       /// Light version passing nullptr for the coefficient vector. External solutions
       /// are initialized with zeros.
-      void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = nullptr);
+      bool assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = nullptr);
       /// Light version passing nullptr for the coefficient vector. External solutions
       /// are initialized with zeros.
       /// Without the matrix.
-      void assemble(Vector<Scalar>* rhs);
+      bool assemble(Vector<Scalar>* rhs);
       /// Assembling.
-      void assemble(Solution<Scalar>** u_ext_sln, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs);
+      bool assemble(Solution<Scalar>** u_ext_sln, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs);
 
       /// set time information for time-dependent problems.
       void set_time(double time);
@@ -115,8 +115,8 @@ namespace Hermes
       bool nonlinear, add_dirichlet_lift;
       
       /// DiscreteProblemMatrixVector methods.
-      void set_matrix(SparseMatrix<Scalar>* mat);
-      void set_rhs(Vector<Scalar>* rhs);
+      bool set_matrix(SparseMatrix<Scalar>* mat);
+      bool set_rhs(Vector<Scalar>* rhs);
       void invalidate_matrix();
       
       /// Assembly data.

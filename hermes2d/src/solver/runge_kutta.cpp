@@ -168,8 +168,8 @@ namespace Hermes
       }
       else
       {
-        this->stage_wf_left.set_verbose_output(false);
-        this->stage_wf_right.set_verbose_output(false);
+        this->stage_wf_left.set_verbose_output(true);
+        this->stage_wf_right.set_verbose_output(true);
       }
 
       // The tensor discrete problem is created in two parts. First, matrix_left is the Jacobian

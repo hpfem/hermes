@@ -189,8 +189,8 @@ namespace Hermes
 #pragma endregion
 
       virtual void assemble_residual(bool store_previous_residual) = 0;
-      virtual void assemble_jacobian(bool store_previous_jacobian) = 0;
-      virtual void assemble(bool store_previous_jacobian, bool store_previous_residual) = 0;
+      virtual bool assemble_jacobian(bool store_previous_jacobian) = 0;
+      virtual bool assemble(bool store_previous_jacobian, bool store_previous_residual) = 0;
 
       /// \return Whether or not should the processing continue.
       virtual void on_damping_factor_updated();

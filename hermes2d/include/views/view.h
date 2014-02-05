@@ -34,6 +34,9 @@ namespace Hermes
 #define H2D_DEFAULT_HEIGHT 400
 #define H2DV_SCALE_LOG_BASE 1.005 ///< Base of the scale coefficient. Scale = base^{mouse move}.
 
+#define transform_x(x) ((x * scale + trans_x) + center_x)
+#define transform_y(y) (center_y - (y * scale + trans_y))
+
       /// Wait events.
       enum ViewWaitEvent {
         HERMES_WAIT_CLOSE, ///< Wait for all windows to close.
@@ -193,8 +196,6 @@ namespace Hermes
         virtual void get_palette_color(double x, float* gl_color); ///< Fills gl_color with palette color. Assumes that gl_color points to a vector of three components (RGB).
 
       protected: //internal functions
-#define transform_x(x) ((x * scale + trans_x) + center_x)
-#define transform_y(y) (center_y - (y * scale + trans_y))
         inline double untransform_x(double x) { return (x - center_x - trans_x) / scale; }
         inline double untransform_y(double y) { return (center_y - y - trans_y) / scale; }
 

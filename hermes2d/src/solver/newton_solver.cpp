@@ -79,19 +79,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::assemble_jacobian(bool store_previous_jacobian)
+    bool NewtonSolver<Scalar>::assemble_jacobian(bool store_previous_jacobian)
     {
-      this->dp->assemble(this->sln_vector, this->get_jacobian());
+      bool result = this->dp->assemble(this->sln_vector, this->get_jacobian());
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number()); 
+      return result;
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::assemble(bool store_previous_jacobian, bool store_previous_residual)
+    bool NewtonSolver<Scalar>::assemble(bool store_previous_jacobian, bool store_previous_residual)
     {
-      this->dp->assemble(this->sln_vector, this->get_jacobian(), this->get_residual());
+      bool result = this->dp->assemble(this->sln_vector, this->get_jacobian(), this->get_residual());
       this->get_residual()->change_sign();
       this->process_vector_output(this->get_residual(), this->get_current_iteration_number());
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number());
+      return result;
     }
 
     template<typename Scalar>

@@ -98,8 +98,8 @@ namespace Hermes
         this->spaces[space_i]->check();
 
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
-      if (!this->spaces[space_i]->is_up_to_date())
-        throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
+        if (!this->spaces[space_i]->is_up_to_date())
+          throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
 
       return true;
     }
@@ -150,23 +150,37 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_matrix(SparseMatrix<Scalar>* mat)
+    bool DiscreteProblem<Scalar>::set_matrix(SparseMatrix<Scalar>* mat)
     {
-      if (mat && this->current_mat != mat)
-        this->invalidate_matrix();
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_matrix(mat);
+
       for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_matrix(mat);
+
+      if (mat && this->current_mat != mat)
+      {
+        this->invalidate_matrix();
+        return false;
+      }
+      else
+        return true;
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_rhs(Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::set_rhs(Vector<Scalar>* rhs)
     {
-      if (rhs && this->current_rhs != rhs)
-        this->invalidate_matrix();
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_rhs(rhs);
+
       for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_rhs(rhs);
+
+      if (rhs && this->current_rhs != rhs)
+      {
+        this->invalidate_matrix();
+        return false;
+      }
+      else
+        return true;
     }
 
     template<typename Scalar>
@@ -200,25 +214,25 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
-      assemble((Solution<Scalar>**)nullptr, mat, rhs);
+      return assemble((Solution<Scalar>**)nullptr, mat, rhs);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, Vector<Scalar>* rhs)
     {
-      assemble(coeff_vec, nullptr, rhs);
+      return assemble(coeff_vec, nullptr, rhs);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(Vector<Scalar>* rhs)
     {
-      assemble((Solution<Scalar>**)nullptr, nullptr, rhs);
+      return assemble((Solution<Scalar>**)nullptr, nullptr, rhs);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
       Solution<Scalar>** u_ext_sln = nullptr;
 
@@ -234,7 +248,7 @@ namespace Hermes
         }
       }
 
-      assemble(u_ext_sln, mat, rhs);
+      bool result = assemble(u_ext_sln, mat, rhs);
 
       if (this->nonlinear && coeff_vec)
       {
@@ -242,6 +256,8 @@ namespace Hermes
           delete u_ext_sln[i];
         delete[] u_ext_sln;
       }
+
+      return result;
     }
 
     template<typename Scalar>
@@ -253,9 +269,9 @@ namespace Hermes
       for (unsigned int ext_i = 0; ext_i < this->wf->ext.size(); ext_i++)
         meshes.push_back(this->wf->ext[ext_i]->get_mesh());
       for (unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
-      for (unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
-      if (this->wf->get_forms()[form_i]->ext[ext_i])
-        meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
+        for (unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
+          if (this->wf->get_forms()[form_i]->ext[ext_i])
+            meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
 
       if (this->nonlinear)
       {
@@ -278,14 +294,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Solution<Scalar>** u_ext_sln, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(Solution<Scalar>** u_ext_sln, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
       // Check.
       this->check();
 
       // Set the matrices.
-      this->set_matrix(mat);
-      this->set_rhs(rhs);
+      bool result = this->set_matrix(mat) && this->set_rhs(rhs);
 
       // Initialize states && previous iterations.
       int num_states;
@@ -376,6 +391,8 @@ namespace Hermes
           e->visited = false;
         }
       }
+
+      return result;
     }
 
     template<typename Scalar>
