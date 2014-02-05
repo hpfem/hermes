@@ -3,6 +3,8 @@
 // Relative tolerance drop (1e-4 == 4 orders of magnitude drop)
 static const double tolerance = 1e-4;
 
+static const int integrationOrder = 4;
+
 // Utilities
 static std::string SolvedExampleString[5] = { "1D", "CircularConvection", "MovingPeak", "AdvectedCube", "SolidBodyRotation" };
 static double exact_solver_error;
@@ -11,7 +13,7 @@ MeshFunctionSharedPtr<double> es(new Solution<double>());
 double* es_v;
 
 // Uncomment to have OpenGL output throughout calculation.
-//#define SHOW_OUTPUT
+#define SHOW_OUTPUT
 
 // Under relaxation in Multiscale
 #define OMEGA 1.0
@@ -113,6 +115,7 @@ std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExa
 
   // Assembler.
   DiscreteProblem<double> dp;
+  dp.set_global_integration_order(integrationOrder);
   // Level 2.
   dp.set_space(full_space);
   dp.set_weak_formulation(&weakform_exact);
@@ -368,6 +371,7 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
 
   // Assembler.
   DiscreteProblem<double> dp;
+  dp.set_global_integration_order(integrationOrder);
   // Level 2.
   dp.set_space(space_2);
   dp.set_weak_formulation(&weakform_exact);
@@ -704,6 +708,7 @@ void exact_solver_timedep(MeshSharedPtr mesh, SolvedExample solvedExample, int p
 
   // Assembler.
   DiscreteProblem<double> dp;
+  dp.set_global_integration_order(integrationOrder);
   // Level 2.
   dp.set_space(full_space);
   dp.set_weak_formulation(&weakform_exact);
