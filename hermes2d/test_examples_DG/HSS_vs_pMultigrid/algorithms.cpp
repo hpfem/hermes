@@ -173,7 +173,7 @@ std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExa
 
   double time = 0.;
   int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 10000);
-  for (int iteration = 0; iteration < iteration_count; iteration++)
+  for (int iteration = 0; iteration <= iteration_count; iteration++)
   {
     static_log.info("Time step: %i, time: %f.", iteration, time);
 
@@ -435,7 +435,7 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
 
   double time = 0.;
   int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 1);
-  for (int time_step = 0; time_step < iteration_count; time_step++)
+  for (int time_step = 0; time_step <= iteration_count; time_step++)
   {
     if (!is_timedep(solvedExample))
       static_log.info("Time step: %i, time: %f.", time_step, time);
@@ -722,7 +722,7 @@ void exact_solver_timedep(MeshSharedPtr mesh, SolvedExample solvedExample, int p
 
   double time = 0.;
   int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 10000);
-  for (int iteration = 0; iteration < iteration_count; iteration++)
+  for (int iteration = 0; iteration <= iteration_count; iteration++)
   {
     dp.assemble(&vector_b);
     solver.solve();
