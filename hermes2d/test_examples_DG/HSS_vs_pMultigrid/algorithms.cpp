@@ -622,7 +622,7 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
         solution_view->set_title("Time: %f", time);
         solution_view->show(previous_sln);
 
-        if ((step == 1) || step > iteration_count - 2)
+        if ((time_step == 1) || time_step > iteration_count - 2)
         {
           std::stringstream ss_bmp, ss_vtk;
           ss_bmp.precision(2);
