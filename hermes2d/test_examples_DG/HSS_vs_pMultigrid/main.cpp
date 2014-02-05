@@ -66,9 +66,6 @@ int main(int argc, char* argv[])
     V_cycles_per_time_step.push_back(1);
   }
 
-  // Sigma - needs to know initialRefinementsCount
-  double sigma = std::pow(2., (double)(initialRefinementsCount)) * sigma_star;
-
   // Load the mesh & set mesh size for CFL -> time step length calculation.
   double mesh_size;
   MeshSharedPtr mesh(new Mesh);
@@ -108,6 +105,8 @@ int main(int argc, char* argv[])
     break;
   }
   double time_step_length = mesh_size * CFL * std::pow(2., -(double)initialRefinementsCount);
+  // Sigma - needs to know initialRefinementsCount
+  double sigma = std::pow(2., (double)(initialRefinementsCount)) * sigma_star * mesh_size;
 
   // Previous time level solution (initialized by the initial condition).
   ExactSolutionScalar<double>* previous_initial_condition = NULL;
