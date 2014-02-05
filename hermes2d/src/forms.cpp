@@ -336,10 +336,22 @@ namespace Hermes
       this->wrapped_geom = geom;
     }
 
+    template<>
+    InterfaceGeom<Hermes::Ord>::InterfaceGeom(Geom<Hermes::Ord>* geom, int n_marker, int n_id, Hermes::Ord n_diam) : Geom<Hermes::Ord>()
+    {
+        this->wrapped_geom = geom;
+    }
+
     template<typename T>
     void InterfaceGeom<T>::free()
     {
       wrapped_geom->free();
+      delete wrapped_geom;
+    }
+
+    template<>
+    void InterfaceGeom<Hermes::Ord>::free()
+    {
       delete wrapped_geom;
     }
 
@@ -365,28 +377,6 @@ namespace Hermes
     T InterfaceGeom<T>::get_neighbor_diam() const
     {
       return neighb_diam;
-    }
-
-    Geom<Hermes::Ord>* init_geom_ord()
-    {
-      Geom<Hermes::Ord>* e = new Geom<Hermes::Ord>;
-      Hermes::Ord x[] = { Hermes::Ord(1) };
-      Hermes::Ord y[] = { Hermes::Ord(1) };
-
-      Hermes::Ord nx[] = { Hermes::Ord(1) };
-      Hermes::Ord ny[] = { Hermes::Ord(1) };
-
-      Hermes::Ord tx[] = { Hermes::Ord(1) };
-      Hermes::Ord ty[] = { Hermes::Ord(1) };
-
-      Hermes::Ord diam = Hermes::Ord(1);
-
-      e->x = x; e->y = y;
-      e->nx = nx; e->ny = ny;
-      e->tx = tx; e->ty = ty;
-      e->diam = diam;
-
-      return e;
     }
 
     Geom<double>* init_geom_vol(RefMap *rm, const int order)

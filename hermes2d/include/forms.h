@@ -77,6 +77,32 @@ namespace Hermes
       ///< Only for edge.
     };
 
+    template<>
+    class HERMES_API Geom<Hermes::Ord>
+    {
+    public:
+      Geom()
+      {
+        x[0] = y[0] = tx[0] = ty[0] = nx[0] = ny[0] = Hermes::Ord(1);
+      }
+      Hermes::Ord x[1];
+      Hermes::Ord y[1];
+      Hermes::Ord tx[1];
+      Hermes::Ord ty[1];
+      Hermes::Ord nx[1];
+      Hermes::Ord ny[1];
+
+      Hermes::Ord diam;           ///< Element diameter (for edge, diameter of the parent element).
+      Hermes::Ord area;           ///< Element area (for edge, area of the parent element).
+      int id;           ///< ID number of the element (undefined for edge).
+      int isurf;        ///< Order number of an edge of the element.
+
+      int elem_marker;       ///< Element marker (for both volumetric and surface forms).
+      int edge_marker;       ///< Edge marker (for surface forms only).
+
+      int orientation;  ///< 0 .... if(nx, ny) is equal to the global normal,
+    };
+
     /// Small class which contains information about the element on the other side of an interface.
     ///
     /// It just appends three new parameters to an instance of Geom. During destruction, the wrapped
@@ -106,8 +132,6 @@ namespace Hermes
       template<typename Scalar> friend class KellyTypeAdapt;
     };
 
-    /// Init element geometry for calculating the integration order.
-    HERMES_API Geom<Hermes::Ord>* init_geom_ord();
     /// Init element geometry for volumetric integrals.
     HERMES_API Geom<double>* init_geom_vol(RefMap *rm, const int order);
     /// Init element geometry for surface integrals.
