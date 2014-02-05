@@ -437,12 +437,11 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
   int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 1);
   for (int time_step = 0; time_step <= iteration_count; time_step++)
   {
-    if (!is_timedep(solvedExample))
-      static_log.info("Time step: %i, time: %f.", time_step, time);
+    static_log.info("Time step: %i, time: %f.", time_step, time);
 
     for (int step = 0; step < (is_timedep(solvedExample) ? V_cycles_per_time_step : iteration_count); step++)
     {
-      static_log.info("- V-cycle %i.", step);
+      //static_log.info("- V-cycle %i.", step);
       v_cycles++;
 
 #pragma region 0 - highest level
