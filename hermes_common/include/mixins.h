@@ -68,6 +68,7 @@ namespace Hermes
     public:
       Loggable(bool verbose_output = false, callbackFn verbose_callback = NULL, bool add_newline = true);
 
+      void set_file_output_only(bool onOff);
       /// Sets the addition of a time stamp on each line in the log file. By default it is on.
       void set_timestamps(bool onOff);
       /// Sets the logFile being always erased before logging.
@@ -151,6 +152,9 @@ namespace Hermes
       /// Verbose output.
       /// Set to 'true' by default.
       bool verbose_output;
+
+      /// Only output to file - not to console.
+      bool file_output_only; 
 
       /// Verbose callback.
       callbackFn verbose_callback;

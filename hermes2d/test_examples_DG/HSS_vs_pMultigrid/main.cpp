@@ -5,10 +5,10 @@
 int polynomialDegree = 2;
 int initialRefinementsCount = 4;
 const Algorithm algorithm = pMultigrid;
-SolvedExample solvedExample = MovingPeak;
+SolvedExample solvedExample = CircularConvection;
 // For the initial shape of the peak.
 const double MovingPeakDiffusivity = 1e-3;
-double diffusivity = 1e-2;
+double diffusivity = 1e-3;
 double s = -1.;
 double sigma_star = 10.;
 double CFL = 1e-1;
@@ -174,21 +174,23 @@ int main(int argc, char* argv[])
   logger_global.set_timestamps(false);
 
   // HSS
+  // Set up loggers.
+  Hermes::Mixins::Loggable logger_HSS(true, NULL, false);
+  logger_HSS.set_timestamps(false);
+  logger_HSS.set_erase_on_beginning(true);
+  Hermes::Mixins::Loggable logger_details(true);
+  logger_details.set_timestamps(false);
+  logger_details.set_erase_on_beginning(true);
+  logger_details.set_file_output_only(true);
+
   if (algorithm == Multiscale || algorithm == Both)
   {
     // All variants
     for (int si = 0; si < iter_per_time_step_HSS.size(); si++)
     {
-      // Set up loggers.
-      Hermes::Mixins::Loggable logger(true, NULL, false);
-      logger.set_timestamps(false);
-      logger.set_erase_on_beginning(true);
-      Hermes::Mixins::Loggable logger_details(true);
-      logger_details.set_timestamps(false);
-      logger_details.set_erase_on_beginning(true);
       std::stringstream ss;
       ss << "HSS(" << iter_per_time_step_HSS[si] << ")_" << solvedExampleString << "_" << initialRefinementsCount << "_" << diffusivity << "_CFL=" << CFL << ".h2d";
-      logger.set_logFile_name(ss.str());
+      logger_HSS.set_logFile_name(ss.str());
       std::stringstream ssd;
       ssd << "HSS_detail(" << iter_per_time_step_HSS[si] << ")_" << solvedExampleString << "_" << initialRefinementsCount << "_" << diffusivity << ".h2d";
       logger_details.set_logFile_name(ssd.str());
@@ -197,56 +199,47 @@ int main(int argc, char* argv[])
       cpu_time.tick();
       // Calculate & return what to put in the log.
       std::string outString = multiscale_decomposition(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_mean_values, previous_derivatives, diffusivity, s, sigma, time_step_length,
-        initial_sln, solution, exact_solution, &solution_view, &exact_view, logger, logger_details, CFL, iter_per_time_step_HSS[si]);
+        initial_sln, solution, exact_solution, &solution_view, &exact_view, logger_HSS, logger_details, CFL, iter_per_time_step_HSS[si]);
       // Stop measuring time.
       cpu_time.tick();
 
       // Fill the logs.
-      logger.info("%f|%s", cpu_time.last(), outString.c_str());
+      logger_HSS.info("%f|%s", cpu_time.last(), outString.c_str());
       std::stringstream ss_global;
-      ss_global << initialRefinementsCount << "|"
-        << diffusivity << "|"
-        << CFL << "|"
-        << "HSS(" << iter_per_time_step_HSS[si] << ")" << "|"
-        << cpu_time.last() << "|"
-        << outString;
+      ss_global << initialRefinementsCount << "|" << diffusivity << "|" << CFL << "|" << "HSS(" << iter_per_time_step_HSS[si] << ")" << "|" << cpu_time.last() << "|" << outString;
       logger_global.info(ss_global.str().c_str());
     }
   }
 
   // p-Multigrid
+  // Set up loggers.
+  Hermes::Mixins::Loggable logger_pMultigrid(true, NULL, false);
+  logger_pMultigrid.set_timestamps(false);
+  logger_pMultigrid.set_erase_on_beginning(true);
+
   if(algorithm == pMultigrid || algorithm == Both)
   {
     for (int si = 0; si < smoothing_steps_per_V_cycle.size(); si++)
     {
      for (int siv = 0; siv < V_cycles_per_time_step.size(); siv++)
       {
-        // Set up loggers.
-        Hermes::Mixins::Loggable logger(true, NULL, false);
-        logger.set_timestamps(false);
-        logger.set_erase_on_beginning(true);
         std::stringstream ss;
         ss << "MG(" << V_cycles_per_time_step[siv] << "-" << smoothing_steps_per_V_cycle[si] << ")_" << solvedExampleString << "_" << initialRefinementsCount << "_" << diffusivity << "_CFL=" << CFL << ".h2d";
-        logger.set_logFile_name(ss.str());
+        logger_pMultigrid.set_logFile_name(ss.str());
 
         MeshFunctionSharedPtr<double> previous_solution_local(new ExactSolutionMovingPeak(mesh, MovingPeakDiffusivity, M_PI / 2.));
         // Start measuring CPU time.
         cpu_time.tick();
         // Calculate & return what to put in the log.
         std::string outString = p_multigrid(mesh, solvedExample, polynomialDegree, initialRefinementsCount, previous_solution_local, diffusivity, time_step_length,
-          solution, exact_solution, &solution_view, &exact_view, s, sigma, logger, smoothing_steps_per_V_cycle[si], CFL, V_cycles_per_time_step[siv]);
+          solution, exact_solution, &solution_view, &exact_view, s, sigma, logger_pMultigrid, smoothing_steps_per_V_cycle[si], CFL, V_cycles_per_time_step[siv]);
         // Stop measuring time.
         cpu_time.tick();
         
         // Fill the logs.
-        logger.info("%f|%s", cpu_time.last(), outString.c_str());
+        logger_pMultigrid.info("%f|%s", cpu_time.last(), outString.c_str());
         std::stringstream ss_global;
-        ss_global << initialRefinementsCount << "|"
-          << diffusivity << "|"
-          << CFL << "|"
-          << "MG(" << V_cycles_per_time_step[siv] << "-" << smoothing_steps_per_V_cycle[si] << ")" << "|"
-          << cpu_time.last() << "|"
-          << outString;
+        ss_global << initialRefinementsCount << "|" << diffusivity << "|" << CFL << "|" << "MG(" << V_cycles_per_time_step[siv] << "-" << smoothing_steps_per_V_cycle[si] << ")" << "|" << cpu_time.last() << "|" << outString;
         logger_global.info(ss_global.str().c_str());
      }
     }

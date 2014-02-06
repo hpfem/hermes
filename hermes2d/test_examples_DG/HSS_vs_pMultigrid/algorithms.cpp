@@ -13,7 +13,7 @@ MeshFunctionSharedPtr<double> es(new Solution<double>());
 double* es_v;
 
 // Uncomment to have OpenGL output throughout calculation.
-//#define SHOW_OUTPUT
+#define SHOW_OUTPUT
 
 // Under relaxation in Multiscale
 #define OMEGA 1.0
@@ -66,10 +66,10 @@ void solve_exact(SolvedExample solvedExample, SpaceSharedPtr<double> space, doub
   ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
   ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
 
-  ss_bmp << "solution_" << SolvedExampleString[solvedExample] << "_" << init_ref_num << "_" << diffusivity << ".bmp";
-  ss_vtk << "solution_" << SolvedExampleString[solvedExample] << "_" << init_ref_num << "_" << diffusivity << ".dat";
-  // exact_solver_view->show(es);
+  ss_bmp << "exact_solution_" << SolvedExampleString[solvedExample] << "_" << init_ref_num << "_" << diffusivity << ".bmp";
+  ss_vtk << "exact_solution_" << SolvedExampleString[solvedExample] << "_" << init_ref_num << "_" << diffusivity << ".dat";
 #ifdef SHOW_OUTPUT
+  exact_solver_view->show(es);
   exact_solver_view->save_screenshot(ss_bmp.str().c_str(), true);
 #endif
   exact_solver_view->get_linearizer()->save_solution_tecplot(es, ss_vtk.str().c_str(), "solution");
@@ -78,7 +78,7 @@ void solve_exact(SolvedExample solvedExample, SpaceSharedPtr<double> space, doub
 std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_mean_values,
   MeshFunctionSharedPtr<double> previous_derivatives, double diffusivity, double s, double sigma, double time_step_length,
   MeshFunctionSharedPtr<double> previous_solution, MeshFunctionSharedPtr<double> solution, MeshFunctionSharedPtr<double> exact_solution,
-  ScalarView* solution_view, ScalarView* exact_view, Hermes::Mixins::Loggable& logger, Hermes::Mixins::Loggable& logger_details, double cfl, int step)
+  ScalarView* solution_view, ScalarView* exact_view, Hermes::Mixins::Loggable& logger, Hermes::Mixins::Loggable& logger_details, double cfl, int steps_per_time_step)
 {
   // Standard L2 space.
   SpaceSharedPtr<double> space(new L2Space<double>(mesh, polynomialDegree, new L2ShapesetTaylor(false)));
@@ -168,86 +168,142 @@ std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExa
   int num_coarse = 0;
   int num_fine = 0;
   int iterations = 0;
+  double time = 0.;
 
   double* merged_sln;
 
-  double time = 0.;
-  int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 10000);
-  for (int iteration = 0; iteration <= iteration_count; iteration++)
+  int time_step_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 10000);
+  int iteration_count = steps_per_time_step;
+  for (int time_step = 1; time_step <= time_step_count; time_step++)
   {
-    static_log.info("Time step: %i, time: %f.", iteration, time);
+    if(is_timedep(solvedExample))
+      static_log.info("Time step: %i, time: %f.", time_step, time);
+    else
+      static_log.info("Time step: %i.", time_step);
 
-    for (int iter_i = 0; iter_i < step; iter_i++)
+    if (is_timedep(solvedExample))
     {
-      iterations++;
-      static_log.info("- iteration: %i.", iter_i);
-
-      // 1. predictor
-      // M
-      if (is_timedep(solvedExample))
-        matrix_M_der.multiply_with_vector(sln_der.v, vector_A_der.v, true);
-      else
-        matrix_M_der.multiply_with_vector(sln_der_k.v, vector_A_der.v, true);
-      add_ders(&sln_means_k, &sln_means_long, const_space, full_space);
-      // -B
-      matrix_A_full.multiply_with_vector(sln_means_long.v, sln_means_long_temp.v, true);
-      SimpleVector<double>* temp_2 = (SimpleVector<double>*)cut_off_means(sln_means_long_temp.v, space, full_space)->change_sign();
-      vector_A_der.add_vector(temp_2);
-      delete temp_2;
-      // (A-A~) - offdiag
-      matrix_A_offdiag.multiply_with_vector(sln_der_k.v, sln_der_offdiag.v, true);
-      vector_A_der.add_vector(sln_der_offdiag.change_sign());
-      // b'
-      vector_A_der.add_vector(&vector_b_der);
-      // SOLVE
-      solver_der.solve();
-      sln_der_k_tilde.set_vector(solver_der.get_sln_vector());
-
-      // 2. means
-      // M
-      if (is_timedep(solvedExample))
-        matrix_M_means.multiply_with_vector(sln_means.v, vector_A_means.v, true);
-      else
-        matrix_M_means.multiply_with_vector(sln_means_k.v, vector_A_means.v, true);
-      // -B
-      add_means(&sln_der_k_tilde, &sln_der_long, space, full_space);
-      matrix_A_full.multiply_with_vector(sln_der_long.v, sln_der_long_temp.v, true);
-      SimpleVector<double>* temp_1 = (SimpleVector<double>*)cut_off_ders(sln_der_long_temp.v, const_space, full_space)->change_sign();
-      vector_A_means.add_vector(temp_1);
-      delete temp_1;
-      // b
-      vector_A_means.add_vector(&vector_b_means);
-      // SOLVE
-      solver_means.solve();
-      sln_means_k.set_vector(solver_means.get_sln_vector());
-
-      // 3. corrector
-      // M
-      if (is_timedep(solvedExample))
-        matrix_M_der.multiply_with_vector(sln_der.v, vector_A_der.v, true);
-      else
-        matrix_M_der.multiply_with_vector(sln_der_k.v, vector_A_der.v, true);
-      // -B
-      add_ders(&sln_means_k, &sln_means_long, const_space, full_space);
-      matrix_A_full.multiply_with_vector(sln_means_long.v, sln_means_long_temp.v, true);
-      SimpleVector<double>* temp_3 = (SimpleVector<double>*)cut_off_means(sln_means_long_temp.v, space, full_space)->change_sign();
-      vector_A_der.add_vector(temp_3);
-      delete temp_3;
-      // (A - A~) - offdiag
-      matrix_A_offdiag.multiply_with_vector(sln_der_k.v, sln_der_offdiag.v, true);
-      vector_A_der.add_vector(sln_der_offdiag.change_sign());
-      // b
-      vector_A_der.add_vector(&vector_b_der);
-      // SOLVE
-      solver_der.solve();
-      if (iteration == 1 || OMEGA >= 0.99)
-        sln_der_k.set_vector(solver_der.get_sln_vector());
-      else
+      for (int step = 1; step <= iteration_count; step++)
       {
-        for (int i = 0; i < ndofs; i++)
-          sln_der_k.set(i, (OMEGA * solver_der.get_sln_vector()[i]) + ((1. - OMEGA) * sln_der_k.get(i)));
+        static_log.info("\tIteration: %i.", step);
+
+        // 1. predictor
+        // M
+        if (is_timedep(solvedExample))
+          matrix_M_der.multiply_with_vector(sln_der.v, vector_A_der.v, true);
+        else
+          matrix_M_der.multiply_with_vector(sln_der_k.v, vector_A_der.v, true);
+        add_ders(&sln_means_k, &sln_means_long, const_space, full_space);
+        // -B
+        matrix_A_full.multiply_with_vector(sln_means_long.v, sln_means_long_temp.v, true);
+        SimpleVector<double>* temp_2 = (SimpleVector<double>*)cut_off_means(sln_means_long_temp.v, space, full_space)->change_sign();
+        vector_A_der.add_vector(temp_2);
+        delete temp_2;
+        // (A-A~) - offdiag
+        matrix_A_offdiag.multiply_with_vector(sln_der_k.v, sln_der_offdiag.v, true);
+        vector_A_der.add_vector(sln_der_offdiag.change_sign());
+        // b'
+        vector_A_der.add_vector(&vector_b_der);
+        // SOLVE
+        solver_der.solve();
+        sln_der_k_tilde.set_vector(solver_der.get_sln_vector());
+
+        // 2. means
+        // M
+        if (is_timedep(solvedExample))
+          matrix_M_means.multiply_with_vector(sln_means.v, vector_A_means.v, true);
+        else
+          matrix_M_means.multiply_with_vector(sln_means_k.v, vector_A_means.v, true);
+        // -B
+        add_means(&sln_der_k_tilde, &sln_der_long, space, full_space);
+        matrix_A_full.multiply_with_vector(sln_der_long.v, sln_der_long_temp.v, true);
+        SimpleVector<double>* temp_1 = (SimpleVector<double>*)cut_off_ders(sln_der_long_temp.v, const_space, full_space)->change_sign();
+        vector_A_means.add_vector(temp_1);
+        delete temp_1;
+        // b
+        vector_A_means.add_vector(&vector_b_means);
+        // SOLVE
+        solver_means.solve();
+        sln_means_k.set_vector(solver_means.get_sln_vector());
+
+        // 3. corrector
+        // M
+        if (is_timedep(solvedExample))
+          matrix_M_der.multiply_with_vector(sln_der.v, vector_A_der.v, true);
+        else
+          matrix_M_der.multiply_with_vector(sln_der_k.v, vector_A_der.v, true);
+        // -B
+        add_ders(&sln_means_k, &sln_means_long, const_space, full_space);
+        matrix_A_full.multiply_with_vector(sln_means_long.v, sln_means_long_temp.v, true);
+        SimpleVector<double>* temp_3 = (SimpleVector<double>*)cut_off_means(sln_means_long_temp.v, space, full_space)->change_sign();
+        vector_A_der.add_vector(temp_3);
+        delete temp_3;
+        // (A - A~) - offdiag
+        matrix_A_offdiag.multiply_with_vector(sln_der_k.v, sln_der_offdiag.v, true);
+        vector_A_der.add_vector(sln_der_offdiag.change_sign());
+        // b
+        vector_A_der.add_vector(&vector_b_der);
+        // SOLVE
+        solver_der.solve();
+        if (OMEGA >= 0.99)
+          sln_der_k.set_vector(solver_der.get_sln_vector());
+        else
+        {
+          for (int i = 0; i < ndofs; i++)
+            sln_der_k.set(i, (OMEGA * solver_der.get_sln_vector()[i]) + ((1. - OMEGA) * sln_der_k.get(i)));
+        }
+        merged_sln = merge_slns(sln_means_k.v, const_space, sln_der_k.v, space, full_space);
       }
-      merged_sln = merge_slns(sln_means_k.v, const_space, sln_der_k.v, space, full_space);
+    }
+    else
+    {
+      for (int step = 1; step <= iteration_count; step++)
+      {
+        static_log.info("\tIteration: %i.", step);
+
+        matrix_M_means.multiply_with_vector(sln_means.v, vector_A_means.v, true);
+        if (polynomialDegree)
+        {
+          add_means(&sln_der_k, &sln_der_long, space, full_space);
+          matrix_A_full.multiply_with_vector(sln_der_long.v, sln_der_long_temp.v, true);
+          SimpleVector<double>* temp_1 = (SimpleVector<double>*)cut_off_ders(sln_der_long_temp.v, const_space, full_space)->change_sign();
+          vector_A_means.add_vector(temp_1);
+          delete temp_1;
+        }
+        vector_A_means.add_vector(&vector_b_means);
+        solver_means.solve();
+        sln_means_k.set_vector(solver_means.get_sln_vector());
+
+        if (polynomialDegree)
+        {
+          num_fine++;
+
+          matrix_M_der.multiply_with_vector(sln_der.v, vector_A_der.v, true);
+          add_ders(&sln_means_k, &sln_means_long, const_space, full_space);
+          matrix_A_full.multiply_with_vector(sln_means_long.v, sln_means_long_temp.v, true);
+          SimpleVector<double>* temp_2 = (SimpleVector<double>*)cut_off_means(sln_means_long_temp.v, space, full_space)->change_sign();
+          vector_A_der.add_vector(temp_2);
+          delete temp_2;
+
+          matrix_A_offdiag.multiply_with_vector(sln_der_k.v, sln_der_offdiag.v, true);
+          vector_A_der.add_vector(sln_der_offdiag.change_sign());
+
+          vector_A_der.add_vector(&vector_b_der);
+          solver_der.solve();
+          if (OMEGA >= 0.99)
+            sln_der_k.set_vector(solver_der.get_sln_vector());
+          else
+          {
+            for (int i = 0; i < ndofs; i++)
+              sln_der_k.set(i, (OMEGA * solver_der.get_sln_vector()[i]) + ((1. - OMEGA) * sln_der_k.get(i)));
+          }
+          merged_sln = merge_slns(sln_means_k.v, const_space, sln_der_k.v, space, full_space);
+        }
+        else
+        {
+          merged_sln = sln_means.v;
+        }
+      }
     }
     sln_means.set_vector(&sln_means_k);
     sln_der.set_vector(&sln_der_k);
@@ -257,19 +313,11 @@ std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExa
     else
       Solution<double>::vector_to_solution(sln_means.v, const_space, solution);
 
+    solution_view->set_title("Time: %f.");
     solution_view->show(solution);
-
-    if (iteration == iteration_count - 1)
-    {
-      std::stringstream ss_bmp, ss_vtk;
-      ss_vtk.precision(2);
-      ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
-      ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
-      solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution");
-    }
 #endif
 
-    bool done = !is_timedep(solvedExample) && error_reduction_condition(calc_l2_error_algebraic(polynomialDegree ? full_space : const_space, merged_sln, es_v, &logger_details, iteration, init_ref_num, diffusivity));
+    bool done = !is_timedep(solvedExample) && error_reduction_condition(calc_l2_error_algebraic(polynomialDegree ? full_space : const_space, merged_sln, es_v, &logger_details, time_step, init_ref_num, diffusivity));
 
     if (is_timedep(solvedExample))
     {
@@ -282,7 +330,7 @@ std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExa
         time += time_step_length;
     }
 
-    bool finish_timedep = is_timedep(solvedExample) && (iteration == iteration_count - 1);
+    bool finish_timedep = is_timedep(solvedExample) && (time_step == time_step_count);
 
     if (polynomialDegree && !finish_timedep)
       delete[] merged_sln;
@@ -306,11 +354,11 @@ std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExa
     std::stringstream ss_bmp;
     ss_vtk.precision(2);
     ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_vtk << "solution_" << "HSS(" << step << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".dat";
+    ss_vtk << "solution_" << "HSS(" << steps_per_time_step << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".dat";
 
     ss_bmp.precision(2);
     ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_bmp << "solution_" << "HSS(" << step << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".bmp";
+    ss_bmp << "solution_" << "HSS(" << steps_per_time_step << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".bmp";
 
 #ifdef SHOW_OUTPUT
     solution_view->show(solution);
@@ -329,7 +377,7 @@ std::string multiscale_decomposition(MeshSharedPtr mesh, SolvedExample solvedExa
 std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int polynomialDegree, int init_ref_num, MeshFunctionSharedPtr<double> previous_sln,
   double diffusivity, double time_step_length,
   MeshFunctionSharedPtr<double> solution, MeshFunctionSharedPtr<double> exact_solution,
-  ScalarView* solution_view, ScalarView* exact_view, double s, double sigma, Hermes::Mixins::Loggable& logger, int steps, double cfl, int V_cycles_per_time_step)
+  ScalarView* solution_view, ScalarView* exact_view, double s, double sigma, Hermes::Mixins::Loggable& logger, int smoothing_steps_per_V_cycle, double cfl, int V_cycles_per_time_step)
 {
   // Spaces
   SpaceSharedPtr<double> space_2(new L2Space<double>(mesh, polynomialDegree, new L2ShapesetTaylor));
@@ -434,21 +482,25 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
   prev_sln_0.set_vector(cut_off_linear_part(prev_sln_1.v, space_0, space_1));
 
   double time = 0.;
-  int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 1);
-  for (int time_step = 0; time_step <= iteration_count; time_step++)
+  int time_step_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 1);
+  int iteration_count = (int)(is_timedep(solvedExample) ? V_cycles_per_time_step : 10000);
+  for (int time_step = 1; time_step <= time_step_count; time_step++)
   {
-    static_log.info("Time step: %i, time: %f.", time_step, time);
+    if(is_timedep(solvedExample))
+      static_log.info("Time step: %i, time: %f.", time_step, time);
+    else
+      static_log.info("Time step: %i.", time_step);
 
-    for (int step = 0; step < (is_timedep(solvedExample) ? V_cycles_per_time_step : iteration_count); step++)
+    for (int step = 0; step < iteration_count; step++)
     {
-      //static_log.info("- V-cycle %i.", step);
+      static_log.info("\tV-cycle %i.", step);
       v_cycles++;
 
 #pragma region 0 - highest level
       // Store the previous solution.
       if (polynomialDegree > 1)
       {
-        for (int iteration = 1; iteration <= steps; iteration++)
+        for (int smoothing_step = 1; smoothing_step <= smoothing_steps_per_V_cycle; smoothing_step++)
         {
           // Solve for increment.
           matrix_A_2.multiply_with_vector(sln_2.v, vector_A_2.v, true);
@@ -493,7 +545,7 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
       delete sln_2_projected;
       f_P1.change_sign();
 
-      for (int iteration = 1; iteration <= steps; iteration++)
+      for (int smoothing_step = 1; smoothing_step <= smoothing_steps_per_V_cycle; smoothing_step++)
       {
         // A(u_K) - done after the first step.
         matrix_A_1.multiply_with_vector(sln_1.v, vector_A_1.v, true);
@@ -567,7 +619,7 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
       sln_1.set_vector(vector_);
       delete[] vector_;
 
-      for (int iteration = 1; iteration <= steps; iteration++)
+      for (int smoothing_step = 1; smoothing_step <= smoothing_steps_per_V_cycle; smoothing_step++)
       {
         // Solve for increment.
         matrix_A_1.multiply_with_vector(sln_1.v, vector_A_1.v, true);
@@ -598,7 +650,7 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
         sln_2.set_vector(vector_);
         delete[] vector_;
 
-        for (int iteration = 1; iteration <= steps; iteration++)
+        for (int smoothing_step = 1; smoothing_step <= smoothing_steps_per_V_cycle; smoothing_step++)
         {
           // Solve for increment.
           matrix_A_2.multiply_with_vector(sln_2.v, vector_A_2.v, true);
@@ -618,27 +670,13 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
 #ifdef SHOW_OUTPUT
         // Make solution & display.
         Solution<double>::vector_to_solution(&sln_2, space_2, previous_sln);
-        solution_view->set_title("Time: %f", time);
+        solution_view->set_title("Time: %f, V_cycle: %i", time, step);
         solution_view->show(previous_sln);
-
-        if ((time_step == 1) || time_step > iteration_count - 2)
-        {
-          std::stringstream ss_bmp, ss_vtk;
-          ss_bmp.precision(2);
-          ss_vtk.precision(2);
-          ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
-          ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
-
-          ss_bmp << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".bmp";
-          ss_vtk << "solution_p=" << polynomialDegree << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << ".dat";
-          solution_view->save_screenshot(ss_bmp.str().c_str(), true);
-          solution_view->get_linearizer()->save_solution_tecplot(previous_sln, ss_vtk.str().c_str(), "solution");
-        }
 #endif
       }
 #pragma endregion
 
-      if (!is_timedep(solvedExample) && error_reduction_condition(calc_l2_error_algebraic(space_2, sln_2.v, es_v)))
+      if (!is_timedep(solvedExample) && error_reduction_condition(calc_l2_error_algebraic(space_2, sln_2.v, es_v, &logger)))
         break;
     }
 
@@ -669,13 +707,13 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
     std::stringstream ss_vtk;
     ss_vtk.precision(2);
     ss_vtk.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_vtk << "solution_" << "MG(" << V_cycles_per_time_step << "-" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".dat";
+    ss_vtk << "solution_" << "MG(" << V_cycles_per_time_step << "-" << smoothing_steps_per_V_cycle << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".dat";
     solution_view->get_linearizer()->save_solution_tecplot(solution, ss_vtk.str().c_str(), "solution", 1, 2.0);
 
     std::stringstream ss_bmp;
     ss_bmp.precision(2);
     ss_bmp.setf(std::ios_base::uppercase | std::ios_base::scientific);
-    ss_bmp << "solution_" << "MG(" << V_cycles_per_time_step << "-" << steps << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".bmp";
+    ss_bmp << "solution_" << "MG(" << V_cycles_per_time_step << "-" << smoothing_steps_per_V_cycle << ")_" << SolvedExampleString[solvedExample] << "_meshRefs=" << init_ref_num << "_D=" << diffusivity << "_CFL=" << cfl << ".bmp";
 
 #ifdef SHOW_OUTPUT
     solution_view->show(solution);
@@ -720,8 +758,8 @@ void exact_solver_timedep(MeshSharedPtr mesh, SolvedExample solvedExample, int p
   // Reporting.
 
   double time = 0.;
-  int iteration_count = (int)(is_timedep(solvedExample) ? std::ceil(end_time(solvedExample) / time_step_length) : 10000);
-  for (int iteration = 0; iteration <= iteration_count; iteration++)
+  int iteration_count = std::ceil(end_time(solvedExample) / time_step_length);
+  for (int iteration = 0; iteration <= iteration_count; ++iteration)
   {
     dp.assemble(&vector_b);
     solver.solve();

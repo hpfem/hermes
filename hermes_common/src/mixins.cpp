@@ -74,6 +74,11 @@ namespace Hermes
       Loggable::set_static_logFile_name(filename.c_str());
     }
 
+    void Loggable::set_file_output_only(bool onOff)
+    {
+      this->file_output_only = onOff;
+    }
+
     bool Loggable::get_verbose_output() const
     {
       return this->verbose_output;
@@ -479,12 +484,13 @@ namespace Hermes
 #pragma omp critical (hermes_log_message)
       {
         //print the message
-        if (!write_console(code, msg))
+        if (!this->file_output_only)
         {
-          printf("%s", msg);  //safe fallback
-        }
+          if (!write_console(code, msg))
+            printf("%s", msg);  //safe fallback
 
-        printf("\n");  //write a new line
+          printf("\n");  //write a new line
+        }
 
         HermesLogEventInfo* info = this->hermes_build_log_info(code);
 
