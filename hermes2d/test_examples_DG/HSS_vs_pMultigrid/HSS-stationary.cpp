@@ -1,7 +1,7 @@
-
 for (int step = 1; step <= iteration_count; step++)
 {
   static_log.info("\tIteration: %i.", step);
+  iterations++;
 
   matrix_M_means.multiply_with_vector(sln_means.v, vector_A_means.v, true);
   if (polynomialDegree)

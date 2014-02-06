@@ -13,7 +13,7 @@ MeshFunctionSharedPtr<double> es(new Solution<double>());
 double* es_v;
 
 // Uncomment to have OpenGL output throughout calculation.
-#define SHOW_OUTPUT
+//#define SHOW_OUTPUT
 
 // Under relaxation in Multiscale
 #define OMEGA 1.0
@@ -342,6 +342,10 @@ std::string p_multigrid(MeshSharedPtr mesh, SolvedExample solvedExample, int pol
   solver_0.set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
 
   // Utils.
+  double* residual_2 = new double[ndofs_2];
+  double* residual_1 = new double[ndofs_1];
+  double* residual_0 = new double[ndofs_0];
+
   SimpleVector<double> sln_2(ndofs_2);
   SimpleVector<double> sln_1(ndofs_1);
   SimpleVector<double> sln_0(ndofs_0);

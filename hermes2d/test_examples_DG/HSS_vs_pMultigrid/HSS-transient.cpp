@@ -1,6 +1,7 @@
 for (int step = 1; step <= iteration_count; step++)
 {
   static_log.info("\tIteration: %i.", step);
+  iterations++;
 
   // 1. predictor
   // M

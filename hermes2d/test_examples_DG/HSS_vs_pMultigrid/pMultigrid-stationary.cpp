@@ -2,7 +2,6 @@ for (int step = 0; step < iteration_count; step++)
 {
   static_log.info("V-cycle %i.", step);
   v_cycles++;
-  static_log.info("Time step: %i, time: %f.", step, time);
 
 #pragma region 0 - highest level
   // Store the previous solution.
@@ -50,11 +49,11 @@ for (int step = 0; step < iteration_count; step++)
   delete sln_2_projected;
   f_P1.change_sign();
 
-  for (int iteration = 1; iteration <= steps; iteration++)
+  for (int smoothing_step = 1; smoothing_step <= smoothing_steps_per_V_cycle; smoothing_step++)
   {
     // Solve for increment.
     SimpleVector<double>* rhs;
-    if (iteration == 1)
+    if (step == 1)
     {
       if (polynomialDegree > 1)
       {
@@ -137,7 +136,7 @@ for (int step = 0; step < iteration_count; step++)
   // Store the previous solution.
   sln_1.set_vector(merge_slns(sln_0.v, space_0, sln_1.v, space_1, space_1, false));
 
-  for (int iteration = 1; iteration <= steps; iteration++)
+  for (int smoothing_step = 1; smoothing_step <= smoothing_steps_per_V_cycle; smoothing_step++)
   {
     // Solve for increment.
     matrix_A_1.multiply_with_vector(sln_1.v, vector_A_1.v, true);
@@ -164,7 +163,7 @@ for (int step = 0; step < iteration_count; step++)
     // Store the previous solution.
     sln_2.set_vector(merge_slns(sln_1.v, space_1, sln_2.v, space_2, space_2, false));
 
-    for (int iteration = 1; iteration <= steps; iteration++)
+    for (int smoothing_step = 1; smoothing_step <= smoothing_steps_per_V_cycle; smoothing_step++)
     {
       // Solve for increment.
       matrix_A_2.multiply_with_vector(sln_2.v, vector_A_2.v, true);
