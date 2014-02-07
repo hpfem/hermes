@@ -38,7 +38,7 @@ namespace Hermes
     namespace Views
     {
       template<typename LinearizerDataDimensions>
-      ThreadLinearizerMultidimensional<LinearizerDataDimensions>::ThreadLinearizerMultidimensional(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer) : user_specified_max(false), user_specified_min(false), criterion(linearizer->criterion)
+      ThreadLinearizerMultidimensional<LinearizerDataDimensions>::ThreadLinearizerMultidimensional(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer) : criterion(linearizer->criterion)
       {
         vertex_size = 0;
         triangle_size = 0;
@@ -189,20 +189,6 @@ namespace Hermes
 
         free_with_check(this->hash_table, true);
         free_with_check(this->info, true);
-      }
-
-      template<typename LinearizerDataDimensions>
-      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::set_min_value(double min)
-      {
-        this->user_specified_min = true;
-        this->user_specified_min_value = min;
-      }
-
-      template<typename LinearizerDataDimensions>
-      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::set_max_value(double max)
-      {
-        this->user_specified_max = true;
-        this->user_specified_max_value = max;
       }
 
       template<typename LinearizerDataDimensions>
@@ -538,40 +524,31 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, const double** values, double* physical_x, double* physical_y, int* vertex_indices) const
       {
+        // Initialization.
         split = 0;
         bool done = false;
-        double max_value = std::max(std::max(this->vertices[iv0][2], this->vertices[iv1][2]), this->vertices[iv2][2]);
-        if (mode == HERMES_MODE_QUAD)
-          max_value = std::max<LINEARIZER_DATA_TYPE>(max_value, this->vertices[iv3][2]);
-        double min_value = std::min(std::min(this->vertices[iv0][2], this->vertices[iv1][2]), this->vertices[iv2][2]);
-        if (mode == HERMES_MODE_QUAD)
-          min_value = std::min<LINEARIZER_DATA_TYPE>(max_value, this->vertices[iv3][2]);
-
-        if (!finite(max_value))
-          throw Exceptions::Exception("Infinite value detected in Linearizer.");
-
-        if (this->user_specified_max && (max_value > this->user_specified_max_value))
-          return;
-
-        if (!done && this->user_specified_min && (min_value < this->user_specified_min_value))
-          return;
-
+        
         // Core of the decision - calculate the approximate error of linearizing the normalized solution
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
         {
-          // Errors in edge midpoints summed up.
+          // Errors (split element - non-split element values) in edge midpoints summed up.
           double error = fabs(values[k][vertex_indices[0]] - midval[2 + k][0])
             + fabs(values[k][vertex_indices[1]] - midval[2 + k][1])
             + fabs(values[k][vertex_indices[2]] - midval[2 + k][2]);
 
+          // For the quad we have one more midpoint.
           if (mode == HERMES_MODE_QUAD)
             error += fabs(values[k][vertex_indices[3]] - midval[2 + k][3]);
 
           // Divide by the edge count.
           error /= (3 + mode);
 
+          /// Relative error.
+          /// max_value_approx here is only an approximation - only taking into account the elements being processed by this thread.
           double relative_error = error / this->max_value_approx;
 
+          // Split ?
+          // See the header of this method (split_decision) for explanation.
           // We put 3 here so that it is easier to test 'full split' both for quads && triangles.
           split = (relative_error > this->criterion.error_tolerance) ? 3 : 0;
 
@@ -581,23 +558,25 @@ namespace Hermes
             double horizontal_error = fabs(values[k][vertex_indices[1]] - midval[2 + k][1]) + fabs(values[k][vertex_indices[3]] - midval[2 + k][3]);
             double vertical_error = fabs(values[k][vertex_indices[0]] - midval[2 + k][0]) + fabs(values[k][vertex_indices[2]] - midval[2 + k][2]);
 
-            // decide whether to split horizontally or vertically only
-            if (horizontal_error > 5 * vertical_error)
+            // Decide whether to split horizontally or vertically only
+            // If one error is LINEARIZER_DIRECTIONAL_QUAD_REFINEMENT_REQUIREMENT larger than the other.
+            if (horizontal_error > LINEARIZER_DIRECTIONAL_QUAD_REFINEMENT_REQUIREMENT * vertical_error)
               split = 1; // h-split
-            else if (vertical_error > 5 * horizontal_error)
+            else if (vertical_error > LINEARIZER_DIRECTIONAL_QUAD_REFINEMENT_REQUIREMENT * horizontal_error)
               split = 2; // v-split
             else
               split = 3;
           }
         }
 
-        // do the same for the curvature
+        // If we are not splitting into four elements alreasdy and we have a curved element, check if we have to split because of the curvature.
         if (curved && split != 3)
         {
           for (int i = 0; i < 3 + mode; i++)
           {
             double error = sqr(physical_x[vertex_indices[i]] - midval[0][i])
               + sqr(physical_y[vertex_indices[i]] - midval[1][i]);
+        
             double diameter = sqr(fns[0]->get_active_element()->diameter);
 
             split = (error / diameter) > this->curvature_epsilon ? 3 : split;

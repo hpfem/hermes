@@ -35,6 +35,11 @@ namespace Hermes
 #define LINEARIZER_DATA_TYPE double
 #endif
 
+/// We refine a quad directionally (horizontally, vertically) only if the error in one direction is this much larger than in the other.
+#ifndef LINEARIZER_DIRECTIONAL_QUAD_REFINEMENT_REQUIREMENT
+#define LINEARIZER_DIRECTIONAL_QUAD_REFINEMENT_REQUIREMENT 5.0
+#endif
+
       /// Typedefs used throughout the Linearizer functionality.
       template<typename Scalar>
       struct ScalarLinearizerDataDimensions

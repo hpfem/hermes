@@ -34,6 +34,7 @@ namespace Hermes
       /// exported to standard formats. The class correctly handles discontinuities in the
       /// solution (e.g., gradients or in Hcurl) by inserting double vertices where necessary.
       /// LinearizerMultidimensional also serves as a container for the resulting linearized mesh.
+      /// LinearizerMultidimensional serves the purpose of both scalar and vector data.
       template<typename LinearizerDataDimensions>
       class HERMES_API LinearizerMultidimensional :
         public Hermes::Mixins::TimeMeasurable,
@@ -41,7 +42,9 @@ namespace Hermes
         public Hermes::Hermes2D::Mixins::Parallel
       {
       public:
-        LinearizerMultidimensional(LinearizerOutputType linearizerOutputType, bool auto_max = true);
+        /// Constructor.
+        /// \param[in] linearizerOutputType Sets this instance to be either for OpenGL visualization (Hermes Views, Agros display), or saving the output to a file (VTK, Tecplot)
+        LinearizerMultidimensional(LinearizerOutputType linearizerOutputType);
         ~LinearizerMultidimensional();
 
         /// Main method - processes the solution and stores the data obtained by the process.
@@ -52,25 +55,37 @@ namespace Hermes
 
         /// Save a MeshFunction (Solution, Filter) in VTK format.
         void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D = true, int item = H2D_FN_VAL_0);
+        /// Save multiple MeshFunctions (Solutions, Filters) in VTK format.
         void save_solution_vtk(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, const char* quantity_name, bool mode_3D = true);
+        /// Save a MeshFunction (Solution, Filter) in Tecplot format.
         void save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item = H2D_FN_VAL_0);
+        /// Save multiple MeshFunctions (Solutions, Filters) in Tecplot format.
         void save_solution_tecplot(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, Hermes::vector<std::string> quantity_names);
 
+        /// Sets the criterion to use for the linearization process.
+        /// This criterion is used in ThreadLinearizerMultidimensional class instances (see threadLinearizerMultidimensional array).
+        /// \param[in] criterion The instance of the criterion - see the class LinearizerCriterion for details (method split_decision() for the adaptive criterion, process_[triangle|quad] for the fixed one).
         void set_criterion(LinearizerCriterion criterion);
 
         /// Set the displacement, i.e. set two functions that will deform the domain for visualization, in the x-direction, and the y-direction.
         void set_displacement(MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult = 1.0);
 
         /// Iterator class.
+        /// Use for iterating through the data structures distributed over threads
         template<typename T>
         class Iterator
         {
         public:
+          /// Constructor
+          /// \param[in] linearizer - the linearizer to whose data to iterate through
           Iterator(const LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
+          /// Move the iterator forward
           void operator++();
+          /// Get the data the iterator points to now.
           T& get() const;
           /// For triangle- and edge- markers.
           int& get_marker() const;
+          /// The iterator has reached the end of the data.
           bool end;
         private:
           int current_thread_index;
@@ -82,19 +97,23 @@ namespace Hermes
           friend class LinearizerMultidimensional;
         };
 
-        /// Begin - iterators.
+        /// Return the appropriate iterator pointing to the beginning.
         Iterator<typename LinearizerDataDimensions::vertex_t> vertices_begin() const;
+        /// Return the appropriate iterator pointing to the beginning.
         Iterator<typename LinearizerDataDimensions::triangle_t> triangles_begin() const;
+        /// Return the appropriate iterator pointing to the beginning.
         Iterator<typename LinearizerDataDimensions::edge_t> edges_begin() const;
+        /// Return the appropriate iterator pointing to the beginning.
         Iterator<triangle_indices_t> triangle_indices_begin() const;
 
-        /// Counts
+        /// Vertex count per all threads.
         int get_vertex_count() const;
+        /// Triangle per all threads.
         int get_triangle_count() const;
+        /// Edge count per all threads.
         int get_edge_count() const;
+        /// Triangle index count per all threads.
         int get_triangle_index_count() const;
-
-        void set_max_absolute_value(double max_abs);
 
         double get_min_value() const;
         double get_max_value() const;
@@ -125,6 +144,8 @@ namespace Hermes
       protected:
         Quad2D *old_quad[LinearizerDataDimensions::dimension], *old_quad_x, *old_quad_y;
 
+        /// Output type setting either the OpenGL or File output.
+        /// This attribute influences the data that are produced - not all data are needed for both cases.
         LinearizerOutputType linearizerOutputType;
 
         /// Before assembling.
@@ -170,7 +191,9 @@ namespace Hermes
         friend class ThreadLinearizerMultidimensional<LinearizerDataDimensions>;
       };
 
+      /// Linearizer for scalar cases - historically called Linearizer.
       typedef LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> > Linearizer;
+      /// Linearizer for vector cases - historically called Vectorizer.
       typedef LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> > Vectorizer;
     }
   }
