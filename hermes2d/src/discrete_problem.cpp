@@ -152,6 +152,8 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_matrix(SparseMatrix<Scalar>* mat)
     {
+      if (mat && this->current_mat != mat)
+        this->invalidate_matrix();
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_matrix(mat);
       for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_matrix(mat);
@@ -160,6 +162,8 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_rhs(Vector<Scalar>* rhs)
     {
+      if (rhs && this->current_rhs != rhs)
+        this->invalidate_matrix();
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_rhs(rhs);
       for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_rhs(rhs);
