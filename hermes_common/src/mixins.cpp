@@ -42,6 +42,7 @@ namespace Hermes
       logFileName(NULL),
       print_timestamps(true),
       erase_on_beginning(false),
+      file_output_only(false),
       log_file_written(false),
       add_newline(add_newline)
     {
