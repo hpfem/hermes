@@ -128,46 +128,40 @@ namespace Hermes
 
       switch (toleranceType)
       {
-      case ResidualNormRelativeToInitial:
-      {
-                                          this->tolerance[0] = tolerance_;
-                                          this->tolerance_set[0] = true;
-      }
-        break;
       case ResidualNormRelativeToPrevious:
       {
-                                           this->tolerance[1] = tolerance_;
-                                           this->tolerance_set[1] = true;
+                                           this->tolerance[0] = tolerance_;
+                                           this->tolerance_set[0] = true;
       }
         break;
       case ResidualNormRatioToInitial:
       {
-                                       this->tolerance[2] = tolerance_;
-                                       this->tolerance_set[2] = true;
+                                       this->tolerance[1] = tolerance_;
+                                       this->tolerance_set[1] = true;
       }
         break;
       case ResidualNormRatioToPrevious:
       {
-                                        this->tolerance[3] = tolerance_;
-                                        this->tolerance_set[3] = true;
+                                        this->tolerance[2] = tolerance_;
+                                        this->tolerance_set[2] = true;
       }
         break;
       case ResidualNormAbsolute:
       {
-                                 this->tolerance[4] = tolerance_;
-                                 this->tolerance_set[4] = true;
+                                 this->tolerance[3] = tolerance_;
+                                 this->tolerance_set[3] = true;
       }
         break;
       case SolutionChangeAbsolute:
       {
-                                   this->tolerance[5] = tolerance_;
-                                   this->tolerance_set[5] = true;
+                                   this->tolerance[4] = tolerance_;
+                                   this->tolerance_set[4] = true;
       }
         break;
       case SolutionChangeRelative:
       {
-                                   this->tolerance[6] = tolerance_;
-                                   this->tolerance_set[6] = true;
+                                   this->tolerance[5] = tolerance_;
+                                   this->tolerance_set[5] = true;
       }
         break;
       default:

@@ -56,13 +56,12 @@ namespace Hermes
         converged = false;
 
       double convergence_decision_value[NonlinearConvergenceMeasurementTypeCount];
-      convergence_decision_value[0] = ((initial_residual_norm - current_residual_norm) / initial_residual_norm);
-      convergence_decision_value[1] = ((previous_residual_norm - current_residual_norm) / previous_residual_norm);
-      convergence_decision_value[2] = (current_residual_norm / initial_residual_norm);
-      convergence_decision_value[3] = (current_residual_norm / previous_residual_norm);
-      convergence_decision_value[4] = current_residual_norm;
-      convergence_decision_value[5] = current_solution_change_norm;
-      convergence_decision_value[6] = (current_solution_change_norm / previous_solution_norm);
+      convergence_decision_value[0] = ((previous_residual_norm - current_residual_norm) / previous_residual_norm);
+      convergence_decision_value[1] = (current_residual_norm / initial_residual_norm);
+      convergence_decision_value[2] = (current_residual_norm / previous_residual_norm);
+      convergence_decision_value[3] = current_residual_norm;
+      convergence_decision_value[4] = current_solution_change_norm;
+      convergence_decision_value[5] = (current_solution_change_norm / previous_solution_norm);
 
       for(int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
       {

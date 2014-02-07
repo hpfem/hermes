@@ -37,18 +37,17 @@ namespace Hermes
   {
     /// Convergence measurement strategies.
     /// Count of the types - for solver to hold arrays of such a length.
-    const int NonlinearConvergenceMeasurementTypeCount = 7;
+    const int NonlinearConvergenceMeasurementTypeCount = 6;
 
     /// This specifies the quantity that is compared to newton_tolerance (settable by set_tolerance()).
     enum NonlinearConvergenceMeasurementType
     {
-      ResidualNormRelativeToInitial = 0x0001,
-      ResidualNormRelativeToPrevious = 0x0002,
-      ResidualNormRatioToInitial = 0x0004,
-      ResidualNormRatioToPrevious = 0x0008,
-      ResidualNormAbsolute = 0x0010,
-      SolutionChangeAbsolute = 0x0020,
-      SolutionChangeRelative = 0x0040
+      ResidualNormRelativeToPrevious = 0x0001,
+      ResidualNormRatioToInitial = 0x0002,
+      ResidualNormRatioToPrevious = 0x0004,
+      ResidualNormAbsolute = 0x0008,
+      SolutionChangeAbsolute = 0x0010,
+      SolutionChangeRelative = 0x0020
     };
 
     /// Nonlinear Convergence state.
