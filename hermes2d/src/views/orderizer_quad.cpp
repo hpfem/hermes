@@ -1,9 +1,10 @@
 /// Simple quad.
 
-static int num_vert_quad_simple[2]  = { 12, 12 };
+static int num_vert_quad_simple[2]  = { 13, 13 };
 
 static double3 vert_quad_simple[] =
 {
+  { 0.0, 0.0, 0.0 },
   { -1, -1, 4.0 },
   {  1, -1, 4.0 },
   {  0.0,   0.0,  4.0 },
@@ -39,13 +40,14 @@ static int3 edge_quad_simple[] =
 };
 
 // triangles
-static int num_vert_tri_simple[2]  = { 3, 3 };
+static int num_vert_tri_simple[2]  = { 4, 4 };
 
 static double3 vert_tri_simple[] =
 {
-  { -1.0,  -1.0,  4.0 },
+  { -1.0 / 3.0, -1.0 / 3.0, 0.0 },
+  { -1.0, -1.0, 4.0 },
   {  1.0,  -1.0,  4.0 },
-  { -1.0,   1.0,  4.0 }
+  { -1.0,   1.0,  4.0 },
 };
 
 static int num_elem_tri_simple[2]  = { 1 , 1};
