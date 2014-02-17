@@ -227,7 +227,6 @@ namespace Hermes
         this->reallocate(mesh);
 
         RefMap refmap;
-        int type = 1;
 
         int oo, o[6];
 
@@ -257,21 +256,21 @@ namespace Hermes
           {
             refmap.set_quad_2d(&quad_ord);
             refmap.set_active_element(e);
-            x = refmap.get_phys_x(type);
-            y = refmap.get_phys_y(type);
+            x = refmap.get_phys_x(1);
+            y = refmap.get_phys_y(1);
 
-            pt = quad_ord.get_points(type, e->get_mode());
-            np = quad_ord.get_num_points(type, e->get_mode());
+            pt = quad_ord.get_points(1, e->get_mode());
+            np = quad_ord.get_num_points(1, e->get_mode());
           }
           else
           {
             refmap.set_quad_2d(&quad_ord_simple);
             refmap.set_active_element(e);
-            x = refmap.get_phys_x(type);
-            y = refmap.get_phys_y(type);
+            x = refmap.get_phys_x(1);
+            y = refmap.get_phys_y(1);
 
-            pt = quad_ord_simple.get_points(type, e->get_mode());
-            np = quad_ord_simple.get_num_points(type, e->get_mode());
+            pt = quad_ord_simple.get_points(1, e->get_mode());
+            np = quad_ord_simple.get_num_points(1, e->get_mode());
           }
 
           int id[80];
@@ -290,32 +289,31 @@ namespace Hermes
             for (int i = 1; i < np; i++)
               make_vert(id[i - 1], x[i], y[i], o[(int)pt[i][2]]);
 
-            for (int i = 0; i < num_elem[mode][type]; i++)
-              this->add_triangle(id[ord_elem[mode][type][i][0]], id[ord_elem[mode][type][i][1]], id[ord_elem[mode][type][i][2]], e->marker);
+            for (int i = 0; i < num_elem[mode][1]; i++)
+              this->add_triangle(id[ord_elem[mode][1][i][0]], id[ord_elem[mode][1][i][1]], id[ord_elem[mode][1][i][2]], e->marker);
 
-            for (int i = 0; i < num_edge[mode][type]; i++)
+            for (int i = 0; i < num_edge[mode][1]; i++)
             {
-              if (e->en[ord_edge[mode][type][i][2]]->bnd || (y[ord_edge[mode][type][i][0] + 1] < y[ord_edge[mode][type][i][1] + 1]) ||
-                ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
-                (x[ord_edge[mode][type][i][0] + 1] < x[ord_edge[mode][type][i][1] + 1])))
+              if (e->en[ord_edge[mode][1][i][2]]->bnd || (y[ord_edge[mode][1][i][0] + 1] < y[ord_edge[mode][1][i][1] + 1]) ||
+                ((y[ord_edge[mode][1][i][0] + 1] == y[ord_edge[mode][1][i][1] + 1]) &&
+                (x[ord_edge[mode][1][i][0] + 1] < x[ord_edge[mode][1][i][1] + 1])))
               {
-                add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], e->en[ord_edge[mode][type][i][2]]->marker);
+                add_edge(id[ord_edge[mode][1][i][0]], id[ord_edge[mode][1][i][1]], e->en[ord_edge[mode][1][i][2]]->marker);
               }
             }
           }
           else
           {
             make_vert(lvert[label_count], x[0], y[0], o[4]);
-            make_vert(lvert[label_count], x[0], y[0], o[5]);
 
-            for (int i = 0; i < np; i++)
-              make_vert(id[i], x[i], y[i], o[(int)pt[i][2]]);
+            for (int i = 1; i < np; i++)
+              make_vert(id[i - 1], x[i], y[i], o[(int)pt[i][2]]);
 
-            for (int i = 0; i < num_elem_simple[mode][type]; i++)
-              this->add_triangle(id[ord_elem_simple[mode][type][i][0]], id[ord_elem_simple[mode][type][i][1]], id[ord_elem_simple[mode][type][i][2]], e->marker);
+            for (int i = 0; i < num_elem_simple[mode][1]; i++)
+              this->add_triangle(id[ord_elem_simple[mode][1][i][0]], id[ord_elem_simple[mode][1][i][1]], id[ord_elem_simple[mode][1][i][2]], e->marker);
 
-            for (int i = 0; i < num_edge_simple[mode][type]; i++)
-              add_edge(id[ord_edge_simple[mode][type][i][0]], id[ord_edge_simple[mode][type][i][1]], e->en[ord_edge_simple[mode][type][i][2]]->marker);
+            for (int i = 0; i < num_edge_simple[mode][1]; i++)
+              add_edge(id[ord_edge_simple[mode][1][i][0]], id[ord_edge_simple[mode][1][i][1]], e->en[ord_edge_simple[mode][1][i][2]]->marker);
           }
 
           double xmin = 1e100, ymin = 1e100, xmax = -1e100, ymax = -1e100;
