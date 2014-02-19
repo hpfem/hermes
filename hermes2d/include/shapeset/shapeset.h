@@ -128,6 +128,21 @@ namespace Hermes
       double get_fn_value (int index, double x, double y, int component, ElementMode2D mode);
       double get_dx_value (int index, double x, double y, int component, ElementMode2D mode);
       double get_dy_value (int index, double x, double y, int component, ElementMode2D mode);
+
+      /// The most used calls are distinguished for optimization.
+      double get_fn_value_0_tri(int index, double x, double y);
+      /// The most used calls are distinguished for optimization.
+      double get_dx_value_0_tri(int index, double x, double y);
+      /// The most used calls are distinguished for optimization.
+      double get_dy_value_0_tri(int index, double x, double y);
+
+      /// The most used calls are distinguished for optimization.
+      double get_fn_value_0_quad(int index, double x, double y);
+      /// The most used calls are distinguished for optimization.
+      double get_dx_value_0_quad(int index, double x, double y);
+      /// The most used calls are distinguished for optimization.
+      double get_dy_value_0_quad(int index, double x, double y);
+
       double get_dxx_value(int index, double x, double y, int component, ElementMode2D mode);
       double get_dyy_value(int index, double x, double y, int component, ElementMode2D mode);
       double get_dxy_value(int index, double x, double y, int component, ElementMode2D mode);

@@ -60,7 +60,7 @@ namespace Hermes
       /// \param[in] n_y the y-component of the unit outer normal.
       /// \param[in] t_x the x-component of the tangent(perpendicular to normal).
       /// \param[in] t_y the y-component of the tangent(perpendicular to normal).
-      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
+      virtual Scalar value(double x, double y) const = 0;
 
       /// Set the current time for time-dependent boundary conditions.
       void set_current_time(double time);
@@ -94,7 +94,7 @@ namespace Hermes
       DefaultEssentialBCConst(Hermes::vector<std::string> markers, Scalar value_const);
       DefaultEssentialBCConst(std::string marker, Scalar value_const);
 
-      Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+      Scalar value(double x, double y) const;
 
       /// Function giving info that u_Essential is a constant.
       inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
@@ -138,7 +138,7 @@ namespace Hermes
 
       ~DefaultEssentialBCNonConst() {};
 
-      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+      virtual Scalar value(double x, double y) const;
 
       /// Function giving info that u_Essential is a non-constant function.
       inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
@@ -159,7 +159,7 @@ namespace Hermes
 
       ~DefaultEssentialBCNonConstHcurl() {};
 
-      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+      virtual Scalar value(double x, double y) const;
 
       /// Function giving info that u_Essential is a non-constant function.
       inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
