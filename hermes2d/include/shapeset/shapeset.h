@@ -218,6 +218,7 @@ namespace Hermes
       double get_constrained_value(int n, int index, double x, double y, int component, ElementMode2D mode);
 
       template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class DiscreteProblemIntegrationOrderCalculator;
       template<typename Scalar> friend class Solution;
       friend class CurvMap;
       friend class CurvMapStatic;

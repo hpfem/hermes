@@ -246,6 +246,8 @@ namespace Hermes
     class HERMES_API Func<Ord>
     {
     public:
+      Func(const int order);
+      const int order;
       Ord val;
       Ord dx;
       Ord dy;
@@ -347,10 +349,6 @@ namespace Hermes
       ///< (when retrieving values on an edge that is oriented differently in both elements).
       static Ord zero;              ///< Zero value used for the zero-extension.
     };
-
-
-    /// Init the function for calculation the integration order.
-    HERMES_API Func<Hermes::Ord>* init_fn_ord(const int order);
 
     /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values).
     HERMES_API Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);

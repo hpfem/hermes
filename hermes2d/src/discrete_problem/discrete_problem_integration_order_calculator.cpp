@@ -33,8 +33,42 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// Geometry instance for order calculation.
+    static Geom<Hermes::Ord> geom_order;
+    /// "Fake" integration weight for order calculation.
+    double wt_order = 1.0;
+
+    Func<Hermes::Ord> func_order[g_max_quad + 1] =
+    {
+      Func<Hermes::Ord>(0),
+      Func<Hermes::Ord>(1),
+      Func<Hermes::Ord>(2),
+      Func<Hermes::Ord>(3),
+      Func<Hermes::Ord>(4),
+      Func<Hermes::Ord>(5),
+      Func<Hermes::Ord>(6),
+      Func<Hermes::Ord>(7),
+      Func<Hermes::Ord>(8),
+      Func<Hermes::Ord>(9),
+      Func<Hermes::Ord>(10),
+      Func<Hermes::Ord>(11),
+      Func<Hermes::Ord>(12),
+      Func<Hermes::Ord>(13),
+      Func<Hermes::Ord>(14),
+      Func<Hermes::Ord>(15),
+      Func<Hermes::Ord>(16),
+      Func<Hermes::Ord>(17),
+      Func<Hermes::Ord>(18),
+      Func<Hermes::Ord>(19),
+      Func<Hermes::Ord>(20),
+      Func<Hermes::Ord>(21),
+      Func<Hermes::Ord>(22),
+      Func<Hermes::Ord>(23),
+      Func<Hermes::Ord>(24)
+    };
+
     template<typename Scalar>
-    DiscreteProblemIntegrationOrderCalculator<Scalar>::DiscreteProblemIntegrationOrderCalculator(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) : 
+    DiscreteProblemIntegrationOrderCalculator<Scalar>::DiscreteProblemIntegrationOrderCalculator(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) :
       selectiveAssembler(selectiveAssembler),
       current_state(nullptr),
       u_ext(nullptr)
@@ -119,7 +153,7 @@ namespace Hermes
           this->deinit_u_ext_orders(u_ext_funcSurf);
 
           // deinit - ext
-          this->deinit_ext_orders(current_wf->ext, current_wf->u_ext_fn, ext_funcSurf);
+          this->deinit_ext_orders(ext_funcSurf);
         }
       }
 
@@ -127,7 +161,7 @@ namespace Hermes
       this->deinit_u_ext_orders(u_ext_func);
 
       // deinit - ext
-      this->deinit_ext_orders(current_wf->ext, current_wf->u_ext_fn, ext_func);
+      this->deinit_ext_orders(ext_func);
 
       return order;
     }
@@ -164,22 +198,17 @@ namespace Hermes
           max_order_j = eo;
       }
 
-      Func<Hermes::Ord>* ou = init_fn_ord(max_order_j + (spaces[form->j]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
-      Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
+      Func<Hermes::Ord>* ou = &func_order[max_order_j + (spaces[form->j]->shapeset->num_components > 1 ? 1 : 0)];
+      Func<Hermes::Ord>* ov = &func_order[max_order_i + (spaces[form->i]->shapeset->num_components > 1 ? 1 : 0)];
 
       // Total order of the vector form.
-      double fake_wt = 1.0;
-      Geom<Hermes::Ord> tmp;
-      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ou, ov, &tmp, local_ext);
+      Hermes::Ord o = form->ord(1, &wt_order, u_ext, ou, ov, &geom_order, local_ext);
 
       adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
       // Cleanup.
       if (form->ext.size() > 0)
-        this->deinit_ext_orders(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : form->wf->u_ext_fn), local_ext);
-
-      delete ou;
-      delete ov;
+        this->deinit_ext_orders(local_ext);
 
       return order;
     }
@@ -207,20 +236,16 @@ namespace Hermes
         if (eo > max_order_i)
           max_order_i = eo;
       }
-      Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
+      Func<Hermes::Ord>* ov = &func_order[max_order_i + (spaces[form->i]->shapeset->num_components > 1 ? 1 : 0)];
 
       // Total order of the vector form.
-      double fake_wt = 1.0;
-      Geom<Hermes::Ord> tmp;
-      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ov, &tmp, local_ext);
+      Hermes::Ord o = form->ord(1, &wt_order, u_ext, ov, &geom_order, local_ext);
 
       adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
       // Cleanup.
       if (form->ext.size() > 0)
-        this->deinit_ext_orders(form->ext, (form->u_ext_fn.size() > 0 ? form->u_ext_fn : form->wf->u_ext_fn), local_ext);
-      
-      delete ov;
+        this->deinit_ext_orders(local_ext);
 
       return order;
     }
@@ -241,12 +266,12 @@ namespace Hermes
           if (this->u_ext[i]->get_active_element())
           {
             if (surface_form)
-              u_ext_func[i] = init_fn_ord(this->u_ext[i]->get_edge_fn_order(this->current_state->isurf) + (this->u_ext[i]->get_num_components() > 1 ? 1 : 0));
+              u_ext_func[i] = &func_order[this->u_ext[i]->get_edge_fn_order(this->current_state->isurf) + (this->u_ext[i]->get_num_components() > 1 ? 1 : 0)];
             else
-              u_ext_func[i] = init_fn_ord(this->u_ext[i]->get_fn_order() + (this->u_ext[i]->get_num_components() > 1 ? 1 : 0));
+              u_ext_func[i] = &func_order[this->u_ext[i]->get_fn_order() + (this->u_ext[i]->get_num_components() > 1 ? 1 : 0)];
           }
           else
-            u_ext_func[i] = init_fn_ord(0);
+            u_ext_func[i] = &func_order[0];
         }
       }
 
@@ -256,16 +281,9 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_u_ext_orders(Func<Hermes::Ord>** u_ext_func)
     {
-      if (u_ext_func)
-      {
-        for (int i = 0; i < this->selectiveAssembler->spaces_size; i++)
-        {
-          if (u_ext_func[i])
-            delete u_ext_func[i];
-        }
-        delete[] u_ext_func;
-      }
+      free_with_check(u_ext_func);
     }
+
 
     template<typename Scalar>
     Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func)
@@ -279,7 +297,7 @@ namespace Hermes
 
       if (ext_size > 0 || u_ext_fns_size > 0)
       {
-        ext_func = new Func<Hermes::Ord>*[ext_size + u_ext_fns_size];
+        ext_func = malloc_with_check<Func<Hermes::Ord>*>(ext_size + u_ext_fns_size);
         for (int ext_i = 0; ext_i < ext.size(); ext_i++)
         {
           if (ext[ext_i])
@@ -287,9 +305,9 @@ namespace Hermes
             if (ext[ext_i]->get_active_element())
             {
               if (surface_form)
-                ext_func[u_ext_fns_size + ext_i] = init_fn_ord(ext[ext_i]->get_edge_fn_order(this->current_state->isurf) + (ext[ext_i]->get_num_components() > 1 ? 1 : 0));
+                ext_func[u_ext_fns_size + ext_i] = &func_order[ext[ext_i]->get_edge_fn_order(this->current_state->isurf) + (ext[ext_i]->get_num_components() > 1 ? 1 : 0)];
               else
-                ext_func[u_ext_fns_size + ext_i] = init_fn_ord(ext[ext_i]->get_fn_order() + (ext[ext_i]->get_num_components() > 1 ? 1 : 0));
+                ext_func[u_ext_fns_size + ext_i] = &func_order[ext[ext_i]->get_fn_order() + (ext[ext_i]->get_num_components() > 1 ? 1 : 0)];
             }
             else
               ext_func[u_ext_fns_size + ext_i] = nullptr;
@@ -297,12 +315,12 @@ namespace Hermes
           else
             ext_func[u_ext_fns_size + ext_i] = nullptr;
         }
-        
+
         for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
         {
           if (u_ext_fns[ext_i])
           {
-            ext_func[ext_i] = init_fn_ord(0);
+            ext_func[ext_i] = &func_order[0];
             u_ext_fns[ext_i]->ord(ext_func + u_ext_fns_size, u_ext_func, ext_func[ext_i]);
           }
           else
@@ -314,21 +332,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** ext_func)
+    void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_orders(Func<Hermes::Ord>** ext_func)
     {
-      if (ext_func)
-      {
-        for (int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
-          delete ext_func[ext_i];
-
-        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
-        {
-          if (ext[ext_i] && ext[ext_i]->get_active_element())
-            delete ext_func[u_ext_fns.size() + ext_i];
-        }
-
-        delete[] ext_func;
-      }
+      free_with_check(ext_func);
     }
 
     template<typename Scalar>
@@ -347,7 +353,7 @@ namespace Hermes
       int inc = (fu->get_num_components() == 2) ? 1 : 0;
       int central_order = fu->get_edge_fn_order(ns->active_edge) + inc;
       int neighbor_order = fu->get_edge_fn_order(ns->neighbor_edge.local_num_of_edge) + inc;
-      return new DiscontinuousFunc<Ord>(init_fn_ord(central_order), init_fn_ord(neighbor_order));
+      return new DiscontinuousFunc<Ord>(&func_order[central_order], &func_order[neighbor_order]);
     }
 
     template<typename Scalar>
@@ -366,6 +372,7 @@ namespace Hermes
     void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_fns_ord(Form<Scalar> *form, FormType** oi, FormType** oext)
     {
       unsigned int prev_size = oi ? (this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset) : 0;
+
       if (oi)
       {
         for (int i = 0; i < prev_size; i++)
@@ -400,7 +407,7 @@ namespace Hermes
       if (current_u_ext[i + mfDG->u_ext_offset])
         u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + mfDG->u_ext_offset]);
       else
-        u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
+        u_ext_ord[i] = new DiscontinuousFunc<Ord>(&func_order[0], false, false);
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
@@ -421,15 +428,13 @@ namespace Hermes
         max_order_j = H2D_GET_H_ORDER(max_order_j);
 
       // Order of shape functions.
-      DiscontinuousFunc<Ord>* ou = new DiscontinuousFunc<Ord>(init_fn_ord(max_order_j), neighbor_supp_u);
-      DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(init_fn_ord(max_order_i), neighbor_supp_v);
+      DiscontinuousFunc<Ord>* ou = new DiscontinuousFunc<Ord>(&func_order[max_order_j], neighbor_supp_u);
+      DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(&func_order[max_order_i], neighbor_supp_v);
 
       // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-      Geom<Hermes::Ord> tmp;
-      double fake_wt = 1.0;
 
       // Total order of the matrix form.
-      Ord o = mfDG->ord(1, &fake_wt, u_ext_ord, ou, ov, &tmp, ext_ord);
+      Ord o = mfDG->ord(1, &wt_order, u_ext_ord, ou, ov, &geom_order, ext_ord);
 
       adjust_order_to_refmaps(mfDG, order, &o, current_refmaps);
 
@@ -459,7 +464,7 @@ namespace Hermes
       if (current_u_ext[i + vfDG->u_ext_offset])
         u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + vfDG->u_ext_offset]);
       else
-        u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
+        u_ext_ord[i] = new DiscontinuousFunc<Ord>(&func_order[0], false, false);
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
@@ -475,14 +480,10 @@ namespace Hermes
         max_order_i = H2D_GET_H_ORDER(max_order_i);
 
       // Order of shape functions.
-      DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(init_fn_ord(max_order_i), neighbor_supp_v);
-
-      // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-      Geom<Hermes::Ord> tmp;
-      double fake_wt = 1.0;
+      DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(&func_order[max_order_i], neighbor_supp_v);
 
       // Total order of the matrix form.
-      Ord o = vfDG->ord(1, &fake_wt, u_ext_ord, ov, &tmp, ext_ord);
+      Ord o = vfDG->ord(1, &wt_order, u_ext_ord, ov, &geom_order, ext_ord);
 
       adjust_order_to_refmaps(vfDG, order, &o, current_refmaps);
 

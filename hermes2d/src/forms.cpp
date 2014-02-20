@@ -39,6 +39,20 @@ namespace Hermes
     {
     }
 
+    Func<Hermes::Ord>::Func(const int order) : order(order)
+    {
+      Hermes::Ord d(order);
+      Hermes::Ord d1(order > 1 ? order - 1 : order);
+
+      this->val = this->val0 = this->val1 = d;
+      this->dx = this->dy = this->curl = this->div = d1;
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+      Hermes::Ord d2(std::min(0, order - 2));
+      this->laplace = d2;
+#endif
+    }
+
     void Func<double>::subtract(Func<double>* func)
     {
       if (this->np != func->np)
@@ -241,7 +255,7 @@ namespace Hermes
         this->dy = fn_central->dy;
       }
 
-    DiscontinuousFunc<Ord>::DiscontinuousFunc(Func<Ord>* fn, bool support_on_neighbor, bool reverse) : Func<Ord>(),
+    DiscontinuousFunc<Ord>::DiscontinuousFunc(Func<Ord>* fn, bool support_on_neighbor, bool reverse) : Func<Ord>(fn->order),
       fn_central(nullptr), fn_neighbor(nullptr), reverse_neighbor_side(reverse)
     {
       if (fn == nullptr)
@@ -251,7 +265,7 @@ namespace Hermes
         this->fn_neighbor = fn;
         this->val_neighbor = fn->val;
         this->dx_neighbor = fn->dx;
-        this->dy_neighbor = fn->dy;      
+        this->dy_neighbor = fn->dy;
       }
       else
       {
@@ -262,7 +276,7 @@ namespace Hermes
       }
     }
 
-    DiscontinuousFunc<Ord>::DiscontinuousFunc(Func<Ord>* fn_c, Func<Ord>* fn_n, bool reverse) : Func<Ord>(),
+    DiscontinuousFunc<Ord>::DiscontinuousFunc(Func<Ord>* fn_c, Func<Ord>* fn_n, bool reverse) : Func<Ord>(std::max(fn_c->order, fn_n->order)),
       fn_central(fn_c), fn_neighbor(fn_n), reverse_neighbor_side(reverse)
     {
       this->val_neighbor = fn_neighbor->val;
@@ -300,21 +314,11 @@ namespace Hermes
     template<typename T>
     void DiscontinuousFunc<T>::free()
     {
-      if (fn_central != nullptr)
+      if (reverse_neighbor_side)
       {
-        delete fn_central;
-        fn_central = nullptr;
-      }
-      if (fn_neighbor != nullptr)
-      {
-        if (reverse_neighbor_side)
-        {
-          free_with_check(this->val_neighbor);
-          free_with_check(this->dx_neighbor);
-          free_with_check(this->dy_neighbor);
-        }
-        delete fn_neighbor;
-        fn_neighbor = nullptr;
+        free_with_check(this->val_neighbor);
+        free_with_check(this->dx_neighbor);
+        free_with_check(this->dy_neighbor);
       }
     }
 
@@ -375,18 +379,6 @@ namespace Hermes
       return area;
     }
 
-    template<>
-    Hermes::Ord Geom<Hermes::Ord>::get_diam_approximation(int n)
-    {
-      return Hermes::Ord(0);
-    }
-
-    template<>
-    Hermes::Ord Geom<Hermes::Ord>::get_area(int n, double* wt)
-    {
-      return Hermes::Ord(0);
-    }
-
     template<typename T>
     InterfaceGeom<T>::InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam) :
       Geom<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
@@ -406,6 +398,12 @@ namespace Hermes
         this->wrapped_geom = geom;
       }
 
+    template<>
+    InterfaceGeom<Hermes::Ord>::InterfaceGeom(Geom<Hermes::Ord>* geom, int n_marker, int n_id, Hermes::Ord n_diam) : Geom<Hermes::Ord>()
+    {
+      this->wrapped_geom = geom;
+    }
+
     template<typename T>
     void InterfaceGeom<T>::free()
     {
@@ -415,6 +413,12 @@ namespace Hermes
 
     template<typename T>
     void InterfaceGeom<T>::free_ord()
+    {
+      delete wrapped_geom;
+    }
+
+    template<>
+    void InterfaceGeom<Hermes::Ord>::free()
     {
       delete wrapped_geom;
     }
@@ -435,27 +439,6 @@ namespace Hermes
     T InterfaceGeom<T>::get_neighbor_diam() const
     {
       return neighb_diam;
-    }
-
-    Geom<Hermes::Ord>* init_geom_ord()
-    {
-      Geom<Hermes::Ord>* e = new Geom<Hermes::Ord>;
-      Hermes::Ord x[] = { Hermes::Ord(1) };
-      Hermes::Ord y[] = { Hermes::Ord(1) };
-
-      Hermes::Ord nx[] = { Hermes::Ord(1) };
-      Hermes::Ord ny[] = { Hermes::Ord(1) };
-
-      Hermes::Ord tx[] = { Hermes::Ord(1) };
-      Hermes::Ord ty[] = { Hermes::Ord(1) };
-
-      Hermes::Ord diam = Hermes::Ord(1);
-
-      e->x = x; e->y = y;
-      e->nx = nx; e->ny = ny;
-      e->tx = tx; e->ty = ty;
-
-      return e;
     }
 
     Geom<double>* init_geom_vol(RefMap *rm, const int order)
@@ -506,25 +489,6 @@ namespace Hermes
       }
       e->orientation = rm->get_active_element()->get_edge_orientation(isurf);
       return e;
-    }
-
-    Func<Hermes::Ord>* init_fn_ord(const int order)
-    {
-      Hermes::Ord d(order);
-      Hermes::Ord d1(order > 1 ? order - 1 : order);
-
-      Func<Hermes::Ord>* f = new Func<Hermes::Ord>();
-      f->val = d;
-      f->dx = d1;
-      f->dy = d1;
-#ifdef H2D_USE_SECOND_DERIVATIVES
-      Hermes::Ord d2(std::min(0, order - 2));
-      f->laplace = d;
-#endif
-      f->val0 = f->val1 = d;
-      f->curl = d1;
-      f->div = d1;
-      return f;
     }
 
     Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
@@ -843,7 +807,7 @@ namespace Hermes
     template HERMES_API void init_fn_preallocated(Func<double>* u, MeshFunction<double>* fu, const int order);
     template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, MeshFunction<std::complex<double> >* fu, const int order);
 
-    template HERMES_API void init_fn_preallocated(Func<double>* u, UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext,const int order, Geom<double>* geometry, ElementMode2D mode);
+    template HERMES_API void init_fn_preallocated(Func<double>* u, UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
     template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
 
 

@@ -56,7 +56,8 @@ namespace Hermes
       void init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear, bool add_dirichlet_lift);
 
       /// Initialize Func storages.
-      void init_funcs();
+      void init_funcs_wf();
+      void init_funcs_space();
       /// Func Memory Pool
       pj_pool_t *FuncMemoryPool;
       void init_funcs_memory_pool();

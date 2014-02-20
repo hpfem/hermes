@@ -67,7 +67,7 @@ namespace Hermes
       Func<Hermes::Ord>** init_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func);
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext_orders.
-      void deinit_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** ext_func);
+      void deinit_ext_orders(Func<Hermes::Ord>** ext_func);
 
       /// Calculates integration order for DG matrix forms.
       int calc_order_dg_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* state, MatrixFormDG<Scalar>* mfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_u, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches);
@@ -91,6 +91,8 @@ namespace Hermes
 
       /// For initialization of external functions.
       Solution<Scalar>** u_ext;
+      Func<Hermes::Ord>** ext_orders;
+      Func<Hermes::Ord>** u_ext_orders;
       Traverse::State* current_state;
 
       template<typename T> friend class DiscreteProblem;
