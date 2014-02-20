@@ -31,8 +31,8 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    Quad1DStd g_quad_1d_std;
-    Quad2DStd g_quad_2d_std;
+    HERMES_API Quad1DStd g_quad_1d_std;
+    HERMES_API Quad2DStd g_quad_2d_std;
 
     H1ShapesetJacobi ref_map_shapeset;
     PrecalcShapeset ref_map_pss_static(&ref_map_shapeset);
@@ -250,9 +250,6 @@ namespace Hermes
       // Cholesky factorization of the matrix
       choldc(this->edge_proj_matrix, this->edge_proj_matrix_size, this->edge_p);
     }
-
-    HERMES_API Quad1DStd g_quad_1d_std;
-    HERMES_API Quad2DStd g_quad_2d_std;
 
     CurvMapStatic curvMapStatic;
 

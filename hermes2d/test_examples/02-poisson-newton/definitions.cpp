@@ -37,7 +37,7 @@ Hermes::Hermes2D::EssentialBoundaryCondition<double>::EssentialBCValueType Custo
   return Hermes::Hermes2D::EssentialBoundaryCondition<double>::BC_FUNCTION;
 }
 
-double CustomDirichletCondition::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
+double CustomDirichletCondition::value(double x, double y) const
 {
   return A*x + B*y + C;
 }

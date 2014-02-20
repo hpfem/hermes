@@ -23,7 +23,7 @@ public:
 
   virtual EssentialBCValueType get_value_type() const;
 
-  virtual double value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+  virtual double value(double x, double y) const;
 
   protected:
     double A, B, C;

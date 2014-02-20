@@ -112,7 +112,7 @@ namespace Hermes
     ///  // VERY IMPORTANT - overriding the method of the base class (DefaultEssentialBCNonConst::value) with a custom implementation.
     ///  // NOTE - one can use the top-level base class (EssentialBoundaryCondition)'s methods for handling the time variable for time-dependent problems: get_current_time().
     ///  // NOTE - the 'virtual' keyword is not here anymore - because we will not need to further derive from this class and override this method.
-    ///  double value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
+    ///  double value(double x, double y) const {
     ///&nbsp; double val_y = vel_inlet * y*(H-y) / (H/2.)/(H/2.);
     ///&nbsp; if (get_current_time() <= startup_time) 
     ///&nbsp;   return val_y * get_current_time()/startup_time;
