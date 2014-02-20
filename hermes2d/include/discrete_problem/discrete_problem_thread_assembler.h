@@ -64,6 +64,11 @@ namespace Hermes
 
       /// De-initialize Func storages.
       void deinit_funcs();
+
+      void deinit_funcs_space();
+      bool funcs_space_initialized;
+      void deinit_funcs_wf();
+      bool funcs_wf_initialized;
       /// Initializitation of u-ext values into Funcs
       void init_u_ext_values(int order);
       /// Initializitation of ext values into Funcs

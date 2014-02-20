@@ -336,20 +336,18 @@ namespace Hermes
         }
       }
 
-      if (current_mat && DG_matrix_forms_present && !edge_processed)
+      for (int i = 0; i < this->spaces_size; i++)
       {
-        for (int i = 0; i < this->spaces_size; i++)
+        for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
         {
-          for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
-          {
-            if (ext_asmlist[i]->dof[func_i] < 0)
-              continue;
-            delete testFunctions[i][func_i];
-          }
-          delete ext_asmlist[i];
-          free_with_check(testFunctions[i]);
+          if (ext_asmlist[i]->dof[func_i] < 0)
+            continue;
+          delete testFunctions[i][func_i];
         }
+        delete ext_asmlist[i];
+        free_with_check(testFunctions[i]);
       }
+
       free_with_check(testFunctions);
       free_with_check(ext_asmlist);
 

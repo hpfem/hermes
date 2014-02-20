@@ -314,11 +314,21 @@ namespace Hermes
     template<typename T>
     void DiscontinuousFunc<T>::free()
     {
-      if (reverse_neighbor_side)
+      if (fn_central != nullptr)
       {
-        free_with_check(this->val_neighbor);
-        free_with_check(this->dx_neighbor);
-        free_with_check(this->dy_neighbor);
+        delete fn_central;
+        fn_central = nullptr;
+      }
+      if (fn_neighbor != nullptr)
+      {
+        if (reverse_neighbor_side)
+        {
+          free_with_check(this->val_neighbor);
+          free_with_check(this->dx_neighbor);
+          free_with_check(this->dy_neighbor);
+        }
+        delete fn_neighbor;
+        fn_neighbor = nullptr;
       }
     }
 
