@@ -55,7 +55,7 @@ namespace Hermes
           rhs->zero();
       }
 
-      if (!matrix_structure_reusable && mat)
+      if ((!matrix_structure_reusable || (mat != this->previous_mat)) && mat)
       {
         // Spaces have changed: create the matrix from scratch.
         matrix_structure_reusable = true;
@@ -202,7 +202,7 @@ namespace Hermes
 
       // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied
       // by previous vector before allocating
-      if (!vector_structure_reusable && rhs)
+      if ((!vector_structure_reusable || (rhs != this->previous_rhs)) && rhs)
       {
         vector_structure_reusable = true;
         rhs->alloc(ndof);
