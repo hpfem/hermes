@@ -636,11 +636,9 @@ namespace Hermes
         // Reassemble the jacobian once not reusable anymore.
         this->info("\t\tre-calculating Jacobian.");
         
-        // Set factorization schemes.
-        if (this->assemble_jacobian(true) && this->jacobian_reusable)
-          this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING);
-        else
-          this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+        // Set factorization scheme.
+        this->assemble_jacobian(true);
+        this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
 
         // Solve the system, state that the jacobian is reusable should it be desirable.
         this->solve_linear_system();
