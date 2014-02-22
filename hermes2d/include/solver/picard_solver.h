@@ -78,7 +78,6 @@ namespace Hermes
       PicardSolver(DiscreteProblem<Scalar>* dp);
       PicardSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
       PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-      void init();
       virtual ~PicardSolver();
 
       // See the base class for details, the following serves only for avoiding C++ name-hiding.

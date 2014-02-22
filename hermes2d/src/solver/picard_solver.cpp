@@ -28,33 +28,27 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver() : Solver<Scalar>(), PicardMatrixSolver<Scalar>()
+    PicardSolver<Scalar>::PicardSolver() : Solver<Scalar>(false), PicardMatrixSolver<Scalar>()
     {
-      this->init();
+      this->dp = new DiscreteProblem<Scalar>(false, false);
     }
 
     template<typename Scalar>
     PicardSolver<Scalar>::PicardSolver(DiscreteProblem<Scalar>* dp) : Solver<Scalar>(dp), PicardMatrixSolver<Scalar>()
     {
-      this->init();
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) : Solver<Scalar>(wf, space), PicardMatrixSolver<Scalar>()
+    PicardSolver<Scalar>::PicardSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) : Solver<Scalar>(false), PicardMatrixSolver<Scalar>()
     {
-      this->init();
+      this->dp = new DiscreteProblem<Scalar>(wf, space, false, false);
+
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) : Solver<Scalar>(wf, spaces), PicardMatrixSolver<Scalar>()
+    PicardSolver<Scalar>::PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) : Solver<Scalar>(false), PicardMatrixSolver<Scalar>()
     {
-      this->init();
-    }
-
-    template<typename Scalar>
-    void PicardSolver<Scalar>::init()
-    {
-      this->dp->set_linear(false, false);
+      this->dp = new DiscreteProblem<Scalar>(wf, spaces, false, false);
     }
 
     template<typename Scalar>

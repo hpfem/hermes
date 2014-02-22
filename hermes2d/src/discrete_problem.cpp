@@ -29,50 +29,43 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool to_set, bool dirichlet_lift_accordingly)
     {
-      init();
+      this->init(to_set, dirichlet_lift_accordingly);
       this->set_spaces(spaces);
       this->set_weak_formulation(wf_);
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, SpaceSharedPtr<Scalar>& space)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, SpaceSharedPtr<Scalar>& space, bool to_set, bool dirichlet_lift_accordingly)
     {
-      init();
+      this->init(to_set, dirichlet_lift_accordingly);
       this->set_space(space);
       this->set_weak_formulation(wf_);
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem()
+    DiscreteProblem<Scalar>::DiscreteProblem(bool to_set, bool dirichlet_lift_accordingly)
     {
-      init();
+      init(to_set, dirichlet_lift_accordingly);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init()
+    void DiscreteProblem<Scalar>::init(bool to_set, bool dirichlet_lift_accordingly)
     {
       this->spaces_size = this->spaces.size();
 
-      this->nonlinear = true;
-      this->add_dirichlet_lift = false;
-
-      // Local number of threads - to avoid calling it over and over again, and against faults caused by the
-      // value being changed while assembling.
-      this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>*[this->num_threads_used];
-      for (int i = 0; i < this->num_threads_used; i++)
-        this->threadAssembler[i] = new DiscreteProblemThreadAssembler<Scalar>(&this->selectiveAssembler);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_linear(bool to_set, bool dirichlet_lift_accordingly)
-    {
       this->nonlinear = !to_set;
       if (dirichlet_lift_accordingly)
         this->add_dirichlet_lift = !this->nonlinear;
       else
         this->add_dirichlet_lift = this->nonlinear;
+
+      // Local number of threads - to avoid calling it over and over again, and against faults caused by the
+      // value being changed while assembling.
+      this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>*[this->num_threads_used];
+      for (int i = 0; i < this->num_threads_used; i++)
+        this->threadAssembler[i] = new DiscreteProblemThreadAssembler<Scalar>(&this->selectiveAssembler, this->nonlinear);
     }
 
     template<typename Scalar>
@@ -325,7 +318,7 @@ namespace Hermes
 
           try
           {
-            this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear, this->add_dirichlet_lift);
+            this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->add_dirichlet_lift);
 
             DiscreteProblemDGAssembler<Scalar>* dgAssembler;
             if (is_DG)

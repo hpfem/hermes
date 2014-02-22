@@ -25,11 +25,11 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) :
+    DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler, bool nonlinear) :
       pss(nullptr), refmaps(nullptr), u_ext(nullptr),
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
       ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0),
-      funcs_wf_initialized(false), funcs_space_initialized(false), spaces_size(0)
+      funcs_wf_initialized(false), funcs_space_initialized(false), spaces_size(0), nonlinear(nonlinear)
     {
       // Init the memory pool - if PJLIB is linked, it will do the magic, if not, it will initialize the pointer to null.
       this->init_funcs_memory_pool();
@@ -107,10 +107,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear_, bool add_dirichlet_lift_)
+    void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool add_dirichlet_lift_)
     {
       // Basic settings.
-      this->nonlinear = nonlinear_;
       this->add_dirichlet_lift = add_dirichlet_lift_;
 
       // Transformables setup.

@@ -42,7 +42,7 @@ namespace Hermes
       void free();
 
     private:
-      DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler);
+      DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler, bool nonlinear);
       ~DiscreteProblemThreadAssembler();
 
       /// Initialization of all structures concerning space - assembly lists, precalculated shapesets, ..
@@ -53,7 +53,7 @@ namespace Hermes
       void init_u_ext(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Solution<Scalar>** u_ext_sln);
 
       /// Initializes the Transformable array for doing transformations.
-      void init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear, bool add_dirichlet_lift);
+      void init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool add_dirichlet_lift);
 
       /// Initialize Func storages.
       void init_funcs_wf();

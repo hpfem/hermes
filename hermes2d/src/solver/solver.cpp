@@ -30,27 +30,30 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    Solver<Scalar>::Solver(bool force_use_direct_solver) : dp(new DiscreteProblem<Scalar>()), own_dp(true)
+    Solver<Scalar>::Solver(bool initialize_discrete_problem)
     {
-      this->init(force_use_direct_solver);
+      if (initialize_discrete_problem)
+      {
+        this->dp = new DiscreteProblem<Scalar>();
+        own_dp = true;
+      }
+      else
+        own_dp = false;
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(DiscreteProblem<Scalar>* dp, bool force_use_direct_solver) :  dp(dp), own_dp(false)
+    Solver<Scalar>::Solver(DiscreteProblem<Scalar>* dp) :  dp(dp), own_dp(false)
     {
-      this->init(force_use_direct_solver);
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver) :  dp(new DiscreteProblem<Scalar>(wf, space)), own_dp(true)
+    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) :  dp(new DiscreteProblem<Scalar>(wf, space)), own_dp(true)
     {
-      this->init(force_use_direct_solver);
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver) :  dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
+    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) :  dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
     {
-      this->init(force_use_direct_solver);
     }
     
     template<typename Scalar>
@@ -63,11 +66,6 @@ namespace Hermes
         this->dp->set_matrix(nullptr);
         this->dp->set_rhs(nullptr);
       }
-    }
-
-    template<typename Scalar>
-    void Solver<Scalar>::init(bool force_use_direct_solver)
-    {
     }
 
     template<typename Scalar>

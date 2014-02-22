@@ -45,10 +45,10 @@ namespace Hermes
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>
     {
     public:
-      Solver(bool force_use_direct_solver = false);
-      Solver(DiscreteProblem<Scalar>* dp, bool force_use_direct_solver = false);
-      Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver = false);
-      Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver = false);
+      Solver(bool initialize_discrete_problem = true);
+      Solver(DiscreteProblem<Scalar>* dp);
+      Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
+      Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~Solver();
 
       /// Basic solve method.
@@ -86,10 +86,7 @@ namespace Hermes
       DiscreteProblem<Scalar>* dp;
 
       /// This instance owns its DP.
-      const bool own_dp;
-      
-    private:
-      void init(bool force_use_direct_solver);
+      bool own_dp;
     };
   }
 }

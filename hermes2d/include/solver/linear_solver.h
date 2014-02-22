@@ -89,8 +89,6 @@ namespace Hermes
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "LinearSolver"; }
-
-      void init_linear(bool force_use_direct_solver);
     };
   }
 }

@@ -47,21 +47,28 @@ namespace Hermes
     {
     public:
       /// Constructor for multiple components / equations.
-      DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-      /// Constructor for one equation.
-      DiscreteProblem(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
-      /// Non-parameterized constructor.
-      DiscreteProblem();
-      /// Destuctor.
-      virtual ~DiscreteProblem();
-
-      /// Make this DiscreteProblem linear.
-      /// Does 2 things
+      /// Making this DiscreteProblem linear does 2 things
       /// 1 - turns off initialization of previous iterations for nonlinear solvers.
       /// 2 - allows for assembling Dirichlet boundary conditions using a Dirichlet lift.
       /// \param[in] dirichlet_lift_accordingly If true, the appropriate settings for (linear / nonlinear)
       /// problem will be used (use Dirichlet lift iff the problem is linear). If false, the other way round.
-      void set_linear(bool to_set = true, bool dirichlet_lift_accordingly = true);
+      DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool linear = false, bool dirichlet_lift_accordingly = true);
+      /// Constructor for one equation.
+      /// Making this DiscreteProblem linear does 2 things
+      /// 1 - turns off initialization of previous iterations for nonlinear solvers.
+      /// 2 - allows for assembling Dirichlet boundary conditions using a Dirichlet lift.
+      /// \param[in] dirichlet_lift_accordingly If true, the appropriate settings for (linear / nonlinear)
+      /// problem will be used (use Dirichlet lift iff the problem is linear). If false, the other way round.
+      DiscreteProblem(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool linear = false, bool dirichlet_lift_accordingly = true);
+      /// Non-parameterized constructor.
+      /// Making this DiscreteProblem linear does 2 things
+      /// 1 - turns off initialization of previous iterations for nonlinear solvers.
+      /// 2 - allows for assembling Dirichlet boundary conditions using a Dirichlet lift.
+      /// \param[in] dirichlet_lift_accordingly If true, the appropriate settings for (linear / nonlinear)
+      /// problem will be used (use Dirichlet lift iff the problem is linear). If false, the other way round.
+      DiscreteProblem(bool linear = false, bool dirichlet_lift_accordingly = true);
+      /// Destuctor.
+      virtual ~DiscreteProblem();
 
       /// Assembling.
       bool assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = nullptr);
@@ -105,7 +112,7 @@ namespace Hermes
       inline std::string getClassName() const { return "DiscreteProblem"; }
 
       /// Init function. Common code for the constructors.
-      void init();
+      void init(bool linear, bool dirichlet_lift_accordingly);
 
       /// Space instances for all equations in the system.
       Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
