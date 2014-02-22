@@ -78,12 +78,8 @@ int main(int argc, char* argv[])
   Hermes2DFunction<double> src(-heat_src);
   CustomWeakFormPicard wf(sln_prev_iter, &lambda, &src);
 
-  // Initialize the FE problem.
-  DiscreteProblem<double> dp(&wf, space);
-  dp.set_linear();
-
   // Initialize the Picard solver.
-  PicardSolver<double> picard(&dp);
+  PicardSolver<double> picard(&wf, space);
   picard.use_Anderson_acceleration(false);
 
   // Perform the Picard's iteration (Anderson acceleration on by default).
