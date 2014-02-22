@@ -61,6 +61,7 @@ namespace Hermes
     template<typename Scalar> class DiscreteProblem;
     template<typename Scalar> class DiscreteProblemDGAssembler;
     template<typename Scalar> class DiscreteProblemThreadAssembler;
+    template<typename Scalar> class DiscreteProblemIntegrationOrderCalculator;
     namespace Views
     {
       template<typename Scalar> class BaseView;

@@ -146,27 +146,6 @@ namespace Hermes
       ExactSolutionScalar<Scalar>* exact_solution;
     };
 
-    /// Class representing non-constant essential boundary condition
-    /// (tangential component for Hcurl approximations).
-    template<typename Scalar>
-    class HERMES_API DefaultEssentialBCNonConstHcurl : public EssentialBoundaryCondition<Scalar>
-    {
-    public:
-      // Tangential values given by a vector-valued solution.
-      DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_,
-        MeshFunctionSharedPtr<Scalar> exact_solution2);
-      DefaultEssentialBCNonConstHcurl(std::string marker, MeshFunctionSharedPtr<Scalar> exact_solution2);
-
-      ~DefaultEssentialBCNonConstHcurl() {};
-
-      virtual Scalar value(double x, double y) const;
-
-      /// Function giving info that u_Essential is a non-constant function.
-      inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
-
-      ExactSolutionVector<Scalar>* exact_solution2;
-    };
-
     /// Class encapsulating all boundary conditions of one problem.
     /// Using the class EssentialBCs and its descendants.
     /// Usage: for passing to Hermes2D::Space in the constructor or set_essential_bcs() method.
