@@ -829,7 +829,6 @@ namespace Hermes
 
     template class HERMES_API DiscontinuousFunc<double>;
     template class HERMES_API DiscontinuousFunc<std::complex<double> >;
-    template class HERMES_API Geom<Hermes::Ord>;
     template class HERMES_API Geom<double>;
     template class HERMES_API InterfaceGeom<Hermes::Ord>;
     template class HERMES_API InterfaceGeom<double>;
