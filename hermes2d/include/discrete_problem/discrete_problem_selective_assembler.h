@@ -88,7 +88,9 @@ namespace Hermes
       /// Matrix structure can be reused.
       /// If other conditions apply.
       bool matrix_structure_reusable;
+      SparseMatrix<Scalar>* previous_mat;
       bool vector_structure_reusable;
+      Vector<Scalar>* previous_rhs;
 
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;

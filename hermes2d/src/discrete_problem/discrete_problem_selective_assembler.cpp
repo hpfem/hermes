@@ -26,7 +26,9 @@ namespace Hermes
       : sp_seq(nullptr),
       spaces_size(0),
       matrix_structure_reusable(false),
-      vector_structure_reusable(false)
+      previous_mat(nullptr),
+      vector_structure_reusable(false),
+      previous_rhs(nullptr)
     {
     }
 
@@ -42,10 +44,10 @@ namespace Hermes
     {
       int ndof = Space<Scalar>::get_num_dofs(spaces);
 
-      if (matrix_structure_reusable && mat)
+      if (matrix_structure_reusable && mat && mat == this->previous_mat)
         mat->zero();
 
-      if (vector_structure_reusable && rhs)
+      if (vector_structure_reusable && rhs && rhs == this->previous_rhs)
       {
         if (rhs->get_size() == 0)
           rhs->alloc(ndof);
@@ -206,6 +208,8 @@ namespace Hermes
         rhs->alloc(ndof);
       }
 
+      previous_mat = mat;
+      previous_rhs = rhs;
       return true;
     }
 
