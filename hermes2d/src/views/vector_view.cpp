@@ -229,7 +229,7 @@ namespace Hermes
         if (range_auto) { min = vec->get_min_value(); max = vec->get_max_value(); }
         double irange = 1.0 / (max - min);
         // special case: constant solution
-        if (fabs(min - max) < Hermes::HermesEpsilon) { irange = 1.0; min -= 0.5; }
+        if (fabs(min - max) < Hermes::HermesSqrtEpsilon) { irange = 1.0; min -= 0.5; }
 
         // draw all triangles
         if (mode != 1)
@@ -287,18 +287,24 @@ namespace Hermes
 
               double wh = output_height + gt, ww = output_width + gs;
 
-              double vert[3][2] = {
+              double vert[3][4] = {
                 {
                   triangle[0][0],
-                  triangle[0][1]
+                  triangle[0][1],
+                  triangle[0][2],
+                  triangle[0][3]
                 },
                 {
                   triangle[1][0],
-                  triangle[1][1]
+                  triangle[1][1],
+                  triangle[1][2],
+                  triangle[1][3]
                 },
                 {
                   triangle[2][0],
-                  triangle[2][1]
+                  triangle[2][1],
+                  triangle[2][2],
+                  triangle[2][3]
                 }
               };
 
@@ -353,11 +359,13 @@ namespace Hermes
               {
                 if (tvert[l1][1] == tvert[l2][1])
                 {
-                  l1 = l2; l2 = r2;
+                  l1 = l2;
+                  l2 = r2;
                 }
                 else if (tvert[r1][1] == tvert[r2][1])
                 {
-                  r1 = r2; r2 = l2;
+                  r1 = r2;
+                  r2 = l2;
                 }
               }
 

@@ -31,12 +31,8 @@ namespace Hermes
       if (target_vec == nullptr)
         throw Exceptions::NullException(2);
 
-      // Initialize DiscreteProblem.
-      DiscreteProblem<Scalar> dp(wf, space);
-      dp.set_linear();
-
       // Initialize linear solver.
-      Hermes::Hermes2D::LinearSolver<Scalar> linear_solver(&dp, true);
+      Hermes::Hermes2D::LinearSolver<Scalar> linear_solver(wf, space);
       linear_solver.set_verbose_output(false);
 
       // Perform Newton iteration.

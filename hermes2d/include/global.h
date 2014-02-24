@@ -116,6 +116,8 @@ namespace Hermes
       HERMES_UNSET_NORM
     };
 
+    /// Element type identification.
+    /// The enum values must not change.
     enum ElementMode2D {
       HERMES_MODE_TRIANGLE = 0,
       HERMES_MODE_QUAD = 1

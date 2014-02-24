@@ -71,8 +71,8 @@ namespace Hermes
       protected:
         DiscreteProblemMatrixVector();
 
-        virtual void set_matrix(SparseMatrix<Scalar>* mat);
-        virtual void set_rhs(Vector<Scalar>* rhs);
+        virtual bool set_matrix(SparseMatrix<Scalar>* mat);
+        virtual bool set_rhs(Vector<Scalar>* rhs);
 
         SparseMatrix<Scalar>* current_mat;
         Vector<Scalar>* current_rhs;

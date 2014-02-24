@@ -36,7 +36,7 @@ EssentialBoundaryCondition<double>::EssentialBCValueType EssentialBCNonConst::ge
   return EssentialBoundaryCondition<double>::BC_FUNCTION; 
 }
 
-double EssentialBCNonConst::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
+double EssentialBCNonConst::value(double x, double y) const
 {
   return (x + 10) * (y + 10) / 100.;
 }

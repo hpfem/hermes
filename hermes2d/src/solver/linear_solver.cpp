@@ -20,6 +20,7 @@
 \brief General linear solver functionality.
 */
 #include "solver/linear_solver.h"
+#include "solvers/matrix_solver.h"
 
 using namespace Hermes::Algebra;
 
@@ -28,38 +29,31 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(bool force_use_direct_solver) : Solver<Scalar>(force_use_direct_solver)
+    LinearSolver<Scalar>::LinearSolver(bool force_use_direct_solver) : Solver<Scalar>(false), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
     {
-      this->init_linear(force_use_direct_solver);
+      this->dp = new DiscreteProblem<Scalar>(true);
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(DiscreteProblem<Scalar>* dp, bool force_use_direct_solver) : Solver<Scalar>(dp, force_use_direct_solver)
+    LinearSolver<Scalar>::LinearSolver(DiscreteProblem<Scalar>* dp, bool force_use_direct_solver) : Solver<Scalar>(dp), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
     {
-      this->init_linear(force_use_direct_solver);
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver) : Solver<Scalar>(wf, space, force_use_direct_solver)
+    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver) : Solver<Scalar>(false), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
     {
-      this->init_linear(force_use_direct_solver);
+      this->dp = new DiscreteProblem<Scalar>(wf, space, true);
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver) : Solver<Scalar>(wf, spaces, force_use_direct_solver)
+    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver) : Solver<Scalar>(false), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
     {
-      this->init_linear(force_use_direct_solver);
+      this->dp = new DiscreteProblem<Scalar>(wf, spaces, true);
     }
 
     template<typename Scalar>
     LinearSolver<Scalar>::~LinearSolver()
     {
-    }
-
-    template<typename Scalar>
-    void LinearSolver<Scalar>::init_linear(bool force_use_direct_solver)
-    {
-      this->dp->set_linear();
     }
 
     template<typename Scalar>

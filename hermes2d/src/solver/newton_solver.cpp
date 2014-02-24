@@ -30,6 +30,7 @@ namespace Hermes
     template<typename Scalar>
     NewtonSolver<Scalar>::NewtonSolver() : Solver<Scalar>(), NewtonMatrixSolver<Scalar>()
     {
+      this->dp = new DiscreteProblem<Scalar>(false, true);
     }
 
     template<typename Scalar>
@@ -40,17 +41,13 @@ namespace Hermes
     template<typename Scalar>
     NewtonSolver<Scalar>::NewtonSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) : Solver<Scalar>(wf, space), NewtonMatrixSolver<Scalar>()
     {
+      this->dp = new DiscreteProblem<Scalar>(wf, space, false, true);
     }
 
     template<typename Scalar>
     NewtonSolver<Scalar>::NewtonSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) : Solver<Scalar>(wf, spaces), NewtonMatrixSolver<Scalar>()
     {
-    }
-
-    template<typename Scalar>
-    void NewtonSolver<Scalar>::init()
-    {
-      this->dp->set_linear(false);
+      this->dp = new DiscreteProblem<Scalar>(wf, spaces, false, true);
     }
 
     template<typename Scalar>
@@ -79,19 +76,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::assemble_jacobian(bool store_previous_jacobian)
+    bool NewtonSolver<Scalar>::assemble_jacobian(bool store_previous_jacobian)
     {
-      this->dp->assemble(this->sln_vector, this->get_jacobian());
+      bool result = this->dp->assemble(this->sln_vector, this->get_jacobian());
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number()); 
+      return result;
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::assemble(bool store_previous_jacobian, bool store_previous_residual)
+    bool NewtonSolver<Scalar>::assemble(bool store_previous_jacobian, bool store_previous_residual)
     {
-      this->dp->assemble(this->sln_vector, this->get_jacobian(), this->get_residual());
+      bool result = this->dp->assemble(this->sln_vector, this->get_jacobian(), this->get_residual());
       this->get_residual()->change_sign();
       this->process_vector_output(this->get_residual(), this->get_current_iteration_number());
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number());
+      return result;
     }
 
     template<typename Scalar>

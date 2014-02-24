@@ -749,12 +749,12 @@ namespace Hermes
               if (current_state->e[i])
               {
                 if (current_state->e[i]->used)
-                  func_ord[i] = init_fn_ord(source_functions_cloned[i]->get_fn_order());
+                  func_ord[i] = new Func<Ord>(source_functions_cloned[i]->get_fn_order());
                 else
-                  func_ord[i] = init_fn_ord(0);
+                  func_ord[i] = new Func<Ord>(0);
               }
               else
-                func_ord[i] = init_fn_ord(0);
+                func_ord[i] = new Func<Ord>(0);
             }
 
             this->order(func_ord, orders);
@@ -949,7 +949,7 @@ namespace Hermes
               for (int i = 0; i < this->number_of_integrals; i++)
                 orders[i] = Hermes::Ord(0);
               for (int i = 0; i < source_functions_size; i++)
-                func_ord[i] = init_fn_ord(source_functions_cloned[i]->get_fn_order());
+                func_ord[i] = new Func<Ord>(source_functions_cloned[i]->get_fn_order());
 
               this->order(func_ord, orders);
 

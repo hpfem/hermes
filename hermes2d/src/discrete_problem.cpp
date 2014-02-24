@@ -29,50 +29,43 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool to_set, bool dirichlet_lift_accordingly)
     {
-      init();
+      this->init(to_set, dirichlet_lift_accordingly);
       this->set_spaces(spaces);
       this->set_weak_formulation(wf_);
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, SpaceSharedPtr<Scalar>& space)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, SpaceSharedPtr<Scalar>& space, bool to_set, bool dirichlet_lift_accordingly)
     {
-      init();
+      this->init(to_set, dirichlet_lift_accordingly);
       this->set_space(space);
       this->set_weak_formulation(wf_);
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem()
+    DiscreteProblem<Scalar>::DiscreteProblem(bool to_set, bool dirichlet_lift_accordingly)
     {
-      init();
+      init(to_set, dirichlet_lift_accordingly);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init()
+    void DiscreteProblem<Scalar>::init(bool to_set, bool dirichlet_lift_accordingly)
     {
       this->spaces_size = this->spaces.size();
 
-      this->nonlinear = true;
-      this->add_dirichlet_lift = false;
-
-      // Local number of threads - to avoid calling it over and over again, and against faults caused by the
-      // value being changed while assembling.
-      this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>*[this->num_threads_used];
-      for (int i = 0; i < this->num_threads_used; i++)
-        this->threadAssembler[i] = new DiscreteProblemThreadAssembler<Scalar>(&this->selectiveAssembler);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_linear(bool to_set, bool dirichlet_lift_accordingly)
-    {
       this->nonlinear = !to_set;
       if (dirichlet_lift_accordingly)
         this->add_dirichlet_lift = !this->nonlinear;
       else
         this->add_dirichlet_lift = this->nonlinear;
+
+      // Local number of threads - to avoid calling it over and over again, and against faults caused by the
+      // value being changed while assembling.
+      this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>*[this->num_threads_used];
+      for (int i = 0; i < this->num_threads_used; i++)
+        this->threadAssembler[i] = new DiscreteProblemThreadAssembler<Scalar>(&this->selectiveAssembler, this->nonlinear);
     }
 
     template<typename Scalar>
@@ -98,8 +91,8 @@ namespace Hermes
         this->spaces[space_i]->check();
 
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
-      if (!this->spaces[space_i]->is_up_to_date())
-        throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
+        if (!this->spaces[space_i]->is_up_to_date())
+          throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
 
       return true;
     }
@@ -150,19 +143,37 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_matrix(SparseMatrix<Scalar>* mat)
+    bool DiscreteProblem<Scalar>::set_matrix(SparseMatrix<Scalar>* mat)
     {
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_matrix(mat);
+
       for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_matrix(mat);
+
+      if (mat && this->current_mat != mat)
+      {
+        this->invalidate_matrix();
+        return false;
+      }
+      else
+        return true;
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_rhs(Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::set_rhs(Vector<Scalar>* rhs)
     {
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_rhs(rhs);
+
       for (int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_rhs(rhs);
+
+      if (rhs && this->current_rhs != rhs)
+      {
+        this->invalidate_matrix();
+        return false;
+      }
+      else
+        return true;
     }
 
     template<typename Scalar>
@@ -196,25 +207,25 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
-      assemble((Solution<Scalar>**)nullptr, mat, rhs);
+      return assemble((Solution<Scalar>**)nullptr, mat, rhs);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, Vector<Scalar>* rhs)
     {
-      assemble(coeff_vec, nullptr, rhs);
+      return assemble(coeff_vec, nullptr, rhs);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(Vector<Scalar>* rhs)
     {
-      assemble((Solution<Scalar>**)nullptr, nullptr, rhs);
+      return assemble((Solution<Scalar>**)nullptr, nullptr, rhs);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
       Solution<Scalar>** u_ext_sln = nullptr;
 
@@ -230,7 +241,7 @@ namespace Hermes
         }
       }
 
-      assemble(u_ext_sln, mat, rhs);
+      bool result = assemble(u_ext_sln, mat, rhs);
 
       if (this->nonlinear && coeff_vec)
       {
@@ -238,6 +249,8 @@ namespace Hermes
           delete u_ext_sln[i];
         delete[] u_ext_sln;
       }
+
+      return result;
     }
 
     template<typename Scalar>
@@ -249,9 +262,9 @@ namespace Hermes
       for (unsigned int ext_i = 0; ext_i < this->wf->ext.size(); ext_i++)
         meshes.push_back(this->wf->ext[ext_i]->get_mesh());
       for (unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
-      for (unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
-      if (this->wf->get_forms()[form_i]->ext[ext_i])
-        meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
+        for (unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
+          if (this->wf->get_forms()[form_i]->ext[ext_i])
+            meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
 
       if (this->nonlinear)
       {
@@ -274,14 +287,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Solution<Scalar>** u_ext_sln, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(Solution<Scalar>** u_ext_sln, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
       // Check.
       this->check();
 
       // Set the matrices.
-      this->set_matrix(mat);
-      this->set_rhs(rhs);
+      bool result = this->set_matrix(mat) && this->set_rhs(rhs);
 
       // Initialize states && previous iterations.
       int num_states;
@@ -306,7 +318,7 @@ namespace Hermes
 
           try
           {
-            this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear, this->add_dirichlet_lift);
+            this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->add_dirichlet_lift);
 
             DiscreteProblemDGAssembler<Scalar>* dgAssembler;
             if (is_DG)
@@ -372,6 +384,8 @@ namespace Hermes
           e->visited = false;
         }
       }
+
+      return result;
     }
 
     template<typename Scalar>

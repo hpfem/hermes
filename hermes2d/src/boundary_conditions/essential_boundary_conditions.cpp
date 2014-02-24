@@ -69,7 +69,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DefaultEssentialBCConst<Scalar>::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
+    Scalar DefaultEssentialBCConst<Scalar>::value(double x, double y) const
     {
       this->warn("EssentialBoundaryCondition::Function used either for a constant condition, or not redefined for nonconstant condition.");
       return 0.0;
@@ -103,43 +103,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DefaultEssentialBCNonConst<Scalar>::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
+    Scalar DefaultEssentialBCNonConst<Scalar>::value(double x, double y) const
     {
       return exact_solution->value(x, y);
-    }
-
-    template<typename Scalar>
-    DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_,
-      MeshFunctionSharedPtr<Scalar> exact_solution2_)
-      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>())
-    {
-      ExactSolutionVector<Scalar>* exact = dynamic_cast<ExactSolutionVector<Scalar>*>(exact_solution2_.get());
-      if(exact)
-        this->exact_solution2 = exact;
-      else
-        throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConstHcurl.");
-
-      for (unsigned int i = 0; i < markers_.size(); i++)
-        this->markers.push_back(markers_[i]);
-    }
-
-    template<typename Scalar>
-    DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(std::string marker, MeshFunctionSharedPtr<Scalar> exact_solution2_)
-      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>())
-    {
-      ExactSolutionVector<Scalar>* exact = dynamic_cast<ExactSolutionVector<Scalar>*>(exact_solution2_.get());
-      if(exact)
-        this->exact_solution2 = exact;
-      else
-        throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConstHcurl.");
-      this->markers.push_back(marker);
-    }
-
-    template<typename Scalar>
-    Scalar DefaultEssentialBCNonConstHcurl<Scalar>::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
-    {
-      Scalar2<Scalar> val = exact_solution2->value(x, y);
-      return val.val[0] * t_x + val.val[1] * t_y;
     }
 
     template<typename Scalar>

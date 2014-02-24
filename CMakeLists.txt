@@ -272,6 +272,12 @@ project(hermes)
     else()
       set(BFD_LIBRARY "")
     endif()
+    
+    if(H2D_DEBUG)
+      set(HERMES_FLAGS ${HERMES_DEBUG_FLAGS})
+    else()
+      set(HERMES_FLAGS ${HERMES_RELEASE_FLAGS})
+    endif()
   endif()
 
   # This overrides CXX flags for MSVC

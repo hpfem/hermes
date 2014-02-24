@@ -60,7 +60,7 @@ namespace Hermes
       /// \param[in] n_y the y-component of the unit outer normal.
       /// \param[in] t_x the x-component of the tangent(perpendicular to normal).
       /// \param[in] t_y the y-component of the tangent(perpendicular to normal).
-      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
+      virtual Scalar value(double x, double y) const = 0;
 
       /// Set the current time for time-dependent boundary conditions.
       void set_current_time(double time);
@@ -94,7 +94,7 @@ namespace Hermes
       DefaultEssentialBCConst(Hermes::vector<std::string> markers, Scalar value_const);
       DefaultEssentialBCConst(std::string marker, Scalar value_const);
 
-      Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+      Scalar value(double x, double y) const;
 
       /// Function giving info that u_Essential is a constant.
       inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
@@ -112,7 +112,7 @@ namespace Hermes
     ///  // VERY IMPORTANT - overriding the method of the base class (DefaultEssentialBCNonConst::value) with a custom implementation.
     ///  // NOTE - one can use the top-level base class (EssentialBoundaryCondition)'s methods for handling the time variable for time-dependent problems: get_current_time().
     ///  // NOTE - the 'virtual' keyword is not here anymore - because we will not need to further derive from this class and override this method.
-    ///  double value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
+    ///  double value(double x, double y) const {
     ///&nbsp; double val_y = vel_inlet * y*(H-y) / (H/2.)/(H/2.);
     ///&nbsp; if (get_current_time() <= startup_time) 
     ///&nbsp;   return val_y * get_current_time()/startup_time;
@@ -138,33 +138,12 @@ namespace Hermes
 
       ~DefaultEssentialBCNonConst() {};
 
-      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+      virtual Scalar value(double x, double y) const;
 
       /// Function giving info that u_Essential is a non-constant function.
       inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
 
       ExactSolutionScalar<Scalar>* exact_solution;
-    };
-
-    /// Class representing non-constant essential boundary condition
-    /// (tangential component for Hcurl approximations).
-    template<typename Scalar>
-    class HERMES_API DefaultEssentialBCNonConstHcurl : public EssentialBoundaryCondition<Scalar>
-    {
-    public:
-      // Tangential values given by a vector-valued solution.
-      DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_,
-        MeshFunctionSharedPtr<Scalar> exact_solution2);
-      DefaultEssentialBCNonConstHcurl(std::string marker, MeshFunctionSharedPtr<Scalar> exact_solution2);
-
-      ~DefaultEssentialBCNonConstHcurl() {};
-
-      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
-
-      /// Function giving info that u_Essential is a non-constant function.
-      inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
-
-      ExactSolutionVector<Scalar>* exact_solution2;
     };
 
     /// Class encapsulating all boundary conditions of one problem.

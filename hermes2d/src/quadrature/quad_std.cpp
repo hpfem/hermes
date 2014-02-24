@@ -2556,10 +2556,6 @@ namespace Hermes
     //// global standard 1d and 2d quadrature //////////////////////////////////////////////////////////
 
     // ... for use in any module
-
-    HERMES_API Quad1DStd g_quad_1d_std;
-    HERMES_API Quad2DStd g_quad_2d_std;
-
     Quad2DLin g_quad_lin;
 
     Quad2DLin::Quad2DLin()

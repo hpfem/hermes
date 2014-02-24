@@ -128,46 +128,40 @@ namespace Hermes
 
       switch (toleranceType)
       {
-      case ResidualNormRelativeToInitial:
-      {
-                                          this->tolerance[0] = tolerance_;
-                                          this->tolerance_set[0] = true;
-      }
-        break;
       case ResidualNormRelativeToPrevious:
       {
-                                           this->tolerance[1] = tolerance_;
-                                           this->tolerance_set[1] = true;
+                                           this->tolerance[0] = tolerance_;
+                                           this->tolerance_set[0] = true;
       }
         break;
       case ResidualNormRatioToInitial:
       {
-                                       this->tolerance[2] = tolerance_;
-                                       this->tolerance_set[2] = true;
+                                       this->tolerance[1] = tolerance_;
+                                       this->tolerance_set[1] = true;
       }
         break;
       case ResidualNormRatioToPrevious:
       {
-                                        this->tolerance[3] = tolerance_;
-                                        this->tolerance_set[3] = true;
+                                        this->tolerance[2] = tolerance_;
+                                        this->tolerance_set[2] = true;
       }
         break;
       case ResidualNormAbsolute:
       {
-                                 this->tolerance[4] = tolerance_;
-                                 this->tolerance_set[4] = true;
+                                 this->tolerance[3] = tolerance_;
+                                 this->tolerance_set[3] = true;
       }
         break;
       case SolutionChangeAbsolute:
       {
-                                   this->tolerance[5] = tolerance_;
-                                   this->tolerance_set[5] = true;
+                                   this->tolerance[4] = tolerance_;
+                                   this->tolerance_set[4] = true;
       }
         break;
       case SolutionChangeRelative:
       {
-                                   this->tolerance[6] = tolerance_;
-                                   this->tolerance_set[6] = true;
+                                   this->tolerance[5] = tolerance_;
+                                   this->tolerance_set[5] = true;
       }
         break;
       default:
@@ -641,13 +635,10 @@ namespace Hermes
 
         // Reassemble the jacobian once not reusable anymore.
         this->info("\t\tre-calculating Jacobian.");
+        
+        // Set factorization scheme.
         this->assemble_jacobian(true);
-
-        // Set factorization schemes.
-        if (this->jacobian_reusable)
-          this->linear_matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING);
-        else
-          this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+        this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
 
         // Solve the system, state that the jacobian is reusable should it be desirable.
         this->solve_linear_system();

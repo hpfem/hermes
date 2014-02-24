@@ -31,6 +31,8 @@ namespace Hermes
       class HERMES_API LinearizerMultidimensional;
       
       /// ThreadLinearizerMultidimensional is a utility class for linearizing a mesh function on a single thread
+      /// The main refinement (splitting) decision is contained in split_decision().
+      /// Important - the instance of LinearizerCriterion (from LinearizerMultidimensional instance) - see the method split_decision() for the adaptive criterion, process_[triangle|quad] for the fixed one.
       template<typename LinearizerDataDimensions>
       class HERMES_API ThreadLinearizerMultidimensional
       {
@@ -39,69 +41,94 @@ namespace Hermes
         void free();
         
       private:
+        /// Constructor
+        /// \param[in] The linearizer this instance is being created for.
         ThreadLinearizerMultidimensional(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
         ~ThreadLinearizerMultidimensional();
 
+        /// Get the data from the "parent" LinearizerMultidimensional class.
         void init_linearizer_data(LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
 
+        /// Initialize arrays, clone functions etc for this run of processing.
         void init_processing(MeshFunctionSharedPtr<double>* sln, LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
+        /// Deinitialize the temporary data for this run of processing.
         void deinit_processing();
         
+        /// Completely process the state current_state
         void process_state(Traverse::State* current_state);
 
-        void set_min_value(double min);
-
-        void set_max_value(double max);
-
+        /// Return the hash value of the couple of vertices with indices p1, p2.
         int hash(int p1, int p2);
+        /// Return the index of the vertex between vertices with indices p1, p2.
         int peek_vertex(int p1, int p2);
 
+        /// Process the edge between vertices with indices iv1, iv2.
         void process_edge(int iv1, int iv2, int marker);
+        /// Add the edge to the resulting data.
         void add_edge(int iv1, int iv2, int marker);
+        /// Add the triangle to the resulting data.
         void add_triangle(int iv0, int iv1, int iv2, int marker);
 
+        /// Add a blank new vertex.
         int add_vertex();
+        /// Return the [existing|new] vertex between p1 and p2, uses add_vertex() for new vertex creation.
         int get_vertex(int p1, int p2, double x, double y, double* value);
 
+        /// Process a triangle with vertices iv0, iv1, iv2.
+        /// Recursive.
+        /// \param[in] level The current level of refinement
         void process_triangle(int iv0, int iv1, int iv2, int level);
-
+        /// Process a quad with vertices iv0, iv1, iv2, iv3.
+        /// Recursive.
+        /// \param[in] level The current level of refinement
         void process_quad(int iv0, int iv1, int iv2, int iv3, int level);
 
+        /// Main method for deciding whether or not to split the currently evaluated element.
+        /// \param[in/out] split Integer filled with the resulting split of the element:
+        /// triangle:: split > 0 ? split to four triangles : no split.
+        /// quad:: split == 0 -> no split.
+        /// quad:: split == 1 -> horizontal split.
+        /// quad:: split == 2 -> vertical split.
+        /// quad:: split == 3 -> split to four quads.
         void split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, const double** val, double* phx, double* phy, int* indices) const;
 
+        /// Utility - check of the orientation of tthe two triangles outputted for a quad.
         bool quad_flip(int iv0, int iv1, int iv2, int iv3) const;
 
         /// Internal.
         double get_max_value(Traverse::State* current_state);
         double max_value_approx;
         
-        /// Internal.
+        /// Push transforms to all necessary functions (including displacement).
         void push_transforms(int transform);
 
-        /// Internal.
+        /// Pop transforms from all necessary functions (including displacement).
         void pop_transforms();
 
+        /// Reallocation of the data fields.
+        /// Done in the initialization of a processing run.
         void reallocate(MeshSharedPtr mesh);
 
         /// Thread-owned clones.
         MeshFunction<double>* fns[LinearizerDataDimensions::dimension + 2];
 
         /// Assigned criterion.
-        /// Defaults to a fixed criterion with one level of refinement.
+        /// See the class LinearizerCriterion.
+        /// Used by split_decision().
         LinearizerCriterion criterion;
 
-        // OpenGL part.
+        /// Data - OpenGL part.
         typename LinearizerDataDimensions::triangle_t* triangles;
         typename LinearizerDataDimensions::edge_t* edges;
         /// - edge_markers: edge markers, ordering equal to edges
         int* edge_markers;
 
-        // FileExport part.
+        /// Data - FileExport part.
         /// Vertices: (x, y, value) triplets
         /// - triangles: vertex index triplets
         triangle_indices_t* triangle_indices;
 
-        // Common part.
+        /// Data - Common part.
         typename LinearizerDataDimensions::vertex_t* vertices;
         /// - triangle_markers: triangle markers, ordering equal to triangles, triangle_indices
         int* triangle_markers;
@@ -114,28 +141,27 @@ namespace Hermes
         int vertex_count, triangle_count, edges_count;
         /// Size of arrays of vertices, triangles and edges
         int vertex_size, triangle_size, edges_size;
-
         
         /// Temporary storage - per state processing.
         double midval[LinearizerDataDimensions::dimension + 2][5];
-        Element* rep_element;
-        bool curved;
+        /// Temporary storage - per state processing.
         const double* val[LinearizerDataDimensions::dimension];
+        /// Representing element of the currently processed state.
+        Element* rep_element;
+        /// The current state is curved.
+        bool curved;
         
         /// From LinearizerMultidimensional - for convenience & speed.
         LinearizerOutputType linearizerOutputType;
 
         /// The information do we want to get out of the solution.
         int item[LinearizerDataDimensions::dimension], component[LinearizerDataDimensions::dimension], value_type[LinearizerDataDimensions::dimension];
+        /// User displacement is present.
         bool user_xdisp, user_ydisp;
+        /// Multiplication factor of the displacement function.
         double dmult;
         /// Standard and curvature epsilon.
         double curvature_epsilon;
-
-
-        /// Keep?
-        bool user_specified_max, user_specified_min;
-        double user_specified_max_value, user_specified_min_value;
 
         friend class LinearizerMultidimensional<LinearizerDataDimensions>;
       };

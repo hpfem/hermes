@@ -25,17 +25,23 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) :
+    DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler, bool nonlinear) :
       pss(nullptr), refmaps(nullptr), u_ext(nullptr),
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
-      ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0)
+      ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0),
+      funcs_wf_initialized(false), funcs_space_initialized(false), spaces_size(0), nonlinear(nonlinear)
     {
+      // Init the memory pool - if PJLIB is linked, it will do the magic, if not, it will initialize the pointer to null.
+      this->init_funcs_memory_pool();
     }
 
     template<typename Scalar>
     DiscreteProblemThreadAssembler<Scalar>::~DiscreteProblemThreadAssembler()
     {
       this->free();
+#ifdef WITH_PJLIB
+      pj_pool_release(this->FuncMemoryPool);
+#endif
     }
 
     template<typename Scalar>
@@ -43,7 +49,14 @@ namespace Hermes
     {
       this->free_spaces();
 
+      bool reinit_funcs = this->spaces_size != spaces.size();
       this->spaces_size = spaces.size();
+      
+      if (reinit_funcs)
+      {
+        this->deinit_funcs_space();
+        this->init_funcs_space();
+      }
 
       pss = malloc_with_check<PrecalcShapeset*>(spaces_size);
       refmaps = malloc_with_check<RefMap*>(spaces_size);
@@ -59,10 +72,11 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf_)
     {
+      this->deinit_funcs_wf();
       this->free_weak_formulation();
-
       this->wf = wf_->clone();
       this->wf->cloneMembers(wf_);
+      this->init_funcs_wf();
     }
 
     template<typename Scalar>
@@ -93,13 +107,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear_, bool add_dirichlet_lift_)
+    void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool add_dirichlet_lift_)
     {
-      // Init the memory pool - if PJLIB is linked, it will do the magic, if not, it will initialize the pointer to null.
-      this->init_funcs_memory_pool();
-
       // Basic settings.
-      this->nonlinear = nonlinear_;
       this->add_dirichlet_lift = add_dirichlet_lift_;
 
       // Transformables setup.
@@ -142,9 +152,6 @@ namespace Hermes
 
       // Process markers.
       this->wf->processFormMarkers(spaces);
-
-      // Initialize Func storage.
-      this->init_funcs();
     }
 
     template<typename Scalar>
@@ -168,8 +175,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_funcs()
+    void DiscreteProblemThreadAssembler<Scalar>::init_funcs_space()
     {
+      this->funcs_space_initialized = true;
+
       // Basis & test fns, u_ext funcs.
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
@@ -183,6 +192,13 @@ namespace Hermes
         if (this->nonlinear)
           this->u_ext_funcs[space_i] = preallocate_fn<Scalar>(this->FuncMemoryPool);
       }
+    }
+
+
+    template<typename Scalar>
+    void DiscreteProblemThreadAssembler<Scalar>::init_funcs_wf()
+    {
+      this->funcs_wf_initialized = true;
 
       // Reallocation of wf-(nonlocal-) ext funcs.
       int ext_size = this->wf->ext.size();
@@ -235,11 +251,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::deinit_funcs()
+    void DiscreteProblemThreadAssembler<Scalar>::deinit_funcs_space()
     {
-#ifdef WITH_PJLIB
-      pj_pool_release(this->FuncMemoryPool);
-#else
+      if (!funcs_space_initialized)
+        return;
+      else
+        funcs_space_initialized = false;
 
       for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
@@ -258,6 +275,15 @@ namespace Hermes
         if (this->nonlinear)
           delete this->u_ext_funcs[space_i];
       }
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemThreadAssembler<Scalar>::deinit_funcs_wf()
+    {
+      if (!funcs_wf_initialized)
+        return;
+      else
+        funcs_wf_initialized = false;
 
       // Ext
       int ext_size = this->wf->ext.size();
@@ -291,7 +317,13 @@ namespace Hermes
         for (int ext_i = 0; ext_i < local_ext_size; ext_i++)
           delete this->ext_funcs_local[local_u_ext_fns_size + ext_i];
       }
-#endif
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemThreadAssembler<Scalar>::deinit_funcs()
+    {
+      this->deinit_funcs_wf();
+      this->deinit_funcs_space();
     }
 
     template<typename Scalar>
@@ -438,7 +470,7 @@ namespace Hermes
               init_fn_preallocated(target_array[u_ext_fns_size + ext_i], ext[ext_i].get(), order);
           }
         }
-        
+
         for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
         {
           if (u_ext_fns[ext_i])
@@ -696,12 +728,12 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_assembling()
     {
-      this->deinit_funcs();
     }
 
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::free()
     {
+      this->deinit_funcs();
       this->free_spaces();
       this->free_weak_formulation();
       this->free_u_ext();

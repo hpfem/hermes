@@ -145,7 +145,7 @@ namespace Hermes
       /// as well as the unit normal and unit tangential vectors. This is done using
       /// the Wikipedia page http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline.
       static void nurbs_edge(Element* e, Curve* curve, int edge, double t, double& x,
-        double& y, double& n_x, double& n_y, double& t_x, double& t_y);
+        double& y);
 
       //// non-polynomial reference map //////////////////////////////////////////////////////////////////////////////////
       static const double2 ref_vert[2][H2D_MAX_NUMBER_VERTICES];

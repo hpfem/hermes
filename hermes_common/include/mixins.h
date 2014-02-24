@@ -66,8 +66,13 @@ namespace Hermes
       typedef void(*callbackFn)(const char*);
 
     public:
-      Loggable(bool verbose_output = false, callbackFn verbose_callback = nullptr);
+      Loggable(bool verbose_output = false, callbackFn verbose_callback = NULL, bool add_newline = true);
 
+      void set_file_output_only(bool onOff);
+      /// Sets the addition of a time stamp on each line in the log file. By default it is on.
+      void set_timestamps(bool onOff);
+      /// Sets the logFile being always erased before logging.
+      void set_erase_on_beginning(bool onOff);
       void set_logFile_name(const char* filename);
       void set_logFile_name(std::string filename);
       static void set_static_logFile_name(const char* filename);
@@ -148,8 +153,22 @@ namespace Hermes
       /// Set to 'true' by default.
       bool verbose_output;
 
+      /// Only output to file - not to console.
+      bool file_output_only; 
+
       /// Verbose callback.
       callbackFn verbose_callback;
+
+      /// Print timestampts.
+      bool print_timestamps;
+
+      /// Erase the file on the beginning.
+      bool erase_on_beginning;
+
+      /// Internal.
+      bool log_file_written;
+
+      bool add_newline;
     };
 
     /// \brief Class using time measurement
