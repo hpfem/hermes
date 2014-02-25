@@ -963,37 +963,19 @@ namespace Hermes
         mesh->init(size);
 
         // Initial vertices check.
-        /*
         for (int vertex_i = 0; vertex_i < vertices_count; vertex_i++)
         {
-        std::string x_i_s = parsed_xml_domain->vertices().v().at(vertex_i).x();
-        std::string y_i_s = parsed_xml_domain->vertices().v().at(vertex_i).y();
+            double x_i = std::strtod(parsed_xml_domain->vertices().v().at(vertex_i).x().c_str(), nullptr);
+            double y_i = std::strtod(parsed_xml_domain->vertices().v().at(vertex_i).y().c_str(), nullptr);
+            for (int vertex_j = vertex_i + 1; vertex_j < vertices_count; vertex_j++)
+            {
+                double x_j = std::strtod(parsed_xml_domain->vertices().v().at(vertex_j).x().c_str(), nullptr);
+                double y_j = std::strtod(parsed_xml_domain->vertices().v().at(vertex_j).y().c_str(), nullptr);
+                if(x_i == x_j && y_i == y_j)
+                  throw Exceptions::MeshLoadFailureException("Vertices %i and %i share coordinates [%f, %f].", vertex_i, vertex_j, x_i, y_i);
+            }
+        }
 
-        double x_i = ::atof(x_i_s.c_str());
-        double y_i = ::atof(y_i_s.c_str());
-        for (int vertex_j = vertex_i + 1; vertex_j < vertices_count; vertex_j++)
-        {
-        std::string x_j_s = parsed_xml_domain->vertices().v().at(vertex_j).x();
-        std::string y_j_s = parsed_xml_domain->vertices().v().at(vertex_j).y();
-
-        double x_j = ::atof(x_j_s.c_str());
-        double y_j = ::atof(y_j_s.c_str());
-        if(x_i == x_j && y_i == y_j)
-        {
-        std::cout << std::endl;
-        std::cout << "|" << x_i_s << "|";
-        std::cout << std::endl;
-        std::cout << "|" << y_i_s << "|";
-        std::cout << std::endl;
-        std::cout << "|" << x_j_s << "|";
-        std::cout << std::endl;
-        std::cout  << "|"<< y_j_s << "|";
-        std::cout << std::endl;
-        throw Exceptions::MeshLoadFailureException("Vertices %i and %i share coordinates [%f, %f].", vertex_i, vertex_j, x_i, y_i);
-        }
-        }
-        }
-        */
         // Create top-level vertex nodes.
         for (int vertex_i = 0; vertex_i < vertices_count; vertex_i++)
         {
@@ -1035,9 +1017,34 @@ namespace Hermes
           // test of value if no variable found.
           if (!x_found)
             x_value = std::strtod(x.c_str(), nullptr);
+          else
+          {
+            // This is a hard part, to find out if it is really zero.
+            int dot_position = strchr(x.c_str(), '.') == nullptr ? -1 : strchr(x.c_str(), '.') - x.c_str();
+            for (int i = 0; i < dot_position; i++)
+            if (strncmp(x.c_str() + i, "0", 1) != 0)
+              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
+            for (int i = dot_position + 1; i < x.length(); i++)
+            if (strncmp(x.c_str() + i, "0", 1) != 0)
+              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
+            x_value = 0.;
+          }
 
           if (!y_found)
-            y_value = std::strtod(y.c_str(), NULL);
+          if (std::strtod(y.c_str(), nullptr) != 0.0)
+            y_value = std::strtod(y.c_str(), nullptr);
+          else
+          {
+            // This is a hard part, to find out if it is really zero.
+            int dot_position = strchr(y.c_str(), '.') == nullptr ? -1 : strchr(y.c_str(), '.') - y.c_str();
+            for (int i = 0; i < dot_position; i++)
+            if (strncmp(y.c_str() + i, "0", 1) != 0)
+              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
+            for (int i = dot_position + 1; i < y.length(); i++)
+            if (strncmp(y.c_str() + i, "0", 1) != 0)
+              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
+            y_value = 0.;
+          }
 
           // assignment.
           node->x = x_value;
