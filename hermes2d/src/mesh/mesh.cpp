@@ -339,10 +339,10 @@ namespace Hermes
         throw Hermes::Exceptions::MeshLoadFailureException("Some of the vertices of element #%d are identical which is impossible.", e->id);
 
       if (v0->x == v1->x && v0->x == v2->x)
-        throw Hermes::Exceptions::MeshLoadFailureException("Vertices in element %i share coordinates: [%i, %i, %i].", e->id, v0->id, v1->id, v2->id);
+        throw Hermes::Exceptions::MeshLoadFailureException("Vertices [%i, %i, %i] in element %i share x-coordinates: [%f, %f, %f].", e->id, v0->id, v1->id, v2->id, v0->x, v1->x, v2->x);
 
       if (v0->y == v1->y && v0->y == v2->y)
-        throw Hermes::Exceptions::MeshLoadFailureException("Vertices in element %i share coordinates: [%i, %i, %i].", e->id, v0->id, v1->id, v2->id);
+        throw Hermes::Exceptions::MeshLoadFailureException("Vertices [%i, %i, %i] in element %i share y-coordinates: [%f, %f, %f].", e->id, v0->id, v1->id, v2->id, v0->y, v1->y, v2->y);
 
       e->vn[0] = v0;
       e->vn[1] = v1;
@@ -379,6 +379,13 @@ namespace Hermes
       // set vertex and edge node pointers
       if (v0 == v1 || v1 == v2 || v2 == v3 || v3 == v0 || v2 == v0 || v3 == v1)
         throw Hermes::Exceptions::MeshLoadFailureException("Some of the vertices of element #%d are identical which is not right.", e->id);
+
+      if ((v0->x == v1->x && v0->x == v2->x) || (v0->x == v1->x && v0->x == v3->x) || (v0->x == v2->x && v0->x == v3->x) || (v1->x == v2->x && v2->x == v3->x))
+        throw Hermes::Exceptions::MeshLoadFailureException("Some of the vertices [%i, %i, %i, %i] in element %i share x-coordinates: [%f, %f, %f, %f].", e->id, v0->id, v1->id, v2->id, v0->x, v1->x, v2->x, v3->x);
+
+      if ((v0->y == v1->y && v0->y == v2->y) || (v0->y == v1->y && v0->y == v3->y) || (v0->y == v2->y && v0->y == v3->y) || (v1->y == v2->y && v2->y == v3->y))
+        throw Hermes::Exceptions::MeshLoadFailureException("Some of the vertices [%i, %i, %i, %i] in element %i share y-coordinates: [%f, %f, %f, %f].", e->id, v0->id, v1->id, v2->id, v0->y, v1->y, v2->y, v3->y);
+
       e->vn[0] = v0;
       e->vn[1] = v1;
       e->vn[2] = v2;

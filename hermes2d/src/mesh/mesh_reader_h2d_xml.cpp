@@ -1027,6 +1027,20 @@ namespace Hermes
           size *= 2;
         mesh->init(size);
 
+        // Initial vertices check.
+        for (int vertex_i = 0; vertex_i < vertices_count; vertex_i++)
+        {
+            double x_i = std::strtod(parsed_xml_domain->vertices().v().at(vertex_i).x().c_str(), nullptr);
+            double y_i = std::strtod(parsed_xml_domain->vertices().v().at(vertex_i).y().c_str(), nullptr);
+            for (int vertex_j = vertex_i + 1; vertex_j < vertices_count; vertex_j++)
+            {
+                double x_j = std::strtod(parsed_xml_domain->vertices().v().at(vertex_j).x().c_str(), nullptr);
+                double y_j = std::strtod(parsed_xml_domain->vertices().v().at(vertex_j).y().c_str(), nullptr);
+                if(x_i == x_j && y_i == y_j)
+                  throw Exceptions::MeshLoadFailureException("Vertices %i and %i share coordinates [%f, %f].", vertex_i, vertex_j, x_i, y_i);
+            }
+        }
+
         // Create top-level vertex nodes.
         for (int vertex_i = 0; vertex_i < vertices_count; vertex_i++)
         {
@@ -1075,11 +1089,11 @@ namespace Hermes
             int dot_position = strchr(x.c_str(), '.') == nullptr ? -1 : strchr(x.c_str(), '.') - x.c_str();
             for (int i = 0; i < dot_position; i++)
             if (strncmp(x.c_str() + i, "0", 1) != 0)
-              this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
+              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
             for (int i = dot_position + 1; i < x.length(); i++)
             if (strncmp(x.c_str() + i, "0", 1) != 0)
-              this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
-            x_value = std::strtod(x.c_str(), nullptr);
+              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
+            x_value = 0.;
           }
 
           if (!y_found)
@@ -1091,11 +1105,11 @@ namespace Hermes
             int dot_position = strchr(y.c_str(), '.') == nullptr ? -1 : strchr(y.c_str(), '.') - y.c_str();
             for (int i = 0; i < dot_position; i++)
             if (strncmp(y.c_str() + i, "0", 1) != 0)
-              this->warn("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
+              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
             for (int i = dot_position + 1; i < y.length(); i++)
             if (strncmp(y.c_str() + i, "0", 1) != 0)
-              this->warn("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
-            y_value = std::strtod(y.c_str(), nullptr);
+              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
+            y_value = 0.;
           }
 
           // assignment.
