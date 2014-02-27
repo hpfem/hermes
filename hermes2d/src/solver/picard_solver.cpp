@@ -31,6 +31,7 @@ namespace Hermes
     PicardSolver<Scalar>::PicardSolver() : Solver<Scalar>(false), PicardMatrixSolver<Scalar>()
     {
       this->dp = new DiscreteProblem<Scalar>(false, false);
+      this->own_dp = true;
     }
 
     template<typename Scalar>
@@ -42,6 +43,7 @@ namespace Hermes
     PicardSolver<Scalar>::PicardSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) : Solver<Scalar>(false), PicardMatrixSolver<Scalar>()
     {
       this->dp = new DiscreteProblem<Scalar>(wf, space, false, false);
+      this->own_dp = true;
 
     }
 
@@ -49,6 +51,7 @@ namespace Hermes
     PicardSolver<Scalar>::PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) : Solver<Scalar>(false), PicardMatrixSolver<Scalar>()
     {
       this->dp = new DiscreteProblem<Scalar>(wf, spaces, false, false);
+      this->own_dp = true;
     }
 
     template<typename Scalar>

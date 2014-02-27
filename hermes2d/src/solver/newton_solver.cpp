@@ -31,6 +31,7 @@ namespace Hermes
     NewtonSolver<Scalar>::NewtonSolver() : Solver<Scalar>(), NewtonMatrixSolver<Scalar>()
     {
       this->dp = new DiscreteProblem<Scalar>(false, true);
+      this->own_dp = true;
     }
 
     template<typename Scalar>
@@ -42,12 +43,14 @@ namespace Hermes
     NewtonSolver<Scalar>::NewtonSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) : Solver<Scalar>(wf, space), NewtonMatrixSolver<Scalar>()
     {
       this->dp = new DiscreteProblem<Scalar>(wf, space, false, true);
+      this->own_dp = true;
     }
 
     template<typename Scalar>
     NewtonSolver<Scalar>::NewtonSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) : Solver<Scalar>(wf, spaces), NewtonMatrixSolver<Scalar>()
     {
       this->dp = new DiscreteProblem<Scalar>(wf, spaces, false, true);
+      this->own_dp = true;
     }
 
     template<typename Scalar>
