@@ -1273,7 +1273,6 @@ namespace Hermes
       this->element_markers_conversion.conversion_table.clear();
       this->element_markers_conversion.conversion_table_inverse.clear();
       this->refinements.clear();
-      this->seq = -1;
     }
 
     Element* Mesh::element_on_physical_coordinates(double x, double y)

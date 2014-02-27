@@ -252,13 +252,7 @@ namespace Hermes
 
       this->shapeset = space->shapeset->clone();
 
-      if (new_mesh->get_seq() != space->get_mesh()->get_seq())
-      {
-        new_mesh->copy(space->get_mesh());
-        this->mesh = new_mesh;
-      }
-      else
-        this->mesh = space->get_mesh();
+      this->mesh = new_mesh;
 
       this->resize_tables();
 
