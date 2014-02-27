@@ -327,36 +327,10 @@ namespace Hermes
 
               // test of value if no variable found.
               if (!x_found)
-              if (std::strtod(x.c_str(), nullptr) != 0.0)
                 x_value = std::strtod(x.c_str(), nullptr);
-              else
-              {
-                // This is a hard part, to find out if it is really zero.
-                int dot_position = strchr(x.c_str(), '.') == nullptr ? -1 : strchr(x.c_str(), '.') - x.c_str();
-                for (int i = 0; i < dot_position; i++)
-                if (strncmp(x.c_str() + i, "0", 1) != 0)
-                  throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_number + 1);
-                for (int i = dot_position + 1; i < x.length(); i++)
-                if (strncmp(x.c_str() + i, "0", 1) != 0)
-                  throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_number + 1);
-                x_value = std::strtod(x.c_str(), nullptr);
-              }
 
               if (!y_found)
-              if (std::strtod(y.c_str(), nullptr) != 0.0)
                 y_value = std::strtod(y.c_str(), nullptr);
-              else
-              {
-                // This is a hard part, to find out if it is really zero.
-                int dot_position = strchr(y.c_str(), '.') == nullptr ? -1 : strchr(y.c_str(), '.') - y.c_str();
-                for (int i = 0; i < dot_position; i++)
-                if (strncmp(y.c_str() + i, "0", 1) != 0)
-                  throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_number + 1);
-                for (int i = dot_position + 1; i < y.length(); i++)
-                if (strncmp(y.c_str() + i, "0", 1) != 0)
-                  throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_number + 1);
-                y_value = std::strtod(y.c_str(), nullptr);
-              }
 
               // assignment.
               node->x = x_value;
@@ -829,36 +803,10 @@ namespace Hermes
 
           // test of value if no variable found.
           if (!x_found)
-          if (std::strtod(x.c_str(), nullptr) != 0.0)
             x_value = std::strtod(x.c_str(), nullptr);
-          else
-          {
-            // This is a hard part, to find out if it is really zero.
-            int dot_position = strchr(x.c_str(), '.') == nullptr ? -1 : strchr(x.c_str(), '.') - x.c_str();
-            for (int i = 0; i < dot_position; i++)
-            if (strncmp(x.c_str() + i, "0", 1) != 0)
-              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
-            for (int i = dot_position + 1; i < x.length(); i++)
-            if (strncmp(x.c_str() + i, "0", 1) != 0)
-              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
-            x_value = std::strtod(x.c_str(), nullptr);
-          }
 
           if (!y_found)
-          if (std::strtod(y.c_str(), nullptr) != 0.0)
             y_value = std::strtod(y.c_str(), nullptr);
-          else
-          {
-            // This is a hard part, to find out if it is really zero.
-            int dot_position = strchr(y.c_str(), '.') == nullptr ? -1 : strchr(y.c_str(), '.') - y.c_str();
-            for (int i = 0; i < dot_position; i++)
-            if (strncmp(y.c_str() + i, "0", 1) != 0)
-              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
-            for (int i = dot_position + 1; i < y.length(); i++)
-            if (strncmp(y.c_str() + i, "0", 1) != 0)
-              throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
-            y_value = std::strtod(y.c_str(), nullptr);
-          }
 
           // assignment.
           node->x = x_value;
@@ -1086,40 +1034,10 @@ namespace Hermes
 
           // test of value if no variable found.
           if (!x_found)
-          {
-              if (std::strtod(x.c_str(), nullptr) != 0.0)
-                x_value = std::strtod(x.c_str(), nullptr);
-              else
-              {
-                // This is a hard part, to find out if it is really zero.
-                int dot_position = strchr(x.c_str(), '.') == nullptr ? -1 : strchr(x.c_str(), '.') - x.c_str();
-                for (int i = 0; i < dot_position; i++)
-                if (strncmp(x.c_str() + i, "0", 1) != 0)
-                  throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
-                for (int i = dot_position + 1; i < x.length(); i++)
-                if (strncmp(x.c_str() + i, "0", 1) != 0)
-                  throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
-                x_value = 0.;
-              }
-          }
+              x_value = std::strtod(x.c_str(), nullptr);
 
           if (!y_found)
-          {
-              if (std::strtod(y.c_str(), NULL) != 0.0)
                 y_value = std::strtod(y.c_str(), NULL   );
-              else
-              {
-                // This is a hard part, to find out if it is really zero.
-                int dot_position = strchr(y.c_str(), '.') == nullptr ? -1 : strchr(y.c_str(), '.') - y.c_str();
-                for (int i = 0; i < dot_position; i++)
-                if (strncmp(y.c_str() + i, "0", 1) != 0)
-                  throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
-                for (int i = dot_position + 1; i < y.length(); i++)
-                if (strncmp(y.c_str() + i, "0", 1) != 0)
-                  throw Exceptions::MeshLoadFailureException("Probably wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
-                y_value = 0.;
-              }
-          }
 
           // assignment.
           node->x = x_value;
