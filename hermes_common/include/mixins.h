@@ -23,7 +23,6 @@
 #define __HERMES_COMMON_MIXINS_H
 
 #include "common.h"
-#include "data_structures/hermes_vector.h"
 #include "exceptions.h"
 #include "api.h"
 
@@ -292,8 +291,8 @@ namespace Hermes
   typedef Hermes::Mixins::OutputAttachable::Parameter<double> OutputParameterDouble;
   typedef Hermes::Mixins::OutputAttachable::Parameter<bool> OutputParameterBool;
 
-  typedef Hermes::Mixins::OutputAttachable::Parameter<Hermes::vector<unsigned int> > OutputParameterUnsignedIntVector;
-  typedef Hermes::Mixins::OutputAttachable::Parameter<Hermes::vector<double> > OutputParameterDoubleVector;
-  typedef Hermes::Mixins::OutputAttachable::Parameter<Hermes::vector<bool> > OutputParameterBoolVector;
+  typedef Hermes::Mixins::OutputAttachable::Parameter<std::vector<unsigned int> > OutputParameterUnsignedIntVector;
+  typedef Hermes::Mixins::OutputAttachable::Parameter<std::vector<double> > OutputParameterDoubleVector;
+  typedef Hermes::Mixins::OutputAttachable::Parameter<std::vector<bool> > OutputParameterBoolVector;
 }
 #endif

@@ -158,7 +158,7 @@ namespace Hermes
       this->init_data_storage();
 
       // Prepare multi-mesh traversal and error arrays.
-      Hermes::vector<MeshSharedPtr > meshes;
+      std::vector<MeshSharedPtr > meshes;
 
       for (int i = 0; i < this->component_count; i++)
         meshes.push_back(coarse_solutions[i]->get_mesh());

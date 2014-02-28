@@ -175,13 +175,13 @@ namespace Hermes
       /// boundary marked by 'marker'. Elements touching both by an edge or
       /// by a vertex are refined. 'aniso' allows or disables anisotropic
       /// splits of quads.
-      void refine_towards_boundary(Hermes::vector<std::string> markers, int depth = 1, bool aniso = true, bool mark_as_initial = false);
+      void refine_towards_boundary(std::vector<std::string> markers, int depth = 1, bool aniso = true, bool mark_as_initial = false);
       void refine_towards_boundary(std::string marker, int depth = 1, bool aniso = true, bool mark_as_initial = false);
 
       /// Refines all element sharing the marker passed.
       void refine_in_area(std::string marker, int depth = 1, int refinement = 0, bool mark_as_initial = false);
       /// Refines all element sharing the markers passed.
-      void refine_in_areas(Hermes::vector<std::string> markers, int depth = 1, int refinement = 0, bool mark_as_initial = false);
+      void refine_in_areas(std::vector<std::string> markers, int depth = 1, int refinement = 0, bool mark_as_initial = false);
 
       /// Regularizes the mesh by refining elements with hanging nodes of
       /// degree more than 'n'. As a result, n-irregular mesh is obtained.
@@ -433,7 +433,7 @@ namespace Hermes
 
       /// Vector for storing refinements in order to be able to save/load meshes with identical element IDs.
       /// Refinement "-1" stands for unrefinement.
-      Hermes::vector<std::pair<unsigned int, int> > refinements;
+      std::vector<std::pair<unsigned int, int> > refinements;
 
       /// Refines a quad element into four quads, or two quads (horizontally or
       /// vertically. If mesh != nullptr, the new_ elements are incorporated into
@@ -474,7 +474,7 @@ namespace Hermes
       /// \param[in] markers The markers
       /// \param[in] levels the number of layers of elements forming the "eggshell". Must be > 1.
       /// \param[in] n_element_guess(optional) Approximate number of elements that will be in this method. Used as an allocation hint. -1 for not-known.
-      static MeshSharedPtr get_egg_shell(MeshSharedPtr mesh, Hermes::vector<std::string> markers, unsigned int levels, int n_element_guess = -1);
+      static MeshSharedPtr get_egg_shell(MeshSharedPtr mesh, std::vector<std::string> markers, unsigned int levels, int n_element_guess = -1);
 
       /// The mesh returned from get_egg_shell has this marker on the "1" boundary.
       static const std::string eggShell1Marker;
@@ -497,7 +497,7 @@ namespace Hermes
       /// \param[in/out] n_elements Size of the array.
       /// \param[in] marker The marker
       /// \param[in] n_element_guess(optional) Approximate number of elements that will be in this method. Used as an allocation hint. -1 for not-known.
-      static void get_egg_shell_structures(MeshSharedPtr target_mesh, Element**& elements, int& n_elements, Hermes::vector<std::string> markers, unsigned int levels, int n_element_guess = -1);
+      static void get_egg_shell_structures(MeshSharedPtr target_mesh, Element**& elements, int& n_elements, std::vector<std::string> markers, unsigned int levels, int n_element_guess = -1);
 
       /// Internal.
       /// Return the "Egg-shell" mesh.

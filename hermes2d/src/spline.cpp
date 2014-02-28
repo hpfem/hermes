@@ -22,7 +22,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    CubicSpline::CubicSpline(Hermes::vector<double> points, Hermes::vector<double> values,
+    CubicSpline::CubicSpline(std::vector<double> points, std::vector<double> values,
       double bc_left, double bc_right,
       bool first_der_left, bool first_der_right,
       bool extrapolate_der_left, bool extrapolate_der_right) : Hermes::Hermes1DFunction<double>(), points(points), values(values),

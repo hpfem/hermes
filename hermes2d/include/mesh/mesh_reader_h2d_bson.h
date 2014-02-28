@@ -55,10 +55,10 @@ namespace Hermes
       /// This method loads multiple meshes according to subdomains described in the meshfile.
       /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the file.
       ///&nbsp;         also the order is determined by the order in the file.
-      void load(const char *filename, Hermes::vector<MeshSharedPtr > meshes);
+      void load(const char *filename, std::vector<MeshSharedPtr > meshes);
 
       /// This method saves multiple meshes according to subdomains in the vector meshes.
-      void save(const char *filename, Hermes::vector<MeshSharedPtr > meshes);
+      void save(const char *filename, std::vector<MeshSharedPtr > meshes);
 
     private:
       struct vertex_BSON
@@ -290,17 +290,17 @@ namespace Hermes
             this->refinements.push_back(refinement);
           }
         }
-        Hermes::vector<int> vertices;
-        Hermes::vector<int> elements;
-        Hermes::vector<int> boundary_edges;
-        Hermes::vector<int> inner_edges;
-        Hermes::vector<refinement_BSON> refinements;
+        std::vector<int> vertices;
+        std::vector<int> elements;
+        std::vector<int> boundary_edges;
+        std::vector<int> inner_edges;
+        std::vector<refinement_BSON> refinements;
       };
 
       static bool elementCompare (element_BSON el_i, element_BSON el_j) { return ( el_i.i < el_j.i ); }
 
       void load_domain(bson& br, MeshSharedPtr mesh, std::map<int, int>& vertex_is, std::map<int, int>& element_is, std::map<int, int>& edge_is,
-        Hermes::vector<element_BSON>& elements, Hermes::vector<edge_BSON>& edges, Hermes::vector<vertex_BSON>& vertices, Hermes::vector<arc_BSON>& arcs, Hermes::vector<subdomain_BSON>& subdomains);
+        std::vector<element_BSON>& elements, std::vector<edge_BSON>& edges, std::vector<vertex_BSON>& vertices, std::vector<arc_BSON>& arcs, std::vector<subdomain_BSON>& subdomains);
     };
   }
 }

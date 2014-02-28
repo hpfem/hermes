@@ -98,7 +98,7 @@ namespace Hermes
 
       if (essential_bcs != nullptr)
       {
-        for (typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+        for (typename std::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
         for (unsigned int i = 0; i < (*it)->markers.size(); i++)
         if (mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
           throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker %s.", (*it)->markers.at(i).c_str());
@@ -467,7 +467,7 @@ namespace Hermes
     void Space<Scalar>::unrefine_all_mesh_elements_internal(bool keep_initial_refinements, bool only_unrefine_space_data)
     {
       // find inactive elements with active sons
-      Hermes::vector<int> list;
+      std::vector<int> list;
       Element* e;
       for_all_inactive_elements(e, this->mesh)
       {
@@ -1299,7 +1299,7 @@ namespace Hermes
         if (essential_bcs != nullptr && spaceTypeFromString(parsed_xml_space->spaceType().get().c_str()) != HERMES_L2_SPACE && spaceTypeFromString(parsed_xml_space->spaceType().get().c_str()) != HERMES_L2_MARKERWISE_CONST_SPACE)
         {
           space->essential_bcs = essential_bcs;
-          for (typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+          for (typename std::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
           for (unsigned int i = 0; i < (*it)->markers.size(); i++)
           if (space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.end())
             throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
@@ -1398,7 +1398,7 @@ namespace Hermes
       if (essential_bcs != nullptr && space->get_type() != HERMES_L2_SPACE && space->get_type() != HERMES_L2_MARKERWISE_CONST_SPACE)
       {
         space->essential_bcs = essential_bcs;
-        for (typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+        for (typename std::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
         for (unsigned int i = 0; i < (*it)->markers.size(); i++)
         if (space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.end())
           throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");

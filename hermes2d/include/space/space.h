@@ -43,7 +43,7 @@ namespace Hermes
     };
 
     template <typename Scalar>
-    using SpaceSharedPtrVector = Hermes::vector<SpaceSharedPtr<Scalar> >;
+    using SpaceSharedPtrVector = std::vector<SpaceSharedPtr<Scalar> >;
 
     namespace Mixins
     {
@@ -56,7 +56,7 @@ namespace Hermes
         /// Sets new_ spaces for the instance.
         virtual void set_spaces(SpaceSharedPtrVector<Scalar> spaces) = 0;
         virtual void set_space(SpaceSharedPtr<Scalar> space);
-        /// Get all spaces as a Hermes::vector.
+        /// Get all spaces as a std::vector.
         virtual SpaceSharedPtrVector<Scalar> get_spaces();
         virtual SpaceSharedPtr<Scalar> get_space(int n);
       };
@@ -249,7 +249,7 @@ namespace Hermes
       /// \return The number of basis functions contained in the space.
       virtual int assign_dofs(int first_dof = 0);
 
-      /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
+      /// \brief Assings the degrees of freedom to all Spaces in the std::vector.
       static int assign_dofs(SpaceSharedPtrVector<Scalar> spaces);
 #pragma endregion
 
@@ -469,8 +469,8 @@ namespace Hermes
       double*  chol_p;
 
       /// Used for bc projection.
-      Hermes::vector<Scalar*> bc_data_projections;
-      Hermes::vector<typename Space<Scalar>::BaseComponent*> bc_data_base_components;
+      std::vector<Scalar*> bc_data_projections;
+      std::vector<typename Space<Scalar>::BaseComponent*> bc_data_base_components;
 
       void precalculate_projection_matrix(int nv, double**& mat, double*& p);
       void update_edge_bc(Element* e, SurfPos* surf_pos);

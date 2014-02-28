@@ -37,7 +37,7 @@ MeshSharedPtr mesh(new Mesh);
 // Initialize boundary conditions.
 DefaultEssentialBCConst<double> bc_zero("Zero", 0.);
 CustomEssentialBCNonConst bc_essential("Bdy");
-EssentialBCs<double> essential_bcs(Hermes::vector<EssentialBoundaryCondition<double>*>(&bc_zero, &bc_essential));
+EssentialBCs<double> essential_bcs(std::vector<EssentialBoundaryCondition<double>*>(&bc_zero, &bc_essential));
 
 // Initialize the initial condition.
 MeshFunctionSharedPtr<double> sln_time_prev(new CustomInitialCondition(mesh));

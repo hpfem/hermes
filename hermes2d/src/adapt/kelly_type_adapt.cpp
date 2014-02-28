@@ -34,10 +34,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< SpaceSharedPtr<Scalar> >& spaces_,
+    KellyTypeAdapt<Scalar>::KellyTypeAdapt(std::vector< SpaceSharedPtr<Scalar> >& spaces_,
                                            bool ignore_visited_segments_,
-                                           Hermes::vector<const InterfaceEstimatorScalingFunction*> interface_scaling_fns_,
-                                           Hermes::vector<NormType > norms_)
+                                           std::vector<const InterfaceEstimatorScalingFunction*> interface_scaling_fns_,
+                                           std::vector<NormType > norms_)
       : Adapt<Scalar>(spaces_, norms_)
     {
       error_estimators_surf.reserve(this->num);
@@ -82,7 +82,7 @@ namespace Hermes
     template<typename Scalar>
     bool KellyTypeAdapt<Scalar>::adapt(double thr, int strat, int regularize, double to_be_processed)
     {
-      Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
+      std::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
       RefinementSelectors::HOnlySelector<Scalar> selector;
       for (int i = 0; i < this->num; i++)
         refinement_selectors.push_back(&selector);
@@ -112,7 +112,7 @@ namespace Hermes
 
     template<typename Scalar>
     double KellyTypeAdapt<Scalar>::calc_err_internal(MeshFunctionSharedPtrVector<Scalar> slns,
-                                                     Hermes::vector<double>* component_errors,
+                                                     std::vector<double>* component_errors,
                                                      unsigned int error_flags)
     {
       if(slns.size() != this->num)

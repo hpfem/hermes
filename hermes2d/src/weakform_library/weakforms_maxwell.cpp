@@ -39,7 +39,7 @@ namespace Hermes
         if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
       }
       template<typename Scalar>
-      DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
+      DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, std::vector<std::string> areas,
         Scalar const_coeff,
         CubicSpline* c_spline,
         SymFlag sym,
@@ -141,7 +141,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
+      DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, std::vector<std::string> areas, Scalar const_coeff,
         CubicSpline* c_spline,
         GeomType gt, int order_increase)
         : VectorFormVol<Scalar>(i), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt),

@@ -34,7 +34,7 @@ namespace Hermes
         DefaultJacobianMagnetostatics(int i, int j, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
           CubicSpline* c_spline = nullptr, SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR,
           int order_increase = 3);
-        DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
+        DefaultJacobianMagnetostatics(int i, int j, std::vector<std::string> areas,
           Scalar const_coeff, CubicSpline* c_spline = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, int order_increase = 3);
 
@@ -63,7 +63,7 @@ namespace Hermes
           CubicSpline* c_spline = nullptr,
           GeomType gt = HERMES_PLANAR,
           int order_increase = 3);
-        DefaultResidualMagnetostatics(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
+        DefaultResidualMagnetostatics(int i, std::vector<std::string> areas, Scalar const_coeff = 1.0,
           CubicSpline* c_spline = nullptr,
           GeomType gt = HERMES_PLANAR, int order_increase = 3);
 

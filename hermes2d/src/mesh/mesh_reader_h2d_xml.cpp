@@ -158,7 +158,7 @@ namespace Hermes
       out.close();
     }
 
-    void MeshReaderH2DXML::load(const char *filename, Hermes::vector<MeshSharedPtr > meshes)
+    void MeshReaderH2DXML::load(const char *filename, std::vector<MeshSharedPtr > meshes)
     {
       try
       {
@@ -177,7 +177,7 @@ namespace Hermes
       }
     }
 
-    void MeshReaderH2DXML::load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, Hermes::vector<MeshSharedPtr > meshes)
+    void MeshReaderH2DXML::load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, std::vector<MeshSharedPtr > meshes)
     {
       for (unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
       {
@@ -567,7 +567,7 @@ namespace Hermes
 
     static bool elementCompare(XMLSubdomains::el_t* el_i, XMLSubdomains::el_t* el_j) { return (el_i->i() < el_j->i()); }
 
-    void MeshReaderH2DXML::save(const char *filename, Hermes::vector<MeshSharedPtr > meshes)
+    void MeshReaderH2DXML::save(const char *filename, std::vector<MeshSharedPtr > meshes)
     {
       // For mapping of physical coordinates onto top vertices.
       std::map<std::pair<double, double>, unsigned int> points_to_vertices;
@@ -579,7 +579,7 @@ namespace Hermes
       // Global vertices list.
       XMLMesh::vertices_type vertices;
       // Global elements list.
-      Hermes::vector<XMLSubdomains::el_t*> elements;
+      std::vector<XMLSubdomains::el_t*> elements;
       // Global boudnary edges list.
       XMLSubdomains::edges_type edges;
       // Global curves list.

@@ -784,7 +784,7 @@ namespace Hermes
 
       // vector for curved elements that do not contain the point when considering straightened edges.
       // these are then checked at the end of this method, as they are really slow to look for the point in.
-      Hermes::vector<Element*> improbable_curved_elements;
+      std::vector<Element*> improbable_curved_elements;
 
       // main loop over all active elements.
       for_all_active_elements(e, mesh)

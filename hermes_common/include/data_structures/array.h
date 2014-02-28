@@ -122,7 +122,7 @@ namespace Hermes
       this->append_only = append_only;
     }
 
-    /// Wrapper function for Hermes::vector::add() for compatibility purposes.
+    /// Wrapper function for std::vector::add() for compatibility purposes.
     int add(TYPE item)
     {
       TYPE* ptr = this->add();

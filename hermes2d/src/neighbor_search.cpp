@@ -125,7 +125,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    const Hermes::vector<Element*>* NeighborSearch<Scalar>::get_neighbors() const
+    const std::vector<Element*>* NeighborSearch<Scalar>::get_neighbors() const
     {
       return &neighbors;
     }
@@ -264,7 +264,7 @@ namespace Hermes
     template<typename Scalar>
     bool NeighborSearch<Scalar>::set_active_edge_multimesh(const int& edge)
     {
-      Hermes::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
+      std::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
       // Inter-element edge.
       if (is_inter_edge(edge, transformations))
       {
@@ -295,15 +295,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<unsigned int> NeighborSearch<Scalar>::get_transforms(uint64_t sub_idx) const
+    std::vector<unsigned int> NeighborSearch<Scalar>::get_transforms(uint64_t sub_idx) const
     {
-      Hermes::vector<unsigned int> transformations_backwards;
+      std::vector<unsigned int> transformations_backwards;
       while (sub_idx > 0)
       {
         transformations_backwards.push_back((sub_idx - 1) & 7);
         sub_idx = (sub_idx - 1) >> 3;
       }
-      Hermes::vector<unsigned int> transformations;
+      std::vector<unsigned int> transformations;
       for (unsigned int i = 0; i < transformations_backwards.size(); i++)
         transformations.push_back(transformations_backwards[transformations_backwards.size() - 1 - i]);
 
@@ -311,7 +311,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NeighborSearch<Scalar>::is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations) const
+    bool NeighborSearch<Scalar>::is_inter_edge(const int& edge, const std::vector<unsigned int>& transformations) const
     {
       // No subelements => of course this edge is an inter-element one.
       if (transformations.size() == 0)
@@ -391,7 +391,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations)
+    void NeighborSearch<Scalar>::update_according_to_sub_idx(const std::vector<unsigned int>& transformations)
     {
       if (neighborhood_type == H2D_DG_NO_TRANSF && transformations.size() == 0)
         return;
@@ -431,12 +431,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::handle_sub_idx_way_down(const Hermes::vector<unsigned int>& transformations)
+    void NeighborSearch<Scalar>::handle_sub_idx_way_down(const std::vector<unsigned int>& transformations)
     {
-      Hermes::vector<unsigned int> neighbors_to_be_deleted;
-      Hermes::vector<unsigned int> neighbors_not_to_be_deleted;
+      std::vector<unsigned int> neighbors_to_be_deleted;
+      std::vector<unsigned int> neighbors_not_to_be_deleted;
 
-      Hermes::vector<unsigned int> updated_transformations;
+      std::vector<unsigned int> updated_transformations;
       for (int i = 0; i < transformations.size(); i++)
       {
         if (!((active_edge == 0 && transformations[i] == 4) || (active_edge == 1 && transformations[i] == 7) || (active_edge == 2 && transformations[i] == 5) || (active_edge == 3 && transformations[i] == 6)))
@@ -555,9 +555,9 @@ namespace Hermes
       if (neighborhood_type != H2D_DG_GO_DOWN)
         return;
       // Obtain the transformations sequence.
-      Hermes::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
+      std::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
 
-      Hermes::vector<unsigned int> updated_transformations;
+      std::vector<unsigned int> updated_transformations;
       for (int i = 0; i < transformations.size(); i++)
       {
         if (!((active_edge == 0 && transformations[i] == 4) || (active_edge == 1 && transformations[i] == 7) || (active_edge == 2 && transformations[i] == 5) || (active_edge == 3 && transformations[i] == 6)))
@@ -1105,13 +1105,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NeighborSearch<Scalar>::Transformations::Transformations(const Hermes::vector<unsigned int>& t)
+    NeighborSearch<Scalar>::Transformations::Transformations(const std::vector<unsigned int>& t)
     {
       copy_from(t);
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::Transformations::copy_from(const Hermes::vector<unsigned int>& t)
+    void NeighborSearch<Scalar>::Transformations::copy_from(const std::vector<unsigned int>& t)
     {
       num_levels = std::min<unsigned int>(t.size(), max_level);
       std::copy(t.begin(), t.begin() + num_levels, transf);
@@ -1125,7 +1125,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::Transformations::copy_to(Hermes::vector<unsigned int>* t)
+    void NeighborSearch<Scalar>::Transformations::copy_to(std::vector<unsigned int>* t)
     {
       t->assign(transf, transf + num_levels);
     }
@@ -1145,9 +1145,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::Transformations::apply_on(const Hermes::vector<Transformable*>& tr) const
+    void NeighborSearch<Scalar>::Transformations::apply_on(const std::vector<Transformable*>& tr) const
     {
-      for (Hermes::vector<Transformable*>::const_iterator it = tr.begin(); it != tr.end(); ++it)
+      for (std::vector<Transformable*>::const_iterator it = tr.begin(); it != tr.end(); ++it)
       for (unsigned int i = 0; i < num_levels; i++)
         (*it)->push_transform(transf[i]);
     }

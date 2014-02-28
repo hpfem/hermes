@@ -61,7 +61,7 @@ namespace Hermes
       }
       
       template<typename Scalar>
-      void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices, ElementMode2D mode)
+      void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, std::vector<ShapeInx>& indices, ElementMode2D mode)
       {
         int quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
         const int num_bubbles = shapeset->get_num_bubbles(quad_order, mode);
@@ -88,7 +88,7 @@ namespace Hermes
       template<typename Scalar>
       void OptimumSelector<Scalar>::build_shape_indices(const ElementMode2D mode, const Range& vertex_order, const Range& edge_bubble_order)
       {
-        Hermes::vector<ShapeInx> &indices = shape_indices[mode];
+        std::vector<ShapeInx> &indices = shape_indices[mode];
         int* next_order = this->next_order_shape[mode];
         int& max_shape_inx = this->max_shape_inx[mode];
         int num_edges = (mode == HERMES_MODE_QUAD) ? 4 : 3;
@@ -280,9 +280,9 @@ namespace Hermes
         //evaluate
         if(full_eval)
         {
-          Hermes::vector<ShapeInx>& shapes = shape_indices[mode];
+          std::vector<ShapeInx>& shapes = shape_indices[mode];
           int num = 0;
-          typename Hermes::vector<ShapeInx>::const_iterator shape = shapes.begin();
+          typename std::vector<ShapeInx>::const_iterator shape = shapes.begin();
           while (shape != shapes.end())
           {
             if(((int)shape->type & allowed_type_mask) != 0)
@@ -299,7 +299,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::append_candidates_split(Hermes::vector<Cand>& candidates, const int start_order, const int last_order, const int split, bool iso_p)
+      void OptimumSelector<Scalar>::append_candidates_split(std::vector<Cand>& candidates, const int start_order, const int last_order, const int split, bool iso_p)
       {
         //check whether end orders are not lower than start orders
         if(last_order < 0 || start_order < 0)
@@ -345,9 +345,9 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Hermes::vector<Cand> OptimumSelector<Scalar>::create_candidates(Element* e, int quad_order)
+      std::vector<Cand> OptimumSelector<Scalar>::create_candidates(Element* e, int quad_order)
       {
-        Hermes::vector<Cand> candidates;
+        std::vector<Cand> candidates;
 
         // Get the current order range.
         int current_min_order, current_max_order;
@@ -432,7 +432,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::update_cands_info(Hermes::vector<Cand>& candidates, CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const
+      void OptimumSelector<Scalar>::update_cands_info(std::vector<Cand>& candidates, CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const
       {
         for(int i = 0; i < candidates.size(); i++)
         {
@@ -462,7 +462,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::evaluate_cands_dof(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln)
+      void OptimumSelector<Scalar>::evaluate_cands_dof(std::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln)
       {
         bool tri = e->is_triangle();
 
@@ -540,7 +540,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::evaluate_candidates(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln)
+      void OptimumSelector<Scalar>::evaluate_candidates(std::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln)
       {
         evaluate_cands_error(candidates, e, rsln);
 
@@ -556,7 +556,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::evaluate_cands_score(Hermes::vector<Cand>& candidates, Element* e)
+      void OptimumSelector<Scalar>::evaluate_cands_score(std::vector<Cand>& candidates, Element* e)
       {
         // Original candidate.
         Cand& unrefined = candidates[0];
@@ -582,7 +582,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, Cand*& best_candidate, Cand* best_candidates_specific_type[4])
+      void OptimumSelector<Scalar>::select_best_candidate(std::vector<Cand>& candidates, Element* e, Cand*& best_candidate, Cand* best_candidates_specific_type[4])
       {
         //sort according to the score
         const int num_cands = (int)candidates.size();
@@ -647,7 +647,7 @@ namespace Hermes
         }
 
         //build candidates.
-        Hermes::vector<Cand> candidates = create_candidates(element, quad_order);
+        std::vector<Cand> candidates = create_candidates(element, quad_order);
         //there are candidates to choose from
         Cand* best_candidate;
         Cand* best_candidates_specific_type[4];

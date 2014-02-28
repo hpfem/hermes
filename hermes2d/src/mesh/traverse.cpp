@@ -904,7 +904,7 @@ namespace Hermes
       return traverse.unidata;
     }
 
-    template HERMES_API Traverse::State** Traverse::get_states<double>(Hermes::vector<MeshFunctionSharedPtr<double> > mesh_functions, int& states_count);
-    template HERMES_API Traverse::State** Traverse::get_states<std::complex<double> >(Hermes::vector<MeshFunctionSharedPtr<std::complex<double> > > mesh_functions, int& states_count);
+    template HERMES_API Traverse::State** Traverse::get_states<double>(std::vector<MeshFunctionSharedPtr<double> > mesh_functions, int& states_count);
+    template HERMES_API Traverse::State** Traverse::get_states<std::complex<double> >(std::vector<MeshFunctionSharedPtr<std::complex<double> > > mesh_functions, int& states_count);
   }
 }

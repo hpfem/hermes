@@ -114,16 +114,16 @@ namespace Hermes
       bool set_active_edge_multimesh(const int& edge);
 
       /// Extract transformations in the correct direction from the provided sub_idx.
-      Hermes::vector<unsigned int> get_transforms(uint64_t sub_idx) const;
+      std::vector<unsigned int> get_transforms(uint64_t sub_idx) const;
 
       /// Gives an info if edge is an intra- or inter- element edge.
-      bool is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations) const;
+      bool is_inter_edge(const int& edge, const std::vector<unsigned int>& transformations) const;
 
       /// Update according to the subelement mapping of the central element.
-      void update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations);
+      void update_according_to_sub_idx(const std::vector<unsigned int>& transformations);
 
       /// Special function for handling subelement transformations in the case of more than one neighboring active elements.
-      void handle_sub_idx_way_down(const Hermes::vector<unsigned int>& transformations);
+      void handle_sub_idx_way_down(const std::vector<unsigned int>& transformations);
 
       /// Give the info if the two transformations are correct, w.r.t. the edge.
       /// Simply compares a to b in case of triangles, does more work in case of quads.
@@ -188,7 +188,7 @@ namespace Hermes
       ///
       /// \return pointer to the vector of neighboring elements.
       ///
-      const Hermes::vector<Element*>* get_neighbors() const;
+      const std::vector<Element*>* get_neighbors() const;
 
       /// Frees the memory occupied by the extended shapeset.
       void clear_supported_shapes();
@@ -291,13 +291,13 @@ namespace Hermes
         Transformations();
         Transformations(const Transformations* t);
         void operator=(const Transformations* t);
-        Transformations(const Hermes::vector<unsigned int>& t);
+        Transformations(const std::vector<unsigned int>& t);
 
-        void copy_from(const Hermes::vector<unsigned int>& t);
+        void copy_from(const std::vector<unsigned int>& t);
 
         void copy_from(const Transformations* t);
 
-        void copy_to(Hermes::vector<unsigned int>* t);
+        void copy_to(std::vector<unsigned int>* t);
 
         void reset();
 
@@ -305,7 +305,7 @@ namespace Hermes
 
         void apply_on(Transformable* tr) const;
 
-        void apply_on(const Hermes::vector<Transformable*>& tr) const;
+        void apply_on(const std::vector<Transformable*>& tr) const;
 
         template<typename T> friend class NeighborSearch;
         template<typename T> friend class KellyTypeAdapt;
@@ -345,8 +345,8 @@ namespace Hermes
       NeighborEdgeInfo neighbor_edge;///< Assembled edge, w.r.t. the element on the other side.
       int active_segment;            ///< Part of the active edge shared by central and neighbor elements.
 
-      Hermes::vector<NeighborEdgeInfo> neighbor_edges;   ///< Active edge information from each neighbor.
-      Hermes::vector<Element*> neighbors;                ///< Vector with pointers to the neighbor elements.
+      std::vector<NeighborEdgeInfo> neighbor_edges;   ///< Active edge information from each neighbor.
+      std::vector<Element*> neighbors;                ///< Vector with pointers to the neighbor elements.
       unsigned int n_neighbors;                          ///< Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
 
       /// Possible neighborhood types, according to which way we went on the neighbor element in order to get to the

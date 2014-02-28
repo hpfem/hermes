@@ -78,7 +78,7 @@ namespace Hermes
           ElementInfo() : x(0), y(0), width(0), height(0), id(-1) {};
           ElementInfo(int id, float x, float y, float width, float height) : x(x), y(y), width(width), height(height), id(id) {};
         };
-        Hermes::vector<ElementInfo> element_infos; ///< Element info.
+        std::vector<ElementInfo> element_infos; ///< Element info.
 
         unsigned int element_id_widget; ///< A GL display-list denoting a element ID widget. The geometry assumes the size of a pixel is 1x1.
 

@@ -102,7 +102,7 @@ namespace Hermes
                   continue;
 
                 ns.set_active_edge(ed);
-                const Hermes::vector<Element *> *neighbors = ns.get_neighbors();
+                const std::vector<Element *> *neighbors = ns.get_neighbors();
 
                 neighbor_elems_counts[el][ed] = ns.get_num_neighbors();
                 neighbor_elems_arrays[el][ed] = new Element *[neighbor_elems_counts[el][ed]];

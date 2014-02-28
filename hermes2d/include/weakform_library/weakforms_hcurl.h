@@ -38,7 +38,7 @@ namespace Hermes
           Scalar const_coeff = 1.0, Hermes2DFunction<Scalar>* f_coeff = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
-        DefaultMatrixFormVol<Scalar>(int i, int j, Hermes::vector<std::string> areas,
+        DefaultMatrixFormVol<Scalar>(int i, int j, std::vector<std::string> areas,
           Scalar const_coeff = 1.0, Hermes2DFunction<Scalar>* f_coeff = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
@@ -71,7 +71,7 @@ namespace Hermes
           CubicSpline* c_spline = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
-        DefaultJacobianCurlCurl(int i, int j, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
+        DefaultJacobianCurlCurl(int i, int j, std::vector<std::string> areas, Scalar const_coeff = 1.0,
           CubicSpline* c_spline = nullptr,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
@@ -107,7 +107,7 @@ namespace Hermes
           Hermes2DFunction<Scalar>* f_coeff1 = nullptr,
           GeomType gt = HERMES_PLANAR);
 
-        DefaultVectorFormVol<Scalar>(int i, Hermes::vector<std::string> areas,
+        DefaultVectorFormVol<Scalar>(int i, std::vector<std::string> areas,
           Scalar const_coeff0 = 1.0, Scalar const_coeff1 = 1.0,
           Hermes2DFunction<Scalar>* f_coeff0 = nullptr,
           Hermes2DFunction<Scalar>* f_coeff1 = nullptr,
@@ -142,7 +142,7 @@ namespace Hermes
           Hermes2DFunction<Scalar>* f_coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
-        DefaultResidualVol(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
+        DefaultResidualVol(int i, std::vector<std::string> areas, Scalar const_coeff = 1.0,
           Hermes2DFunction<Scalar>* f_coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
@@ -178,7 +178,7 @@ namespace Hermes
           CubicSpline* c_spline = nullptr,
           GeomType gt = HERMES_PLANAR);
 
-        DefaultResidualCurlCurl(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
+        DefaultResidualCurlCurl(int i, std::vector<std::string> areas, Scalar const_coeff = 1.0,
           CubicSpline* c_spline = nullptr,
           GeomType gt = HERMES_PLANAR);
 
@@ -212,7 +212,7 @@ namespace Hermes
           Scalar const_coeff = 1.0, Hermes2DFunction<Scalar>* f_coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
-        DefaultMatrixFormSurf<Scalar>(int i, int j, Hermes::vector<std::string> areas,
+        DefaultMatrixFormSurf<Scalar>(int i, int j, std::vector<std::string> areas,
           Scalar const_coeff = 1.0, Hermes2DFunction<Scalar>* f_coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
@@ -246,7 +246,7 @@ namespace Hermes
           Hermes2DFunction<Scalar>* f_coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
-        DefaultVectorFormSurf<Scalar>(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
+        DefaultVectorFormSurf<Scalar>(int i, std::vector<std::string> areas, Scalar const_coeff = 1.0,
           Hermes2DFunction<Scalar>* f_coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
@@ -279,7 +279,7 @@ namespace Hermes
           Scalar const_coeff = 1.0, Hermes2DFunction<Scalar>* f_coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 
-        DefaultResidualSurf(int i, Hermes::vector<std::string> areas,
+        DefaultResidualSurf(int i, std::vector<std::string> areas,
           Scalar const_coeff = 1.0, Hermes2DFunction<Scalar>* f_coeff = nullptr,
           GeomType gt = HERMES_PLANAR);
 

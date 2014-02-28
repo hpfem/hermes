@@ -125,7 +125,7 @@ namespace Hermes
       virtual SpaceSharedPtrVector<Scalar> get_spaces();
 
       /**
-       \fn  void RungeKutta::set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);
+       \fn  void RungeKutta::set_filters_to_reinit(std::vector<Filter<Scalar>*> filters_to_reinit);
 
        \brief Sets the filters to reinitialize.
 
@@ -135,7 +135,7 @@ namespace Hermes
        \param[in]  filters_to_reinit the filters to reinitialize.
        */
 
-      void set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);
+      void set_filters_to_reinit(std::vector<Filter<Scalar>*> filters_to_reinit);
 
     protected:
       /// Initialization of DiscreteProblems.
@@ -178,7 +178,7 @@ namespace Hermes
 
       /// Space instances for all equations in the system.
       SpaceSharedPtrVector<Scalar> spaces;
-      Hermes::vector<unsigned int> spaces_seqs;
+      std::vector<unsigned int> spaces_seqs;
 
       /// ButcherTable.
       ButcherTable* bt;
@@ -222,7 +222,7 @@ namespace Hermes
       Scalar* vector_left;
       
       ///< The filters to reinitialize in every Newton's loop
-      Hermes::vector<Filter<Scalar>*> filters_to_reinit;
+      std::vector<Filter<Scalar>*> filters_to_reinit;
     };
   }
 }

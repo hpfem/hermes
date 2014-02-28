@@ -33,9 +33,9 @@ namespace Hermes
       // get iteration.
       unsigned int iteration = nonlinear_solver->get_current_iteration_number();
 
-      const Hermes::vector<double>& residual_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->residual_norms());
-      const Hermes::vector<double>& solution_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->solution_norms());
-      const Hermes::vector<double>& solution_change_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->solution_change_norms());
+      const std::vector<double>& residual_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->residual_norms());
+      const std::vector<double>& solution_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->solution_norms());
+      const std::vector<double>& solution_change_norms = nonlinear_solver->get_parameter_value(nonlinear_solver->solution_change_norms());
       int residual_norms_count = residual_norms.size();
       int solution_norms_count = solution_norms.size();
       int solution_change_norms_count = solution_change_norms.size();

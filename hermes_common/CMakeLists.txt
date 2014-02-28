@@ -70,7 +70,6 @@ project(hermes_common)
     include/data_structures/array.h
     include/data_structures/range.h
     include/data_structures/table.h
-    include/data_structures/hermes_vector.h
     include/solvers/matrix_solver.h
     include/solvers/linear_matrix_solver.h
     include/solvers/nonlinear_matrix_solver.h
@@ -179,7 +178,6 @@ project(hermes_common)
     include/data_structures/array.h
     include/data_structures/range.h
     include/data_structures/table.h
-    include/data_structures/hermes_vector.h
   )
   
   SOURCE_GROUP(

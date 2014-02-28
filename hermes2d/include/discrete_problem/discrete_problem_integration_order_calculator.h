@@ -64,7 +64,7 @@ namespace Hermes
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for external functions.
-      Func<Hermes::Ord>** init_ext_orders(MeshFunctionSharedPtrVector<Scalar>& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func);
+      Func<Hermes::Ord>** init_ext_orders(MeshFunctionSharedPtrVector<Scalar>& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func);
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext_orders.
       void deinit_ext_orders(Func<Hermes::Ord>** ext_func);

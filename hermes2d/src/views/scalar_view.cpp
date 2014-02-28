@@ -253,7 +253,7 @@ namespace Hermes
         glDisable(GL_BLEND);
 
         //draw element IDs
-        Hermes::vector<ElementInfo>::const_iterator iter = element_infos.begin();
+        std::vector<ElementInfo>::const_iterator iter = element_infos.begin();
         while (iter != element_infos.end())
         {
           //check element dimension in pixels

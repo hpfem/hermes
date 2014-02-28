@@ -112,7 +112,7 @@ namespace Hermes
       /// Returns all states on the passed meshes.
       /// Overload for mesh functions.
       template<typename Scalar>
-      State** get_states(Hermes::vector<MeshFunctionSharedPtr<Scalar> > mesh_functions, int& num);
+      State** get_states(std::vector<MeshFunctionSharedPtr<Scalar> > mesh_functions, int& num);
       
     private:
       /// Used by get_states.

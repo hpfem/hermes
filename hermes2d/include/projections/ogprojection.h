@@ -48,14 +48,14 @@ namespace Hermes
 
       /// This method allows to specify your own multiple OG-projection forms.
       static void project_global(const SpaceSharedPtrVector<Scalar> spaces,
-        const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
-        const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
+        const std::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
+        const std::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
         Scalar* target_vec);
 
       /// Wrapper that delivers a vector of Solutions instead of a coefficient vector.   
       static void project_global(const SpaceSharedPtrVector<Scalar> spaces,
-        const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
-        const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
+        const std::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
+        const std::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
         const MeshFunctionSharedPtrVector<Scalar>& target_slns);
 
       /**
@@ -87,14 +87,14 @@ namespace Hermes
 
       /// Wrapper for multiple source MeshFunctions that delivers coefficient vector.
       static void project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_meshfns,
-        Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>());
+        Scalar* target_vec, std::vector<NormType> proj_norms = std::vector<NormType>());
 
       static void project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_meshfns,
-        Hermes::Algebra::Vector<Scalar>* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>());
+        Hermes::Algebra::Vector<Scalar>* target_vec, std::vector<NormType> proj_norms = std::vector<NormType>());
       
       static void project_global(SpaceSharedPtrVector<Scalar> spaces,
         MeshFunctionSharedPtrVector<Scalar> source_slns, MeshFunctionSharedPtrVector<Scalar> target_slns,
-        Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(), bool delete_old_mesh = false);
+        std::vector<NormType> proj_norms = std::vector<NormType>(), bool delete_old_mesh = false);
 
     protected:
       /// Underlying function for global orthogonal projection.

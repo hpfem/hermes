@@ -26,7 +26,7 @@ CustomWeakFormPoissonNewton::CustomWeakFormPoissonNewton(std::string mat_al, Her
 
 /* Custom non-constant Dirichlet condition */
 
-CustomDirichletCondition::CustomDirichletCondition(Hermes::vector<std::string> markers,
+CustomDirichletCondition::CustomDirichletCondition(std::vector<std::string> markers,
   double A, double B, double C)
   : Hermes::Hermes2D::EssentialBoundaryCondition<double>(markers), A(A), B(B), C(C)
 {

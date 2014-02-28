@@ -245,8 +245,8 @@ namespace Hermes
         /// Passes solution components calculated from solution vector as Solutions.
         static void vector_to_solutions(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
           MeshFunctionSharedPtrVector<Scalar> solutions,
-          Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
-          Hermes::vector<int> start_indices = Hermes::vector<int>());
+          std::vector<bool> add_dir_lift = std::vector<bool>(),
+          std::vector<int> start_indices = std::vector<int>());
 
         static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
           bool add_dir_lift = true, int start_index = 0);
@@ -256,8 +256,8 @@ namespace Hermes
 
         static void vector_to_solutions(const Vector<Scalar>* vec, SpaceSharedPtrVector<Scalar> spaces,
           MeshFunctionSharedPtrVector<Scalar> solutions,
-          Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
-          Hermes::vector<int> start_indices = Hermes::vector<int>());
+          std::vector<bool> add_dir_lift = std::vector<bool>(),
+          std::vector<int> start_indices = std::vector<int>());
 
         static void vector_to_solutions_common_dir_lift(const Vector<Scalar>* vec, SpaceSharedPtrVector<Scalar> spaces,
           MeshFunctionSharedPtrVector<Scalar> solutions,
@@ -271,9 +271,9 @@ namespace Hermes
           bool add_dir_lift = true, int start_index = 0);
 
         static void vector_to_solutions(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
-          MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<PrecalcShapeset *> pss,
-          Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
-          Hermes::vector<int> start_indices = Hermes::vector<int>());
+          MeshFunctionSharedPtrVector<Scalar> solutions, std::vector<PrecalcShapeset *> pss,
+          std::vector<bool> add_dir_lift = std::vector<bool>(),
+          std::vector<int> start_indices = std::vector<int>());
 #pragma endregion
     };
   }

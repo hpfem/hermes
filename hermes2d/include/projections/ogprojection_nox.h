@@ -86,18 +86,18 @@ namespace Hermes
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper for multiple source MeshFunction pointers that delivers coefficient vector.
-      void project_global(SpaceSharedPtrVector<Scalar> spaces, Hermes::vector<MeshFunction<Scalar>* > source_meshfns,
-          Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(),
+      void project_global(SpaceSharedPtrVector<Scalar> spaces, std::vector<MeshFunction<Scalar>* > source_meshfns,
+          Scalar* target_vec, std::vector<NormType> proj_norms = std::vector<NormType>(),
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper for multiple source MeshFunctionSharedPtrs that delivers coefficient vector.
       void project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_slns,
-          Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(),
+          Scalar* target_vec, std::vector<NormType> proj_norms = std::vector<NormType>(),
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       void project_global(SpaceSharedPtrVector<Scalar> spaces,
           MeshFunctionSharedPtrVector<Scalar> source_slns, MeshFunctionSharedPtrVector<Scalar> target_slns,
-          Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(), bool delete_old_mesh = false,
+          std::vector<NormType> proj_norms = std::vector<NormType>(), bool delete_old_mesh = false,
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
     protected:

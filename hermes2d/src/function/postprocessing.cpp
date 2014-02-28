@@ -83,7 +83,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Hermes::vector<int> Limiter<Scalar>::get_changed_element_ids() const
+      std::vector<int> Limiter<Scalar>::get_changed_element_ids() const
       {
         return this->changed_element_ids;
       }
@@ -126,7 +126,7 @@ namespace Hermes
           this->init(maximum_polynomial_order);
         }
 
-      VertexBasedLimiter::VertexBasedLimiter(Hermes::vector<SpaceSharedPtr<double> > spaces, double* solution_vector, int maximum_polynomial_order)
+      VertexBasedLimiter::VertexBasedLimiter(std::vector<SpaceSharedPtr<double> > spaces, double* solution_vector, int maximum_polynomial_order)
         : Limiter<double>(spaces, solution_vector)
       {
           this->init(maximum_polynomial_order);
@@ -168,7 +168,7 @@ namespace Hermes
         this->print_details = print_details_;
       }
 
-      Hermes::vector<std::pair<int, double> > VertexBasedLimiter::get_correction_factors() const
+      std::vector<std::pair<int, double> > VertexBasedLimiter::get_correction_factors() const
       {
         return this->correction_factors;
       }
@@ -187,7 +187,7 @@ namespace Hermes
         Element* e;
 
         // Vector to remember if there was limiting of the second derivatives.
-        Hermes::vector<bool> quadratic_correction_done;
+        std::vector<bool> quadratic_correction_done;
 
         if (this->get_verbose_output())
           std::cout << "Quadratic correction" << std::endl;
@@ -593,7 +593,7 @@ namespace Hermes
       template<typename Scalar>
       Scalar* IntegralCalculator<Scalar>::calculate(std::string marker)
       {
-        Hermes::vector<std::string> markers;
+        std::vector<std::string> markers;
         markers.push_back(marker);
         return this->calculate(markers);
       }
@@ -629,7 +629,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Scalar* VolumetricIntegralCalculator<Scalar>::calculate(Hermes::vector<std::string> markers)
+      Scalar* VolumetricIntegralCalculator<Scalar>::calculate(std::vector<std::string> markers)
       {
 #ifdef _DEBUG
         this->info("User markers");
@@ -639,7 +639,7 @@ namespace Hermes
         // This serves for assembling over the whole domain in the case a passed marker is HERMES_ANY.
         bool assemble_everywhere = false;
 
-        Hermes::vector<int> internal_markers;
+        std::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)
         {
           if (markers[i] == HERMES_ANY)
@@ -828,7 +828,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Scalar* SurfaceIntegralCalculator<Scalar>::calculate(Hermes::vector<std::string> markers)
+      Scalar* SurfaceIntegralCalculator<Scalar>::calculate(std::vector<std::string> markers)
       {
 #ifdef _DEBUG
         this->info("User markers");
@@ -838,7 +838,7 @@ namespace Hermes
         // This serves for assembling over the whole domain in the case a passed marker is HERMES_ANY.
         bool assemble_everywhere = false;
 
-        Hermes::vector<int> internal_markers;
+        std::vector<int> internal_markers;
         for (int i = 0; i < markers.size(); i++)
         {
           if (markers[i] == HERMES_ANY)

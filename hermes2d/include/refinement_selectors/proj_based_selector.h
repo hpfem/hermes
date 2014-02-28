@@ -67,7 +67,7 @@ namespace Hermes
         double get_error_weight_aniso() const;
 
         /// Evaluated shapes for all possible transformations for all points. The first index is a transformation, the second index is an index of a shape function.
-        typedef Hermes::vector<TrfShapeExp> TrfShape[H2D_TRF_NUM];
+        typedef std::vector<TrfShapeExp> TrfShape[H2D_TRF_NUM];
 
         bool* cached_shape_vals_valid; ///< True if shape values were already initialized.
         TrfShape* cached_shape_ortho_vals; ///< Precalculated valus of orthogonalized shape functions.
@@ -143,7 +143,7 @@ namespace Hermes
         *             used transformation including the identity to the a size defined by \a max_shape_inx. The system will assume that shape functions
         *             are precalculated if the array corresponding to the identity function is not empty.
         */
-        virtual void precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals, ElementMode2D mode) {};
+        virtual void precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals, ElementMode2D mode) {};
 
         /// Calculates values of orthogonalized shape function at GIP for all transformations.
         /** Override this method to supply a pre-calculated vales of orthonormalized shape function expansions
@@ -163,7 +163,7 @@ namespace Hermes
         *             used transformation including the identity to the a size defined by \a max_shape_inx. The system will assume that shape functions
         *             are precalculated if the array corresponding to the identity function is not empty.
         */
-        virtual void precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& ortho_svals, ElementMode2D mode) {};
+        virtual void precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const std::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& ortho_svals, ElementMode2D mode) {};
 
       protected:
         /// Constructor.
@@ -234,7 +234,7 @@ namespace Hermes
 
         /// Calculates error of candidates.
         /** Overriden function. For details, see OptimumSelector::evaluate_cands_error(). */
-        virtual void evaluate_cands_error(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln);
+        virtual void evaluate_cands_error(std::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln);
 
         /// Calculates projection errors of an elements of candidates for all permutations of orders.
         /** Errors are not normalized and they are squared.
@@ -267,14 +267,14 @@ namespace Hermes
         *  \param[in] sub_ortho_svals
         *  \param[in] info Information about candidates: range of orders, etc.
         *  \param[out] errors_squared Calculated squared errors for all orders specified through \a info. */
-        void calc_error_cand_element(const ElementMode2D mode, double3* gip_points, int num_gip_points, const int num_sub, Element** sub_domains, Trf** sub_trfs, int* sons, Hermes::vector<TrfShapeExp>** sub_nonortho_svals, Hermes::vector<TrfShapeExp>** sub_ortho_svals, const typename OptimumSelector<Scalar>::CandsInfo& info, CandElemProjError errors_squared, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]);
+        void calc_error_cand_element(const ElementMode2D mode, double3* gip_points, int num_gip_points, const int num_sub, Element** sub_domains, Trf** sub_trfs, int* sons, std::vector<TrfShapeExp>** sub_nonortho_svals, std::vector<TrfShapeExp>** sub_ortho_svals, const typename OptimumSelector<Scalar>::CandsInfo& info, CandElemProjError errors_squared, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]);
 
       protected: //projection
         /// Projection of an element of a candidate.
         struct ElemProj {
           int* shape_inxs; ///< Used shape indices
           int num_shapes; ///< A number of used shape indices.
-          Hermes::vector<TrfShapeExp>& svals; ///< A precalculated shape-function values. Empty is not defined.
+          std::vector<TrfShapeExp>& svals; ///< A precalculated shape-function values. Empty is not defined.
           Scalar* shape_coeffs; ///< Coefficients of shape indices of a projection.
           int max_quad_order; ///< An encoded maximum order of the projection. If triangle, the vertical order is equal to the horizontal order.
         };

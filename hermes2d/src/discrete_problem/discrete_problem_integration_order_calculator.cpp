@@ -286,7 +286,7 @@ namespace Hermes
 
 
     template<typename Scalar>
-    Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(MeshFunctionSharedPtrVector<Scalar>& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func)
+    Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(MeshFunctionSharedPtrVector<Scalar>& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func)
     {
       int ext_size = ext.size();
       int u_ext_fns_size = u_ext_fns.size();
@@ -411,7 +411,7 @@ namespace Hermes
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
-      MeshFunctionSharedPtrVector<Scalar> ext_ord_fns = mfDG->ext.size() ? mfDG->ext.size() : mfDG->wf->ext.size();
+      MeshFunctionSharedPtrVector<Scalar> ext_ord_fns = mfDG->ext.size() ? mfDG->ext : mfDG->wf->ext;
       if (ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
 
@@ -468,7 +468,7 @@ namespace Hermes
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
-      MeshFunctionSharedPtrVector<Scalar> ext_ord_fns = vfDG->ext.size() ? vfDG->ext.size() : vfDG->wf->ext.size();
+      MeshFunctionSharedPtrVector<Scalar> ext_ord_fns = vfDG->ext.size() ? vfDG->ext : vfDG->wf->ext;
       if (ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
 

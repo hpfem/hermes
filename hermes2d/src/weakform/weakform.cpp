@@ -238,14 +238,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::set_u_ext_fn(Hermes::vector<UExtFunctionSharedPtr<Scalar> > ext)
+    void WeakForm<Scalar>::set_u_ext_fn(std::vector<UExtFunctionSharedPtr<Scalar> > ext)
     {
       this->u_ext_fn = ext;
     }
 
     template<typename Scalar>
     template<typename FormType>
-    void WeakForm<Scalar>::processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces, bool surface, Hermes::vector<FormType> forms_to_process)
+    void WeakForm<Scalar>::processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces, bool surface, std::vector<FormType> forms_to_process)
     {
       for(int form_i = 0; form_i < forms_to_process.size(); form_i++)
       {
@@ -328,13 +328,13 @@ namespace Hermes
       areas.push_back(area);
     }
     template<typename Scalar>
-    void Form<Scalar>::set_areas(Hermes::vector<std::string> areas)
+    void Form<Scalar>::set_areas(std::vector<std::string> areas)
     {
       this->areas = areas;
     }
 
     template<typename Scalar>
-    Hermes::vector<std::string> Form<Scalar>::getAreas() const
+    std::vector<std::string> Form<Scalar>::getAreas() const
     {
       return this->areas;
     }
@@ -372,7 +372,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Form<Scalar>::set_u_ext_fn(Hermes::vector<UExtFunctionSharedPtr<Scalar> > ext)
+    void Form<Scalar>::set_u_ext_fn(std::vector<UExtFunctionSharedPtr<Scalar> > ext)
     {
       this->u_ext_fn = ext;
     }
@@ -673,38 +673,38 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<Form<Scalar> *> WeakForm<Scalar>::get_forms() const
+    std::vector<Form<Scalar> *> WeakForm<Scalar>::get_forms() const
     {
       return forms;
     }
 
     template<typename Scalar>
-    Hermes::vector<MatrixFormVol<Scalar> *> WeakForm<Scalar>::get_mfvol() const
+    std::vector<MatrixFormVol<Scalar> *> WeakForm<Scalar>::get_mfvol() const
     {
       return mfvol;
     }
     template<typename Scalar>
-    Hermes::vector<MatrixFormSurf<Scalar> *> WeakForm<Scalar>::get_mfsurf() const
+    std::vector<MatrixFormSurf<Scalar> *> WeakForm<Scalar>::get_mfsurf() const
     {
       return mfsurf;
     }
     template<typename Scalar>
-    Hermes::vector<MatrixFormDG<Scalar> *> WeakForm<Scalar>::get_mfDG() const
+    std::vector<MatrixFormDG<Scalar> *> WeakForm<Scalar>::get_mfDG() const
     {
       return mfDG;
     }
     template<typename Scalar>
-    Hermes::vector<VectorFormVol<Scalar> *> WeakForm<Scalar>::get_vfvol() const
+    std::vector<VectorFormVol<Scalar> *> WeakForm<Scalar>::get_vfvol() const
     {
       return vfvol;
     }
     template<typename Scalar>
-    Hermes::vector<VectorFormSurf<Scalar> *> WeakForm<Scalar>::get_vfsurf() const
+    std::vector<VectorFormSurf<Scalar> *> WeakForm<Scalar>::get_vfsurf() const
     {
       return vfsurf;
     }
     template<typename Scalar>
-    Hermes::vector<VectorFormDG<Scalar> *> WeakForm<Scalar>::get_vfDG() const
+    std::vector<VectorFormDG<Scalar> *> WeakForm<Scalar>::get_vfDG() const
     {
       return vfDG;
     }

@@ -549,7 +549,7 @@ namespace Hermes
       bson_destroy(&bw);
     }
 
-    void MeshReaderH2DBSON::save(const char *filename, Hermes::vector<MeshSharedPtr > meshes)
+    void MeshReaderH2DBSON::save(const char *filename, std::vector<MeshSharedPtr > meshes)
     {
       // For mapping of physical coordinates onto top vertices.
       std::map<std::pair<double, double>, unsigned int> points_to_vertices;
@@ -558,11 +558,11 @@ namespace Hermes
       // For mapping of vertex pairs onto curves.
       std::map<std::pair<unsigned int, unsigned int>, bool> vertices_to_curves;
 
-      Hermes::vector<element_BSON> elements;
-      Hermes::vector<edge_BSON> edges;
-      Hermes::vector<vertex_BSON> vertices;
-      Hermes::vector<arc_BSON> arcs;
-      Hermes::vector<subdomain_BSON> subdomains;
+      std::vector<element_BSON> elements;
+      std::vector<edge_BSON> edges;
+      std::vector<vertex_BSON> vertices;
+      std::vector<arc_BSON> arcs;
+      std::vector<subdomain_BSON> subdomains;
 
       bool* baseElementsSaved = new bool[meshes[0]->get_num_base_elements()];
       memset(baseElementsSaved, 0, sizeof(bool) * meshes[0]->get_num_base_elements());
@@ -736,7 +736,7 @@ namespace Hermes
       bson_destroy(&bw);
     }
 
-    void MeshReaderH2DBSON::load(const char *filename, Hermes::vector<MeshSharedPtr > meshes)
+    void MeshReaderH2DBSON::load(const char *filename, std::vector<MeshSharedPtr > meshes)
     {
       FILE *fpr;
       fpr = fopen(filename, "rb");
@@ -763,11 +763,11 @@ namespace Hermes
       std::map<int, int> element_is;
       std::map<int, int> edge_is;
 
-      Hermes::vector<element_BSON> elements;
-      Hermes::vector<edge_BSON> edges;
-      Hermes::vector<vertex_BSON> vertices;
-      Hermes::vector<arc_BSON> arcs;
-      Hermes::vector<subdomain_BSON> subdomains;
+      std::vector<element_BSON> elements;
+      std::vector<edge_BSON> edges;
+      std::vector<vertex_BSON> vertices;
+      std::vector<arc_BSON> arcs;
+      std::vector<subdomain_BSON> subdomains;
 
       // load
       this->load_domain(br, global_mesh, vertex_is, element_is, edge_is, elements, edges, vertices, arcs, subdomains);
@@ -1061,7 +1061,7 @@ namespace Hermes
     }
 
     void MeshReaderH2DBSON::load_domain(bson& br, MeshSharedPtr mesh, std::map<int, int>& vertex_is, std::map<int, int>& element_is, std::map<int, int>& edge_is,
-      Hermes::vector<element_BSON>& elements, Hermes::vector<edge_BSON>& edges, Hermes::vector<vertex_BSON>& vertices, Hermes::vector<arc_BSON>& arcs, Hermes::vector<subdomain_BSON>& subdomains)
+      std::vector<element_BSON>& elements, std::vector<edge_BSON>& edges, std::vector<vertex_BSON>& vertices, std::vector<arc_BSON>& arcs, std::vector<subdomain_BSON>& subdomains)
     {
       bson_iterator it, it_sub;
       bson b_sub, b_sub_sub;

@@ -255,7 +255,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors)
+    bool Adapt<Scalar>::adapt(std::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors)
     {
       // Initialize.
       MeshSharedPtr meshes[H2D_MAX_COMPONENTS];
@@ -497,7 +497,7 @@ namespace Hermes
     {
       if (!refinement_selector)
         throw Exceptions::NullException(1);
-      Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
+      std::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
       refinement_selectors.push_back(refinement_selector);
       return adapt(refinement_selectors);
     }

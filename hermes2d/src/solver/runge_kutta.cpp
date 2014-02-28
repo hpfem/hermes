@@ -384,10 +384,10 @@ namespace Hermes
         else
         {
           // Translate residual vector into residual functions.
-          Hermes::vector<bool> add_dir_lift_vector;
+          std::vector<bool> add_dir_lift_vector;
           add_dir_lift_vector.reserve(1);
           add_dir_lift_vector.push_back(false);
-          Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right->get_spaces(), residuals_vector, false);
+          Solution<Scalar>::vector_to_solutions_common_dir_lift(vector_right, stage_dp_right->get_spaces(), residuals_vector, false);
 
           MeshFunctionSharedPtrVector<Scalar> meshFns;
           for(int i = 0; i < residuals_vector.size(); i++)
@@ -515,7 +515,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit)
+    void RungeKutta<Scalar>::set_filters_to_reinit(std::vector<Filter<Scalar>*> filters_to_reinit)
     {
       for(int i = 0; i < filters_to_reinit.size(); i++)
         this->filters_to_reinit.push_back(filters_to_reinit.at(i));
@@ -558,10 +558,10 @@ namespace Hermes
 
       // Extracting volume and surface matrix and vector forms from the
       // original weak formulation.
-      Hermes::vector<MatrixFormVol<Scalar> *> mfvol_base = wf->mfvol;
-      Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf_base = wf->mfsurf;
-      Hermes::vector<VectorFormVol<Scalar> *> vfvol_base = wf->vfvol;
-      Hermes::vector<VectorFormSurf<Scalar> *> vfsurf_base = wf->vfsurf;
+      std::vector<MatrixFormVol<Scalar> *> mfvol_base = wf->mfvol;
+      std::vector<MatrixFormSurf<Scalar> *> mfsurf_base = wf->mfsurf;
+      std::vector<VectorFormVol<Scalar> *> vfvol_base = wf->vfvol;
+      std::vector<VectorFormSurf<Scalar> *> vfsurf_base = wf->vfsurf;
 
       // Duplicate matrix volume forms, scale them according
       // to the Butcher's table, enhance them with additional
@@ -667,10 +667,10 @@ namespace Hermes
 
       // Extracting volume and surface matrix and vector forms from the
       // 'right' weak formulation.
-      Hermes::vector<MatrixFormVol<Scalar> *> mfvol = stage_wf_right->mfvol;
-      Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf = stage_wf_right->mfsurf;
-      Hermes::vector<VectorFormVol<Scalar> *> vfvol = stage_wf_right->vfvol;
-      Hermes::vector<VectorFormSurf<Scalar> *> vfsurf = stage_wf_right->vfsurf;
+      std::vector<MatrixFormVol<Scalar> *> mfvol = stage_wf_right->mfvol;
+      std::vector<MatrixFormSurf<Scalar> *> mfsurf = stage_wf_right->mfsurf;
+      std::vector<VectorFormVol<Scalar> *> vfvol = stage_wf_right->vfvol;
+      std::vector<VectorFormSurf<Scalar> *> vfsurf = stage_wf_right->vfsurf;
 
       stage_wf_right->ext.clear();
 

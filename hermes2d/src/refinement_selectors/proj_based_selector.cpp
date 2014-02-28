@@ -127,7 +127,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void ProjBasedSelector<Scalar>::evaluate_cands_error(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln)
+      void ProjBasedSelector<Scalar>::evaluate_cands_error(std::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln)
       {
         bool tri = e->is_triangle();
 
@@ -322,8 +322,8 @@ namespace Hermes
           if (base_element->active)
           {
             Trf* sub_trfs[4] = { &trfs[0], &trfs[1], &trfs[2], &trfs[3] };
-            Hermes::vector<TrfShapeExp>* p_trf_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
-            Hermes::vector<TrfShapeExp>* p_trf_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
+            std::vector<TrfShapeExp>* p_trf_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
+            std::vector<TrfShapeExp>* p_trf_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
             for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
             {
               int sub_rval[1] = { son };
@@ -336,8 +336,8 @@ namespace Hermes
           else
           {
             Trf* p_trf_identity[1] = { &trfs[H2D_TRF_IDENTITY] };
-            Hermes::vector<TrfShapeExp>* p_trf_svals[1] = { &svals[H2D_TRF_IDENTITY] };
-            Hermes::vector<TrfShapeExp>* p_trf_ortho_svals[1] = { &ortho_svals[H2D_TRF_IDENTITY] };
+            std::vector<TrfShapeExp>* p_trf_svals[1] = { &svals[H2D_TRF_IDENTITY] };
+            std::vector<TrfShapeExp>* p_trf_ortho_svals[1] = { &ortho_svals[H2D_TRF_IDENTITY] };
             for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
             {
               int sub_rval[1] = { son };
@@ -360,8 +360,8 @@ namespace Hermes
               Trf* sub_trfs[2] = { &trfs[tr[version][0]], &trfs[tr[version][1]] };
               Element* sub_domains[2] = { base_element, base_element };
               int sub_rval[2] = { tr[version][0], tr[version][1] };
-              Hermes::vector<TrfShapeExp>* sub_svals[2] = { &svals[tr[version][0]], &svals[tr[version][1]] };
-              Hermes::vector<TrfShapeExp>* sub_ortho_svals[2] = { &ortho_svals[tr[version][0]], &ortho_svals[tr[version][1]] };
+              std::vector<TrfShapeExp>* sub_svals[2] = { &svals[tr[version][0]], &svals[tr[version][1]] };
+              std::vector<TrfShapeExp>* sub_ortho_svals[2] = { &ortho_svals[tr[version][0]], &ortho_svals[tr[version][1]] };
               calc_error_cand_element(mode, gip_points, num_gip_points
                 , 2, sub_domains, sub_trfs, sub_rval
                 , sub_svals, sub_ortho_svals
@@ -377,8 +377,8 @@ namespace Hermes
               Trf* sub_trfs[2] = { &trfs[tr[version][0]], &trfs[tr[version][1]] };
               Element* sub_domains[2] = { base_element->sons[sons[version][0]], base_element->sons[sons[version][1]] };
               int sub_rval[2] = { sons[version][0], sons[version][1] };
-              Hermes::vector<TrfShapeExp>* sub_svals[2] = { &svals[tr[version][0]], &svals[tr[version][1]] };
-              Hermes::vector<TrfShapeExp>* sub_ortho_svals[2] = { &ortho_svals[tr[version][0]], &ortho_svals[tr[version][1]] };
+              std::vector<TrfShapeExp>* sub_svals[2] = { &svals[tr[version][0]], &svals[tr[version][1]] };
+              std::vector<TrfShapeExp>* sub_ortho_svals[2] = { &ortho_svals[tr[version][0]], &ortho_svals[tr[version][1]] };
               calc_error_cand_element(mode, gip_points, num_gip_points
                 , 2, sub_domains, sub_trfs, sub_rval
                 , sub_svals, sub_ortho_svals
@@ -394,8 +394,8 @@ namespace Hermes
           {
             Trf* sub_trfs[4] = { &trfs[0], &trfs[1], &trfs[2], &trfs[3] };
             int sub_rval[4] = { 0, 1, 2, 3 };
-            Hermes::vector<TrfShapeExp>* sub_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
-            Hermes::vector<TrfShapeExp>* sub_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
+            std::vector<TrfShapeExp>* sub_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
+            std::vector<TrfShapeExp>* sub_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
             Element* sub_domains[4] = { base_element, base_element, base_element, base_element };
 
             calc_error_cand_element(mode, gip_points, num_gip_points
@@ -407,8 +407,8 @@ namespace Hermes
           {
             Trf* sub_trfs[4] = { &trfs[0], &trfs[1], &trfs[2], &trfs[3] };
             int sub_rval[4] = { 0, 1, 2, 3 };
-            Hermes::vector<TrfShapeExp>* sub_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
-            Hermes::vector<TrfShapeExp>* sub_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
+            std::vector<TrfShapeExp>* sub_svals[4] = { &svals[0], &svals[1], &svals[2], &svals[3] };
+            std::vector<TrfShapeExp>* sub_ortho_svals[4] = { &ortho_svals[0], &ortho_svals[1], &ortho_svals[2], &ortho_svals[3] };
 
             calc_error_cand_element(mode, gip_points, num_gip_points
               , 4, base_element->sons, sub_trfs, sub_rval
@@ -426,7 +426,7 @@ namespace Hermes
       void ProjBasedSelector<Scalar>::calc_error_cand_element(const ElementMode2D mode
         , double3* gip_points, int num_gip_points
         , const int num_sub, Element** sub_domains, Trf** sub_trfs, int* sons
-        , Hermes::vector<TrfShapeExp>** sub_nonortho_svals, Hermes::vector<TrfShapeExp>** sub_ortho_svals
+        , std::vector<TrfShapeExp>** sub_nonortho_svals, std::vector<TrfShapeExp>** sub_ortho_svals
         , const typename OptimumSelector<Scalar>::CandsInfo& info
         , CandElemProjError errors_squared, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]
         )
@@ -439,7 +439,7 @@ namespace Hermes
         double* d = new double[max_num_shapes]; //solver data
         double** proj_matrix = new_matrix<double>(max_num_shapes, max_num_shapes);
         ProjMatrixCache& proj_matrices = proj_matrix_cache[mode];
-        Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& full_shape_indices = this->shape_indices[mode];
+        std::vector<typename OptimumSelector<Scalar>::ShapeInx>& full_shape_indices = this->shape_indices[mode];
 
         //check whether ortho-svals are available
         bool ortho_svals_available = true;
@@ -447,8 +447,8 @@ namespace Hermes
           ortho_svals_available &= !sub_ortho_svals[i]->empty();
 
         /// An array of cached right-hand side values.
-        Hermes::vector< ValueCacheItem<Scalar> > nonortho_rhs_cache;
-        Hermes::vector< ValueCacheItem<Scalar> > ortho_rhs_cache;
+        std::vector< ValueCacheItem<Scalar> > nonortho_rhs_cache;
+        std::vector< ValueCacheItem<Scalar> > ortho_rhs_cache;
         for (int i = 0; i <= this->max_shape_inx[mode]; i++)
         {
           nonortho_rhs_cache.push_back(ValueCacheItem<Scalar>());
@@ -486,8 +486,8 @@ namespace Hermes
           bool use_ortho = ortho_svals_available && order_perm.get_order_h() == order_perm.get_order_v();
 
           //select a cache
-          Hermes::vector< ValueCacheItem<Scalar> >& rhs_cache = use_ortho ? ortho_rhs_cache : nonortho_rhs_cache;
-          Hermes::vector<TrfShapeExp>** sub_svals = use_ortho ? sub_ortho_svals : sub_nonortho_svals;
+          std::vector< ValueCacheItem<Scalar> >& rhs_cache = use_ortho ? ortho_rhs_cache : nonortho_rhs_cache;
+          std::vector<TrfShapeExp>** sub_svals = use_ortho ? sub_ortho_svals : sub_nonortho_svals;
 
           //calculate projection matrix iff no ortho is used
           if (!use_ortho)
@@ -512,7 +512,7 @@ namespace Hermes
             Element* this_sub_domain = sub_domains[inx_sub];
             ElemSubTrf this_sub_trf = { sub_trfs[inx_sub], 1 / sub_trfs[inx_sub]->m[0], 1 / sub_trfs[inx_sub]->m[1] };
             ElemGIP this_sub_gip = { gip_points, num_gip_points };
-            Hermes::vector<TrfShapeExp>& this_sub_svals = *(sub_svals[inx_sub]);
+            std::vector<TrfShapeExp>& this_sub_svals = *(sub_svals[inx_sub]);
 
             for (int k = 0; k < num_shapes; k++)
             {

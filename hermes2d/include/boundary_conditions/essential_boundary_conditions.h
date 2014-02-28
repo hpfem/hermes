@@ -37,7 +37,8 @@ namespace Hermes
     {
     public:
       /// Default constructor.
-      EssentialBoundaryCondition(Hermes::vector<std::string> markers);
+      EssentialBoundaryCondition();
+      EssentialBoundaryCondition(std::vector<std::string> markers);
       EssentialBoundaryCondition(std::string marker);
 
       /// Virtual destructor.
@@ -76,7 +77,7 @@ namespace Hermes
       double current_time;
 
       /// Markers.
-      Hermes::vector<std::string> markers;
+      std::vector<std::string> markers;
 
       template<typename T> friend class EssentialBCs;
       template<typename T> friend class Space;
@@ -88,10 +89,11 @@ namespace Hermes
 
     /// Class representing constant essential boundary condition.
     template<typename Scalar>
-    class HERMES_API DefaultEssentialBCConst : public EssentialBoundaryCondition<Scalar> {
+    class HERMES_API DefaultEssentialBCConst : public EssentialBoundaryCondition<Scalar>
+    {
     public:
       /// Constructors.
-      DefaultEssentialBCConst(Hermes::vector<std::string> markers, Scalar value_const);
+      DefaultEssentialBCConst(std::vector<std::string> markers, Scalar value_const);
       DefaultEssentialBCConst(std::string marker, Scalar value_const);
 
       Scalar value(double x, double y) const;
@@ -106,7 +108,7 @@ namespace Hermes
     /// {
     /// public:
     ///&nbsp;// Constructor with multiple markers, setting velocity at inlet(vel_inlet), domain height(H) and startup time(startup_time) - all parameters are of this example - DERIVED - class.
-    ///&nbsp;MyEssentialBCNonConst(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
+    ///&nbsp;MyEssentialBCNonConst(std::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
     ///&nbsp;  EssentialBoundaryCondition<double>(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
     ///
     ///  // VERY IMPORTANT - overriding the method of the base class (DefaultEssentialBCNonConst::value) with a custom implementation.
@@ -131,7 +133,7 @@ namespace Hermes
     class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition<Scalar>
     {
     public:
-      DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_,
+      DefaultEssentialBCNonConst(std::vector<std::string> markers_,
         MeshFunctionSharedPtr<Scalar> exact_solution);
 
       DefaultEssentialBCNonConst(std::string marker, MeshFunctionSharedPtr<Scalar> exact_solution);
@@ -156,20 +158,20 @@ namespace Hermes
       EssentialBCs();
 
       /// Constructor with all boundary conditions of a problem.
-      EssentialBCs(Hermes::vector<EssentialBoundaryCondition<Scalar> *> essential_bcs);
+      EssentialBCs(std::vector<EssentialBoundaryCondition<Scalar> *> essential_bcs);
       EssentialBCs(EssentialBoundaryCondition<Scalar>* boundary_condition);
 
       /// Default destructor.
       ~EssentialBCs();
 
       /// Initializes the class, fills the structures.
-      void add_boundary_conditions(Hermes::vector<EssentialBoundaryCondition<Scalar> *> essential_bcs);
+      void add_boundary_conditions(std::vector<EssentialBoundaryCondition<Scalar> *> essential_bcs);
       void add_boundary_condition(EssentialBoundaryCondition<Scalar>* essential_bc);
 
       /// Public iterators for the private data structures.
-      typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator iterator;
-      typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator begin() const;
-      typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator end() const;
+      typename std::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator iterator;
+      typename std::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator begin() const;
+      typename std::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator end() const;
 
       EssentialBoundaryCondition<Scalar>* get_boundary_condition(std::string marker);
 
@@ -178,12 +180,12 @@ namespace Hermes
 
     private:
       /// All boundary conditions together.
-      Hermes::vector<EssentialBoundaryCondition<Scalar> *> all;
+      std::vector<EssentialBoundaryCondition<Scalar> *> all;
 
       /// Boundary markers.
-      Hermes::vector<std::string> markers;
+      std::vector<std::string> markers;
       /// Boundary conditions with the same order.
-      Hermes::vector<EssentialBoundaryCondition<Scalar> *> BCs;
+      std::vector<EssentialBoundaryCondition<Scalar> *> BCs;
 
       /// Special boundary condition when it is defined on all boundary markers.
       EssentialBoundaryCondition<Scalar> * HermesAnyBC;

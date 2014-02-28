@@ -77,7 +77,7 @@ protected:
         ProjectionLumpedVectorFormVol(int i) : VectorFormVol<double>(i)
     {
       //this->adapt_eval = false;     
-     // this->ext = Hermes::vector<MeshFunction<double>*>();
+     // this->ext = std::vector<MeshFunction<double>*>();
      // this->ext.push_back(ext);
     }
 

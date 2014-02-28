@@ -43,7 +43,7 @@ namespace Hermes
         /// Get all solutions.
         void get_solutions(MeshFunctionSharedPtrVector<Scalar> solutions);
         /// Get changed element ids.
-        Hermes::vector<int> get_changed_element_ids() const;
+        std::vector<int> get_changed_element_ids() const;
 
         /// Helpers for state querying.
         virtual bool isOkay() const;
@@ -60,7 +60,7 @@ namespace Hermes
         SpaceSharedPtrVector<Scalar> spaces;
         Scalar* solution_vector;
         MeshFunctionSharedPtrVector<Scalar> limited_solutions;
-        Hermes::vector<int> changed_element_ids;
+        std::vector<int> changed_element_ids;
 
         virtual void process() = 0;
 
@@ -73,9 +73,9 @@ namespace Hermes
       {
       public:
         VertexBasedLimiter(SpaceSharedPtr<double> space, double* solution_vector, int maximum_polynomial_order);
-        VertexBasedLimiter(Hermes::vector<SpaceSharedPtr<double> > spaces, double* solution_vector, int maximum_polynomial_order);
+        VertexBasedLimiter(std::vector<SpaceSharedPtr<double> > spaces, double* solution_vector, int maximum_polynomial_order);
         virtual ~VertexBasedLimiter();
-        Hermes::vector<std::pair<int, double> > get_correction_factors() const;
+        std::vector<std::pair<int, double> > get_correction_factors() const;
         void print_detailed_info(bool print_details = true);
         int maximum_polynomial_order;
         void set_p_coarsening_only();
@@ -107,7 +107,7 @@ namespace Hermes
         void deallocate_vertex_values();
 
         int mixed_derivatives_count;
-        Hermes::vector<std::pair<int, double> > correction_factors;
+        std::vector<std::pair<int, double> > correction_factors;
         bool print_details;
       };
 
@@ -127,7 +127,7 @@ namespace Hermes
 
         /// Main method returning the value(s).
         /// \return The values (more values at once for saving time with initialization etc.)
-        virtual Scalar* calculate(Hermes::vector<std::string> markers) = 0;
+        virtual Scalar* calculate(std::vector<std::string> markers) = 0;
 
         /// Main method returning the value(s).
         /// One marker overload.
@@ -158,7 +158,7 @@ namespace Hermes
 
         /// Main method returning the value.
         /// Not designed to be overriden.
-        Scalar* calculate(Hermes::vector<std::string> markers);
+        Scalar* calculate(std::vector<std::string> markers);
 				using IntegralCalculator<Scalar>::calculate;
       };
 
@@ -172,7 +172,7 @@ namespace Hermes
 
         /// Main method returning the value.
         /// Not designed to be overriden.
-        Scalar* calculate(Hermes::vector<std::string> markers);
+        Scalar* calculate(std::vector<std::string> markers);
         using IntegralCalculator<Scalar>::calculate;
       };
     }

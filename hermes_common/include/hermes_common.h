@@ -43,7 +43,6 @@
 #include "hermes_function.h"
 #include "util/compat.h"
 #include "util/callstack.h"
-#include "data_structures/hermes_vector.h"
 #include "data_structures/table.h"
 #include "data_structures/array.h"
 #include "data_structures/range.h"

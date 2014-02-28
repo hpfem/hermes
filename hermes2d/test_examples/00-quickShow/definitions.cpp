@@ -71,7 +71,7 @@ Ord CustomNonlinearity::derivative(Ord u) const
   return Ord(10);
 }
 
-CustomEssentialBCNonConst::CustomEssentialBCNonConst(std::string marker) : EssentialBoundaryCondition<double>(Hermes::vector<std::string>())
+CustomEssentialBCNonConst::CustomEssentialBCNonConst(std::string marker) : EssentialBoundaryCondition<double>(std::vector<std::string>())
 {
   markers.push_back(marker);
 }

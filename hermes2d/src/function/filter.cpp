@@ -205,7 +205,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    SimpleFilter<Scalar>::SimpleFilter(MeshFunctionSharedPtrVector<Scalar> solutions, const Hermes::vector<int> items)
+    SimpleFilter<Scalar>::SimpleFilter(MeshFunctionSharedPtrVector<Scalar> solutions, const std::vector<int> items)
     {
       this->num = solutions.size();
       if (this->num > H2D_MAX_COMPONENTS)
@@ -276,7 +276,7 @@ namespace Hermes
             throw Hermes::Exceptions::Exception("Value of 'item%d' is incorrect in filter definition.", i + 1);
         }
 
-        Hermes::vector<Scalar*> values;
+        std::vector<Scalar*> values;
         for (int i = 0; i < this->num; i++)
           values.push_back(tab[i]);
 
@@ -295,7 +295,7 @@ namespace Hermes
       Func<Scalar>* toReturn = new Func<Scalar>(1, 1);
 
       Scalar result;
-      Hermes::vector<Scalar*> values;
+      std::vector<Scalar*> values;
       for (int i = 0; i < this->num; i++)
         values.push_back(&val[i]);
 
@@ -461,9 +461,9 @@ namespace Hermes
           dy[i] = this->sln[i]->get_dy_values(j);
         }
 
-        Hermes::vector<const Scalar *> values_vector;
-        Hermes::vector<const Scalar *> dx_vector;
-        Hermes::vector<const Scalar *> dy_vector;
+        std::vector<const Scalar *> values_vector;
+        std::vector<const Scalar *> dx_vector;
+        std::vector<const Scalar *> dy_vector;
 
         for (int i = 0; i < this->num; i++)
         {
@@ -485,7 +485,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void MagFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result)
+    void MagFilter<Scalar>::filter_fn(int n, std::vector<Scalar*> values, Scalar* result)
     {
       for (int i = 0; i < n; i++)
 
@@ -498,14 +498,13 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    MagFilter<Scalar>::MagFilter(MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<int> items) : SimpleFilter<Scalar>(solutions, items)
+    MagFilter<Scalar>::MagFilter(MeshFunctionSharedPtrVector<Scalar> solutions, std::vector<int> items) : SimpleFilter<Scalar>(solutions, items)
     {
     };
 
     template<typename Scalar>
     MagFilter<Scalar>::MagFilter(MeshFunctionSharedPtr<Scalar> sln1, int item1)
-      : SimpleFilter<Scalar>(MeshFunctionSharedPtrVector<Scalar>(sln1, sln1),
-      Hermes::vector<int>(item1 & H2D_FN_COMPONENT_0, item1 & H2D_FN_COMPONENT_1))
+      : SimpleFilter<Scalar>({ sln1, sln1 }, { item1 & H2D_FN_COMPONENT_0, item1 & H2D_FN_COMPONENT_1 })
     {
         if (sln1->get_num_components() < 2)
           throw Hermes::Exceptions::Exception("The single-argument constructor is intended for vector-valued solutions.");
@@ -520,7 +519,7 @@ namespace Hermes
     MeshFunction<Scalar>* MagFilter<Scalar>::clone() const
     {
       MeshFunctionSharedPtrVector<Scalar> slns;
-      Hermes::vector<int> items;
+      std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
         slns.push_back(this->sln[i]->clone());
@@ -530,7 +529,7 @@ namespace Hermes
       return filter;
     }
 
-    void TopValFilter::filter_fn(int n, Hermes::vector<double*> values, double* result)
+    void TopValFilter::filter_fn(int n, std::vector<double*> values, double* result)
     {
       for (int i = 0; i < n; i++)
       {
@@ -543,7 +542,7 @@ namespace Hermes
       }
     };
 
-    TopValFilter::TopValFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, Hermes::vector<double> limits, Hermes::vector<int> items) : SimpleFilter<double>(solutions, items), limits(limits)
+    TopValFilter::TopValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> limits, std::vector<int> items) : SimpleFilter<double>(solutions, items), limits(limits)
     {
     };
 
@@ -563,8 +562,8 @@ namespace Hermes
 
     MeshFunction<double>* TopValFilter::clone() const
     {
-      Hermes::vector<MeshFunctionSharedPtr<double> > slns;
-      Hermes::vector<int> items;
+      std::vector<MeshFunctionSharedPtr<double> > slns;
+      std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
         slns.push_back(this->sln[i]->clone());
@@ -574,7 +573,7 @@ namespace Hermes
       return filter;
     }
 
-    void BottomValFilter::filter_fn(int n, Hermes::vector<double*> values, double* result)
+    void BottomValFilter::filter_fn(int n, std::vector<double*> values, double* result)
     {
       for (int i = 0; i < n; i++)
       {
@@ -587,7 +586,7 @@ namespace Hermes
       }
     };
 
-    BottomValFilter::BottomValFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, Hermes::vector<double> limits, Hermes::vector<int> items) : SimpleFilter<double>(solutions, items), limits(limits)
+    BottomValFilter::BottomValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> limits, std::vector<int> items) : SimpleFilter<double>(solutions, items), limits(limits)
     {
     };
 
@@ -607,8 +606,8 @@ namespace Hermes
 
     MeshFunction<double>* BottomValFilter::clone() const
     {
-      Hermes::vector<MeshFunctionSharedPtr<double> > slns;
-      Hermes::vector<int> items;
+      std::vector<MeshFunctionSharedPtr<double> > slns;
+      std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
         slns.push_back(this->sln[i]->clone());
@@ -618,7 +617,7 @@ namespace Hermes
       return filter;
     }
 
-    void ValFilter::filter_fn(int n, Hermes::vector<double*> values, double* result)
+    void ValFilter::filter_fn(int n, std::vector<double*> values, double* result)
     {
       for (int i = 0; i < n; i++)
       {
@@ -634,7 +633,7 @@ namespace Hermes
       }
     };
 
-    ValFilter::ValFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, Hermes::vector<double> low_limits, Hermes::vector<double> high_limits, Hermes::vector<int> items) : SimpleFilter<double>(solutions, items), low_limits(low_limits), high_limits(high_limits)
+    ValFilter::ValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> low_limits, std::vector<double> high_limits, std::vector<int> items) : SimpleFilter<double>(solutions, items), low_limits(low_limits), high_limits(high_limits)
     {
     };
 
@@ -655,8 +654,8 @@ namespace Hermes
 
     MeshFunction<double>* ValFilter::clone() const
     {
-      Hermes::vector<MeshFunctionSharedPtr<double> > slns;
-      Hermes::vector<int> items;
+      std::vector<MeshFunctionSharedPtr<double> > slns;
+      std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
         slns.push_back(this->sln[i]->clone());
@@ -667,13 +666,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiffFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result)
+    void DiffFilter<Scalar>::filter_fn(int n, std::vector<Scalar*> values, Scalar* result)
     {
       for (int i = 0; i < n; i++) result[i] = values.at(0)[i] - values.at(1)[i];
     };
 
     template<typename Scalar>
-    DiffFilter<Scalar>::DiffFilter(MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<int> items) : SimpleFilter<Scalar>(solutions, items) {}
+    DiffFilter<Scalar>::DiffFilter(MeshFunctionSharedPtrVector<Scalar> solutions, std::vector<int> items) : SimpleFilter<Scalar>(solutions, items) {}
 
     template<typename Scalar>
     DiffFilter<Scalar>::~DiffFilter()
@@ -684,7 +683,7 @@ namespace Hermes
     MeshFunction<Scalar>* DiffFilter<Scalar>::clone() const
     {
       MeshFunctionSharedPtrVector<Scalar> slns;
-      Hermes::vector<int> items;
+      std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
         slns.push_back(this->sln[i]->clone());
@@ -695,7 +694,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void SumFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result)
+    void SumFilter<Scalar>::filter_fn(int n, std::vector<Scalar*> values, Scalar* result)
     {
       for (int i = 0; i < n; i++)
       {
@@ -706,7 +705,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    SumFilter<Scalar>::SumFilter(MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<int> items) : SimpleFilter<Scalar>(solutions, items) {}
+    SumFilter<Scalar>::SumFilter(MeshFunctionSharedPtrVector<Scalar> solutions, std::vector<int> items) : SimpleFilter<Scalar>(solutions, items) {}
 
     template<typename Scalar>
     SumFilter<Scalar>::~SumFilter()
@@ -717,7 +716,7 @@ namespace Hermes
     MeshFunction<Scalar>* SumFilter<Scalar>::clone() const
     {
       MeshFunctionSharedPtrVector<Scalar> slns;
-      Hermes::vector<int> items;
+      std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
         slns.push_back(this->sln[i]->clone());
@@ -728,21 +727,21 @@ namespace Hermes
     }
 
     template<>
-    void SquareFilter<double>::filter_fn(int n, Hermes::vector<double *> v1, double* result)
+    void SquareFilter<double>::filter_fn(int n, std::vector<double *> v1, double* result)
     {
       for (int i = 0; i < n; i++)
         result[i] = sqr(v1.at(0)[i]);
     };
 
     template<>
-    void SquareFilter<std::complex<double> >::filter_fn(int n, Hermes::vector<std::complex<double> *> v1, std::complex<double> * result)
+    void SquareFilter<std::complex<double> >::filter_fn(int n, std::vector<std::complex<double> *> v1, std::complex<double> * result)
     {
       for (int i = 0; i < n; i++)
         result[i] = std::norm(v1.at(0)[i]);
     };
 
     template<typename Scalar>
-    SquareFilter<Scalar>::SquareFilter(MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<int> items)
+    SquareFilter<Scalar>::SquareFilter(MeshFunctionSharedPtrVector<Scalar> solutions, std::vector<int> items)
       : SimpleFilter<Scalar>(solutions, items)
     {
         if (solutions.size() > 1)
@@ -758,7 +757,7 @@ namespace Hermes
     MeshFunction<Scalar>* SquareFilter<Scalar>::clone() const
     {
       MeshFunctionSharedPtrVector<Scalar> slns;
-      Hermes::vector<int> items;
+      std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
         slns.push_back(this->sln[i]->clone());
@@ -768,13 +767,13 @@ namespace Hermes
       return filter;
     }
 
-    void AbsFilter::filter_fn(int n, Hermes::vector<double*> v1, double * result)
+    void AbsFilter::filter_fn(int n, std::vector<double*> v1, double * result)
     {
       for (int i = 0; i < n; i++)
         result[i] = std::abs(v1.at(0)[i]);
     };
 
-    AbsFilter::AbsFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, Hermes::vector<int> items)
+    AbsFilter::AbsFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<int> items)
       : SimpleFilter<double>(solutions, items)
     {
         if (solutions.size() > 1)
@@ -799,8 +798,8 @@ namespace Hermes
 
     MeshFunction<double>* AbsFilter::clone() const
     {
-      Hermes::vector<MeshFunctionSharedPtr<double> > slns;
-      Hermes::vector<int> items;
+      std::vector<MeshFunctionSharedPtr<double> > slns;
+      std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
         slns.push_back(this->sln[i]->clone());
@@ -878,13 +877,13 @@ namespace Hermes
     {
     }
 
-    void AngleFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, double* result)
+    void AngleFilter::filter_fn(int n, std::vector<std::complex<double>*> v1, double* result)
     {
       for (int i = 0; i < n; i++)
         result[i] = atan2(v1.at(0)[i].imag(), v1.at(0)[i].real());
     };
 
-    AngleFilter::AngleFilter(Hermes::vector<MeshFunctionSharedPtr<std::complex<double> > > solutions, Hermes::vector<int> items)
+    AngleFilter::AngleFilter(std::vector<MeshFunctionSharedPtr<std::complex<double> > > solutions, std::vector<int> items)
       : SimpleFilter<std::complex<double> >(solutions, items)
     {
         if (solutions.size() > 1)
@@ -938,7 +937,7 @@ namespace Hermes
       return 0;
     }
 
-    VonMisesFilter::VonMisesFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, double lambda, double mu,
+    VonMisesFilter::VonMisesFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, double lambda, double mu,
       int cyl, int item1, int item2)
       : Filter<double>(solutions)
     {
@@ -965,7 +964,7 @@ namespace Hermes
 
     MeshFunction<double>* VonMisesFilter::clone() const
     {
-      Hermes::vector<MeshFunctionSharedPtr<double> > slns;
+      std::vector<MeshFunctionSharedPtr<double> > slns;
       for (int i = 0; i < num; i++)
         slns.push_back(sln[i]->clone());
       VonMisesFilter* filter = new VonMisesFilter(&slns[0], num, lambda, mu, cyl, item1, item2);
@@ -1033,7 +1032,7 @@ namespace Hermes
 
     template<typename Scalar>
     LinearFilter<Scalar>::LinearFilter(MeshFunctionSharedPtr<Scalar> older, MeshFunctionSharedPtr<Scalar> old, double tau_frac)
-      : Filter<Scalar>(MeshFunctionSharedPtrVector<Scalar>(older, old))
+      : Filter<Scalar>({ older, old })
     {
         this->tau_frac = tau_frac;
         init_components();

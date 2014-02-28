@@ -322,7 +322,7 @@ namespace Hermes
     template<typename Scalar>
     bool NonlinearMatrixSolver<Scalar>::calculate_damping_factor(unsigned int& successful_steps)
     {
-      Hermes::vector<double>& damping_factors_vector = this->get_parameter_value(p_damping_factors);
+      std::vector<double>& damping_factors_vector = this->get_parameter_value(p_damping_factors);
 
       if (this->manual_damping)
       {
@@ -487,11 +487,11 @@ namespace Hermes
       // Initialize parameters.
       unsigned int successful_steps_damping = 0;
       unsigned int successful_steps_jacobian = 0;
-      Hermes::vector<bool> iterations_with_recalculated_jacobian;
-      Hermes::vector<double> residual_norms;
-      Hermes::vector<double> solution_norms;
-      Hermes::vector<double> solution_change_norms;
-      Hermes::vector<double> damping_factors;
+      std::vector<bool> iterations_with_recalculated_jacobian;
+      std::vector<double> residual_norms;
+      std::vector<double> solution_norms;
+      std::vector<double> solution_change_norms;
+      std::vector<double> damping_factors;
       bool residual_norm_drop;
       unsigned int iteration = 1;
 

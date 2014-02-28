@@ -54,11 +54,11 @@ public:
 
       VectorFormVolVel* vector_vel_form_x = new VectorFormVolVel(0, Stokes, time_step);
 
-      Hermes::vector<MeshFunction<double> *> ext_vel_x;
+      std::vector<MeshFunction<double> *> ext_vel_x;
 
       VectorFormVolVel* vector_vel_form_y = new VectorFormVolVel(1, Stokes, time_step);
 
-      Hermes::vector<MeshFunction<double> *> ext_vel_y;
+      std::vector<MeshFunction<double> *> ext_vel_y;
   };
 
   class BilinearFormSymVel : public MatrixFormVol<double>
@@ -248,7 +248,7 @@ public:
 
     VectorFormNS_0* F_0 = new VectorFormNS_0(0, Stokes, Reynolds, time_step);
     
-    //F_0->set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time));
+    //F_0->set_ext(std::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time));
     this->set_ext(xvel_prev_time);
 
     add_vector_form(F_0);
@@ -634,10 +634,10 @@ protected:
 class EssentialBCNonConst : public EssentialBoundaryCondition<double>
 {
 public:
-  EssentialBCNonConst(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
+  EssentialBCNonConst(std::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
       EssentialBoundaryCondition<double>(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
       EssentialBCNonConst(std::string marker, double vel_inlet, double H, double startup_time) : 
-      EssentialBoundaryCondition<double>(Hermes::vector<std::string>()), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {
+      EssentialBoundaryCondition<double>(std::vector<std::string>()), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {
         markers.push_back(marker);
       };
 

@@ -67,10 +67,10 @@ namespace Hermes
       struct Row
       {
         std::string name, color, line, marker;
-        Hermes::vector<Values> data;
+        std::vector<Values> data;
       };
 
-      Hermes::vector<Row> rows;
+      std::vector<Row> rows;
     };
 
     ///  Outputs just two numbers per row.

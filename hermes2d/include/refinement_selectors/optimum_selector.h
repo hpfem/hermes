@@ -72,7 +72,7 @@ namespace Hermes
         /** \param[in,out] info_h Information about all H-candidates.
         *  \param[in,out] info_p Information about all P-candidates.
         *  \param[in,out] info_aniso Information about all ANISO-candidates. */
-        void update_cands_info(Hermes::vector<Cand>& candidates, CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const;
+        void update_cands_info(std::vector<Cand>& candidates, CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const;
 
         /// Appends cancidates of a given refinement and a given range of orders.
         /** If either borders or a ranges is invalid (i.e. smaller than zero)
@@ -81,7 +81,7 @@ namespace Hermes
         *  \param[in] last_order The upper boundery of a range in a form of an encoded order.
         *  \param[in] split A refinement, see the enum RefinementTypes.
         *  \param[in] iso_p True if both orders (horizontal and vertical) should be modified uniformly. Used in a case of a triangle. */
-        void append_candidates_split(Hermes::vector<Cand>& candidates, const int start_quad_order, const int last_order, const int split, bool iso_p);
+        void append_candidates_split(std::vector<Cand>& candidates, const int start_quad_order, const int last_order, const int split, bool iso_p);
 
         /// Fill a list of candidates.
         /** Override to generate or adjust generated candidates. The method has to initialize the array OptimumSelector::candidates.
@@ -93,14 +93,14 @@ namespace Hermes
         *  \param[in] max_p_quad_order A maximum encoded order of an element of a P-candidate.
         *  \return A vector of candidates. The first candidate has to be equal to the original element with a refinement ::H2D_REFINEMENT_P.
          */
-        virtual Hermes::vector<Cand> create_candidates(Element* e, int quad_order);
+        virtual std::vector<Cand> create_candidates(Element* e, int quad_order);
 
         /// Calculates error, dofs, and score of candidates.
         /** \param[in] e An element that is being refined.
         *  \param[in] rsln A reference solution which is used to calculate the error.
         *  \param[out] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be nullptr.
         *  \param[out] dev_error A deviation of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be nullptr. */
-        void evaluate_candidates(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln);
+        void evaluate_candidates(std::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln);
 
         /// Sorts and selects the best candidate and the best H-candidate according to the score.
         /** Any two candidates with the same score are skipped since it is not possible to decide between them.
@@ -117,21 +117,21 @@ namespace Hermes
         *     0 - overall
         *     1 - 4 : indexed by enum RefinementType.
         */
-        virtual void select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, Cand*& best_candidate, Cand* best_candidates_specific_type[4]);
+        virtual void select_best_candidate(std::vector<Cand>& candidates, Element* e, Cand*& best_candidate, Cand* best_candidates_specific_type[4]);
 
         /// Calculates error of candidates.
         /** This method has to be implemented in inherited classes.
         *  \param[in] e An element that is being refined.
         *  \param[in] rsln A reference solution which is used to calculate the error.
         */
-        virtual void evaluate_cands_error(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln) = 0;
+        virtual void evaluate_cands_error(std::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln) = 0;
 
         /// Calculates DOF of candidates.
         /** It uses a list of shape indices (OptimumSelector::shape_indices) to
         *  count a number of DOFs. No number of DOFs cannot be zero.
         *  \param[in] e An element that is being refined.
         *  \param[in] rsln A reference solution which is used to calculate the error. */
-        virtual void evaluate_cands_dof(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln);
+        virtual void evaluate_cands_dof(std::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln);
 
         /// Evalutes score of candidates.
         /** It calculates score \f$s\f$ of a candidate as \f[s = \frac{\log_{10} e_0 - \log_{10} e}{(d - d_0)^c},\f]
@@ -142,7 +142,7 @@ namespace Hermes
         *
         *  If overridden, the higher score the better candidate.
         *  \param[in] e An element that is being refined. */
-        virtual void evaluate_cands_score(Hermes::vector<Cand>& candidates, Element* e);
+        virtual void evaluate_cands_score(std::vector<Cand>& candidates, Element* e);
 
         /// Number of shape functions for
         /// - mode
@@ -201,7 +201,7 @@ namespace Hermes
 
         Shapeset *shapeset; ///< A shapeset used to calculate error.
 
-        Hermes::vector<ShapeInx> shape_indices[H2D_NUM_MODES]; ///< Shape indices. The first index is a mode (ElementMode2D).
+        std::vector<ShapeInx> shape_indices[H2D_NUM_MODES]; ///< Shape indices. The first index is a mode (ElementMode2D).
         int max_shape_inx[H2D_NUM_MODES]; ///< A maximum index of a shape function. The first index is a mode (ElementMode2D).
         int next_order_shape[H2D_NUM_MODES][H2DRS_MAX_ORDER+1]; ///< An index to the array OptimumSelector::shape_indices of a shape function of the next uniform order. The first index is a mode (ElementMode2D), the second index is an order.
         bool has_vertex_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains vertex functions. The index is a mode (ElementMode2D).
@@ -218,7 +218,7 @@ namespace Hermes
         *  \param[in] order_v A vertical order of an element.
         *  \param[in,out] used_shape_index A vector of used shape indices. If a shape index is present in the map, a shape was already added and it will not be added again.
         *  \param[in,out] indices A vector of shape indices. The vector is updated by the function. */
-        void add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices, ElementMode2D mode);
+        void add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, std::vector<ShapeInx>& indices, ElementMode2D mode);
 
         /// Builds shape index table OptimumSelector::shape_indices.
         /** The method fills the array OptimumSelector::shape_indices for a given mode.

@@ -56,7 +56,7 @@ namespace Hermes
 
       template<>
       DefaultMatrixFormVol<double>::DefaultMatrixFormVol
-        (int i, int j, Hermes::vector<std::string> areas,
+        (int i, int j, std::vector<std::string> areas,
         Hermes2DFunction<double>* coeff, SymFlag sym, GeomType gt)
         : MatrixFormVol<double>(i, j), coeff(coeff), gt(gt)
       {
@@ -72,7 +72,7 @@ namespace Hermes
         }
       template<>
       DefaultMatrixFormVol<std::complex<double> >::DefaultMatrixFormVol
-        (int i, int j, Hermes::vector<std::string> areas,
+        (int i, int j, std::vector<std::string> areas,
         Hermes2DFunction<std::complex<double> >* coeff, SymFlag sym, GeomType gt)
         : MatrixFormVol<std::complex<double> >(i, j), coeff(coeff), gt(gt)
       {
@@ -179,7 +179,7 @@ namespace Hermes
         };
 
       template<typename Scalar>
-      DefaultJacobianDiffusion<Scalar>::DefaultJacobianDiffusion(int i, int j, Hermes::vector<std::string> areas,
+      DefaultJacobianDiffusion<Scalar>::DefaultJacobianDiffusion(int i, int j, std::vector<std::string> areas,
         Hermes1DFunction<Scalar>* coeff, SymFlag sym, GeomType gt)
         : MatrixFormVol<Scalar>(i, j), idx_j(j), coeff(coeff), gt(gt)
       {
@@ -312,7 +312,7 @@ namespace Hermes
         };
 
       template<typename Scalar>
-      DefaultMatrixFormDiffusion<Scalar>::DefaultMatrixFormDiffusion(int i, int j, Hermes::vector<std::string> areas,
+      DefaultMatrixFormDiffusion<Scalar>::DefaultMatrixFormDiffusion(int i, int j, std::vector<std::string> areas,
         Hermes1DFunction<Scalar>* coeff, SymFlag sym, GeomType gt)
         : MatrixFormVol<Scalar>(i, j), idx_j(j), coeff(coeff), gt(gt)
       {
@@ -422,7 +422,7 @@ namespace Hermes
         }
 
       template<typename Scalar>
-      DefaultJacobianAdvection<Scalar>::DefaultJacobianAdvection(int i, int j, Hermes::vector<std::string> areas,
+      DefaultJacobianAdvection<Scalar>::DefaultJacobianAdvection(int i, int j, std::vector<std::string> areas,
         Hermes1DFunction<Scalar>* coeff1,
         Hermes1DFunction<Scalar>* coeff2,
         GeomType gt)
@@ -512,7 +512,7 @@ namespace Hermes
         }
 
       template<typename Scalar>
-      DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, Hermes::vector<std::string> areas,
+      DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, std::vector<std::string> areas,
         Hermes2DFunction<Scalar>* coeff,
         GeomType gt)
         : VectorFormVol<Scalar>(i), coeff(coeff), gt(gt)
@@ -609,7 +609,7 @@ namespace Hermes
         }
 
       template<typename Scalar>
-      DefaultResidualVol<Scalar>::DefaultResidualVol(int i, Hermes::vector<std::string> areas,
+      DefaultResidualVol<Scalar>::DefaultResidualVol(int i, std::vector<std::string> areas,
         Hermes2DFunction<Scalar>* coeff,
         GeomType gt)
         : VectorFormVol<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
@@ -705,7 +705,7 @@ namespace Hermes
         };
 
       template<typename Scalar>
-      DefaultResidualDiffusion<Scalar>::DefaultResidualDiffusion(int i, Hermes::vector<std::string> areas,
+      DefaultResidualDiffusion<Scalar>::DefaultResidualDiffusion(int i, std::vector<std::string> areas,
         Hermes1DFunction<Scalar>* coeff, GeomType gt)
         : VectorFormVol<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
       {
@@ -805,7 +805,7 @@ namespace Hermes
         }
 
       template<typename Scalar>
-      DefaultResidualAdvection<Scalar>::DefaultResidualAdvection(int i, Hermes::vector<std::string> areas, \
+      DefaultResidualAdvection<Scalar>::DefaultResidualAdvection(int i, std::vector<std::string> areas, \
         Hermes1DFunction<Scalar>* coeff1,
         Hermes1DFunction<Scalar>* coeff2,
         GeomType gt)
@@ -891,7 +891,7 @@ namespace Hermes
         }
 
       template<typename Scalar>
-      DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, Hermes::vector<std::string> areas,
+      DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, std::vector<std::string> areas,
         Hermes2DFunction<Scalar>* coeff,
         GeomType gt)
         : MatrixFormSurf<Scalar>(i, j), coeff(coeff), gt(gt)
@@ -990,7 +990,7 @@ namespace Hermes
         }
 
       template<typename Scalar>
-      DefaultJacobianFormSurf<Scalar>::DefaultJacobianFormSurf(int i, int j, Hermes::vector<std::string> areas,
+      DefaultJacobianFormSurf<Scalar>::DefaultJacobianFormSurf(int i, int j, std::vector<std::string> areas,
         Hermes1DFunction<Scalar>* coeff,
         GeomType gt)
         : MatrixFormSurf<Scalar>(i, j), coeff(coeff), gt(gt)
@@ -1062,7 +1062,7 @@ namespace Hermes
         }
 
       template<typename Scalar>
-      DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, Hermes::vector<std::string> areas,
+      DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, std::vector<std::string> areas,
         Hermes2DFunction<Scalar>* coeff,
         GeomType gt)
         : VectorFormSurf<Scalar>(i), coeff(coeff), gt(gt)
@@ -1162,7 +1162,7 @@ namespace Hermes
         }
 
       template<typename Scalar>
-      DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, Hermes::vector<std::string> areas,
+      DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, std::vector<std::string> areas,
         Hermes2DFunction<Scalar>* coeff,
         GeomType gt)
         : VectorFormSurf<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)

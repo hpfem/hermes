@@ -40,10 +40,10 @@ namespace Hermes
           class HERMES_API DefaultWeakFormFixedSource : public WeakForm<Scalar>
           {
           public:
-            DefaultWeakFormFixedSource( Hermes::vector<std::string> regions,
-              Hermes::vector<double> D_map,
-              Hermes::vector<double> Sigma_a_map,
-              Hermes::vector<double> Q_map );
+            DefaultWeakFormFixedSource( std::vector<std::string> regions,
+              std::vector<double> D_map,
+              std::vector<double> Sigma_a_map,
+              std::vector<double> Q_map );
           };
         }
       }
@@ -512,7 +512,7 @@ namespace Hermes
           class MultiArray
           {
           private:
-            Hermes::vector<NDArrayType> m_data;
+            std::vector<NDArrayType> m_data;
           public:
             MultiArray(const NDArrayType& val) {
               m_data.push_back(val);
@@ -523,7 +523,7 @@ namespace Hermes
               return *this;
             }
 
-            operator Hermes::vector<NDArrayType>() {
+            operator std::vector<NDArrayType>() {
               return m_data;
             }
           };
@@ -533,7 +533,7 @@ namespace Hermes
             typedef MultiArray<rank0> row;
             typedef MultiArray<rank1> mat;
             typedef MultiArray<bool> bool_row;
-            typedef MultiArray< Hermes::vector<bool> > bool_mat;
+            typedef MultiArray< std::vector<bool> > bool_mat;
           }
         }
 
@@ -1190,17 +1190,17 @@ namespace Hermes
 
               DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
                 Hermes2DFunction<Scalar>*f_src,
-                Hermes::vector<std::string> src_areas,
+                std::vector<std::string> src_areas,
                 GeomType geom_type = HERMES_PLANAR);
 
               DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-                const Hermes::vector<Hermes2DFunction<Scalar>*>& f_src,
+                const std::vector<Hermes2DFunction<Scalar>*>& f_src,
                 std::string src_area = HERMES_ANY,
                 GeomType geom_type = HERMES_PLANAR);
 
               DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-                const Hermes::vector<Hermes2DFunction<Scalar>*>& f_src,
-                Hermes::vector<std::string> src_areas,
+                const std::vector<Hermes2DFunction<Scalar>*>& f_src,
+                std::vector<std::string> src_areas,
                 GeomType geom_type = HERMES_PLANAR);
             };
 
@@ -1208,7 +1208,7 @@ namespace Hermes
             class HERMES_API DefaultWeakFormSourceIteration : public WeakForm<Scalar>
             {
             protected:
-              Hermes::vector<FissionYield::OuterIterationForm<Scalar>*> keff_iteration_forms;
+              std::vector<FissionYield::OuterIterationForm<Scalar>*> keff_iteration_forms;
 
             public:
               DefaultWeakFormSourceIteration( const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
@@ -1232,9 +1232,9 @@ namespace Hermes
           class HERMES_API SourceFilter : public SimpleFilter<double>
           {
             public:
-            SourceFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, const MaterialPropertyMaps* matprop,
+            SourceFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, const MaterialPropertyMaps* matprop,
                          const std::string& source_area)
-              : SimpleFilter<double>(solutions, Hermes::vector<int>())
+              : SimpleFilter<double>(solutions, std::vector<int>())
             {
               nu = matprop->get_nu().at(source_area);
               Sigma_f = matprop->get_Sigma_f().at(source_area);
@@ -1243,7 +1243,7 @@ namespace Hermes
             rank1 nu;
             rank1 Sigma_f;
 
-            void filter_fn(int n, Hermes::vector<double*> values, double* result);
+            void filter_fn(int n, std::vector<double*> values, double* result);
           };
         }
       }

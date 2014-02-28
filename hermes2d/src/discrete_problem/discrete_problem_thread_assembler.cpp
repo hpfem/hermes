@@ -455,7 +455,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Func<Scalar>** target_array, MeshFunctionSharedPtrVector<Scalar>& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry)
+    void DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Func<Scalar>** target_array, MeshFunctionSharedPtrVector<Scalar>& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry)
     {
       int ext_size = ext.size();
       int u_ext_fns_size = u_ext_fns.size();

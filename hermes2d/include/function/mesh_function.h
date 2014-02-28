@@ -39,7 +39,7 @@ namespace Hermes
     };
 
     template <typename Scalar>
-    using MeshFunctionSharedPtrVector = Hermes::vector<MeshFunctionSharedPtr<Scalar> >;
+    using MeshFunctionSharedPtrVector = std::vector<MeshFunctionSharedPtr<Scalar> >;
 
     /** \defgroup meshFunctions Mesh functions
     * \brief Collection of classes that represent various functions of the mesh coordinates, i.e. defined on the Mesh.

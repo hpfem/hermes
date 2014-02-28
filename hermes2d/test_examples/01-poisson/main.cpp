@@ -45,7 +45,7 @@ public:
   {
   }
 
-  MyVolumetricIntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<double> > source_functions, int number_of_integrals) : PostProcessing::SurfaceIntegralCalculator<double>(source_functions, number_of_integrals)
+  MyVolumetricIntegralCalculator(std::vector<MeshFunctionSharedPtr<double> > source_functions, int number_of_integrals) : PostProcessing::SurfaceIntegralCalculator<double>(source_functions, number_of_integrals)
   {
   }
 
@@ -72,8 +72,7 @@ int main(int argc, char* argv[])
     mesh->refine_all_elements();
 
   // Initialize essential boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"),
-    FIXED_BDY_TEMP);
+  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential({ "Bottom", "Inner", "Outer", "Left" }, FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Initialize space->

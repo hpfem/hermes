@@ -29,10 +29,10 @@ namespace Hermes
         namespace Diffusion
         {
           template<typename Scalar>
-          DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(Hermes::vector<std::string> regions,
-            Hermes::vector<double> D_map,
-            Hermes::vector<double> Sigma_a_map,
-            Hermes::vector<double> Q_map) : WeakForm<Scalar>(1)
+          DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(std::vector<std::string> regions,
+            std::vector<double> D_map,
+            std::vector<double> Sigma_a_map,
+            std::vector<double> Q_map) : WeakForm<Scalar>(1)
           {
               using namespace WeakFormsH1;
 
@@ -379,7 +379,7 @@ namespace Hermes
               // Now, we surely have Sigma_r ...
 
               if (scattering_multigroup_structure.empty())
-                scattering_multigroup_structure = bool2(G, Hermes::vector<bool>(G, true));
+                scattering_multigroup_structure = bool2(G, std::vector<bool>(G, true));
 
               if (!Sigma_s_given)
               {
@@ -391,7 +391,7 @@ namespace Hermes
                 {
                   Sigma_s = create_map2_by_diagonals(Common::NDArrayMapOp::subtract<rank1>(Sigma_t, Sigma_r));
 
-                  scattering_multigroup_structure = bool2(G, Hermes::vector<bool>(G, false));
+                  scattering_multigroup_structure = bool2(G, std::vector<bool>(G, false));
                   for (unsigned int gto = 0; gto < G; gto++)
                   for (unsigned int gfrom = 0; gfrom < G; gfrom++)
                   if (gto == gfrom)
@@ -401,7 +401,7 @@ namespace Hermes
                 {
                   this->warn(W_NO_SCATTERING);
                   fill_with(0.0, &Sigma_s);
-                  scattering_multigroup_structure = bool2(G, Hermes::vector<bool>(G, false));
+                  scattering_multigroup_structure = bool2(G, std::vector<bool>(G, false));
                 }
 
                 Sigma_s_given = true;
@@ -814,7 +814,7 @@ namespace Hermes
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
               Hermes2DFunction<Scalar>*f_src,
-              Hermes::vector<std::string> src_areas,
+              std::vector<std::string> src_areas,
               GeomType geom_type) : WeakForm<Scalar>(matprop.get_G())
             {
                 lhs_init(matprop.get_G(), matprop, mesh, geom_type);
@@ -824,7 +824,7 @@ namespace Hermes
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-              const Hermes::vector<Hermes2DFunction<Scalar>*>& f_src,
+              const std::vector<Hermes2DFunction<Scalar>*>& f_src,
               std::string src_area,
               GeomType geom_type) : WeakForm<Scalar>(matprop.get_G())
             {
@@ -838,8 +838,8 @@ namespace Hermes
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-              const Hermes::vector<Hermes2DFunction<Scalar>*>& f_src,
-              Hermes::vector<std::string> src_areas,
+              const std::vector<Hermes2DFunction<Scalar>*>& f_src,
+              std::vector<std::string> src_areas,
               GeomType geom_type) : WeakForm<Scalar>(matprop.get_G())
             {
                 if (f_src.size() != matprop.get_G())
@@ -883,7 +883,7 @@ namespace Hermes
             void DefaultWeakFormSourceIteration<Scalar>::update_keff(double new_keff)
             {
               /* Somehow does not work with templates. A bug / typo from me?
-              Hermes::vector<FissionYield::OuterIterationForm<Scalar> *>::iterator it = keff_iteration_forms.begin();
+              std::vector<FissionYield::OuterIterationForm<Scalar> *>::iterator it = keff_iteration_forms.begin();
               for ( ; it != keff_iteration_forms.end(); ++it)
               (*it)->update_keff(new_keff);
               */
@@ -895,7 +895,7 @@ namespace Hermes
 
         namespace SupportClasses
         {
-          void SourceFilter::filter_fn(int n, Hermes::vector<double*> values, double* result)
+          void SourceFilter::filter_fn(int n, std::vector<double*> values, double* result)
           {
             for (int i = 0; i < n; i++)
             {

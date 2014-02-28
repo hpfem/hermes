@@ -167,7 +167,7 @@ namespace Hermes
       /// External functions.
       /// Set functions acting on the u_ext functions in assembling (for fast assembling of nonlinear problems).
       /// IMPORTANT: These functions will appear at the beginning of the Func<Scalar>** ext array in the value(), and ord() methods of individual forms.
-      void set_u_ext_fn(Hermes::vector<UExtFunctionSharedPtr<Scalar> > ext);
+      void set_u_ext_fn(std::vector<UExtFunctionSharedPtr<Scalar> > ext);
 
       /// External functions.
       /// Set external functions.
@@ -185,13 +185,13 @@ namespace Hermes
       bool is_DG() const;
 
       /// Internal.
-      Hermes::vector<Form<Scalar> *> get_forms() const;
-      Hermes::vector<MatrixFormVol<Scalar> *> get_mfvol() const;
-      Hermes::vector<MatrixFormSurf<Scalar> *> get_mfsurf() const;
-      Hermes::vector<MatrixFormDG<Scalar> *> get_mfDG() const;
-      Hermes::vector<VectorFormVol<Scalar> *> get_vfvol() const;
-      Hermes::vector<VectorFormSurf<Scalar> *> get_vfsurf() const;
-      Hermes::vector<VectorFormDG<Scalar> *> get_vfDG() const;
+      std::vector<Form<Scalar> *> get_forms() const;
+      std::vector<MatrixFormVol<Scalar> *> get_mfvol() const;
+      std::vector<MatrixFormSurf<Scalar> *> get_mfsurf() const;
+      std::vector<MatrixFormDG<Scalar> *> get_mfDG() const;
+      std::vector<VectorFormVol<Scalar> *> get_vfvol() const;
+      std::vector<VectorFormSurf<Scalar> *> get_vfsurf() const;
+      std::vector<VectorFormDG<Scalar> *> get_vfDG() const;
 
       /// Deletes all volumetric and surface forms.
       void delete_all();
@@ -199,7 +199,7 @@ namespace Hermes
     protected:
       /// External solutions.
       MeshFunctionSharedPtrVector<Scalar> ext;
-      Hermes::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
+      std::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
 
       double current_time;
       double current_time_step;
@@ -209,25 +209,25 @@ namespace Hermes
       bool is_matfree;
 
       /// Holds all forms.
-      Hermes::vector<Form<Scalar> *> forms;
+      std::vector<Form<Scalar> *> forms;
 
       /// Holds volumetric matrix forms.
-      Hermes::vector<MatrixFormVol<Scalar> *> mfvol;
+      std::vector<MatrixFormVol<Scalar> *> mfvol;
 
       /// Holds surface matrix forms.
-      Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf;
+      std::vector<MatrixFormSurf<Scalar> *> mfsurf;
 
       /// Holds DG matrix forms.
-      Hermes::vector<MatrixFormDG<Scalar> *> mfDG;
+      std::vector<MatrixFormDG<Scalar> *> mfDG;
 
       /// Holds volumetric vector forms.
-      Hermes::vector<VectorFormVol<Scalar> *> vfvol;
+      std::vector<VectorFormVol<Scalar> *> vfvol;
 
       /// Holds surface vector forms.
-      Hermes::vector<VectorFormSurf<Scalar> *> vfsurf;
+      std::vector<VectorFormSurf<Scalar> *> vfsurf;
 
       /// Holds DG vector forms.
-      Hermes::vector<VectorFormDG<Scalar> *> vfDG;
+      std::vector<VectorFormDG<Scalar> *> vfDG;
 
       bool** get_blocks(bool force_diagonal_blocks) const;
 
@@ -247,7 +247,7 @@ namespace Hermes
 
       // Internal - processes markers, translates from strings to ints.
       template<typename FormType>
-      void processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces, bool surface, Hermes::vector<FormType> forms_to_process);
+      void processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces, bool surface, std::vector<FormType> forms_to_process);
       void processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces);
 
     private:
@@ -270,8 +270,8 @@ namespace Hermes
       /// get-set methods
       /// areas
       void set_area(std::string area);
-      void set_areas(Hermes::vector<std::string> areas);
-      Hermes::vector<std::string> getAreas() const;
+      void set_areas(std::vector<std::string> areas);
+      std::vector<std::string> getAreas() const;
 
       /// external functions - dual functionality with the overall WeakForm.
       /// For Agros, this approach is better in some way, for e.g. Euler equations,
@@ -284,7 +284,7 @@ namespace Hermes
       /// External functions.
       /// Set more external functions.
       void set_ext(MeshFunctionSharedPtrVector<Scalar> ext);
-      void set_u_ext_fn(Hermes::vector<UExtFunctionSharedPtr<Scalar> > ext);
+      void set_u_ext_fn(std::vector<UExtFunctionSharedPtr<Scalar> > ext);
       MeshFunctionSharedPtrVector<Scalar> get_ext() const;
 
       /// scaling factor
@@ -297,10 +297,10 @@ namespace Hermes
       inline void set_weakform(WeakForm<Scalar>* wf) { this->wf = wf; }
 
       /// Markers of the areas where this form will be assembled.
-      Hermes::vector<std::string> areas;
+      std::vector<std::string> areas;
 
       /// Internal - this structure is being filled anew with every assembling.
-      Hermes::vector<int> areas_internal;
+      std::vector<int> areas_internal;
       
       /// Internal - this structure is being filled anew with every assembling.
       /// True iff areas contain HERMES_ANY - meaning that this form represents an integral over the whole domain (whole boundary in case of surface forms).
@@ -314,7 +314,7 @@ namespace Hermes
 
       /// External solutions.
       MeshFunctionSharedPtrVector<Scalar> ext;
-      Hermes::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
+      std::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
 
       double get_current_stage_time() const;
 

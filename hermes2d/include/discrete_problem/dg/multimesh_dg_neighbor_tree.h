@@ -42,10 +42,10 @@ namespace Hermes
       static void insert_into_multimesh_tree(MultimeshDGNeighborTreeNode* node, unsigned int* transformations, unsigned int transformation_count);
 
       /// Return a global (unified list of central element transformations representing the neighbors on the union mesh.
-      static Hermes::vector<Hermes::vector<unsigned int>*> get_multimesh_neighbors_transformations(MultimeshDGNeighborTreeNode* multimesh_tree);
+      static std::vector<std::vector<unsigned int>*> get_multimesh_neighbors_transformations(MultimeshDGNeighborTreeNode* multimesh_tree);
 
       /// Traverse the multimesh tree. Used in the function get_multimesh_neighbors_transformations().
-      static void traverse_multimesh_tree(MultimeshDGNeighborTreeNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations);
+      static void traverse_multimesh_tree(MultimeshDGNeighborTreeNode* node, std::vector<std::vector<unsigned int>*>& running_transformations);
 
       /// Update the NeighborSearch according to the multimesh tree.
       static void update_neighbor_search(NeighborSearch<Scalar>* ns, MultimeshDGNeighborTreeNode* multimesh_tree);
@@ -59,8 +59,8 @@ namespace Hermes
       static int update_ns_subtree(NeighborSearch<Scalar>* ns, MultimeshDGNeighborTreeNode* node, unsigned int ith_neighbor);
 
       /// Traverse the multimesh subtree. Used in the function update_ns_subtree().
-      static void traverse_multimesh_subtree(MultimeshDGNeighborTreeNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
-        Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
+      static void traverse_multimesh_subtree(MultimeshDGNeighborTreeNode* node, std::vector<std::vector<unsigned int>*>& running_central_transformations,
+        std::vector<std::vector<unsigned int>*>& running_neighbor_transformations, const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
 
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;

@@ -456,7 +456,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector,
       SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> solutions,
-      Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
+      std::vector<bool> add_dir_lift, std::vector<int> start_indices)
     {
       if (solution_vector == nullptr)
         throw Exceptions::NullException(1);
@@ -464,7 +464,7 @@ namespace Hermes
         throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
-      Hermes::vector<int> start_indices_new;
+      std::vector<int> start_indices_new;
       if (start_indices.empty())
       {
         int counter = 0;
@@ -488,7 +488,7 @@ namespace Hermes
         if (Solution<Scalar>::static_verbose_output)
           Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
 
-        if (add_dir_lift == Hermes::vector<bool>())
+        if (add_dir_lift == std::vector<bool>())
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
@@ -523,7 +523,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
-      MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
+      MeshFunctionSharedPtrVector<Scalar> solutions, std::vector<bool> add_dir_lift, std::vector<int> start_indices)
     {
       if (solution_vector == nullptr)
         throw Exceptions::NullException(1);
@@ -531,7 +531,7 @@ namespace Hermes
         throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
-      Hermes::vector<int> start_indices_new;
+      std::vector<int> start_indices_new;
       if (start_indices.empty())
       {
         int counter = 0;
@@ -555,7 +555,7 @@ namespace Hermes
         if (Solution<Scalar>::static_verbose_output)
           Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
 
-        if (add_dir_lift == Hermes::vector<bool>())
+        if (add_dir_lift == std::vector<bool>())
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
@@ -572,7 +572,7 @@ namespace Hermes
         throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
-      Hermes::vector<int> start_indices_new;
+      std::vector<int> start_indices_new;
       int counter = 0;
       for (int i = 0; i < spaces.size(); i++)
       {
@@ -599,7 +599,7 @@ namespace Hermes
         throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
-      Hermes::vector<int> start_indices_new;
+      std::vector<int> start_indices_new;
       int counter = 0;
       for (int i = 0; i < spaces.size(); i++)
       {
@@ -633,8 +633,8 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
-      MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<PrecalcShapeset *> pss,
-      Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
+      MeshFunctionSharedPtrVector<Scalar> solutions, std::vector<PrecalcShapeset *> pss,
+      std::vector<bool> add_dir_lift, std::vector<int> start_indices)
     {
       if (solution_vector == nullptr)
         throw Exceptions::NullException(1);
@@ -642,7 +642,7 @@ namespace Hermes
         throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
-      Hermes::vector<int> start_indices_new;
+      std::vector<int> start_indices_new;
       if (start_indices.empty())
       {
         int counter = 0;
@@ -667,7 +667,7 @@ namespace Hermes
         if (Solution<Scalar>::static_verbose_output)
           Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
 
-        if (add_dir_lift == Hermes::vector<bool>())
+        if (add_dir_lift == std::vector<bool>())
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
@@ -1517,7 +1517,7 @@ namespace Hermes
 
       if (sln_type == HERMES_EXACT)
       {
-        Hermes::vector<double> values;
+        std::vector<double> values;
         // values
         bson_find(&it, &br, "values");
         bson_iterator_subobject_init(&it, &sub, 0);
@@ -1635,7 +1635,7 @@ namespace Hermes
 
       if (sln_type == HERMES_EXACT)
       {
-        Hermes::vector<double> values;
+        std::vector<double> values;
         // values
         bson_find(&it, &br, "values");
         bson_iterator_subobject_init(&it, &sub, 0);
@@ -1668,7 +1668,7 @@ namespace Hermes
         this->elem_orders = malloc_with_check<int>(num_elems);
 
         // coeffs.
-        Hermes::vector<double> real_coeffs, imag_coeffs;
+        std::vector<double> real_coeffs, imag_coeffs;
         bson_find(&it_coeffs_real, &br, "coeffs-real");
         bson_iterator_subobject_init(&it_coeffs_real, &sub, 0);
         bson_iterator_init(&it, &sub);

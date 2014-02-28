@@ -145,11 +145,11 @@ namespace Hermes
       MeshFunctionSharedPtr<double> errorMeshFunction[H2D_MAX_COMPONENTS];
 
       /// Holds volumetric matrix forms.
-      Hermes::vector<NormFormVol<Scalar> *> mfvol;
+      std::vector<NormFormVol<Scalar> *> mfvol;
       /// Holds surface matrix forms.
-      Hermes::vector<NormFormSurf<Scalar> *> mfsurf;
+      std::vector<NormFormSurf<Scalar> *> mfsurf;
       /// Holds DG matrix forms.
-      Hermes::vector<NormFormDG<Scalar> *> mfDG;
+      std::vector<NormFormDG<Scalar> *> mfDG;
 
       /// This is for adaptivity, saying that the errors are the correct ones.
       bool elements_stored;

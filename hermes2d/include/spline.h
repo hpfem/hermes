@@ -26,7 +26,7 @@ namespace Hermes
     {
     public:
       /// Constructor (general case).
-      CubicSpline(Hermes::vector<double> points, Hermes::vector<double> values,
+      CubicSpline(std::vector<double> points, std::vector<double> values,
         double bc_left, double bc_right,
         bool first_der_left = true, bool first_der_right = true,
         bool extend_der_left = true, bool extend_der_right = true);
@@ -69,10 +69,10 @@ namespace Hermes
       /// Extrapolate the value of the spline outside of its interval of definition.
       double extrapolate_value(double point_end, double value_end, double derivative_end, double x_in) const;
       /// Grid points, ordered.
-      Hermes::vector<double> points;
+      std::vector<double> points;
 
       /// Values at the grid points.
-      Hermes::vector<double> values;
+      std::vector<double> values;
 
       /// Boundary conditions.
       double bc_left, bc_right;
@@ -94,7 +94,7 @@ namespace Hermes
       double point_right, value_right, derivative_right;
 
       /// A set of four coefficients a, b, c, d for an elementary cubic spline.
-      Hermes::vector<SplineCoeff> coeffs;
+      std::vector<SplineCoeff> coeffs;
 
       /// Gets derivative at a point that lies in interval 'm'.
       double get_derivative_from_interval(double x_in, int m) const;

@@ -56,11 +56,11 @@ namespace Hermes
         /// Save a MeshFunction (Solution, Filter) in VTK format.
         void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D = true, int item = H2D_FN_VAL_0);
         /// Save multiple MeshFunctions (Solutions, Filters) in VTK format.
-        void save_solution_vtk(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, const char* quantity_name, bool mode_3D = true);
+        void save_solution_vtk(std::vector<MeshFunctionSharedPtr<double> > slns, std::vector<int> items, const char* filename, const char* quantity_name, bool mode_3D = true);
         /// Save a MeshFunction (Solution, Filter) in Tecplot format.
         void save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item = H2D_FN_VAL_0);
         /// Save multiple MeshFunctions (Solutions, Filters) in Tecplot format.
-        void save_solution_tecplot(Hermes::vector<MeshFunctionSharedPtr<double> > slns, Hermes::vector<int> items, const char* filename, Hermes::vector<std::string> quantity_names);
+        void save_solution_tecplot(std::vector<MeshFunctionSharedPtr<double> > slns, std::vector<int> items, const char* filename, std::vector<std::string> quantity_names);
 
         /// Sets the criterion to use for the linearization process.
         /// This criterion is used in ThreadLinearizerMultidimensional class instances (see threadLinearizerMultidimensional array).
@@ -91,7 +91,7 @@ namespace Hermes
           int current_thread_index;
           int current_thread;
           int current_thread_size;
-          Hermes::vector<int> thread_sizes;
+          std::vector<int> thread_sizes;
           const LinearizerMultidimensional<LinearizerDataDimensions>* linearizer;
           void check_zero_lengths();
           friend class LinearizerMultidimensional;
@@ -156,7 +156,7 @@ namespace Hermes
 
         void init(MeshFunctionSharedPtr<double>* sln, int* item);
 
-        Hermes::vector<MeshSharedPtr > meshes;
+        std::vector<MeshSharedPtr > meshes;
 
         /// Standard and curvature epsilon.
         double curvature_epsilon;

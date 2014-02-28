@@ -145,15 +145,15 @@ namespace Hermes
       ///
       /// Linear forms used to calculate the error estimator value for each component.
       ///
-      Hermes::vector<typename KellyTypeAdapt::ErrorEstimatorForm *> error_estimators_vol;
-      Hermes::vector<typename KellyTypeAdapt::ErrorEstimatorForm *> error_estimators_surf;
+      std::vector<typename KellyTypeAdapt::ErrorEstimatorForm *> error_estimators_vol;
+      std::vector<typename KellyTypeAdapt::ErrorEstimatorForm *> error_estimators_surf;
 
       Mesh::ElementMarkersConversion element_markers_conversion;
       Mesh::BoundaryMarkersConversion boundary_markers_conversion;
 
       /// Scaling of the interface error estimates. May be specified by the user during construction.
       ///
-      Hermes::vector<const InterfaceEstimatorScalingFunction*> interface_scaling_fns;
+      std::vector<const InterfaceEstimatorScalingFunction*> interface_scaling_fns;
       bool use_aposteriori_interface_scaling; ///< Specifies whether the interface error estimators for each
                                               ///< component will be multiplied by \c interface_scaling_fns
                                               ///< after being evaluated.
@@ -175,7 +175,7 @@ namespace Hermes
       /// done when comparing approximate solution to the exact one - in this case, we do not want to compute
       /// the Kelly estimator value, but rather the ordinary difference between the solutions).
       virtual double calc_err_internal(MeshFunctionSharedPtrVector<Scalar> slns,
-                                       Hermes::vector<double>* component_errors,
+                                       std::vector<double>* component_errors,
                                        unsigned int error_flags);
 
     public:
@@ -211,9 +211,9 @@ namespace Hermes
       ///
       KellyTypeAdapt(SpaceSharedPtrVector<Scalar> spaces,
                      bool ignore_visited_segments = true,
-                     Hermes::vector<const InterfaceEstimatorScalingFunction*>
-                       interface_scaling_fns_ = Hermes::vector<const InterfaceEstimatorScalingFunction*>(),
-                     Hermes::vector<NormType> norms_ = Hermes::vector<NormType>());
+                     std::vector<const InterfaceEstimatorScalingFunction*>
+                       interface_scaling_fns_ = std::vector<const InterfaceEstimatorScalingFunction*>(),
+                     std::vector<NormType> norms_ = std::vector<NormType>());
 
       KellyTypeAdapt(SpaceSharedPtr<Scalar> space,
                      bool ignore_visited_segments = true,
@@ -277,7 +277,7 @@ namespace Hermes
       }
 
       double calc_err_est(MeshFunctionSharedPtrVector<Scalar> slns,
-                          Hermes::vector<double>* component_errors = nullptr,
+                          std::vector<double>* component_errors = nullptr,
                           unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
       {
         return calc_err_internal(slns, component_errors, error_flags);
@@ -353,8 +353,8 @@ namespace Hermes
       ///
       BasicKellyAdapt(SpaceSharedPtrVector<Scalar> spaces_,
                       double const_by_laplacian = 1.0,
-                      Hermes::vector<NormType> norms_ = Hermes::vector<NormType>())
-        : KellyTypeAdapt<Scalar>(spaces_, true, Hermes::vector<const InterfaceEstimatorScalingFunction*>(), norms_)
+                      std::vector<NormType> norms_ = std::vector<NormType>())
+        : KellyTypeAdapt<Scalar>(spaces_, true, std::vector<const InterfaceEstimatorScalingFunction*>(), norms_)
       {
         set_scaling_consts(const_by_laplacian);
         for (int i = 0; i < this->num; i++)

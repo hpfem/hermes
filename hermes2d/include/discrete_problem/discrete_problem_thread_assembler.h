@@ -72,7 +72,7 @@ namespace Hermes
       /// Initializitation of u-ext values into Funcs
       void init_u_ext_values(int order);
       /// Initializitation of ext values into Funcs
-      void init_ext_values(Func<Scalar>** target_array, MeshFunctionSharedPtrVector<Scalar>& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry);
+      void init_ext_values(Func<Scalar>** target_array, MeshFunctionSharedPtrVector<Scalar>& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry);
 
       /// Sets active elements & transformations
       void init_assembling_one_state(const SpaceSharedPtrVector<Scalar> spaces, Traverse::State* current_state);
@@ -101,7 +101,7 @@ namespace Hermes
       RefMap** refmaps;
       RefMap* rep_refmap;
       Solution<Scalar>** u_ext;
-      Hermes::vector<Transformable *> fns;
+      std::vector<Transformable *> fns;
       
       /// For selective reassembling.
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;

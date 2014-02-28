@@ -96,7 +96,7 @@ namespace Hermes
       /// Set the weak forms.
       void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);
 
-      /// Get all spaces as a Hermes::vector.
+      /// Get all spaces as a std::vector.
       SpaceSharedPtrVector<Scalar> get_spaces();
 
     protected:

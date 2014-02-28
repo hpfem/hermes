@@ -90,7 +90,7 @@ namespace Hermes
       RefMap** refmaps;
       Solution<Scalar>** u_ext;
       AsmList<Scalar>* als;
-      Hermes::vector<Transformable *> fns;
+      std::vector<Transformable *> fns;
       WeakFormSharedPtr<Scalar> wf;
       int spaces_size;
       bool nonlinear;

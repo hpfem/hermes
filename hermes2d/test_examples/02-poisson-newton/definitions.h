@@ -19,7 +19,7 @@ public:
 class CustomDirichletCondition : public Hermes::Hermes2D::EssentialBoundaryCondition<double>
 {
 public:
-  CustomDirichletCondition(Hermes::vector<std::string> markers, double A, double B, double C);
+  CustomDirichletCondition(std::vector<std::string> markers, double A, double B, double C);
 
   virtual EssentialBCValueType get_value_type() const;
 

@@ -120,7 +120,6 @@ namespace Hermes
       Ap[i] = pos;
 
       free_with_check(this->pages);
-      this->pages = nullptr;
 
       nnz = Ap[this->size];
 

@@ -114,12 +114,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<Hermes::vector<unsigned int>*> MultimeshDGNeighborTree<Scalar>::get_multimesh_neighbors_transformations(MultimeshDGNeighborTreeNode* multimesh_tree)
+    std::vector<std::vector<unsigned int>*> MultimeshDGNeighborTree<Scalar>::get_multimesh_neighbors_transformations(MultimeshDGNeighborTreeNode* multimesh_tree)
     {
       // Initialize the vector.
-      Hermes::vector<Hermes::vector<unsigned int>*> running_transformations;
+      std::vector<std::vector<unsigned int>*> running_transformations;
       // Prepare the first neighbor's vector.
-      running_transformations.push_back(new Hermes::vector<unsigned int>);
+      running_transformations.push_back(new std::vector<unsigned int>);
       // Fill the vector.
       traverse_multimesh_tree(multimesh_tree, running_transformations);
       return running_transformations;
@@ -127,7 +127,7 @@ namespace Hermes
 
     template<typename Scalar>
     void MultimeshDGNeighborTree<Scalar>::traverse_multimesh_tree(MultimeshDGNeighborTreeNode* node,
-      Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations)
+      std::vector<std::vector<unsigned int>*>& running_transformations)
     {
       // If we are in the root.
       if(node->get_transformation() == 0)
@@ -145,7 +145,7 @@ namespace Hermes
       if(node->get_left_son() == nullptr && node->get_right_son() == nullptr)
       {
         // Create a vector for the new_ neighbor.
-        Hermes::vector<unsigned int>* new_neighbor_transformations = new Hermes::vector<unsigned int>;
+        std::vector<unsigned int>* new_neighbor_transformations = new std::vector<unsigned int>;
         // Copy there the whole path except for this leaf.
         for(unsigned int i = 0; i < running_transformations.back()->size(); i++)
           new_neighbor_transformations->push_back((*running_transformations.back())[i]);
@@ -241,16 +241,16 @@ namespace Hermes
       typename NeighborSearch<Scalar>::NeighborEdgeInfo edge_info = ns->neighbor_edges[ith_neighbor];
 
       // Initialize the vector for central transformations->
-      Hermes::vector<Hermes::vector<unsigned int>*> running_central_transformations;
+      std::vector<std::vector<unsigned int>*> running_central_transformations;
       // Prepare the first new_ neighbor's vector. Push back the current transformations (in case of GO_DOWN neighborhood).
-      running_central_transformations.push_back(new Hermes::vector<unsigned int>);
+      running_central_transformations.push_back(new std::vector<unsigned int>);
       if(ith_neighbor < ns->central_transformations_alloc_size && ns->central_transformations[ith_neighbor])
         ns->central_transformations[ith_neighbor]->copy_to(running_central_transformations.back());
 
       // Initialize the vector for neighbor transformations->
-      Hermes::vector<Hermes::vector<unsigned int>*> running_neighbor_transformations;
+      std::vector<std::vector<unsigned int>*> running_neighbor_transformations;
       // Prepare the first new_ neighbor's vector. Push back the current transformations (in case of GO_UP/NO_TRF neighborhood).
-      running_neighbor_transformations.push_back(new Hermes::vector<unsigned int>);
+      running_neighbor_transformations.push_back(new std::vector<unsigned int>);
       if(ith_neighbor < ns->neighbor_transformations_alloc_size && ns->neighbor_transformations[ith_neighbor])
         ns->neighbor_transformations[ith_neighbor]->copy_to(running_neighbor_transformations.back());
 
@@ -302,16 +302,16 @@ namespace Hermes
 
     template<typename Scalar>
     void MultimeshDGNeighborTree<Scalar>::traverse_multimesh_subtree(MultimeshDGNeighborTreeNode* node,
-      Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
-      Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations,
+      std::vector<std::vector<unsigned int>*>& running_central_transformations,
+      std::vector<std::vector<unsigned int>*>& running_neighbor_transformations,
       const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode)
     {
       // If we are in a leaf.
       if(node->get_left_son() == nullptr && node->get_right_son() == nullptr)
       {
         // Create vectors for the new_ neighbor.
-        Hermes::vector<unsigned int>* new_neighbor_central_transformations = new Hermes::vector<unsigned int>;
-        Hermes::vector<unsigned int>* new_neighbor_neighbor_transformations = new Hermes::vector<unsigned int>;
+        std::vector<unsigned int>* new_neighbor_central_transformations = new std::vector<unsigned int>;
+        std::vector<unsigned int>* new_neighbor_neighbor_transformations = new std::vector<unsigned int>;
 
         // Copy there the whole path except for this leaf.
         for(unsigned int i = 0; i < running_central_transformations.back()->size(); i++)
