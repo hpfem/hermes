@@ -1,7 +1,7 @@
 #include "lumped_projection.h"
 
 
-void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakForm<double>* wf, double* target_vec, CSCMatrix<double>*  mat)
+void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakFormSharedPtr<double> wf, double* target_vec, CSCMatrix<double>*  mat)
 {
 
   if(space == nullptr) printf("this->space == nullptr in Lumped_Projection::project_internal().");

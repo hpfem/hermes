@@ -10,15 +10,14 @@ Regularity_Estimator::Regularity_Estimator(double epsilon): epsilon(epsilon), R_
   al = new 	AsmList<double>;
   rhs_1 =nullptr;
   rhs_2=nullptr;
-  grad_1= new GradientReconstruction_1(sln);
-  grad_2= new GradientReconstruction_2(sln);
+  grad_1= WeakFormSharedPtr<double>(new GradientReconstruction_1(sln));
+  grad_2 = WeakFormSharedPtr<double>(new GradientReconstruction_2(sln));
 };
 
 Regularity_Estimator::~Regularity_Estimator()
 {
   free();
   delete al;	
-  delete grad_1; delete grad_2;	
 }
 
 void Regularity_Estimator::free()

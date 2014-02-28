@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
   int ndof = space->get_num_dofs();
 
   // Initialize the weak formulation.
-  CustomWeakForm wf(MU_R, KAPPA);
+  WeakFormSharedPtr<::complex> wf(new CustomWeakForm(MU_R, KAPPA));
 
   // Initialize coarse and reference mesh solutions.
   MeshFunctionSharedPtr< ::complex > sln(new Hermes::Hermes2D::Solution< ::complex >());

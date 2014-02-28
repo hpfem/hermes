@@ -19,7 +19,7 @@ public:
 
 
 protected:
-  static void project_internal(SpaceSharedPtr<double> space, WeakForm<double>* wf, double* target_vec, CSCMatrix<double>*  mat = nullptr);
+  static void project_internal(SpaceSharedPtr<double> space, WeakFormSharedPtr<double> wf, double* target_vec, CSCMatrix<double>*  mat = nullptr);
 
 
 

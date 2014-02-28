@@ -133,8 +133,8 @@ protected:
   MeshFunctionSharedPtr<double> sln;
   MeshFunctionSharedPtr<double> R_h_1;
   MeshFunctionSharedPtr<double> R_h_2;
-  GradientReconstruction_1* grad_1;
-  GradientReconstruction_2* grad_2;
+  WeakFormSharedPtr<double> grad_1;
+  WeakFormSharedPtr<double> grad_2;
   SpaceSharedPtr<double> space;
   SimpleVector<double> * rhs_1;
   SimpleVector<double> * rhs_2;

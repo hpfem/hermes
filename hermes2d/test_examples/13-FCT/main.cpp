@@ -118,8 +118,8 @@ int main(int argc, char* argv[])
   MeshFunctionSharedPtr<double>initial_condition(new CustomInitialCondition(mesh));
 
   // Initialize the weak formulation.
-  CustomWeakFormMassmatrix  massmatrix(time_step);
-  CustomWeakFormConvection  convection;
+  WeakFormSharedPtr<double>   massmatrix(new CustomWeakFormMassmatrix(time_step));
+  WeakFormSharedPtr<double> convection(new CustomWeakFormConvection);
 
   // Initialize views.
   ScalarView sview("Solution", new WinGeom(0, 500, 500, 400));

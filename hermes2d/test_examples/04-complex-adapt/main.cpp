@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
   int ndof = space->get_num_dofs();
 
   // Initialize the weak formulation.
-  WeakFormSharedPtr<double> wf(new CustomWeakForm ("Air", MU_0, "Iron", MU_IRON, GAMMA_IRON,
+  WeakFormSharedPtr<::complex> wf(new CustomWeakForm("Air", MU_0, "Iron", MU_IRON, GAMMA_IRON,
     "Wire", MU_0, ::complex(J_EXT, 0.0), OMEGA));
 
   // Initialize coarse and reference mesh solution.
