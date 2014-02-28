@@ -542,7 +542,7 @@ namespace Hermes
       }
     };
 
-    TopValFilter::TopValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> limits, std::vector<int> items) : SimpleFilter<double>(solutions, items), limits(limits)
+    TopValFilter::TopValFilter(MeshFunctionSharedPtrVector<double> solutions, std::vector<double> limits, std::vector<int> items) : SimpleFilter<double>(solutions, items), limits(limits)
     {
     };
 
@@ -562,7 +562,7 @@ namespace Hermes
 
     MeshFunction<double>* TopValFilter::clone() const
     {
-      std::vector<MeshFunctionSharedPtr<double> > slns;
+      MeshFunctionSharedPtrVector<double> slns;
       std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
@@ -586,7 +586,7 @@ namespace Hermes
       }
     };
 
-    BottomValFilter::BottomValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> limits, std::vector<int> items) : SimpleFilter<double>(solutions, items), limits(limits)
+    BottomValFilter::BottomValFilter(MeshFunctionSharedPtrVector<double> solutions, std::vector<double> limits, std::vector<int> items) : SimpleFilter<double>(solutions, items), limits(limits)
     {
     };
 
@@ -606,7 +606,7 @@ namespace Hermes
 
     MeshFunction<double>* BottomValFilter::clone() const
     {
-      std::vector<MeshFunctionSharedPtr<double> > slns;
+      MeshFunctionSharedPtrVector<double> slns;
       std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
@@ -633,7 +633,7 @@ namespace Hermes
       }
     };
 
-    ValFilter::ValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> low_limits, std::vector<double> high_limits, std::vector<int> items) : SimpleFilter<double>(solutions, items), low_limits(low_limits), high_limits(high_limits)
+    ValFilter::ValFilter(MeshFunctionSharedPtrVector<double> solutions, std::vector<double> low_limits, std::vector<double> high_limits, std::vector<int> items) : SimpleFilter<double>(solutions, items), low_limits(low_limits), high_limits(high_limits)
     {
     };
 
@@ -654,7 +654,7 @@ namespace Hermes
 
     MeshFunction<double>* ValFilter::clone() const
     {
-      std::vector<MeshFunctionSharedPtr<double> > slns;
+      MeshFunctionSharedPtrVector<double> slns;
       std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
@@ -773,7 +773,7 @@ namespace Hermes
         result[i] = std::abs(v1.at(0)[i]);
     };
 
-    AbsFilter::AbsFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<int> items)
+    AbsFilter::AbsFilter(MeshFunctionSharedPtrVector<double> solutions, std::vector<int> items)
       : SimpleFilter<double>(solutions, items)
     {
         if (solutions.size() > 1)
@@ -798,7 +798,7 @@ namespace Hermes
 
     MeshFunction<double>* AbsFilter::clone() const
     {
-      std::vector<MeshFunctionSharedPtr<double> > slns;
+      MeshFunctionSharedPtrVector<double> slns;
       std::vector<int> items;
       for (int i = 0; i < this->num; i++)
       {
@@ -937,7 +937,7 @@ namespace Hermes
       return 0;
     }
 
-    VonMisesFilter::VonMisesFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, double lambda, double mu,
+    VonMisesFilter::VonMisesFilter(MeshFunctionSharedPtrVector<double> solutions, double lambda, double mu,
       int cyl, int item1, int item2)
       : Filter<double>(solutions)
     {
@@ -964,7 +964,7 @@ namespace Hermes
 
     MeshFunction<double>* VonMisesFilter::clone() const
     {
-      std::vector<MeshFunctionSharedPtr<double> > slns;
+      MeshFunctionSharedPtrVector<double> slns;
       for (int i = 0; i < num; i++)
         slns.push_back(sln[i]->clone());
       VonMisesFilter* filter = new VonMisesFilter(&slns[0], num, lambda, mu, cyl, item1, item2);

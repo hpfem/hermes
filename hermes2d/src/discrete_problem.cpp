@@ -254,7 +254,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, std::vector<MeshSharedPtr >& meshes)
+    void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, MeshSharedPtrVector& meshes)
     {
       // Vector of meshes.
       for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)

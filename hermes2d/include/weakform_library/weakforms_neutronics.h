@@ -1232,7 +1232,7 @@ namespace Hermes
           class HERMES_API SourceFilter : public SimpleFilter<double>
           {
             public:
-            SourceFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, const MaterialPropertyMaps* matprop,
+            SourceFilter(MeshFunctionSharedPtrVector<double> solutions, const MaterialPropertyMaps* matprop,
                          const std::string& source_area)
               : SimpleFilter<double>(solutions, std::vector<int>())
             {

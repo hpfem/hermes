@@ -97,11 +97,11 @@ int main(int argc, char* argv[])
 	// Solution pointer.
 	MeshFunctionSharedPtr<double> sln_time_prev1(new ConstantSolution<double>(mesh, TEMP_INIT));
 	MeshFunctionSharedPtr<double> sln_time_prev2(new ConstantSolution<double>(mesh, TEMP_INIT));
-  std::vector<MeshFunctionSharedPtr<double> > sln_time_prev(sln_time_prev1, sln_time_prev2);
+  MeshFunctionSharedPtrVector<double> sln_time_prev(sln_time_prev1, sln_time_prev2);
 
 	MeshFunctionSharedPtr<double> sln_time_new1(new Solution<double>(mesh));
 	MeshFunctionSharedPtr<double> sln_time_new2(new Solution<double>(mesh));
-  std::vector<MeshFunctionSharedPtr<double> > sln_time_new(sln_time_new1, sln_time_new2);
+  MeshFunctionSharedPtrVector<double> sln_time_new(sln_time_new1, sln_time_new2);
 
   CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
 		&current_time, TEMP_INIT, T_FINAL);

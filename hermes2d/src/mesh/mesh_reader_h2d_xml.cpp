@@ -158,7 +158,7 @@ namespace Hermes
       out.close();
     }
 
-    void MeshReaderH2DXML::load(const char *filename, std::vector<MeshSharedPtr > meshes)
+    void MeshReaderH2DXML::load(const char *filename, MeshSharedPtrVector meshes)
     {
       try
       {
@@ -177,7 +177,7 @@ namespace Hermes
       }
     }
 
-    void MeshReaderH2DXML::load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, std::vector<MeshSharedPtr > meshes)
+    void MeshReaderH2DXML::load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, MeshSharedPtrVector meshes)
     {
       for (unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
       {
@@ -567,7 +567,7 @@ namespace Hermes
 
     static bool elementCompare(XMLSubdomains::el_t* el_i, XMLSubdomains::el_t* el_j) { return (el_i->i() < el_j->i()); }
 
-    void MeshReaderH2DXML::save(const char *filename, std::vector<MeshSharedPtr > meshes)
+    void MeshReaderH2DXML::save(const char *filename, MeshSharedPtrVector meshes)
     {
       // For mapping of physical coordinates onto top vertices.
       std::map<std::pair<double, double>, unsigned int> points_to_vertices;

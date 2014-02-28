@@ -109,9 +109,9 @@ int main(int argc, char* argv[])
 
   // Initialize coarse and reference mesh solutions.
   MeshFunctionSharedPtr<double> u_sln(new Solution<double>()), v_sln(new Solution<double>()), u_ref_sln(new Solution<double>()), v_ref_sln(new Solution<double>());
-  std::vector<MeshFunctionSharedPtr<double> > slns(u_sln, v_sln);
-  std::vector<MeshFunctionSharedPtr<double> > ref_slns(u_ref_sln, v_ref_sln);
-  std::vector<MeshFunctionSharedPtr<double> > exact_slns(exact_u, exact_v);
+  MeshFunctionSharedPtrVector<double> slns(u_sln, v_sln);
+  MeshFunctionSharedPtrVector<double> ref_slns(u_ref_sln, v_ref_sln);
+  MeshFunctionSharedPtrVector<double> exact_slns(exact_u, exact_v);
 
   // Initialize refinement selector.
   H1ProjBasedSelector<double> selector(CAND_LIST);
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
     }
 
     // Translate the resulting coefficient vector into the instance of Solution.
-    Solution<double>::vector_to_solutions(newton.get_sln_vector(), ref_spaces_const, std::vector<MeshFunctionSharedPtr<double> >(u_ref_sln, v_ref_sln));
+    Solution<double>::vector_to_solutions(newton.get_sln_vector(), ref_spaces_const, MeshFunctionSharedPtrVector<double>(u_ref_sln, v_ref_sln));
 
     // Project the fine mesh solution onto the coarse mesh.
     Hermes::Mixins::Loggable::Static::info("Projecting reference solution on coarse mesh.");

@@ -357,7 +357,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(std::vector<MeshFunctionSharedPtr<double> > slns, std::vector<int> items, const char* filename, const char *quantity_name,
+      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(MeshFunctionSharedPtrVector<double> slns, std::vector<int> items, const char* filename, const char *quantity_name,
         bool mode_3D)
       {
         if (this->linearizerOutputType != FileExport)
@@ -433,7 +433,7 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D, int item)
       {
-        std::vector<MeshFunctionSharedPtr<double> > slns;
+        MeshFunctionSharedPtrVector<double> slns;
         std::vector<int> items;
         slns.push_back(sln);
         items.push_back(item);
@@ -441,7 +441,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(std::vector<MeshFunctionSharedPtr<double> > slns, std::vector<int> items, const char* filename, std::vector<std::string> quantity_names)
+      void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(MeshFunctionSharedPtrVector<double> slns, std::vector<int> items, const char* filename, std::vector<std::string> quantity_names)
       {
         if (this->linearizerOutputType != FileExport)
           throw Exceptions::Exception("This LinearizerMultidimensional is not meant to be used for file export, create a new one with appropriate linearizerOutputType.");
@@ -485,7 +485,7 @@ namespace Hermes
       template<typename LinearizerDataDimensions>
       void LinearizerMultidimensional<LinearizerDataDimensions>::save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item)
       {
-        std::vector<MeshFunctionSharedPtr<double> > slns;
+        MeshFunctionSharedPtrVector<double> slns;
         std::vector<int> items;
         slns.push_back(sln);
         items.push_back(item);
