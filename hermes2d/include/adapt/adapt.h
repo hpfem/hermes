@@ -138,7 +138,7 @@ namespace Hermes
       /**
       *  \param[in] refinement_selectors Vector of selectors.
       *  \return True if no element was refined. In usual case, this indicates that adaptivity is not able to refine anything and the adaptivity loop should end. */
-      bool adapt(RefinementSelectors::RefinementSelectorsVector<Scalar> refinement_selectors);
+      bool adapt(RefinementSelectors::SelectorVector<Scalar> refinement_selectors);
 
       /// Refines elements based on results from the ErrorCalculator class.
       /**
@@ -170,7 +170,7 @@ namespace Hermes
       void set_defaults();
 
       /// Initialization.
-      void init_adapt(RefinementSelectors::RefinementSelectorsVector<Scalar>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes);
+      void init_adapt(RefinementSelectors::SelectorVector<Scalar>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes);
       /// Return the number of element where a refinement will be sought.
       int calculate_attempted_element_refinements_count();
       /// Handle meshes and spaces at the end of the routine.

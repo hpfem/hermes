@@ -52,7 +52,7 @@ namespace Hermes
     namespace RefinementSelectors
     {
       template <typename Scalar>
-      using RefinementSelectorsVector = std::vector<Selector<Scalar>*>;
+      using SelectorVector = std::vector<Selector<Scalar>*>;
 
       /// A parent of all refinement selectors. Abstract class. \ingroup g_selectors
       /** All refinement selectors have to derive from this class or its children.
