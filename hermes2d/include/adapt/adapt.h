@@ -128,7 +128,7 @@ namespace Hermes
     public:
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
       /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
-      Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
+      Adapt(SpaceSharedPtrVector<Scalar> spaces, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
       Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
       Adapt(ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
@@ -138,7 +138,7 @@ namespace Hermes
       /**
       *  \param[in] refinement_selectors Vector of selectors.
       *  \return True if no element was refined. In usual case, this indicates that adaptivity is not able to refine anything and the adaptivity loop should end. */
-      bool adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*> refinement_selectors);
+      bool adapt(RefinementSelectors::RefinementSelectorsVector<Scalar> refinement_selectors);
 
       /// Refines elements based on results from the ErrorCalculator class.
       /**
@@ -159,7 +159,7 @@ namespace Hermes
       inline std::string getClassName() const { return "Adapt"; }
 
       /// Set spaces.
-      void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      void set_spaces(SpaceSharedPtrVector<Scalar> spaces);
       void set_space(SpaceSharedPtr<Scalar> space);
 
       /// Return the error mesh function - for postprocessing the information about which elements have been refined.
@@ -170,7 +170,7 @@ namespace Hermes
       void set_defaults();
 
       /// Initialization.
-      void init_adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes);
+      void init_adapt(RefinementSelectors::RefinementSelectorsVector<Scalar>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes);
       /// Return the number of element where a refinement will be sought.
       int calculate_attempted_element_refinements_count();
       /// Handle meshes and spaces at the end of the routine.
@@ -212,9 +212,9 @@ namespace Hermes
       int regularization;
 
       /// Meshes.
-      Hermes::vector<MeshSharedPtr> meshes;
+      MeshSharedPtrVector meshes;
       /// Spaces.
-      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
+      SpaceSharedPtrVector<Scalar> spaces;
 
       /// Error calculator.
       ErrorCalculator<Scalar>* errorCalculator;

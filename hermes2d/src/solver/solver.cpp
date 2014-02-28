@@ -47,12 +47,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) :  dp(new DiscreteProblem<Scalar>(wf, space)), own_dp(true)
+    Solver<Scalar>::Solver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space) :  dp(new DiscreteProblem<Scalar>(wf, space)), own_dp(true)
     {
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) :  dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
+    Solver<Scalar>::Solver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces) :  dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
     {
     }
     
@@ -75,7 +75,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solver<Scalar>::solve(MeshFunctionSharedPtr<Scalar>& initial_guess)
+    void Solver<Scalar>::solve(MeshFunctionSharedPtr<Scalar> initial_guess)
     {
       if(this->dp->get_spaces().size() != 1)
         throw Hermes::Exceptions::ValueException("dp->get_spaces().size()", this->dp->get_spaces().size(), 1);
@@ -86,7 +86,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solver<Scalar>::solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess)
+    void Solver<Scalar>::solve(MeshFunctionSharedPtrVector<Scalar>& initial_guess)
     {
       Scalar* coeff_vec = new Scalar[Space<Scalar>::get_num_dofs(this->dp->get_spaces())];
       OGProjection<Scalar>::project_global(this->dp->get_spaces(), initial_guess, coeff_vec);
@@ -108,7 +108,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solver<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf)
+    void Solver<Scalar>::set_weak_formulation(WeakFormSharedPtr<Scalar> wf)
     {
       this->dp->set_weak_formulation(wf);
     }
@@ -120,13 +120,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
+    void Solver<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spaces)
     {
       this->dp->set_spaces(spaces);
     }
     
     template<typename Scalar>
-    Hermes::vector<SpaceSharedPtr<Scalar> >& Solver<Scalar>::get_spaces()
+    SpaceSharedPtrVector<Scalar> Solver<Scalar>::get_spaces()
     {
       return this->dp->get_spaces();
     }

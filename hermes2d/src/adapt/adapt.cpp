@@ -80,7 +80,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces_, ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), strategy(strategy)
+    Adapt<Scalar>::Adapt(SpaceSharedPtrVector<Scalar> spaces_, ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), strategy(strategy)
     {
       this->set_spaces(spaces_);
       this->init();
@@ -129,7 +129,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
+    void Adapt<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spaces)
     {
       this->spaces = spaces;
       this->num = spaces.size();
@@ -187,7 +187,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::init_adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes)
+    void Adapt<Scalar>::init_adapt(RefinementSelectors::RefinementSelectorsVector<Scalar>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes)
     {
       // Start time measurement.
       this->tick();
@@ -274,7 +274,7 @@ namespace Hermes
       this->elements_to_refine = malloc_with_check<Adapt<Scalar>, ElementToRefine>(elements_to_refine_count, this);
 
       // Projected solutions obtaining.
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslns;
+      MeshFunctionSharedPtrVector<Scalar> rslns;
       OGProjection<Scalar> ogProjection;
 
       for (unsigned int i = 0; i < this->num; i++)
@@ -299,7 +299,7 @@ namespace Hermes
           end = attempted_element_refinements_count;
 
         // rslns cloning.
-        Hermes::vector<MeshFunctionSharedPtr<Scalar> > current_rslns;
+        MeshFunctionSharedPtrVector<Scalar> current_rslns;
         for (unsigned int i = 0; i < this->num; i++)
           current_rslns.push_back(rslns[i]->clone());
 
@@ -645,7 +645,7 @@ namespace Hermes
       if (elem_ref.id == -1)
         return;
 
-      SpaceSharedPtr<Scalar>& space = this->spaces[elem_ref.comp];
+      SpaceSharedPtr<Scalar> space = this->spaces[elem_ref.comp];
 
       Element* e = space->get_mesh()->get_element(elem_ref.id);
 

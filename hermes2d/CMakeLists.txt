@@ -205,6 +205,7 @@ project(hermes2d)
     src/solver/runge_kutta.cpp
     
     src/adapt/adapt.cpp
+    src/adapt/adapt_solver.cpp
     src/adapt/kelly_type_adapt.cpp
     src/adapt/error_calculator.cpp
     src/adapt/error_thread_calculator.cpp
@@ -336,6 +337,7 @@ project(hermes2d)
   SOURCE_GROUP(
     "Source Files\\Adaptivity" FILES 
     src/adapt/adapt.cpp
+    src/adapt/adapt_solver.cpp
     src/adapt/kelly_type_adapt.cpp
     src/adapt/error_calculator.cpp
     src/adapt/error_thread_calculator.cpp
@@ -451,6 +453,7 @@ project(hermes2d)
     include/solver/runge_kutta.h
     
     include/adapt/adapt.h
+    include/adapt/adapt_solver.h
     include/adapt/kelly_type_adapt.h
     include/adapt/error_calculator.h
     include/adapt/error_thread_calculator.h
@@ -583,6 +586,7 @@ project(hermes2d)
   SOURCE_GROUP(
     "Header Files\\Adaptivity" FILES 
     include/adapt/adapt.h
+    include/adapt/adapt_solver.h
     include/adapt/kelly_type_adapt.h
     include/adapt/error_calculator.h
     include/adapt/error_thread_calculator.h

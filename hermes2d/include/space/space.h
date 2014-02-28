@@ -29,6 +29,8 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// @ingroup spaces
+    /// \brief Used to pass the instances of Space around.
     template<typename Scalar>
     class HERMES_API SpaceSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
     {
@@ -40,6 +42,9 @@ namespace Hermes
       void operator=(const SpaceSharedPtr<Scalar>& other);
     };
 
+    template <typename Scalar>
+    using SpaceSharedPtrVector = Hermes::vector<SpaceSharedPtr<Scalar> >;
+
     namespace Mixins
     {
       /// \ingroup g_mixins2d
@@ -49,11 +54,11 @@ namespace Hermes
       {
       public:
         /// Sets new_ spaces for the instance.
-        virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) = 0;
-        virtual void set_space(SpaceSharedPtr<Scalar>& space);
+        virtual void set_spaces(SpaceSharedPtrVector<Scalar> spaces) = 0;
+        virtual void set_space(SpaceSharedPtr<Scalar> space);
         /// Get all spaces as a Hermes::vector.
-        virtual Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
-        virtual SpaceSharedPtr<Scalar>& get_space(int n);
+        virtual SpaceSharedPtrVector<Scalar> get_spaces();
+        virtual SpaceSharedPtr<Scalar> get_space(int n);
       };
     }
 
@@ -163,7 +168,7 @@ namespace Hermes
       int get_num_dofs() const;
 
       /// \brief Returns the number of basis functions contained in the spaces.
-      static int get_num_dofs(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      static int get_num_dofs(SpaceSharedPtrVector<Scalar> spaces);
 
       /// \brief Returns the number of basis functions contained in the space.
       static int get_num_dofs(SpaceSharedPtr<Scalar> space);
@@ -245,7 +250,7 @@ namespace Hermes
       virtual int assign_dofs(int first_dof = 0);
 
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
-      static int assign_dofs(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      static int assign_dofs(SpaceSharedPtrVector<Scalar> spaces);
 #pragma endregion
 
 #pragma region Mesh handling
@@ -257,7 +262,7 @@ namespace Hermes
 
       /// Recursively removes all son elements of the given element and
       /// Version for more spaces sharing the mesh
-      static void unrefine_all_mesh_elements(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, bool keep_initial_refinements = true);
+      static void unrefine_all_mesh_elements(SpaceSharedPtrVector<Scalar> spaces, bool keep_initial_refinements = true);
 #pragma endregion
 
 #pragma region Boundary conditions
@@ -267,9 +272,9 @@ namespace Hermes
       /// essential boundary conditions.
       void update_essential_bc_values();
 
-      static void update_essential_bc_values(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, double time);
+      static void update_essential_bc_values(SpaceSharedPtrVector<Scalar> spaces, double time);
 
-      static void update_essential_bc_values(SpaceSharedPtr<Scalar>& space, double time);
+      static void update_essential_bc_values(SpaceSharedPtr<Scalar> space, double time);
 #pragma endregion
 
 #pragma region Save & Load

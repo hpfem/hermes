@@ -46,14 +46,14 @@ namespace Hermes
       ~DiscreteProblemThreadAssembler();
 
       /// Initialization of all structures concerning space - assembly lists, precalculated shapesets, ..
-      void init_spaces(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      void init_spaces(const SpaceSharedPtrVector<Scalar> spaces);
       /// Initialization of the weak formulation.
-      void set_weak_formulation(WeakForm<Scalar>* wf);
+      void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);
       /// Initialization of previous iterations for non-linear solvers.
-      void init_u_ext(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Solution<Scalar>** u_ext_sln);
+      void init_u_ext(const SpaceSharedPtrVector<Scalar> spaces, Solution<Scalar>** u_ext_sln);
 
       /// Initializes the Transformable array for doing transformations.
-      void init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool add_dirichlet_lift);
+      void init_assembling(Solution<Scalar>** u_ext_sln, const SpaceSharedPtrVector<Scalar> spaces, bool add_dirichlet_lift);
 
       /// Initialize Func storages.
       void init_funcs_wf();
@@ -72,10 +72,10 @@ namespace Hermes
       /// Initializitation of u-ext values into Funcs
       void init_u_ext_values(int order);
       /// Initializitation of ext values into Funcs
-      void init_ext_values(Func<Scalar>** target_array, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry);
+      void init_ext_values(Func<Scalar>** target_array, MeshFunctionSharedPtrVector<Scalar>& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry);
 
       /// Sets active elements & transformations
-      void init_assembling_one_state(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state);
+      void init_assembling_one_state(const SpaceSharedPtrVector<Scalar> spaces, Traverse::State* current_state);
       /// Assemble the state.
       void assemble_one_state();
       /// Matrix volumetric forms - assemble the form.

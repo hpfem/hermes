@@ -29,7 +29,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool to_set, bool dirichlet_lift_accordingly)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_,SpaceSharedPtrVector<Scalar> spaces, bool to_set, bool dirichlet_lift_accordingly)
     {
       this->init(to_set, dirichlet_lift_accordingly);
       this->set_spaces(spaces);
@@ -37,7 +37,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, SpaceSharedPtr<Scalar>& space, bool to_set, bool dirichlet_lift_accordingly)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_,SpaceSharedPtr<Scalar> space, bool to_set, bool dirichlet_lift_accordingly)
     {
       this->init(to_set, dirichlet_lift_accordingly);
       this->set_space(space);
@@ -111,7 +111,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<SpaceSharedPtr<Scalar> >& DiscreteProblem<Scalar>::get_spaces()
+    SpaceSharedPtrVector<Scalar> DiscreteProblem<Scalar>::get_spaces()
     {
       return this->spaces;
     }
@@ -134,11 +134,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf_)
+    void DiscreteProblem<Scalar>::set_weak_formulation(WeakFormSharedPtr<Scalar> wf)
     {
-      Mixins::DiscreteProblemWeakForm<Scalar>::set_weak_formulation(wf_);
+      Mixins::DiscreteProblemWeakForm<Scalar>::set_weak_formulation(wf);
 
-      this->selectiveAssembler.set_weak_formulation(wf_);
+      this->selectiveAssembler.set_weak_formulation(wf);
       this->selectiveAssembler.matrix_structure_reusable = false;
     }
 
@@ -177,7 +177,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spacesToSet)
+    void DiscreteProblem<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spacesToSet)
     {
       if (this->spaces_size != spacesToSet.size() && this->spaces_size > 0)
         throw Hermes::Exceptions::LengthException(0, spacesToSet.size(), this->spaces_size);
@@ -199,9 +199,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_space(SpaceSharedPtr<Scalar>& space)
+    void DiscreteProblem<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
     {
-      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
+      SpaceSharedPtrVector<Scalar> spaces;
       spaces.push_back(space);
       this->set_spaces(spaces);
     }
@@ -298,7 +298,7 @@ namespace Hermes
       // Initialize states && previous iterations.
       int num_states;
       Traverse::State** states;
-      Hermes::vector<MeshSharedPtr> meshes;
+      MeshSharedPtrVector meshes;
       this->init_assembling(states, num_states, u_ext_sln, meshes);
 
       // Creating matrix sparse structure.

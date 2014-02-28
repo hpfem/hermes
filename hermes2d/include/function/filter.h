@@ -37,7 +37,7 @@ namespace Hermes
     {
     public:
       Filter();
-      Filter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions);
+      Filter(MeshFunctionSharedPtrVector<Scalar> solutions);
       Filter(MeshFunctionSharedPtr<Scalar>* solutions, int num);
 
       virtual ~Filter();
@@ -50,7 +50,7 @@ namespace Hermes
       inline std::string getClassName() const { return "Filter"; }
 
     protected:
-      void init(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions);
+      void init(MeshFunctionSharedPtrVector<Scalar> solutions);
 
       virtual void set_quad_2d(Quad2D* quad_2d);
 
@@ -102,7 +102,7 @@ namespace Hermes
       SimpleFilter();
       virtual ~SimpleFilter();
 
-      SimpleFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<int> items = Hermes::vector<int>());
+      SimpleFilter(MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<int> items = Hermes::vector<int>());
 
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
 
@@ -161,11 +161,11 @@ namespace Hermes
       // one result (rslt), all inputs and result including derivatives
       DXDYFilter();
 
-      DXDYFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions);
+      DXDYFilter(MeshFunctionSharedPtrVector<Scalar> solutions);
 
       virtual ~DXDYFilter();
     protected:
-      void init(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions);
+      void init(MeshFunctionSharedPtrVector<Scalar> solutions);
 
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
 
@@ -184,7 +184,7 @@ namespace Hermes
     class HERMES_API MagFilter : public SimpleFilter<Scalar>
     {
     public:
-      MagFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      MagFilter(MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 
       MagFilter(MeshFunctionSharedPtr<Scalar> sln1, int item1 = H2D_FN_VAL); ///< for vector-valued sln1
       virtual MeshFunction<Scalar>* clone() const;
@@ -249,7 +249,7 @@ namespace Hermes
     class HERMES_API DiffFilter : public SimpleFilter<Scalar>
     {
     public:
-      DiffFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      DiffFilter(MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
       virtual MeshFunction<Scalar>* clone() const;
       virtual ~DiffFilter();
 
@@ -263,7 +263,7 @@ namespace Hermes
     class HERMES_API SumFilter : public SimpleFilter<Scalar>
     {
     public:
-      SumFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      SumFilter(MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
       virtual MeshFunction<Scalar>* clone() const;
       virtual ~SumFilter();
 
@@ -277,7 +277,7 @@ namespace Hermes
     class HERMES_API SquareFilter : public SimpleFilter<Scalar>
     {
     public:
-      SquareFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      SquareFilter(MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
       virtual MeshFunction<Scalar>* clone() const;
       virtual ~SquareFilter();
 

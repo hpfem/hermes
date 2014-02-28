@@ -45,7 +45,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_spaces(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
+    void DiscreteProblemThreadAssembler<Scalar>::init_spaces(const SpaceSharedPtrVector<Scalar> spaces)
     {
       this->free_spaces();
 
@@ -70,17 +70,17 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf_)
+    void DiscreteProblemThreadAssembler<Scalar>::set_weak_formulation(WeakFormSharedPtr<Scalar> wf_)
     {
       this->deinit_funcs_wf();
       this->free_weak_formulation();
-      this->wf = wf_->clone();
+      this->wf = WeakFormSharedPtr<Scalar>(wf_->clone());
       this->wf->cloneMembers(wf_);
       this->init_funcs_wf();
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_u_ext(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Solution<Scalar>** u_ext_sln)
+    void DiscreteProblemThreadAssembler<Scalar>::init_u_ext(const SpaceSharedPtrVector<Scalar> spaces, Solution<Scalar>** u_ext_sln)
     {
       assert(this->spaces_size == spaces.size() && this->pss);
 
@@ -107,7 +107,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool add_dirichlet_lift_)
+    void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const SpaceSharedPtrVector<Scalar> spaces, bool add_dirichlet_lift_)
     {
       // Basic settings.
       this->add_dirichlet_lift = add_dirichlet_lift_;
@@ -327,7 +327,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_assembling_one_state(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state_)
+    void DiscreteProblemThreadAssembler<Scalar>::init_assembling_one_state(const SpaceSharedPtrVector<Scalar> spaces, Traverse::State* current_state_)
     {
       current_state = current_state_;
       this->integrationOrderCalculator.current_state = this->current_state;
@@ -455,7 +455,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Func<Scalar>** target_array, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry)
+    void DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Func<Scalar>** target_array, MeshFunctionSharedPtrVector<Scalar>& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry)
     {
       int ext_size = ext.size();
       int u_ext_fns_size = u_ext_fns.size();
@@ -761,11 +761,7 @@ namespace Hermes
     void DiscreteProblemThreadAssembler<Scalar>::free_weak_formulation()
     {
       if (this->wf)
-      {
         this->wf->free_ext();
-        delete this->wf;
-        this->wf = nullptr;
-      }
     }
 
     template<typename Scalar>

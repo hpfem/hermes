@@ -31,7 +31,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* wf,
+    void OGProjectionNOX<Scalar>::project_internal(SpaceSharedPtr<Scalar> space, WeakFormSharedPtr<Scalar> wf,
       Scalar* target_vec, double newton_tol, int newton_max_iter)
     {
         // Sanity check.
@@ -99,7 +99,7 @@ namespace Hermes
       double newton_tol, int newton_max_iter)
     {
       // Define projection weak form.
-      WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
+      WeakFormSharedPtr<Scalar> proj_wf = new WeakForm<Scalar>(1);
       proj_wf->add_matrix_form(custom_projection_jacobian);
       proj_wf->add_vector_form(custom_projection_residual);
 
@@ -138,7 +138,7 @@ namespace Hermes
       else norm = proj_norm;
 
       // Define temporary projection weak form.
-      WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
+      WeakFormSharedPtr<Scalar> proj_wf = new WeakForm<Scalar>(1);
       proj_wf->set_ext(source_meshfn);
       // Add Jacobian.
       proj_wf->add_matrix_form(new ProjectionMatrixFormVol(0, 0, norm));
@@ -194,7 +194,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
+    void OGProjectionNOX<Scalar>::project_global(SpaceSharedPtrVector<Scalar> spaces,
       Hermes::vector<MeshFunction<Scalar>* > source_meshfns,
       Scalar* target_vec, Hermes::vector<NormType> proj_norms,
       double newton_tol, int newton_max_iter)
@@ -219,7 +219,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
+    void OGProjectionNOX<Scalar>::project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_slns,
       Scalar* target_vec, Hermes::vector<NormType> proj_norms,
       double newton_tol, int newton_max_iter)
     {
@@ -242,8 +242,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
+    void OGProjectionNOX<Scalar>::project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_slns,
+      MeshFunctionSharedPtrVector<Scalar> target_slns,
       Hermes::vector<NormType> proj_norms, bool delete_old_meshes,
       double newton_tol, int newton_max_iter)
     {

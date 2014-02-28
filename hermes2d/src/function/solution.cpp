@@ -455,7 +455,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector,
-      Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+      SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> solutions,
       Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       if (solution_vector == nullptr)
@@ -522,8 +522,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
+    void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
+      MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       if (solution_vector == nullptr)
         throw Exceptions::NullException(1);
@@ -563,8 +563,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Vector<Scalar>* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, bool add_dir_lift)
+    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Vector<Scalar>* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
+      MeshFunctionSharedPtrVector<Scalar> solutions, bool add_dir_lift)
     {
       if (solution_vector == nullptr)
         throw Exceptions::NullException(1);
@@ -590,8 +590,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, bool add_dir_lift)
+    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
+      MeshFunctionSharedPtrVector<Scalar> solutions, bool add_dir_lift)
     {
       if (solution_vector == nullptr)
         throw Exceptions::NullException(1);
@@ -632,8 +632,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<PrecalcShapeset *> pss,
+    void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
+      MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<PrecalcShapeset *> pss,
       Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       if (solution_vector == nullptr)
@@ -712,7 +712,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::add(MeshFunctionSharedPtr<Scalar> other_mesh_function, SpaceSharedPtr<Scalar> target_space)
+    void Solution<Scalar>::add(MeshFunctionSharedPtr<Scalar>& other_mesh_function, SpaceSharedPtr<Scalar> target_space)
     {
       Scalar* base_vector = malloc_with_check<Solution<Scalar>, Scalar>(target_space->get_num_dofs(), this);
       Scalar* added_vector = malloc_with_check<Solution<Scalar>, Scalar>(target_space->get_num_dofs(), this);

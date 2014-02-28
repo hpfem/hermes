@@ -76,7 +76,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, RefMap** current_refmaps, WeakForm<Scalar>* current_wf)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(const SpaceSharedPtrVector<Scalar> spaces, RefMap** current_refmaps, WeakFormSharedPtr<Scalar> current_wf)
     {
       // Order set to constant.
       if (current_wf->global_integration_order_set)
@@ -95,7 +95,7 @@ namespace Hermes
         MatrixFormVol<Scalar>* current_mfvol = current_wf->mfvol[current_mfvol_i];
         if (!selectiveAssembler->form_to_be_assembled(current_mfvol, current_state))
           continue;
-        current_mfvol->wf = current_wf;
+        current_mfvol->wf = current_wf.get();
         int orderTemp = calc_order_matrix_form(spaces, current_mfvol, current_refmaps, ext_func, u_ext_func);
         if (order < orderTemp)
           order = orderTemp;
@@ -106,7 +106,7 @@ namespace Hermes
         VectorFormVol<Scalar>* current_vfvol = current_wf->vfvol[current_vfvol_i];
         if (!selectiveAssembler->form_to_be_assembled(current_vfvol, current_state))
           continue;
-        current_vfvol->wf = current_wf;
+        current_vfvol->wf = current_wf.get();
         int orderTemp = calc_order_vector_form(spaces, current_vfvol, current_refmaps, ext_func, u_ext_func);
         if (order < orderTemp)
           order = orderTemp;
@@ -131,7 +131,7 @@ namespace Hermes
             MatrixFormSurf<Scalar>* current_mfsurf = current_wf->mfsurf[current_mfsurf_i];
             if (!selectiveAssembler->form_to_be_assembled(current_mfsurf, current_state))
               continue;
-            current_mfsurf->wf = current_wf;
+            current_mfsurf->wf = current_wf.get();
             int orderTemp = calc_order_matrix_form(spaces, current_mfsurf, current_refmaps, ext_funcSurf, u_ext_funcSurf);
             if (order < orderTemp)
               order = orderTemp;
@@ -143,7 +143,7 @@ namespace Hermes
             if (!selectiveAssembler->form_to_be_assembled(current_vfsurf, current_state))
               continue;
 
-            current_vfsurf->wf = current_wf;
+            current_vfsurf->wf = current_wf.get();
             int orderTemp = calc_order_vector_form(spaces, current_vfsurf, current_refmaps, ext_funcSurf, u_ext_funcSurf);
             if (order < orderTemp)
               order = orderTemp;
@@ -167,7 +167,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixForm<Scalar> *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(const SpaceSharedPtrVector<Scalar> spaces, MatrixForm<Scalar> *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
     {
       int order;
 
@@ -214,7 +214,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_vector_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, VectorForm<Scalar> *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_vector_form(const SpaceSharedPtrVector<Scalar> spaces, VectorForm<Scalar> *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
     {
       int order;
 
@@ -286,7 +286,7 @@ namespace Hermes
 
 
     template<typename Scalar>
-    Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func)
+    Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(MeshFunctionSharedPtrVector<Scalar>& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func)
     {
       int ext_size = ext.size();
       int u_ext_fns_size = u_ext_fns.size();
@@ -357,7 +357,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscontinuousFunc<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_fns_ord(Hermes::vector<MeshFunctionSharedPtr<Scalar> > &ext,
+    DiscontinuousFunc<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_fns_ord(MeshFunctionSharedPtrVector<Scalar> &ext,
       NeighborSearch<Scalar>** neighbor_searches)
     {
       DiscontinuousFunc<Ord>** fake_ext_fns = new DiscontinuousFunc<Ord>*[ext.size()];
@@ -391,7 +391,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state, MatrixFormDG<Scalar>* mfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_u, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_matrix_form(const SpaceSharedPtrVector<Scalar> spaces, Traverse::State* current_state, MatrixFormDG<Scalar>* mfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_u, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches)
     {
       NeighborSearch<Scalar>* nbs_u = neighbor_searches[mfDG->j];
 
@@ -411,7 +411,7 @@ namespace Hermes
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = mfDG->ext.size() ? mfDG->ext.size() : mfDG->wf->ext.size();
+      MeshFunctionSharedPtrVector<Scalar> ext_ord_fns = mfDG->ext.size() ? mfDG->ext.size() : mfDG->wf->ext.size();
       if (ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
 
@@ -448,7 +448,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_vector_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state, VectorFormDG<Scalar>* vfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_vector_form(const SpaceSharedPtrVector<Scalar> spaces, Traverse::State* current_state, VectorFormDG<Scalar>* vfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches)
     {
       NeighborSearch<Scalar>* nbs_u = neighbor_searches[vfDG->i];
 
@@ -468,7 +468,7 @@ namespace Hermes
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = vfDG->ext.size() ? vfDG->ext.size() : vfDG->wf->ext.size();
+      MeshFunctionSharedPtrVector<Scalar> ext_ord_fns = vfDG->ext.size() ? vfDG->ext.size() : vfDG->wf->ext.size();
       if (ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
 

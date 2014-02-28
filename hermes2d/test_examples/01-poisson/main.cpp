@@ -82,14 +82,14 @@ int main(int argc, char* argv[])
   std::cout << "Ndofs: " << space->get_num_dofs() << std::endl;
 
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
-    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(VOLUME_HEAT_SRC));
+  WeakFormSharedPtr<double> wf(new CustomWeakFormPoisson("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
+    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(VOLUME_HEAT_SRC)));
 
   // Initialize the solution.
   MeshFunctionSharedPtr<double> sln(new Solution<double>);
 
   // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(wf, space);
 
   // Solve the linear problem.
   try

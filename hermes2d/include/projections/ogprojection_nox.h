@@ -86,17 +86,17 @@ namespace Hermes
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper for multiple source MeshFunction pointers that delivers coefficient vector.
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunction<Scalar>* > source_meshfns,
+      void project_global(SpaceSharedPtrVector<Scalar> spaces, Hermes::vector<MeshFunction<Scalar>* > source_meshfns,
           Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(),
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper for multiple source MeshFunctionSharedPtrs that delivers coefficient vector.
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
+      void project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_slns,
           Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(),
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
+      void project_global(SpaceSharedPtrVector<Scalar> spaces,
+          MeshFunctionSharedPtrVector<Scalar> source_slns, MeshFunctionSharedPtrVector<Scalar> target_slns,
           Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(), bool delete_old_mesh = false,
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
@@ -106,7 +106,7 @@ namespace Hermes
       /// a special projection weak form, which is different from
       /// the weak form of the PDE. If you supply a weak form of the
       /// PDE, the PDE will just be solved.
-      void project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* proj_wf, Scalar* target_vec,
+      void project_internal(SpaceSharedPtr<Scalar> space, WeakFormSharedPtr<Scalar> proj_wf, Scalar* target_vec,
         double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Jacobian matrix (same as stiffness matrix since projections are linear).

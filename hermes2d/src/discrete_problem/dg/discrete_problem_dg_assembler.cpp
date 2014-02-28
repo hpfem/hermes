@@ -31,7 +31,7 @@ namespace Hermes
     unsigned int DiscreteProblemDGAssembler<Scalar>::dg_order = 20;
 
     template<typename Scalar>
-    DiscreteProblemDGAssembler<Scalar>::DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Hermes::vector<MeshSharedPtr>& meshes)
+    DiscreteProblemDGAssembler<Scalar>::DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const SpaceSharedPtrVector<Scalar> spaces, MeshSharedPtrVector& meshes)
       : pss(threadAssembler->pss),
       refmaps(threadAssembler->refmaps),
       u_ext(threadAssembler->u_ext),
@@ -73,7 +73,7 @@ namespace Hermes
 
 
     template<typename Scalar>
-    NeighborSearch<Scalar>* DiscreteProblemDGAssembler<Scalar>::get_neighbor_search_ext(WeakForm<Scalar>* wf, NeighborSearch<Scalar>** neighbor_searches, int index)
+    NeighborSearch<Scalar>* DiscreteProblemDGAssembler<Scalar>::get_neighbor_search_ext(WeakFormSharedPtr<Scalar> wf, NeighborSearch<Scalar>** neighbor_searches, int index)
     {
       return neighbor_searches[index + wf->get_neq()];
     }
@@ -436,7 +436,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscontinuousFunc<Scalar>** DiscreteProblemDGAssembler<Scalar>::init_ext_fns(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext,
+    DiscontinuousFunc<Scalar>** DiscreteProblemDGAssembler<Scalar>::init_ext_fns(MeshFunctionSharedPtrVector<Scalar> ext,
       NeighborSearch<Scalar>** current_neighbor_searches, int order)
     {
       DiscontinuousFunc<Scalar>** ext_fns = new DiscontinuousFunc<Scalar>*[ext.size()];

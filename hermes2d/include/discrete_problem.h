@@ -52,14 +52,14 @@ namespace Hermes
       /// 2 - allows for assembling Dirichlet boundary conditions using a Dirichlet lift.
       /// \param[in] dirichlet_lift_accordingly If true, the appropriate settings for (linear / nonlinear)
       /// problem will be used (use Dirichlet lift iff the problem is linear). If false, the other way round.
-      DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool linear = false, bool dirichlet_lift_accordingly = true);
+      DiscreteProblem(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces, bool linear = false, bool dirichlet_lift_accordingly = true);
       /// Constructor for one equation.
       /// Making this DiscreteProblem linear does 2 things
       /// 1 - turns off initialization of previous iterations for nonlinear solvers.
       /// 2 - allows for assembling Dirichlet boundary conditions using a Dirichlet lift.
       /// \param[in] dirichlet_lift_accordingly If true, the appropriate settings for (linear / nonlinear)
       /// problem will be used (use Dirichlet lift iff the problem is linear). If false, the other way round.
-      DiscreteProblem(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool linear = false, bool dirichlet_lift_accordingly = true);
+      DiscreteProblem(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space, bool linear = false, bool dirichlet_lift_accordingly = true);
       /// Non-parameterized constructor.
       /// Making this DiscreteProblem linear does 2 things
       /// 1 - turns off initialization of previous iterations for nonlinear solvers.
@@ -90,18 +90,18 @@ namespace Hermes
       void set_time_step(double time_step);
 
       /// Sets new_ spaces for the instance.
-      void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-      void set_space(SpaceSharedPtr<Scalar>& space);
+      void set_spaces(SpaceSharedPtrVector<Scalar> spaces);
+      void set_space(SpaceSharedPtr<Scalar> space);
 
       /// Set the weak forms.
-      void set_weak_formulation(WeakForm<Scalar>* wf);
+      void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);
 
       /// Get all spaces as a Hermes::vector.
-      Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
+      SpaceSharedPtrVector<Scalar> get_spaces();
 
     protected:
       /// Initialize states.
-      void init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, Hermes::vector<MeshSharedPtr>& meshes);
+      void init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, MeshSharedPtrVector& meshes);
       void deinit_assembling(Traverse::State** states, int num_states);
 
       /// RungeKutta helpers.
@@ -115,7 +115,7 @@ namespace Hermes
       void init(bool linear, bool dirichlet_lift_accordingly);
 
       /// Space instances for all equations in the system.
-      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
+      SpaceSharedPtrVector<Scalar> spaces;
       int spaces_size;
       
       /// Internal.

@@ -42,7 +42,7 @@ namespace Hermes
     {
     public:
       /// Constructor copying data from DiscreteProblemThreadAssembler.
-      DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Hermes::vector<MeshSharedPtr>& meshes);
+      DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const SpaceSharedPtrVector<Scalar> spaces, MeshSharedPtrVector& meshes);
       
       /// Destructor.
       ~DiscreteProblemDGAssembler();
@@ -70,7 +70,7 @@ namespace Hermes
       void deinit_assembling_one_neighbor();
 
       /// Initialize external functions for DG forms.
-      DiscontinuousFunc<Scalar>** init_ext_fns(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext,
+      DiscontinuousFunc<Scalar>** init_ext_fns(MeshFunctionSharedPtrVector<Scalar> ext,
         NeighborSearch<Scalar>** neighbor_searches, int order);
 
       /// Initialize neighbors.
@@ -91,7 +91,7 @@ namespace Hermes
       Solution<Scalar>** u_ext;
       AsmList<Scalar>* als;
       Hermes::vector<Transformable *> fns;
-      WeakForm<Scalar>* wf;
+      WeakFormSharedPtr<Scalar> wf;
       int spaces_size;
       bool nonlinear;
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;
@@ -103,14 +103,14 @@ namespace Hermes
       /// Current local matrix.
       Scalar local_stiffness_matrix[H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_LOCAL_BASIS_SIZE * 4];
 
-      const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces;
-      const Hermes::vector<MeshSharedPtr>& meshes;
+      const SpaceSharedPtrVector<Scalar> spaces;
+      const MeshSharedPtrVector& meshes;
 
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemIntegrationOrderCalculator;
 
       /// Finds the correct NeighborSearch.
-      static NeighborSearch<Scalar>* get_neighbor_search_ext(WeakForm<Scalar>* wf, NeighborSearch<Scalar>** neighbor_searches, int index);
+      static NeighborSearch<Scalar>* get_neighbor_search_ext(WeakFormSharedPtr<Scalar> wf, NeighborSearch<Scalar>** neighbor_searches, int index);
 
 #ifdef DEBUG_DG_ASSEMBLING
       void debug();

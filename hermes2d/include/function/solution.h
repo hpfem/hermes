@@ -135,7 +135,7 @@ namespace Hermes
 
       /// Adds another mesh function on the given space.
       /// See method of parent class.
-      virtual void add(MeshFunctionSharedPtr<Scalar> other_mesh_function, SpaceSharedPtr<Scalar> target_space);
+      virtual void add(MeshFunctionSharedPtr<Scalar>& other_mesh_function, SpaceSharedPtr<Scalar> target_space);
 
       /// Multiplies the function represented by this class by the given coefficient.
       virtual void multiply(Scalar coef);
@@ -243,8 +243,8 @@ namespace Hermes
         static void set_static_verbose_output(bool verbose);
 
         /// Passes solution components calculated from solution vector as Solutions.
-        static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        static void vector_to_solutions(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
+          MeshFunctionSharedPtrVector<Scalar> solutions,
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
@@ -254,24 +254,24 @@ namespace Hermes
         static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, Solution<Scalar>* solution,
           bool add_dir_lift = true, int start_index = 0);
 
-        static void vector_to_solutions(const Vector<Scalar>* vec, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        static void vector_to_solutions(const Vector<Scalar>* vec, SpaceSharedPtrVector<Scalar> spaces,
+          MeshFunctionSharedPtrVector<Scalar> solutions,
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
-        static void vector_to_solutions_common_dir_lift(const Vector<Scalar>* vec, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        static void vector_to_solutions_common_dir_lift(const Vector<Scalar>* vec, SpaceSharedPtrVector<Scalar> spaces,
+          MeshFunctionSharedPtrVector<Scalar> solutions,
           bool add_dir_lift = false);
 
-        static void vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        static void vector_to_solutions_common_dir_lift(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
+          MeshFunctionSharedPtrVector<Scalar> solutions,
           bool add_dir_lift = false);
 
         static void vector_to_solution(const Vector<Scalar>* vec, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
           bool add_dir_lift = true, int start_index = 0);
 
-        static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<PrecalcShapeset *> pss,
+        static void vector_to_solutions(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
+          MeshFunctionSharedPtrVector<Scalar> solutions, Hermes::vector<PrecalcShapeset *> pss,
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 #pragma endregion

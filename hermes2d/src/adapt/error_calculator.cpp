@@ -117,11 +117,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::calculate_errors(MeshFunctionSharedPtr<Scalar>& coarse_solution, MeshFunctionSharedPtr<Scalar>& fine_solution, bool sort_and_store)
+    void ErrorCalculator<Scalar>::calculate_errors(MeshFunctionSharedPtr<Scalar> coarse_solution, MeshFunctionSharedPtr<Scalar> fine_solution, bool sort_and_store)
     {
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions;
+      MeshFunctionSharedPtrVector<Scalar> coarse_solutions;
       coarse_solutions.push_back(coarse_solution);
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions;
+      MeshFunctionSharedPtrVector<Scalar> fine_solutions;
       fine_solutions.push_back(fine_solution);
       this->calculate_errors(coarse_solutions, fine_solutions, sort_and_store);
     }
@@ -147,7 +147,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions_, Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions_, bool sort_and_store)
+    void ErrorCalculator<Scalar>::calculate_errors(MeshFunctionSharedPtrVector<Scalar> coarse_solutions_, MeshFunctionSharedPtrVector<Scalar> fine_solutions_, bool sort_and_store)
     {
       this->coarse_solutions = coarse_solutions_;
       this->fine_solutions = fine_solutions_;
@@ -391,9 +391,9 @@ namespace Hermes
     }
 
     template<typename Scalar, NormType normType>
-    double DefaultNormCalculator<Scalar, normType>::calculate_norms(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& solutions)
+    double DefaultNormCalculator<Scalar, normType>::calculate_norms(MeshFunctionSharedPtrVector<Scalar>& solutions)
     {
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > zero_fine_solutions;
+      MeshFunctionSharedPtrVector<Scalar> zero_fine_solutions;
       for (int i = 0; i < solutions.size(); i++)
         zero_fine_solutions.push_back(MeshFunctionSharedPtr<Scalar>(new ZeroSolution<Scalar>(solutions[i]->get_mesh())));
       this->calculate_errors(solutions, zero_fine_solutions, false);
@@ -402,7 +402,7 @@ namespace Hermes
     }
 
     template<typename Scalar, NormType normType>
-    double DefaultNormCalculator<Scalar, normType>::calculate_norm(MeshFunctionSharedPtr<Scalar> & solution)
+    double DefaultNormCalculator<Scalar, normType>::calculate_norm(MeshFunctionSharedPtr<Scalar> solution)
     {
       MeshFunctionSharedPtr<Scalar> zero_fine_solution(new ZeroSolution<Scalar>(solution->get_mesh()));
       this->calculate_errors(solution, zero_fine_solution, false);

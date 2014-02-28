@@ -52,11 +52,11 @@ namespace Hermes
       /// Calculates the errors between coarse_solutions and fine_solutions.
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
       /// IMPORTANT: if the parameter is passed as false, this, and also any previous error calculations are lost and it is not possible to get back to them.
-      void calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions, Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions, bool sort_and_store = true);
+      void calculate_errors(MeshFunctionSharedPtrVector<Scalar> coarse_solutions, MeshFunctionSharedPtrVector<Scalar> fine_solutions, bool sort_and_store = true);
 
       /// Calculates the errors between coarse_solutions and fine_solutions.
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
-      void calculate_errors(MeshFunctionSharedPtr<Scalar>& coarse_solution, MeshFunctionSharedPtr<Scalar>& fine_solution, bool sort_and_store = true);
+      void calculate_errors(MeshFunctionSharedPtr<Scalar> coarse_solution, MeshFunctionSharedPtr<Scalar> fine_solution, bool sort_and_store = true);
 
       virtual ~ErrorCalculator();  ///< Destructor. Deallocates allocated private data.
 
@@ -117,8 +117,8 @@ namespace Hermes
       void postprocess_error();
 
       /// Data.
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions;
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions;
+      MeshFunctionSharedPtrVector<Scalar> coarse_solutions;
+      MeshFunctionSharedPtrVector<Scalar> fine_solutions;
 
       /// Absolute / Relative error.
       CalculatedErrorType errorType;
@@ -184,9 +184,9 @@ namespace Hermes
       virtual ~DefaultNormCalculator();
 
       /// Norms calculation.
-      double calculate_norms(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& solutions);
+      double calculate_norms(MeshFunctionSharedPtrVector<Scalar>& solutions);
       /// Norms calculation.
-      double calculate_norm(MeshFunctionSharedPtr<Scalar> & solution);
+      double calculate_norm(MeshFunctionSharedPtr<Scalar> solution);
     };
   }
 }

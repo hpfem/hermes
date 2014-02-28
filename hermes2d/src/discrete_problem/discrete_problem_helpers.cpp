@@ -54,12 +54,12 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DiscreteProblemWeakForm<Scalar>::DiscreteProblemWeakForm(WeakForm<Scalar>* wf_) : wf(wf_)
+      DiscreteProblemWeakForm<Scalar>::DiscreteProblemWeakForm(WeakFormSharedPtr<Scalar> wf_) : wf(wf_)
       {
       }
 
       template<typename Scalar>
-      void DiscreteProblemWeakForm<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf_)
+      void DiscreteProblemWeakForm<Scalar>::set_weak_formulation(WeakFormSharedPtr<Scalar> wf_)
       {
         if (!wf_)
           throw Hermes::Exceptions::NullException(0);
@@ -68,7 +68,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      WeakForm<Scalar>* DiscreteProblemWeakForm<Scalar>::get_weak_formulation() const
+      WeakFormSharedPtr<Scalar> DiscreteProblemWeakForm<Scalar>::get_weak_formulation() const
       {
         return this->wf;
       }

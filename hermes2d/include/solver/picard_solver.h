@@ -76,8 +76,8 @@ namespace Hermes
     public:
       PicardSolver();
       PicardSolver(DiscreteProblem<Scalar>* dp);
-      PicardSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
-      PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      PicardSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space);
+      PicardSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces);
       virtual ~PicardSolver();
 
       // See the base class for details, the following serves only for avoiding C++ name-hiding.
@@ -91,10 +91,10 @@ namespace Hermes
       Scalar* get_sln_vector();
 
       /// DiscreteProblemWeakForm helper.
-      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      virtual void set_spaces(SpaceSharedPtrVector<Scalar> spaces);
 
       /// DiscreteProblemWeakForm helper.
-      virtual void set_weak_formulation(WeakForm<Scalar>* wf);
+      virtual void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);
 
       virtual void assemble_residual(bool store_previous_residual);
       virtual bool assemble_jacobian(bool store_previous_jacobian);

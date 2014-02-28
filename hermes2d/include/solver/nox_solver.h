@@ -52,9 +52,9 @@ namespace Hermes
     {
     public:
       /// Constructor for multiple components / equations.
-      DiscreteProblemNOX(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      DiscreteProblemNOX(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces);
       /// Constructor for one equation.
-      DiscreteProblemNOX(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
+      DiscreteProblemNOX(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space);
       /// Non-parameterized constructor.
       DiscreteProblemNOX();
 

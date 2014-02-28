@@ -41,14 +41,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver) : Solver<Scalar>(false), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
+    LinearSolver<Scalar>::LinearSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space, bool force_use_direct_solver) : Solver<Scalar>(false), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
     {
       this->dp = new DiscreteProblem<Scalar>(wf, space, true);
       this->own_dp = true;
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver) : Solver<Scalar>(false), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
+    LinearSolver<Scalar>::LinearSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces, bool force_use_direct_solver) : Solver<Scalar>(false), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
     {
       this->dp = new DiscreteProblem<Scalar>(wf, spaces, true);
       this->own_dp = true;
@@ -72,14 +72,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LinearSolver<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf)
+    void LinearSolver<Scalar>::set_weak_formulation(WeakFormSharedPtr<Scalar> wf)
     {
       Solver<Scalar>::set_weak_formulation(wf);
       this->jacobian_reusable = false;
     }
 
     template<typename Scalar>
-    void LinearSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
+    void LinearSolver<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spaces)
     {
       Solver<Scalar>::set_spaces(spaces);
       this->jacobian_reusable = false;

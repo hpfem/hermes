@@ -74,8 +74,8 @@ namespace Hermes
     public:
       NewtonSolver();
       NewtonSolver(DiscreteProblem<Scalar>* dp);
-      NewtonSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
-      NewtonSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      NewtonSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space);
+      NewtonSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces);
       virtual ~NewtonSolver();
 
       // See the base class for details, the following serves only for avoiding C++ name-hiding.
@@ -89,10 +89,10 @@ namespace Hermes
       Scalar* get_sln_vector();
 
       /// DiscreteProblemWeakForm helper.
-      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      virtual void set_spaces(SpaceSharedPtrVector<Scalar> spaces);
 
       /// DiscreteProblemWeakForm helper.
-      virtual void set_weak_formulation(WeakForm<Scalar>* wf);
+      virtual void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);
 
       virtual void assemble_residual(bool store_previous_residual);
       /// \return Information if the jacobian structure was reused.

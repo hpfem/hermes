@@ -282,15 +282,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Traverse::State** Traverse::get_states(Hermes::vector<MeshFunctionSharedPtr<Scalar> > mesh_functions, int& states_count)
+    Traverse::State** Traverse::get_states(MeshFunctionSharedPtrVector<Scalar> mesh_functions, int& states_count)
     {
-      Hermes::vector<MeshSharedPtr> meshes;
+      MeshSharedPtrVector meshes;
       for (int i = 0; i < mesh_functions.size(); i++)
         meshes.push_back(mesh_functions[i]->get_mesh());
       return this->get_states(meshes, states_count);
     }
 
-    Traverse::State** Traverse::get_states(Hermes::vector<MeshSharedPtr> meshes, int& states_count)
+    Traverse::State** Traverse::get_states(MeshSharedPtrVector meshes, int& states_count)
     {
       return Traverse::get_states(&meshes[0], meshes.size(), states_count);
     }

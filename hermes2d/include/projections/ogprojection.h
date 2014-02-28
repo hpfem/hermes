@@ -47,16 +47,16 @@ namespace Hermes
         MeshFunctionSharedPtr<Scalar> target_sln);
 
       /// This method allows to specify your own multiple OG-projection forms.
-      static void project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
+      static void project_global(const SpaceSharedPtrVector<Scalar> spaces,
         const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
         const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
         Scalar* target_vec);
 
       /// Wrapper that delivers a vector of Solutions instead of a coefficient vector.   
-      static void project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
+      static void project_global(const SpaceSharedPtrVector<Scalar> spaces,
         const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
         const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
-        const Hermes::vector<MeshFunctionSharedPtr<Scalar> >& target_slns);
+        const MeshFunctionSharedPtrVector<Scalar>& target_slns);
 
       /**
       \fn  static void OGProjection::project_global(SpaceSharedPtr<Scalar> space,
@@ -86,14 +86,14 @@ namespace Hermes
         NormType proj_norm = HERMES_UNSET_NORM);
 
       /// Wrapper for multiple source MeshFunctions that delivers coefficient vector.
-      static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_meshfns,
+      static void project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_meshfns,
         Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>());
 
-      static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_meshfns,
+      static void project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_meshfns,
         Hermes::Algebra::Vector<Scalar>* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>());
       
-      static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-        Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
+      static void project_global(SpaceSharedPtrVector<Scalar> spaces,
+        MeshFunctionSharedPtrVector<Scalar> source_slns, MeshFunctionSharedPtrVector<Scalar> target_slns,
         Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(), bool delete_old_mesh = false);
 
     protected:
@@ -102,7 +102,7 @@ namespace Hermes
       /// a special projection weak form, which is different from
       /// the weak form of the PDE. If you supply a weak form of the
       /// PDE, the PDE will just be solved.
-      static void project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* proj_wf, Scalar* target_vec);
+      static void project_internal(SpaceSharedPtr<Scalar> space, WeakFormSharedPtr<Scalar> proj_wf, Scalar* target_vec);
     };
   }
 }

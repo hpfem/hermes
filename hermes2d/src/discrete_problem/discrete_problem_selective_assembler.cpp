@@ -40,7 +40,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool DiscreteProblemSelectiveAssembler<Scalar>::prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State**& states, int& num_states)
+    bool DiscreteProblemSelectiveAssembler<Scalar>::prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, SpaceSharedPtrVector<Scalar> spaces, Traverse::State**& states, int& num_states)
     {
       int ndof = Space<Scalar>::get_num_dofs(spaces);
 
@@ -214,7 +214,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemSelectiveAssembler<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spacesToSet)
+    void DiscreteProblemSelectiveAssembler<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spacesToSet)
     {
       if (!sp_seq)
       {
@@ -240,7 +240,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemSelectiveAssembler<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf_)
+    void DiscreteProblemSelectiveAssembler<Scalar>::set_weak_formulation(WeakFormSharedPtr<Scalar> wf_)
     {
       Mixins::DiscreteProblemWeakForm<Scalar>::set_weak_formulation(wf_);
 

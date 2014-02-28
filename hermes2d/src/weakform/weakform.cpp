@@ -30,6 +30,22 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar>
+    WeakFormSharedPtr<Scalar>::WeakFormSharedPtr(Hermes::Hermes2D::WeakForm<Scalar>* ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::WeakForm<Scalar> >(ptr)
+    {
+    }
+
+    template<typename Scalar>
+    WeakFormSharedPtr<Scalar>::WeakFormSharedPtr(const WeakFormSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::WeakForm<Scalar> >(other)
+    {
+    }
+
+    template<typename Scalar>
+    void WeakFormSharedPtr<Scalar>::operator=(const WeakFormSharedPtr& other)
+    {
+      std::tr1::shared_ptr<Hermes::Hermes2D::WeakForm<Scalar> >::operator=(other);
+    }
+
     static bool warned_nonOverride = false;
 
     /// This is to be used by weak forms specifying numerical flux through interior edges.
@@ -90,7 +106,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::cloneMembers(const WeakForm<Scalar>* other_wf)
+    void WeakForm<Scalar>::cloneMembers(const WeakFormSharedPtr<Scalar>& other_wf)
     {
       this->mfvol.clear();
       this->mfsurf.clear();
@@ -164,7 +180,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::cloneMemberExtFunctions(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_ext, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& cloned_ext)
+    void WeakForm<Scalar>::cloneMemberExtFunctions(MeshFunctionSharedPtrVector<Scalar> source_ext, MeshFunctionSharedPtrVector<Scalar>& cloned_ext)
     {
       cloned_ext.clear();
       for(unsigned int i = 0; i < source_ext.size(); i++)
@@ -209,7 +225,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext)
+    void WeakForm<Scalar>::set_ext(MeshFunctionSharedPtrVector<Scalar> ext)
     {
       this->ext = ext;
     }
@@ -229,7 +245,7 @@ namespace Hermes
 
     template<typename Scalar>
     template<typename FormType>
-    void WeakForm<Scalar>::processFormMarkers(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool surface, Hermes::vector<FormType> forms_to_process)
+    void WeakForm<Scalar>::processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces, bool surface, Hermes::vector<FormType> forms_to_process)
     {
       for(int form_i = 0; form_i < forms_to_process.size(); form_i++)
       {
@@ -259,7 +275,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::processFormMarkers(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
+    void WeakForm<Scalar>::processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces)
     {
       processFormMarkers(spaces, false, this->mfvol);
       processFormMarkers(spaces, false, this->vfvol);
@@ -276,7 +292,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<MeshFunctionSharedPtr<Scalar> > WeakForm<Scalar>::get_ext() const
+    MeshFunctionSharedPtrVector<Scalar> WeakForm<Scalar>::get_ext() const
     {
       return this->ext;
     }
@@ -343,7 +359,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Form<Scalar>::set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext)
+    void Form<Scalar>::set_ext(MeshFunctionSharedPtrVector<Scalar> ext)
     {
       this->ext = ext;
     }
@@ -362,7 +378,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<MeshFunctionSharedPtr<Scalar> > Form<Scalar>::get_ext() const
+    MeshFunctionSharedPtrVector<Scalar> Form<Scalar>::get_ext() const
     {
       return this->ext;
     }
@@ -770,5 +786,8 @@ namespace Hermes
     template class HERMES_API VectorFormSurf<std::complex<double> >;
     template class HERMES_API VectorFormDG<double>;
     template class HERMES_API VectorFormDG<std::complex<double> >;
+
+    template class HERMES_API WeakFormSharedPtr<double>;
+    template class HERMES_API WeakFormSharedPtr<std::complex<double> >;
   }
 }

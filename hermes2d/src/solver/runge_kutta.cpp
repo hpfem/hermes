@@ -26,9 +26,9 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ButcherTable* bt)
-      : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * spaces.size()),
-      stage_wf_left(spaces.size()), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
+    RungeKutta<Scalar>::RungeKutta(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces, ButcherTable* bt)
+      : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(new WeakForm<Scalar>(bt->get_size() * spaces.size())),
+      stage_wf_left(new WeakForm<Scalar>(spaces.size())), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
     {
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -61,9 +61,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space, ButcherTable* bt)
-      : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * 1),
-      stage_wf_left(1), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
+    RungeKutta<Scalar>::RungeKutta(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space, ButcherTable* bt)
+      : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(new WeakForm<Scalar>(bt->get_size())),
+      stage_wf_left(new WeakForm<Scalar>(1)), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
     {
       this->spaces.push_back(space);
@@ -92,7 +92,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
+    void RungeKutta<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spaces)
     {
       bool delete_K_vector = false;
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -123,7 +123,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::set_space(SpaceSharedPtr<Scalar>& space)
+    void RungeKutta<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
     {
       bool delete_K_vector = false;
       if(space->get_seq() != this->spaces_seqs[0])
@@ -151,7 +151,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<SpaceSharedPtr<Scalar> >& RungeKutta<Scalar>::get_spaces()
+    SpaceSharedPtrVector<Scalar> RungeKutta<Scalar>::get_spaces()
     {
       return this->spaces;
     }
@@ -163,13 +163,13 @@ namespace Hermes
 
       if(this->get_verbose_output())
       {
-        this->stage_wf_left.set_verbose_output(true);
-        this->stage_wf_right.set_verbose_output(true);
+        this->stage_wf_left->set_verbose_output(true);
+        this->stage_wf_right->set_verbose_output(true);
       }
       else
       {
-        this->stage_wf_left.set_verbose_output(true);
-        this->stage_wf_right.set_verbose_output(true);
+        this->stage_wf_left->set_verbose_output(true);
+        this->stage_wf_right->set_verbose_output(true);
       }
 
       // The tensor discrete problem is created in two parts. First, matrix_left is the Jacobian
@@ -179,10 +179,10 @@ namespace Hermes
       // matrix and residula vector coming from the function f(...). Of course the RK equation is assumed
       // in a form suitable for the Newton's method: k_i - f(...) = 0. At the end, matrix_left and vector_left
       // are added to matrix_right and vector_right, respectively.
-      this->stage_dp_left = new DiscreteProblem<Scalar>(&stage_wf_left, spaces);
+      this->stage_dp_left = new DiscreteProblem<Scalar>(stage_wf_left, spaces);
 
       // All Spaces of the problem.
-      Hermes::vector<SpaceSharedPtr<Scalar> > stage_spaces_vector;
+      SpaceSharedPtrVector<Scalar> stage_spaces_vector;
 
       // Create spaces for stage solutions K_i. This is necessary
       // to define a num_stages x num_stages block weak formulation.
@@ -190,7 +190,7 @@ namespace Hermes
         for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
           stage_spaces_vector.push_back(spaces[space_i]);
 
-      this->stage_dp_right = new DiscreteProblem<Scalar>(&stage_wf_right, stage_spaces_vector);
+      this->stage_dp_right = new DiscreteProblem<Scalar>(stage_wf_right, stage_spaces_vector);
 
       // Prepare residuals of stage solutions.
       if(!residual_as_vector)
@@ -276,20 +276,20 @@ namespace Hermes
     void RungeKutta<Scalar>::rk_time_step_newton(MeshFunctionSharedPtr<Scalar>  sln_time_prev,
       MeshFunctionSharedPtr<Scalar>  sln_time_new, MeshFunctionSharedPtr<Scalar>  error_fn)
     {
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
+      MeshFunctionSharedPtrVector<Scalar> slns_time_prev = MeshFunctionSharedPtrVector<Scalar>();
       slns_time_prev.push_back(sln_time_prev);
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new  = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
+      MeshFunctionSharedPtrVector<Scalar> slns_time_new  = MeshFunctionSharedPtrVector<Scalar>();
       slns_time_new.push_back(sln_time_new);
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > error_fns      = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
+      MeshFunctionSharedPtrVector<Scalar> error_fns      = MeshFunctionSharedPtrVector<Scalar>();
       error_fns.push_back(error_fn);
       return rk_time_step_newton(slns_time_prev, slns_time_new,
         error_fns);
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev,
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new,
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > error_fns)
+    void RungeKutta<Scalar>::rk_time_step_newton(MeshFunctionSharedPtrVector<Scalar> slns_time_prev,
+      MeshFunctionSharedPtrVector<Scalar> slns_time_new,
+      MeshFunctionSharedPtrVector<Scalar> error_fns)
     {
       this->tick();
 
@@ -302,7 +302,7 @@ namespace Hermes
       update_stage_wf(slns_time_prev);
 
       // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
-      if(error_fns != Hermes::vector<MeshFunctionSharedPtr<Scalar> >() && bt->is_embedded() == false)
+      if(error_fns != MeshFunctionSharedPtrVector<Scalar>() && bt->is_embedded() == false)
         throw Hermes::Exceptions::Exception("rk_time_step_newton(): R-K method must be embedded if temporal error estimate is requested.");
 
       info("\tRunge-Kutta: time step, time: %f, time step: %f", this->time, this->time_step);
@@ -312,7 +312,7 @@ namespace Hermes
         Space<Scalar>::update_essential_bc_values(spaces, this->time + bt->get_C(stage_i)*this->time_step);
 
       // All Spaces of the problem.
-      Hermes::vector<SpaceSharedPtr<Scalar> > stage_spaces_vector;
+      SpaceSharedPtrVector<Scalar> stage_spaces_vector;
       // Create spaces for stage solutions K_i. This is necessary
       // to define a num_stages x num_stages block weak formulation.
       for (unsigned int i = 0; i < num_stages; i++)
@@ -389,7 +389,7 @@ namespace Hermes
           add_dir_lift_vector.push_back(false);
           Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right->get_spaces(), residuals_vector, false);
 
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > meshFns;
+          MeshFunctionSharedPtrVector<Scalar> meshFns;
           for(int i = 0; i < residuals_vector.size(); i++)
             meshFns.push_back(residuals_vector[i]);
 
@@ -475,7 +475,7 @@ namespace Hermes
 
       // If error_fn is not nullptr, use the B2-row in the Butcher's
       // table to calculate the temporal error estimate.
-      if(error_fns != Hermes::vector<MeshFunctionSharedPtr<Scalar> >())
+      if(error_fns != MeshFunctionSharedPtrVector<Scalar>())
       {
         for (int i = 0; i < ndof; i++)
         {
@@ -496,21 +496,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev,
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new)
+    void RungeKutta<Scalar>::rk_time_step_newton(MeshFunctionSharedPtrVector<Scalar> slns_time_prev,
+      MeshFunctionSharedPtrVector<Scalar> slns_time_new)
     {
       return rk_time_step_newton(slns_time_prev, slns_time_new,
-        Hermes::vector<MeshFunctionSharedPtr<Scalar> >());
+        MeshFunctionSharedPtrVector<Scalar>());
     }
 
     template<typename Scalar>
     void RungeKutta<Scalar>::rk_time_step_newton(MeshFunctionSharedPtr<Scalar>  sln_time_prev, MeshFunctionSharedPtr<Scalar>  sln_time_new)
     {
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev;
+      MeshFunctionSharedPtrVector<Scalar> slns_time_prev;
       slns_time_prev.push_back(sln_time_prev);
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new;
+      MeshFunctionSharedPtrVector<Scalar> slns_time_new;
       slns_time_new.push_back(sln_time_new);
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > error_fns;
+      MeshFunctionSharedPtrVector<Scalar> error_fns;
       return rk_time_step_newton(slns_time_prev, slns_time_new, error_fns);
     }
 
@@ -525,8 +525,8 @@ namespace Hermes
     void RungeKutta<Scalar>::create_stage_wf(unsigned int size, bool block_diagonal_jacobian)
     {
       // Clear the WeakForms.
-      stage_wf_left.delete_all();
-      stage_wf_right.delete_all();
+      stage_wf_left->delete_all();
+      stage_wf_right->delete_all();
 
       // First let's do the mass matrix (only one block ndof times ndof).
       for(unsigned int component_i = 0; component_i < size; component_i++)
@@ -538,7 +538,7 @@ namespace Hermes
           proj_form->areas.push_back(HERMES_ANY);
           proj_form->scaling_factor = 1.0;
           proj_form->u_ext_offset = 0;
-          stage_wf_left.add_matrix_form(proj_form);
+          stage_wf_left->add_matrix_form(proj_form);
         }
         if(spaces[component_i]->get_type() == HERMES_HDIV_SPACE
           || spaces[component_i]->get_type() == HERMES_HCURL_SPACE)
@@ -547,7 +547,7 @@ namespace Hermes
           proj_form->areas.push_back(HERMES_ANY);
           proj_form->scaling_factor = 1.0;
           proj_form->u_ext_offset = 0;
-          stage_wf_left.add_matrix_form(proj_form);
+          stage_wf_left->add_matrix_form(proj_form);
         }
       }
 
@@ -585,7 +585,7 @@ namespace Hermes
 
             // Add the matrix form to the corresponding block of the
             // stage Jacobian matrix.
-            stage_wf_right.add_matrix_form(mfv_ij);
+            stage_wf_right->add_matrix_form(mfv_ij);
           }
         }
       }
@@ -610,7 +610,7 @@ namespace Hermes
 
             // Add the matrix form to the corresponding block of the
             // stage Jacobian matrix.
-            stage_wf_right.add_matrix_form_surf(mfs_ij);
+            stage_wf_right->add_matrix_form_surf(mfs_ij);
           }
         }
       }
@@ -631,7 +631,7 @@ namespace Hermes
 
           // Add the matrix form to the corresponding block of the
           // stage Jacobian matrix.
-          stage_wf_right.add_vector_form(vfv_i);
+          stage_wf_right->add_vector_form(vfv_i);
         }
       }
 
@@ -651,31 +651,31 @@ namespace Hermes
 
           // Add the matrix form to the corresponding block of the
           // stage Jacobian matrix.
-          stage_wf_right.add_vector_form_surf(vfs_i);
+          stage_wf_right->add_vector_form_surf(vfs_i);
         }
       }
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::update_stage_wf(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev)
+    void RungeKutta<Scalar>::update_stage_wf(MeshFunctionSharedPtrVector<Scalar> slns_time_prev)
     {
       if(this->wf->global_integration_order_set)
       {
-        this->stage_wf_left.set_global_integration_order(this->wf->global_integration_order);
-        this->stage_wf_right.set_global_integration_order(this->wf->global_integration_order);
+        this->stage_wf_left->set_global_integration_order(this->wf->global_integration_order);
+        this->stage_wf_right->set_global_integration_order(this->wf->global_integration_order);
       }
 
       // Extracting volume and surface matrix and vector forms from the
       // 'right' weak formulation.
-      Hermes::vector<MatrixFormVol<Scalar> *> mfvol = stage_wf_right.mfvol;
-      Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf = stage_wf_right.mfsurf;
-      Hermes::vector<VectorFormVol<Scalar> *> vfvol = stage_wf_right.vfvol;
-      Hermes::vector<VectorFormSurf<Scalar> *> vfsurf = stage_wf_right.vfsurf;
+      Hermes::vector<MatrixFormVol<Scalar> *> mfvol = stage_wf_right->mfvol;
+      Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf = stage_wf_right->mfsurf;
+      Hermes::vector<VectorFormVol<Scalar> *> vfvol = stage_wf_right->vfvol;
+      Hermes::vector<VectorFormSurf<Scalar> *> vfsurf = stage_wf_right->vfsurf;
 
-      stage_wf_right.ext.clear();
+      stage_wf_right->ext.clear();
 
       for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-        stage_wf_right.ext.push_back(slns_time_prev[slns_time_prev_i]);
+        stage_wf_right->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
       // Duplicate matrix volume forms, scale them according
       // to the Butcher's table, enhance them with additional

@@ -61,8 +61,8 @@ int main(int argc, char* argv[])
   int ndof = space->get_num_dofs();
 
   // Initialize the weak formulation.
-  CustomWeakForm wf("Air", MU_0, "Iron", MU_IRON, GAMMA_IRON,
-    "Wire", MU_0, ::complex(J_EXT, 0.0), OMEGA);
+  WeakFormSharedPtr<double> wf(new CustomWeakForm ("Air", MU_0, "Iron", MU_IRON, GAMMA_IRON,
+    "Wire", MU_0, ::complex(J_EXT, 0.0), OMEGA));
 
   // Initialize coarse and reference mesh solution.
   MeshFunctionSharedPtr< ::complex> sln(new Hermes::Hermes2D::Solution< ::complex>());
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
-  DiscreteProblem< ::complex> dp(&wf, space);
+  DiscreteProblem< ::complex> dp(wf, space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver< ::complex> newton(&dp);

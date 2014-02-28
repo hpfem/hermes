@@ -35,13 +35,13 @@ namespace Hermes
       {
       public:
         Limiter(SpaceSharedPtr<Scalar> space, Scalar* solution_vector);
-        Limiter(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Scalar* solution_vector);
+        Limiter(SpaceSharedPtrVector<Scalar> spaces, Scalar* solution_vector);
         virtual ~Limiter();
 
         /// Get the zero-th solution.
         MeshFunctionSharedPtr<Scalar> get_solution();
         /// Get all solutions.
-        void get_solutions(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions);
+        void get_solutions(MeshFunctionSharedPtrVector<Scalar> solutions);
         /// Get changed element ids.
         Hermes::vector<int> get_changed_element_ids() const;
 
@@ -57,9 +57,9 @@ namespace Hermes
 
       protected:
         int component_count;
-        Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
+        SpaceSharedPtrVector<Scalar> spaces;
         Scalar* solution_vector;
-        Hermes::vector<MeshFunctionSharedPtr<Scalar> > limited_solutions;
+        MeshFunctionSharedPtrVector<Scalar> limited_solutions;
         Hermes::vector<int> changed_element_ids;
 
         virtual void process() = 0;
@@ -123,7 +123,7 @@ namespace Hermes
         /// \param[in] number_of_integrals Number of results (expressions) evaluated. The method integral will get the array result allocated according to this parameter.
         /// 
         IntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);
-        IntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals);
+        IntegralCalculator(MeshFunctionSharedPtrVector<Scalar> source_functions, int number_of_integrals);
 
         /// Main method returning the value(s).
         /// \return The values (more values at once for saving time with initialization etc.)
@@ -142,7 +142,7 @@ namespace Hermes
         virtual void order(Func<Hermes::Ord> **fns, Hermes::Ord* result) = 0;
       
       protected:
-        Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions;
+        MeshFunctionSharedPtrVector<Scalar> source_functions;
         int number_of_integrals;
 
         void add_results(Scalar* results_local, Scalar* results);
@@ -154,7 +154,7 @@ namespace Hermes
       {
       public:
         VolumetricIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);
-        VolumetricIntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals);
+        VolumetricIntegralCalculator(MeshFunctionSharedPtrVector<Scalar> source_functions, int number_of_integrals);
 
         /// Main method returning the value.
         /// Not designed to be overriden.
@@ -168,7 +168,7 @@ namespace Hermes
       {
       public:
         SurfaceIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);
-        SurfaceIntegralCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals);
+        SurfaceIntegralCalculator(MeshFunctionSharedPtrVector<Scalar> source_functions, int number_of_integrals);
 
         /// Main method returning the value.
         /// Not designed to be overriden.

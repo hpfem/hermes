@@ -38,6 +38,9 @@ namespace Hermes
       Hermes::Hermes2D::Solution<Scalar>* get_solution();
     };
 
+    template <typename Scalar>
+    using MeshFunctionSharedPtrVector = Hermes::vector<MeshFunctionSharedPtr<Scalar> >;
+
     /** \defgroup meshFunctions Mesh functions
     * \brief Collection of classes that represent various functions of the mesh coordinates, i.e. defined on the Mesh.
     * These comprise solutions, exact &amp; initial solutions, filters (functions of the solutions) etc.
@@ -88,7 +91,7 @@ namespace Hermes
 
       /// Adds another mesh function on the given space.
       /// ! Resulting mesh function is a solution.
-      virtual void add(MeshFunctionSharedPtr<Scalar> other_mesh_function, SpaceSharedPtr<Scalar> target_space);
+      virtual void add(MeshFunctionSharedPtr<Scalar>& other_mesh_function, SpaceSharedPtr<Scalar> target_space);
 
       /// Return the approximate maximum value of this instance.
       virtual Scalar get_approx_max_value(int item = H2D_FN_VAL_0);
