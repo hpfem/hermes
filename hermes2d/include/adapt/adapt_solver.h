@@ -27,6 +27,29 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    class HERMES_API AdaptSolverCriterion
+    {
+    public:
+      AdaptSolverCriterion();
+      virtual bool done(double error, int iteration) = 0;
+    };
+
+    class HERMES_API AdaptSolverCriterionErrorThreshold : public AdaptSolverCriterion
+    {
+    public:
+      AdaptSolverCriterionErrorThreshold(double error_threshold);
+      virtual bool done(double error, int iteration);
+      double error_threshold;
+    };
+
+    class HERMES_API AdaptSolverCriterionFixed : public AdaptSolverCriterion
+    {
+    public:
+      AdaptSolverCriterionFixed(int refinement_levels);
+      virtual bool done(double error, int iteration);
+      int refinement_levels;
+    };
+
     /// A complete adaptivity solver class handling the matrix reuse.
     /// \ingroup g_adapt
     template<typename Scalar, typename SolverType>
@@ -37,8 +60,8 @@ namespace Hermes
     {
     public:
       /// Constructor.
-      AdaptSolver(SpaceSharedPtrVector<Scalar> initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy, RefinementSelectors::SelectorVector<Scalar> selectors, double threshold);
-      AdaptSolver(SpaceSharedPtr<Scalar> initial_space, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy, RefinementSelectors::Selector<Scalar>* selector, double threshold);
+      AdaptSolver(SpaceSharedPtrVector<Scalar> initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::SelectorVector<Scalar> selectors, AdaptSolverCriterion* stopping_criterion_global);
+      AdaptSolver(SpaceSharedPtr<Scalar> initial_space, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::Selector<Scalar>* selector, AdaptSolverCriterion* stopping_criterion_global);
 
       /// Common code for the constructors.
       void init();
@@ -61,21 +84,24 @@ namespace Hermes
       /// Get i-th solution.
       MeshFunctionSharedPtr<Scalar> get_ref_sln(int index);
 
+      /// Switch visualization on / off.
+      void switch_visualization(bool on_off);
+
       /// Setters.
       void set_initial_spaces(SpaceSharedPtrVector<Scalar>);
       void set_wf(WeakFormSharedPtr<Scalar>);
       void set_error_calculator(ErrorCalculator<Scalar>*);
-      void set_strategy(AdaptivityStoppingCriterion<Scalar>*);
+      void set_stopping_criterion_single_step(AdaptivityStoppingCriterion<Scalar>*);
       void set_selectors(RefinementSelectors::SelectorVector<Scalar>);
-      void set_threshold(double threshold);
+      void set_stopping_criterion_global(AdaptSolverCriterion* stopping_criterion_global);
 
       /// Getters.
       SpaceSharedPtrVector<Scalar> get_initial_spaces();
       WeakFormSharedPtr<Scalar> get_wf();
       ErrorCalculator<Scalar>* get_error_calculator();
-      AdaptivityStoppingCriterion<Scalar>* get_strategy();
+      AdaptivityStoppingCriterion<Scalar>* get_stopping_criterion_single_step();
       RefinementSelectors::SelectorVector<Scalar> get_selectors();
-      double get_threshold();
+      AdaptSolverCriterion* get_stopping_criterion_global();
 
     private:
       
@@ -83,12 +109,20 @@ namespace Hermes
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "AdaptSolver"; }
 
-      /// Initialize and de-initialize data for one solution (one adaptivity loop)
+      /// Initialize data for one solution (one adaptivity loop)
       void init_solving();
+      
+      /// De-initialize data for one solution (one adaptivity loop)
       void deinit_solving();
 
-      /// The threshold for the loop to stop - the quantity measured is the total error as measured by the provided instance of error calculator.
-      double threshold;
+      /// Fill the array element_ids_to_reassemble.
+      void mark_elements_to_reassemble();
+
+      /// (Optional) visualization.
+      void visualize(std::vector<SpaceSharedPtr<Scalar> >& ref_spaces);
+
+      /// The stopping_criterion_global for the loop to stop - the quantity measured is the total error as measured by the provided instance of error calculator.
+      AdaptSolverCriterion* stopping_criterion_global;
 
       /// Information if the solve method is running.
       /// Used for banning descendants of this class to perform some actions 
@@ -112,7 +146,7 @@ namespace Hermes
       /// Internal structures - Stopping criterion for each refinement step.
       /// This class changes this instance during the solve() method: no.
       /// Can user change this during adaptation: [will be used from the following step onwards].
-      AdaptivityStoppingCriterion<Scalar>* strategy;
+      AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step;
 
       /// Internal structures - Stopping criterion for each refinement step.
       /// This class changes this instance during the solve() method: no.
@@ -123,6 +157,11 @@ namespace Hermes
       MeshFunctionSharedPtrVector<Scalar> ref_slns;
       MeshFunctionSharedPtrVector<Scalar> slns;
 
+      /// Views - used only if visualization is ON.
+      std::vector<Views::ScalarView*> scalar_views;
+      std::vector<Views::OrderView*> order_views;
+      std::vector<Views::BaseView<Scalar>*> base_views;
+
       /// Strictly private - Adapt instance.
       Adapt<Scalar>* adaptivity_internal;
       
@@ -131,6 +170,12 @@ namespace Hermes
 
       /// Strictly private - counter.
       int adaptivity_step;
+
+      /// Strictly private - elements to reassemble.
+      std::vector<int> element_ids_to_reassemble;
+
+      /// use Hermes views to display stuff.
+      bool visualization;
     };
   }
 }

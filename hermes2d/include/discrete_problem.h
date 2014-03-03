@@ -99,6 +99,10 @@ namespace Hermes
       /// Get all spaces as a std::vector.
       SpaceSharedPtrVector<Scalar> get_spaces();
 
+      /// Experimental.
+      typedef void refine_states_fn(Traverse::State**& states, int& num_states);
+      refine_states_fn refine_states;
+
     protected:
       /// Initialize states.
       void init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, MeshSharedPtrVector& meshes);

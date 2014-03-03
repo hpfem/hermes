@@ -18,21 +18,48 @@
 #include "solver/newton_solver.h"
 #include "solver/picard_solver.h"
 #include "ogprojection.h"
+#include "views/scalar_view.h"
+#include "views/base_view.h"
+#include "views/order_view.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
+    AdaptSolverCriterion::AdaptSolverCriterion()
+    {
+    }
+
+    AdaptSolverCriterionErrorThreshold::AdaptSolverCriterionErrorThreshold(double error_tolerance) : AdaptSolverCriterion()
+    {
+      this->error_threshold = error_threshold;
+    }
+
+    bool AdaptSolverCriterionErrorThreshold::done(double error, int iteration)
+    {
+      return error < this->error_threshold;
+    }
+
+    AdaptSolverCriterionFixed::AdaptSolverCriterionFixed(int refinement_levels) : AdaptSolverCriterion()
+    {
+      this->refinement_levels = refinement_levels;
+    }
+
+    bool AdaptSolverCriterionFixed::done(double error, int iteration)
+    {
+      return iteration >= this->refinement_levels;
+    }
+
     template<typename Scalar, typename SolverType>
-    AdaptSolver<Scalar, SolverType>::AdaptSolver(SpaceSharedPtrVector<Scalar> initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy, RefinementSelectors::SelectorVector<Scalar> selectors, double threshold)
-      : spaces(initial_spaces), wf(wf), error_calculator(error_calculator), strategy(strategy), selectors(selectors), threshold(threshold)
+    AdaptSolver<Scalar, SolverType>::AdaptSolver(SpaceSharedPtrVector<Scalar> initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::SelectorVector<Scalar> selectors, AdaptSolverCriterion* stopping_criterion_global)
+      : spaces(initial_spaces), wf(wf), error_calculator(error_calculator), stopping_criterion_single_step(stopping_criterion_single_step), selectors(selectors), stopping_criterion_global(stopping_criterion_global)
     {
       this->init();
     }
 
     template<typename Scalar, typename SolverType>
-    AdaptSolver<Scalar, SolverType>::AdaptSolver(SpaceSharedPtr<Scalar> initial_space, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy, RefinementSelectors::Selector<Scalar>* selector, double threshold)
-      : wf(wf), strategy(strategy), error_calculator(error_calculator), threshold(threshold)
+    AdaptSolver<Scalar, SolverType>::AdaptSolver(SpaceSharedPtr<Scalar> initial_space, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::Selector<Scalar>* selector, AdaptSolverCriterion* stopping_criterion_global)
+      : wf(wf), stopping_criterion_single_step(stopping_criterion_single_step), error_calculator(error_calculator), stopping_criterion_global(stopping_criterion_global)
     {
       this->spaces.push_back(initial_space);
       this->selectors.push_back(selector);
@@ -40,18 +67,37 @@ namespace Hermes
       this->init();
     }
 
+    static int currentAdaptSolverIteration;
+    static int currentAdaptSolverRefinedElementsCount;
+    static std::vector<int>* currentAdaptSolverRefinedElementsCount;
+
+    void get_states_to_reassemble(Traverse::State**& states, int& num_states)
+    {
+
+    }
+
     template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::init()
     {
       this->solver = new SolverType(wf, spaces);
-      this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, strategy);
+      this->solver->dp->refine_states = &get_states_to_reassemble;
+      this->solver->output_matrix();
+      this->solver->set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
+      this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
       this->solve_method_running = false;
+      this->visualization = false;
     }
 
     template<typename Scalar, typename SolverType>
     AdaptSolver<Scalar, SolverType>:: ~AdaptSolver()
     {
       delete this->solver;
+    }
+
+    template<typename Scalar, typename SolverType>
+    void AdaptSolver<Scalar, SolverType>::switch_visualization(bool on_off)
+    {
+      this->visualization = on_off;
     }
 
     template<typename Scalar, typename SolverType>
@@ -65,18 +111,40 @@ namespace Hermes
       {
         ref_slns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>));
         slns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>));
+        if (this->visualization)
+        {
+          this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * 410, 10, 400, 300)));
+          this->scalar_views.back()->set_title("Reference solution #%i", i);
+
+          this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 410, 340, 400, 300)));
+          this->base_views.back()->set_title("Reference space #%i - basis", i);
+
+          this->order_views.push_back(new Views::OrderView("", new Views::WinGeom(i * 410, 670, 400, 300)));
+          this->order_views.back()->set_title("Reference space #%i - orders", i);
+        }
       }
+
+      this->element_ids_to_reassemble.clear();
     }
 
     template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::deinit_solving()
     {
       this->solve_method_running = false;
+
+      if (this->visualization)
+      for (int i = 0; i < this->spaces.size(); i++)
+      {
+        delete this->scalar_views[i];
+        delete this->base_views[i];
+        delete this->order_views[i];
+      }
     }
 
     template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::solve()
     {
+      this->init_solving();
       do
       {
         this->info("AdaptSolver step %d:", this->adaptivity_step);
@@ -97,11 +165,15 @@ namespace Hermes
         // Initialize reference problem.
         this->info("Solving on reference mesh.");
 
+
         // Perform solution.
         this->solver->solve();
 
         // Translate the resulting coefficient vector into the instance of Solution.
         Solution<Scalar>::vector_to_solutions(solver->get_sln_vector(), ref_spaces, ref_slns);
+
+        if (this->visualization)
+          this->visualize(ref_spaces);
 
         // Project the fine mesh solution onto the coarse mesh.
         this->info("Projecting reference solution on coarse mesh.");
@@ -113,8 +185,8 @@ namespace Hermes
         double error = this->error_calculator->get_total_error_squared() * 100;
         this->info("The error estimate: %f.", error);
 
-        // If err_est too large, adapt the mesh->
-        if (error < this->threshold)
+        // If err_est too large, adapt the mesh.
+        if (this->stopping_criterion_global->done(error, this->adaptivity_step))
         {
           this->deinit_solving();
           return;
@@ -123,12 +195,50 @@ namespace Hermes
         {
           this->info("Adapting coarse mesh.");
           this->adaptivity_internal->adapt(this->selectors);
+          this->mark_elements_to_reassemble();
         }
 
         this->adaptivity_step++;
       } while (true);
 
       this->deinit_solving();
+    }
+
+    template<typename Scalar, typename SolverType>
+    void AdaptSolver<Scalar, SolverType>::get_states_to_reassemble(Traverse::State**& states, int& num_states)
+    {
+      this->element_ids_to_reassemble.clear();
+      for (int i = 0; i < this->adaptivity_internal->elements_to_refine_count; i++)
+      {
+        Element* current_element = current_state->e[this->elements_to_refine[i].comp];
+        if (this->elements_to_refine[i].id == current_element->id || (current_element->parent && this->elements_to_refine[i].id == current_element->parent->id))
+          info_array[current_state->e[this->num]->id] = this->elements_to_refine[i].split;
+      }
+    }
+
+    template<typename Scalar, typename SolverType>
+    void AdaptSolver<Scalar, SolverType>::mark_elements_to_reassemble()
+    {
+      this->element_ids_to_reassemble.clear();
+      for (int i = 0; i < this->adaptivity_internal->elements_to_refine_count; i++)
+      {
+        Element* current_element = current_state->e[this->elements_to_refine[i].comp];
+        if (this->elements_to_refine[i].id == current_element->id || (current_element->parent && this->elements_to_refine[i].id == current_element->parent->id))
+          info_array[current_state->e[this->num]->id] = this->elements_to_refine[i].split;
+      }
+    }
+
+    template<typename Scalar, typename SolverType>
+    void AdaptSolver<Scalar, SolverType>::visualize(std::vector<SpaceSharedPtr<Scalar> >& ref_spaces)
+    {
+      for (int i = 0; i < this->spaces.size(); i++)
+      {
+        this->scalar_views[i]->show(this->ref_slns[i]);
+        this->base_views[i]->show(ref_spaces[i]);
+        this->order_views[i]->show(ref_spaces[i]);
+      }
+
+      Views::View::wait_for_keypress();
     }
 
     template<typename Scalar, typename SolverType>
@@ -164,15 +274,15 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    double AdaptSolver<Scalar, SolverType>::get_threshold()
+    AdaptSolverCriterion* AdaptSolver<Scalar, SolverType>::get_stopping_criterion_global()
     {
-      return this->threshold;
+      return this->stopping_criterion_global;
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::set_threshold(double threshold)
+    void AdaptSolver<Scalar, SolverType>::set_stopping_criterion_global(AdaptSolverCriterion* stopping_criterion_global)
     {
-      this->threshold = threshold;
+      this->stopping_criterion_global = stopping_criterion_global;
     }
 
     template<typename Scalar, typename SolverType>
@@ -199,10 +309,10 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::set_strategy(AdaptivityStoppingCriterion<Scalar>* strategy)
+    void AdaptSolver<Scalar, SolverType>::set_stopping_criterion_single_step(AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step)
     {
-      this->strategy = strategy;
-      this->adaptivity_internal->set_strategy(strategy);
+      this->stopping_criterion_single_step = stopping_criterion_single_step;
+      this->adaptivity_internal->set_strategy(stopping_criterion_single_step);
     }
 
     template<typename Scalar, typename SolverType>
@@ -230,9 +340,9 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    AdaptivityStoppingCriterion<Scalar>* AdaptSolver<Scalar, SolverType>::get_strategy()
+    AdaptivityStoppingCriterion<Scalar>* AdaptSolver<Scalar, SolverType>::get_stopping_criterion_single_step()
     {
-      return this->strategy;
+      return this->stopping_criterion_single_step;
     }
 
     template<typename Scalar, typename SolverType>

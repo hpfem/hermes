@@ -53,6 +53,8 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init(bool to_set, bool dirichlet_lift_accordingly)
     {
+      this->refine_states = nullptr;
+
       this->spaces_size = this->spaces.size();
 
       this->nonlinear = !to_set;
@@ -300,6 +302,8 @@ namespace Hermes
       Traverse::State** states;
       MeshSharedPtrVector meshes;
       this->init_assembling(states, num_states, u_ext_sln, meshes);
+      if(this->refine_states)
+        this->refine_states(states, num_states);
 
       // Creating matrix sparse structure.
       // If there are no states, return.

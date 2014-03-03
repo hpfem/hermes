@@ -50,6 +50,12 @@ namespace Hermes
         void show(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0,
           MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0);
 
+        void show(MeshFunctionSharedPtr<std::complex<double> > sln, int item = H2D_FN_VAL_0,
+          MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0)
+        {
+          throw Exceptions::Exception("Visualization of complex 2D solution is not possible, please use a filter that converts the solution into a real function, then display that one.");
+        }
+
         void show_linearizer_data(double eps, int item = H2D_FN_VAL_0);
 
         inline void show_mesh(bool show = true) { show_edges = show; refresh(); }
