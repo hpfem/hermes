@@ -76,8 +76,9 @@ namespace Hermes
       EXPORT_FORMAT_MATRIX_MARKET = 3,
 #ifdef WITH_BSON
       /// \brief Own binary BSON-based import-export
-      EXPORT_FORMAT_BSON = 2
+      EXPORT_FORMAT_BSON = 2,
 #endif
+      EXPORT_FORMAT_MATLAB_SIMPLE = 5
     };
   }
 }

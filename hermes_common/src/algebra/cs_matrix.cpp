@@ -492,6 +492,27 @@ namespace Hermes
                                       fclose(file);
       }
         break;
+
+      case EXPORT_FORMAT_MATLAB_SIMPLE:
+      {
+                                        FILE* file = fopen(filename, "w");
+                                        if (invert_storage)
+                                          this->switch_orientation();
+                                        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n",
+                                          this->size, this->size, nnz, nnz);
+                                        for (unsigned int j = 0; j < this->size; j++)
+                                        for (int i = Ap[j]; i < Ap[j + 1]; i++)
+                                        {
+                                          fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
+                                          Hermes::Helpers::fprint_num(file, Ax[i], number_format);
+                                          fprintf(file, "\n");
+                                        }
+                                        fprintf(file, "];\n");
+                                        if (invert_storage)
+                                          this->switch_orientation();
+                                        fclose(file);
+      }
+        break;
 #ifdef WITH_BSON
       case EXPORT_FORMAT_BSON:
       {

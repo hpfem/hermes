@@ -88,6 +88,7 @@
 #include "refinement_selectors/hcurl_proj_based_selector.h"
 
 #include "adapt/adapt.h"
+#include "adapt/adapt_solver.h"
 #include "adapt/error_calculator.h"
 #include "adapt/error_thread_calculator.h"
 #include "adapt/kelly_type_adapt.h"
