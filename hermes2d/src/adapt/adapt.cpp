@@ -519,7 +519,7 @@ namespace Hermes
           continue;
 
         //select a refinement used by all components that share a mesh which is about to be refined
-        int selected_refinement = elem_ref.split;
+        RefinementType selected_refinement = elem_ref.split;
         for (int j = 0; j < this->num; j++)
         {
           if (selected_refinement == H2D_REFINEMENT_H)
@@ -535,7 +535,7 @@ namespace Hermes
               //select more complicated refinement
               if ((elem_ref_ii->split != selected_refinement) && (elem_ref_ii->split != H2D_REFINEMENT_P))
               {
-                if ((elem_ref_ii->split == H2D_REFINEMENT_ANISO_H || elem_ref_ii->split == H2D_REFINEMENT_ANISO_V) && selected_refinement == H2D_REFINEMENT_P)
+                if ((elem_ref_ii->split == H2D_REFINEMENT_H_ANISO_H || elem_ref_ii->split == H2D_REFINEMENT_H_ANISO_V) && selected_refinement == H2D_REFINEMENT_P)
                   selected_refinement = elem_ref_ii->split;
                 else
                   selected_refinement = H2D_REFINEMENT_H;
@@ -668,12 +668,12 @@ namespace Hermes
       {
         if (e->active)
         {
-          space->get_mesh()->refine_element_id(elem_ref.id, (elem_ref.split == H2D_REFINEMENT_ANISO_H ? 1 : 2));
+          space->get_mesh()->refine_element_id(elem_ref.id, (elem_ref.split == H2D_REFINEMENT_H_ANISO_H ? 1 : 2));
         }
         for (int j = 0; j < 2; j++)
         {
-          space->set_element_order_internal(e->sons[(elem_ref.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2]->id, elem_ref.refinement_polynomial_order[j]);
-          space->edata[e->sons[(elem_ref.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2]->id].changed_in_last_adaptation = true;
+          space->set_element_order_internal(e->sons[(elem_ref.split == H2D_REFINEMENT_H_ANISO_H) ? j : j + 2]->id, elem_ref.refinement_polynomial_order[j]);
+          space->edata[e->sons[(elem_ref.split == H2D_REFINEMENT_H_ANISO_H) ? j : j + 2]->id].changed_in_last_adaptation = true;
         }
       }
     }

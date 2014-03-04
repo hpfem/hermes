@@ -1,10 +1,44 @@
 #include "element_to_refine.h"
-#include "refinement_selectors/candidates.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
+    bool HERMES_API is_refin_aniso(const RefinementType refin_type)
+    {
+      if (refin_type == H2D_REFINEMENT_H_ANISO_H || refin_type == H2D_REFINEMENT_H_ANISO_V)
+        return true;
+      else
+        return false;
+    }
+
+    int HERMES_API get_refin_sons(const RefinementType refin_type)
+    {
+      switch (refin_type)
+      {
+      case H2D_REFINEMENT_P: return 1; break;
+      case H2D_REFINEMENT_H: return 4; break;
+      case H2D_REFINEMENT_H_ANISO_H:
+      case H2D_REFINEMENT_H_ANISO_V: return 2; break;
+      default: throw Hermes::Exceptions::Exception("Invalid refinement type %d", (int)refin_type); return -1;
+      }
+    }
+
+    const HERMES_API std::string get_refin_str(const RefinementType refin_type)
+    {
+      switch (refin_type)
+      {
+      case H2D_REFINEMENT_P: return "P"; break;
+      case H2D_REFINEMENT_H: return "H"; break;
+      case H2D_REFINEMENT_H_ANISO_H: return "AnisoH"; break;
+      case H2D_REFINEMENT_H_ANISO_V: return "AnisoV"; break;
+      default:
+        std::stringstream str;
+        str << "Unknown(" << refin_type << ")";
+        return str.str();
+      }
+    }
+
     ElementToRefine::ElementToRefine() : id(-1), comp(-1)
     {
     };

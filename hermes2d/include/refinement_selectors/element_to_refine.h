@@ -22,11 +22,12 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    namespace RefinementSelectors{
-      template<typename Scalar> class Selector;
-      template<typename Scalar> class HOnlySelector;
-      template<typename Scalar> class POnlySelector;
-      template<typename Scalar> class OptimumSelector;
+    /// Possible refinements of an element.
+    enum RefinementType {
+      H2D_REFINEMENT_P = 0, ///< P-refinement.
+      H2D_REFINEMENT_H = 1, ///< H-refinement.
+      H2D_REFINEMENT_H_ANISO_H = 2, ///< ANISO-refienement. The element is split along the horizontal axis. Quadrilaterals only.
+      H2D_REFINEMENT_H_ANISO_V = 3 ///< ANISO-refienement. The element is split along the vertical axis. Quadrilaterals only.
     };
 
     /// A refinement record. \ingroup g_adapt
@@ -53,7 +54,7 @@ namespace Hermes
       /// An index of the component.
       int comp;
       /// Proposed refinement. Possible values are defined in the enum ::RefinementType.
-      int split;
+      RefinementType split;
       /// Encoded orders of sons.
       int refinement_polynomial_order[H2D_MAX_ELEMENT_SONS];
       /// Encoded orders of the best refinement of a certaint type.
@@ -72,12 +73,11 @@ namespace Hermes
       *  \param[in] src A source arrapy. */
       static void copy_orders(int* dest, const int* src);
       static void copy_errors(double* dest, const double* src);
+    private:
+      /// This array is internal.
+      bool refinement_polynomial_order_changed[H2D_MAX_ELEMENT_SONS];
       template<typename T> friend class Adapt;
-      template<typename T> friend class ErrorCalculator;
-      template<typename T> friend class RefinementSelectors::Selector;
-      template<typename T> friend class RefinementSelectors::HOnlySelector;
-      template<typename T> friend class RefinementSelectors::POnlySelector;
-      template<typename T> friend class RefinementSelectors::OptimumSelector;
+      template<typename T, typename S> friend class AdaptSolver;
     };
   }
 }

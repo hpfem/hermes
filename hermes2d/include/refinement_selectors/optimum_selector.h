@@ -81,7 +81,7 @@ namespace Hermes
         *  \param[in] last_order The upper boundery of a range in a form of an encoded order.
         *  \param[in] split A refinement, see the enum RefinementTypes.
         *  \param[in] iso_p True if both orders (horizontal and vertical) should be modified uniformly. Used in a case of a triangle. */
-        void append_candidates_split(std::vector<Cand>& candidates, const int start_quad_order, const int last_order, const int split, bool iso_p);
+        void append_candidates_split(std::vector<Cand>& candidates, const int start_quad_order, const int last_order, const RefinementType split, bool iso_p);
 
         /// Fill a list of candidates.
         /** Override to generate or adjust generated candidates. The method has to initialize the array OptimumSelector::candidates.

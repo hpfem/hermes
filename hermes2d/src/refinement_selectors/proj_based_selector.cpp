@@ -187,13 +187,13 @@ namespace Hermes
               error_squared *= 0.25; //element of a candidate occupies 1/4 of the reference domain defined over a candidate
               break;
 
-            case H2D_REFINEMENT_ANISO_H:
-            case H2D_REFINEMENT_ANISO_V:
+            case H2D_REFINEMENT_H_ANISO_H:
+            case H2D_REFINEMENT_H_ANISO_V:
             {
                                          error_squared = 0.0;
                                          for (int j = 0; j < 2; j++)
                                          {
-                                           c.errors[j] = anisoerr[(c.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2][H2D_GET_H_ORDER(c.p[j])][H2D_GET_V_ORDER(c.p[j])];
+                                           c.errors[j] = anisoerr[(c.split == H2D_REFINEMENT_H_ANISO_H) ? j : j + 2][H2D_GET_H_ORDER(c.p[j])][H2D_GET_V_ORDER(c.p[j])];
                                            error_squared += c.errors[j];
                                          }
                                          error_squared *= 0.5;  //element of a candidate occupies 1/2 of the reference domain defined over a candidate
@@ -220,8 +220,8 @@ namespace Hermes
           switch (c.split)
           {
           case H2D_REFINEMENT_H: c.error *= error_weight_h; break;
-          case H2D_REFINEMENT_ANISO_H:
-          case H2D_REFINEMENT_ANISO_V: c.error *= error_weight_aniso; break;
+          case H2D_REFINEMENT_H_ANISO_H:
+          case H2D_REFINEMENT_H_ANISO_V: c.error *= error_weight_aniso; break;
           case H2D_REFINEMENT_P: c.error *= error_weight_p; break;
           default: throw Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d", c.split, i);
           }

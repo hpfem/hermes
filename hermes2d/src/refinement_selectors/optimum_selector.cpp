@@ -299,7 +299,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::append_candidates_split(std::vector<Cand>& candidates, const int start_order, const int last_order, const int split, bool iso_p)
+      void OptimumSelector<Scalar>::append_candidates_split(std::vector<Cand>& candidates, const int start_order, const int last_order, const RefinementType split, bool iso_p)
       {
         //check whether end orders are not lower than start orders
         if(last_order < 0 || start_order < 0)
@@ -424,8 +424,8 @@ namespace Hermes
             order = std::min(H2D_GET_H_ORDER(last_order_vt), H2D_GET_V_ORDER(last_order_vt));
             last_order_vt = H2D_MAKE_QUAD_ORDER(order, order);
           }
-          append_candidates_split(candidates, start_order_hz, last_order_hz, H2D_REFINEMENT_ANISO_H, iso_p);
-          append_candidates_split(candidates, start_order_vt, last_order_vt, H2D_REFINEMENT_ANISO_V, iso_p);
+          append_candidates_split(candidates, start_order_hz, last_order_hz, H2D_REFINEMENT_H_ANISO_H, iso_p);
+          append_candidates_split(candidates, start_order_vt, last_order_vt, H2D_REFINEMENT_H_ANISO_V, iso_p);
         }
 
         return candidates;
@@ -440,7 +440,7 @@ namespace Hermes
           Cand& cand = candidates[i];
           if(cand.split == H2D_REFINEMENT_H) info = &info_h;
           else if(cand.split == H2D_REFINEMENT_P) info = &info_p;
-          else if(cand.split == H2D_REFINEMENT_ANISO_H || cand.split == H2D_REFINEMENT_ANISO_V) info = &info_aniso;
+          else if(cand.split == H2D_REFINEMENT_H_ANISO_H || cand.split == H2D_REFINEMENT_H_ANISO_V) info = &info_aniso;
           else { throw Hermes::Exceptions::Exception("Invalid candidate type: %d.", cand.split); };
 
           //evaluate elements of candidates
@@ -512,7 +512,7 @@ namespace Hermes
                 c.dofs -= 4 + 3; //edge vertex + central vertex
               break;
 
-            case H2D_REFINEMENT_ANISO_H:
+            case H2D_REFINEMENT_H_ANISO_H:
               c.dofs = num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[0]) + 1][H2D_GET_V_ORDER(c.p[0]) + 1][H2DSI_ANY];
               c.dofs += num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[1]) + 1][H2D_GET_V_ORDER(c.p[1]) + 1][H2DSI_ANY];
               c.dofs -= num_shapes[HERMES_MODE_QUAD][std::min(H2D_GET_H_ORDER(c.p[0]), H2D_GET_H_ORDER(c.p[1])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_HORIZ_EDGE] / 2; //shared edge functions
@@ -520,7 +520,7 @@ namespace Hermes
                 c.dofs -= 2; //shared vertex functions
               break;
 
-            case H2D_REFINEMENT_ANISO_V:
+            case H2D_REFINEMENT_H_ANISO_V:
               c.dofs = num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[0]) + 1][H2D_GET_V_ORDER(c.p[0]) + 1][H2DSI_ANY];
               c.dofs += num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[1]) + 1][H2D_GET_V_ORDER(c.p[1]) + 1][H2DSI_ANY];
               c.dofs -= num_shapes[HERMES_MODE_QUAD][H2DRS_ORDER_ANY + 1][std::min(H2D_GET_V_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[1])) + 1][H2DSI_VERT_EDGE] / 2; //shared edge functions
@@ -618,18 +618,18 @@ namespace Hermes
 
         for(int i = 0; i < num_cands; i++)
         {
-          if(candidates[i].split == H2D_REFINEMENT_ANISO_H)
+          if(candidates[i].split == H2D_REFINEMENT_H_ANISO_H)
           {
-            best_candidates_specific_type[H2D_REFINEMENT_ANISO_H] = &candidates[i];
+            best_candidates_specific_type[H2D_REFINEMENT_H_ANISO_H] = &candidates[i];
             break;
           }
         }
 
         for(int i = 0; i < num_cands; i++)
         {
-          if(candidates[i].split == H2D_REFINEMENT_ANISO_V)
+          if(candidates[i].split == H2D_REFINEMENT_H_ANISO_V)
           {
-            best_candidates_specific_type[H2D_REFINEMENT_ANISO_V] = &candidates[i];
+            best_candidates_specific_type[H2D_REFINEMENT_H_ANISO_V] = &candidates[i];
             break;
           }
         }
