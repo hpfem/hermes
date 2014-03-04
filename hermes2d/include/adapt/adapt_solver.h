@@ -116,7 +116,13 @@ namespace Hermes
       void deinit_solving();
 
       /// Fill the array element_ids_to_reassemble.
+      /// This is in fact the main method responsible of any re-use logic:
+      /// - not only it fills the array with elements that were directly changed in adaptivity (that is easy)
+      /// - it has to also correctly identify all other elements that need to be reassembled (that is not easy).
       void mark_elements_to_reassemble();
+
+      /// Recursive function marking all elements between vertices v1 and v2 on the mesh[component].
+      void mark_elements_to_reassemble_smaller_neighbors(int v1, int v2, int component);
 
       /// (Optional) visualization.
       void visualize(std::vector<SpaceSharedPtr<Scalar> >& ref_spaces);
@@ -172,7 +178,11 @@ namespace Hermes
       int adaptivity_step;
 
       /// Strictly private - elements to reassemble.
-      std::vector<int> element_ids_to_reassemble;
+      /// Internal data: std::pair: [0] - element id, [1] - component (for multimesh).
+      std::vector<std::pair<int, int> > elements_to_reassemble;
+
+      /// Strictly private - vector of Meshes - just optimization - selectable by the spaces as well.
+      MeshSharedPtrVector meshes;
 
       /// use Hermes views to display stuff.
       bool visualization;

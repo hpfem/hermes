@@ -166,7 +166,7 @@ namespace Hermes
 
       if (edata == nullptr)
       {
-        throw Hermes::Exceptions::Exception("nullptr edata detected in Space<Scalar>::get_element_order().");
+        throw Hermes::Exceptions::Exception("nullptr edata detected in Space<Scalar>.");
         return false;
       }
 
@@ -869,7 +869,7 @@ namespace Hermes
 
       if (edata == nullptr)
       {
-        throw Hermes::Exceptions::Exception("nullptr edata detected in Space<Scalar>::get_element_order().");
+        throw Hermes::Exceptions::Exception("nullptr edata detected in Space<Scalar>::assign_dofs().");
         return false;
       }
 

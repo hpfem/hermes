@@ -100,7 +100,10 @@ namespace Hermes
       SpaceSharedPtrVector<Scalar> get_spaces();
 
       /// Experimental.
-      typedef void refine_states_fn(Traverse::State**& states, int& num_states);
+      typedef void (*refine_states_fn)(Traverse::State**& states, int& num_states);
+      void set_refine_states_fn(refine_states_fn fn) {
+        this->refine_states = fn;
+      }
       refine_states_fn refine_states;
 
     protected:

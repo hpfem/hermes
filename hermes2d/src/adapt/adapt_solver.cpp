@@ -67,23 +67,9 @@ namespace Hermes
       this->init();
     }
 
-    static int currentAdaptSolverIteration;
-    static int currentAdaptSolverRefinedElementsCount;
-    static std::vector<int>* currentAdaptSolverRefinedElementsCount;
-
-    void get_states_to_reassemble(Traverse::State**& states, int& num_states)
-    {
-
-    }
-
     template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::init()
     {
-      this->solver = new SolverType(wf, spaces);
-      this->solver->dp->refine_states = &get_states_to_reassemble;
-      this->solver->output_matrix();
-      this->solver->set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
-      this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
       this->solve_method_running = false;
       this->visualization = false;
     }
@@ -98,6 +84,41 @@ namespace Hermes
     void AdaptSolver<Scalar, SolverType>::switch_visualization(bool on_off)
     {
       this->visualization = on_off;
+    }
+
+    static int currentAdaptSolverIteration;
+    static int currentSpaceSize;
+    static std::vector<std::pair<int, int> >* current_elements_to_reassemble;
+
+    void get_states_to_reassemble(Traverse::State**& states, int& num_states)
+    {
+      if (currentAdaptSolverIteration == 1)
+        return;
+
+      Traverse::State** new_states = malloc_with_check<Traverse::State*>(num_states, true);
+      int new_num_states = 0;
+      for (int state_i = 0; state_i < num_states; state_i++)
+      {
+        for (int space_i = 0; space_i < currentSpaceSize; space_i++)
+        {
+          bool added = false;
+          for (int to_reassemble_i = 0; to_reassemble_i < current_elements_to_reassemble->size(); to_reassemble_i++)
+          {
+            if (space_i == current_elements_to_reassemble->at(to_reassemble_i).second && states[state_i]->e[space_i]->id == current_elements_to_reassemble->at(to_reassemble_i).first)
+            {
+              new_states[new_num_states++] = Traverse::State::clone(states[state_i]);
+              added = true;
+              break;
+            }
+            if (added)
+              break;
+          }
+        }
+      }
+      free_with_check(states);
+      new_states = realloc_with_check<Traverse::State*>(new_states, new_num_states);
+      states = new_states;
+      num_states = new_num_states;
     }
 
     template<typename Scalar, typename SolverType>
@@ -124,7 +145,15 @@ namespace Hermes
         }
       }
 
-      this->element_ids_to_reassemble.clear();
+      this->solver = new SolverType(wf, spaces);
+      this->solver->dp->set_refine_states_fn(&get_states_to_reassemble);
+      this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
+
+      this->elements_to_reassemble.clear();
+
+      this->meshes.clear();
+      for (int i = 0; i < this->spaces.size(); i++)
+        this->meshes.push_back(this->spaces[i]->get_mesh());
     }
 
     template<typename Scalar, typename SolverType>
@@ -139,6 +168,9 @@ namespace Hermes
         delete this->base_views[i];
         delete this->order_views[i];
       }
+
+      delete this->adaptivity_internal;
+      delete this->solver;
     }
 
     template<typename Scalar, typename SolverType>
@@ -162,11 +194,13 @@ namespace Hermes
         // Set these to the solver.
         this->solver->set_spaces(ref_spaces);
 
-        // Initialize reference problem.
-        this->info("Solving on reference mesh.");
-
+        // Initialize the states handler.
+        currentAdaptSolverIteration = this->adaptivity_step;
+        currentSpaceSize = this->spaces.size();
+        current_elements_to_reassemble = &this->elements_to_reassemble;
 
         // Perform solution.
+        this->info("Solving on reference mesh.");
         this->solver->solve();
 
         // Translate the resulting coefficient vector into the instance of Solution.
@@ -205,26 +239,121 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::get_states_to_reassemble(Traverse::State**& states, int& num_states)
+    void AdaptSolver<Scalar, SolverType>::mark_elements_to_reassemble()
     {
-      this->element_ids_to_reassemble.clear();
+      this->elements_to_reassemble.clear();
       for (int i = 0; i < this->adaptivity_internal->elements_to_refine_count; i++)
       {
-        Element* current_element = current_state->e[this->elements_to_refine[i].comp];
-        if (this->elements_to_refine[i].id == current_element->id || (current_element->parent && this->elements_to_refine[i].id == current_element->parent->id))
-          info_array[current_state->e[this->num]->id] = this->elements_to_refine[i].split;
+        ElementToRefine* element_to_refine = &this->adaptivity_internal->elements_to_refine[i];
+        if (element_to_refine->id == -1)
+          continue;
+        RefinementType refinement_type = element_to_refine->split;
+        int component = element_to_refine->comp;
+        Element* e = this->meshes[component]->get_element_fast(element_to_refine->id);
+
+        if (refinement_type == H2D_REFINEMENT_H || refinement_type == H2D_REFINEMENT_H_ANISO_H || refinement_type == H2D_REFINEMENT_H_ANISO_V)
+        {
+          // Naturally, all element sons (in case of h-refinements) go to the array.
+          // The rest of the method's logic is about other elements that need to be added due to the refinement of this element.
+          for (int son_i = 0; son_i < H2D_MAX_ELEMENT_SONS; son_i++)
+          if (e->sons[son_i])
+            this->elements_to_reassemble.push_back(std::pair<int, int>(e->sons[son_i]->id, component));
+
+        }
+
+        if (refinement_type == H2D_REFINEMENT_P)
+        {
+          // Naturally, the element goes to the array.
+          // The rest of the method's logic is about other elements that need to be added due to the refinement of this element.
+          this->elements_to_reassemble.push_back(std::pair<int, int>(e->id, component));
+        }
+
+        // Now go through all edges and decide whether to add the neighbor(s) there or what.
+        for (int edge_i = 0; edge_i < e->nvert; edge_i++)
+        {
+          Node* en = e->en[edge_i];
+          // not boundary edges.
+          if (en->bnd)
+            continue;
+
+          // look for a direct neighbor.
+          int found_neighbor_id = -1;
+          if (en->elem[0] && en->elem[0]->id != e->id)
+            found_neighbor_id = en->elem[0]->id;
+          else
+          {
+            if (en->elem[1] && en->elem[1]->id != e->id)
+              found_neighbor_id = en->elem[1]->id;
+          }
+
+          // elements were originally of the same size
+          if (found_neighbor_id != -1)
+          {
+            // only add the neighbor if we are dealing with a p-refinement towards the edge (in the sense that the edge has not been split).
+            if (refinement_type == H2D_REFINEMENT_P && element_to_refine->refinement_polynomial_order_changed[0])
+              this->elements_to_reassemble.push_back(std::pair<int, int>(found_neighbor_id, component));
+            if (refinement_type == H2D_REFINEMENT_H_ANISO_H && ((edge_i == 0 && element_to_refine->refinement_polynomial_order_changed[0]) || (edge_i == 2 && element_to_refine->refinement_polynomial_order_changed[1])))
+              this->elements_to_reassemble.push_back(std::pair<int, int>(found_neighbor_id, component));
+            if (refinement_type == H2D_REFINEMENT_H_ANISO_H && ((edge_i == 1 && element_to_refine->refinement_polynomial_order_changed[3]) || (edge_i == 3 && element_to_refine->refinement_polynomial_order_changed[2])))
+              this->elements_to_reassemble.push_back(std::pair<int, int>(found_neighbor_id, component));
+          }
+          else
+          {
+            // Now there are two options - larger neighbor vs. smaller neighbors
+            bool larger_neighbor = false;
+            Element* parent = e->parent;
+            while (parent)
+            {
+              if (parent->en[edge_i]->elem[0])
+              {
+                larger_neighbor = true;
+                break;
+              }
+              else
+              {
+                if (parent->en[edge_i]->elem[1])
+                {
+                  larger_neighbor = true;
+                  break;
+                }
+              }
+              parent = parent->parent;
+            }
+
+            if (larger_neighbor)
+            {
+              // no need to add anything
+            }
+            else
+            {
+              // The hardest part - addition of the smaller elements
+              this->mark_elements_to_reassemble_smaller_neighbors(e->vn[edge_i]->id, e->vn[(edge_i+1)%e->nvert]->id, component);
+            }
+          }
+        }
+
       }
     }
 
+
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::mark_elements_to_reassemble()
+    void AdaptSolver<Scalar, SolverType>::mark_elements_to_reassemble_smaller_neighbors(int v1, int v2, int component)
     {
-      this->element_ids_to_reassemble.clear();
-      for (int i = 0; i < this->adaptivity_internal->elements_to_refine_count; i++)
+      Node* en = this->meshes[component]->peek_edge_node(v1, v2);
+      if (en)
       {
-        Element* current_element = current_state->e[this->elements_to_refine[i].comp];
-        if (this->elements_to_refine[i].id == current_element->id || (current_element->parent && this->elements_to_refine[i].id == current_element->parent->id))
-          info_array[current_state->e[this->num]->id] = this->elements_to_refine[i].split;
+        if (en->elem[0] || en->elem[1])
+          this->elements_to_reassemble.push_back(std::pair<int, int>(en->elem[0] ? en->elem[0]->id : en->elem[1]->id, component));
+      }
+      else
+      {
+        Node* vn = this->meshes[component]->peek_vertex_node(v1, v2);
+        if (vn)
+        {
+          this->mark_elements_to_reassemble_smaller_neighbors(v1, vn->id, component);
+          this->mark_elements_to_reassemble_smaller_neighbors(vn->id, v2, component);
+        }
+        assert(0);
       }
     }
 
@@ -291,6 +420,7 @@ namespace Hermes
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked to change the initial spaces while it was running.");
       this->spaces = spaces;
+      
       this->adaptivity_internal->set_spaces(this->spaces);
     }
 

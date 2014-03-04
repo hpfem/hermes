@@ -227,6 +227,7 @@ namespace Hermes
       MeshFunctionSharedPtr<double> refinementInfoMeshFunction[H2D_MAX_COMPONENTS];
       /// Mesh function for postprocessing the information about which elements have been refined - for the whole system.
       MeshFunctionSharedPtr<double> refinementInfoMeshFunctionGlobal;
+      template<typename T, typename S> friend class AdaptSolver;
     };
   }
 }

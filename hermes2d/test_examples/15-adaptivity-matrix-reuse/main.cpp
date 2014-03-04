@@ -36,21 +36,36 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
   mloader.load("domain.xml", mesh);
 
+  mesh->refine_element_id(0);
+
   // Initialize essential boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("0", 10.);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Initialize space.
-  SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, nullptr, 2));
-  space->set_element_order(0, 2);
-  space->set_element_order(1, 2);
+  SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, 1));
+  space->set_element_order(1, 4);
   space->assign_dofs();
+
   BaseView<double> b("Coarse space");
-  b.get_linearizer()->set_criterion(LinearizerCriterionFixed(3));
+  b.get_linearizer()->set_criterion(LinearizerCriterionFixed(5));
   b.show(space);
 
   // Weak Form
   WeakFormSharedPtr<double> wf(new WeakFormsH1::DefaultWeakFormPoissonLinear<double>(HERMES_ANY, new Hermes2DFunction<double>(13.0)));
+
+
+  LinearSolver<double> solver(wf, space);
+  solver.set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
+  solver.output_matrix();
+  solver.solve();
+  MeshFunctionSharedPtr<double> sln(new Solution<double>);
+  Solution<double>::vector_to_solution(solver.get_sln_vector(), space, sln);
+
+  ScalarView s;
+  s.get_linearizer()->set_criterion(LinearizerCriterionFixed(3));
+  s.show(sln);
+  View::wait();
 
   /*
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 1);
@@ -71,16 +86,9 @@ int main(int argc, char* argv[])
 
   */
 
-  LinearSolver<double> solver(wf, space);
-  solver.set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
-  solver.output_matrix();
-  solver.solve();
-  MeshFunctionSharedPtr<double> sln(new Solution<double>);
-  Solution<double>::vector_to_solution(solver.get_sln_vector(), space, sln);
 
-  ScalarView s;
-  s.get_linearizer()->set_criterion(LinearizerCriterionFixed(3));
-  s.show(sln);
+
+  
 
 
   MeshSharedPtr meshf(new Mesh);
