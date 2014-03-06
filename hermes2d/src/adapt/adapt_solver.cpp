@@ -87,8 +87,11 @@ namespace Hermes
     }
 
     static int currentAdaptSolverIteration;
-    static int currentSpaceSize;
     static std::vector<std::pair<int, int> >* current_elements_to_reassemble;
+    template<typename Scalar>
+    SpaceSharedPtrVector<Scalar>* current_ref_spaces;
+    template<typename Scalar>
+    SpaceSharedPtrVector<Scalar>* current_prev_ref_spaces;
 
     void get_states_to_reassemble(Traverse::State**& states, int& num_states)
     {
@@ -150,10 +153,8 @@ namespace Hermes
       this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
 
       this->elements_to_reassemble.clear();
-
-      this->meshes.clear();
-      for (int i = 0; i < this->spaces.size(); i++)
-        this->meshes.push_back(this->spaces[i]->get_mesh());
+      this->DOFs_to_reassemble.clear();
+      this->ref_spaces.clear();
     }
 
     template<typename Scalar, typename SolverType>
@@ -182,7 +183,7 @@ namespace Hermes
         this->info("AdaptSolver step %d:", this->adaptivity_step);
 
         // Construct globally refined reference meshes and setup reference spaces.
-        std::vector<SpaceSharedPtr<Scalar> > ref_spaces;
+        prev_ref_spaces = ref_spaces;
         for (int i = 0; i < this->spaces.size(); i++)
         {
           Mesh::ReferenceMeshCreator ref_mesh_creator(spaces[i]->get_mesh());
@@ -242,6 +243,9 @@ namespace Hermes
     void AdaptSolver<Scalar, SolverType>::mark_elements_to_reassemble()
     {
       this->elements_to_reassemble.clear();
+      this->DOFs_to_reassemble.clear();
+
+      // Identify elements that changed.
       for (int i = 0; i < this->adaptivity_internal->elements_to_refine_count; i++)
       {
         ElementToRefine* element_to_refine = &this->adaptivity_internal->elements_to_refine[i];
@@ -249,89 +253,47 @@ namespace Hermes
           continue;
         RefinementType refinement_type = element_to_refine->split;
         int component = element_to_refine->comp;
-        Element* e = this->meshes[component]->get_element_fast(element_to_refine->id);
+        Element* e = this->ref_spaces[component]->get_element_fast(element_to_refine->id);
+        for(int son_i = 0; son_i < H2D_MAX_ELEMENT_SONS; son_i)
+          this->elements_to_reassemble.push_back(std::pair<int, int>(e->sons[son_i]->id, component));
+      }
 
-        if (refinement_type == H2D_REFINEMENT_H || refinement_type == H2D_REFINEMENT_H_ANISO_H || refinement_type == H2D_REFINEMENT_H_ANISO_V)
+      // Identify DOFs of the changed elements.
+      AsmList<Scalar> al;
+      for (int i = 0; i < this->elements_to_reassemble.size(); i++)
+      {
+        Element* e = this->ref_spaces[component]->get_mesh()->get_element_fast(this->elements_to_reassemble[i].first);
+        this->ref_spaces[this->elements_to_reassemble[i].second]->get_element_assembly_list(e, &al);
+        for(int j = 0; j < al.cnt; j++)
+          this->DOFs_to_reassemble.push_back(std::pair<int, int>(al.dof[j], this->elements_to_reassemble[i].second));
+      }
+
+      // Take a look at other elements if they share a DOF that changed.
+      /// \todo This is ineffective, a more effective way is to employ an improved neighbor searching.
+      for (int space_i = 0; space_i < this->ref_spaces.size(); space_i++)
+      {
+        for_all_active_elements_fast(this->ref_spaces[space_i]->get_mesh())
         {
-          // Naturally, all element sons (in case of h-refinements) go to the array.
-          // The rest of the method's logic is about other elements that need to be added due to the refinement of this element.
-          for (int son_i = 0; son_i < H2D_MAX_ELEMENT_SONS; son_i++)
-          if (e->sons[son_i])
-            this->elements_to_reassemble.push_back(std::pair<int, int>(e->sons[son_i]->id, component));
-
-        }
-
-        if (refinement_type == H2D_REFINEMENT_P)
-        {
-          // Naturally, the element goes to the array.
-          // The rest of the method's logic is about other elements that need to be added due to the refinement of this element.
-          this->elements_to_reassemble.push_back(std::pair<int, int>(e->id, component));
-        }
-
-        // Now go through all edges and decide whether to add the neighbor(s) there or what.
-        for (int edge_i = 0; edge_i < e->nvert; edge_i++)
-        {
-          Node* en = e->en[edge_i];
-          // not boundary edges.
-          if (en->bnd)
-            continue;
-
-          // look for a direct neighbor.
-          int found_neighbor_id = -1;
-          if (en->elem[0] && en->elem[0]->id != e->id)
-            found_neighbor_id = en->elem[0]->id;
-          else
+          bool found = false;
+          this->ref_spaces[space_i]->get_element_assembly_list(e, &al);
+          for (int i = 0; i < this->DOFs_to_reassemble.size(); i++)
           {
-            if (en->elem[1] && en->elem[1]->id != e->id)
-              found_neighbor_id = en->elem[1]->id;
-          }
-
-          // elements were originally of the same size
-          if (found_neighbor_id != -1)
-          {
-            // only add the neighbor if we are dealing with a p-refinement towards the edge (in the sense that the edge has not been split).
-            if (refinement_type == H2D_REFINEMENT_P && element_to_refine->refinement_polynomial_order_changed[0])
-              this->elements_to_reassemble.push_back(std::pair<int, int>(found_neighbor_id, component));
-            if (refinement_type == H2D_REFINEMENT_H_ANISO_H && ((edge_i == 0 && element_to_refine->refinement_polynomial_order_changed[0]) || (edge_i == 2 && element_to_refine->refinement_polynomial_order_changed[1])))
-              this->elements_to_reassemble.push_back(std::pair<int, int>(found_neighbor_id, component));
-            if (refinement_type == H2D_REFINEMENT_H_ANISO_H && ((edge_i == 1 && element_to_refine->refinement_polynomial_order_changed[3]) || (edge_i == 3 && element_to_refine->refinement_polynomial_order_changed[2])))
-              this->elements_to_reassemble.push_back(std::pair<int, int>(found_neighbor_id, component));
-          }
-          else
-          {
-            // Now there are two options - larger neighbor vs. smaller neighbors
-            bool larger_neighbor = false;
-            Element* parent = e->parent;
-            while (parent)
+            if (space_i == this->DOFs_to_reassemble[i].second)
             {
-              if (parent->en[edge_i]->elem[0])
+              for (int j = 0; j < al.cnt; j++)
               {
-                larger_neighbor = true;
-                break;
-              }
-              else
-              {
-                if (parent->en[edge_i]->elem[1])
+                if (al.dof[j] == this->DOFs_to_reassemble[i].first)
                 {
-                  larger_neighbor = true;
+                  this->elements_to_reassemble.push_back(std::pair<int, int>(e->->id, component));
+                  found = true;
                   break;
                 }
               }
-              parent = parent->parent;
             }
-
-            if (larger_neighbor)
-            {
-              // no need to add anything
-            }
-            else
-            {
-              // The hardest part - addition of the smaller elements
-              this->mark_elements_to_reassemble_smaller_neighbors(e->vn[edge_i]->id, e->vn[(edge_i+1)%e->nvert]->id, component);
-            }
+            if (found)
+              break;
           }
         }
-
       }
     }
 

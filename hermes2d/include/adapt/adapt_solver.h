@@ -138,6 +138,9 @@ namespace Hermes
       /// This class changes this instance during the solve() method: yes.
       /// Can user change this during adaptation: no.
       SpaceSharedPtrVector<Scalar> spaces;
+
+      /// This is to hold the ref_spaces for matrix reuse.
+      SpaceSharedPtrVector<Scalar> ref_spaces;
       
       /// Internal structures - Weak form.
       /// This class changes this instance during the solve() method: no.
@@ -180,9 +183,7 @@ namespace Hermes
       /// Strictly private - elements to reassemble.
       /// Internal data: std::pair: [0] - element id, [1] - component (for multimesh).
       std::vector<std::pair<int, int> > elements_to_reassemble;
-
-      /// Strictly private - vector of Meshes - just optimization - selectable by the spaces as well.
-      MeshSharedPtrVector meshes;
+      std::vector<std::pair<int, int> > DOFs_to_reassemble;
 
       /// use Hermes views to display stuff.
       bool visualization;
