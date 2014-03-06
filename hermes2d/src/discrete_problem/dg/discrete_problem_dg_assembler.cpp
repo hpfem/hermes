@@ -59,12 +59,12 @@ namespace Hermes
 
       if (DG_matrix_forms_present)
       {
-        npss = malloc_with_check<PrecalcShapeset*>(spaces_size);
+        npss = malloc_with_check<PrecalcShapesetAssembling*>(spaces_size);
         nrefmaps = malloc_with_check<RefMap*>(spaces_size);
 
         for (unsigned int j = 0; j < spaces_size; j++)
         {
-          npss[j] = new PrecalcShapeset(spaces[j]->shapeset);
+          npss[j] = new PrecalcShapesetAssembling(spaces[j]->shapeset);
           nrefmaps[j] = new RefMap();
         }
       }

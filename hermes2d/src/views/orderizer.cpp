@@ -71,6 +71,11 @@ namespace Hermes
           tables = ord_tables;
           np = ord_np;
         };
+
+        virtual int get_id()
+        {
+          return 5;
+        };
       } quad_ord;
 
       static class Quad2DOrdSimple : public Quad2D
@@ -83,6 +88,11 @@ namespace Hermes
           num_tables[0] = num_tables[1] = 2;
           tables = ord_tables_simple;
           np = ord_np_simple;
+        };
+
+        virtual int get_id()
+        {
+          return 6;
         };
       } quad_ord_simple;
 

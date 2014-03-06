@@ -91,7 +91,7 @@ namespace Hermes
       virtual void copy(const MeshFunction<Scalar>* sln);
 
       /// Sets solution equal to Dirichlet lift only, solution vector = 0.
-      void set_dirichlet_lift(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss = nullptr);
+      void set_dirichlet_lift(SpaceSharedPtr<Scalar> space);
 
       /// Saves the complete solution (i.e., including the internal copy of the mesh and
       /// element orders) to an XML file.
@@ -175,8 +175,6 @@ namespace Hermes
       /// Converts a coefficient vector into a Solution.
       virtual void set_coeff_vector(SpaceSharedPtr<Scalar> space, const Vector<Scalar>* vec, bool add_dir_lift, int start_index);
 
-      virtual void set_coeff_vector(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss, const Scalar* coeffs, bool add_dir_lift, int start_index);
-
       virtual void set_coeff_vector(SpaceSharedPtr<Scalar> space, const Scalar* coeffs, bool add_dir_lift, int start_index);
 
       SolutionType sln_type;
@@ -230,9 +228,6 @@ namespace Hermes
 
 #pragma region static
       public:
-        static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
-          PrecalcShapeset* pss, bool add_dir_lift = true, int start_index = 0);
-
         static bool static_verbose_output;
 
         // Calculate derivative wrt. x of mono into result.
@@ -270,10 +265,6 @@ namespace Hermes
         static void vector_to_solution(const Vector<Scalar>* vec, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
           bool add_dir_lift = true, int start_index = 0);
 
-        static void vector_to_solutions(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
-          MeshFunctionSharedPtrVector<Scalar> solutions, std::vector<PrecalcShapeset *> pss,
-          std::vector<bool> add_dir_lift = std::vector<bool>(),
-          std::vector<int> start_indices = std::vector<int>());
 #pragma endregion
     };
   }

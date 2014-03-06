@@ -43,6 +43,8 @@ namespace Hermes
       template<typename Scalar> class HcurlProjBasedSelector;
     };
 
+#define H2D_MAX_LOCAL_BASIS_SIZE_TRI 164
+#define H2D_MAX_LOCAL_BASIS_SIZE_QUAD 308
 #define H2D_MAX_LOCAL_BASIS_SIZE 308
 
     /// @ingroup spaces

@@ -31,7 +31,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    class PrecalcShapeset;
     /// @ingroup inner
     /// Discrete problem DG assembling class.
     ///
@@ -83,10 +82,10 @@ namespace Hermes
       bool** processed;
 
       // Neighbor psss, refmaps.
-      PrecalcShapeset ** npss;
+      PrecalcShapesetAssembling ** npss;
       RefMap ** nrefmaps;
 
-      PrecalcShapeset** pss;
+      PrecalcShapesetAssembling** pss;
       RefMap** refmaps;
       Solution<Scalar>** u_ext;
       AsmList<Scalar>* als;

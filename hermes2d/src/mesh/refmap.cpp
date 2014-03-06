@@ -21,7 +21,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    RefMap::RefMap() : ref_map_shapeset(H1ShapesetJacobi()), ref_map_pss(PrecalcShapeset(&ref_map_shapeset))
+    RefMap::RefMap() : ref_map_shapeset(H1ShapesetJacobi()), ref_map_pss(&ref_map_shapeset)
     {
       quad_2d = nullptr;
       set_quad_2d(&g_quad_2d_std);
@@ -129,9 +129,8 @@ namespace Hermes
       }
 #pragma omp critical (element_iro_cache_setting)
       {
-        RefMap rm;
-        rm.set_active_element(element);
-        element->iro_cache = rm.calc_inv_ref_order();
+        this->set_active_element(element);
+        element->iro_cache = this->calc_inv_ref_order();
       }
     }
 

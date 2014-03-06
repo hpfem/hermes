@@ -37,6 +37,10 @@ namespace Hermes
     {
     public:  Quad2DStd();
              ~Quad2DStd();
+             virtual int get_id()
+             {
+               return 1;
+             };
 
              virtual void dummy_fn() {}
     };
@@ -75,6 +79,10 @@ namespace Hermes
     {
     public:
       Quad2DLin();
+      virtual int get_id()
+      {
+        return 2;
+      };
     };
 
     extern HERMES_API Quad2DLin g_quad_lin;

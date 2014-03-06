@@ -70,9 +70,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    const Scalar* Function<Scalar>::get_values(int a, int b) const
+    const Scalar* Function<Scalar>::get_values(int component, int item) const
     {
-      return values[a][b];
+      return values[component][item];
     }
 
     template<typename Scalar>
@@ -214,7 +214,7 @@ namespace Hermes
       assert(this->values_valid);
       int np = this->quads[this->cur_quad]->get_num_points(this->order, this->element->get_mode());
       Scalar* toReturn = malloc_with_check<Scalar>(np);
-      memcpy(toReturn, this->values[component][item], sizeof(Scalar)* np);
+      memcpy(toReturn, this->get_values(component, item), sizeof(Scalar)* np);
       return toReturn;
     }
 

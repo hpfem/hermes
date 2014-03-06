@@ -58,12 +58,12 @@ namespace Hermes
         this->init_funcs_space();
       }
 
-      pss = malloc_with_check<PrecalcShapeset*>(spaces_size);
+      pss = malloc_with_check<PrecalcShapesetAssembling*>(spaces_size);
       refmaps = malloc_with_check<RefMap*>(spaces_size);
 
       for (unsigned int j = 0; j < spaces_size; j++)
       {
-        pss[j] = new PrecalcShapeset(spaces[j]->shapeset);
+        pss[j] = new PrecalcShapesetAssembling(spaces[j]->shapeset);
         refmaps[j] = new RefMap();
         refmaps[j]->set_quad_2d(&g_quad_2d_std);
       }

@@ -25,6 +25,7 @@ namespace Hermes
   namespace Hermes2D
   {
     class Element;
+    class RefMap;
     class Quad1DStd;
     class Quad2DStd;
     struct Trf;
@@ -119,7 +120,7 @@ namespace Hermes
       int order;
 
     private:
-      PrecalcShapeset ref_map_pss;
+      PrecalcShapesetAssembling ref_map_pss;
 
       /// Transformation (2x2) matrix.
       Trf* ctm;

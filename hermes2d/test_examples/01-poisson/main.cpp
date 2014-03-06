@@ -27,10 +27,10 @@ using namespace Hermes::Hermes2D;
 //
 // The following parameters can be changed:
 
-const bool HERMES_VISUALIZATION = true;   // Set to "false" to suppress Hermes OpenGL visualization.
-const bool VTK_VISUALIZATION = true;     // Set to "true" to enable VTK output.
+const bool HERMES_VISUALIZATION = false;   // Set to "false" to suppress Hermes OpenGL visualization.
+const bool VTK_VISUALIZATION = false;     // Set to "true" to enable VTK output.
 const int P_INIT = 3;                     // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 6;               // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -121,6 +121,7 @@ int main(int argc, char* argv[])
       // Visualize the solution.
       Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
       Hermes::Hermes2D::Views::OrderView viewSp("Space", new Hermes::Hermes2D::Views::WinGeom(0, 400, 500, 400));
+      viewS.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(0));
       viewS.show(sln);
       viewSp.show(space);
       viewS.wait_for_close();

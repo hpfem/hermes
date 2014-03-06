@@ -17,6 +17,7 @@
 #define _MESHLOADER_H_
 
 #include "mesh.h"
+#include "refmap.h"
 namespace Hermes
 {
   namespace Hermes2D
@@ -24,7 +25,7 @@ namespace Hermes
     /** @defgroup mesh_readers Mesh readers
      * \brief Collection of classes with the purpose of saving and loading Mesh class instances.
      */
-    
+
     /// Abstract class for mesh readers
     ///
     /// @ingroup mesh_readers
@@ -37,6 +38,9 @@ namespace Hermes
       /// @param filename [in] The name of the file.
       /// @param mesh [out] The mesh.
       virtual void load(const char *filename, MeshSharedPtr mesg) = 0;
+
+      /// Reference mapping for detecting the inverse reference mapping order.
+      RefMap ref_map;
     };
   }
 }

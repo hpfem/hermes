@@ -49,7 +49,7 @@ namespace Hermes
       /// \param index[in] Shape index.
       void set_active_shape(int index);
 
-    private:
+    protected:
       virtual void set_quad_2d(Quad2D* quad_2d);
 
       /// \brief Frees all precalculated tables.
@@ -88,6 +88,72 @@ namespace Hermes
       template<typename T> friend class DiscreteProblemThreadAssembler;
       template<typename T> friend class NeighborSearch;
       friend class CurvMap;
+    };
+
+    /// \brief PrecalcShapesetAssembling common storage.
+    class HERMES_API PrecalcShapesetAssemblingStorage
+    {
+      PrecalcShapesetAssemblingStorage(Shapeset* shapeset);
+      ~PrecalcShapesetAssemblingStorage();
+      Shapeset* shapeset;
+    private:
+      double*** PrecalculatedValues[H2D_NUM_MODES][H2D_NUM_FUNCTION_VALUES];
+      bool** PrecalculatedInfo[H2D_NUM_MODES][H2D_NUM_FUNCTION_VALUES];
+      friend class PrecalcShapesetAssembling;
+    };
+
+    /// @ingroup meshFunctions
+    /// \brief PrecalcShapeset variant for fast assembling.
+    class HERMES_API PrecalcShapesetAssembling : public PrecalcShapeset
+    {
+    public:
+      /// \brief Constructs a standard (master) precalculated shapeset class.
+      /// \param shapeset[in] Pointer to the shapeset to be precalculated.
+      PrecalcShapesetAssembling(Shapeset* shapeset);
+
+      /// Destructor.
+      virtual ~PrecalcShapesetAssembling();
+
+      /// \brief Returns function values.
+      /// \param component[in] The component of the function (0 or 1).
+      /// \return The values of the function at all points of the current integration rule.
+      const double* get_fn_values(int component = 0) const;
+
+      /// \brief Returns the x partial derivative.
+      /// \param component[in] The component of the function (0 or 1).
+      /// \return The x partial derivative of the function at all points of the current integration rule.
+      const double* get_dx_values(int component = 0) const;
+
+      /// \brief Returns the y partial derivative.
+      /// \param component[in] The component of the function (0 or 1).
+      /// \return The y partial derivative of the function at all points of the current integration rule.
+      const double* get_dy_values(int component = 0) const;
+
+#ifdef H2D_USE_SECOND_DERIVATIVES
+      /// \brief Returns the second x partial derivative.
+      /// \param component[in] The component of the function (0 or 1).
+      /// \return The x second partial derivative of the function at all points of the current integration rule.
+      const double* get_dxx_values(int component = 0) const;
+
+      /// \brief Returns the second y partial derivative.
+      /// \param component[in] The component of the function (0 or 1).
+      /// \return The y second partial derivative of the function at all points of the current integration rule.
+      const double* get_dyy_values(int component = 0) const;
+
+      /// \brief Returns the second mixed derivative.
+      /// \param component[in] The component of the function (0 or 1).
+      /// \return The second mixed derivative of the function at all points of the current integration rule.
+      const double* get_dxy_values(int component = 0) const;
+#endif
+
+      const double* get_values(int component, int item) const;
+
+    private:
+      virtual void precalculate(int order, int mask);
+
+      static std::vector<PrecalcShapesetAssemblingStorage*> tables;
+
+      PrecalcShapesetAssemblingStorage* storage;
     };
   }
 }

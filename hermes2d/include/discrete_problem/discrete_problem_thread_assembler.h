@@ -97,7 +97,7 @@ namespace Hermes
       /// Free nonlinearities-related data.
       void free_u_ext();
 
-      PrecalcShapeset** pss;
+      PrecalcShapesetAssembling** pss;
       RefMap** refmaps;
       RefMap* rep_refmap;
       Solution<Scalar>** u_ext;

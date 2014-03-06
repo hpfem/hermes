@@ -35,7 +35,7 @@ namespace Hermes
     HERMES_API Quad2DStd g_quad_2d_std;
 
     H1ShapesetJacobi ref_map_shapeset;
-    PrecalcShapeset ref_map_pss_static(&ref_map_shapeset);
+    PrecalcShapesetAssembling ref_map_pss_static(&ref_map_shapeset);
 
     CurvMapStatic::CurvMapStatic()
     {
@@ -98,19 +98,16 @@ namespace Hermes
 
           ref_map_pss_static.set_active_shape(ii);
           ref_map_pss_static.set_quad_order(o, H2D_FN_VAL);
-          double* fni = ref_map_pss_static.deep_copy_array();
+          const double* fni = ref_map_pss_static.get_fn_values();
 
           ref_map_pss_static.set_active_shape(ij);
           ref_map_pss_static.set_quad_order(o, H2D_FN_VAL);
-          double* fnj = ref_map_pss_static.deep_copy_array();
+          const double* fnj = ref_map_pss_static.get_fn_values();
 
           double3* pt = g_quad_2d_std.get_points(o, mode);
           double val = 0.0;
           for (int k = 0; k < g_quad_2d_std.get_num_points(o, mode); k++)
             val += pt[k][2] * (fni[k] * fnj[k]);
-
-          free_with_check(fni);
-          free_with_check(fnj);
 
           mat[i][j] = mat[j][i] = val;
         }
@@ -315,14 +312,14 @@ namespace Hermes
       return  0.5 * (y + 1);
     }
 
-    CurvMap::CurvMap() : ref_map_pss(PrecalcShapeset(&ref_map_shapeset))
+    CurvMap::CurvMap() : ref_map_pss(&ref_map_shapeset)
     {
       coeffs = nullptr;
       ctm = nullptr;
       memset(curves, 0, sizeof(Curve*)* H2D_MAX_NUMBER_EDGES);
     }
 
-    CurvMap::CurvMap(const CurvMap* cm) : ref_map_pss(PrecalcShapeset(&ref_map_shapeset))
+    CurvMap::CurvMap(const CurvMap* cm) : ref_map_pss(&ref_map_shapeset)
     {
       this->nc = cm->nc;
       this->order = cm->order;
@@ -806,8 +803,6 @@ namespace Hermes
 
       //bubble part
       calc_bubble_projection(e, curves, order, coeffs);
-
-      RefMap::set_element_iro_cache(e);
     }
 
     void CurvMap::get_mid_edge_points(Element* e, double2* pt, int n)

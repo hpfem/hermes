@@ -37,6 +37,8 @@ namespace Hermes
 #define g_max_tri 20
     
     // Maximum number of integration points.
+#define H2D_MAX_INTEGRATION_POINTS_COUNT_TRI 79
+#define H2D_MAX_INTEGRATION_POINTS_COUNT_QUAD 169
 #define H2D_MAX_INTEGRATION_POINTS_COUNT 169
 
     /// Quad1D is a base class for all 1D quadrature points.
@@ -78,6 +80,7 @@ namespace Hermes
 
       inline double2* get_ref_vertex(int n, ElementMode2D mode) { return &ref_vert[mode][n]; }
 
+      virtual int get_id() = 0;
     protected:
       double3*** tables;
       int** np;

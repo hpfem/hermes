@@ -534,7 +534,7 @@ namespace Hermes
             {
               if (e->cm != nullptr)
                 e->cm->update_refmap_coeffs(e);
-              RefMap::set_element_iro_cache(e);
+              this->ref_map.set_element_iro_cache(e);
             }
 
             // refinements.
@@ -942,7 +942,7 @@ namespace Hermes
         {
           if (e->cm != nullptr)
             e->cm->update_refmap_coeffs(e);
-          RefMap::set_element_iro_cache(e);
+          this->ref_map.set_element_iro_cache(e);
         }
       }
       catch (const xml_schema::exception& e)
@@ -979,34 +979,34 @@ namespace Hermes
         /*
         for (int vertex_i = 0; vertex_i < vertices_count; vertex_i++)
         {
-            std::string x_i_s = parsed_xml_domain->vertices().v().at(vertex_i).x();
-            std::string y_i_s = parsed_xml_domain->vertices().v().at(vertex_i).y();
+        std::string x_i_s = parsed_xml_domain->vertices().v().at(vertex_i).x();
+        std::string y_i_s = parsed_xml_domain->vertices().v().at(vertex_i).y();
 
-            double x_i = ::atof(x_i_s.c_str());
-            double y_i = ::atof(y_i_s.c_str());
-            for (int vertex_j = vertex_i + 1; vertex_j < vertices_count; vertex_j++)
-            {
-                std::string x_j_s = parsed_xml_domain->vertices().v().at(vertex_j).x();
-                std::string y_j_s = parsed_xml_domain->vertices().v().at(vertex_j).y();
+        double x_i = ::atof(x_i_s.c_str());
+        double y_i = ::atof(y_i_s.c_str());
+        for (int vertex_j = vertex_i + 1; vertex_j < vertices_count; vertex_j++)
+        {
+        std::string x_j_s = parsed_xml_domain->vertices().v().at(vertex_j).x();
+        std::string y_j_s = parsed_xml_domain->vertices().v().at(vertex_j).y();
 
-                double x_j = ::atof(x_j_s.c_str());
-                double y_j = ::atof(y_j_s.c_str());
-                if(x_i == x_j && y_i == y_j)
-                {
-                  std::cout << std::endl;
-                  std::cout << "|" << x_i_s << "|";
-                  std::cout << std::endl;
-                  std::cout << "|" << y_i_s << "|";
-                  std::cout << std::endl;
-                  std::cout << "|" << x_j_s << "|";
-                  std::cout << std::endl;
-                  std::cout  << "|"<< y_j_s << "|";
-                  std::cout << std::endl;
-                  throw Exceptions::MeshLoadFailureException("Vertices %i and %i share coordinates [%f, %f].", vertex_i, vertex_j, x_i, y_i);
-}
-            }
+        double x_j = ::atof(x_j_s.c_str());
+        double y_j = ::atof(y_j_s.c_str());
+        if(x_i == x_j && y_i == y_j)
+        {
+        std::cout << std::endl;
+        std::cout << "|" << x_i_s << "|";
+        std::cout << std::endl;
+        std::cout << "|" << y_i_s << "|";
+        std::cout << std::endl;
+        std::cout << "|" << x_j_s << "|";
+        std::cout << std::endl;
+        std::cout  << "|"<< y_j_s << "|";
+        std::cout << std::endl;
+        throw Exceptions::MeshLoadFailureException("Vertices %i and %i share coordinates [%f, %f].", vertex_i, vertex_j, x_i, y_i);
         }
-*/
+        }
+        }
+        */
         // Create top-level vertex nodes.
         for (int vertex_i = 0; vertex_i < vertices_count; vertex_i++)
         {
@@ -1047,10 +1047,10 @@ namespace Hermes
 
           // test of value if no variable found.
           if (!x_found)
-              x_value = std::strtod(x.c_str(), nullptr);
+            x_value = std::strtod(x.c_str(), nullptr);
 
           if (!y_found)
-                y_value = std::strtod(y.c_str(), NULL   );
+            y_value = std::strtod(y.c_str(), NULL);
 
           // assignment.
           node->x = x_value;
@@ -1187,7 +1187,7 @@ namespace Hermes
         {
           if (e->cm != nullptr)
             e->cm->update_refmap_coeffs(e);
-          //RefMap::set_element_iro_cache(e);
+          this->ref_map.set_element_iro_cache(e);
         }
       }
       catch (const xml_schema::exception& e)

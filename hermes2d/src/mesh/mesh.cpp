@@ -442,7 +442,10 @@ namespace Hermes
       // update coefficients of curved reference mapping
       for (int i = 0; i < 4; i++)
       if (sons[i]->is_curved())
+      {
         sons[i]->cm->update_refmap_coeffs(sons[i]);
+        sons[i]->iro_cache = e->iro_cache;
+      }
 
       // deactivate this element and unregister from its nodes
       e->active = 0;
@@ -649,7 +652,10 @@ namespace Hermes
       if (sons[i])
       {
         if(sons[i]->cm)
+        {
           sons[i]->cm->update_refmap_coeffs(sons[i]);
+          sons[i]->iro_cache = e->iro_cache;
+          }
       }
 
       // set pointers to parent element for sons
@@ -1651,7 +1657,10 @@ namespace Hermes
       // update coefficients of curved reference mapping
       for (int i = 0; i < 3; i++)
       if (sons[i]->is_curved())
+      {
         sons[i]->cm->update_refmap_coeffs(sons[i]);
+        sons[i]->iro_cache = e->iro_cache;
+        }
 
       // deactivate this element and unregister from its nodes
       e->active = 0;
@@ -1824,6 +1833,7 @@ namespace Hermes
         if (sons[i]->is_curved())
         {
           sons[i]->cm->update_refmap_coeffs(sons[i]);
+          sons[i]->iro_cache = e->iro_cache;
         }
       }
       nactive += 2;
@@ -2091,6 +2101,7 @@ namespace Hermes
       if (enew->is_curved())
       {
         enew->cm->update_refmap_coeffs(enew);
+        enew->iro_cache = e->iro_cache;
       }
 
       // now the original edge nodes may no longer exist...
@@ -2212,6 +2223,7 @@ namespace Hermes
       if (enew->is_curved())
       {
         enew->cm->update_refmap_coeffs(enew);
+        enew->iro_cache = e->iro_cache;
       }
 
       // now the original edge nodes may no longer exist...
@@ -2402,7 +2414,10 @@ namespace Hermes
       // update coefficients of curved reference mapping
       for (i = 0; i < 4; i++)
       if (sons[i] != nullptr && sons[i]->cm != nullptr)
+      {
         sons[i]->cm->update_refmap_coeffs(sons[i]);
+        sons[i]->iro_cache = e->iro_cache;
+      }
 
       //set pointers to parent element for sons
       for (int i = 0; i < 4; i++)

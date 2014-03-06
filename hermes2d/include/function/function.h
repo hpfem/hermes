@@ -121,33 +121,33 @@ namespace Hermes
       /// \brief Returns function values.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The values of the function at all points of the current integration rule.
-      const Scalar* get_fn_values(int component = 0) const;
+      virtual const Scalar* get_fn_values(int component = 0) const;
 
       /// \brief Returns the x partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The x partial derivative of the function at all points of the current integration rule.
-      const Scalar* get_dx_values(int component = 0) const;
+      virtual const Scalar* get_dx_values(int component = 0) const;
 
       /// \brief Returns the y partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The y partial derivative of the function at all points of the current integration rule.
-      const Scalar* get_dy_values(int component = 0) const;
+      virtual const Scalar* get_dy_values(int component = 0) const;
 
 #ifdef H2D_USE_SECOND_DERIVATIVES
       /// \brief Returns the second x partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The x second partial derivative of the function at all points of the current integration rule.
-      const Scalar* get_dxx_values(int component = 0) const;
+      virtual const Scalar* get_dxx_values(int component = 0) const;
 
       /// \brief Returns the second y partial derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The y second partial derivative of the function at all points of the current integration rule.
-      const Scalar* get_dyy_values(int component = 0) const;
+      virtual const Scalar* get_dyy_values(int component = 0) const;
 
       /// \brief Returns the second mixed derivative.
       /// \param component[in] The component of the function (0 or 1).
       /// \return The second mixed derivative of the function at all points of the current integration rule.
-      const Scalar* get_dxy_values(int component = 0) const;
+      virtual const Scalar* get_dxy_values(int component = 0) const;
 #endif
 
       /// \brief Returns function values.
@@ -164,7 +164,7 @@ namespace Hermes
       /// \param mask[in] A combination of one or more of the constants H2D_FN_VAL, H2D_FN_DX, H2D_FN_DY, ...
       void set_quad_order(unsigned int order, int mask = H2D_FN_DEFAULT);
 
-      const Scalar* get_values(int a, int b) const;
+      virtual const Scalar* get_values(int component, int item) const;
 
       /// \brief Returns the polynomial degree of the function being represented by the class.
       virtual int get_fn_order() const;
