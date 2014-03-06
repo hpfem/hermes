@@ -92,12 +92,13 @@ namespace Hermes
     Element::Element() : visited(false), area(0.0), diameter(0.0), center_set(false)
     {
     };
-    int Element::next_vert(int i) const
+
+    unsigned short Element::next_vert(unsigned short i) const
     {
       return (i < (int)nvert - 1) ? i + 1 : 0;
     }
 
-    int Element::prev_vert(int i) const
+    unsigned short Element::prev_vert(unsigned short i) const
     {
       return (i > 0) ? i - 1 : nvert - 1;
     }
@@ -171,7 +172,7 @@ namespace Hermes
         {
           // 0 - prepare data structures.
           int eo = g_quad_2d_std.get_edge_points(isurf, this->get_mode() == HERMES_MODE_TRIANGLE ? g_max_tri : g_max_quad, this->get_mode());
-          int np = g_quad_2d_std.get_num_points(eo, this->get_mode());
+          unsigned short np = g_quad_2d_std.get_num_points(eo, this->get_mode());
           double* x_curv = new double[np];
           double* y_curv = new double[np];
           double* x_straight = new double[np];

@@ -23,7 +23,6 @@
 #include "quad_all.h"
 #include "matrix.h"
 #include "algebra/dense_matrix_operations.h"
-#include "mesh/refmap.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 
@@ -72,9 +71,9 @@ namespace Hermes
       free_with_check(bubble_quad_p);
     }
 
-    double** CurvMapStatic::calculate_bubble_projection_matrix(int* indices, ElementMode2D mode)
+    double** CurvMapStatic::calculate_bubble_projection_matrix(unsigned short* indices, ElementMode2D mode)
     {
-      int nb;
+      unsigned short nb;
       double** mat;
 
       if (mode == HERMES_MODE_TRIANGLE)
@@ -124,7 +123,7 @@ namespace Hermes
         Element e;
         e.nvert = 3;
         ref_map_pss_static.set_active_element(&e);
-        int* indices = ref_map_shapeset.get_bubble_indices(ref_map_shapeset.get_max_order(), HERMES_MODE_TRIANGLE);
+        unsigned short* indices = ref_map_shapeset.get_bubble_indices(ref_map_shapeset.get_max_order(), HERMES_MODE_TRIANGLE);
         curvMapStatic.bubble_proj_matrix_tri = calculate_bubble_projection_matrix(indices, HERMES_MODE_TRIANGLE);
 
         // cholesky factorization of the matrix
@@ -137,7 +136,7 @@ namespace Hermes
       Element e;
       e.nvert = 4;
       ref_map_pss_static.set_active_element(&e);
-      int *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
+      unsigned short *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
       curvMapStatic.bubble_proj_matrix_quad = calculate_bubble_projection_matrix(indices, HERMES_MODE_QUAD);
 
       // cholesky factorization of the matrix
@@ -372,9 +371,7 @@ namespace Hermes
       }
     }
 
-    bool CurvMap::warning_issued = false;
-
-    double CurvMap::nurbs_basis_fn(int i, int k, double t, double* knot)
+    double CurvMap::nurbs_basis_fn(unsigned short i, unsigned short k, double t, double* knot)
     {
       if (k == 0)
       {
@@ -406,17 +403,11 @@ namespace Hermes
       t = (t + 1.0) / 2.0;
 
       // Start point A, end point B.
-      double2 A, B;
-      A[0] = e->vn[edge]->x;
-      A[1] = e->vn[edge]->y;
-      B[0] = e->vn[e->next_vert(edge)]->x;
-      B[1] = e->vn[e->next_vert(edge)]->y;
+      double2 A = { e->vn[edge]->x, e->vn[edge]->y };
+      double2 B = { e->vn[e->next_vert(edge)]->x, e->vn[e->next_vert(edge)]->y };
 
       // Vector pointing from A to B.
-      double2 v;
-      v[0] = B[0] - A[0];
-      v[1] = B[1] - A[1];
-      double abs_v = sqrt(sqr(v[0]) + sqr(v[1]));
+      double2 v = { B[0] - A[0], B[1] - A[1] };
 
       // Straight line.
       if (!curve)
@@ -444,9 +435,9 @@ namespace Hermes
           kv = ((Nurbs*)curve)->kv;
         }
 
+        // sum of basis fns and weights
+        double sum = 0.0;
         x = y = 0.0;
-        double sum = 0.0;  // sum of basis fns and weights
-
         for (int i = 0; i < np; i++)
         {
           double basis = nurbs_basis_fn(i, degree, t, kv);
@@ -457,7 +448,6 @@ namespace Hermes
           x += w_i * basis * x_i;
           y += w_i * basis * y_i;
         }
-
         x /= sum;
         y /= sum;
       }
@@ -469,10 +459,10 @@ namespace Hermes
       { { -1.0, -1.0 }, { 1.0, -1.0 }, { 1.0, 1.0 }, { -1.0, 1.0 } }
     };
 
-    void CurvMap::nurbs_edge_0(Element* e, Curve* curve, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y)
+    void CurvMap::nurbs_edge_0(Element* e, Curve* curve, unsigned short edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y)
     {
-      int va = edge;
-      int vb = e->next_vert(edge);
+      unsigned short va = edge;
+      unsigned short vb = e->next_vert(edge);
       nurbs_edge(e, curve, edge, t, x, y);
 
       x -= 0.5 * ((1 - t) * (e->vn[va]->x) + (1 + t) * (e->vn[vb]->x));
@@ -542,9 +532,9 @@ namespace Hermes
         calc_ref_map_tri(e, curve, xi_1, xi_2, f[0], f[1]);
     }
 
-    void CurvMap::edge_coord(Element* e, int edge, double t, double2& x, double2& v) const
+    void CurvMap::edge_coord(Element* e, unsigned short edge, double t, double2& x) const
     {
-      int mode = e->get_mode();
+      unsigned short mode = e->get_mode();
       double2 a, b;
       a[0] = ctm->m[0] * ref_vert[mode][edge][0] + ctm->t[0];
       a[1] = ctm->m[1] * ref_vert[mode][edge][1] + ctm->t[1];
@@ -553,25 +543,21 @@ namespace Hermes
 
       for (int i = 0; i < 2; i++)
       {
-        v[i] = b[i] - a[i];
-        x[i] = a[i] + (t + 1.0) / 2.0 * v[i];
+        x[i] = a[i] + (t + 1.0) / 2.0 * (b[i] - a[i]);
       }
-      double lenght = sqrt(v[0] * v[0] + v[1] * v[1]);
-      v[0] /= lenght; v[1] /= lenght;
     }
 
-    void CurvMap::calc_edge_projection(Element* e, int edge, Curve** nurbs, int order, double2* proj) const
+    void CurvMap::calc_edge_projection(Element* e, unsigned short edge, Curve** nurbs, unsigned short order, double2* proj) const
     {
-      int i, j, k;
-      int mo1 = g_quad_1d_std.get_max_order();
-      int np = g_quad_1d_std.get_num_points(mo1);
-      int ne = order - 1;
-      int mode = e->get_mode();
+      unsigned short i, j, k;
+      unsigned short mo1 = g_quad_1d_std.get_max_order();
+      unsigned short np = g_quad_1d_std.get_num_points(mo1);
+      unsigned short ne = order - 1;
+      unsigned short mode = e->get_mode();
 
       assert(np <= 15 && ne <= 10);
       double2 fn[15];
       double rhside[2][10];
-      memset(fn, 0, sizeof(double2)* np);
       memset(rhside[0], 0, sizeof(double)* ne);
       memset(rhside[1], 0, sizeof(double)* ne);
 
@@ -587,11 +573,12 @@ namespace Hermes
       calc_ref_map(e, nurbs, b_1, b_2, fb);
 
       double2* pt = g_quad_1d_std.get_points(mo1);
-      for (j = 0; j < np; j++) // over all integration points
+      // over all integration points
+      for (j = 0; j < np; j++)
       {
-        double2 x, v;
+        double2 x;
         double t = pt[j][0];
-        edge_coord(e, edge, t, x, v);
+        edge_coord(e, edge, t, x);
         calc_ref_map(e, nurbs, x[0], x[1], fn[j]);
 
         for (k = 0; k < 2; k++)
@@ -656,12 +643,13 @@ namespace Hermes
       }
     }
 
-    void CurvMap::old_projection(Element* e, int order, double2* proj, double* old[2])
+    void CurvMap::old_projection(Element* e, unsigned short order, double2* proj, double* old[2])
     {
-      int mo2 = g_quad_2d_std.get_max_order(e->get_mode());
-      int np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
+      unsigned short mo2 = g_quad_2d_std.get_max_order(e->get_mode());
+      unsigned short np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
+      unsigned short nvert = e->get_nvert();
 
-      for (unsigned int k = 0; k < e->get_nvert(); k++) // loop over vertices
+      for (unsigned int k = 0; k < nvert; k++) // loop over vertices
       {
         // vertex basis functions in all integration points
         int index_v = ref_map_shapeset.get_vertex_index(k, e->get_mode());
@@ -683,20 +671,20 @@ namespace Hermes
 
           for (int m = 0; m < 2; m++)  //part 0 or 1
           for (int j = 0; j < np; j++)
-            old[m][j] += proj[e->get_nvert() + k * (order - 1) + ii][m] * ed[j];
+            old[m][j] += proj[nvert + k * (order - 1) + ii][m] * ed[j];
         }
       }
     }
 
-    void CurvMap::calc_bubble_projection(Element* e, Curve** curve, int order, double2* proj)
+    void CurvMap::calc_bubble_projection(Element* e, Curve** curve, unsigned short order, double2* proj)
     {
       ref_map_pss.set_active_element(e);
 
-      int i, j, k;
-      int mo2 = g_quad_2d_std.get_max_order(e->get_mode());
-      int np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
-      int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
-      int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
+      unsigned short i, j, k;
+      unsigned short mo2 = g_quad_2d_std.get_max_order(e->get_mode());
+      unsigned short np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
+      unsigned short qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
+      unsigned short nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
 
       double2* fn = new double2[np];
       memset(fn, 0, np * sizeof(double2));
@@ -763,11 +751,11 @@ namespace Hermes
       ref_map_pss.set_active_element(e);
 
       // allocate projection coefficients
-      int nv = e->get_nvert();
+      int nvert = e->get_nvert();
       int ne = order - 1;
       int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
       int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
-      nc = nv + nv*ne + nb;
+      this->nc = nvert + nvert*ne + nb;
       this->coeffs = realloc_with_check<double2>(this->coeffs, nc);
 
       // WARNING: do not change the format of the array 'coeffs'. If it changes,
@@ -788,7 +776,7 @@ namespace Hermes
 
       // calculation of new_ projection coefficients
       // vertex part
-      for (unsigned int i = 0; i < e->get_nvert(); i++)
+      for (unsigned int i = 0; i < nvert; i++)
       {
         coeffs[i][0] = e->vn[i]->x;
         coeffs[i][1] = e->vn[i]->y;
@@ -798,14 +786,14 @@ namespace Hermes
         e = e->cm->parent;
 
       // edge part
-      for (int edge = 0; edge < e->get_nvert(); edge++)
+      for (int edge = 0; edge < nvert; edge++)
         calc_edge_projection(e, edge, curves, order, coeffs);
 
       //bubble part
       calc_bubble_projection(e, curves, order, coeffs);
     }
 
-    void CurvMap::get_mid_edge_points(Element* e, double2* pt, int n)
+    void CurvMap::get_mid_edge_points(Element* e, double2* pt, unsigned short n)
     {
       Curve** curves = this->curves;
       Transformable tran;
@@ -820,7 +808,7 @@ namespace Hermes
 
       ctm = tran.get_ctm();
       double xi_1, xi_2;
-      for (int i = 0; i < n; i++)
+      for (unsigned short i = 0; i < n; i++)
       {
         xi_1 = ctm->m[0] * pt[i][0] + ctm->t[0];
         xi_2 = ctm->m[1] * pt[i][1] + ctm->t[1];

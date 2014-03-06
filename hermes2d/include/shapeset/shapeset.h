@@ -98,7 +98,7 @@ namespace Hermes
       virtual Shapeset* clone() = 0;
 
       /// Returns 2 if this is a vector shapeset, 1 otherwise.
-      int get_num_components() const;
+      unsigned char get_num_components() const;
 
       /// Returns the maximum poly degree for all shape functions.
       int get_max_order() const;
@@ -108,12 +108,12 @@ namespace Hermes
       virtual int get_max_index(ElementMode2D mode) const = 0;
 
       /// Returns the index of a vertex shape function associated with the specified vertex.
-      int get_vertex_index(int vertex, ElementMode2D mode) const;
+      unsigned short get_vertex_index(int vertex, ElementMode2D mode) const;
 
       /// Returns the index of an edge function associated with the specified edge and of the
       /// requested order. 'ori' can be 0 or 1 and determines edge orientation (this is for
       /// shapesets with non-symmetric edge functions).
-      int get_edge_index(int edge, int ori, int order, ElementMode2D mode) const;
+      unsigned short get_edge_index(unsigned char edge, int ori, int order, ElementMode2D mode) const;
 
       /// Returns space type.
       /// Internal.
@@ -121,7 +121,7 @@ namespace Hermes
 
       /// Returns shapeset identifier.
       /// Internal.
-      virtual int get_id() const = 0;
+      virtual unsigned char get_id() const = 0;
 
       /// Obtains the value of the given shape function. (x,y) is a coordinate in the reference
       /// domain, component is 0 for Scalar shapesets and 0 or 1 for vector shapesets.
@@ -154,7 +154,7 @@ namespace Hermes
 
     protected:
       /// Returns a complete set of indices of bubble functions for an element of the given order.
-      virtual int* get_bubble_indices(int order, ElementMode2D mode) const;
+      virtual unsigned short* get_bubble_indices(int order, ElementMode2D mode) const;
 
       /// Returns the index of a constrained edge function. 'part' is 0 or 1 for edge
       /// halves, 2, 3, 4, 5 for edge quarters, etc. See shapeset.cpp.
@@ -165,15 +165,15 @@ namespace Hermes
 
       shape_fn_t*** shape_table[6];
 
-      int**  vertex_indices;
-      int*** edge_indices;
-      int*** bubble_indices;
-      int**  bubble_count;
-      int**  index_to_order;
+      unsigned short**  vertex_indices;
+      unsigned short*** edge_indices;
+      unsigned short*** bubble_indices;
+      unsigned short**  bubble_count;
+      unsigned short**  index_to_order;
 
       double2 ref_vert[H2D_MAX_SOLUTION_COMPONENTS][H2D_MAX_NUMBER_VERTICES];
-      int max_order, min_order;
-      int num_components;
+      unsigned char max_order, min_order;
+      unsigned char num_components;
 
       int ebias; ///< 2 for H1 shapesets, 0 for H(curl) shapesets. It is the order of the
       ///< first edge function.

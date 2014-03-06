@@ -121,16 +121,12 @@ namespace Hermes
       /// Internal.
       virtual void set_active_element(Element* e);
 
-      /// Set the reference mapping.
-      /// Internal.
-      void set_refmap(RefMap* refmap_to_set);
-
       /// Returns the order of the edge number edge of the current active element.
       virtual int get_edge_fn_order(int edge);
     protected:
       ElementMode2D mode;
       MeshSharedPtr mesh;
-      RefMap* refmap;
+      RefMap refmap;
 
       void update_refmap();
 

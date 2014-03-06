@@ -30,7 +30,7 @@ namespace Hermes
       HcurlShapesetGradLeg();
       virtual Shapeset* clone() { return new HcurlShapesetGradLeg(*this); };
       virtual int get_max_index(ElementMode2D mode) const;
-      virtual int get_id() const { return 13; }
+      virtual unsigned char get_id() const { return 13; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
       
       static const int max_index[H2D_NUM_MODES];

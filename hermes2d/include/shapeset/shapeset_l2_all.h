@@ -33,7 +33,7 @@ namespace Hermes
       virtual Shapeset* clone() { return new L2ShapesetLegendre(*this); };
       virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
       virtual int get_max_index(ElementMode2D mode) const;
-      virtual int get_id() const { return 30; }
+      virtual unsigned char get_id() const { return 30; }
       
       static const int max_index[H2D_NUM_MODES];
     };
@@ -47,11 +47,11 @@ namespace Hermes
       virtual Shapeset* clone() { return new L2ShapesetTaylor(*this); };
       virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
       virtual int get_max_index(ElementMode2D mode) const;
-      virtual int get_id() const { return 31; }
+      virtual unsigned char get_id() const { return 31; }
 
       /// Returns a complete set of indices of bubble functions for an element of the given order.
       /// Reimplemented because this shapeset uses linear (not bi-linear), quadratic (not bi-quadratic) etc. polynomials.
-      int* get_bubble_indices(int order, ElementMode2D mode) const;
+      unsigned short* get_bubble_indices(int order, ElementMode2D mode) const;
 
       /// Returns the number of bubble functions for an element of the given order.
       /// Reimplemented because this shapeset uses linear (not bi-linear), quadratic (not bi-quadratic) etc. polynomials.

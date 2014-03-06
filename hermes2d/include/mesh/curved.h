@@ -54,12 +54,12 @@ namespace Hermes
       double angle; ///< arc angle
 
       /// Arc degree is 2.
-      static const int degree = 2;
+      static const unsigned short degree = 2;
 
       /// Arc has 3 control points
-      static const int np = 3;
+      static const unsigned short np = 3;
       // there are 6 knots: {0, 0, 0, 1, 1, 1}
-      static const int nk = 6;
+      static const unsigned short nk = 6;
       double kv[6];
       double3 pt[3];
     };
@@ -80,10 +80,10 @@ namespace Hermes
       Nurbs(const Nurbs* other);
       ~Nurbs();
 
-      int degree;  ///< curve degree (2=quadratic, etc.)
-      int np;      ///< number of control points
+      unsigned short degree;  ///< curve degree (2=quadratic, etc.)
+      unsigned short np;      ///< number of control points
       double3* pt; ///< control points and their weights
-      int nk;      ///< knot vector length
+      unsigned short nk;      ///< knot vector length
       double* kv;  ///< knot vector
     };
 
@@ -127,7 +127,7 @@ namespace Hermes
 
       /// finally here are the coefficients of the higher-order basis functions
       /// that constitute the projected reference mapping:
-      int nc; ///< number of coefficients
+      unsigned short nc; ///< number of coefficients
       double2* coeffs; ///< array of the coefficients
 
       /// this is called for every curvilinear element when it is created
@@ -137,10 +137,10 @@ namespace Hermes
       /// then new_ coefficients are projected.
       void update_refmap_coeffs(Element* e);
 
-      void get_mid_edge_points(Element* e, double2* pt, int n);
+      void get_mid_edge_points(Element* e, double2* pt, unsigned short n);
 
       /// Recursive calculation of the basis function N_i,k(int i, int k, double t, double* knot).
-      static double nurbs_basis_fn(int i, int k, double t, double* knot);
+      static double nurbs_basis_fn(unsigned short i, unsigned short k, double t, double* knot);
 
       /// Nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
       /// as well as the unit normal and unit tangential vectors. This is done using
@@ -152,7 +152,8 @@ namespace Hermes
       static const double2 ref_vert[2][H2D_MAX_NUMBER_VERTICES];
 
       /// Subtraction of straight edge and nurbs curve.
-      static void nurbs_edge_0(Element* e, Curve* nurbs, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y);
+      static void nurbs_edge_0(Element* e, Curve* nurbs, unsigned short edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y);
+
       /// Calculation of nonpolynomial reference mapping on curved element
       static void calc_ref_map_tri(Element* e, Curve** nurbs, double xi_1, double xi_2, double& x, double& y);
       static void calc_ref_map_quad(Element* e, Curve** nurbs, double xi_1, double xi_2,
@@ -162,12 +163,12 @@ namespace Hermes
 
       /// Edge part of projection based interpolation ///////////////////////////////////////////////////
       /// Compute point (x, y) in reference element, edge vector (v1, v2)
-      void edge_coord(Element* e, int edge, double t, double2& x, double2& v) const;
-      void calc_edge_projection(Element* e, int edge, Curve** nurbs, int order, double2* proj) const;
+      void edge_coord(Element* e, unsigned short edge, double t, double2& x) const;
+      void calc_edge_projection(Element* e, unsigned short edge, Curve** nurbs, unsigned short order, double2* proj) const;
 
       //// Bubble part of projection based interpolation /////////////////////////////////////////////////
-      void old_projection(Element* e, int order, double2* proj, double* old[2]);
-      void calc_bubble_projection(Element* e, Curve** nurbs, int order, double2* proj);
+      void old_projection(Element* e, unsigned short order, double2* proj, double* old[2]);
+      void calc_bubble_projection(Element* e, Curve** nurbs, unsigned short order, double2* proj);
 
       static CurvMap* create_son_curv_map(Element* e, int son);
 
@@ -185,8 +186,6 @@ namespace Hermes
       friend class MeshReaderH2D;
       friend class MeshReaderH2DXML;
       friend class MeshReaderH2DBSON;
-
-      static bool warning_issued;
     };
 
     class CurvMapStatic
@@ -199,19 +198,19 @@ namespace Hermes
       /// Preparation of projection matrices, Cholesky factorization
       void precalculate_cholesky_projection_matrix_edge();
       /// Calculate the H1 seminorm products (\phi_i, \phi_j) for all 0 <= i, j < n, n is the number of bubble functions
-      double** calculate_bubble_projection_matrix(int* indices, ElementMode2D mode);
+      double** calculate_bubble_projection_matrix(unsigned short* indices, ElementMode2D mode);
       void precalculate_cholesky_projection_matrices_bubble();
 
       double** edge_proj_matrix;  ///< projection matrix for each edge is the same
-      int edge_proj_matrix_size;
+      unsigned short edge_proj_matrix_size;
       double** bubble_proj_matrix_tri; ///< projection matrix for triangle bubbles
       double** bubble_proj_matrix_quad; ///< projection matrix for quad bubbles
 
       double* edge_p;  ///<  diagonal vector in cholesky factorization
       double* bubble_tri_p; ///<  diagonal vector in cholesky factorization
-      int tri_bubble_np;
+      unsigned short tri_bubble_np;
       double* bubble_quad_p; ///<  diagonal vector in cholesky factorization
-      int quad_bubble_np;
+      unsigned short quad_bubble_np;
     };
 
     /// Global instance used inside Hermes which is also accessible to users.

@@ -507,7 +507,7 @@ namespace Hermes
       // Evaluate the form.
       Quad2D* quad = sln->get_quad_2d();
       double3* pt = quad->get_points(order, sln->get_active_element()->get_mode());
-      int np = quad->get_num_points(order, sln->get_active_element()->get_mode());
+      unsigned short np = quad->get_num_points(order, sln->get_active_element()->get_mode());
 
       // Initialize geometry and jacobian*weights.
       Geom<double>* e = init_geom_vol(rm, order);
@@ -572,7 +572,7 @@ namespace Hermes
       // eval the form
       Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
       double3* pt = quad->get_points(order, rm->get_active_element()->get_mode());
-      int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
+      unsigned short np = quad->get_num_points(order, rm->get_active_element()->get_mode());
 
       // Initialize geometry and jacobian*weights
       Geom<double>* e = init_geom_vol(rm, order);
@@ -664,7 +664,7 @@ namespace Hermes
       Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
       int eo = quad->get_edge_points(surf_pos->surf_num, order, rm->get_active_element()->get_mode());
       double3* pt = quad->get_points(eo, rm->get_active_element()->get_mode());
-      int np = quad->get_num_points(eo, rm->get_active_element()->get_mode());
+      unsigned short np = quad->get_num_points(eo, rm->get_active_element()->get_mode());
 
       // Initialize geometry and jacobian*weights.
       double3* tan;
@@ -762,7 +762,7 @@ namespace Hermes
 
       Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
       int eo = quad->get_edge_points(surf_pos->surf_num, order, rm->get_active_element()->get_mode());
-      int np = quad->get_num_points(eo, rm->get_active_element()->get_mode());
+      unsigned short np = quad->get_num_points(eo, rm->get_active_element()->get_mode());
       double3* pt = quad->get_points(eo, rm->get_active_element()->get_mode());
 
       // Initialize geometry and jacobian*weights (do not use the NeighborSearch caching mechanism).

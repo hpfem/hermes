@@ -48,7 +48,6 @@ namespace Hermes
     MeshFunction<Scalar>::MeshFunction()
       : Function<Scalar>()
     {
-        refmap = new RefMap;
         this->element = nullptr;
       }
 
@@ -57,13 +56,11 @@ namespace Hermes
       Function<Scalar>()
     {
         this->mesh = mesh;
-        this->refmap = new RefMap;
       }
 
     template<typename Scalar>
     MeshFunction<Scalar>::~MeshFunction()
     {
-      delete refmap;
       free();
     }
 
@@ -257,14 +254,7 @@ namespace Hermes
     {
       if (update)
         this->update_refmap();
-      return refmap;
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::set_refmap(RefMap* refmap_to_set)
-    {
-      delete refmap;
-      this->refmap = refmap_to_set;
+      return &refmap;
     }
 
     template<typename Scalar>
@@ -273,7 +263,7 @@ namespace Hermes
       if (quad_2d == nullptr)
         throw Exceptions::NullException(1);
       Function<Scalar>::set_quad_2d(quad_2d);
-      refmap->set_quad_2d(quad_2d);
+      refmap.set_quad_2d(quad_2d);
     }
 
     template<typename Scalar>
@@ -284,13 +274,13 @@ namespace Hermes
 
       Function<Scalar>::set_active_element(e);
       mode = e->get_mode();
-      refmap->set_active_element(e);
+      refmap.set_active_element(e);
     }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::update_refmap()
     {
-      refmap->force_transform(this->sub_idx, this->ctm);
+      refmap.force_transform(this->sub_idx, this->ctm);
     }
 
     template class HERMES_API MeshFunction<double>;

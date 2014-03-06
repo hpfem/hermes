@@ -121,9 +121,6 @@ namespace Hermes
       /// - it has to also correctly identify all other elements that need to be reassembled (that is not easy).
       void mark_elements_to_reassemble();
 
-      /// Recursive function marking all elements between vertices v1 and v2 on the mesh[component].
-      void mark_elements_to_reassemble_smaller_neighbors(int v1, int v2, int component);
-
       /// (Optional) visualization.
       void visualize(std::vector<SpaceSharedPtr<Scalar> >& ref_spaces);
 
@@ -141,6 +138,7 @@ namespace Hermes
 
       /// This is to hold the ref_spaces for matrix reuse.
       SpaceSharedPtrVector<Scalar> ref_spaces;
+      SpaceSharedPtrVector<Scalar> prev_ref_spaces;
       
       /// Internal structures - Weak form.
       /// This class changes this instance during the solve() method: no.
@@ -184,6 +182,9 @@ namespace Hermes
       /// Internal data: std::pair: [0] - element id, [1] - component (for multimesh).
       std::vector<std::pair<int, int> > elements_to_reassemble;
       std::vector<std::pair<int, int> > DOFs_to_reassemble;
+
+      SparseMatrix<Scalar>* prev_mat;
+      Scalar* prev_rhs;
 
       /// use Hermes views to display stuff.
       bool visualization;

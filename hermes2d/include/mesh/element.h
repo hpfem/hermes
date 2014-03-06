@@ -122,7 +122,8 @@ namespace Hermes
         Element* sons[H2D_MAX_ELEMENT_SONS]; ///< son elements (up to four)
       };
 
-      int marker;        ///< element marker
+      /// element marker
+      int marker;
 
       // returns the edge orientation. This works for the unconstrained edges.
       int get_edge_orientation(int ie) const;
@@ -159,11 +160,11 @@ namespace Hermes
       double diameter;
 
       /// Increase in integration order, see RefMap::calc_inv_ref_order()
-      int iro_cache;
+      unsigned short iro_cache;
 
       /// Helper functions to obtain the index of the next or previous vertex/edge
-      int next_vert(int i) const;
-      int prev_vert(int i) const;
+      unsigned short next_vert(unsigned short i) const;
+      unsigned short prev_vert(unsigned short i) const;
 
       /// Returns a pointer to the neighboring element across the edge 'ie', or
       /// nullptr if it does not exist or is across an irregular edge.

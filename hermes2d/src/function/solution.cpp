@@ -73,7 +73,7 @@ namespace Hermes
           free_with_check(tables[mode_i][k]);
       }
 
-      virtual int get_id()
+      virtual unsigned char get_id()
       {
         return 3;
       };
@@ -400,7 +400,7 @@ namespace Hermes
       {
         this->mode = e->get_mode();
         o = elem_orders[e->id];
-        int np = quad->get_num_points(o, e->get_mode());
+        unsigned short np = quad->get_num_points(o, e->get_mode());
 
         AsmList<Scalar> al;
         space->get_element_assembly_list(e, &al);
@@ -862,7 +862,7 @@ namespace Hermes
     {
       int i, j, k, l;
       Quad2D* quad = this->quads[this->cur_quad];
-      int np = quad->get_num_points(order, this->mode);
+      unsigned short np = quad->get_num_points(order, this->mode);
 
       if (sln_type == HERMES_SLN)
       {

@@ -72,6 +72,8 @@ namespace Hermes
     {
       this->solve_method_running = false;
       this->visualization = false;
+      this->prev_mat = nullptr;
+      this->prev_rhs = nullptr;
     }
 
     template<typename Scalar, typename SolverType>
@@ -86,28 +88,81 @@ namespace Hermes
       this->visualization = on_off;
     }
 
-    static int currentAdaptSolverIteration;
-    static std::vector<std::pair<int, int> >* current_elements_to_reassemble;
     template<typename Scalar>
-    SpaceSharedPtrVector<Scalar>* current_ref_spaces;
-    template<typename Scalar>
-    SpaceSharedPtrVector<Scalar>* current_prev_ref_spaces;
-
-    void get_states_to_reassemble(Traverse::State**& states, int& num_states)
+    class StateReassemblyHelper
     {
-      if (currentAdaptSolverIteration == 1)
+    public:
+      static int current_iteration;
+      static std::vector<std::pair<int, int> >* current_elements_to_reassemble;
+      static SpaceSharedPtrVector<Scalar>* current_ref_spaces;
+      static SpaceSharedPtrVector<Scalar>* current_prev_ref_spaces;
+      static SparseMatrix<Scalar>* prev_mat;
+      static Scalar* prev_rhs;
+    };
+
+    template<typename Scalar>
+    void get_states_to_reassemble(Traverse::State**& states, int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    {
+      if (StateReassemblyHelper<Scalar>::current_iteration == 1)
         return;
 
+      int spaces_size = StateReassemblyHelper<Scalar>::current_ref_spaces->size();
+      int elements_to_reassemble_size = StateReassemblyHelper<Scalar>::current_elements_to_reassemble->size();
+      std::vector<std::pair<int, int> > newSpace_elements_to_reassemble;
+
+      int DOF_to_DOF_map
+
+      // First, identify the elements on the new reference spaces.
+      Traverse trav(spaces_size * 2);
+      MeshFunctionSharedPtrVector<Scalar> dummy_fns;
+      for (int i = 0; i < spaces_size; i++)
+        dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_prev_ref_spaces->at(i)->get_mesh()));
+      for (int i = 0; i < spaces_size; i++)
+        dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_ref_spaces->at(i)->get_mesh()));
+
+      int num_states_local;
+      Traverse::State** states_local = trav.get_states(dummy_fns, num_states_local);
+      for (int local_state_i = 0; local_state_i < num_states_local; local_state_i++)
+      {
+        bool added = false;
+        Traverse::State* current_local_state = states_local[local_state_i];
+        for (int elem_i = 0; elem_i < elements_to_reassemble_size; elem_i++)
+        {
+          for (int space_i = 0; space_i < spaces_size; space_i++)
+          {
+            if (StateReassemblyHelper<Scalar>::current_elements_to_reassemble->at(elem_i).second == space_i)
+            {
+              if (StateReassemblyHelper<Scalar>::current_elements_to_reassemble->at(elem_i).second == current_local_state->e[space_i]->id)
+              {
+                newSpace_elements_to_reassemble.push_back(std::pair<int, int>(current_local_state->e[space_i]->id, space_i));
+                added = true;
+                break;
+              }
+            }
+          }
+          if (added)
+            break;
+        }
+        if (!added)
+        {
+          for (int space_i = 0; space_i < spaces_size; space_i++)
+          {
+
+          }
+        }
+      }
+
+      // Using the changed element on the new reference space, select the states from the original states that need to be recalculated.
+      int newSpace_elements_to_reassemble_size = newSpace_elements_to_reassemble.size();
       Traverse::State** new_states = malloc_with_check<Traverse::State*>(num_states, true);
       int new_num_states = 0;
-      for (int state_i = 0; state_i < num_states; state_i++)
       {
-        for (int space_i = 0; space_i < currentSpaceSize; space_i++)
+        for (int space_i = 0; space_i < spaces_size; space_i++)
         {
           bool added = false;
-          for (int to_reassemble_i = 0; to_reassemble_i < current_elements_to_reassemble->size(); to_reassemble_i++)
+          for (int to_reassemble_i = 0; to_reassemble_i <newSpace_elements_to_reassemble_size; to_reassemble_i++)
           {
-            if (space_i == current_elements_to_reassemble->at(to_reassemble_i).second && states[state_i]->e[space_i]->id == current_elements_to_reassemble->at(to_reassemble_i).first)
+            if (space_i == newSpace_elements_to_reassemble.at(to_reassemble_i).second && states[state_i]->e[space_i]->id == newSpace_elements_to_reassemble.at(to_reassemble_i).first)
             {
               new_states[new_num_states++] = Traverse::State::clone(states[state_i]);
               added = true;
@@ -149,7 +204,7 @@ namespace Hermes
       }
 
       this->solver = new SolverType(wf, spaces);
-      this->solver->dp->set_refine_states_fn(&get_states_to_reassemble);
+      this->solver->dp->set_refine_states_fn(&get_states_to_reassemble<Scalar>);
       this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
 
       this->elements_to_reassemble.clear();
@@ -196,13 +251,25 @@ namespace Hermes
         this->solver->set_spaces(ref_spaces);
 
         // Initialize the states handler.
-        currentAdaptSolverIteration = this->adaptivity_step;
-        currentSpaceSize = this->spaces.size();
-        current_elements_to_reassemble = &this->elements_to_reassemble;
+        StateReassemblyHelper<Scalar>::current_iteration = this->adaptivity_step;
+        StateReassemblyHelper<Scalar>::current_ref_spaces = &ref_spaces;
+        StateReassemblyHelper<Scalar>::current_prev_ref_spaces = &prev_ref_spaces;
+        StateReassemblyHelper<Scalar>::current_elements_to_reassemble = &this->elements_to_reassemble;
 
         // Perform solution.
         this->info("Solving on reference mesh.");
         this->solver->solve();
+
+        // Update the stored (previous) linear system.
+        if (this->prev_mat)
+          delete this->prev_mat;
+        this->prev_mat = (static_cast<Hermes::Solvers::MatrixSolver<Scalar>>(this->solver))->get_jacobian()->duplicate();
+        StateReassemblyHelper<Scalar>::prev_mat = this->prev_mat;
+        if (this->prev_rhs)
+          delete[] this->prev_rhs;
+        this->prev_rhs = new Scalar[this->prev_mat->get_size()];
+        (static_cast<Hermes::Solvers::MatrixSolver<Scalar>>(this->solver))->get_residual()->extract(this->prev_rhs);
+        StateReassemblyHelper<Scalar>::prev_rhs = this->prev_rhs;
 
         // Translate the resulting coefficient vector into the instance of Solution.
         Solution<Scalar>::vector_to_solutions(solver->get_sln_vector(), ref_spaces, ref_slns);
@@ -253,7 +320,7 @@ namespace Hermes
           continue;
         RefinementType refinement_type = element_to_refine->split;
         int component = element_to_refine->comp;
-        Element* e = this->ref_spaces[component]->get_element_fast(element_to_refine->id);
+        Element* e = this->ref_spaces[component]->get_mesh()->get_element_fast(element_to_refine->id);
         for(int son_i = 0; son_i < H2D_MAX_ELEMENT_SONS; son_i)
           this->elements_to_reassemble.push_back(std::pair<int, int>(e->sons[son_i]->id, component));
       }
@@ -262,10 +329,11 @@ namespace Hermes
       AsmList<Scalar> al;
       for (int i = 0; i < this->elements_to_reassemble.size(); i++)
       {
+        int component = this->elements_to_reassemble[i].second;
         Element* e = this->ref_spaces[component]->get_mesh()->get_element_fast(this->elements_to_reassemble[i].first);
-        this->ref_spaces[this->elements_to_reassemble[i].second]->get_element_assembly_list(e, &al);
+        this->ref_spaces[component]->get_element_assembly_list(e, &al);
         for(int j = 0; j < al.cnt; j++)
-          this->DOFs_to_reassemble.push_back(std::pair<int, int>(al.dof[j], this->elements_to_reassemble[i].second));
+          this->DOFs_to_reassemble.push_back(std::pair<int, int>(al.dof[j], component));
       }
 
       // Take a look at other elements if they share a DOF that changed.
@@ -284,7 +352,7 @@ namespace Hermes
               {
                 if (al.dof[j] == this->DOFs_to_reassemble[i].first)
                 {
-                  this->elements_to_reassemble.push_back(std::pair<int, int>(e->->id, component));
+                  this->elements_to_reassemble.push_back(std::pair<int, int>(e->id, space_i));
                   found = true;
                   break;
                 }
@@ -294,28 +362,6 @@ namespace Hermes
               break;
           }
         }
-      }
-    }
-
-
-    template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::mark_elements_to_reassemble_smaller_neighbors(int v1, int v2, int component)
-    {
-      Node* en = this->meshes[component]->peek_edge_node(v1, v2);
-      if (en)
-      {
-        if (en->elem[0] || en->elem[1])
-          this->elements_to_reassemble.push_back(std::pair<int, int>(en->elem[0] ? en->elem[0]->id : en->elem[1]->id, component));
-      }
-      else
-      {
-        Node* vn = this->meshes[component]->peek_vertex_node(v1, v2);
-        if (vn)
-        {
-          this->mark_elements_to_reassemble_smaller_neighbors(v1, vn->id, component);
-          this->mark_elements_to_reassemble_smaller_neighbors(vn->id, v2, component);
-        }
-        assert(0);
       }
     }
 

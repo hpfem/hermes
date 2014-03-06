@@ -47,7 +47,7 @@ namespace Hermes
       /// can then be obtained by setting the required integration rule order by calling
       /// set_quad_order() and after that calling get_values(), get_dx_values(), etc.
       /// \param index[in] Shape index.
-      void set_active_shape(int index);
+      virtual void set_active_shape(int index);
 
     protected:
       virtual void set_quad_2d(Quad2D* quad_2d);

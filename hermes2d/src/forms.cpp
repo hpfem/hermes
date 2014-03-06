@@ -453,11 +453,13 @@ namespace Hermes
 
     Geom<double>* init_geom_vol(RefMap *rm, const int order)
     {
+      Element* element = rm->get_active_element();
+      ElementMode2D mode = element->get_mode();
       Geom<double>* e = new Geom<double>;
-      e->id = rm->get_active_element()->id;
-      e->elem_marker = rm->get_active_element()->marker;
+      e->id = element->id;
+      e->elem_marker = element->marker;
       Quad2D* quad = rm->get_quad_2d();
-      int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
+      unsigned short np = quad->get_num_points(order, mode);
       e->x = malloc_with_check<double>(np);
       e->y = malloc_with_check<double>(np);
       double* x = rm->get_phys_x(order);
@@ -472,10 +474,13 @@ namespace Hermes
 
     Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan)
     {
+      Element* element = rm->get_active_element();
+      ElementMode2D mode = element->get_mode();
+
       Geom<double>* e = new Geom<double>;
       e->edge_marker = marker;
-      e->elem_marker = rm->get_active_element()->marker;
-      e->id = rm->get_active_element()->id;
+      e->elem_marker = element->marker;
+      e->id = element->id;
       e->isurf = isurf;
 
       tan = rm->get_tangent(isurf, order);
@@ -483,7 +488,7 @@ namespace Hermes
       double* y = rm->get_phys_y(order);
 
       Quad2D* quad = rm->get_quad_2d();
-      int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
+      unsigned short np = quad->get_num_points(order, mode);
       e->x = malloc_with_check<double>(np);
       e->y = malloc_with_check<double>(np);
       e->tx = malloc_with_check<double>(np);
@@ -714,7 +719,7 @@ namespace Hermes
       fu->set_quad_order(order);
 #endif
       int nc = fu->get_num_components();
-      int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
+      unsigned short np = quad->get_num_points(order, fu->get_active_element()->get_mode());
       u->np = np;
       u->nc = nc;
 
@@ -759,7 +764,7 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("nullptr UExtFunction in Func<Scalar>*::init_fn().");
 
       Quad2D* quad = &g_quad_2d_std;
-      int np = quad->get_num_points(order, mode);
+      unsigned short np = quad->get_num_points(order, mode);
 
       fu->value(np, ext, u_ext, u, geometry);
     }
@@ -771,7 +776,7 @@ namespace Hermes
       if (quad == nullptr)
         quad = &g_quad_2d_std;
 
-      int np = quad->get_num_points(order, mode);
+      unsigned short np = quad->get_num_points(order, mode);
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
       if (nc == 1)
@@ -796,7 +801,7 @@ namespace Hermes
       int nc = 1;
       Quad2D* quad = &g_quad_2d_std;
 
-      int np = quad->get_num_points(order, mode);
+      unsigned short np = quad->get_num_points(order, mode);
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
       // Sanity check.

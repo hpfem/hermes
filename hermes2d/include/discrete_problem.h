@@ -100,11 +100,11 @@ namespace Hermes
       SpaceSharedPtrVector<Scalar> get_spaces();
 
       /// Experimental.
-      typedef void (*refine_states_fn)(Traverse::State**& states, int& num_states);
-      void set_refine_states_fn(refine_states_fn fn) {
-        this->refine_states = fn;
+      typedef void(*reassembled_states_reuse_linear_system_fn)(Traverse::State**& states, int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs);
+      void set_reassembled_states_reuse_linear_system_fn(reassembled_states_reuse_linear_system_fn fn) {
+        this->reassembled_states_reuse_linear_system = fn;
       }
-      refine_states_fn refine_states;
+      reassembled_states_reuse_linear_system_fn reassembled_states_reuse_matrix;
 
     protected:
       /// Initialize states.

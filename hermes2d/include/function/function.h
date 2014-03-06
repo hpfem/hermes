@@ -116,7 +116,7 @@ namespace Hermes
       virtual ~Function();
 
       /// \brief Returns the number of components of the function being represented by the class.
-      int get_num_components() const;
+      unsigned char get_num_components() const;
 
       /// \brief Returns function values.
       /// \param component[in] The component of the function (0 or 1).
@@ -216,7 +216,7 @@ namespace Hermes
       int order;
 
       /// Number of vector components
-      int num_components;
+      unsigned char num_components;
 
       /// With changed sub-element mapping, or an element, or anything else there comes the need for a change of the current values.
       /// This invalidates the current values.

@@ -324,7 +324,7 @@ namespace Hermes
               element_refinement_location[component][element_id] = &elements_to_refine[id_to_refine];
             }
             else
-              elements_to_refine[id_to_refine] = ElementToRefine(-1, -1);
+              elements_to_refine[id_to_refine] = ElementToRefine();
           }
           catch (Hermes::Exceptions::Exception& e)
           {

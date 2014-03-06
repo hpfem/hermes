@@ -41,7 +41,7 @@ namespace Hermes
       /// Constructor.
       /** \param[in] id An ID of the element.
       *  \param[in] comp An index of a component. */
-      ElementToRefine(int id, int comp);
+      ElementToRefine(int id, unsigned short comp);
 
       /// Copy-contructor.
       ElementToRefine(const ElementToRefine &orig);
@@ -49,29 +49,32 @@ namespace Hermes
       /// Assignment operator.
       ElementToRefine& operator=(const ElementToRefine& orig);
     
+      /// Validity info.
+      bool valid;
+
       /// An ID of the element.
       int id;
       /// An index of the component.
-      int comp;
+      unsigned short comp;
       /// Proposed refinement. Possible values are defined in the enum ::RefinementType.
       RefinementType split;
       /// Encoded orders of sons.
-      int refinement_polynomial_order[H2D_MAX_ELEMENT_SONS];
+      unsigned short refinement_polynomial_order[H2D_MAX_ELEMENT_SONS];
       /// Encoded orders of the best refinement of a certaint type.
       /// Indexed by enum RefinementType.
-      int best_refinement_polynomial_order_type[4][H2D_MAX_ELEMENT_SONS]; 
+      unsigned short best_refinement_polynomial_order_type[4][H2D_MAX_ELEMENT_SONS]; 
       /// Error of the selected candidate.
       double errors[H2D_MAX_ELEMENT_SONS];
 
       /// Returns a number of sons.
       /** \return A number of sons of a given refinement. */
-      int get_num_sons() const;
+      unsigned short get_num_sons() const;
 
       /// Copies array of orders.
       /** The length of the array is defubed by ::H2D_MAX_ELEMENT_SONS.
       *  \param[in] dest A destination array.
       *  \param[in] src A source arrapy. */
-      static void copy_orders(int* dest, const int* src);
+      static void copy_orders(unsigned short* dest, const unsigned short* src);
       static void copy_errors(double* dest, const double* src);
     private:
       /// This array is internal.

@@ -72,7 +72,7 @@ namespace Hermes
           np = ord_np;
         };
 
-        virtual int get_id()
+        virtual unsigned char get_id()
         {
           return 5;
         };
@@ -90,7 +90,7 @@ namespace Hermes
           np = ord_np_simple;
         };
 
-        virtual int get_id()
+        virtual unsigned char get_id()
         {
           return 6;
         };

@@ -37,7 +37,7 @@ namespace Hermes
     {
     public:  Quad2DStd();
              ~Quad2DStd();
-             virtual int get_id()
+             virtual unsigned char get_id()
              {
                return 1;
              };
@@ -79,7 +79,7 @@ namespace Hermes
     {
     public:
       Quad2DLin();
-      virtual int get_id()
+      virtual unsigned char get_id()
       {
         return 2;
       };

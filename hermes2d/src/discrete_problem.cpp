@@ -302,13 +302,14 @@ namespace Hermes
       Traverse::State** states;
       MeshSharedPtrVector meshes;
       this->init_assembling(states, num_states, u_ext_sln, meshes);
-      if(this->refine_states)
-        this->refine_states(states, num_states);
-
+      
       // Creating matrix sparse structure.
       // If there are no states, return.
       if (this->selectiveAssembler.prepare_sparse_structure(this->current_mat, this->current_rhs, this->spaces, states, num_states))
       {
+        if (this->refine_states)
+          this->refine_states(states, num_states);
+
         // Is this a DG assembling.
         bool is_DG = this->wf->is_DG();
 

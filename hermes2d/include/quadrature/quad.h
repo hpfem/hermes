@@ -28,8 +28,8 @@ namespace Hermes
       H2D_GIP2D_W = 2  ///< A weight.
     };
 
-    static int H2D_GIP1D_X = 0;
-    static int H2D_GIP1D_W = 1;
+    static unsigned short H2D_GIP1D_X = 0;
+    static unsigned short H2D_GIP1D_W = 1;
 
     // Maximum integration order for global quadrature, for quadrilaterals.
 #define g_max_quad 24
@@ -48,9 +48,9 @@ namespace Hermes
     public:
 
       inline double2* get_points(int order) const { return tables[order]; }
-      inline int get_num_points(int order) const { return np[order]; };
+      inline unsigned short get_num_points(int order) const { return np[order]; };
 
-      inline int get_max_order() const { return max_order; }
+      inline unsigned short get_max_order() const { return max_order; }
       inline double get_ref_vertex(int n) const { return ref_vert[n]; }
 
     protected:
@@ -59,7 +59,7 @@ namespace Hermes
       int* np;
 
       double ref_vert[H2D_NUM_MODES];
-      int max_order;
+      unsigned short max_order;
 
       virtual void dummy_fn() = 0; // to prevent this class from being instantiated
     };
@@ -70,24 +70,24 @@ namespace Hermes
     class HERMES_API Quad2D
     {
     public:
-      inline int get_num_points(int order, ElementMode2D mode)  const { assert(order < num_tables[mode]); return np[mode][order]; };
+      inline unsigned short get_num_points(int order, ElementMode2D mode)  const { assert(order < num_tables[mode]); return np[mode][order]; };
       inline double3* get_points(int order, ElementMode2D mode) const { assert(order < num_tables[mode]); return tables[mode][order]; }
       inline int get_edge_points(int edge, int order, ElementMode2D mode) { assert(order < num_tables[mode]);  return  max_order[mode] + 1 + (3 * (1 - mode) + 4 * mode)*order + edge; }
 
-      inline int get_max_order(ElementMode2D mode) const { return max_order[mode]; }
-      inline int get_safe_max_order(ElementMode2D mode) const { return safe_max_order[mode]; }
-      inline int get_num_tables(ElementMode2D mode) const { return num_tables[mode]; }
+      inline unsigned short get_max_order(ElementMode2D mode) const { return max_order[mode]; }
+      inline unsigned short get_safe_max_order(ElementMode2D mode) const { return safe_max_order[mode]; }
+      inline unsigned short get_num_tables(ElementMode2D mode) const { return num_tables[mode]; }
 
       inline double2* get_ref_vertex(int n, ElementMode2D mode) { return &ref_vert[mode][n]; }
 
-      virtual int get_id() = 0;
+      virtual unsigned char get_id() = 0;
     protected:
       double3*** tables;
-      int** np;
+      unsigned short** np;
 
-      int num_tables[2];
-      int max_order[2], safe_max_order[2];
-      int max_edge_order;
+      unsigned short num_tables[2];
+      unsigned short max_order[2], safe_max_order[2];
+      unsigned short max_edge_order;
 
       double2 ref_vert[2][H2D_MAX_NUMBER_VERTICES];
     };
