@@ -1,6 +1,6 @@
 /// Simple quad.
 
-static int num_vert_quad_simple[2]  = { 13, 13 };
+static unsigned short num_vert_quad_simple[2]  = { 13, 13 };
 
 static double3 vert_quad_simple[] =
 {
@@ -19,7 +19,7 @@ static double3 vert_quad_simple[] =
   {  0.0,   0.0,  5.0 },
 };
 
-static int num_elem_quad_simple[2]  = { 4 , 4};
+static unsigned short num_elem_quad_simple[2]  = { 4 , 4};
 
 static int3 elem_quad_simple[] =
 {
@@ -29,7 +29,7 @@ static int3 elem_quad_simple[] =
   {9,10,11}
 };
 
-static int num_edge_quad_simple[2] = {4, 4};
+static unsigned short num_edge_quad_simple[2] = {4, 4};
 
 static int3 edge_quad_simple[] =
 {
@@ -40,7 +40,7 @@ static int3 edge_quad_simple[] =
 };
 
 // triangles
-static int num_vert_tri_simple[2]  = { 4, 4 };
+static unsigned short num_vert_tri_simple[2]  = { 4, 4 };
 
 static double3 vert_tri_simple[] =
 {
@@ -50,14 +50,14 @@ static double3 vert_tri_simple[] =
   { -1.0,   1.0,  4.0 },
 };
 
-static int num_elem_tri_simple[2]  = { 1 , 1};
+static unsigned short num_elem_tri_simple[2]  = { 1 , 1};
 
 static int3 elem_tri_simple[] =
 {
   {0,1,2}
 };
 
-static int num_edge_tri_simple[2] = {3, 3};
+static unsigned short num_edge_tri_simple[2] = {3, 3};
 
 static int3 edge_tri_simple[] =
 {
@@ -71,7 +71,7 @@ static int3 edge_tri_simple[] =
 
 /// Edge orders.
 
-static int num_vert_quad[2]  = { 29, 77 };
+static unsigned short num_vert_quad[2]  = { 29, 77 };
 
 static double3 vert_quad0[] =
 {
@@ -203,7 +203,7 @@ static double3 vert_quad1[] =
 };
 
 
-static int num_elem_quad[2]  = { 12 , 64};
+static unsigned short num_elem_quad[2]  = { 12 , 64};
 
 static int3 elem_quad0[] =
 {
@@ -295,7 +295,7 @@ static int3 elem_quad1[] =
 
 };
 
-static int num_edge_quad[2] = {4, 16};
+static unsigned short num_edge_quad[2] = {4, 16};
 
 static int3 edge_quad0[] =
 {
@@ -326,7 +326,7 @@ static int3 edge_quad1[] =
 };
 
 // triangles
-static int num_vert_tri[2]  = { 16, 38 };
+static unsigned short num_vert_tri[2]  = { 16, 38 };
 
 static double3 vert_tri0[] =
 {
@@ -399,7 +399,7 @@ static double3 vert_tri1[] =
 };
 
 
-static int num_elem_tri[2]  = { 7 , 30};
+static unsigned short num_elem_tri[2]  = { 7 , 30};
 
 static int3 elem_tri0[] =
 {
@@ -450,7 +450,7 @@ static int3 elem_tri1[] =
   {34,32,33},
 };
 
-static int num_edge_tri[2] = {3, 12};
+static unsigned short num_edge_tri[2] = {3, 12};
 
 static int3 edge_tri0[] =
 {

@@ -162,7 +162,7 @@ namespace Hermes
       /// get_values(), get_dx_values() etc. will be returning function values at these points.
       /// \param order[in] Integration rule order.
       /// \param mask[in] A combination of one or more of the constants H2D_FN_VAL, H2D_FN_DX, H2D_FN_DY, ...
-      void set_quad_order(unsigned int order, int mask = H2D_FN_DEFAULT);
+      void set_quad_order(unsigned short order, unsigned short mask = H2D_FN_DEFAULT);
 
       virtual const Scalar* get_values(int component, int item) const;
 
@@ -207,10 +207,10 @@ namespace Hermes
 
       /// \brief Returns the polynomial degree of the function at given edge. To be overridden in derived classes.
       /// \param edge[in] Edge at which the order should be evaluated. (0-3)
-      virtual int get_edge_fn_order(int edge) const;
+      virtual int get_edge_fn_order(unsigned char edge) const;
 
       /// precalculates the current function at the current integration points.
-      virtual void precalculate(int order, int mask);
+      virtual void precalculate(unsigned short order, unsigned short mask);
 
       /// Current function polynomial order
       int order;

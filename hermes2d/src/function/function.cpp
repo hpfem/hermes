@@ -50,13 +50,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Function<Scalar>::get_edge_fn_order(int edge) const
+    int Function<Scalar>::get_edge_fn_order(unsigned char) const
     {
       return order;
     }
 
     template<typename Scalar>
-    void Function<Scalar>::set_quad_order(unsigned int order, int mask)
+    void Function<Scalar>::set_quad_order(unsigned short order, unsigned short mask)
     {
       precalculate(order, mask);
       this->order = order;
@@ -106,7 +106,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Function<Scalar>::precalculate(int order, int mask)
+    void Function<Scalar>::precalculate(unsigned short order, unsigned short mask)
     {
       this->values_valid = true;
     }
@@ -159,7 +159,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Function<Scalar>::get_num_components() const
+    unsigned char Function<Scalar>::get_num_components() const
     {
       return num_components;
     }
@@ -212,7 +212,7 @@ namespace Hermes
     Scalar* Function<Scalar>::deep_copy_array(int component, int item) const
     {
       assert(this->values_valid);
-      int np = this->quads[this->cur_quad]->get_num_points(this->order, this->element->get_mode());
+      unsigned short np = this->quads[this->cur_quad]->get_num_points(this->order, this->element->get_mode());
       Scalar* toReturn = malloc_with_check<Scalar>(np);
       memcpy(toReturn, this->get_values(component, item), sizeof(Scalar)* np);
       return toReturn;

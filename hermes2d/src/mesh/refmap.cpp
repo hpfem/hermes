@@ -78,13 +78,13 @@ namespace Hermes
 
       // prepare the shapes and coefficients of the reference map
       int j, k = 0;
-      for (unsigned int i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
         indices[k++] = ref_map_shapeset.get_vertex_index(i, e->get_mode());
 
       // straight-edged element
       if (e->cm == nullptr)
       {
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         {
           lin_coeffs[i][0] = e->vn[i]->x;
           lin_coeffs[i][1] = e->vn[i]->y;
@@ -95,7 +95,7 @@ namespace Hermes
       else // curvilinear element - edge and bubble shapes
       {
         int o = e->cm->order;
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         for (j = 2; j <= o; j++)
           indices[k++] = ref_map_shapeset.get_edge_index(i, 0, j, e->get_mode());
 
@@ -289,7 +289,7 @@ namespace Hermes
     void RefMap::calc_tangent(int edge, int eo)
     {
       int i, j;
-      int np = quad_2d->get_num_points(eo, element->get_mode());
+      unsigned short np = quad_2d->get_num_points(eo, element->get_mode());
       double3* tan = this->tan[edge];
       int a = edge, b = element->next_vert(edge);
 
@@ -548,13 +548,13 @@ namespace Hermes
 
       // prepare the shapes and coefficients of the reference map
       int j, k = 0;
-      for (unsigned int i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
         local_indices[k++] = shapeset.get_vertex_index(i, e->get_mode());
 
       // straight-edged element
       if (e->cm == nullptr)
       {
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         {
           local_lin_coeffs[i][0] = e->vn[i]->x;
           local_lin_coeffs[i][1] = e->vn[i]->y;
@@ -565,7 +565,7 @@ namespace Hermes
       else // curvilinear element - edge and bubble shapes
       {
         int o = e->cm->order;
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         for (j = 2; j <= o; j++)
           local_indices[k++] = shapeset.get_edge_index(i, 0, j, e->get_mode());
 
@@ -903,7 +903,7 @@ namespace Hermes
       }
 
       // loop through the improbable curved elements.
-      for (int i = 0; i < improbable_curved_elements.size(); i++)
+      for(unsigned short i = 0; i < improbable_curved_elements.size(); i++)
       {
         untransform(improbable_curved_elements[i], x, y, xi1, xi2);
         if (is_in_ref_domain(improbable_curved_elements[i], xi1, xi2))

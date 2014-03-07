@@ -683,7 +683,7 @@ namespace Hermes
 
       // obtain markers and bnds from son elements
       int mrk[H2D_MAX_NUMBER_EDGES], bnd[H2D_MAX_NUMBER_EDGES];
-      for (unsigned i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
       {
         MeshUtil::get_edge_sons(e, i, s1, s2);
         assert(e->sons[s1]->active);
@@ -806,7 +806,7 @@ namespace Hermes
 
     static int rtv_criterion(Element* e)
     {
-      for (unsigned int i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
       if (e->vn[i]->id == rtv_id)
         return 0;
       return -1;
@@ -868,7 +868,7 @@ namespace Hermes
 
         Element* e;
         for_all_active_elements(e, this)
-        for (unsigned int j = 0; j < e->get_nvert(); j++)
+        for (unsigned char j = 0; j < e->get_nvert(); j++)
         {
           bool marker_matched = false;
           for (unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
@@ -913,7 +913,7 @@ namespace Hermes
 
           Element* e;
           for_all_active_elements(e, this)
-          for (unsigned int j = 0; j < e->get_nvert(); j++)
+          for (unsigned char j = 0; j < e->get_nvert(); j++)
           {
             if (e->en[j]->marker == rtb_marker)
             {
@@ -1238,7 +1238,7 @@ namespace Hermes
           enew = this->create_quad(e->marker, v0, v1, v2, &nodes[e->vn[3]->id], nullptr);
 
         // copy edge markers
-        for (unsigned int j = 0; j < e->get_nvert(); j++)
+        for (unsigned char j = 0; j < e->get_nvert(); j++)
         {
           Node* en = MeshUtil::get_base_edge_node(e, j);
           enew->en[j]->bnd = en->bnd; // copy bnd data from the active el.
@@ -1392,7 +1392,7 @@ namespace Hermes
         }
 
         // copy edge markers
-        for (unsigned int j = 0; j < e->get_nvert(); j++)
+        for (unsigned char j = 0; j < e->get_nvert(); j++)
         {
           Node* en = MeshUtil::get_base_edge_node(e, j);
           enew->en[j]->bnd = en->bnd;
@@ -2151,7 +2151,7 @@ namespace Hermes
 
       // FIXME:
       if (rtb_aniso)
-      for (unsigned int i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
         refinement_angle[i] = refinement_angle[i] * 2;
 
       // deactivate this element and unregister from its nodes
@@ -2167,7 +2167,7 @@ namespace Hermes
       if ((e->is_curved()) && (!e_inter))
       {
         bool create_new = false;
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         {
           if (fabs(refinement_angle[i] - 0.0) > 1e-4)
           {
@@ -2311,7 +2311,7 @@ namespace Hermes
         if ((e->is_curved()) && (!e_inter))
         {
           //bool create_new_ = false;
-          for (unsigned int i = 0; i < e->get_nvert(); i++)
+          for (unsigned char i = 0; i < e->get_nvert(); i++)
           {
             if (fabs(refinement_angle[i] - 0.0) > 1e-4)
             {
@@ -2715,7 +2715,7 @@ namespace Hermes
           int iso = -1;
           if (e->is_triangle())
           {
-            for (unsigned int i = 0; i < e->get_nvert(); i++)
+            for (unsigned char i = 0; i < e->get_nvert(); i++)
             {
               j = e->next_vert(i);
               if (get_edge_degree(e->vn[i], e->vn[j]) > n)
@@ -2738,7 +2738,7 @@ namespace Hermes
             }
             else
             {
-              for (unsigned int i = 0; i < e->get_nvert(); i++)
+              for (unsigned char i = 0; i < e->get_nvert(); i++)
               {
                 j = e->next_vert(i);
                 if (get_edge_degree(e->vn[i], e->vn[j]) > n)
@@ -2827,7 +2827,7 @@ namespace Hermes
         throw Exceptions::ValueException("levels", levels, 1);
 
       std::vector<int> internal_markers;
-      for (int i = 0; i < markers.size(); i++)
+      for(unsigned short i = 0; i < markers.size(); i++)
       {
         Hermes::Hermes2D::Mesh::MarkersConversion::IntValid internalMarker = target_mesh->get_element_markers_conversion().get_internal_marker(markers[i]);
         if (internalMarker.valid)
@@ -2848,7 +2848,7 @@ namespace Hermes
       for_all_active_elements(e, target_mesh)
       {
         bool target_marker = false;
-        for (int i = 0; i < internal_markers.size(); i++)
+        for(unsigned short i = 0; i < internal_markers.size(); i++)
         {
           if (e->marker == internal_markers[i])
           {

@@ -90,7 +90,7 @@ namespace Hermes
       // init - ext
       Func<Hermes::Ord>** ext_func = this->init_ext_orders(current_wf->ext, current_wf->u_ext_fn, u_ext_func);
 
-      for (int current_mfvol_i = 0; current_mfvol_i < current_wf->mfvol.size(); current_mfvol_i++)
+      for(unsigned short current_mfvol_i = 0; current_mfvol_i < current_wf->mfvol.size(); current_mfvol_i++)
       {
         MatrixFormVol<Scalar>* current_mfvol = current_wf->mfvol[current_mfvol_i];
         if (!selectiveAssembler->form_to_be_assembled(current_mfvol, current_state))
@@ -101,7 +101,7 @@ namespace Hermes
           order = orderTemp;
       }
 
-      for (int current_vfvol_i = 0; current_vfvol_i < current_wf->vfvol.size(); current_vfvol_i++)
+      for(unsigned short current_vfvol_i = 0; current_vfvol_i < current_wf->vfvol.size(); current_vfvol_i++)
       {
         VectorFormVol<Scalar>* current_vfvol = current_wf->vfvol[current_vfvol_i];
         if (!selectiveAssembler->form_to_be_assembled(current_vfvol, current_state))
@@ -126,7 +126,7 @@ namespace Hermes
           // init - ext
           Func<Hermes::Ord>** ext_funcSurf = this->init_ext_orders(current_wf->ext, current_wf->u_ext_fn, u_ext_func);
 
-          for (int current_mfsurf_i = 0; current_mfsurf_i < current_wf->mfsurf.size(); current_mfsurf_i++)
+          for(unsigned short current_mfsurf_i = 0; current_mfsurf_i < current_wf->mfsurf.size(); current_mfsurf_i++)
           {
             MatrixFormSurf<Scalar>* current_mfsurf = current_wf->mfsurf[current_mfsurf_i];
             if (!selectiveAssembler->form_to_be_assembled(current_mfsurf, current_state))
@@ -137,7 +137,7 @@ namespace Hermes
               order = orderTemp;
           }
 
-          for (int current_vfsurf_i = 0; current_vfsurf_i < current_wf->vfsurf.size(); current_vfsurf_i++)
+          for(unsigned short current_vfsurf_i = 0; current_vfsurf_i < current_wf->vfsurf.size(); current_vfsurf_i++)
           {
             VectorFormSurf<Scalar>* current_vfsurf = current_wf->vfsurf[current_vfsurf_i];
             if (!selectiveAssembler->form_to_be_assembled(current_vfsurf, current_state))
@@ -298,7 +298,7 @@ namespace Hermes
       if (ext_size > 0 || u_ext_fns_size > 0)
       {
         ext_func = malloc_with_check<Func<Hermes::Ord>*>(ext_size + u_ext_fns_size);
-        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
+        for(unsigned short ext_i = 0; ext_i < ext.size(); ext_i++)
         {
           if (ext[ext_i])
           {
@@ -452,7 +452,7 @@ namespace Hermes
     {
       NeighborSearch<Scalar>* nbs_u = neighbor_searches[vfDG->i];
 
-      unsigned int prev_size = this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset;
+      unsigned short prev_size = this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset;
 
       // Order to return.
       int order = 0;
@@ -460,7 +460,7 @@ namespace Hermes
       DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset];
 
       if (current_u_ext)
-      for (int i = 0; i < prev_size; i++)
+      for (unsigned short i = 0; i < prev_size; i++)
       if (current_u_ext[i + vfDG->u_ext_offset])
         u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + vfDG->u_ext_offset]);
       else

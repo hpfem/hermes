@@ -140,7 +140,7 @@ namespace Hermes
 
       AsmList<Scalar> als[H2D_MAX_COMPONENTS];
       AsmList<Scalar> alsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_COMPONENTS];
-      int spaces_size;
+      unsigned short spaces_size;
       bool nonlinear, add_dirichlet_lift;
 
       friend class DiscreteProblem<Scalar>;

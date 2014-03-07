@@ -741,7 +741,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    CSMatrix<Scalar>* CSCMatrix<Scalar>::duplicate() const
+    SparseMatrix<Scalar>* CSCMatrix<Scalar>::duplicate() const
     {
       CSCMatrix<Scalar>* new_matrix = new CSCMatrix<Scalar>();
       new_matrix->create(this->get_size(), this->get_nnz(), this->get_Ap(), this->get_Ai(), this->get_Ax());

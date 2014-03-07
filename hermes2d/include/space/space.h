@@ -401,7 +401,7 @@ namespace Hermes
           };
           /// Number of dofs. Temporarily used during assignment
           /// of DOFs to indicate nodes which were not processed yet.
-          int n;
+          short n;
         };
         struct // constrained vertex node
         {
@@ -420,8 +420,9 @@ namespace Hermes
       {
       public:
         ElementData() : changed_in_last_adaptation(true) {};
-        int order;
-        int bdof, n;
+        short order;
+        unsigned short bdof;
+        short n;
         bool changed_in_last_adaptation;
       };
 

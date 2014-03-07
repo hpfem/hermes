@@ -183,7 +183,7 @@ namespace Hermes
       std::vector<std::pair<int, int> > elements_to_reassemble;
       std::vector<std::pair<int, int> > DOFs_to_reassemble;
 
-      SparseMatrix<Scalar>* prev_mat;
+      CSCMatrix<Scalar>* prev_mat;
       Scalar* prev_rhs;
 
       /// use Hermes views to display stuff.

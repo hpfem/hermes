@@ -31,7 +31,7 @@ namespace Hermes
       stage_wf_left(new WeakForm<Scalar>(spaces.size())), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
     {
-      for(unsigned int i = 0; i < spaces.size(); i++)
+      for(unsigned unsigned char i = 0; i < spaces.size(); i++)
       {
         this->spaces.push_back(spaces.at(i));
         this->spaces_seqs.push_back(spaces.at(i)->get_seq());
@@ -95,7 +95,7 @@ namespace Hermes
     void RungeKutta<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spaces)
     {
       bool delete_K_vector = false;
-      for(unsigned int i = 0; i < spaces.size(); i++)
+      for(unsigned unsigned char i = 0; i < spaces.size(); i++)
       {
         if(spaces[i]->get_seq() != this->spaces_seqs[i])
           delete_K_vector = true;
@@ -103,7 +103,7 @@ namespace Hermes
 
       this->spaces = spaces;
       this->spaces_seqs.clear();
-      for(unsigned int i = 0; i < spaces.size(); i++)
+      for(unsigned unsigned char i = 0; i < spaces.size(); i++)
         this->spaces_seqs.push_back(spaces.at(i)->get_seq());
 
       if(delete_K_vector)
@@ -390,7 +390,7 @@ namespace Hermes
           Solution<Scalar>::vector_to_solutions_common_dir_lift(vector_right, stage_dp_right->get_spaces(), residuals_vector, false);
 
           MeshFunctionSharedPtrVector<Scalar> meshFns;
-          for(int i = 0; i < residuals_vector.size(); i++)
+          for(unsigned short i = 0; i < residuals_vector.size(); i++)
             meshFns.push_back(residuals_vector[i]);
 
           DefaultNormCalculator<Scalar, HERMES_L2_NORM> errorCalculator(meshFns.size());
@@ -517,7 +517,7 @@ namespace Hermes
     template<typename Scalar>
     void RungeKutta<Scalar>::set_filters_to_reinit(std::vector<Filter<Scalar>*> filters_to_reinit)
     {
-      for(int i = 0; i < filters_to_reinit.size(); i++)
+      for(unsigned short i = 0; i < filters_to_reinit.size(); i++)
         this->filters_to_reinit.push_back(filters_to_reinit.at(i));
     }
 

@@ -266,7 +266,7 @@ namespace Hermes
 
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
       void free(void);
-      virtual void precalculate(int order, int mask);
+      virtual void precalculate(unsigned short order, unsigned short mask);
     };
 
     template<typename Scalar>

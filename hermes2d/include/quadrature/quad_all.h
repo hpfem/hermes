@@ -63,13 +63,13 @@ namespace Hermes
 
     extern double3 lin_pts_1_quad[21];
 
-    extern int quad_indices[9][5];
+    extern unsigned short quad_indices[9][5];
 
-    extern int tri_indices[5][3];
+    extern unsigned short tri_indices[5][3];
 
-    extern int lin_np_tri[2];
-    extern int lin_np_quad[2];
-    extern int* lin_np[2];
+    extern unsigned short lin_np_tri[2];
+    extern unsigned short lin_np_quad[2];
+    extern unsigned short* lin_np[2];
 
     extern double3*  lin_tables_tri[2];
     extern double3*  lin_tables_quad[2];

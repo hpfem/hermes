@@ -151,7 +151,7 @@ namespace Hermes
       virtual void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt);
 
       /// Duplicates a matrix (including allocation).
-      virtual CSMatrix<Scalar>* duplicate() const;
+      SparseMatrix<Scalar>* duplicate() const;
     };
 
     /// \brief General CSR Matrix class.
@@ -179,7 +179,7 @@ namespace Hermes
       void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt);
 
       /// Duplicates a matrix (including allocation).
-      virtual SparseMatrix<Scalar>* duplicate() const;
+      SparseMatrix<Scalar>* duplicate() const;
 
       /// Important - normal SparseMatrix has the pages structure suitable for CSC matrix, so we need
       /// to override the structure creation here.

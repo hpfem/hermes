@@ -65,7 +65,7 @@ namespace Hermes
       {
         int quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
         const int num_bubbles = shapeset->get_num_bubbles(quad_order, mode);
-        int* bubble_inxs = shapeset->get_bubble_indices(quad_order, mode);
+        unsigned short* bubble_inxs = shapeset->get_bubble_indices(quad_order, mode);
         for(int j = 0; j < num_bubbles; j++)
         {
           int inx_bubble = bubble_inxs[j];
@@ -110,7 +110,7 @@ namespace Hermes
         //for all orders
         max_shape_inx = 0;
         int examined_shape = 0;
-        for(int i = order_range.lower(); i <= 10; i++)
+        for (unsigned char i = order_range.lower(); i <= 10; i++)
         {
           //vertex functions
           if(vertex_order.is_in_closed(i))
@@ -229,9 +229,9 @@ namespace Hermes
             }
             else { //triangles
               int order = i;
-              int num_bubbles = shapeset->get_num_bubbles(order, mode);
-              int* bubble_inxs = shapeset->get_bubble_indices(order, mode);
-              for(int j = 0; j < num_bubbles; j++)
+              unsigned short num_bubbles = shapeset->get_num_bubbles(order, mode);
+              unsigned short* bubble_inxs = shapeset->get_bubble_indices(order, mode);
+              for (unsigned short j = 0; j < num_bubbles; j++)
               {
                 int inx_bubble = bubble_inxs[j];
                 if(used_shape_index.find(inx_bubble) == used_shape_index.end())
@@ -311,7 +311,7 @@ namespace Hermes
         const int num_sons = get_refin_sons(split);
 
         //initialize orders
-        int quad_orders[H2D_MAX_ELEMENT_SONS];
+        unsigned short quad_orders[H2D_MAX_ELEMENT_SONS];
         OrderPermutator quad_perms[H2D_MAX_ELEMENT_SONS];
         for(int i = 0; i < num_sons; i++)
         {
@@ -434,7 +434,7 @@ namespace Hermes
       template<typename Scalar>
       void OptimumSelector<Scalar>::update_cands_info(std::vector<Cand>& candidates, CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const
       {
-        for(int i = 0; i < candidates.size(); i++)
+        for(unsigned short i = 0; i < candidates.size(); i++)
         {
           CandsInfo* info = nullptr;
           Cand& cand = candidates[i];
@@ -563,7 +563,7 @@ namespace Hermes
         // Original candidate score is zero.
         unrefined.score = 0;
 
-        for (int i = 1; i < candidates.size(); i++)
+        for(unsigned short i = 1; i < candidates.size(); i++)
         {
           Cand& candidate = candidates[i];
 

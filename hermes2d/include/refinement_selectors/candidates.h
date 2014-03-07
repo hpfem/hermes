@@ -82,15 +82,15 @@ namespace Hermes
       public:
         double error; ///< Error of this candidate's sons.
         double errors[H2D_MAX_ELEMENT_SONS]; ///< Error of this candidate's sons.
-        int dofs;  ///< An estimated number of DOFs.
+        unsigned short dofs;  ///< An estimated number of DOFs.
         RefinementType split; ///< A refinement, see the enum RefinementType.
-        int p[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons, see ::H2D_MAKE_QUAD_ORDER. In a case of a triangle, the vertical order is equal to the horizontal one.
+        unsigned short p[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons, see ::H2D_MAKE_QUAD_ORDER. In a case of a triangle, the vertical order is equal to the horizontal one.
         double score; ///< A score of a candidate: the higher the better. If zero, the score is not valid and a candidate should be ignored. Evaluated in OptimumSelector::select_best_candidate.
 
         /// Constructor.
         /** \param[in] split A refinement, see the enum RefinementTypes.
         *  \param[in] order_elems Encoded orders for all element of candidate. If triangle, a vertical order has to be equal to the horizontal one. Unused elements of the array can be ignored. */
-        Cand(const RefinementType split, const int order_elems[H2D_MAX_ELEMENT_SONS]);
+        Cand(const RefinementType split, const unsigned short order_elems[H2D_MAX_ELEMENT_SONS]);
 
         /// Constructor.
         /** \param[in] split A refinement, see the enum RefinementTypes.
@@ -98,11 +98,11 @@ namespace Hermes
         *  \param[in] order_elem1 Encoded order of the second element of the candidate, if any. If triangle, a vertical order has to be equal to the horizontal one.
         *  \param[in] order_elem2 Encoded order of the third element of the candidate, if any. If triangle, a vertical order has to be equal to the horizontal one.
         *  \param[in] order_elem3 Encoded order of the fourth element of the candidate, if any. If triangle, a vertical order has to be equal to the horizontal one. */
-        Cand(const RefinementType split, const int order_elem0, const int order_elem1 = 0, const int order_elem2 = 0, const int order_elem3 = 0);
+        Cand(const RefinementType split, const unsigned short order_elem0, const unsigned short order_elem1 = 0, const unsigned short order_elem2 = 0, const unsigned short order_elem3 = 0);
 
         /// Returns a number of elements of a candidate.
         /** \return A number of elements of a candidate. */
-        int get_num_elems() const;
+        unsigned char get_num_elems() const;
       };
     }
   }

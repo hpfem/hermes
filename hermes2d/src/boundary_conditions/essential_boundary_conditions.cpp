@@ -191,7 +191,7 @@ namespace Hermes
           else
           {
             any_set = *iterator;
-            for(int i = 0; i < this->markers.size(); i++)
+            for(unsigned short i = 0; i < this->markers.size(); i++)
               if(this->markers[i] == *it)
                 throw Hermes::Exceptions::Exception("Attempt to define more than one description of the BC on the same part of the boundary with marker '%s'.", it->c_str());
             this->markers.push_back(*it);
@@ -205,7 +205,7 @@ namespace Hermes
     {
       if(this->HermesAnyBC != nullptr)
         return this->HermesAnyBC;
-      for(int i = 0; i < this->markers.size(); i++)
+      for(unsigned short i = 0; i < this->markers.size(); i++)
         if(this->markers[i] == marker)
           return this->BCs[i];
       return nullptr;

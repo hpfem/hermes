@@ -320,6 +320,7 @@ namespace Hermes
             if (refinement_selectors[component]->select_refinement(meshes[component]->get_element(element_id), current_order, current_rslns[component].get(), elem_ref))
             {
               // Put this refinement to the storage.
+              elem_ref.valid = true;
               elements_to_refine[id_to_refine] = elem_ref;
               element_refinement_location[component][element_id] = &elements_to_refine[id_to_refine];
             }
@@ -600,7 +601,7 @@ namespace Hermes
         free_with_check(elems_to_refine);
         elems_to_refine = new_elems_to_refine_array;
 
-        for (int inx = 0; inx < new_elems_to_refine.size(); inx++)
+        for(unsigned short inx = 0; inx < new_elems_to_refine.size(); inx++)
           elems_to_refine[num_elem_to_proc + inx] = new_elems_to_refine[inx];
         num_elem_to_proc += new_elems_to_refine.size();
       }
@@ -642,7 +643,7 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::apply_refinement(const ElementToRefine& elem_ref)
     {
-      if (elem_ref.id == -1)
+      if (!elem_ref.valid)
         return;
 
       SpaceSharedPtr<Scalar> space = this->spaces[elem_ref.comp];

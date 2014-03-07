@@ -23,10 +23,10 @@ extern Shapeset::shape_fn_t* simple_quad_shape_fn_table_dxx[1];
 extern Shapeset::shape_fn_t* simple_quad_shape_fn_table_dxy[1];
 extern Shapeset::shape_fn_t* simple_quad_shape_fn_table_dyy[1];
 
-extern int simple_quad_vertex_indices[H2D_MAX_NUMBER_VERTICES];
-extern int* simple_quad_edge_indices[H2D_MAX_NUMBER_EDGES];
-extern int* simple_quad_bubble_indices[];
-extern int simple_quad_bubble_count[];
-extern int simple_quad_index_to_order[];
+extern unsigned short simple_quad_vertex_indices[H2D_MAX_NUMBER_VERTICES];
+extern unsigned short* simple_quad_edge_indices[H2D_MAX_NUMBER_EDGES];
+extern unsigned short* simple_quad_bubble_indices[];
+extern unsigned short simple_quad_bubble_count[];
+extern unsigned short simple_quad_index_to_order[];
 
 #endif

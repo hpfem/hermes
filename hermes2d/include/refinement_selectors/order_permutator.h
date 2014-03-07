@@ -37,14 +37,14 @@ namespace Hermes
       class HERMES_API OrderPermutator
       {
       protected:
-        int order_h; ///< The current horizontal order.
-        int order_v; ///< The current verical order.
-        int start_order_h; ///< The starting horizontal order.
-        int start_order_v; ///< The starting vertical order.
-        int end_order_h; ///< The ending horizontal order.
-        int end_order_v; ///< The ending vertical order.
+        unsigned short order_h; ///< The current horizontal order.
+        unsigned short order_v; ///< The current verical order.
+        unsigned short start_order_h; ///< The starting horizontal order.
+        unsigned short start_order_v; ///< The starting vertical order.
+        unsigned short end_order_h; ///< The ending horizontal order.
+        unsigned short end_order_v; ///< The ending vertical order.
         bool iso_p; ///< True if orders is incresed in both the horizontal order and the vertical order are increased simultaneously.
-        int* tgt_quad_order; ///< A pointer to which a current order is stored in encoded form. Ignored if nullptr.
+        unsigned short* tgt_quad_order; ///< A pointer to which a current order is stored in encoded form. Ignored if nullptr.
 
       public:
         /// Constructor.
@@ -52,7 +52,7 @@ namespace Hermes
         *  \param[in] end_quad_order The ending order in an encoded form.
         *  \param[in] iso_p True if both orders (i.e. horizontal and vertical) should be increased simultaneously.
         *  \param[in] tgt_quad_order A point to a location to which a current orders (i.e. horizontal and vertical) are stored in an encoded form. Ignored if nullptr. */
-        OrderPermutator (int start_quad_order = 0, int end_quad_order = 0, bool iso_p = false, int* tgt_quad_order = nullptr);
+        OrderPermutator(unsigned short start_quad_order = 0, unsigned short end_quad_order = 0, bool iso_p = false, unsigned short* tgt_quad_order = nullptr);
 
         /// Moves to the next permutation of orders.
         /** \return True if there is a next permutation of orders. */
@@ -63,23 +63,23 @@ namespace Hermes
 
         /// Returns the current horizontal order.
         /** \return The current horizontal order. */
-        int get_order_h() const;
+        unsigned short get_order_h() const;
 
         /// Returns the current vertical order.
         /** \return The current vertical order. */
-        int get_order_v() const;
+        unsigned short get_order_v() const;
 
         /// Returns the current order in an encoded form.
         /** \return The current order in an encoded form. */
-        int get_quad_order() const;
+        unsigned short get_quad_order() const;
 
         /// Returns the starting order in an encoded form.
         /** \return The starting order in an encoded form. */
-        int get_start_quad_order() const;
+        unsigned short get_start_quad_order() const;
 
         /// Returns the ending order in an encoded form.
         /** \return The ending order in an encoded form. */
-        int get_end_quad_order() const;
+        unsigned short get_end_quad_order() const;
       };
     }
   }

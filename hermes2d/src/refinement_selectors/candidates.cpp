@@ -76,7 +76,7 @@ namespace Hermes
         }
       }
 
-      Cand::Cand(const RefinementType split, const int order_elems[H2D_MAX_ELEMENT_SONS])
+      Cand::Cand(const RefinementType split, const unsigned short order_elems[H2D_MAX_ELEMENT_SONS])
         : dofs(-1), split(split), score(0) {
           p[0] = order_elems[0];
           p[1] = order_elems[1];
@@ -84,7 +84,7 @@ namespace Hermes
           p[3] = order_elems[3];
       };
 
-      Cand::Cand(const RefinementType split, const int order_elem0, const int order_elem1, const int order_elem2, const int order_elem3)
+      Cand::Cand(const RefinementType split, const unsigned short order_elem0, const unsigned short order_elem1, const unsigned short order_elem2, const unsigned short order_elem3)
         : dofs(-1), split(split), score(0) {
           p[0] = order_elem0;
           p[1] = order_elem1;
@@ -92,7 +92,7 @@ namespace Hermes
           p[3] = order_elem3;
       };
 
-      int Cand::get_num_elems() const {
+      unsigned char Cand::get_num_elems() const {
         switch (split) {
         case H2D_REFINEMENT_H: return 4;
         case H2D_REFINEMENT_P: return 1;
@@ -101,7 +101,7 @@ namespace Hermes
           return 2;
         default:
           throw Hermes::Exceptions::Exception("Invalid refinement type %d.", split);
-          return -1;
+          return 0;
           break;
         }
       }

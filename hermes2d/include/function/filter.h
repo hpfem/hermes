@@ -112,7 +112,7 @@ namespace Hermes
       virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result) = 0;
 
       void init_components();
-      virtual void precalculate(int order, int mask);
+      virtual void precalculate(unsigned short order, unsigned short mask);
 
     };
 
@@ -145,7 +145,7 @@ namespace Hermes
 
       virtual void filter_fn(int n, std::complex<double>* values, double* result) = 0;
 
-      virtual void precalculate(int order, int mask);
+      virtual void precalculate(unsigned short order, unsigned short mask);
     };
 
     /// @ingroup meshFunctions
@@ -173,7 +173,7 @@ namespace Hermes
 
       void init_components();
 
-      virtual void precalculate(int order, int mask);
+      virtual void precalculate(unsigned short order, unsigned short mask);
     };
 
     /// @ingroup meshFunctions
@@ -378,7 +378,7 @@ namespace Hermes
 
       int cyl, item1, item2;
 
-      virtual void precalculate(int order, int mask);
+      virtual void precalculate(unsigned short order, unsigned short mask);
     };
 
     /// @ingroup meshFunctions
@@ -400,7 +400,7 @@ namespace Hermes
     protected:
       double tau_frac;
 
-      virtual void precalculate(int order, int mask);
+      virtual void precalculate(unsigned short order, unsigned short mask);
 
       void init_components();
 

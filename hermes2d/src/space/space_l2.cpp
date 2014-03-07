@@ -115,8 +115,8 @@ namespace Hermes
       typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
       if (!ed->n) return;
 
-      int* indices = this->shapeset->get_bubble_indices(ed->order, e->get_mode());
-      for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof++)
+      unsigned short* indices = this->shapeset->get_bubble_indices(ed->order, e->get_mode());
+      for (unsigned short i = 0, dof = ed->bdof; i < ed->n; i++, dof++)
       {
         //printf("triplet: %d, %d, %f\n", *indices, dof, 1.0);
         al->add_triplet(*indices++, dof, 1.0);

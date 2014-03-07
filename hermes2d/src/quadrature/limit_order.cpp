@@ -6,7 +6,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    static int default_order_table_tri[] =
+    static unsigned short default_order_table_tri[] =
     {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
       17, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
@@ -16,7 +16,7 @@ namespace Hermes
     };
 
 #ifdef EXTREME_QUAD
-    static int default_order_table_quad[] =
+    static unsigned short default_order_table_quad[] =
     {
       1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15,
       17, 17, 19, 19, 21, 21, 23, 23, 25, 25, 27, 27, 29, 29, 31, 31,
@@ -27,7 +27,7 @@ namespace Hermes
       97, 97, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99
     };
 #else
-    static int default_order_table_quad[] =
+    static unsigned short default_order_table_quad[] =
     {
       1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15, 17,
       17, 19, 19, 21, 21, 23, 23, 24, 24, 24, 24, 24, 24, 24,
@@ -37,16 +37,17 @@ namespace Hermes
     };
 #endif
 
-    static int* g_order_table_quad = default_order_table_quad;
-    static int* g_order_table_tri  = default_order_table_tri;
+    static unsigned short* g_order_table_quad = default_order_table_quad;
+    static unsigned short* g_order_table_tri  = default_order_table_tri;
     static bool warned_order = false;
 
-    HERMES_API int  g_max_order;
-    HERMES_API int  g_safe_max_order;
+    HERMES_API unsigned short  g_max_order;
+    HERMES_API unsigned short  g_safe_max_order;
 
-    HERMES_API void set_order_limit_table(int* tri_table, int* quad_table, int n)
+    HERMES_API void set_order_limit_table(unsigned short* tri_table, unsigned short* quad_table, unsigned short n)
     {
-      if(n < 24) throw Hermes::Exceptions::Exception("Hermes::Order limit tables must have at least 24 entries.");
+      if(n < 24)
+        throw Hermes::Exceptions::Exception("Hermes::Order limit tables must have at least 24 entries.");
       g_order_table_tri  = tri_table;
       g_order_table_quad = quad_table;
     }

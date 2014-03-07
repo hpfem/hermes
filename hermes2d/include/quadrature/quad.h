@@ -56,7 +56,7 @@ namespace Hermes
     protected:
 
       double2** tables;
-      int* np;
+      unsigned short* np;
 
       double ref_vert[H2D_NUM_MODES];
       unsigned short max_order;
@@ -72,7 +72,7 @@ namespace Hermes
     public:
       inline unsigned short get_num_points(int order, ElementMode2D mode)  const { assert(order < num_tables[mode]); return np[mode][order]; };
       inline double3* get_points(int order, ElementMode2D mode) const { assert(order < num_tables[mode]); return tables[mode][order]; }
-      inline int get_edge_points(int edge, int order, ElementMode2D mode) { assert(order < num_tables[mode]);  return  max_order[mode] + 1 + (3 * (1 - mode) + 4 * mode)*order + edge; }
+      inline unsigned short get_edge_points(int edge, unsigned short order, ElementMode2D mode) { assert(order < num_tables[mode]);  return  max_order[mode] + 1 + (3 * (1 - mode) + 4 * mode)*order + edge; }
 
       inline unsigned short get_max_order(ElementMode2D mode) const { return max_order[mode]; }
       inline unsigned short get_safe_max_order(ElementMode2D mode) const { return safe_max_order[mode]; }

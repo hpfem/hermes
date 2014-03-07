@@ -115,7 +115,6 @@ namespace Hermes
           }
           else
             fns[k] = sln[k]->clone();
-          fns[k]->set_refmap(new RefMap);
           fns[k]->set_quad_2d(&g_quad_lin);
         }
         if (user_xdisp)
@@ -265,7 +264,7 @@ namespace Hermes
           fns[k]->set_quad_order(1, item[k]);
           values[k] = fns[k]->get_values(component[k], value_type[k]);
         }
-        int* vertex_indices = tri_indices[0];
+        unsigned short* vertex_indices = tri_indices[0];
 
         if (curved)
         {
@@ -370,7 +369,7 @@ namespace Hermes
         const double* values[LinearizerDataDimensions::dimension];
         double* physical_x;
         double* physical_y;
-        int* vertex_indices = quad_indices[0];
+        unsigned short* vertex_indices = quad_indices[0];
         bool flip = this->quad_flip(iv0, iv1, iv2, iv3);
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
         {
@@ -522,7 +521,7 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
-      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, const double** values, double* physical_x, double* physical_y, int* vertex_indices) const
+      void ThreadLinearizerMultidimensional<LinearizerDataDimensions>::split_decision(int& split, int iv0, int iv1, int iv2, int iv3, ElementMode2D mode, const double** values, double* physical_x, double* physical_y, unsigned short* vertex_indices) const
       {
         // Initialization.
         split = 0;

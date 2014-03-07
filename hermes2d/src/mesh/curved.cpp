@@ -87,12 +87,12 @@ namespace Hermes
         nb = this->quad_bubble_np;
       }
 
-      for (int i = 0; i < nb; i++)
+      for (unsigned short i = 0; i < nb; i++)
       {
-        for (int j = i; j < nb; j++)
+        for (unsigned short j = i; j < nb; j++)
         {
-          int ii = indices[i], ij = indices[j];
-          int o = ref_map_shapeset.get_order(ii, mode) + ref_map_shapeset.get_order(ij, mode);
+          unsigned short ii = indices[i], ij = indices[j];
+          unsigned short o = ref_map_shapeset.get_order(ii, mode) + ref_map_shapeset.get_order(ij, mode);
           o = std::max(H2D_GET_V_ORDER(o), H2D_GET_H_ORDER(o));
 
           ref_map_pss_static.set_active_shape(ii);
@@ -105,7 +105,7 @@ namespace Hermes
 
           double3* pt = g_quad_2d_std.get_points(o, mode);
           double val = 0.0;
-          for (int k = 0; k < g_quad_2d_std.get_num_points(o, mode); k++)
+          for (unsigned short k = 0; k < g_quad_2d_std.get_num_points(o, mode); k++)
             val += pt[k][2] * (fni[k] * fnj[k]);
 
           mat[i][j] = mat[j][i] = val;
@@ -480,7 +480,7 @@ namespace Hermes
 
       double l[3] = { lambda_0(xi_1, xi_2), lambda_1(xi_1, xi_2), lambda_2(xi_1, xi_2) };
 
-      for (unsigned int j = 0; j < e->get_nvert(); j++)
+      for (unsigned char j = 0; j < e->get_nvert(); j++)
       {
         int va = j;
         int vb = e->next_vert(j);

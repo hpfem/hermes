@@ -21,7 +21,7 @@ namespace Hermes
   {
     namespace RefinementSelectors
     {
-      OrderPermutator::OrderPermutator(int start_quad_order, int end_quad_order, bool iso_p, int* tgt_quad_order)
+      OrderPermutator::OrderPermutator(unsigned short start_quad_order, unsigned short end_quad_order, bool iso_p, unsigned short* tgt_quad_order)
         : start_order_h(H2D_GET_H_ORDER(start_quad_order)), start_order_v(H2D_GET_V_ORDER(start_quad_order))
         , end_order_h(H2D_GET_H_ORDER(end_quad_order)), end_order_v(H2D_GET_V_ORDER(end_quad_order))
         , iso_p(iso_p), tgt_quad_order(tgt_quad_order)
@@ -65,27 +65,27 @@ namespace Hermes
           *tgt_quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
       }
 
-      int OrderPermutator::get_order_h() const
+      unsigned short OrderPermutator::get_order_h() const
       {
         return order_h;
       }
 
-      int OrderPermutator::get_order_v() const
+      unsigned short OrderPermutator::get_order_v() const
       {
         return order_v;
       }
 
-      int OrderPermutator::get_quad_order() const
+      unsigned short OrderPermutator::get_quad_order() const
       {
         return H2D_MAKE_QUAD_ORDER(order_h, order_v);
       }
 
-      int OrderPermutator::get_start_quad_order() const
+      unsigned short OrderPermutator::get_start_quad_order() const
       {
         return H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
       }
 
-      int OrderPermutator::get_end_quad_order() const
+      unsigned short OrderPermutator::get_end_quad_order() const
       {
         return H2D_MAKE_QUAD_ORDER(end_order_h, end_order_v);
       }

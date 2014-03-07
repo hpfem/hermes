@@ -43,19 +43,8 @@ namespace Hermes
     {
     };
 
-    ElementToRefine::ElementToRefine(int id, unsigned short comp) : id(id), comp(comp), split(H2D_REFINEMENT_H), valid(true)
+    ElementToRefine::ElementToRefine(int id, unsigned short comp) : id(id), comp(comp), split(H2D_REFINEMENT_H), valid(false)
     {
-    };
-
-    ElementToRefine::ElementToRefine(const ElementToRefine &orig) : id(orig.id), comp(orig.comp), split(orig.split), valid(orig.valid)
-    {
-      if (this->valid)
-      {
-        copy_orders(this->refinement_polynomial_order, orig.refinement_polynomial_order);
-        for (int i = 0; i < 4; i++)
-          copy_orders(this->best_refinement_polynomial_order_type[i], orig.best_refinement_polynomial_order_type[i]);
-        copy_errors(errors, orig.errors);
-      }
     };
 
     unsigned short ElementToRefine::get_num_sons() const
@@ -78,6 +67,7 @@ namespace Hermes
       id = orig.id;
       comp = orig.comp;
       split = orig.split;
+      valid = orig.valid;
       copy_orders(this->refinement_polynomial_order, orig.refinement_polynomial_order);
       for(int i = 0; i < 5; i++)
         copy_orders(this->best_refinement_polynomial_order_type[i], orig.best_refinement_polynomial_order_type[i]);

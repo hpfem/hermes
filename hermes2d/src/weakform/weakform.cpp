@@ -247,11 +247,11 @@ namespace Hermes
     template<typename FormType>
     void WeakForm<Scalar>::processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces, bool surface, std::vector<FormType> forms_to_process)
     {
-      for(int form_i = 0; form_i < forms_to_process.size(); form_i++)
+      for(unsigned short form_i = 0; form_i < forms_to_process.size(); form_i++)
       {
         Form<Scalar>* form = forms_to_process[form_i];
         form->areas_internal.clear();
-        for(int marker_i = 0; marker_i < form->areas.size(); marker_i++)
+        for(unsigned short marker_i = 0; marker_i < form->areas.size(); marker_i++)
         {
           if(form->areas[marker_i] == HERMES_ANY)
           {

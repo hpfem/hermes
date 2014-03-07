@@ -246,7 +246,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void SimpleFilter<Scalar>::precalculate(int order, int mask)
+    void SimpleFilter<Scalar>::precalculate(unsigned short order, unsigned short mask)
     {
 #ifdef H2D_USE_SECOND_DERIVATIVES
       if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
@@ -360,7 +360,7 @@ namespace Hermes
       this->sln_complex->pop_transform();
     }
 
-    void ComplexFilter::precalculate(int order, int mask)
+    void ComplexFilter::precalculate(unsigned short order, unsigned short mask)
     {
 #ifdef H2D_USE_SECOND_DERIVATIVES
       if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
@@ -437,7 +437,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DXDYFilter<Scalar>::precalculate(int order, int mask)
+    void DXDYFilter<Scalar>::precalculate(unsigned short order, unsigned short mask)
     {
       Quad2D* quad = this->quads[this->cur_quad];
       unsigned short np = quad->get_num_points(order, this->element->get_mode());
@@ -894,7 +894,7 @@ namespace Hermes
     {
     }
 
-    void VonMisesFilter::precalculate(int order, int mask)
+    void VonMisesFilter::precalculate(unsigned short order, unsigned short mask)
     {
 #ifdef H2D_USE_SECOND_DERIVATIVES
       if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
@@ -915,7 +915,7 @@ namespace Hermes
       const double *dvdy = this->sln[1]->get_dy_values();
       const double *uval = this->sln[0]->get_fn_values();
       update_refmap();
-      double *x = refmap->get_phys_x(order);
+      double *x = refmap.get_phys_x(order);
 
       for (int i = 0; i < np; i++)
       {
@@ -972,7 +972,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LinearFilter<Scalar>::precalculate(int order, int mask)
+    void LinearFilter<Scalar>::precalculate(unsigned short order, unsigned short mask)
     {
       Quad2D* quad = this->quads[this->cur_quad];
       unsigned short np = quad->get_num_points(order, this->element->get_mode());

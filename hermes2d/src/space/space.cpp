@@ -232,7 +232,7 @@ namespace Hermes
         for (int i = oldsize; i < esize; i++)
         {
           edata[i].order = -1;
-          edata[i].bdof = -1;
+          edata[i].bdof = 0;
           edata[i].n = -1;
           edata[i].changed_in_last_adaptation = true;
         }
@@ -363,7 +363,7 @@ namespace Hermes
     int Space<Scalar>::get_num_dofs(SpaceSharedPtrVector<Scalar> spaces)
     {
       int ndof = 0;
-      for (unsigned int i = 0; i < spaces.size(); i++)
+      for (unsigned unsigned char i = 0; i < spaces.size(); i++)
         ndof += spaces[i]->get_num_dofs();
       return ndof;
     }
@@ -584,7 +584,7 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::unrefine_all_mesh_elements(SpaceSharedPtrVector<Scalar> spaces, bool keep_initial_refinements)
     {
-      for (int i = 0; i < spaces.size() - 1; i++)
+      for (unsigned char i = 0; i < spaces.size() - 1; i++)
         spaces[i]->unrefine_all_mesh_elements_internal(keep_initial_refinements, true);
 
       spaces[spaces.size() - 1]->unrefine_all_mesh_elements_internal(keep_initial_refinements, false);
@@ -766,7 +766,8 @@ namespace Hermes
     int Space<Scalar>::get_edge_order(Element* e, int edge) const
     {
       Node* en = e->en[edge];
-      if (en->id >= nsize || edge >= (int)e->get_nvert()) return 0;
+      if (en->id >= nsize || edge >= e->get_nvert())
+        return 0;
 
       if (ndata[en->id].n == -1)
         return get_edge_order_internal(ndata[en->id].base); // constrained node
@@ -916,7 +917,7 @@ namespace Hermes
       Element* e;
       for_all_active_elements(e, mesh)
       {
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         {
           if (e->en[i]->bnd)
           if (essential_bcs != nullptr)
@@ -961,9 +962,9 @@ namespace Hermes
 
       // add vertex, edge and bubble functions to the assembly list
       al->cnt = 0;
-      for (unsigned int i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
         get_vertex_assembly_list(e, i, al);
-      for (unsigned int i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
         get_boundary_assembly_list_internal(e, i, al);
       get_bubble_assembly_list(e, al);
     }
@@ -986,7 +987,7 @@ namespace Hermes
 
       if (!ed->n) return;
 
-      int* indices = shapeset->get_bubble_indices(ed->order, e->get_mode());
+      unsigned short* indices = shapeset->get_bubble_indices(ed->order, e->get_mode());
       for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof++, indices++)
         al->add_triplet(*indices, dof, 1.0);
     }
@@ -1000,14 +1001,14 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::precalculate_projection_matrix(int nv, double**& mat, double*& p)
     {
-      int n = shapeset->get_max_order() + 1 - nv;
+      unsigned char n = shapeset->get_max_order() + 1 - nv;
       mat = new_matrix<double>(n, n);
       int component = (get_type() == HERMES_HDIV_SPACE) ? 1 : 0;
 
       Quad1DStd quad1d;
-      for (int i = 0; i < n; i++)
+      for (unsigned char i = 0; i < n; i++)
       {
-        for (int j = i; j < n; j++)
+        for (unsigned char j = i; j < n; j++)
         {
           int o = i + j + 4;
           double2* pt = quad1d.get_points(o);
@@ -1063,7 +1064,7 @@ namespace Hermes
       Element* e;
       for_all_active_elements(e, mesh)
       {
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         {
           int j = e->next_vert(i);
           if (e->vn[i]->bnd && e->vn[j]->bnd)

@@ -168,7 +168,7 @@ namespace Hermes
         double x_center, y_center;
         this->get_center(x_center, y_center);
 
-        for (int isurf = 0; isurf < this->nvert; isurf++)
+        for (unsigned char isurf = 0; isurf < this->nvert; isurf++)
         {
           // 0 - prepare data structures.
           int eo = g_quad_2d_std.get_edge_points(isurf, this->get_mode() == HERMES_MODE_TRIANGLE ? g_max_tri : g_max_quad, this->get_mode());

@@ -431,28 +431,28 @@ namespace Hermes
       // - count.
       int edge_count = 0;
       for_all_base_elements(e, mesh)
-      for (unsigned i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
       if(MeshUtil::get_base_edge_node(e, i)->marker)
         edge_count++;
       bson_append_int(&bw, "edge-count", edge_count);
       // - ids 1
       bson_append_start_array(&bw, "edge-1");
       for_all_base_elements(e, mesh)
-      for (unsigned i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
       if(MeshUtil::get_base_edge_node(e, i)->marker)
         bson_append_int(&bw, "c", e->vn[i]->id);
       bson_append_finish_array(&bw);
       // - ids 2
       bson_append_start_array(&bw, "edge-2");
       for_all_base_elements(e, mesh)
-      for (unsigned i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
       if(MeshUtil::get_base_edge_node(e, i)->marker)
         bson_append_int(&bw, "c", e->vn[e->next_vert(i)]->id);
       bson_append_finish_array(&bw);
       // - markers
       bson_append_start_array(&bw, "edge-marker");
       for_all_base_elements(e, mesh)
-      for (unsigned i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
       if(MeshUtil::get_base_edge_node(e, i)->marker)
         bson_append_string(&bw, "c", mesh->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker.c_str());
       bson_append_finish_array(&bw);
@@ -463,7 +463,7 @@ namespace Hermes
       for_all_base_elements(e, mesh)
       {
         if(e->is_curved())
-        for (unsigned i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         if(e->cm->curves[i] != nullptr)
         if(e->cm->curves[i]->type == ArcType)
           arc_count++;
@@ -474,7 +474,7 @@ namespace Hermes
       for_all_base_elements(e, mesh)
       {
         if(e->is_curved())
-        for (unsigned i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         if(e->cm->curves[i] != nullptr)
         {
           if(e->cm->curves[i]->type != ArcType)
@@ -488,7 +488,7 @@ namespace Hermes
       for_all_base_elements(e, mesh)
       {
         if(e->is_curved())
-        for (unsigned i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         if(e->cm->curves[i] != nullptr)
         {
           if(e->cm->curves[i]->type != ArcType)
@@ -502,7 +502,7 @@ namespace Hermes
       for_all_base_elements(e, mesh)
       {
         if(e->is_curved())
-        for (unsigned i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         if(e->cm->curves[i] != nullptr)
         {
           if(e->cm->curves[i]->type != ArcType)
@@ -516,7 +516,7 @@ namespace Hermes
       // - count.
       for_all_base_elements(e, mesh)
       if(e->is_curved())
-      for (unsigned i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
       if(e->cm->curves[i] != nullptr)
       if(e->cm->curves[i]->type != ArcType)
         throw Exceptions::Exception("BSON mesh loader can not operate with general NURBS so far.");
@@ -625,7 +625,7 @@ namespace Hermes
         bool has_inner_edges = false;
         for_all_base_elements(e, meshes[meshes_i])
         {
-          for (unsigned i = 0; i < e->get_nvert(); i++)
+          for (unsigned char i = 0; i < e->get_nvert(); i++)
           {
             if(MeshUtil::get_base_edge_node(e, i)->bnd)
             {
@@ -646,7 +646,7 @@ namespace Hermes
         if(has_inner_edges)
         {
           for_all_base_elements(e, meshes[meshes_i])
-          for (unsigned i = 0; i < e->get_nvert(); i++)
+          for (unsigned char i = 0; i < e->get_nvert(); i++)
           {
             if(!MeshUtil::get_base_edge_node(e, i)->bnd)
             {
@@ -666,7 +666,7 @@ namespace Hermes
         for_all_base_elements(e, meshes[meshes_i])
         {
           if(e->is_curved())
-          for (unsigned i = 0; i < e->get_nvert(); i++)
+          for (unsigned char i = 0; i < e->get_nvert(); i++)
           if(e->cm->curves[i] != nullptr)
           if(vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
           {

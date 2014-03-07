@@ -290,7 +290,7 @@ namespace Hermes
 
       if (current_mat && DG_matrix_forms_present && !edge_processed)
       {
-        for (int current_mfsurf_i = 0; current_mfsurf_i < wf->mfDG.size(); current_mfsurf_i++)
+        for(unsigned short current_mfsurf_i = 0; current_mfsurf_i < wf->mfDG.size(); current_mfsurf_i++)
         {
           if (!this->selectiveAssembler->form_to_be_assembled((MatrixForm<Scalar>*)wf->mfDG[current_mfsurf_i], current_state))
             continue;

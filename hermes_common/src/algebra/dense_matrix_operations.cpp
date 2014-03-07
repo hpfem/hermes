@@ -29,10 +29,10 @@ namespace Hermes
   {
     namespace DenseMatrixOperations
     {
-      template<typename T>
-      void ludcmp(T **a, int n, int *indx, double *d)
+      template<typename T, typename Int>
+      void ludcmp(T **a, Int n, Int *indx, double *d)
       {
-        int i, imax = 0, j, k;
+        Int i, imax = 0, j, k;
         T big, dum, sum, temp;
         T *vv = malloc_with_check<T>(n);
 
@@ -96,10 +96,11 @@ namespace Hermes
         free_with_check(vv);
       }
 
-      template<typename T, typename S>
-      void lubksb(T **a, int n, int *indx, S *b)
+      template<typename T, typename S, typename Int>
+      void lubksb(T **a, Int n, Int *indx, S *b)
       {
-        int i, ip, j;
+        Int ip, j;
+        int i;
         S sum;
 
         for (i = 0; i < n; i++)
@@ -120,17 +121,21 @@ namespace Hermes
         }
       }
 
-      template<typename T>
-      void choldc(T **a, int n, T p[])
+      template<typename T, typename Int>
+      void choldc(T **a, Int n, T p[])
       {
-        int i, j, k;
+        Int i, j, k;
         for (i = 0; i < n; i++)
         {
           for (j = i; j < n; j++)
           {
             T sum = a[i][j];
             k = i;
-            while (--k >= 0) sum -= a[i][k] * a[j][k];
+            while (k > 0)
+            {
+              sum -= a[i][k] * a[j][k];
+              k--;
+            }
             if (i == j)
             {
               if ((std::complex<double>(sum)).real() <= 0.0)
@@ -142,13 +147,35 @@ namespace Hermes
         }
       }
 
-      template HERMES_API void ludcmp<double>(double **a, int n, int *indx, double *d);
-      template HERMES_API void ludcmp<std::complex<double> >(std::complex<double> **a, int n, int *indx, double *d);
-      template HERMES_API void lubksb<double, std::complex<double> >(double **a, int n, int *indx, std::complex<double> *d);
-      template HERMES_API void lubksb<double, double>(double **a, int n, int *indx, double *d);
-      template HERMES_API void lubksb<std::complex<double>, std::complex<double> >(std::complex<double> **a, int n, int *indx, std::complex<double> *d);
-      template HERMES_API void choldc<double>(double **a, int n, double p[]);
-      template HERMES_API void choldc<std::complex<double> >(std::complex<double> **a, int n, std::complex<double> p[]);
+      template HERMES_API void ludcmp<double, int>(double **a, int n, int *indx, double *d);
+      template HERMES_API void ludcmp<std::complex<double>, int>(std::complex<double> **a, int n, int *indx, double *d);
+
+      template HERMES_API void ludcmp<double, unsigned short>(double **a, unsigned short n, unsigned short *indx, double *d);
+      template HERMES_API void ludcmp<std::complex<double>, unsigned short>(std::complex<double> **a, unsigned short n, unsigned short *indx, double *d);
+
+      template HERMES_API void ludcmp<double, unsigned char>(double **a, unsigned char n, unsigned char *indx, double *d);
+      template HERMES_API void ludcmp<std::complex<double>, unsigned char>(std::complex<double> **a, unsigned char n, unsigned char *indx, double *d);
+
+      template HERMES_API void lubksb<double, std::complex<double>, int>(double **a, int n, int *indx, std::complex<double> *d);
+      template HERMES_API void lubksb<double, double, int>(double **a, int n, int *indx, double *d);
+      template HERMES_API void lubksb<std::complex<double>, std::complex<double>, int>(std::complex<double> **a, int n, int *indx, std::complex<double> *d);
+      
+      template HERMES_API void lubksb<double, std::complex<double>, unsigned short>(double **a, unsigned short n, unsigned short *indx, std::complex<double> *d);
+      template HERMES_API void lubksb<double, double, unsigned short>(double **a, unsigned short n, unsigned short *indx, double *d);
+      template HERMES_API void lubksb<std::complex<double>, std::complex<double>, unsigned short>(std::complex<double> **a, unsigned short n, unsigned short *indx, std::complex<double> *d);
+
+      template HERMES_API void lubksb<double, std::complex<double>, unsigned char>(double **a, unsigned char n, unsigned char *indx, std::complex<double> *d);
+      template HERMES_API void lubksb<double, double, unsigned char>(double **a, unsigned char n, unsigned char *indx, double *d);
+      template HERMES_API void lubksb<std::complex<double>, std::complex<double>, unsigned char>(std::complex<double> **a, unsigned char n, unsigned char *indx, std::complex<double> *d);
+      
+      template HERMES_API void choldc<double, int>(double **a, int n, double p[]);
+      template HERMES_API void choldc<std::complex<double>, int>(std::complex<double> **a, int n, std::complex<double> p[]);
+
+      template HERMES_API void choldc<double, unsigned short>(double **a, unsigned short n, double p[]);
+      template HERMES_API void choldc<std::complex<double>, unsigned short>(std::complex<double> **a, unsigned short n, std::complex<double> p[]);
+
+      template HERMES_API void choldc<double, unsigned char>(double **a, unsigned char n, double p[]);
+      template HERMES_API void choldc<std::complex<double>, unsigned char>(std::complex<double> **a, unsigned char n, std::complex<double> p[]);
     }
   }
 }

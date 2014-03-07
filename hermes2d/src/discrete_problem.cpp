@@ -53,7 +53,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init(bool to_set, bool dirichlet_lift_accordingly)
     {
-      this->refine_states = nullptr;
+      this->reassembled_states_reuse_linear_system = nullptr;
 
       this->spaces_size = this->spaces.size();
 
@@ -89,10 +89,10 @@ namespace Hermes
         return false;
 
       // Initial check of meshes and spaces.
-      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+      for (unsigned short space_i = 0; space_i < this->spaces_size; space_i++)
         this->spaces[space_i]->check();
 
-      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+      for (unsigned short space_i = 0; space_i < this->spaces_size; space_i++)
         if (!this->spaces[space_i]->is_up_to_date())
           throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
 
@@ -307,8 +307,8 @@ namespace Hermes
       // If there are no states, return.
       if (this->selectiveAssembler.prepare_sparse_structure(this->current_mat, this->current_rhs, this->spaces, states, num_states))
       {
-        if (this->refine_states)
-          this->refine_states(states, num_states);
+        if (this->reassembled_states_reuse_linear_system)
+          this->reassembled_states_reuse_linear_system(states, num_states, this->current_mat, this->current_rhs);
 
         // Is this a DG assembling.
         bool is_DG = this->wf->is_DG();

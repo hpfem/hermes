@@ -48,7 +48,7 @@ namespace Hermes
       int idx[H2D_MAX_LOCAL_BASIS_SIZE];      ///< array of shape function indices
       int dof[H2D_MAX_LOCAL_BASIS_SIZE];      ///< array of basis function numbers (DOFs)
       Scalar coef[H2D_MAX_LOCAL_BASIS_SIZE];  ///< array of coefficients
-      unsigned int cnt;       ///< the number of items in the arrays idx, dof and coef
+      unsigned short cnt;       ///< the number of items in the arrays idx, dof and coef
 
       /// Adds a record for one basis function (shape functions index, basis functions index, coefficient).
       void add_triplet(int i, int d, Scalar c);

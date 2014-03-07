@@ -437,7 +437,7 @@ namespace Hermes
       std::vector<unsigned int> neighbors_not_to_be_deleted;
 
       std::vector<unsigned int> updated_transformations;
-      for (int i = 0; i < transformations.size(); i++)
+      for(unsigned short i = 0; i < transformations.size(); i++)
       {
         if (!((active_edge == 0 && transformations[i] == 4) || (active_edge == 1 && transformations[i] == 7) || (active_edge == 2 && transformations[i] == 5) || (active_edge == 3 && transformations[i] == 6)))
         {
@@ -558,7 +558,7 @@ namespace Hermes
       std::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
 
       std::vector<unsigned int> updated_transformations;
-      for (int i = 0; i < transformations.size(); i++)
+      for(unsigned short i = 0; i < transformations.size(); i++)
       {
         if (!((active_edge == 0 && transformations[i] == 4) || (active_edge == 1 && transformations[i] == 7) || (active_edge == 2 && transformations[i] == 5) || (active_edge == 3 && transformations[i] == 6)))
         {

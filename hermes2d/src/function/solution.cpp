@@ -27,11 +27,11 @@ namespace Hermes
   {
     static double3* cheb_tab_tri[11];
     static double3* cheb_tab_quad[11];
-    static int      cheb_np_tri[11];
-    static int      cheb_np_quad[11];
+    static unsigned short      cheb_np_tri[11];
+    static unsigned short      cheb_np_quad[11];
 
     static double3** cheb_tab[2] = { cheb_tab_tri, cheb_tab_quad };
-    static int*      cheb_np[2] = { cheb_np_tri, cheb_np_quad };
+    static unsigned short*      cheb_np[2] = { cheb_np_tri, cheb_np_quad };
 
     static class Quad2DCheb : public Quad2D
     {
@@ -248,7 +248,7 @@ namespace Hermes
     public:
       // this is a set of LU-decomposed matrices shared by all Solutions
       double** mat[2][11];
-      int* perm[2][11];
+      unsigned short* perm[2][11];
 
       mono_lu_init()
       {
@@ -277,13 +277,14 @@ namespace Hermes
     mono_lu;
 
     template<typename Scalar>
-    double** Solution<Scalar>::calc_mono_matrix(int mode, int o)
+    double** Solution<Scalar>::calc_mono_matrix(int mode, unsigned char o)
     {
       if (mono_lu.mat[mode][o] == nullptr)
       {
-        int i, j, k, l, m, row;
+        unsigned char i, j, m, row;
+        char k, l;
         double x, y, xn, yn;
-        int n = this->mode ? sqr(o + 1) : (o + 1)*(o + 2) / 2;
+        unsigned short n = this->mode ? sqr(o + 1) : (o + 1)*(o + 2) / 2;
 
         // loop through all chebyshev points
         mono_lu.mat[mode][o] = new_matrix<double>(n, n);
@@ -303,7 +304,7 @@ namespace Hermes
 
         double d;
         if (mono_lu.perm[mode][o] == nullptr)
-          mono_lu.perm[mode][o] = malloc_with_check<Solution<Scalar>, int>(n, this);
+          mono_lu.perm[mode][o] = malloc_with_check<Solution<Scalar>, unsigned short>(n, this);
         ludcmp(mono_lu.mat[mode][o], n, mono_lu.perm[mode][o], &d);
       }
 
@@ -430,7 +431,7 @@ namespace Hermes
 
           // solve for the monomial coefficients
           calc_mono_matrix(this->mode, o);
-          lubksb<double, Scalar>(mono_lu.mat[this->mode][o], np, mono_lu.perm[this->mode][o], val);
+          lubksb(mono_lu.mat[this->mode][o], np, mono_lu.perm[this->mode][o], val);
         }
       }
 
@@ -456,7 +457,7 @@ namespace Hermes
       if (start_indices.empty())
       {
         int counter = 0;
-        for (int i = 0; i < spaces.size(); i++)
+        for (unsigned char i = 0; i < spaces.size(); i++)
         {
           start_indices_new.push_back(counter);
           counter += spaces[i]->get_num_dofs();
@@ -465,13 +466,13 @@ namespace Hermes
       else
       {
         if (start_indices.size() != spaces.size()) throw Hermes::Exceptions::Exception("Mismatched start indices in vector_to_solutions().");
-        for (int i = 0; i < spaces.size(); i++)
+        for (unsigned char i = 0; i < spaces.size(); i++)
         {
           start_indices_new.push_back(start_indices[i]);
         }
       }
 
-      for (int i = 0; i < spaces.size(); i++)
+      for (unsigned char i = 0; i < spaces.size(); i++)
       {
         if (Solution<Scalar>::static_verbose_output)
           Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
@@ -523,7 +524,7 @@ namespace Hermes
       if (start_indices.empty())
       {
         int counter = 0;
-        for (int i = 0; i < spaces.size(); i++)
+        for (unsigned char i = 0; i < spaces.size(); i++)
         {
           start_indices_new.push_back(counter);
           counter += spaces[i]->get_num_dofs();
@@ -532,13 +533,13 @@ namespace Hermes
       else
       {
         if (start_indices.size() != spaces.size()) throw Hermes::Exceptions::Exception("Mismatched start indices in vector_to_solutions().");
-        for (int i = 0; i < spaces.size(); i++)
+        for (unsigned char i = 0; i < spaces.size(); i++)
         {
           start_indices_new.push_back(start_indices[i]);
         }
       }
 
-      for (int i = 0; i < spaces.size(); i++)
+      for (unsigned char i = 0; i < spaces.size(); i++)
       {
         if (Solution<Scalar>::static_verbose_output)
           Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
@@ -562,13 +563,13 @@ namespace Hermes
       // If start indices are not given, calculate them using the dimension of each space.
       std::vector<int> start_indices_new;
       int counter = 0;
-      for (int i = 0; i < spaces.size(); i++)
+      for (unsigned char i = 0; i < spaces.size(); i++)
       {
         start_indices_new.push_back(counter);
         counter += spaces[i]->get_num_dofs();
       }
 
-      for (int i = 0; i < spaces.size(); i++)
+      for (unsigned char i = 0; i < spaces.size(); i++)
       {
         if (Solution<Scalar>::static_verbose_output)
           Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
@@ -589,13 +590,13 @@ namespace Hermes
       // If start indices are not given, calculate them using the dimension of each space.
       std::vector<int> start_indices_new;
       int counter = 0;
-      for (int i = 0; i < spaces.size(); i++)
+      for (unsigned char i = 0; i < spaces.size(); i++)
       {
         start_indices_new.push_back(counter);
         counter += spaces[i]->get_num_dofs();
       }
 
-      for (int i = 0; i < spaces.size(); i++)
+      for (unsigned char i = 0; i < spaces.size(); i++)
       {
         if (Solution<Scalar>::static_verbose_output)
           Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
@@ -779,8 +780,8 @@ namespace Hermes
         if ((newmask & H2D_SECOND) == H2D_SECOND)
         {
           this->update_refmap();
-          mat = this->refmap->get_inv_ref_map(order);
-          double3x2 *mm, *mat2 = this->refmap->get_second_ref_map(order);
+          mat = this->refmap.get_inv_ref_map(order);
+          double3x2 *mm, *mat2 = this->refmap.get_second_ref_map(order);
           for (i = 0, m = mat, mm = mat2; i < np; i++, m++, mm++)
           {
             Scalar vx = this->values[0][1][i];
@@ -798,8 +799,8 @@ namespace Hermes
         if ((mask & H2D_GRAD) == H2D_GRAD)
         {
           this->update_refmap();
-          mat = this->refmap->get_const_inv_ref_map();
-          if (!this->refmap->is_jacobian_const()) { mat = this->refmap->get_inv_ref_map(order); mstep = 1; }
+          mat = this->refmap.get_const_inv_ref_map();
+          if (!this->refmap.is_jacobian_const()) { mat = this->refmap.get_inv_ref_map(order); mstep = 1; }
 
           for (i = 0, m = mat; i < np; i++, m += mstep)
           {
@@ -815,8 +816,8 @@ namespace Hermes
       else if (space_type == HERMES_HCURL_SPACE)
       {
           this->update_refmap();
-          mat = this->refmap->get_const_inv_ref_map();
-          if (!this->refmap->is_jacobian_const()) { mat = this->refmap->get_inv_ref_map(order); mstep = 1; }
+          mat = this->refmap.get_const_inv_ref_map();
+          if (!this->refmap.is_jacobian_const()) { mat = this->refmap.get_inv_ref_map(order); mstep = 1; }
 
           for (i = 0, m = mat; i < np; i++, m += mstep)
           {
@@ -843,8 +844,8 @@ namespace Hermes
         if ((mask & H2D_FN_VAL) == H2D_FN_VAL)
         {
           this->update_refmap();
-          mat = this->refmap->get_const_inv_ref_map();
-          if (!this->refmap->is_jacobian_const()) { mat = this->refmap->get_inv_ref_map(order); mstep = 1; }
+          mat = this->refmap.get_const_inv_ref_map();
+          if (!this->refmap.is_jacobian_const()) { mat = this->refmap.get_inv_ref_map(order); mstep = 1; }
 
           for (i = 0, m = mat; i < np; i++, m += mstep)
           {
@@ -858,7 +859,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::precalculate(int order, int mask)
+    void Solution<Scalar>::precalculate(unsigned short order, unsigned short mask)
     {
       int i, j, k, l;
       Quad2D* quad = this->quads[this->cur_quad];
@@ -935,8 +936,8 @@ namespace Hermes
           throw Hermes::Exceptions::Exception("Cannot obtain second derivatives of an exact solution.");
         
         this->update_refmap();
-        double* x = this->refmap->get_phys_x(order);
-        double* y = this->refmap->get_phys_y(order);
+        double* x = this->refmap.get_phys_x(order);
+        double* y = this->refmap.get_phys_y(order);
 
         // evaluate the exact solution
         if (this->num_components == 1)
@@ -946,8 +947,8 @@ namespace Hermes
           {
             double2x2 *mat, *m;
             int mstep = 0;
-            mat = this->refmap->get_const_inv_ref_map();
-            if (!this->refmap->is_jacobian_const()) { mat = this->refmap->get_inv_ref_map(order); mstep = 1; }
+            mat = this->refmap.get_const_inv_ref_map();
+            if (!this->refmap.is_jacobian_const()) { mat = this->refmap.get_inv_ref_map(order); mstep = 1; }
 
             for (i = 0, m = mat; i < np; i++, m += mstep)
             {
@@ -1610,7 +1611,7 @@ namespace Hermes
         while (bson_iterator_next(&it))
           imag_coeffs.push_back(bson_iterator_double(&it));
 
-        for (int i = 0; i < imag_coeffs.size(); i++)
+        for(unsigned short i = 0; i < imag_coeffs.size(); i++)
           this->mono_coeffs[i] = std::complex<double>(real_coeffs[i], imag_coeffs[i]);
 
         // elem order
@@ -1731,7 +1732,7 @@ namespace Hermes
         {
           double2x2 m;
           double xx, yy;
-          this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, m);
+          this->refmap.inv_ref_map_at_point(xi1, xi2, xx, yy, m);
           Scalar dx = get_ref_value(e, xi1, xi2, a, 1);
           Scalar dy = get_ref_value(e, xi1, xi2, a, 2);
           if (b == 1) return m[0][0] * dx + m[0][1] * dy; // H2D_FN_DX
@@ -1744,14 +1745,14 @@ namespace Hermes
           double3x2 mat2;
           double xx, yy;
 
-          this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, mat);
+          this->refmap.inv_ref_map_at_point(xi1, xi2, xx, yy, mat);
 
           Scalar vx = get_ref_value(e, xi1, xi2, a, 1);
           Scalar vy = get_ref_value(e, xi1, xi2, a, 2);
           Scalar vxx = get_ref_value(e, xi1, xi2, a, 3);
           Scalar vyy = get_ref_value(e, xi1, xi2, a, 4);
           Scalar vxy = get_ref_value(e, xi1, xi2, a, 5);
-          this->refmap->second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
+          this->refmap.second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
           if (b == 3)
             return sqr(mat[0][0])*vxx + 2 * mat[0][1] * mat[0][0] * vxy + sqr(mat[0][1])*vyy + mat2[0][0] * vx + mat2[0][1] * vy;   // dxx
           if (b == 4)
@@ -1769,7 +1770,7 @@ namespace Hermes
         {
           double2x2 m;
           double xx, yy;
-          this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, m);
+          this->refmap.inv_ref_map_at_point(xi1, xi2, xx, yy, m);
           Scalar vx = get_ref_value(e, xi1, xi2, 0, 0);
           Scalar vy = get_ref_value(e, xi1, xi2, 1, 0);
           if (a == 0) return m[0][0] * vx + m[0][1] * vy; // H2D_FN_VAL_0
@@ -1795,7 +1796,7 @@ namespace Hermes
 
       Scalar** toReturn = malloc_with_check<Solution<Scalar>, Scalar*>(2, this);
       double2x2 mat;
-      this->refmap->inv_ref_map_at_point(x_ref, y_ref, x_dummy, y_dummy, mat);
+      this->refmap.inv_ref_map_at_point(x_ref, y_ref, x_dummy, y_dummy, mat);
       if (this->num_components == 1)
       {
         toReturn[0] = malloc_with_check<Solution<Scalar>, Scalar>(6, this);
@@ -1822,7 +1823,7 @@ namespace Hermes
         toReturn[0][2] = mat[1][0] * result[1] + mat[1][1] * result[2];
 #ifdef H2D_USE_SECOND_DERIVATIVES
         double3x2 mat2;
-        this->refmap->second_ref_map_at_point(x_ref, y_ref, x_dummy, y_dummy, mat2);
+        this->refmap.second_ref_map_at_point(x_ref, y_ref, x_dummy, y_dummy, mat2);
 
         toReturn[0][3] = sqr(mat[0][0])*result[3] + 2 * mat[0][1] * mat[0][0] * result[5] + sqr(mat[0][1])*result[4] + mat2[0][0] * result[1] + mat2[0][1] * result[2];
         toReturn[0][4] = sqr(mat[1][0])*result[3] + 2 * mat[1][1] * mat[1][0] * result[5] + sqr(mat[1][1])*result[4] + mat2[2][0] * result[1] + mat2[2][1] * result[2];
@@ -1894,7 +1895,7 @@ namespace Hermes
 
             double2x2 m;
             double xx, yy;
-            this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, m);
+            this->refmap.inv_ref_map_at_point(xi1, xi2, xx, yy, m);
             Scalar dx = get_ref_value(e, xi1, xi2, 0, 1);
             Scalar dy = get_ref_value(e, xi1, xi2, 0, 2);
             toReturn->dx[0] = m[0][0] * dx + m[0][1] * dy;
@@ -1905,8 +1906,8 @@ namespace Hermes
             double2x2 mat;
             double3x2 mat2;
 
-            this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, mat);
-            this->refmap->second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
+            this->refmap.inv_ref_map_at_point(xi1, xi2, xx, yy, mat);
+            this->refmap.second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
 
             Scalar vxx = get_ref_value(e, xi1, xi2, 0, 3);
             Scalar vyy = get_ref_value(e, xi1, xi2, 0, 4);
@@ -1920,7 +1921,7 @@ namespace Hermes
           {
             double2x2 m;
             double xx, yy;
-            this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, m);
+            this->refmap.inv_ref_map_at_point(xi1, xi2, xx, yy, m);
             Scalar vx = get_ref_value(e, xi1, xi2, 0, 0);
             Scalar vy = get_ref_value(e, xi1, xi2, 1, 0);
             toReturn->val0[0] = m[0][0] * vx + m[0][1] * vy;

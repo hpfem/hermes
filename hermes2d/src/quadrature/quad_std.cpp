@@ -1549,7 +1549,7 @@ namespace Hermes
       std_pts_98_99_1d, std_pts_98_99_1d
     };
 
-    static int std_np_1d[] =
+    static unsigned short std_np_1d[] =
     {
       sizeof(std_pts_0_1_1d) / sizeof(double2),
       sizeof(std_pts_0_1_1d) / sizeof(double2),
@@ -2380,7 +2380,7 @@ namespace Hermes
       { -0.978904561411718, 0.859512343113706, 0.007147818771900 }
     };
 
-    static int std_np_2d_tri[g_max_tri + 1 + 3 * g_max_tri + 3] =
+    static unsigned short std_np_2d_tri[g_max_tri + 1 + 3 * g_max_tri + 3] =
     {
       sizeof(std_pts_0_2d_tri) / sizeof(double3),
       sizeof(std_pts_1_2d_tri) / sizeof(double3),
@@ -2422,7 +2422,7 @@ namespace Hermes
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static double3* make_quad_table(int order, int& np)
+    static double3* make_quad_table(int order, unsigned short& np)
     {
       // points on a quad are calculated as a simple cartesian
       // product of 1D quadrature points...
@@ -2444,7 +2444,7 @@ namespace Hermes
       return result;
     }
 
-    static double3* make_edge_table(double2& v1, double2& v2, int& np, int order)
+    static double3* make_edge_table(double2& v1, double2& v2, unsigned short& np, unsigned short order)
     {
       np = std_np_1d[order];
       double3* result = malloc_with_check<double3>(np);
@@ -2463,7 +2463,7 @@ namespace Hermes
     }
 
     static double3* std_tables_2d_quad[g_max_quad + 1 + 4 * g_max_quad + 4];
-    static int std_np_2d_quad[g_max_quad + 1 + 4 * g_max_quad + 4];
+    static unsigned short std_np_2d_quad[g_max_quad + 1 + 4 * g_max_quad + 4];
 
     static double3** std_tables_2d[2] =
     {
@@ -2471,7 +2471,7 @@ namespace Hermes
       std_tables_2d_quad
     };
 
-    static int* std_np_2d[2] =
+    static unsigned short* std_np_2d[2] =
     {
       std_np_2d_tri,
       std_np_2d_quad
@@ -2502,7 +2502,7 @@ namespace Hermes
       num_tables[1] = max_order[1] + 1 + 4 * max_order[1] + 4;
 
       // create quad tables and edge tables
-      int i, j, k, l;
+      unsigned short i, j, k, l;
 
       for (i = 0; i <= max_order[0]; i++)
       {
@@ -2531,7 +2531,7 @@ namespace Hermes
 
     Quad2DStd::~Quad2DStd()
     {
-      int i, j, k, l;
+      unsigned short i, j, k, l;
       for (i = 0; i <= max_order[0]; i++)
       {
         for (j = 0; j < 3; j++)
@@ -2622,7 +2622,7 @@ namespace Hermes
       { -0.5, 0.5, 0.0 }  // 20
     };
 
-    int quad_indices[9][5] =
+    unsigned short quad_indices[9][5] =
     {
       { 0, 1, 2, 3, 4 },
       { 5, 6, 7, 8, 9 }, { 10, 11, 12, 6, 13 },
@@ -2631,14 +2631,14 @@ namespace Hermes
       { 5, 4, 18, 3, 7 }, { 10, 1, 15, 4, 12 }
     };
 
-    int tri_indices[5][3] =
+    unsigned short tri_indices[5][3] =
     {
       { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 9, 10, 11 }, { 9, 4, 8 }
     };
 
-    int lin_np_tri[2] = { 3, 12 };
-    int lin_np_quad[2] = { 4, 21 };
-    int* lin_np[2] = { lin_np_tri, lin_np_quad };
+    unsigned short lin_np_tri[2] = { 3, 12 };
+    unsigned short lin_np_quad[2] = { 4, 21 };
+    unsigned short* lin_np[2] = { lin_np_tri, lin_np_quad };
 
     double3*  lin_tables_tri[2] = { lin_pts_0_tri, lin_pts_1_tri };
     double3*  lin_tables_quad[2] = { lin_pts_0_quad, lin_pts_1_quad };

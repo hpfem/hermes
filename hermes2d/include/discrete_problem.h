@@ -104,7 +104,7 @@ namespace Hermes
       void set_reassembled_states_reuse_linear_system_fn(reassembled_states_reuse_linear_system_fn fn) {
         this->reassembled_states_reuse_linear_system = fn;
       }
-      reassembled_states_reuse_linear_system_fn reassembled_states_reuse_matrix;
+      reassembled_states_reuse_linear_system_fn reassembled_states_reuse_linear_system;
 
     protected:
       /// Initialize states.

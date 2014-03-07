@@ -93,7 +93,7 @@ namespace Hermes
       /// Returns the polynomial degree of the specified shape function.
       /// If on quads, it returns encoded orders. The orders has to be decoded through macros
       /// H2D_GET_H_ORDER and H2D_GET_V_ORDER.
-      int get_order(int index, ElementMode2D mode) const;
+      unsigned short get_order(int index, ElementMode2D mode) const;
 
       virtual Shapeset* clone() = 0;
 
@@ -101,11 +101,11 @@ namespace Hermes
       unsigned char get_num_components() const;
 
       /// Returns the maximum poly degree for all shape functions.
-      int get_max_order() const;
-      int get_min_order() const;
+      unsigned short get_max_order() const;
+      unsigned short get_min_order() const;
 
       /// Returns the highest shape function index.
-      virtual int get_max_index(ElementMode2D mode) const = 0;
+      virtual unsigned short get_max_index(ElementMode2D mode) const = 0;
 
       /// Returns the index of a vertex shape function associated with the specified vertex.
       unsigned short get_vertex_index(int vertex, ElementMode2D mode) const;
@@ -113,7 +113,7 @@ namespace Hermes
       /// Returns the index of an edge function associated with the specified edge and of the
       /// requested order. 'ori' can be 0 or 1 and determines edge orientation (this is for
       /// shapesets with non-symmetric edge functions).
-      unsigned short get_edge_index(unsigned char edge, int ori, int order, ElementMode2D mode) const;
+      unsigned short get_edge_index(unsigned char edge, unsigned short ori, unsigned short order, ElementMode2D mode) const;
 
       /// Returns space type.
       /// Internal.
@@ -125,11 +125,11 @@ namespace Hermes
 
       /// Obtains the value of the given shape function. (x,y) is a coordinate in the reference
       /// domain, component is 0 for Scalar shapesets and 0 or 1 for vector shapesets.
-      double get_value(int n, int index, double x, double y, int component, ElementMode2D mode);
+      double get_value(int n, int index, double x, double y, unsigned short component, ElementMode2D mode);
 
-      double get_fn_value (int index, double x, double y, int component, ElementMode2D mode);
-      double get_dx_value (int index, double x, double y, int component, ElementMode2D mode);
-      double get_dy_value (int index, double x, double y, int component, ElementMode2D mode);
+      double get_fn_value (int index, double x, double y, unsigned short component, ElementMode2D mode);
+      double get_dx_value (int index, double x, double y, unsigned short component, ElementMode2D mode);
+      double get_dy_value (int index, double x, double y, unsigned short component, ElementMode2D mode);
 
       /// The most used calls are distinguished for optimization.
       double get_fn_value_0_tri(int index, double x, double y);
@@ -145,20 +145,20 @@ namespace Hermes
       /// The most used calls are distinguished for optimization.
       double get_dy_value_0_quad(int index, double x, double y);
 
-      double get_dxx_value(int index, double x, double y, int component, ElementMode2D mode);
-      double get_dyy_value(int index, double x, double y, int component, ElementMode2D mode);
-      double get_dxy_value(int index, double x, double y, int component, ElementMode2D mode);
+      double get_dxx_value(int index, double x, double y, unsigned short component, ElementMode2D mode);
+      double get_dyy_value(int index, double x, double y, unsigned short component, ElementMode2D mode);
+      double get_dxy_value(int index, double x, double y, unsigned short component, ElementMode2D mode);
 
       /// Returns the number of bubble functions for an element of the given order.
-      virtual int get_num_bubbles(int order, ElementMode2D mode) const;
+      virtual unsigned short get_num_bubbles(unsigned short order, ElementMode2D mode) const;
 
     protected:
       /// Returns a complete set of indices of bubble functions for an element of the given order.
-      virtual unsigned short* get_bubble_indices(int order, ElementMode2D mode) const;
+      virtual unsigned short* get_bubble_indices(unsigned short order, ElementMode2D mode) const;
 
       /// Returns the index of a constrained edge function. 'part' is 0 or 1 for edge
       /// halves, 2, 3, 4, 5 for edge quarters, etc. See shapeset.cpp.
-      int get_constrained_edge_index(int edge, int order, int ori, int part, ElementMode2D mode) const;
+      int get_constrained_edge_index(unsigned char edge, unsigned short order, unsigned short ori, unsigned short part, ElementMode2D mode) const;
 
       /// Returns the coordinates of the reference domain vertices.
       double2* get_ref_vertex(int vertex, ElementMode2D mode);
@@ -175,11 +175,11 @@ namespace Hermes
       unsigned char max_order, min_order;
       unsigned char num_components;
 
-      int ebias; ///< 2 for H1 shapesets, 0 for H(curl) shapesets. It is the order of the
+      unsigned short ebias; ///< 2 for H1 shapesets, 0 for H(curl) shapesets. It is the order of the
       ///< first edge function.
 
       double** comb_table;
-      int table_size;
+      unsigned short table_size;
       /**    numbering of edge intervals: (the variable 'part')
       -+-        -+-         -+-
       |          |        13 |
@@ -204,20 +204,20 @@ namespace Hermes
       /// linear combination of standard edge functions. This function determines the coefficients
       /// of such linear combination by forming and solving a simple linear system.
       ///
-      double* calculate_constrained_edge_combination(int order, int part, int ori, ElementMode2D mode);
+      double* calculate_constrained_edge_combination(unsigned short order, unsigned short part, unsigned short ori, ElementMode2D mode);
 
       /// Returns the coefficients for the linear combination forming a constrained edge function.
       /// This function performs the storage (caching) of these coefficients, so that they can be
       /// calculated only once.
       ///
-      double* get_constrained_edge_combination(int order, int part, int ori, int& nitems, ElementMode2D mode);
+      double* get_constrained_edge_combination(unsigned short order, unsigned short part, unsigned short ori, unsigned short& nitems, ElementMode2D mode);
 
       /// Releases all cached coefficients.
       void free_constrained_edge_combinations();
 
       /// Constructs the linear combination of edge functions, forming a constrained edge function.
       ///
-      double get_constrained_value(int n, int index, double x, double y, int component, ElementMode2D mode);
+      double get_constrained_value(int n, int index, double x, double y, unsigned short component, ElementMode2D mode);
 
       template<typename Scalar> friend class DiscreteProblem;
       template<typename Scalar> friend class DiscreteProblemIntegrationOrderCalculator;

@@ -32,10 +32,10 @@ namespace Hermes
       L2ShapesetLegendre();
       virtual Shapeset* clone() { return new L2ShapesetLegendre(*this); };
       virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
-      virtual int get_max_index(ElementMode2D mode) const;
+      virtual unsigned short get_max_index(ElementMode2D mode) const;
       virtual unsigned char get_id() const { return 30; }
       
-      static const int max_index[H2D_NUM_MODES];
+      static const unsigned short max_index[H2D_NUM_MODES];
     };
 
     /// L2 Taylor shapeset - Taylor basis functions as proposed by Kuzmin, Luo
@@ -46,7 +46,7 @@ namespace Hermes
       L2ShapesetTaylor(bool contains_means = true);
       virtual Shapeset* clone() { return new L2ShapesetTaylor(*this); };
       virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
-      virtual int get_max_index(ElementMode2D mode) const;
+      virtual unsigned short get_max_index(ElementMode2D mode) const;
       virtual unsigned char get_id() const { return 31; }
 
       /// Returns a complete set of indices of bubble functions for an element of the given order.
@@ -55,9 +55,9 @@ namespace Hermes
 
       /// Returns the number of bubble functions for an element of the given order.
       /// Reimplemented because this shapeset uses linear (not bi-linear), quadratic (not bi-quadratic) etc. polynomials.
-      virtual int get_num_bubbles(int order, ElementMode2D mode) const;
+      virtual unsigned short get_num_bubbles(int order, ElementMode2D mode) const;
       
-      static const int max_index[H2D_NUM_MODES];
+      static const unsigned short max_index[H2D_NUM_MODES];
     };
 
     /// This is the default shapeset typedef

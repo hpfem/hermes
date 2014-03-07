@@ -219,8 +219,8 @@ namespace Hermes
       /// pivoting; d is output as +-1 depending on whether the number of row interchanges was even
       /// or odd, respectively. This routine is used in combination with lubksb to solve linear equations
       /// or invert a matrix.
-      template<typename T>
-      HERMES_API void ludcmp(T **a, int n, int *indx, double *d);
+      template<typename T, typename Int>
+      HERMES_API void ludcmp(T **a, Int n, Int *indx, double *d);
 
       /// Solves the set of n linear equations AX = B. Here a[n][n] is input, not as the matrix
       /// A but rather as its LU decomposition, determined by the routine ludcmp. indx[n] is input
@@ -229,15 +229,15 @@ namespace Hermes
       /// and can be left in place for successive calls with different right-hand sides b. This routine takes
       /// into account the possibility that b will begin with many zero elements, so it is efficient for use
       /// in matrix inversion.
-      template<typename T, typename S>
-      HERMES_API void lubksb(T **a, int n, int *indx, S *b);
+      template<typename T, typename S, typename Int>
+      HERMES_API void lubksb(T **a, Int n, Int *indx, S *b);
 
       /// Given a positive-definite symmetric matrix a[n][n], this routine constructs its Cholesky
       /// decomposition, A = L*L^T . On input, only the upper triangle of a need be given; it is not
       /// modified. The Cholesky factor L is returned in the lower triangle of a, except for its diagonal
       /// elements which are returned in p[n].
-      template<typename T>
-      HERMES_API void choldc(T **a, int n, T p[]);
+      template<typename T, typename Int>
+      HERMES_API void choldc(T **a, Int n, T p[]);
 
       /// Solves the set of n linear equations A*x = b, where a is a positive-definite symmetric matrix.
       /// a[n][n] and p[n] are input as the output of the routine choldc. Only the lower
@@ -246,8 +246,8 @@ namespace Hermes
       /// for successive calls with different right-hand sides b. b is not modified unless you identify b and
       /// x in the calling sequence, which is allowed. The right-hand side b can be complex, in which case
       /// the solution x is also complex.
-      template<typename T>
-      void cholsl(double **a, int n, double p[], T b[], T x[])
+      template<typename T, typename Int>
+      void cholsl(double **a, Int n, double p[], T b[], T x[])
       {
         int i, k;
         T sum;

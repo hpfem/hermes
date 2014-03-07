@@ -25,37 +25,37 @@ namespace Hermes
     namespace Views
     {
       // vertices
-      static int*      ord_np[2] = { num_vert_tri, num_vert_quad };
+      static unsigned short*      ord_np[2] = { num_vert_tri, num_vert_quad };
       static double3*  ord_tables_tri[2] = { vert_tri0, vert_tri1 };
       static double3*  ord_tables_quad[2] = { vert_quad0, vert_quad1 };
       static double3** ord_tables[2] = { ord_tables_tri, ord_tables_quad };
 
       // triangles
-      static int*      num_elem[2] = { num_elem_tri, num_elem_quad };
+      static unsigned short*      num_elem[2] = { num_elem_tri, num_elem_quad };
       static int3*     ord_elem_tri[2] = { elem_tri0, elem_tri1 };
       static int3*     ord_elem_quad[2] = { elem_quad0, elem_quad1 };
       static int3**    ord_elem[2] = { ord_elem_tri, ord_elem_quad };
 
       // edges
-      static int*      num_edge[2] = { num_edge_tri, num_edge_quad };
+      static unsigned short*      num_edge[2] = { num_edge_tri, num_edge_quad };
       static int3*     ord_edge_tri[2] = { edge_tri0, edge_tri1 };
       static int3*     ord_edge_quad[2] = { edge_quad0, edge_quad1 };
       static int3**    ord_edge[2] = { ord_edge_tri, ord_edge_quad };
 
       // vertices_simple
-      static int*      ord_np_simple[2] = { num_vert_tri_simple, num_vert_quad_simple };
+      static unsigned short*      ord_np_simple[2] = { num_vert_tri_simple, num_vert_quad_simple };
       static double3*  ord_tables_tri_simple[2] = { vert_tri_simple, vert_tri_simple };
       static double3*  ord_tables_quad_simple[2] = { vert_quad_simple, vert_quad_simple };
       static double3** ord_tables_simple[2] = { ord_tables_tri_simple, ord_tables_quad_simple };
 
       // triangles
-      static int*      num_elem_simple[2] = { num_elem_tri_simple, num_elem_quad_simple };
+      static unsigned short*      num_elem_simple[2] = { num_elem_tri_simple, num_elem_quad_simple };
       static int3*     ord_elem_tri_simple[2] = { elem_tri_simple, elem_tri_simple };
       static int3*     ord_elem_quad_simple[2] = { elem_quad_simple, elem_quad_simple };
       static int3**    ord_elem_simple[2] = { ord_elem_tri_simple, ord_elem_quad_simple };
 
       // edges
-      static int*      num_edge_simple[2] = { num_edge_tri_simple, num_edge_quad_simple };
+      static unsigned short*      num_edge_simple[2] = { num_edge_tri_simple, num_edge_quad_simple };
       static int3*     ord_edge_tri_simple[2] = { edge_tri_simple, edge_tri_simple };
       static int3*     ord_edge_quad_simple[2] = { edge_quad_simple, edge_quad_simple };
       static int3**    ord_edge_simple[2] = { ord_edge_tri_simple, ord_edge_quad_simple };

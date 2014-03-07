@@ -86,7 +86,7 @@ namespace Hermes
           oi->id = e->id;
           oi->type = e->marker;
           oi->x = oi->y = 0.0;
-          for (unsigned i = 0; i < e->get_nvert(); i++)
+          for (unsigned char i = 0; i < e->get_nvert(); i++)
           {
             oi->x += e->vn[i]->x;
             oi->y += e->vn[i]->y;

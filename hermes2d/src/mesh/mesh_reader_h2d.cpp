@@ -456,7 +456,7 @@ namespace Hermes
       first = true;
       for_all_base_elements(e, mesh)
       {
-        for (unsigned i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         if ((mrk = MeshUtil::get_base_edge_node(e, i)->marker))
         {
           const char* nl = first ? "\n" : ",\n";  first = false;
@@ -471,7 +471,7 @@ namespace Hermes
       {
         if (e->is_curved())
         {
-          for (unsigned i = 0; i < e->get_nvert(); i++)
+          for (unsigned char i = 0; i < e->get_nvert(); i++)
           if (e->cm->curves[i] != nullptr)
           {
             fprintf(f, first ? "curves =\n[\n" : ",\n");  first = false;

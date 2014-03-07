@@ -121,7 +121,7 @@ namespace Hermes
       // save boundary markers
       XMLMesh::edges_type edges;
       for_all_base_elements(e, mesh)
-      for (unsigned i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
       if (MeshUtil::get_base_edge_node(e, i)->marker)
         edges.ed().push_back(XMLMesh::ed(e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker.c_str()));
 
@@ -129,7 +129,7 @@ namespace Hermes
       XMLMesh::curves_type curves;
       for_all_base_elements(e, mesh)
       if (e->is_curved())
-      for (unsigned i = 0; i < e->get_nvert(); i++)
+      for (unsigned char i = 0; i < e->get_nvert(); i++)
       if (e->cm->curves[i] != nullptr)
       if (e->cm->curves[i]->type == ArcType)
         save_arc(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, (Arc*)e->cm->curves[i], curves);
@@ -215,7 +215,7 @@ namespace Hermes
 
         for (unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
         {
-          for (int element_i = 0; element_i < parsed_xml_domain->elements().el().size(); element_i++)
+          for(unsigned short element_i = 0; element_i < parsed_xml_domain->elements().el().size(); element_i++)
           {
             XMLSubdomains::domain::elements_type::el_type* element = &parsed_xml_domain->elements().el().at(element_i);
 
@@ -663,7 +663,7 @@ namespace Hermes
         bool has_inner_edges = false;
         for_all_base_elements(e, meshes[meshes_i])
         {
-          for (unsigned i = 0; i < e->get_nvert(); i++)
+          for (unsigned char i = 0; i < e->get_nvert(); i++)
           {
             if (MeshUtil::get_base_edge_node(e, i)->bnd)
             {
@@ -685,7 +685,7 @@ namespace Hermes
         {
           subdomain.inner_edges().set(XMLSubdomains::subdomain::inner_edges_type());
           for_all_base_elements(e, meshes[meshes_i])
-          for (unsigned i = 0; i < e->get_nvert(); i++)
+          for (unsigned char i = 0; i < e->get_nvert(); i++)
           {
             if (!MeshUtil::get_base_edge_node(e, i)->bnd)
             {
@@ -705,7 +705,7 @@ namespace Hermes
         for_all_base_elements(e, meshes[meshes_i])
         {
           if (e->is_curved())
-          for (unsigned i = 0; i < e->get_nvert(); i++)
+          for (unsigned char i = 0; i < e->get_nvert(); i++)
           if (e->cm->curves[i] != nullptr)
           if (vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
           {
@@ -730,10 +730,10 @@ namespace Hermes
       std::sort(elements.begin(), elements.end(), elementCompare);
 
       XMLSubdomains::elements_type elementsToPass;
-      for (int i = 0; i < elements.size(); i++)
+      for(unsigned short i = 0; i < elements.size(); i++)
         elementsToPass.el().push_back(*elements[i]);
 
-      for (int i = 0; i < elements.size(); i++)
+      for(unsigned short i = 0; i < elements.size(); i++)
         delete elements[i];
       XMLSubdomains::domain xmldomain(vertices, elementsToPass, edges, subdomains);
       xmldomain.curves().set(curves);

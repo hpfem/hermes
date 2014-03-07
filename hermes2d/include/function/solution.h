@@ -188,13 +188,13 @@ namespace Hermes
 
       void transform_values(int order, int mask, int np);
 
-      virtual void precalculate(int order, int mask);
+      virtual void precalculate(unsigned short order, unsigned short mask);
 
       Scalar* dxdy_coeffs[H2D_MAX_SOLUTION_COMPONENTS][H2D_NUM_FUNCTION_VALUES];
 
       Scalar* dxdy_buffer;
 
-      double** calc_mono_matrix(int mode, int o);
+      double** calc_mono_matrix(int mode, unsigned char o);
 
       void init_dxdy_buffer();
 

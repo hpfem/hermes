@@ -141,7 +141,7 @@ namespace Hermes
       inline bool is_curved() const {
         return cm != nullptr;
       }
-      inline int get_nvert() const {
+      inline unsigned char get_nvert() const {
         return this->nvert;
       }
 

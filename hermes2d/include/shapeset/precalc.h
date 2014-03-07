@@ -62,18 +62,18 @@ namespace Hermes
       Shapeset* get_shapeset() const;
 
       /// Returns the polynomial order of the active shape function on given edge.
-      virtual int get_edge_fn_order(int edge);
+      virtual unsigned short get_edge_fn_order(int edge);
 
       Shapeset* shapeset;
 
       int index;
 
-      int max_index[H2D_NUM_MODES];
+      unsigned short max_index[H2D_NUM_MODES];
 
       /// Transformed points to the reference domain, used by precalculate.
       double2 ref_points[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
-      virtual void precalculate(int order, int mask);
+      virtual void precalculate(unsigned short order, unsigned short mask);
 
       void update_max_index();
 
@@ -146,10 +146,10 @@ namespace Hermes
       const double* get_dxy_values(int component = 0) const;
 #endif
 
-      const double* get_values(int component, int item) const;
+      const double* get_values(int component, unsigned short item) const;
 
     private:
-      virtual void precalculate(int order, int mask);
+      virtual void precalculate(unsigned short order, unsigned short mask);
 
       static std::vector<PrecalcShapesetAssemblingStorage*> tables;
 

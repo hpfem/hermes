@@ -601,7 +601,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void UExtFunction<Scalar>::precalculate(int order, int mask)
+    void UExtFunction<Scalar>::precalculate(unsigned short order, unsigned short mask)
     {
     }
 

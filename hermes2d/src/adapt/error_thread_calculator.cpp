@@ -272,7 +272,7 @@ namespace Hermes
       this->errorThreadCalculator->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorThreadCalculator->errorCalculator->component_count, order_base, current_state->isurf, current_state->rep->marker, this->errorThreadCalculator->geometry, this->errorThreadCalculator->jacobian_x_weights);
       free_with_check(refmaps);
 
-      for (int current_mfDG_i = 0; current_mfDG_i < this->errorThreadCalculator->errorCalculator->mfDG.size(); current_mfDG_i++)
+      for(unsigned short current_mfDG_i = 0; current_mfDG_i < this->errorThreadCalculator->errorCalculator->mfDG.size(); current_mfDG_i++)
       {
         NormFormDG<Scalar>* mfs = this->errorThreadCalculator->errorCalculator->mfDG[current_mfDG_i];
 
@@ -383,7 +383,7 @@ namespace Hermes
 
       free_with_check(refmaps);
 
-      for (int i = 0; i < this->errorCalculator->mfvol.size(); i++)
+      for(unsigned short i = 0; i < this->errorCalculator->mfvol.size(); i++)
       {
         NormFormVol<Scalar>* form = this->errorCalculator->mfvol[i];
         double* error = &this->errorCalculator->errors[form->i][current_state->e[form->i]->id];
@@ -412,7 +412,7 @@ namespace Hermes
       this->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorCalculator->component_count, order, current_state->isurf, current_state->rep->marker, this->geometry, this->jacobian_x_weights);
       free_with_check(refmaps);
 
-      for (int i = 0; i < this->errorCalculator->mfsurf.size(); i++)
+      for(unsigned short i = 0; i < this->errorCalculator->mfsurf.size(); i++)
       {
         NormFormSurf<Scalar>* form = this->errorCalculator->mfsurf[i];
 

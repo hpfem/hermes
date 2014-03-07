@@ -180,7 +180,7 @@ namespace Hermes
       this->funcs_space_initialized = true;
 
       // Basis & test fns, u_ext funcs.
-      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+      for (unsigned short space_i = 0; space_i < this->spaces_size; space_i++)
       {
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
           this->funcs[space_i][j] = preallocate_fn<double>(this->FuncMemoryPool);
@@ -223,7 +223,7 @@ namespace Hermes
       // Calculating local sizes.
       int local_ext_size = 0;
       int local_u_ext_fns_size = 0;
-      for (int form_i = 0; form_i < this->wf->forms.size(); form_i++)
+      for(unsigned short form_i = 0; form_i < this->wf->forms.size(); form_i++)
       {
         if (this->wf->forms[form_i]->ext.size() > local_ext_size)
           local_ext_size = this->wf->forms[form_i]->ext.size();
@@ -258,7 +258,7 @@ namespace Hermes
       else
         funcs_space_initialized = false;
 
-      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+      for (unsigned short space_i = 0; space_i < this->spaces_size; space_i++)
       {
         // Test functions
         for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
@@ -300,7 +300,7 @@ namespace Hermes
       // Ext - local
       int local_ext_size = 0;
       int local_u_ext_fns_size = 0;
-      for (int form_i = 0; form_i < this->wf->forms.size(); form_i++)
+      for(unsigned short form_i = 0; form_i < this->wf->forms.size(); form_i++)
       {
         if (this->wf->forms[form_i]->ext.size() > local_ext_size)
           local_ext_size = this->wf->forms[form_i]->ext.size();
@@ -333,7 +333,7 @@ namespace Hermes
       this->integrationOrderCalculator.current_state = this->current_state;
 
       // Active elements.
-      for (int j = 0; j < fns.size(); j++)
+      for(unsigned short j = 0; j < fns.size(); j++)
       {
         if (current_state->e[j])
         {
@@ -380,7 +380,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_calculation_variables()
     {
-      for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+      for (unsigned short space_i = 0; space_i < this->spaces_size; space_i++)
       {
         if (current_state->e[space_i] == nullptr)
           continue;
@@ -407,7 +407,7 @@ namespace Hermes
           this->orderSurface[edge_i] = this->order;
           this->order = order_local;
 
-          for (unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
+          for (unsigned short space_i = 0; space_i < this->spaces_size; space_i++)
           {
             if (!current_state->e[space_i])
               continue;
@@ -480,7 +480,7 @@ namespace Hermes
 
       if (this->rungeKutta)
       {
-        for (int ext_i = 0; ext_i < ext.size(); ext_i++)
+        for(unsigned short ext_i = 0; ext_i < ext.size(); ext_i++)
           u_ext_func[ext_i]->add(target_array[ext.size() - this->RK_original_spaces_count + ext_i]);
       }
     }
@@ -496,7 +496,7 @@ namespace Hermes
 
       if (this->current_mat || this->add_dirichlet_lift)
       {
-        for (int current_mfvol_i = 0; current_mfvol_i < this->wf->mfvol.size(); current_mfvol_i++)
+        for(unsigned short current_mfvol_i = 0; current_mfvol_i < this->wf->mfvol.size(); current_mfvol_i++)
         {
           if (!selectiveAssembler->form_to_be_assembled(this->wf->mfvol[current_mfvol_i], current_state))
             continue;
@@ -509,7 +509,7 @@ namespace Hermes
       }
       if (this->current_rhs)
       {
-        for (int current_vfvol_i = 0; current_vfvol_i < this->wf->vfvol.size(); current_vfvol_i++)
+        for(unsigned short current_vfvol_i = 0; current_vfvol_i < this->wf->vfvol.size(); current_vfvol_i++)
         {
           if (!selectiveAssembler->form_to_be_assembled(this->wf->vfvol[current_vfvol_i], current_state))
             continue;
@@ -541,7 +541,7 @@ namespace Hermes
 
           if (this->current_mat || this->add_dirichlet_lift)
           {
-            for (int current_mfsurf_i = 0; current_mfsurf_i < this->wf->mfsurf.size(); current_mfsurf_i++)
+            for(unsigned short current_mfsurf_i = 0; current_mfsurf_i < this->wf->mfsurf.size(); current_mfsurf_i++)
             {
               if (!selectiveAssembler->form_to_be_assembled(this->wf->mfsurf[current_mfsurf_i], current_state))
                 continue;
@@ -556,7 +556,7 @@ namespace Hermes
 
           if (this->current_rhs)
           {
-            for (int current_vfsurf_i = 0; current_vfsurf_i < this->wf->vfsurf.size(); current_vfsurf_i++)
+            for(unsigned short current_vfsurf_i = 0; current_vfsurf_i < this->wf->vfsurf.size(); current_vfsurf_i++)
             {
               if (!selectiveAssembler->form_to_be_assembled(this->wf->vfsurf[current_vfsurf_i], current_state))
                 continue;

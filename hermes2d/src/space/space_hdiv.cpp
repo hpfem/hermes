@@ -187,8 +187,8 @@ namespace Hermes
       typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
       if (!ed->n) return;
 
-      int* indices = this->shapeset->get_bubble_indices(ed->order, e->get_mode());
-      for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof++)
+      unsigned short* indices = this->shapeset->get_bubble_indices(ed->order, e->get_mode());
+      for (unsigned short i = 0, dof = ed->bdof; i < ed->n; i++, dof++)
         al->add_triplet(*indices++, dof, 1.0);
     }
 
@@ -261,7 +261,7 @@ namespace Hermes
       // on non-refined elements all we have to do is update edge nodes lying on constrained edges
       if (e->active)
       {
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         {
           if (ei[i] != nullptr)
           {
@@ -277,7 +277,7 @@ namespace Hermes
       {
         // create new_ edge infos where we don't have them yet
         typename Space<Scalar>::EdgeInfo ei_data[4];
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         {
           if (ei[i] == nullptr)
           {
@@ -302,7 +302,7 @@ namespace Hermes
         // create edge infos for half-edges
         typename Space<Scalar>::EdgeInfo  half_ei_data[4][2];
         typename Space<Scalar>::EdgeInfo* half_ei[4][2];
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
         {
           if (ei[i] == nullptr)
           {

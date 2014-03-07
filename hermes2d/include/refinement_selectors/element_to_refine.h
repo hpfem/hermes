@@ -43,9 +43,6 @@ namespace Hermes
       *  \param[in] comp An index of a component. */
       ElementToRefine(int id, unsigned short comp);
 
-      /// Copy-contructor.
-      ElementToRefine(const ElementToRefine &orig);
-
       /// Assignment operator.
       ElementToRefine& operator=(const ElementToRefine& orig);
     

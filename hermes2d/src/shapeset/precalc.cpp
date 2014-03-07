@@ -51,14 +51,14 @@ namespace Hermes
       this->order = std::max(H2D_GET_H_ORDER(shapeset->get_order(index, element->get_mode())), H2D_GET_V_ORDER(shapeset->get_order(index, element->get_mode())));
     }
 
-    void PrecalcShapeset::precalculate(int order, int mask)
+    void PrecalcShapeset::precalculate(unsigned short order, unsigned short mask)
     {
       Function<double>::precalculate(order, mask);
 
-      int np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
+      unsigned short np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
       double3* pt = this->quads[cur_quad]->get_points(order, this->element->get_mode());
 
-      int j, k;
+      unsigned short j, k;
 
       ElementMode2D mode = element->get_mode();
 
@@ -141,7 +141,7 @@ namespace Hermes
       return shapeset->get_space_type();
     }
 
-    int PrecalcShapeset::get_edge_fn_order(int edge)
+    unsigned short PrecalcShapeset::get_edge_fn_order(int edge)
     {
       return H2D_MAKE_EDGE_ORDER(element->get_mode(), edge, shapeset->get_order(index, element->get_mode()));
     }
@@ -150,7 +150,7 @@ namespace Hermes
 
     PrecalcShapesetAssembling::PrecalcShapesetAssembling(Shapeset* shapeset) : PrecalcShapeset(shapeset), storage(nullptr)
     {
-      for (int i = 0; i < tables.size(); i++)
+      for(unsigned short i = 0; i < tables.size(); i++)
       {
         if (tables[i]->shapeset->get_id() == shapeset->get_id())
         {
@@ -168,7 +168,6 @@ namespace Hermes
       }
     }
 
-
     PrecalcShapesetAssembling::~PrecalcShapesetAssembling()
     {
 
@@ -176,24 +175,27 @@ namespace Hermes
 
     const double* PrecalcShapesetAssembling::get_fn_values(int component) const
     {
-      if (this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][this->order][this->index])
-        return this->storage->PrecalculatedValues[this->element->get_mode()][0][this->order][this->index];
+      unsigned char mode = this->element->get_mode();
+      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][0][this->order][this->index])
+        return this->storage->PrecalculatedValues[mode][0][this->order][this->index];
       assert(this->values_valid);
       return &values[component][0][0];
     }
 
     const double* PrecalcShapesetAssembling::get_dx_values(int component) const
     {
-      if (this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][this->order][this->index])
-        return this->storage->PrecalculatedValues[this->element->get_mode()][1][this->order][this->index];
+      unsigned char mode = this->element->get_mode();
+      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][0][this->order][this->index])
+        return this->storage->PrecalculatedValues[mode][1][this->order][this->index];
       assert(this->values_valid);
       return &values[component][1][0];
     }
 
     const double* PrecalcShapesetAssembling::get_dy_values(int component) const
     {
-      if (this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][this->order][this->index])
-        return this->storage->PrecalculatedValues[this->element->get_mode()][2][this->order][this->index];
+      unsigned char mode = this->element->get_mode();
+      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][0][this->order][this->index])
+        return this->storage->PrecalculatedValues[mode][2][this->order][this->index];
       assert(this->values_valid);
       return &values[component][2][0];
     }
@@ -218,7 +220,7 @@ namespace Hermes
     }
 #endif
 
-    const double* PrecalcShapesetAssembling::get_values(int component, int item) const
+    const double* PrecalcShapesetAssembling::get_values(int component, unsigned short item) const
     {
       if (item == 0)
         return this->get_fn_values(component);
@@ -230,18 +232,18 @@ namespace Hermes
         return Function<double>::get_values(component, item);
     }
 
-    void PrecalcShapesetAssembling::precalculate(int order, int mask)
+    void PrecalcShapesetAssembling::precalculate(unsigned short order, unsigned short mask)
     {
-      if (this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][order][index])
+      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][order][index])
         return;
       else
       {
         Function<double>::precalculate(order, mask);
 
-        int np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
+        unsigned short np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
         double3* pt = this->quads[cur_quad]->get_points(order, this->element->get_mode());
 
-        int j, k;
+        unsigned short j, k;
 
         ElementMode2D mode = element->get_mode();
 
@@ -264,7 +266,7 @@ namespace Hermes
         {
           if (this->num_components == 1)
           {
-            if (this->get_quad_2d()->get_id() == 1)
+            if (this->index > 0 && this->get_quad_2d()->get_id() == 1)
             {
 #pragma omp critical (precalculatingPSS)
               {
@@ -350,7 +352,7 @@ namespace Hermes
     {
       for (int i = 0; i < H2D_NUM_MODES; i++)
       {
-        int g_max, np;
+        unsigned short g_max, np;
         if (i == HERMES_MODE_TRIANGLE)
         {
           g_max = g_max_tri + 1;
@@ -362,7 +364,7 @@ namespace Hermes
           np = H2D_MAX_INTEGRATION_POINTS_COUNT_QUAD;
         }
 
-        int local_base_size = this->shapeset->get_max_index((ElementMode2D)i) + 1;
+        unsigned short local_base_size = this->shapeset->get_max_index((ElementMode2D)i) + 1;
 
         for (int j = 0; j < H2D_NUM_FUNCTION_VALUES; j++)
         {
@@ -385,13 +387,13 @@ namespace Hermes
     {
       for (int i = 0; i < H2D_NUM_MODES; i++)
       {
-        int g_max;
+        unsigned short g_max;
         if (i == HERMES_MODE_TRIANGLE)
           g_max = g_max_tri + 1;
         else
           g_max = g_max_quad + 1;
 
-        int local_base_size = this->shapeset->get_max_index((ElementMode2D)i) + 1;
+        unsigned short local_base_size = this->shapeset->get_max_index((ElementMode2D)i) + 1;
 
         for (int j = 0; j < H2D_NUM_FUNCTION_VALUES; j++)
         {

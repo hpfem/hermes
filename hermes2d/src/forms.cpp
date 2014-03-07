@@ -548,7 +548,7 @@ namespace Hermes
 #endif
 
       int nc = fu->get_num_components();
-      int np = fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode());
+      unsigned short np = fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode());
       u->np = np;
       u->nc = nc;
 

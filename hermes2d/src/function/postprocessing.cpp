@@ -633,14 +633,14 @@ namespace Hermes
       {
 #ifdef _DEBUG
         this->info("User markers");
-        for (int i = 0; i < markers.size(); i++)
+        for(unsigned short i = 0; i < markers.size(); i++)
           this->info("\t%s", markers[i].c_str());
 #endif
         // This serves for assembling over the whole domain in the case a passed marker is HERMES_ANY.
         bool assemble_everywhere = false;
 
         std::vector<int> internal_markers;
-        for (int i = 0; i < markers.size(); i++)
+        for(unsigned short i = 0; i < markers.size(); i++)
         {
           if (markers[i] == HERMES_ANY)
           {
@@ -663,7 +663,7 @@ namespace Hermes
 
 #ifdef _DEBUG
         this->info("Internal markers");
-        for (int i = 0; i < internal_markers.size(); i++)
+        for(unsigned short i = 0; i < internal_markers.size(); i++)
           this->info("\t%i", internal_markers[i]);
 #endif
 
@@ -712,7 +712,7 @@ namespace Hermes
             if (!assemble_everywhere)
             {
               bool target_marker = false;
-              for (int i = 0; i < internal_markers.size(); i++)
+              for(unsigned short i = 0; i < internal_markers.size(); i++)
               {
                 if (current_state->rep->marker == internal_markers[i])
                 {
@@ -832,14 +832,14 @@ namespace Hermes
       {
 #ifdef _DEBUG
         this->info("User markers");
-        for (int i = 0; i < markers.size(); i++)
+        for(unsigned short i = 0; i < markers.size(); i++)
           this->info("\t%s", markers[i].c_str());
 #endif
         // This serves for assembling over the whole domain in the case a passed marker is HERMES_ANY.
         bool assemble_everywhere = false;
 
         std::vector<int> internal_markers;
-        for (int i = 0; i < markers.size(); i++)
+        for(unsigned short i = 0; i < markers.size(); i++)
         {
           if (markers[i] == HERMES_ANY)
           {
@@ -861,7 +861,7 @@ namespace Hermes
 
 #ifdef _DEBUG
         this->info("Internal markers");
-        for (int i = 0; i < internal_markers.size(); i++)
+        for(unsigned short i = 0; i < internal_markers.size(); i++)
           this->info("\t%i", internal_markers[i]);
 #endif
 
@@ -909,7 +909,7 @@ namespace Hermes
             Traverse::State* current_state = states[state_i];
 
             // Set active element.
-            for (int i = 0; i < source_functions_size; i++)
+            for (unsigned short i = 0; i < source_functions_size; i++)
             {
               if (current_state->e[i])
               if (current_state->e[i]->used)
@@ -923,7 +923,7 @@ namespace Hermes
 
             Hermes::Ord order = Hermes::Ord(refmap->get_inv_ref_order());
 
-            for (int edge = 0; edge < current_state->rep->nvert; edge++)
+            for (unsigned short edge = 0; edge < current_state->rep->nvert; edge++)
             {
 #ifdef _DEBUG
               this->info("Thread %i, state %i, edge %i", thread_number, state_i, edge);
@@ -931,7 +931,7 @@ namespace Hermes
               if (!assemble_everywhere)
               {
                 bool target_marker = false;
-                for (int i = 0; i < internal_markers.size(); i++)
+                for(unsigned short i = 0; i < internal_markers.size(); i++)
                 {
                   if (current_state->rep->en[edge]->marker == internal_markers[i])
                   {
