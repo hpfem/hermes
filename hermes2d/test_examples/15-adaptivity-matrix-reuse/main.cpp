@@ -10,6 +10,10 @@ class CustomSelector : public Selector<double>
 {
 public:
   /// Constructor.
+  CustomSelector() : Selector<double>()
+  {
+  };
+
   CustomSelector(std::vector<int> element_ids) : Selector<double>(), element_ids(element_ids)
   {
   };
@@ -32,24 +36,27 @@ public:
 
 int main(int argc, char* argv[])
 {
+  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
+
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
   mloader.load("quad.xml", mesh);
   mesh->refine_all_elements();
-  mesh->refine_towards_boundary("0", 4);
-  mesh->refine_towards_boundary("1", 3);
-  mesh->refine_towards_vertex(154,2);
+  mesh->refine_all_elements();
+  mesh->refine_all_elements();
+  mesh->refine_all_elements();
+  mesh->refine_all_elements();
 
   // Initialize essential boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("0", 10.);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Initialize space.
-  SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, 1));
+  SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, 3));
 
   BaseView<double> b("Coarse space");
-  b.get_linearizer()->set_criterion(LinearizerCriterionFixed(5));
+  b.get_linearizer()->set_criterion(LinearizerCriterionFixed(0));
   b.show(space);
 
   // Weak Form
@@ -58,17 +65,21 @@ int main(int argc, char* argv[])
 #ifdef ADAPT_SOLVER
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 1);
   AdaptStoppingCriterionSingleElement<double> criterion(0.);
-  CustomSelector selector({ 0, 2, 10, 34, 132, 351, 400, 500, 600, 700, 800 });
+  CustomSelector selector;
+  for (int i = 0; i <  mesh->get_max_element_id(); i++)
+  {
+    //if ((i % 21) == 0) selector.element_ids.push_back(i);
+  }
   AdaptSolverCriterionFixed global_criterion(2);
 
   AdaptSolver<double, LinearSolver<double> > adaptSolver(space, wf, &errorCalculator, &criterion, &selector, &global_criterion);
 
-  adaptSolver.switch_visualization(true);
+  adaptSolver.switch_visualization(false);
   adaptSolver.set_verbose_output(true);
   adaptSolver.solve();
 
   ScalarView s;
-  s.get_linearizer()->set_criterion(LinearizerCriterionFixed(3));
+  s.get_linearizer()->set_criterion(LinearizerCriterionFixed(0));
   s.show(adaptSolver.get_ref_sln(0));
 
 #else
@@ -113,7 +124,7 @@ int main(int argc, char* argv[])
   sf.get_linearizer()->set_criterion(LinearizerCriterionFixed(3));
   sf.show(slnf);
 
-  View::wait();
 #endif
+  View::wait();
   return 0;
 }

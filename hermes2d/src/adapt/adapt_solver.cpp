@@ -123,6 +123,11 @@ namespace Hermes
       if (StateReassemblyHelper<Scalar>::current_iteration == 1)
         return;
 
+      
+      Hermes::Mixins::Loggable::Static::info("\t\tget_states_to_reassemble measurements:");
+        Hermes::Mixins::TimeMeasurable cpu_time;
+      cpu_time.tick();
+
       int spaces_size = StateReassemblyHelper<Scalar>::current_ref_spaces->size();
       int elements_to_reassemble_size = StateReassemblyHelper<Scalar>::current_elements_to_reassemble->size();
       std::vector<std::pair<int, int> > newSpace_elements_to_reassemble;
@@ -145,6 +150,9 @@ namespace Hermes
       for (int i = 0; i < spaces_size; i++)
         dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_ref_spaces->at(i)->get_mesh()));
 
+      cpu_time.tick();
+      Hermes::Mixins::Loggable::Static::info("\t\t\tInitialization: %s", cpu_time.last_str().c_str());
+      cpu_time.tick();
       int num_states_local;
       Traverse::State** states_local = trav.get_states(dummy_fns, num_states_local);
       for (int local_state_i = 0; local_state_i < num_states_local; local_state_i++)
@@ -183,6 +191,11 @@ namespace Hermes
         }
       }
 
+      cpu_time.tick();
+      Hermes::Mixins::Loggable::Static::info("\t\t\tSearch for changed elements on the new Space: %s", cpu_time.last_str().c_str());
+      cpu_time.tick();
+
+
       // Using the changed element on the new reference space, select the states from the original states that need to be recalculated.
       int newSpace_elements_to_reassemble_size = newSpace_elements_to_reassemble.size();
       Traverse::State** new_states = malloc_with_check<Traverse::State*>(num_states, true);
@@ -210,6 +223,10 @@ namespace Hermes
       states = new_states;
       num_states = new_num_states;
 
+      cpu_time.tick();
+      Hermes::Mixins::Loggable::Static::info("\t\t\tPicking the new states: %s", cpu_time.last_str().c_str());
+      cpu_time.tick();
+
       // Now we have to use the DOF to DOF map to fill in the necessary entries in the new matrix and rhs from the old ones.
       Scalar* Ax = StateReassemblyHelper<Scalar>::prev_mat->get_Ax();
       int* Ai = StateReassemblyHelper<Scalar>::prev_mat->get_Ai();
@@ -228,6 +245,9 @@ namespace Hermes
           rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::prev_rhs[i]);
         }
       }
+
+      cpu_time.tick();
+      Hermes::Mixins::Loggable::Static::info("\t\t\tCopying the old linear system: %s", cpu_time.last_str().c_str());
     }
 
     template<typename Scalar, typename SolverType>
@@ -244,9 +264,11 @@ namespace Hermes
         if (this->visualization)
         {
           this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * 410, 10, 400, 300)));
+          this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(0));
           this->scalar_views.back()->set_title("Reference solution #%i", i);
 
           this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 410, 340, 400, 300)));
+          this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(0));
           this->base_views.back()->set_title("Reference space #%i - basis", i);
 
           this->order_views.push_back(new Views::OrderView("", new Views::WinGeom(i * 410, 670, 400, 300)));
@@ -255,8 +277,6 @@ namespace Hermes
       }
 
       this->solver = new SolverType(wf, spaces);
-      this->solver->output_matrix();
-      this->solver->set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
       this->solver->dp->set_reassembled_states_reuse_linear_system_fn(&get_states_to_reassemble<Scalar>);
       this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
 

@@ -53,6 +53,8 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init(bool to_set, bool dirichlet_lift_accordingly)
     {
+      this->set_verbose_output(true);
+
       this->reassembled_states_reuse_linear_system = nullptr;
 
       this->spaces_size = this->spaces.size();
@@ -293,6 +295,7 @@ namespace Hermes
     {
       // Check.
       this->check();
+      this->tick();
 
       // Set the matrices.
       bool result = this->set_matrix(mat) && this->set_rhs(rhs);
@@ -302,72 +305,83 @@ namespace Hermes
       Traverse::State** states;
       MeshSharedPtrVector meshes;
       this->init_assembling(states, num_states, u_ext_sln, meshes);
-      
+      this->tick();
+      this->info("\tDiscreteProblem: Initialization: %s.", this->last_str().c_str());
+      this->tick();
+
       // Creating matrix sparse structure.
       // If there are no states, return.
       if (this->selectiveAssembler.prepare_sparse_structure(this->current_mat, this->current_rhs, this->spaces, states, num_states))
       {
+        this->tick();
+        this->info("\tDiscreteProblem: Prepare sparse structure: %s.", this->last_str().c_str());
+
         if (this->reassembled_states_reuse_linear_system)
           this->reassembled_states_reuse_linear_system(states, num_states, this->current_mat, this->current_rhs);
 
-        // Is this a DG assembling.
-        bool is_DG = this->wf->is_DG();
+        if (num_states > 0)
+        {
+          // Is this a DG assembling.
+          bool is_DG = this->wf->is_DG();
 
 #pragma omp parallel num_threads(this->num_threads_used)
-        {
-          int thread_number = omp_get_thread_num();
-          int start = (num_states / this->num_threads_used) * thread_number;
-          int end = (num_states / this->num_threads_used) * (thread_number + 1);
-          if (thread_number == this->num_threads_used - 1)
-            end = num_states;
-
-          try
           {
-            this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->add_dirichlet_lift);
+            int thread_number = omp_get_thread_num();
+            int start = (num_states / this->num_threads_used) * thread_number;
+            int end = (num_states / this->num_threads_used) * (thread_number + 1);
+            if (thread_number == this->num_threads_used - 1)
+              end = num_states;
 
-            DiscreteProblemDGAssembler<Scalar>* dgAssembler;
-            if (is_DG)
-              dgAssembler = new DiscreteProblemDGAssembler<Scalar>(this->threadAssembler[thread_number], this->spaces, meshes);
-
-            for (int state_i = start; state_i < end; state_i++)
+            try
             {
-              // Exception already thrown -> exit the loop.
-              if (!this->exceptionMessageCaughtInParallelBlock.empty())
-                break;
+              this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->add_dirichlet_lift);
 
-              Traverse::State* current_state = states[state_i];
+              DiscreteProblemDGAssembler<Scalar>* dgAssembler;
+              if (is_DG)
+                dgAssembler = new DiscreteProblemDGAssembler<Scalar>(this->threadAssembler[thread_number], this->spaces, meshes);
 
-              this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);
+              for (int state_i = start; state_i < end; state_i++)
+              {
+                // Exception already thrown -> exit the loop.
+                if (!this->exceptionMessageCaughtInParallelBlock.empty())
+                  break;
 
-              this->threadAssembler[thread_number]->assemble_one_state();
+                Traverse::State* current_state = states[state_i];
+
+                this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);
+
+                this->threadAssembler[thread_number]->assemble_one_state();
+
+                if (is_DG)
+                {
+                  dgAssembler->init_assembling_one_state(current_state);
+                  dgAssembler->assemble_one_state();
+                  dgAssembler->deinit_assembling_one_state();
+                }
+                this->threadAssembler[thread_number]->deinit_assembling_one_state();
+              }
 
               if (is_DG)
-              {
-                dgAssembler->init_assembling_one_state(current_state);
-                dgAssembler->assemble_one_state();
-                dgAssembler->deinit_assembling_one_state();
-              }
-              this->threadAssembler[thread_number]->deinit_assembling_one_state();
+                delete dgAssembler;
+
+              this->threadAssembler[thread_number]->deinit_assembling();
             }
-
-            if (is_DG)
-              delete dgAssembler;
-
-            this->threadAssembler[thread_number]->deinit_assembling();
-          }
-          catch (Hermes::Exceptions::Exception& e)
-          {
+            catch (Hermes::Exceptions::Exception& e)
+            {
 #pragma omp critical (exceptionMessageCaughtInParallelBlock)
-            this->exceptionMessageCaughtInParallelBlock = e.info();
-          }
-          catch (std::exception& e)
-          {
+              this->exceptionMessageCaughtInParallelBlock = e.info();
+            }
+            catch (std::exception& e)
+            {
 #pragma omp critical (exceptionMessageCaughtInParallelBlock)
-            this->exceptionMessageCaughtInParallelBlock = e.what();
+              this->exceptionMessageCaughtInParallelBlock = e.what();
+            }
           }
         }
       }
 
+      this->tick();
+      
       // Deinitialize states && previous iterations.
       this->deinit_assembling(states, num_states);
 
@@ -389,6 +403,9 @@ namespace Hermes
           e->visited = false;
         }
       }
+
+      this->tick();
+      this->info("\tDiscreteProblem: De-initialization: %s.", this->last_str().c_str());
 
       return result;
     }

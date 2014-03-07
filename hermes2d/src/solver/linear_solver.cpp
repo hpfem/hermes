@@ -90,11 +90,9 @@ namespace Hermes
     {
       this->check();
 
-      this->tick();
-
       this->on_initialization();
 
-      this->info("\tLinearSolver: assembling...");
+      this->tick();
 
       // Extremely important.
       Space<Scalar>::assign_dofs(this->dp->get_spaces());
@@ -102,16 +100,16 @@ namespace Hermes
       // Assemble the residual always and the Matrix when necessary (nonconstant jacobian, not reusable, ...).
       if (this->jacobian_reusable && this->constant_jacobian)
       {
-        this->info("\tLinearSolver: reusing Matrix, assembling RHS.");
+        this->info("\tLinearSolver: assembling... [reusing matrix, assembling rhs].");
         this->dp->assemble(coeff_vec, this->get_residual());
         this->linear_matrix_solver->set_reuse_scheme(Hermes::Solvers::HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
       }
       else
       {
         if (this->jacobian_reusable)
-          this->info("\tLinearSolver: recalculating a reusable Matrix.");
+          this->info("\tLinearSolver: assembling... [re-assembling with a reusable matrix structure].");
         else
-          this->info("\tLinearSolver: calculating the Matrix.");
+          this->info("\tLinearSolver: assembling... [assembling the matrix and rhs anew].");
         this->dp->assemble(coeff_vec, this->get_jacobian(), this->get_residual());
         this->linear_matrix_solver->set_reuse_scheme(Hermes::Solvers::HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
       }
@@ -119,7 +117,9 @@ namespace Hermes
       this->process_matrix_output(this->get_jacobian(), 1);
       this->process_vector_output(this->get_residual(), 1);
 
-      this->info("\tLinearSolver: assembling done. Solving...");
+      this->tick();
+      this->info("\tLinearSolver: assembling done in %s. Solving...", this->last_str().c_str());
+      this->tick();
 
       // Solve, if the solver is iterative, give him the initial guess.
       this->linear_matrix_solver->solve(coeff_vec);
@@ -129,8 +129,7 @@ namespace Hermes
       this->on_finish();
 
       this->tick();
-      this->info("\tLinearSolver: done.");
-      this->info("\tLinearSolver: solution duration: %f s.", this->last());
+      this->info("\tLinearSolver: solving done in %s.", this->last_str().c_str());
     }
 
     template class HERMES_API LinearSolver<double>;

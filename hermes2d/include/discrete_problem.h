@@ -36,7 +36,8 @@ namespace Hermes
     ///
     template<typename Scalar>
     class HERMES_API DiscreteProblem : 
-      public Hermes::Mixins::TimeMeasurable, 
+      public Hermes::Mixins::Loggable,
+      public Hermes::Mixins::TimeMeasurable,
       public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
       public Hermes::Mixins::StateQueryable,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
