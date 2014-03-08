@@ -182,6 +182,7 @@ namespace Hermes
           Geom<double>* geometry = init_geom_surf(&refmap_curv, isurf, this->en[isurf]->marker, eo, tan);
           memcpy(x_curv, geometry->x, np*sizeof(double));
           memcpy(y_curv, geometry->y, np*sizeof(double));
+          geometry->free();
           delete geometry;
 
           // 2. - act if there was no curvature
@@ -191,6 +192,7 @@ namespace Hermes
           geometry = init_geom_surf(&refmap_straight, isurf, this->en[isurf]->marker, eo, tan);
           memcpy(x_straight, geometry->x, np*sizeof(double));
           memcpy(y_straight, geometry->y, np*sizeof(double));
+          geometry->free();
           delete geometry;
 
           // 3. - compare the two, get the updated area.
