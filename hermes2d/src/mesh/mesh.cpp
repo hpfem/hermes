@@ -1267,6 +1267,10 @@ namespace Hermes
       this->element_markers_conversion.conversion_table_inverse.clear();
       this->refinements.clear();
       this->seq = -1;
+
+      for(std::map<int, MarkerArea*>::iterator p = marker_areas.begin(); p != marker_areas.end(); p++)
+      delete p->second;
+      marker_areas.clear();
     }
 
     Element* Mesh::element_on_physical_coordinates(double x, double y)
