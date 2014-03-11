@@ -275,18 +275,22 @@ namespace Hermes
 
       // Projected solutions obtaining.
       MeshFunctionSharedPtrVector<Scalar> rslns;
-      OGProjection<Scalar> ogProjection;
 
       for (unsigned int i = 0; i < this->num; i++)
       {
-        rslns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>()));
+        if (dynamic_cast<ExactSolution<Scalar>*>(this->errorCalculator->fine_solutions[i].get()))
+        {
+          rslns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>()));
 
-        typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->meshes[i]);
-        MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-        typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh);
-        SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
+          typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->meshes[i]);
+          MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
+          typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh);
+          SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
 
-        ogProjection.project_global(ref_space, this->errorCalculator->fine_solutions[i], rslns[i]);
+          OGProjection<Scalar>::project_global(ref_space, this->errorCalculator->fine_solutions[i], rslns[i]);
+        }
+        else
+          rslns.push_back(this->errorCalculator->fine_solutions[i]);
       }
 
       // Parallel section

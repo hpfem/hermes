@@ -71,6 +71,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NewtonSolver<Scalar>::set_verbose_output(bool to_set)
+    {
+      Loggable::set_verbose_output(to_set);
+      this->dp->set_verbose_output(to_set);
+    }
+
+    template<typename Scalar>
     void NewtonSolver<Scalar>::assemble_residual(bool store_previous_residual)
     {
       this->dp->assemble(this->sln_vector, this->get_residual());

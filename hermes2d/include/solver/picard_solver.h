@@ -93,6 +93,9 @@ namespace Hermes
       /// DiscreteProblemWeakForm helper.
       virtual void set_spaces(SpaceSharedPtrVector<Scalar> spaces);
 
+      /// See Hermes::Mixins::Loggable.
+      virtual void set_verbose_output(bool to_set);
+
       /// DiscreteProblemWeakForm helper.
       virtual void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);
 

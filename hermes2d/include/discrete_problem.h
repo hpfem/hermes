@@ -107,6 +107,9 @@ namespace Hermes
       }
       reassembled_states_reuse_linear_system_fn reassembled_states_reuse_linear_system;
 
+      /// See Hermes::Mixins::Loggable.
+      virtual void set_verbose_output(bool to_set);
+
     protected:
       /// Initialize states.
       void init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, MeshSharedPtrVector& meshes);

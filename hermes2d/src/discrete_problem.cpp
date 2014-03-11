@@ -53,8 +53,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init(bool to_set, bool dirichlet_lift_accordingly)
     {
-      this->set_verbose_output(true);
-
       this->reassembled_states_reuse_linear_system = nullptr;
 
       this->spaces_size = this->spaces.size();
@@ -99,6 +97,13 @@ namespace Hermes
           throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
 
       return true;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::set_verbose_output(bool to_set)
+    {
+      Loggable::set_verbose_output(to_set);
+      this->selectiveAssembler.set_verbose_output(to_set);
     }
 
     template<typename Scalar>

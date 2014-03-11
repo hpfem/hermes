@@ -35,7 +35,7 @@ namespace Hermes
 
     template <typename Scalar>
     class Solver: 
-      public virtual Hermes::Mixins::TimeMeasurable, 
+      public virtual Hermes::Mixins::TimeMeasurable,
       public Hermes::Mixins::SettableComputationTime, 
       public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
       public virtual Hermes::Mixins::OutputAttachable,
@@ -79,6 +79,7 @@ namespace Hermes
 
       /// DiscreteProblemWeakForm helper.
       virtual void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);
+
     protected:
       virtual bool isOkay() const;
       

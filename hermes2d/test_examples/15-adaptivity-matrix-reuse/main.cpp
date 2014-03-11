@@ -6,7 +6,7 @@ using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
 const int P_INIT = 2;                     // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 5;               // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 2;               // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -32,7 +32,7 @@ public:
     for(unsigned short i = 0; i < this->element_ids.size(); i++)
     if (element->id == this->element_ids[i])
     {
-      refinement.refinement_polynomial_order[0] = refinement.refinement_polynomial_order[1] = refinement.refinement_polynomial_order[2] = refinement.refinement_polynomial_order[3] = 1;
+      refinement.refinement_polynomial_order[0] = refinement.refinement_polynomial_order[1] = refinement.refinement_polynomial_order[2] = refinement.refinement_polynomial_order[3] = P_INIT;
       return true;
     }
     return false;
@@ -48,14 +48,14 @@ int main(int argc, char* argv[])
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
-  mloader.load("domain.xml", mesh);
+  mloader.load("quad.xml", mesh);
 
   // Refine all elements, do it INIT_REF_NUM-times.
   for (unsigned int i = 0; i < INIT_REF_NUM; i++)
     mesh->refine_all_elements();
 
   // Initialize essential boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential({ "Bottom", "Inner", "Outer", "Left" }, FIXED_BDY_TEMP);
+  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(HERMES_ANY, FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Initialize space->
@@ -64,8 +64,7 @@ int main(int argc, char* argv[])
   std::cout << "Ndofs: " << space->get_num_dofs() << std::endl;
 
   // Weak Form
-  WeakFormSharedPtr<double> wf(new CustomWeakFormPoisson("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
-    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(VOLUME_HEAT_SRC)));
+  WeakFormSharedPtr<double> wf(new CustomWeakFormPoisson(new Hermes::Hermes2DFunction<double>(VOLUME_HEAT_SRC)));
 
 #ifdef ADAPT_SOLVER
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 1);
@@ -73,13 +72,13 @@ int main(int argc, char* argv[])
   CustomSelector selector;
   for (int i = 0; i <  mesh->get_max_element_id(); i++)
   {
-    //if ((i % 21) == 0) selector.element_ids.push_back(i);
+    if ((i % 7) == 0) selector.element_ids.push_back(i);
   }
-  AdaptSolverCriterionFixed global_criterion(1);
+  AdaptSolverCriterionFixed global_criterion(2);
 
   AdaptSolver<double, LinearSolver<double> > adaptSolver(space, wf, &errorCalculator, &criterion, &selector, &global_criterion);
 
-  adaptSolver.switch_visualization(false);
+  adaptSolver.switch_visualization(true);
   adaptSolver.set_verbose_output(true);
   adaptSolver.solve();
 

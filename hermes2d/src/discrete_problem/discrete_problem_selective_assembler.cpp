@@ -219,7 +219,6 @@ namespace Hermes
           }
         }
         this->tick();
-        this->set_verbose_output(true);
         this->info("DiscreteProblemSelectiveAssembler: Loop: %s.", this->last_str().c_str());
 
         this->tick();

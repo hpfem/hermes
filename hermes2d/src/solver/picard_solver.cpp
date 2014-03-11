@@ -72,6 +72,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void PicardSolver<Scalar>::set_verbose_output(bool to_set)
+    {
+      Loggable::set_verbose_output(to_set);
+      this->dp->set_verbose_output(to_set);
+    }
+
+    template<typename Scalar>
     void PicardSolver<Scalar>::assemble_residual(bool store_previous_residual)
     {
       bool use_Anderson = this->anderson_is_on && (this->vec_in_memory >= this->num_last_vectors_used);

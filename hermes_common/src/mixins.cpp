@@ -557,8 +557,6 @@ namespace Hermes
       this->verbose_callback = callback;
     }
 
-
-
     TimeMeasurable::TimeMeasurable(const char *name) : period_name(name == nullptr ? "unnamed" : name)
     {
       //initialization
