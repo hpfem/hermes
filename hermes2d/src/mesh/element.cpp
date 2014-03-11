@@ -93,16 +93,6 @@ namespace Hermes
     {
     };
 
-    unsigned short Element::next_vert(unsigned short i) const
-    {
-      return (i < (int)nvert - 1) ? i + 1 : 0;
-    }
-
-    unsigned short Element::prev_vert(unsigned short i) const
-    {
-      return (i > 0) ? i - 1 : nvert - 1;
-    }
-
     bool Element::hsplit() const
     {
       if (active)

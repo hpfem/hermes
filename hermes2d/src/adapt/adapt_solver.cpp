@@ -331,7 +331,7 @@ namespace Hermes
         StateReassemblyHelper<Scalar>::current_elements_to_reassemble = &this->elements_to_reassemble;
 
         // Perform solution.
-        this->info("Solving on reference mesh.");
+        this->info("Solving on reference mesh, %i DOFs.", Space<Scalar>::get_num_dofs(ref_spaces));
         this->solver->solve();
 
         // Update the stored (previous) linear system.

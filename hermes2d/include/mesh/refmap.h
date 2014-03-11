@@ -221,7 +221,7 @@ namespace Hermes
       /// matrix alone. This is added to the total integration order in weak form itegrals.
       int calc_inv_ref_order();
 
-      int indices[70];
+      unsigned short indices[70];
 
       int nc;
 

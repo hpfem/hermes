@@ -37,6 +37,8 @@ namespace Hermes
     ///
     template<typename Scalar>
     class HERMES_API DiscreteProblemSelectiveAssembler : 
+      public Hermes::Mixins::TimeMeasurable,
+      public Hermes::Mixins::Loggable,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>
     {

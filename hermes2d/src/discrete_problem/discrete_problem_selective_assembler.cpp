@@ -63,9 +63,12 @@ namespace Hermes
         mat->prealloc(ndof);
 
         AsmList<Scalar>* al = malloc_with_check<AsmList<Scalar> >(spaces_size);
+        int* dofs_m, *dofs_n;
+        unsigned int cnts_m, cnts_n;
         bool **blocks = this->wf->get_blocks(this->force_diagonal_blocks);
 
         // Loop through all elements.
+        this->tick();
         for (int state_i = 0; state_i < num_states; state_i++)
         {
           Traverse::State* current_state = states[state_i];
@@ -172,32 +175,61 @@ namespace Hermes
           }
 
           // Go through all equation-blocks of the local stiffness matrix.
-          for (unsigned int m = 0; m < spaces_size; m++)
+          if (spaces_size == 1)
           {
-            for (unsigned int n = 0; n < spaces_size; n++)
+            cnts_m = al[0].cnt;
+            dofs_m = al[0].dof;
+            if (blocks[0][0] && current_state->e[0])
             {
-              if (blocks[m][n] && current_state->e[m] && current_state->e[n])
+              for (unsigned int i = 0; i < cnts_m; i++)
               {
-                AsmList<Scalar>*am = &(al[m]);
-                AsmList<Scalar>*an = &(al[n]);
-
-                // Pretend assembling of the element stiffness matrix.
-                for (unsigned int i = 0; i < am->cnt; i++)
+                if (dofs_m[i] >= 0)
                 {
-                  if (am->dof[i] >= 0)
-                  for (unsigned int j = 0; j < an->cnt; j++)
-                  if (an->dof[j] >= 0)
-                    mat->pre_add_ij(am->dof[i], an->dof[j]);
+                  for (unsigned int j = 0; j < cnts_m; j++)
+                  if (dofs_m[j] >= 0)
+                    mat->pre_add_ij(dofs_m[i], dofs_m[j]);
+                }
+              }
+            }
+          }
+          else
+          {
+            for (unsigned int m = 0; m < spaces_size; m++)
+            {
+              cnts_m = al[m].cnt;
+              dofs_m = al[m].dof;
+              for (unsigned int n = 0; n < spaces_size; n++)
+              {
+                if (blocks[m][n] && current_state->e[m] && current_state->e[n])
+                {
+                  cnts_n = al[n].cnt;
+                  dofs_n = al[n].dof;
+
+                  // Pretend assembling of the element stiffness matrix.
+                  for (unsigned int i = 0; i < cnts_m; i++)
+                  {
+                    if (dofs_m[i] >= 0)
+                    for (unsigned int j = 0; j < cnts_n; j++)
+                    if (dofs_n[j] >= 0)
+                      mat->pre_add_ij(dofs_m[i], dofs_n[j]);
+                  }
                 }
               }
             }
           }
         }
+        this->tick();
+        this->set_verbose_output(true);
+        this->info("DiscreteProblemSelectiveAssembler: Loop: %s.", this->last_str().c_str());
 
+        this->tick();
+        
         free_with_check(al);
         free_with_check(blocks, true);
-
         mat->alloc();
+        
+        this->tick();
+        this->info("DiscreteProblemSelectiveAssembler: Finish: %s.", this->last_str().c_str());
       }
 
       // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied

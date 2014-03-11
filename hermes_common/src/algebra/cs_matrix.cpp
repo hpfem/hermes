@@ -115,11 +115,12 @@ namespace Hermes
       for (i = 0; i < this->size; i++)
       {
         Ap[i] = pos;
-        pos += this->sort_and_store_indices(this->pages[i], Ai + pos, Ai + aisize);
+        pos += this->sort_and_store_indices(&this->pages[i], Ai + pos, Ai + aisize);
       }
-      Ap[i] = pos;
+      Ap[this->size] = pos;
 
       free_with_check(this->pages);
+      free_with_check(this->next_pages);
 
       nnz = Ap[this->size];
 
@@ -784,14 +785,18 @@ namespace Hermes
     template<typename Scalar>
     void CSRMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
     {
-      if (this->pages[row] == nullptr || this->pages[row]->count >= SparseMatrix<Scalar>::PAGE_SIZE)
+      if (pages[row].count >= PAGE_SIZE)
       {
-        typename SparseMatrix<Scalar>::Page *new_page = new typename SparseMatrix<Scalar>::Page;
-        new_page->count = 0;
-        new_page->next = this->pages[row];
-        this->pages[row] = new_page;
+        Page* final_page = pages[row].next;
+        while (final_page->next != nullptr && final_page->count >= PAGE_SIZE)
+          final_page = final_page->next;
+
+        if (final_page->count >= PAGE_SIZE)
+          final_page->next = new Page;
+        final_page->idx[final_page->count++] = col;
       }
-      this->pages[row]->idx[this->pages[row]->count++] = col;
+      else
+        pages[row].idx[pages[row].count++] = col;
     }
 
     template<typename Scalar>

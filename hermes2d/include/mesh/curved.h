@@ -54,12 +54,12 @@ namespace Hermes
       double angle; ///< arc angle
 
       /// Arc degree is 2.
-      static const unsigned short degree = 2;
+      static const unsigned char degree = 2;
 
       /// Arc has 3 control points
-      static const unsigned short np = 3;
+      static const unsigned char np = 3;
       // there are 6 knots: {0, 0, 0, 1, 1, 1}
-      static const unsigned short nk = 6;
+      static const unsigned char nk = 6;
       double kv[6];
       double3 pt[3];
     };
@@ -80,10 +80,10 @@ namespace Hermes
       Nurbs(const Nurbs* other);
       ~Nurbs();
 
-      unsigned short degree;  ///< curve degree (2=quadratic, etc.)
-      unsigned short np;      ///< number of control points
+      unsigned char degree;  ///< curve degree (2=quadratic, etc.)
+      unsigned char np;      ///< number of control points
       double3* pt; ///< control points and their weights
-      unsigned short nk;      ///< knot vector length
+      unsigned char nk;      ///< knot vector length
       double* kv;  ///< knot vector
     };
 

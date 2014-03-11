@@ -5,6 +5,15 @@ using namespace Hermes::Hermes2D;
 using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
+const int P_INIT = 2;                     // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 5;               // Number of initial uniform mesh refinements.
+
+// Problem parameters.
+const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
+const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
+const double VOLUME_HEAT_SRC = 5;        // Volume heat sources generated (for example) by electric current.
+const double FIXED_BDY_TEMP = 20;        // Fixed temperature on the boundary.
+
 /// Custom selector, selects the appropriate elements
 class CustomSelector : public Selector<double>
 {
@@ -36,31 +45,27 @@ public:
 
 int main(int argc, char* argv[])
 {
-  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
-
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
-  mloader.load("quad.xml", mesh);
-  mesh->refine_all_elements();
-  mesh->refine_all_elements();
-  mesh->refine_all_elements();
-  mesh->refine_all_elements();
-  mesh->refine_all_elements();
+  mloader.load("domain.xml", mesh);
+
+  // Refine all elements, do it INIT_REF_NUM-times.
+  for (unsigned int i = 0; i < INIT_REF_NUM; i++)
+    mesh->refine_all_elements();
 
   // Initialize essential boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("0", 10.);
+  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential({ "Bottom", "Inner", "Outer", "Left" }, FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
-  // Initialize space.
-  SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, 3));
+  // Initialize space->
+  SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT));
 
-  BaseView<double> b("Coarse space");
-  b.get_linearizer()->set_criterion(LinearizerCriterionFixed(0));
-  b.show(space);
+  std::cout << "Ndofs: " << space->get_num_dofs() << std::endl;
 
   // Weak Form
-  WeakFormSharedPtr<double> wf(new WeakFormsH1::DefaultWeakFormPoissonLinear<double>(HERMES_ANY, new Hermes2DFunction<double>(13.0)));
+  WeakFormSharedPtr<double> wf(new CustomWeakFormPoisson("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
+    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(VOLUME_HEAT_SRC)));
 
 #ifdef ADAPT_SOLVER
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 1);
@@ -70,7 +75,7 @@ int main(int argc, char* argv[])
   {
     //if ((i % 21) == 0) selector.element_ids.push_back(i);
   }
-  AdaptSolverCriterionFixed global_criterion(2);
+  AdaptSolverCriterionFixed global_criterion(1);
 
   AdaptSolver<double, LinearSolver<double> > adaptSolver(space, wf, &errorCalculator, &criterion, &selector, &global_criterion);
 

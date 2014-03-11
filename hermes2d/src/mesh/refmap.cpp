@@ -77,7 +77,7 @@ namespace Hermes
       this->is_const = !element->is_curved() && (element->is_triangle() || is_parallelogram(element));
 
       // prepare the shapes and coefficients of the reference map
-      int j, k = 0;
+      unsigned short j, k = 0;
       for (unsigned char i = 0; i < e->get_nvert(); i++)
         indices[k++] = ref_map_shapeset.get_vertex_index(i, e->get_mode());
 
@@ -94,7 +94,7 @@ namespace Hermes
       }
       else // curvilinear element - edge and bubble shapes
       {
-        int o = e->cm->order;
+        unsigned short o = e->cm->order;
         for (unsigned char i = 0; i < e->get_nvert(); i++)
         for (j = 2; j <= o; j++)
           indices[k++] = ref_map_shapeset.get_edge_index(i, 0, j, e->get_mode());

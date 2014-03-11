@@ -187,20 +187,26 @@ namespace Hermes
 
     protected:
       /// Size of page (max number of indices stored in one page).
-      static const int PAGE_SIZE = 62;
+      /// DO NOT CHANGE, otherwise the data types in Page struct needs to be revisited.
+      static const int PAGE_SIZE = 128;
 
       /// Structure for storing indices in sparse matrix
       struct Page {
+        Page(bool dyn_stored_ = false) : dyn_stored(dyn_stored_), next(nullptr), count(0) {
+        };
         /// number of indices stored
-        int count;
-        /// buffer for storring indices
+        unsigned char count;
+        /// buffer for storing indices
         int idx[PAGE_SIZE];
         /// pointer to next page
         Page *next;
+        /// this page is stored in the dynamically allocated part.
+        bool dyn_stored;
       };
 
       /// array of pages with indices array. Each field of arra contains pages for one column
-      Page **pages;
+      Page *pages;
+      Page **next_pages;
 
       /// gather all pages in the buffer, delete them, sort buffer and remove duplicities
       /// @param[in] page first page with indices

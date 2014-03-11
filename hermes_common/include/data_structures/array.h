@@ -96,7 +96,7 @@ namespace Hermes
       this->nunused = array.nunused;
       this->append_only = array.append_only;
 
-      for (short i = 0; i < this->page_count; i++)
+      for (unsigned i = 0; i < this->page_count; i++)
       {
         TYPE* new_page = malloc_with_check<Array<TYPE>, TYPE>(HERMES_PAGE_SIZE, this);
         memcpy(new_page, array.pages[i], sizeof(TYPE)* HERMES_PAGE_SIZE);

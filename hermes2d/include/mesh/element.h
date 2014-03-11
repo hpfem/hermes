@@ -163,8 +163,15 @@ namespace Hermes
       unsigned short iro_cache;
 
       /// Helper functions to obtain the index of the next or previous vertex/edge
-      unsigned short next_vert(unsigned short i) const;
-      unsigned short prev_vert(unsigned short i) const;
+      inline unsigned short Element::next_vert(unsigned short i) const
+      {
+        return ((i + 1) % nvert);
+      }
+
+      inline unsigned short Element::prev_vert(unsigned short i) const
+      {
+        return ((i - 1) % nvert);
+      }
 
       /// Returns a pointer to the neighboring element across the edge 'ie', or
       /// nullptr if it does not exist or is across an irregular edge.

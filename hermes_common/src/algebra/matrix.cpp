@@ -103,6 +103,7 @@ namespace Hermes
     SparseMatrix<Scalar>::SparseMatrix() : Matrix<Scalar>()
     {
       pages = nullptr;
+      next_pages = nullptr;
       row_storage = false;
       col_storage = false;
     }
@@ -112,6 +113,7 @@ namespace Hermes
     {
       this->size = size;
       pages = nullptr;
+      next_pages = nullptr;
 
       row_storage = false;
       col_storage = false;
@@ -123,23 +125,18 @@ namespace Hermes
       this->size = mat.get_size();
 
       if (mat.pages)
-      {
-        this->pages = malloc_with_check<SparseMatrix<Scalar>, Page *>(this->size, this);
-        memset(this->pages, 0, this->size * sizeof(Page *));
+        this->pages = malloc_with_check<SparseMatrix<Scalar>, Page>(this->size, this);
+      else
+        this->pages = nullptr;
 
-        for (int col = 0; col < this->size; col++)
-        {
-          Page *page = mat.pages[col];
-          Page *new_page = new Page;
-          new_page->count = page->count;
-          memcpy(new_page->idx, page->idx, sizeof(int)* page->count);
-          new_page->next = this->pages[col];
-          this->pages[col] = new_page;
-        }
+      if (mat.next_pages)
+      {
+        this->next_pages = malloc_with_check<SparseMatrix<Scalar>, Page *>(this->size, this);
+        memset(this->next_pages, 0, sizeof(Page*)* this->size);
       }
       else
       {
-        this->pages = nullptr;
+        this->next_pages = nullptr;
       }
 
       row_storage = false;
@@ -157,11 +154,15 @@ namespace Hermes
     {
       if (pages)
       {
-        for (unsigned int i = 0; i < this->size; i++)
-        if (pages[i])
-          delete pages[i];
         free_with_check(pages);
       }
+
+      if (next_pages)
+      {
+        for (unsigned int i = 0; i < this->size; i++)
+          delete next_pages[i];
+        free_with_check(next_pages);
+      } 
     }
 
     template<typename Scalar>
@@ -244,22 +245,27 @@ namespace Hermes
     void SparseMatrix<Scalar>::prealloc(unsigned int n)
     {
       this->size = n;
-
-      pages = malloc_with_check<SparseMatrix<Scalar>, Page *>(n, this);
-      memset(pages, 0, n * sizeof(Page *));
+      pages = malloc_with_check<SparseMatrix<Scalar>, Page>(n, this);
     }
 
     template<typename Scalar>
     void SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
     {
-      if (pages[col] == nullptr || pages[col]->count >= PAGE_SIZE)
+      if (pages[col].count >= PAGE_SIZE)
       {
-        Page *new_page = new Page;
-        new_page->count = 0;
-        new_page->next = pages[col];
-        pages[col] = new_page;
+        Page* final_page = &(pages[col]);
+        while (final_page->next != nullptr && final_page->count >= PAGE_SIZE)
+          final_page = final_page->next;
+
+        if (final_page->next == nullptr && final_page->count >= PAGE_SIZE)
+        {
+          final_page->next = new Page(true);
+          final_page = final_page->next;
+        }
+        final_page->idx[final_page->count++] = row;
       }
-      pages[col]->idx[pages[col]->count++] = row;
+      else
+        pages[col].idx[pages[col].count++] = row;
     }
 
     template<typename Scalar>
@@ -273,7 +279,8 @@ namespace Hermes
         end += page->count;
         Page *tmp = page;
         page = page->next;
-        delete tmp;
+        if (tmp->dyn_stored)
+          delete tmp;
       }
 
       // sort the indices and remove duplicities
@@ -291,7 +298,7 @@ namespace Hermes
     {
       int total = 0;
       for (unsigned int i = 0; i < this->size; i++)
-      for (Page *page = pages[i]; page != nullptr; page = page->next)
+      for (Page *page = &pages[i]; page != nullptr; page = page->next)
         total += page->count;
 
       return total;
