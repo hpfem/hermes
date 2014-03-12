@@ -106,6 +106,11 @@ namespace Hermes
         this->reassembled_states_reuse_linear_system = fn;
       }
       reassembled_states_reuse_linear_system_fn reassembled_states_reuse_linear_system;
+      void set_reusable_DOFs(bool **reusable_DOFs)
+      {
+        for (int i = 0; i < this->num_threads_used; i++)
+          this->threadAssembler[i]->reusable_DOFs = reusable_DOFs;
+      }
 
       /// See Hermes::Mixins::Loggable.
       virtual void set_verbose_output(bool to_set);
@@ -128,7 +133,10 @@ namespace Hermes
       /// Space instances for all equations in the system.
       SpaceSharedPtrVector<Scalar> spaces;
       int spaces_size;
-      
+
+      /// Dirichlet lift rhs part.
+      Vector<Scalar>* dirichlet_lift_rhs;
+
       /// Internal.
       bool nonlinear, add_dirichlet_lift;
       

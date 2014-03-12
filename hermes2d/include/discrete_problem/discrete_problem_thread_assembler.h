@@ -97,6 +97,9 @@ namespace Hermes
       /// Free nonlinearities-related data.
       void free_u_ext();
 
+      /// Dirichlet lift rhs part.
+      Vector<Scalar>* dirichlet_lift_rhs;
+
       PrecalcShapesetAssembling** pss;
       RefMap** refmaps;
       RefMap* rep_refmap;
@@ -145,6 +148,9 @@ namespace Hermes
 
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
+
+      /// Experimental.
+      bool** reusable_DOFs;
     };
   }
 }

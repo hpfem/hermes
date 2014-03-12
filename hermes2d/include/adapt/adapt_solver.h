@@ -182,7 +182,7 @@ namespace Hermes
       /// Strictly private - elements to reassemble.
       /// Internal data: std::pair: [0] - element id, [1] - component (for multimesh).
       std::set<std::pair<int, unsigned char> > elements_to_reassemble;
-      std::vector<std::pair<int, unsigned char> > DOFs_to_reassemble;
+      std::set<std::pair<int, unsigned char> > DOFs_to_reassemble;
 
       CSCMatrix<Scalar>* prev_mat;
       Scalar* prev_rhs;

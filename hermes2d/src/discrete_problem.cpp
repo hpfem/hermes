@@ -63,6 +63,11 @@ namespace Hermes
       else
         this->add_dirichlet_lift = this->nonlinear;
 
+      if (this->add_dirichlet_lift)
+        this->dirichlet_lift_rhs = create_vector<Scalar>(false);
+      else
+        this->dirichlet_lift_rhs = nullptr;
+
       // Local number of threads - to avoid calling it over and over again, and against faults caused by the
       // value being changed while assembling.
       this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>*[this->num_threads_used];
@@ -73,10 +78,12 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::~DiscreteProblem()
     {
-
       for (int i = 0; i < this->num_threads_used; i++)
         delete this->threadAssembler[i];
       delete[] this->threadAssembler;
+
+      if (this->dirichlet_lift_rhs)
+        delete this->dirichlet_lift_rhs;
     }
 
     template<typename Scalar>
@@ -174,7 +181,10 @@ namespace Hermes
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_rhs(rhs);
 
       for (int i = 0; i < this->num_threads_used; i++)
+      {
         this->threadAssembler[i]->set_rhs(rhs);
+        this->threadAssembler[i]->dirichlet_lift_rhs = this->dirichlet_lift_rhs;
+      }
 
       if (rhs && this->current_rhs != rhs)
       {
@@ -293,6 +303,10 @@ namespace Hermes
 
       // Init the caught parallel exception message.
       this->exceptionMessageCaughtInParallelBlock.clear();
+
+      // Dirichlet lift rhs part.
+      int ndof = Space<Scalar>::get_num_dofs(spaces);
+      this->dirichlet_lift_rhs->alloc(ndof);
     }
 
     template<typename Scalar>
@@ -421,6 +435,9 @@ namespace Hermes
       for (int i = 0; i < num_states; i++)
         delete states[i];
       free_with_check(states);
+
+      // Very important.
+      this->current_rhs->add_vector(this->dirichlet_lift_rhs);
     }
 
     template class HERMES_API DiscreteProblem<double>;

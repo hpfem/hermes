@@ -29,7 +29,7 @@ namespace Hermes
       pss(nullptr), refmaps(nullptr), u_ext(nullptr),
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
       ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0),
-      funcs_wf_initialized(false), funcs_space_initialized(false), spaces_size(0), nonlinear(nonlinear)
+      funcs_wf_initialized(false), funcs_space_initialized(false), spaces_size(0), nonlinear(nonlinear), reusable_DOFs(nullptr)
     {
       // Init the memory pool - if PJLIB is linked, it will do the magic, if not, it will initialize the pointer to null.
       this->init_funcs_memory_pool();
@@ -606,6 +606,12 @@ namespace Hermes
 
         for (unsigned int j = 0; j < current_als_j->cnt; j++)
         {
+          if (current_als_j->dof[j] >= 0 && this->reusable_DOFs && *this->reusable_DOFs)
+          {
+            if ((*this->reusable_DOFs)[current_als_j->dof[j]] && (*this->reusable_DOFs)[current_als_i->dof[i]])
+              continue;
+          }
+
           // Skip symmetric values that do not contribute to Dirichlet lift.
           if (sym && j < i && current_als_j->dof[j] >= 0)
             continue;
@@ -639,7 +645,7 @@ namespace Hermes
           }
           else if (this->add_dirichlet_lift && this->current_rhs)
           {
-            this->current_rhs->add(current_als_i->dof[i], -val);
+            this->dirichlet_lift_rhs->add(current_als_i->dof[i], -val);
           }
         }
       }
@@ -669,7 +675,7 @@ namespace Hermes
                 if (current_als_j->dof[i] >= 0)
                 {
                   int local_matrix_index_array = i * H2D_MAX_LOCAL_BASIS_SIZE + j;
-                  this->current_rhs->add(current_als_j->dof[i], -local_stiffness_matrix[local_matrix_index_array]);
+                  this->dirichlet_lift_rhs->add(current_als_j->dof[i], -local_stiffness_matrix[local_matrix_index_array]);
                 }
               }
             }
@@ -702,6 +708,12 @@ namespace Hermes
       {
         if (current_als_i->dof[i] < 0)
           continue;
+
+        if (this->reusable_DOFs && *this->reusable_DOFs)
+        {
+          if ((*this->reusable_DOFs)[current_als_i->dof[i]])
+            continue;
+        }
 
         // Is this necessary, i.e. is there a coefficient smaller than Hermes::HermesSqrtEpsilon?
         if (std::abs(current_als_i->coef[i]) < Hermes::HermesSqrtEpsilon)
