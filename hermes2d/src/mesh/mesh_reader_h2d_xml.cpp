@@ -97,15 +97,7 @@ namespace Hermes
       // save vertices
       XMLMesh::vertices_type vertices;
       for (int i = 0; i < mesh->ntopvert; i++)
-      {
-        std::ostringstream x_stream;
-        x_stream << mesh->nodes[i].x;
-
-        std::ostringstream y_stream;
-        y_stream << mesh->nodes[i].y;
-
-        vertices.v().push_back(std::auto_ptr<XMLMesh::v>(new XMLMesh::v(x_stream.str(), y_stream.str(), i)));
-      }
+        vertices.v().push_back(std::auto_ptr<XMLMesh::v>(new XMLMesh::v(std::to_string(mesh->nodes[i].x), std::to_string(mesh->nodes[i].y), i)));
 
       // save elements
       XMLMesh::elements_type elements;
@@ -648,13 +640,8 @@ namespace Hermes
             int new_i = points_to_vertices.size();
             vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, new_i));
             points_to_vertices.insert(std::pair<std::pair<double, double>, unsigned int>(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y), points_to_vertices.size()));
-            std::ostringstream x_stream;
-            x_stream << meshes[meshes_i]->nodes[i].x;
-
-            std::ostringstream y_stream;
-            y_stream << meshes[meshes_i]->nodes[i].y;
-
-            vertices.v().push_back(std::auto_ptr<XMLMesh::v>(new XMLMesh::v(x_stream.str(), y_stream.str(), new_i)));
+            
+            vertices.v().push_back(std::auto_ptr<XMLMesh::v>(new XMLMesh::v(std::to_string(meshes[meshes_i]->nodes[i].x), std::to_string(meshes[meshes_i]->nodes[i].y), i)));
           }
           if (!hasAllElements)
             subdomain.vertices()->i().push_back(vertices_to_vertices.find(i)->second);
