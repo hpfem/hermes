@@ -609,7 +609,16 @@ namespace Hermes
           if (current_als_j->dof[j] >= 0 && this->reusable_DOFs && *this->reusable_DOFs)
           {
             if ((*this->reusable_DOFs)[current_als_j->dof[j]] && (*this->reusable_DOFs)[current_als_i->dof[i]])
+            {
+              unsigned short local_matrix_index_array = i * H2D_MAX_LOCAL_BASIS_SIZE + j;
+              local_stiffness_matrix[local_matrix_index_array] = 0.;
+              if (sym || tra)
+              {
+                unsigned short local_matrix_index_array_transposed = j * H2D_MAX_LOCAL_BASIS_SIZE + i;
+                local_stiffness_matrix[local_matrix_index_array_transposed] = 0.;
+              }
               continue;
+            }
           }
 
           // Skip symmetric values that do not contribute to Dirichlet lift.
@@ -620,7 +629,7 @@ namespace Hermes
           if (current_als_j->dof[j] >= 0 && !this->current_mat)
             continue;
 
-          if (std::abs(current_als_j->coef[j]) < Hermes::HermesSqrtEpsilon)
+          if (std::abs(current_als_j->coef[j]) < Hermes::HermesEpsilon)
             continue;
 
           Func<double>* u = base_fns[j];
@@ -630,7 +639,7 @@ namespace Hermes
 
           if (current_als_j->dof[j] >= 0)
           {
-            int local_matrix_index_array = i * H2D_MAX_LOCAL_BASIS_SIZE + j;
+            unsigned short local_matrix_index_array = i * H2D_MAX_LOCAL_BASIS_SIZE + j;
 
             if (surface_form)
               local_stiffness_matrix[local_matrix_index_array] = 0.5 * val;
@@ -639,7 +648,7 @@ namespace Hermes
 
             if (sym)
             {
-              int local_matrix_index_array_transposed = j * H2D_MAX_LOCAL_BASIS_SIZE + i;
+              unsigned short local_matrix_index_array_transposed = j * H2D_MAX_LOCAL_BASIS_SIZE + i;
               local_stiffness_matrix[local_matrix_index_array_transposed] = local_stiffness_matrix[local_matrix_index_array];
             }
           }

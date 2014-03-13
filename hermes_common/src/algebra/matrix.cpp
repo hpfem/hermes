@@ -84,16 +84,35 @@ namespace Hermes
       return this->size;
     };
 
-    template<typename Scalar>
-    void Matrix<Scalar>::add(unsigned int m, unsigned int n, Scalar *mat, int *rows, int *cols, const int size)
+    template<>
+    void Matrix<double>::add(unsigned int m, unsigned int n, double *mat, int *rows, int *cols, const int size)
     {
       for (unsigned int i = 0; i < m; i++)
       {
         for (unsigned int j = 0; j < n; j++)
         {
-          if (rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+          double entry = mat[i * size + j];
+          if (entry > HermesEpsilon || entry < -HermesEpsilon)
           {
-            add(rows[i], cols[j], mat[i * size + j]);
+            if (rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+              add(rows[i], cols[j], entry);
+          }
+        }
+      }
+    }
+
+    template<>
+    void Matrix<std::complex<double> >::add(unsigned int m, unsigned int n, std::complex<double>* mat, int *rows, int *cols, const int size)
+    {
+      for (unsigned int i = 0; i < m; i++)
+      {
+        for (unsigned int j = 0; j < n; j++)
+        {
+          std::complex<double> entry = mat[i * size + j];
+          if (entry.real() > HermesEpsilon || entry.real() < -HermesEpsilon || entry.imag() > HermesEpsilon || entry.imag() < -HermesEpsilon)
+          {
+            if (rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+              add(rows[i], cols[j], mat[i * size + j]);
           }
         }
       }

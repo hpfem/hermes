@@ -50,7 +50,6 @@ namespace Hermes
       protected:
 
         SpaceSharedPtr<Scalar> space;
-        PrecalcShapeset* pss;
         MeshFunctionSharedPtr<Scalar> sln;
         MeshFunctionSharedPtr<double> complex_filter;
 

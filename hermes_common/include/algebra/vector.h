@@ -57,6 +57,9 @@ namespace Hermes
       /// @param[in] idx - index which to obtain the value from
       virtual Scalar get(unsigned int idx) const = 0;
 
+      /// Duplicate vector (including allocation).
+      virtual Vector<Scalar>* duplicate() const = 0;
+
       /// Extract vector values into user-provided array.
       /// @param[out] v - array which will contain extracted values
       virtual void extract(Scalar *v) const = 0;
@@ -89,6 +92,11 @@ namespace Hermes
       /// Add a vector.
       virtual Vector<Scalar>* add_vector(Scalar* vec);
 
+      /// Subtract a vector.
+      virtual Vector<Scalar>* subtract_vector(Vector<Scalar>* vec);
+      /// Subtract a vector.
+      virtual Vector<Scalar>* subtract_vector(Scalar* vec);
+
       /// update subset of the elements
       ///
       /// @param[in] n   - number of positions to update
@@ -118,11 +126,17 @@ namespace Hermes
       virtual void extract(Scalar *v) const;
       virtual void zero();
       virtual Vector<Scalar>* change_sign();
+
+      /// Duplicates a matrix (including allocation).
+      Vector<Scalar>* duplicate() const;
+
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
       virtual Vector<Scalar>* add_vector(Vector<Scalar>* vec);
       virtual Vector<Scalar>* add_vector(Scalar* vec);
+      virtual Vector<Scalar>* subtract_vector(Vector<Scalar>* vec);
+      virtual Vector<Scalar>* subtract_vector(Scalar* vec);
       virtual Vector<Scalar>* set_vector(Vector<Scalar>* vec);
       virtual Vector<Scalar>* set_vector(Scalar* vec);
 

@@ -153,6 +153,7 @@ namespace Hermes
 
       template<typename T> friend class Solver;
       template<typename T> friend class LinearSolver;
+      template<typename T, typename S> friend class AdaptSolver;
       template<typename T> friend class NonlinearSolver;
       template<typename T> friend class NewtonSolver;
       template<typename T> friend class PicardSolver;

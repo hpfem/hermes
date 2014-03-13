@@ -185,7 +185,7 @@ namespace Hermes
       std::set<std::pair<int, unsigned char> > DOFs_to_reassemble;
 
       CSCMatrix<Scalar>* prev_mat;
-      Scalar* prev_rhs;
+      Vector<Scalar>* prev_rhs;
 
       /// use Hermes views to display stuff.
       bool visualization;

@@ -104,6 +104,23 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Vector<Scalar>* Vector<Scalar>::subtract_vector(Hermes::Algebra::Vector<Scalar>* vec)
+    {
+      assert(this->get_size() == vec->get_size());
+      for (unsigned int i = 0; i < this->get_size(); i++)
+        this->add(i, -vec->get(i));
+      return this;
+    }
+
+    template<typename Scalar>
+    Vector<Scalar>* Vector<Scalar>::subtract_vector(Scalar* vec)
+    {
+      for (unsigned int i = 0; i < this->get_size(); i++)
+        this->add(i, -vec[i]);
+      return this;
+    }
+
+    template<typename Scalar>
     void SimpleVector<Scalar>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       if (!v)
@@ -187,6 +204,7 @@ namespace Hermes
         break;
 
       case EXPORT_FORMAT_PLAIN_ASCII:
+      case EXPORT_FORMAT_MATLAB_SIMPLE:
       {
                                       FILE* file = fopen(filename, "w");
                                       if (!file)
@@ -460,17 +478,43 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Vector<Scalar>* SimpleVector<Scalar>::duplicate() const
+    {
+      SimpleVector<Scalar>* new_vector = new SimpleVector<Scalar>(this->size);
+      new_vector->set_vector(this->v);
+      return new_vector;
+    }
+
+    template<typename Scalar>
     void SimpleVector<Scalar>::extract(Scalar *v) const
     {
       memcpy(v, this->v, this->size * sizeof(Scalar));
     }
 
     template<typename Scalar>
+    Vector<Scalar>* SimpleVector<Scalar>::subtract_vector(Vector<Scalar>* vec)
+    {
+      assert(this->get_size() == vec->get_size());
+      for (unsigned int i = 0; i < this->size; i++)
+        this->v[i] -= vec->get(i);
+      return this;
+
+    }
+
+    template<typename Scalar>
+    Vector<Scalar>* SimpleVector<Scalar>::subtract_vector(Scalar* vec)
+    {
+      for (unsigned int i = 0; i < this->size; i++)
+        this->v[i] -= vec[i];
+      return this;
+    }
+
+    template<typename Scalar>
     Vector<Scalar>* SimpleVector<Scalar>::add_vector(Vector<Scalar>* vec)
     {
       assert(this->get_size() == vec->get_size());
-      for (unsigned int i = 0; i < this->get_size(); i++)
-        this->add(i, vec->get(i));
+      for (unsigned int i = 0; i < this->size; i++)
+        this->v[i] += vec->get(i);
       return this;
 
     }
@@ -479,7 +523,7 @@ namespace Hermes
     Vector<Scalar>* SimpleVector<Scalar>::add_vector(Scalar* vec)
     {
       for (unsigned int i = 0; i < this->get_size(); i++)
-        this->add(i, vec[i]);
+        this->v[i] += vec[i];
       return this;
     }
 

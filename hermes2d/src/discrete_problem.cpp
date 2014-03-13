@@ -437,7 +437,8 @@ namespace Hermes
       free_with_check(states);
 
       // Very important.
-      this->current_rhs->add_vector(this->dirichlet_lift_rhs);
+      if(this->add_dirichlet_lift)
+        this->current_rhs->add_vector(this->dirichlet_lift_rhs);
     }
 
     template class HERMES_API DiscreteProblem<double>;

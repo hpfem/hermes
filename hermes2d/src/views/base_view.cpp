@@ -32,7 +32,6 @@ namespace Hermes
       BaseView<Scalar>::BaseView(const char* title, WinGeom* wg)
         : ScalarView((char*)title, wg), sln(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>())), complex_filter(MeshFunctionSharedPtr<double>())
       {
-        pss = nullptr;
         this->show_edges = true;
         basic_title.assign(title);
       }
@@ -41,7 +40,6 @@ namespace Hermes
       BaseView<Scalar>::BaseView(char* title, WinGeom* wg)
         : ScalarView(title, wg), sln(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>())), complex_filter(MeshFunctionSharedPtr<double>())
       {
-        pss = nullptr;
         this->show_edges = true;
         basic_title.assign(title);
       }
@@ -51,7 +49,6 @@ namespace Hermes
       {
         this->space = space;
         free();
-        pss = new PrecalcShapeset(space->shapeset);
         ndof = this->space->get_num_dofs();
         base_index = 0;
         this->eps = eps;
@@ -62,7 +59,6 @@ namespace Hermes
       template<typename Scalar>
       void BaseView<Scalar>::free()
       {
-        if (pss != nullptr) { delete pss; pss = nullptr; }
       }
 
       template<>
@@ -74,11 +70,11 @@ namespace Hermes
         {
           if (base_index < ndof)
             coeffs[base_index] = 1.0;
-          Solution<double>::vector_to_solution(coeffs, space, sln, pss, false);
+          Solution<double>::vector_to_solution(coeffs, space, sln, false);
         }
         else
         {
-          Solution<double>::vector_to_solution(coeffs, space, sln, pss, true);
+          Solution<double>::vector_to_solution(coeffs, space, sln, true);
         }
 
         ScalarView::show(sln, item);
@@ -94,11 +90,11 @@ namespace Hermes
         if (base_index >= 0)
         {
           if (base_index < ndof) coeffs[base_index] = 1.0;
-          Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss, false);
+          Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, false);
         }
         else
         {
-          Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss, true);
+          Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, true);
         }
 
 

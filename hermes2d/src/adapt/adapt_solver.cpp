@@ -97,7 +97,7 @@ namespace Hermes
       static SpaceSharedPtrVector<Scalar>* current_ref_spaces;
       static SpaceSharedPtrVector<Scalar>* current_prev_ref_spaces;
       static CSCMatrix<Scalar>* prev_mat;
-      static Scalar* prev_rhs;
+      static Vector<Scalar>* prev_rhs;
       static bool** reusable_DOFs;
     };
 
@@ -120,7 +120,7 @@ namespace Hermes
     CSCMatrix<Scalar>* StateReassemblyHelper<Scalar>::prev_mat;
 
     template<typename Scalar>
-    Scalar* StateReassemblyHelper<Scalar>::prev_rhs;
+    Vector<Scalar>* StateReassemblyHelper<Scalar>::prev_rhs;
 
     template<typename Scalar>
     bool** StateReassemblyHelper<Scalar>::reusable_DOFs;
@@ -130,7 +130,7 @@ namespace Hermes
     {
       if (StateReassemblyHelper<Scalar>::current_iteration == 1)
       {
-        *StateReassemblyHelper<Scalar>::reusable_DOFs = nullptr;
+        (*StateReassemblyHelper<Scalar>::reusable_DOFs) = nullptr;
         return;
       }
 
@@ -156,13 +156,13 @@ namespace Hermes
       std::set<std::pair<int, unsigned char> > newSpace_elements_to_reassemble;
       // - number of DOFs of the previous spaces.
       int prev_ref_system_size = StateReassemblyHelper<Scalar>::prev_mat->get_size();
-      int ref_system_size = StateReassemblyHelper<Scalar>::prev_mat->get_size();
+      int ref_system_size = Space<Scalar>::get_num_dofs(*StateReassemblyHelper<Scalar>::current_ref_spaces);
       // - DOF to DOF map of those DOFs we can reuse. -1s are there to distinguish those we cannot.
       int* DOF_to_DOF_map = malloc_with_check<int>(prev_ref_system_size);
       for (int i = 0; i < prev_ref_system_size; i++)
         DOF_to_DOF_map[i] = -1;
       // - DOF to reassemble.
-      *StateReassemblyHelper<Scalar>::reusable_DOFs = calloc_with_check<bool>(ref_system_size, true);
+      (*StateReassemblyHelper<Scalar>::reusable_DOFs) = calloc_with_check<bool>(ref_system_size, true);
       // - utility assembly lists.
       AsmList<Scalar> al, al_prev;
       // - dummy functions for traversing the previous and current reference spaces together
@@ -172,7 +172,7 @@ namespace Hermes
       for (int i = 0; i < spaces_size; i++)
         dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_ref_spaces->at(i)->get_mesh()));
       // - (for reporting) count of DOFs needed to be reassembled
-      int DOF_to_reassemble_count = 0;
+      int reusable_DOFs_count = 0;
 
       // Start.
       Hermes::Mixins::Loggable::Static::info("\t   Handling Reusing matrix entries on the new Ref. Space:");
@@ -210,10 +210,10 @@ namespace Hermes
                 last_matched_index = j_al;
                 if (StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->find(std::pair<int, unsigned char>(al_prev.dof[i_al_prev], space_i)) == StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->end())
                 {
-                  if (!*StateReassemblyHelper<Scalar>::reusable_DOFs[al.dof[j_al]])
+                  if (!(*StateReassemblyHelper<Scalar>::reusable_DOFs)[al.dof[j_al]])
                   {
-                    DOF_to_reassemble_count++;
-                    *StateReassemblyHelper<Scalar>::reusable_DOFs[al.dof[j_al]] = true;
+                    reusable_DOFs_count++;
+                    (*StateReassemblyHelper<Scalar>::reusable_DOFs)[al.dof[j_al]] = true;
                   }
                   DOF_to_DOF_map[al_prev.dof[i_al_prev]] = al.dof[j_al];
                 }
@@ -225,7 +225,7 @@ namespace Hermes
 
       cpu_time.tick();
       Hermes::Mixins::Loggable::Static::info("\t      No. of elements to reassemble: %i / %i total - %2.0f%%.", newSpace_elements_to_reassemble.size(), total_elements_new_spaces, ((float)newSpace_elements_to_reassemble.size() / (float)total_elements_new_spaces) * 100.);
-      Hermes::Mixins::Loggable::Static::info("\t      No. of DOFs to reassemble: %i / %i total - %2.0f%%.", DOF_to_reassemble_count, ref_system_size, ((float)DOF_to_reassemble_count / (float)ref_system_size) * 100.);
+      Hermes::Mixins::Loggable::Static::info("\t      No. of DOFs to reassemble: %i / %i total - %2.0f%%.", ref_system_size - reusable_DOFs_count, ref_system_size, ((float)(ref_system_size - reusable_DOFs_count) / (float)ref_system_size) * 100.);
       Hermes::Mixins::Loggable::Static::info("\t      Search for elements to reassemble: %4.3f s", cpu_time.last());
       cpu_time.tick();
 
@@ -274,7 +274,7 @@ namespace Hermes
               used_entries++;
             }
           }
-          rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::prev_rhs[i]);
+          rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::prev_rhs->get(i));
         }
       }
 
@@ -298,11 +298,11 @@ namespace Hermes
         if (this->visualization)
         {
           this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * 410, 10, 400, 300)));
-          this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(0));
+          this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
           this->scalar_views.back()->set_title("Reference solution #%i", i);
 
           this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 410, 340, 400, 300)));
-          this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(0));
+          this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
           this->base_views.back()->set_title("Reference space #%i - basis", i);
 
           this->order_viewsRef.push_back(new Views::OrderView("", new Views::WinGeom(i * 410, 670, 400, 300)));
@@ -314,6 +314,12 @@ namespace Hermes
       }
 
       this->solver = new SolverType(wf, spaces);
+      //this->solver->output_matrix();
+      this->solver->set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
+
+      //this->solver->output_rhs();
+      this->solver->set_rhs_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
+
       this->solver->dp->set_reassembled_states_reuse_linear_system_fn(&get_states_to_reassemble<Scalar>);
       this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
 
@@ -359,7 +365,7 @@ namespace Hermes
         {
           Mesh::ReferenceMeshCreator ref_mesh_creator(spaces[i]->get_mesh());
           MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-          Space<Scalar>::ReferenceSpaceCreator u_ref_space_creator(spaces[i], ref_mesh);
+          Space<Scalar>::ReferenceSpaceCreator u_ref_space_creator(spaces[i], ref_mesh, 0);
           ref_spaces.push_back(u_ref_space_creator.create_ref_space());
         }
 
@@ -371,23 +377,25 @@ namespace Hermes
         StateReassemblyHelper<Scalar>::current_ref_spaces = &ref_spaces;
         StateReassemblyHelper<Scalar>::current_prev_ref_spaces = &prev_ref_spaces;
         StateReassemblyHelper<Scalar>::current_elements_to_reassemble = &this->elements_to_reassemble;
+        StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble = &this->DOFs_to_reassemble;
 
         // Perform solution.
         this->info("\tSolving on reference mesh, %i DOFs.", Space<Scalar>::get_num_dofs(ref_spaces));
         this->solver->solve();
 
         // Free reusable DOFs data structures for this run.
-        free_with_check<bool>(*StateReassemblyHelper<Scalar>::reusable_DOFs, true);
+        free_with_check<bool>((*StateReassemblyHelper<Scalar>::reusable_DOFs), true);
 
         // Update the stored (previous) linear system.
         if (this->prev_mat)
           delete this->prev_mat;
-        this->prev_mat = (Hermes::Algebra::CSCMatrix<Scalar>*)(static_cast<Hermes::Solvers::MatrixSolver<Scalar>*>(this->solver))->get_jacobian()->duplicate();
+        this->prev_mat = (Hermes::Algebra::CSCMatrix<Scalar>*)(this->solver->get_jacobian()->duplicate());
         StateReassemblyHelper<Scalar>::prev_mat = this->prev_mat;
+
         if (this->prev_rhs)
-          delete[] this->prev_rhs;
-        this->prev_rhs = new Scalar[this->prev_mat->get_size()];
-        (static_cast<Hermes::Solvers::MatrixSolver<Scalar>*>(this->solver))->get_residual()->extract(this->prev_rhs);
+          delete this->prev_rhs;
+        this->prev_rhs = this->solver->get_residual()->duplicate();
+        this->prev_rhs->subtract_vector(this->solver->dp->dirichlet_lift_rhs);
         StateReassemblyHelper<Scalar>::prev_rhs = this->prev_rhs;
 
         // Translate the resulting coefficient vector into the instance of Solution.
@@ -477,7 +485,7 @@ namespace Hermes
 
       // Take a look at other elements if they share a DOF that changed.
       /// \todo This is ineffective, a more effective way is to employ an improved neighbor searching.
-      for(unsigned short space_i = 0; space_i < this->ref_spaces.size(); space_i++)
+      for(unsigned char space_i = 0; space_i < this->ref_spaces.size(); space_i++)
       {
         for_all_active_elements_fast(this->ref_spaces[space_i]->get_mesh())
         {

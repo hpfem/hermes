@@ -5,7 +5,7 @@ using namespace Hermes::Hermes2D;
 using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
-const int P_INIT = 2;                     // Uniform polynomial degree of mesh elements.
+const int P_INIT = 4;                     // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 6;               // Number of initial uniform mesh refinements.
 
 // Problem parameters.
@@ -32,6 +32,7 @@ public:
     for(unsigned short i = 0; i < this->element_ids.size(); i++)
     if (element->id == this->element_ids[i])
     {
+      refinement.split = H2D_REFINEMENT_H;
       refinement.refinement_polynomial_order[0] = refinement.refinement_polynomial_order[1] = refinement.refinement_polynomial_order[2] = refinement.refinement_polynomial_order[3] = P_INIT;
       return true;
     }
@@ -45,6 +46,8 @@ public:
 
 int main(int argc, char* argv[])
 {
+  HermesCommonApi.set_integral_param_value(numThreads, 1);
+
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
@@ -55,7 +58,7 @@ int main(int argc, char* argv[])
     mesh->refine_all_elements();
 
   // Initialize essential boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(HERMES_ANY, FIXED_BDY_TEMP);
+  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(std::vector<std::string>({"0","1", "2"}), FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Initialize space->
@@ -72,9 +75,9 @@ int main(int argc, char* argv[])
   CustomSelector selector;
   for (int i = 0; i <  mesh->get_max_element_id(); i++)
   {
-    if ((i % 17) == 0) selector.element_ids.push_back(i);
+    if ((i % 34) == 0) selector.element_ids.push_back(i);
   }
-  AdaptSolverCriterionFixed global_criterion(2);
+  AdaptSolverCriterionFixed global_criterion(1);
 
   AdaptSolver<double, LinearSolver<double> > adaptSolver(space, wf, &errorCalculator, &criterion, &selector, &global_criterion);
 
@@ -89,8 +92,8 @@ int main(int argc, char* argv[])
 #else
 
   LinearSolver<double> solver(wf, space);
-  solver.set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
-  solver.output_matrix();
+  //solver.set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
+  //solver.output_matrix();
   solver.solve();
   MeshFunctionSharedPtr<double> sln(new Solution<double>);
   Solution<double>::vector_to_solution(solver.get_sln_vector(), space, sln);
