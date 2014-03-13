@@ -106,6 +106,7 @@ namespace Hermes
       IterSolver<Scalar>* as_IterSolver() const;
       AMGSolver<Scalar>* as_AMGSolver() const;
       virtual ~LinearMatrixSolver();
+      virtual void free() = 0;
 
       /// Solve.
       /// @return true on succes

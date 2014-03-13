@@ -46,7 +46,7 @@ public:
 
 int main(int argc, char* argv[])
 {
-  HermesCommonApi.set_integral_param_value(numThreads, 1);
+  //HermesCommonApi.set_integral_param_value(numThreads, 1);
 
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);

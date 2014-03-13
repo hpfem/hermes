@@ -247,7 +247,7 @@ namespace Hermes
       }
       else
       {
-        for (int i = 0; i < csMatrix->get_size(); i++)
+        for(unsigned short i = 0; i < csMatrix->get_size(); i++)
         {
           int index = csMatrix->Ap[i];
           for (int j = 0; j < csMatrix->Ap[i + 1] - index; j++)

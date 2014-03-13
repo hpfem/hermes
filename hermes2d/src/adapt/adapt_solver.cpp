@@ -298,11 +298,11 @@ namespace Hermes
         if (this->visualization)
         {
           this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * 410, 10, 400, 300)));
-          this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
+          this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(1));
           this->scalar_views.back()->set_title("Reference solution #%i", i);
 
           this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 410, 340, 400, 300)));
-          this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
+          this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(1));
           this->base_views.back()->set_title("Reference space #%i - basis", i);
 
           this->order_viewsRef.push_back(new Views::OrderView("", new Views::WinGeom(i * 410, 670, 400, 300)));
@@ -382,6 +382,7 @@ namespace Hermes
         // Perform solution.
         this->info("\tSolving on reference mesh, %i DOFs.", Space<Scalar>::get_num_dofs(ref_spaces));
         this->solver->solve();
+        this->solver->get_linear_matrix_solver()->free();
 
         // Free reusable DOFs data structures for this run.
         free_with_check<bool>((*StateReassemblyHelper<Scalar>::reusable_DOFs), true);
@@ -424,7 +425,7 @@ namespace Hermes
         {
           this->info("\tAdapting coarse mesh.");
           total_elements_prev_spaces = 0;
-          for (int i = 0; i < this->spaces.size(); i++)
+          for(unsigned short i = 0; i < this->spaces.size(); i++)
             total_elements_prev_spaces += this->spaces[i]->get_mesh()->get_num_active_elements();
           this->adaptivity_internal->adapt(this->selectors);
           this->mark_elements_to_reassemble();
@@ -445,7 +446,7 @@ namespace Hermes
       this->DOFs_to_reassemble.clear();
 
       int total_elements_prev_ref_spaces = 0;
-      for (int i = 0; i < this->spaces.size(); i++)
+      for(unsigned short i = 0; i < this->spaces.size(); i++)
         total_elements_prev_ref_spaces += this->ref_spaces[i]->get_mesh()->get_num_active_elements();
 
       // Identify elements that changed.

@@ -35,18 +35,18 @@ namespace Hermes
   /// members 'id' and 'unused' in order to be usable by this class.
   /// \todo Is this dimension independent?
 
+#define HERMES_PAGE_BITS 8
+#define HERMES_PAGE_SIZE (1 << HERMES_PAGE_BITS)
+#define HERMES_PAGE_MASK (HERMES_PAGE_SIZE - 1)
+
   template<class TYPE>
   class Array
   {
   protected:
     TYPE** pages; ///< \todo standard array for maximum access speed
     int* unused;
-    int  page_count, size, nitems, unused_size, nunused;
+    unsigned int  page_count, size, nitems, unused_size, nunused;
     bool append_only;
-
-    static const int HERMES_PAGE_BITS = 8;
-    static const int HERMES_PAGE_SIZE = 1 << HERMES_PAGE_BITS;
-    static const int HERMES_PAGE_MASK = HERMES_PAGE_SIZE - 1;
   public:
 
     Array(int initial_page_count = 0) : pages(nullptr), unused(nullptr)

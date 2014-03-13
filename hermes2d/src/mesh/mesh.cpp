@@ -1331,7 +1331,7 @@ namespace Hermes
       this->element_markers_conversion = mesh->element_markers_conversion;
 
       // clear reference for all nodes
-      for (int i = 0; i < nodes.get_size(); i++)
+      for(unsigned short i = 0; i < nodes.get_size(); i++)
       {
         Node& node = nodes[i];
         if (node.type == HERMES_TYPE_EDGE) { //process only edge nodes
