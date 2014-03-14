@@ -118,6 +118,13 @@ namespace Hermes
       /// current polynomial degree of the refmap approximation
       int order;
 
+      /// this is called for every curvilinear element when it is created
+      /// or when it is necessary to re-calculate coefficients for another
+      /// order: 'e' is a pointer to the element to which this CurvMap
+      /// belongs to. First, old "coeffs" are removed if they are not nullptr,
+      /// then new_ coefficients are projected.
+      void update_refmap_coeffs(Element* e);
+
     private:
       PrecalcShapeset ref_map_pss;
 
@@ -128,13 +135,6 @@ namespace Hermes
       /// that constitute the projected reference mapping:
       int nc; ///< number of coefficients
       double2* coeffs; ///< array of the coefficients
-
-      /// this is called for every curvilinear element when it is created
-      /// or when it is necessary to re-calculate coefficients for another
-      /// order: 'e' is a pointer to the element to which this CurvMap
-      /// belongs to. First, old "coeffs" are removed if they are not nullptr,
-      /// then new_ coefficients are projected.
-      void update_refmap_coeffs(Element* e);
 
       void get_mid_edge_points(Element* e, double2* pt, int n);
 

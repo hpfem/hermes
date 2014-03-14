@@ -31,6 +31,9 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    HERMES_API Quad1DStd g_quad_1d_std;
+    HERMES_API Quad2DStd g_quad_2d_std;
+    
     static H1ShapesetJacobi ref_map_shapeset;
     static PrecalcShapeset ref_map_pss_static(&ref_map_shapeset);
 

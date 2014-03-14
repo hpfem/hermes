@@ -558,7 +558,7 @@ namespace Hermes
       {
         while (this->current_thread_size == 0)
         {
-          if (this->current_thread_size == this->thread_sizes.size() - 1)
+          if (this->current_thread_size == this->thread_sizes[this->thread_sizes.size() - 1])
           {
             this->end = true;
             break;
