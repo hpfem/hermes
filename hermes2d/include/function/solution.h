@@ -162,7 +162,7 @@ namespace Hermes
       int* elem_orders;
     protected:
 
-      virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
+        virtual int get_edge_fn_order(int edge);
 
       /// Enables or disables transformation of the solution derivatives (H1 case)
       /// or values (vector (Hcurl) case). This means H2D_FN_DX_0 and H2D_FN_DY_0 or
