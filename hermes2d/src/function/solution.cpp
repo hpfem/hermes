@@ -691,6 +691,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int Solution<Scalar>::get_edge_fn_order(int edge)
+    {
+        return MeshFunction<Scalar>::get_edge_fn_order(edge);
+    }
+
+    template<typename Scalar>
     void Solution<Scalar>::set_dirichlet_lift(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss)
     {
       space_type = space->get_type();
