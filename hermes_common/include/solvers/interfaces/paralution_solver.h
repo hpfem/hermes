@@ -170,9 +170,6 @@ namespace Hermes
       /// Get the residual value.
       virtual double get_residual_norm();
 
-      /// Sets the verboseness.
-      virtual void set_verbose_output(bool to_set);
-
       /// Utility.
       virtual int get_matrix_size();
 

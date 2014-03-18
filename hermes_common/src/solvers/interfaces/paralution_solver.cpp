@@ -266,12 +266,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void AbstractParalutionLinearMatrixSolver<Scalar>::set_verbose_output(bool to_set)
-    {
-      Hermes::Mixins::Loggable::set_verbose_output(to_set);
-    }
-
-    template<typename Scalar>
     double AbstractParalutionLinearMatrixSolver<Scalar>::get_residual_norm()
     {
       return final_residual;
