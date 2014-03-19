@@ -110,7 +110,7 @@ namespace Hermes
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used.
         *  \param[in] order_h_inc An increase of the horizontal order in a quadrilateral and an order in a triangle. The increase has to be greater or equal to 0.
         *  \param[in] order_v_inc An increase of the vertical order in a quadrilateral. The increase has to be greater or equal to 0. */
-        POnlySelector(int max_order, int order_h_inc, int order_v_inc);
+        POnlySelector(int max_order = H2DRS_DEFAULT_ORDER, int order_h_inc = 1, int order_v_inc = 1);
 
       protected:
         /// Selects a refinement.

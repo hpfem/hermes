@@ -151,6 +151,7 @@ namespace Hermes
 
       /// Experimental.
       bool** reusable_DOFs;
+      bool** reusable_Dirichlet;
     };
   }
 }

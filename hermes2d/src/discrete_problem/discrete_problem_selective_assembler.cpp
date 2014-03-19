@@ -219,16 +219,16 @@ namespace Hermes
           }
         }
         this->tick();
-        this->info("DiscreteProblemSelectiveAssembler: Loop: %s.", this->last_str().c_str());
+        this->info("\tDiscreteProblemSelectiveAssembler: Loop: %s.", this->last_str().c_str());
 
         this->tick();
-        
+
         free_with_check(al);
         free_with_check(blocks, true);
         mat->alloc();
-        
+
         this->tick();
-        this->info("DiscreteProblemSelectiveAssembler: Finish: %s.", this->last_str().c_str());
+        this->info("\tDiscreteProblemSelectiveAssembler: Finish: %s.", this->last_str().c_str());
       }
 
       // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied

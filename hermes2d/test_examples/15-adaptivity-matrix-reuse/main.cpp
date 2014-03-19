@@ -5,7 +5,7 @@ using namespace Hermes::Hermes2D;
 using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
-const int P_INIT = 4;                     // Uniform polynomial degree of mesh elements.
+const int P_INIT = 3;                     // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 6;               // Number of initial uniform mesh refinements.
 
 // Problem parameters.
@@ -29,7 +29,7 @@ public:
 
   virtual bool select_refinement(Element* element, int quad_order, MeshFunction<double>* rsln, ElementToRefine& refinement)
   {
-    for(unsigned short i = 0; i < this->element_ids.size(); i++)
+    for (unsigned short i = 0; i < this->element_ids.size(); i++)
     if (element->id == this->element_ids[i])
     {
       refinement.split = H2D_REFINEMENT_H;
@@ -47,6 +47,7 @@ public:
 int main(int argc, char* argv[])
 {
   //HermesCommonApi.set_integral_param_value(numThreads, 1);
+  //HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
 
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
@@ -58,7 +59,7 @@ int main(int argc, char* argv[])
     mesh->refine_all_elements();
 
   // Initialize essential boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(std::vector<std::string>({"0","1", "2"}), FIXED_BDY_TEMP);
+  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(std::vector<std::string>({ "0", "1", "2" }), FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Initialize space->
@@ -73,21 +74,18 @@ int main(int argc, char* argv[])
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 1);
   AdaptStoppingCriterionSingleElement<double> criterion(0.);
   CustomSelector selector;
-  for (int i = 0; i <  mesh->get_max_element_id(); i++)
+  for (int i = 0; i < mesh->get_max_element_id(); i++)
   {
-    if ((i % 34) == 0) selector.element_ids.push_back(i);
+    if ((i % 33) == 0) selector.element_ids.push_back(i);
+    selector.element_ids.push_back(6);
   }
-  AdaptSolverCriterionFixed global_criterion(1);
+  AdaptSolverCriterionFixed global_criterion(2);
 
   AdaptSolver<double, LinearSolver<double> > adaptSolver(space, wf, &errorCalculator, &criterion, &selector, &global_criterion);
 
-  adaptSolver.switch_visualization(true);
+  adaptSolver.switch_visualization(false);
   adaptSolver.set_verbose_output(true);
-  adaptSolver.solve();
-
-  ScalarView s;
-  s.get_linearizer()->set_criterion(LinearizerCriterionFixed(0));
-  s.show(adaptSolver.get_ref_sln(0));
+  adaptSolver.solve(hpAdaptivity);
 
 #else
 

@@ -106,10 +106,13 @@ namespace Hermes
         this->reassembled_states_reuse_linear_system = fn;
       }
       reassembled_states_reuse_linear_system_fn reassembled_states_reuse_linear_system;
-      void set_reusable_DOFs(bool **reusable_DOFs)
+      void set_reusable_DOFs(bool **reusable_DOFs, bool **reusable_Dirichlet)
       {
         for (int i = 0; i < this->num_threads_used; i++)
+        {
           this->threadAssembler[i]->reusable_DOFs = reusable_DOFs;
+          this->threadAssembler[i]->reusable_Dirichlet = reusable_Dirichlet;
+        }
       }
 
       /// See Hermes::Mixins::Loggable.

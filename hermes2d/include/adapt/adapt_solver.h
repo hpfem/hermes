@@ -50,6 +50,15 @@ namespace Hermes
       int refinement_levels;
     };
 
+    /// h-, p-, hp-adaptivity
+    /// Also influences the selectors - i.e. for h-, or p- adaptivity 
+    enum AdaptivityType
+    {
+      pAdaptivity,
+      hAdaptivity,
+      hpAdaptivity
+    };
+
     /// A complete adaptivity solver class handling the matrix reuse.
     /// \ingroup g_adapt
     template<typename Scalar, typename SolverType>
@@ -70,7 +79,7 @@ namespace Hermes
       ~AdaptSolver();
 
       /// The main method - solve.
-      void solve();
+      void solve(AdaptivityType adaptivityType);
 
       /// Get the solutions.
       MeshFunctionSharedPtrVector<Scalar> get_slns();
@@ -103,15 +112,18 @@ namespace Hermes
       RefinementSelectors::SelectorVector<Scalar> get_selectors();
       AdaptSolverCriterion* get_stopping_criterion_global();
 
+      /// See Hermes::Mixins::Loggable.
+      virtual void set_verbose_output(bool to_set);
+
     private:
-      
+
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "AdaptSolver"; }
 
       /// Initialize data for one solution (one adaptivity loop)
-      void init_solving();
-      
+      void init_solving(AdaptivityType adaptivityType);
+
       /// De-initialize data for one solution (one adaptivity loop)
       void deinit_solving();
 
@@ -139,7 +151,7 @@ namespace Hermes
       /// This is to hold the ref_spaces for matrix reuse.
       SpaceSharedPtrVector<Scalar> ref_spaces;
       SpaceSharedPtrVector<Scalar> prev_ref_spaces;
-      
+
       /// Internal structures - Weak form.
       /// This class changes this instance during the solve() method: no.
       /// Can user change this during adaptation: no [technically why not, but makes no sense].
@@ -159,7 +171,7 @@ namespace Hermes
       /// This class changes this instance during the solve() method: no.
       /// Can user change this during adaptation: [will be used from the following step onwards].
       RefinementSelectors::SelectorVector<Scalar> selectors;
-      
+
       /// The solution being returned on demand.
       MeshFunctionSharedPtrVector<Scalar> ref_slns;
       MeshFunctionSharedPtrVector<Scalar> slns;
@@ -167,12 +179,12 @@ namespace Hermes
       /// Views - used only if visualization is ON.
       std::vector<Views::ScalarView*> scalar_views;
       std::vector<Views::OrderView*> order_viewsRef;
-      std::vector<Views::OrderView*> order_views;
+      std::vector<Views::MeshView*> order_views;
       std::vector<Views::BaseView<Scalar>*> base_views;
 
       /// Strictly private - Adapt instance.
       Adapt<Scalar>* adaptivity_internal;
-      
+
       /// Strictly private - solver.
       SolverType* solver;
 
@@ -185,13 +197,17 @@ namespace Hermes
       std::set<std::pair<int, unsigned char> > DOFs_to_reassemble;
 
       CSCMatrix<Scalar>* prev_mat;
-      Vector<Scalar>* prev_rhs;
+      Vector<Scalar>* prev_rhs, *prev_dirichlet_lift_rhs;
 
       /// use Hermes views to display stuff.
       bool visualization;
 
       /// For info only.
       int total_elements_prev_spaces;
+
+      /// Utility simple selectors.
+      RefinementSelectors::SelectorVector<Scalar> hOnlySelectors;
+      RefinementSelectors::SelectorVector<Scalar> pOnlySelectors;
     };
   }
 }

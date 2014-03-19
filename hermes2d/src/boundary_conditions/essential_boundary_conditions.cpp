@@ -87,27 +87,27 @@ namespace Hermes
       MeshFunctionSharedPtr<Scalar> exact_solution_)
       : EssentialBoundaryCondition<Scalar>(std::vector<std::string>())
     {
-      ExactSolutionScalar<Scalar>* exact = dynamic_cast<ExactSolutionScalar<Scalar>*>(exact_solution_.get());
-      if(exact)
-        this->exact_solution = exact;
-      else
-        throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
-      
-      for (unsigned int i = 0; i < markers_.size(); i++)
-        this->markers.push_back(markers_[i]);
-    }
+        ExactSolutionScalar<Scalar>* exact = dynamic_cast<ExactSolutionScalar<Scalar>*>(exact_solution_.get());
+        if (exact)
+          this->exact_solution = exact;
+        else
+          throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
+
+        for (unsigned int i = 0; i < markers_.size(); i++)
+          this->markers.push_back(markers_[i]);
+      }
 
     template<typename Scalar>
     DefaultEssentialBCNonConst<Scalar>::DefaultEssentialBCNonConst(std::string marker, MeshFunctionSharedPtr<Scalar> exact_solution_)
       : EssentialBoundaryCondition<Scalar>(std::vector<std::string>())
     {
-      ExactSolutionScalar<Scalar>* exact = dynamic_cast<ExactSolutionScalar<Scalar>*>(exact_solution_.get());
-      if(exact)
-        this->exact_solution = exact;
-      else
-        throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
-      this->markers.push_back(marker);
-    }
+        ExactSolutionScalar<Scalar>* exact = dynamic_cast<ExactSolutionScalar<Scalar>*>(exact_solution_.get());
+        if (exact)
+          this->exact_solution = exact;
+        else
+          throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
+        this->markers.push_back(marker);
+      }
 
     template<typename Scalar>
     Scalar DefaultEssentialBCNonConst<Scalar>::value(double x, double y) const
@@ -137,7 +137,7 @@ namespace Hermes
     template<typename Scalar>
     void EssentialBCs<Scalar>::add_boundary_conditions(std::vector<EssentialBoundaryCondition<Scalar> *> boundary_conditions)
     {
-      for(typename std::vector<EssentialBoundaryCondition<Scalar> *>::iterator it = boundary_conditions.begin(); it != boundary_conditions.end(); it++)
+      for (typename std::vector<EssentialBoundaryCondition<Scalar> *>::iterator it = boundary_conditions.begin(); it != boundary_conditions.end(); it++)
         all.push_back(*it);
 
       this->markers.clear();
@@ -176,45 +176,51 @@ namespace Hermes
       this->markers.clear();
       this->BCs.clear();
       EssentialBoundaryCondition<Scalar>* any_set = nullptr;
-      for(this->iterator = begin(); iterator != end(); ++iterator)
-          for(std::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); ++it)
+      for (this->iterator = begin(); iterator != end(); ++iterator)
+      for (std::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); ++it)
+      {
+        if (hermes_any_set)
+          throw Hermes::Exceptions::Exception("Attempt to define a BC on HERMES_ANY together with a BC on a specific part: '%s'.", it->c_str());
+        if ((*it) == HERMES_ANY)
         {
-          if(hermes_any_set)
-            throw Hermes::Exceptions::Exception("Attempt to define a BC on HERMES_ANY together with a BC on a specific part: '%s'.", it->c_str());
-          if((*it) == HERMES_ANY)
-          {
-            if(any_set != nullptr)
-              throw Hermes::Exceptions::Exception("Attempt to define a BC on HERMES_ANY together with a BC on a specific part: '%s'.", any_set->markers.begin()->c_str());
-            hermes_any_set = true;
-            this->HermesAnyBC = *iterator;
-          }
-          else
-          {
-            any_set = *iterator;
-            for(unsigned short i = 0; i < this->markers.size(); i++)
-              if(this->markers[i] == *it)
-                throw Hermes::Exceptions::Exception("Attempt to define more than one description of the BC on the same part of the boundary with marker '%s'.", it->c_str());
-            this->markers.push_back(*it);
-            this->BCs.push_back(*iterator);
-          }
+          if (any_set != nullptr)
+            throw Hermes::Exceptions::Exception("Attempt to define a BC on HERMES_ANY together with a BC on a specific part: '%s'.", any_set->markers.begin()->c_str());
+          hermes_any_set = true;
+          this->HermesAnyBC = *iterator;
         }
+        else
+        {
+          any_set = *iterator;
+          for (unsigned short i = 0; i < this->markers.size(); i++)
+          if (this->markers[i] == *it)
+            throw Hermes::Exceptions::Exception("Attempt to define more than one description of the BC on the same part of the boundary with marker '%s'.", it->c_str());
+          this->markers.push_back(*it);
+          this->BCs.push_back(*iterator);
+        }
+      }
+    }
+
+    template<typename Scalar>
+    const std::vector<std::string>& EssentialBCs<Scalar>::get_markers() const
+    {
+      return this->markers;
     }
 
     template<typename Scalar>
     EssentialBoundaryCondition<Scalar>* EssentialBCs<Scalar>::get_boundary_condition(std::string marker)
     {
-      if(this->HermesAnyBC != nullptr)
+      if (this->HermesAnyBC != nullptr)
         return this->HermesAnyBC;
-      for(unsigned short i = 0; i < this->markers.size(); i++)
-        if(this->markers[i] == marker)
-          return this->BCs[i];
+      for (unsigned short i = 0; i < this->markers.size(); i++)
+      if (this->markers[i] == marker)
+        return this->BCs[i];
       return nullptr;
     }
 
     template<typename Scalar>
     void EssentialBCs<Scalar>::set_current_time(double time)
     {
-      for(iterator = begin(); iterator != end(); iterator++)
+      for (iterator = begin(); iterator != end(); iterator++)
         (*iterator)->set_current_time(time);
     }
 

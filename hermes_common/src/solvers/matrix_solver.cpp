@@ -19,7 +19,7 @@
 
 #include "matrix_solver.h"
 #ifdef WITH_UMFPACK
-  #include "interfaces/umfpack_solver.h"
+#include "interfaces/umfpack_solver.h"
 #endif
 
 namespace Hermes
@@ -55,9 +55,9 @@ namespace Hermes
 
       delete this->linear_matrix_solver;
 
-      if(temp_matrix)
+      if (temp_matrix)
         delete temp_matrix;
-      if(temp_rhs)
+      if (temp_rhs)
         delete temp_rhs;
     }
 
@@ -96,7 +96,7 @@ namespace Hermes
     void MatrixSolver<Scalar>::set_jacobian_constant(bool to_set)
     {
       this->constant_jacobian = to_set;
-      if(!to_set)
+      if (!to_set)
         this->jacobian_reusable = false;
     }
 
@@ -110,13 +110,13 @@ namespace Hermes
     template<typename Scalar>
     void MatrixSolver<Scalar>::set_UMFPACK_output(bool to_set, bool with_output)
     {
-      if(!dynamic_cast<UMFPackLinearMatrixSolver<Scalar>*>(this->linear_matrix_solver))
+      if (!dynamic_cast<UMFPackLinearMatrixSolver<Scalar>*>(this->linear_matrix_solver))
       {
         this->warn("A different MatrixSolver than UMFPACK is used, ignoring the call to set_UMFPACK_reporting().");
         return;
       }
 
-      if(with_output)
+      if (with_output)
         ((UMFPackLinearMatrixSolver<Scalar>*)this->linear_matrix_solver)->set_output_level(2);
       else
         ((UMFPackLinearMatrixSolver<Scalar>*)this->linear_matrix_solver)->set_output_level(0);
@@ -127,10 +127,10 @@ namespace Hermes
     template<typename Scalar>
     void MatrixSolver<Scalar>::handle_UMFPACK_reports()
     {
-      if(this->do_UMFPACK_reporting)
+      if (this->do_UMFPACK_reporting)
       {
         UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->linear_matrix_solver;
-        if(this->linear_matrix_solver->get_used_reuse_scheme() != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
+        if (this->linear_matrix_solver->get_used_reuse_scheme() != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
         {
           this->UMFPACK_reporting_data[this->FactorizationSize] = umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
           this->UMFPACK_reporting_data[this->PeakMemoryUsage] = umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];

@@ -88,7 +88,7 @@ namespace Hermes
     template<typename Scalar>
     void LinearSolver<Scalar>::set_verbose_output(bool to_set)
     {
-      Loggable::set_verbose_output(to_set);
+      MatrixSolver<Scalar>::set_verbose_output(to_set);
       this->dp->set_verbose_output(to_set);
     }
 

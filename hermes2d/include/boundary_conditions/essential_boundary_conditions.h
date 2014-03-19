@@ -173,7 +173,11 @@ namespace Hermes
       typename std::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator begin() const;
       typename std::vector<EssentialBoundaryCondition<Scalar> *>::const_iterator end() const;
 
+      /// Return the essential BC on the specified marker.
       EssentialBoundaryCondition<Scalar>* get_boundary_condition(std::string marker);
+
+      /// Return all the markers where this set of conditions is defined.
+      const std::vector<std::string>& get_markers() const;
 
       /// Sets the current time for time-dependent boundary conditions.
       void set_current_time(double time);

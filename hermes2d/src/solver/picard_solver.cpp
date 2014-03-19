@@ -74,7 +74,7 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::set_verbose_output(bool to_set)
     {
-      Loggable::set_verbose_output(to_set);
+      MatrixSolver<Scalar>::set_verbose_output(to_set);
       this->dp->set_verbose_output(to_set);
     }
 
@@ -96,10 +96,10 @@ namespace Hermes
         if (this->get_current_iteration_number() > 1)
           this->previous_jacobian = this->get_jacobian()->duplicate();
       }
-        
+
       bool use_Anderson = this->anderson_is_on && (this->vec_in_memory >= this->num_last_vectors_used);
       bool result = this->dp->assemble(use_Anderson ? this->previous_Anderson_sln_vector : this->sln_vector, this->get_jacobian());
-      this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number()); 
+      this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number());
       return result;
     }
 

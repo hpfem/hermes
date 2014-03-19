@@ -21,6 +21,7 @@
 #include "views/scalar_view.h"
 #include "views/base_view.h"
 #include "views/order_view.h"
+#include "views/mesh_view.h"
 
 namespace Hermes
 {
@@ -74,11 +75,28 @@ namespace Hermes
       this->visualization = false;
       this->prev_mat = nullptr;
       this->prev_rhs = nullptr;
+      this->prev_dirichlet_lift_rhs = nullptr;
     }
 
     template<typename Scalar, typename SolverType>
     AdaptSolver<Scalar, SolverType>:: ~AdaptSolver()
     {
+      if (this->prev_mat)
+        delete this->prev_mat;
+
+      if (this->prev_rhs)
+        delete this->prev_rhs;
+
+      if (this->prev_dirichlet_lift_rhs)
+        delete this->prev_dirichlet_lift_rhs;
+    }
+
+    template<typename Scalar, typename SolverType>
+    void AdaptSolver<Scalar, SolverType>::set_verbose_output(bool to_set)
+    {
+      Loggable::set_verbose_output(to_set);
+      if (this->error_calculator)
+        this->error_calculator->set_verbose_output(to_set);
     }
 
     template<typename Scalar, typename SolverType>
@@ -98,7 +116,9 @@ namespace Hermes
       static SpaceSharedPtrVector<Scalar>* current_prev_ref_spaces;
       static CSCMatrix<Scalar>* prev_mat;
       static Vector<Scalar>* prev_rhs;
+      static Vector<Scalar>* prev_dirichlet_lift_rhs;
       static bool** reusable_DOFs;
+      static bool** reusable_Dirichlet;
     };
 
     template<typename Scalar>
@@ -123,7 +143,15 @@ namespace Hermes
     Vector<Scalar>* StateReassemblyHelper<Scalar>::prev_rhs;
 
     template<typename Scalar>
+    Vector<Scalar>* StateReassemblyHelper<Scalar>::prev_dirichlet_lift_rhs;
+
+    template<typename Scalar>
     bool** StateReassemblyHelper<Scalar>::reusable_DOFs;
+
+    template<typename Scalar>
+    bool** StateReassemblyHelper<Scalar>::reusable_Dirichlet;
+
+    //#define DEBUG_VIEWS
 
     template<typename Scalar>
     void get_states_to_reassemble(Traverse::State**& states, int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
@@ -131,6 +159,7 @@ namespace Hermes
       if (StateReassemblyHelper<Scalar>::current_iteration == 1)
       {
         (*StateReassemblyHelper<Scalar>::reusable_DOFs) = nullptr;
+        (*StateReassemblyHelper<Scalar>::reusable_Dirichlet) = nullptr;
         return;
       }
 
@@ -141,7 +170,7 @@ namespace Hermes
       int spaces_size = StateReassemblyHelper<Scalar>::current_ref_spaces->size();
       // - shortcuts for spaces, to speed up indirect accesses
       Space<Scalar>** prev_ref_spaces = new Space<Scalar>*[spaces_size];
-      Space<Scalar>** ref_spaces = new Space<Scalar>*[spaces_size];;
+      Space<Scalar>** ref_spaces = new Space<Scalar>*[spaces_size];
       // - number of elements of all new reference spaces combined
       int total_elements_new_spaces = 0;
       // - fill the above structures
@@ -162,7 +191,8 @@ namespace Hermes
       for (int i = 0; i < prev_ref_system_size; i++)
         DOF_to_DOF_map[i] = -1;
       // - DOF to reassemble.
-      (*StateReassemblyHelper<Scalar>::reusable_DOFs) = calloc_with_check<bool>(ref_system_size, true);
+      (*StateReassemblyHelper<Scalar>::reusable_DOFs) = calloc_with_check<bool>(ref_system_size);
+      (*StateReassemblyHelper<Scalar>::reusable_Dirichlet) = calloc_with_check<bool>(spaces_size);
       // - utility assembly lists.
       AsmList<Scalar> al, al_prev;
       // - dummy functions for traversing the previous and current reference spaces together
@@ -173,6 +203,18 @@ namespace Hermes
         dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_ref_spaces->at(i)->get_mesh()));
       // - (for reporting) count of DOFs needed to be reassembled
       int reusable_DOFs_count = 0;
+      // Dirichlet edge markers with components.
+      std::set<std::pair<int, unsigned char> > Dirichlet_markers;
+      for (unsigned char space_i = 0; space_i < spaces_size; space_i++)
+      {
+        std::vector<std::string> markers = ref_spaces[space_i]->get_essential_bcs()->get_markers();
+        for (unsigned short marker_i = 0; marker_i < markers.size(); marker_i++)
+        {
+          Mesh::MarkersConversion::IntValid marker = ref_spaces[space_i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(markers[marker_i]);
+          if (marker.valid)
+            Dirichlet_markers.insert(std::pair<int, unsigned char>(marker.marker, space_i));
+        }
+      }
 
       // Start.
       Hermes::Mixins::Loggable::Static::info("\t   Handling Reusing matrix entries on the new Ref. Space:");
@@ -187,20 +229,39 @@ namespace Hermes
         Traverse::State* current_local_state = states_local[local_state_i];
         for (int space_i = 0; space_i < spaces_size; space_i++)
         {
+          // Dirichlet
+          if (StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->find(std::pair<int, unsigned char>(-1, space_i)) == StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->end())
+            (*StateReassemblyHelper<Scalar>::reusable_Dirichlet)[space_i] = true;
+
           // Mark the appropriate elements
           Element* prev_ref_element = current_local_state->e[space_i];
           Element* ref_element = current_local_state->e[space_i + spaces_size];
           // If the element is changed on the previous ref space, mark the appropriate element on the new ref space as to-reassemble.
+          bool element_added = false;
           if (StateReassemblyHelper<Scalar>::current_elements_to_reassemble->find(std::pair<int, unsigned char>(prev_ref_element->id, space_i)) != StateReassemblyHelper<Scalar>::current_elements_to_reassemble->end())
+          {
             newSpace_elements_to_reassemble.insert(std::pair<int, unsigned char>(ref_element->id, space_i));
+            element_added = true;
+          }
           // Get assembly lists.
           prev_ref_spaces[space_i]->get_element_assembly_list(prev_ref_element, &al_prev);
           ref_spaces[space_i]->get_element_assembly_list(ref_element, &al);
 
           // Fun begins here - we need to figure out which DOFs on the new reference spaces can be reused and which cannot.
           unsigned short last_matched_index = 0;
+          if (!element_added && al_prev.cnt != al.cnt)
+          {
+            newSpace_elements_to_reassemble.insert(std::pair<int, unsigned char>(ref_element->id, space_i));
+            element_added = true;
+          }
+
           for (unsigned short i_al_prev = 0; i_al_prev < al_prev.cnt; i_al_prev++)
           {
+            if (!element_added && al_prev.idx[i_al_prev] != al.idx[i_al_prev])
+            {
+              newSpace_elements_to_reassemble.insert(std::pair<int, unsigned char>(ref_element->id, space_i));
+              element_added = true;
+            }
             for (unsigned short j_al = last_matched_index; j_al < al.cnt; j_al++)
             {
               if (al.dof[j_al] < 0)
@@ -214,8 +275,8 @@ namespace Hermes
                   {
                     reusable_DOFs_count++;
                     (*StateReassemblyHelper<Scalar>::reusable_DOFs)[al.dof[j_al]] = true;
+                    DOF_to_DOF_map[al_prev.dof[i_al_prev]] = al.dof[j_al];
                   }
-                  DOF_to_DOF_map[al_prev.dof[i_al_prev]] = al.dof[j_al];
                 }
               }
             }
@@ -230,6 +291,9 @@ namespace Hermes
       cpu_time.tick();
 
       // Using the changed element on the new reference space, select the states from the original states that need to be recalculated.
+#ifdef DEBUG_VIEWS
+      bool* reassembled = (bool*)calloc(ref_spaces[0]->get_mesh()->get_max_element_id() + 1, sizeof(bool));
+#endif
       Traverse::State** new_states = malloc_with_check<Traverse::State*>(num_states, true);
       int new_num_states = 0;
       for (int state_i = 0; state_i < num_states; state_i++)
@@ -239,10 +303,24 @@ namespace Hermes
           if (newSpace_elements_to_reassemble.find(std::pair<int, unsigned char>(states[state_i]->e[space_i]->id, space_i)) != newSpace_elements_to_reassemble.end())
           {
             new_states[new_num_states++] = Traverse::State::clone(states[state_i]);
+#ifdef DEBUG_VIEWS
+            reassembled[states[state_i]->e[0]->id] = true;
+#endif
             break;
           }
         }
       }
+
+#ifdef DEBUG_VIEWS
+      Views::ScalarView sc_temp("Reassembled states", new Views::WinGeom(600, 10, 600, 600));
+      MeshFunctionSharedPtr<double> reassembled_states_function(new ExactSolutionConstantArray<double, bool>(ref_spaces[0]->get_mesh(), reassembled));
+      sc_temp.show(reassembled_states_function);
+      Views::View::wait_for_keypress();
+      ::free(reassembled);
+#endif
+
+      for (int i = 0; i < num_states; i++)
+        delete states[i];
       free_with_check(states);
       new_states = realloc_with_check<Traverse::State*>(new_states, new_num_states);
       states = new_states;
@@ -277,21 +355,34 @@ namespace Hermes
           rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::prev_rhs->get(i));
         }
       }
+      unsigned int running_count = 0;
+      for (int space_i = 0; space_i < spaces_size; space_i++)
+      {
+        if (*StateReassemblyHelper<Scalar>::reusable_Dirichlet[space_i])
+        {
+          for (unsigned int dof_i = running_count; dof_i < running_count + prev_ref_spaces[space_i]->get_num_dofs(); dof_i++)
+          {
+            if (DOF_to_DOF_map[dof_i] != -1)
+              rhs->add(DOF_to_DOF_map[dof_i], StateReassemblyHelper<Scalar>::prev_dirichlet_lift_rhs->get(dof_i));
+          }
+        }
+        running_count += prev_ref_spaces[space_i]->get_num_dofs();
+      }
 
       cpu_time.tick();
-      Hermes::Mixins::Loggable::Static::info("\t      Reused linear system entries: %i / %i total - %2.0f%%.", used_entries, total_entries, ((float)used_entries / (float)total_entries) * 100.);
+      Hermes::Mixins::Loggable::Static::info("\t      Reused matrix entries: %i / %i total - %2.0f%%.", used_entries, total_entries, ((float)used_entries / (float)total_entries) * 100.);
       Hermes::Mixins::Loggable::Static::info("\t      Copying the linear system: %4.3f s", cpu_time.last());
       free_with_check(DOF_to_DOF_map);
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::init_solving()
+    void AdaptSolver<Scalar, SolverType>::init_solving(AdaptivityType adaptivityType)
     {
       this->adaptivity_step = 1;
       this->solve_method_running = true;
       ref_slns.clear();
       slns.clear();
-      for(unsigned short i = 0; i < this->spaces.size(); i++)
+      for (unsigned short i = 0; i < this->spaces.size(); i++)
       {
         ref_slns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>));
         slns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>));
@@ -302,18 +393,18 @@ namespace Hermes
           this->scalar_views.back()->set_title("Reference solution #%i", i);
 
           this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 410, 340, 400, 300)));
-          this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(1));
-          this->base_views.back()->set_title("Reference space #%i - basis", i);
+          this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
 
           this->order_viewsRef.push_back(new Views::OrderView("", new Views::WinGeom(i * 410, 670, 400, 300)));
           this->order_viewsRef.back()->set_title("Reference space #%i - orders", i);
 
-          this->order_views.push_back(new Views::OrderView("", new Views::WinGeom(i * 410, 1030, 400, 300)));
-          this->order_views.back()->set_title("Coarse space #%i - orders", i);
+          this->order_views.push_back(new Views::MeshView("", new Views::WinGeom(i * 410, 1030, 400, 300)));
+          this->order_views.back()->set_title("Coarse space #%i - mesh", i);
         }
       }
 
       this->solver = new SolverType(wf, spaces);
+      this->solver->set_verbose_output(this->get_verbose_output());
       //this->solver->output_matrix();
       this->solver->set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
 
@@ -322,13 +413,26 @@ namespace Hermes
 
       this->solver->dp->set_reassembled_states_reuse_linear_system_fn(&get_states_to_reassemble<Scalar>);
       this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
+      this->adaptivity_internal->set_verbose_output(this->get_verbose_output());
 
       StateReassemblyHelper<Scalar>::reusable_DOFs = new bool*;
-      this->solver->dp->set_reusable_DOFs(StateReassemblyHelper<Scalar>::reusable_DOFs);
+      StateReassemblyHelper<Scalar>::reusable_Dirichlet = new bool*;
+      this->solver->dp->set_reusable_DOFs(StateReassemblyHelper<Scalar>::reusable_DOFs, StateReassemblyHelper<Scalar>::reusable_Dirichlet);
 
       this->elements_to_reassemble.clear();
       this->DOFs_to_reassemble.clear();
       this->ref_spaces.clear();
+
+      if (adaptivityType == hAdaptivity)
+      {
+        for (unsigned char selector_i = 0; selector_i < this->spaces.size(); selector_i++)
+          hOnlySelectors.push_back(new RefinementSelectors::HOnlySelector<Scalar>());
+      }
+      if (adaptivityType == pAdaptivity)
+      {
+        for (unsigned char selector_i = 0; selector_i < this->spaces.size(); selector_i++)
+          pOnlySelectors.push_back(new RefinementSelectors::POnlySelector<Scalar>());
+      }
     }
 
     template<typename Scalar, typename SolverType>
@@ -337,7 +441,7 @@ namespace Hermes
       this->solve_method_running = false;
 
       if (this->visualization)
-      for(unsigned short i = 0; i < this->spaces.size(); i++)
+      for (unsigned short i = 0; i < this->spaces.size(); i++)
       {
         delete this->scalar_views[i];
         delete this->base_views[i];
@@ -348,12 +452,22 @@ namespace Hermes
       delete this->adaptivity_internal;
       delete this->solver;
       delete StateReassemblyHelper<Scalar>::reusable_DOFs;
+      delete StateReassemblyHelper<Scalar>::reusable_Dirichlet;
+
+      for (unsigned char selector_i = 0; selector_i < this->hOnlySelectors.size(); selector_i++)
+        delete hOnlySelectors[selector_i];
+      hOnlySelectors.clear();
+      for (unsigned char selector_i = 0; selector_i < this->pOnlySelectors.size(); selector_i++)
+        delete pOnlySelectors[selector_i];
+      pOnlySelectors.clear();
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::solve()
+    void AdaptSolver<Scalar, SolverType>::solve(AdaptivityType adaptivityType)
     {
-      this->init_solving();
+      // Initialization - allocations etc.
+      this->init_solving(adaptivityType);
+
       do
       {
         this->info("\tAdaptSolver step %d:", this->adaptivity_step);
@@ -361,11 +475,11 @@ namespace Hermes
         // Construct globally refined reference meshes and setup reference spaces.
         prev_ref_spaces = ref_spaces;
         ref_spaces.clear();
-        for(unsigned short i = 0; i < this->spaces.size(); i++)
+        for (unsigned short i = 0; i < this->spaces.size(); i++)
         {
           Mesh::ReferenceMeshCreator ref_mesh_creator(spaces[i]->get_mesh());
           MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-          Space<Scalar>::ReferenceSpaceCreator u_ref_space_creator(spaces[i], ref_mesh, 0);
+          Space<Scalar>::ReferenceSpaceCreator u_ref_space_creator(spaces[i], adaptivityType == pAdaptivity ? spaces[i]->get_mesh() : ref_mesh, adaptivityType == hAdaptivity ? 0 : 1);
           ref_spaces.push_back(u_ref_space_creator.create_ref_space());
         }
 
@@ -385,7 +499,8 @@ namespace Hermes
         this->solver->get_linear_matrix_solver()->free();
 
         // Free reusable DOFs data structures for this run.
-        free_with_check<bool>((*StateReassemblyHelper<Scalar>::reusable_DOFs), true);
+        free_with_check<bool>(*StateReassemblyHelper<Scalar>::reusable_DOFs);
+        free_with_check<bool>(*StateReassemblyHelper<Scalar>::reusable_Dirichlet);
 
         // Update the stored (previous) linear system.
         if (this->prev_mat)
@@ -398,6 +513,11 @@ namespace Hermes
         this->prev_rhs = this->solver->get_residual()->duplicate();
         this->prev_rhs->subtract_vector(this->solver->dp->dirichlet_lift_rhs);
         StateReassemblyHelper<Scalar>::prev_rhs = this->prev_rhs;
+
+        if (this->prev_dirichlet_lift_rhs)
+          delete this->prev_dirichlet_lift_rhs;
+        this->prev_dirichlet_lift_rhs = this->solver->dp->dirichlet_lift_rhs->duplicate();
+        StateReassemblyHelper<Scalar>::prev_dirichlet_lift_rhs = this->prev_dirichlet_lift_rhs;
 
         // Translate the resulting coefficient vector into the instance of Solution.
         Solution<Scalar>::vector_to_solutions(solver->get_sln_vector(), ref_spaces, ref_slns);
@@ -425,9 +545,16 @@ namespace Hermes
         {
           this->info("\tAdapting coarse mesh.");
           total_elements_prev_spaces = 0;
-          for(unsigned short i = 0; i < this->spaces.size(); i++)
+          for (unsigned short i = 0; i < this->spaces.size(); i++)
             total_elements_prev_spaces += this->spaces[i]->get_mesh()->get_num_active_elements();
-          this->adaptivity_internal->adapt(this->selectors);
+          // For hp-adaptivity, we use the provided selectors.
+          if (adaptivityType == hpAdaptivity)
+            this->adaptivity_internal->adapt(this->selectors);
+          else if (adaptivityType == hAdaptivity)
+            this->adaptivity_internal->adapt(hOnlySelectors);
+          else
+            this->adaptivity_internal->adapt(pOnlySelectors);
+
           this->mark_elements_to_reassemble();
         }
 
@@ -446,7 +573,7 @@ namespace Hermes
       this->DOFs_to_reassemble.clear();
 
       int total_elements_prev_ref_spaces = 0;
-      for(unsigned short i = 0; i < this->spaces.size(); i++)
+      for (unsigned short i = 0; i < this->spaces.size(); i++)
         total_elements_prev_ref_spaces += this->ref_spaces[i]->get_mesh()->get_num_active_elements();
 
       // Identify elements that changed.
@@ -460,8 +587,13 @@ namespace Hermes
         RefinementType refinement_type = element_to_refine->split;
         int component = element_to_refine->comp;
         Element* e = this->ref_spaces[component]->get_mesh()->get_element_fast(element_to_refine->id);
-        for (int son_i = 0; son_i < H2D_MAX_ELEMENT_SONS; son_i++)
-          this->elements_to_reassemble.insert(std::pair<int, unsigned char>(e->sons[son_i]->id, component));
+        if (e->active)
+          this->elements_to_reassemble.insert(std::pair<int, unsigned char>(e->id, component));
+        else
+        {
+          for (int son_i = 0; son_i < H2D_MAX_ELEMENT_SONS; son_i++)
+            this->elements_to_reassemble.insert(std::pair<int, unsigned char>(e->sons[son_i]->id, component));
+        }
       }
       Hermes::Mixins::Loggable::Static::info("\t      No. of coarse mesh elements refined: %i / %i total - %2.0f%%.", valid_elements_to_refine_count, total_elements_prev_spaces, ((float)valid_elements_to_refine_count / (float)total_elements_prev_spaces) * 100.);
       Hermes::Mixins::Loggable::Static::info("\t      No. of fine mesh elements directly changed: %i / %i total - %2.0f%%.", this->elements_to_reassemble.size(), total_elements_prev_ref_spaces, ((float)this->elements_to_reassemble.size() / (float)total_elements_prev_ref_spaces) * 100.);
@@ -486,7 +618,7 @@ namespace Hermes
 
       // Take a look at other elements if they share a DOF that changed.
       /// \todo This is ineffective, a more effective way is to employ an improved neighbor searching.
-      for(unsigned char space_i = 0; space_i < this->ref_spaces.size(); space_i++)
+      for (unsigned char space_i = 0; space_i < this->ref_spaces.size(); space_i++)
       {
         for_all_active_elements_fast(this->ref_spaces[space_i]->get_mesh())
         {
@@ -510,12 +642,12 @@ namespace Hermes
     template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::visualize(std::vector<SpaceSharedPtr<Scalar> >& ref_spaces)
     {
-      for(unsigned short i = 0; i < this->spaces.size(); i++)
+      for (unsigned short i = 0; i < this->spaces.size(); i++)
       {
         this->scalar_views[i]->show(this->ref_slns[i]);
         this->base_views[i]->show(ref_spaces[i]);
         this->order_viewsRef[i]->show(ref_spaces[i]);
-        this->order_views[i]->show(spaces[i]);
+        this->order_views[i]->show(spaces[i]->get_mesh());
       }
 
       Views::View::wait_for_keypress();
@@ -636,7 +768,7 @@ namespace Hermes
     bool AdaptSolver<Scalar, SolverType>::isOkay() const
     {
       this->adaptivity_internal->check();
-      for(unsigned short i = 0; i < this->spaces.size(); i++)
+      for (unsigned short i = 0; i < this->spaces.size(); i++)
         this->spaces[i]->check();
 
       return true;

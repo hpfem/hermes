@@ -149,7 +149,9 @@ namespace Hermes
   {
     if (size == 0)
       return nullptr;
+
     ArrayItem* new_array;
+
     if (force_malloc && std::is_pod<ArrayItem>::value)
       new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
     else

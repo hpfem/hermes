@@ -29,7 +29,7 @@ namespace Hermes
       pss(nullptr), refmaps(nullptr), u_ext(nullptr),
       selectiveAssembler(selectiveAssembler), integrationOrderCalculator(selectiveAssembler),
       ext_funcs(nullptr), ext_funcs_allocated_size(0), ext_funcs_local(nullptr), ext_funcs_local_allocated_size(0),
-      funcs_wf_initialized(false), funcs_space_initialized(false), spaces_size(0), nonlinear(nonlinear), reusable_DOFs(nullptr)
+      funcs_wf_initialized(false), funcs_space_initialized(false), spaces_size(0), nonlinear(nonlinear), reusable_DOFs(nullptr), reusable_Dirichlet(nullptr)
     {
       // Init the memory pool - if PJLIB is linked, it will do the magic, if not, it will initialize the pointer to null.
       this->init_funcs_memory_pool();
@@ -619,6 +619,11 @@ namespace Hermes
               }
               continue;
             }
+          }
+
+          if (current_als_j->dof[j] < 0 && this->reusable_Dirichlet && *this->reusable_Dirichlet && (*this->reusable_Dirichlet)[form->j])
+          {
+            continue;
           }
 
           // Skip symmetric values that do not contribute to Dirichlet lift.
