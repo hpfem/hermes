@@ -520,7 +520,7 @@ namespace Hermes
       for (int inx = 0; inx < num_elem_to_proc; inx++)
       {
         ElementToRefine& elem_ref = elems_to_refine[inx];
-        if (elem_ref.id == -1)
+        if (!elem_ref.valid)
           continue;
 
         //select a refinement used by all components that share a mesh which is about to be refined

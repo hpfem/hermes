@@ -89,6 +89,9 @@ namespace Hermes
     bool NewtonSolver<Scalar>::assemble_jacobian(bool store_previous_jacobian)
     {
       bool result = this->dp->assemble(this->sln_vector, this->get_jacobian());
+      /// After the first time we assemble the matrix on the new reference space, we can no longer reuse the previous one.
+      this->dp->set_reassembled_states_reuse_linear_system_fn(nullptr);
+
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number());
       return result;
     }
@@ -97,6 +100,8 @@ namespace Hermes
     bool NewtonSolver<Scalar>::assemble(bool store_previous_jacobian, bool store_previous_residual)
     {
       bool result = this->dp->assemble(this->sln_vector, this->get_jacobian(), this->get_residual());
+      /// After the first time we assemble the matrix on the new reference space, we can no longer reuse the previous one.
+      this->dp->set_reassembled_states_reuse_linear_system_fn(nullptr);
       this->get_residual()->change_sign();
       this->process_vector_output(this->get_residual(), this->get_current_iteration_number());
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number());

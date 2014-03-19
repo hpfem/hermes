@@ -303,10 +303,13 @@ namespace Hermes
 
       // Init the caught parallel exception message.
       this->exceptionMessageCaughtInParallelBlock.clear();
-
+      
       // Dirichlet lift rhs part.
-      int ndof = Space<Scalar>::get_num_dofs(spaces);
-      this->dirichlet_lift_rhs->alloc(ndof);
+      if (this->add_dirichlet_lift)
+      {
+        int ndof = Space<Scalar>::get_num_dofs(spaces);
+        this->dirichlet_lift_rhs->alloc(ndof);
+      }
     }
 
     template<typename Scalar>
@@ -335,7 +338,8 @@ namespace Hermes
         this->tick();
         this->info("\tDiscreteProblem: Prepare sparse structure: %s.", this->last_str().c_str());
 
-        if (this->reassembled_states_reuse_linear_system)
+        // The following does not make much sense to do just for rhs)
+        if (this->current_mat && this->reassembled_states_reuse_linear_system)
           this->reassembled_states_reuse_linear_system(states, num_states, this->current_mat, this->current_rhs);
 
         if (num_states > 0)

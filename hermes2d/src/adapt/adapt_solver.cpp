@@ -352,21 +352,25 @@ namespace Hermes
               used_entries++;
             }
           }
-          rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::prev_rhs->get(i));
+          if(rhs)
+            rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::prev_rhs->get(i));
         }
       }
-      unsigned int running_count = 0;
-      for (int space_i = 0; space_i < spaces_size; space_i++)
+      if (rhs)
       {
-        if (*StateReassemblyHelper<Scalar>::reusable_Dirichlet[space_i])
+        unsigned int running_count = 0;
+        for (int space_i = 0; space_i < spaces_size; space_i++)
         {
-          for (unsigned int dof_i = running_count; dof_i < running_count + prev_ref_spaces[space_i]->get_num_dofs(); dof_i++)
+          if ((*StateReassemblyHelper<Scalar>::reusable_Dirichlet)[space_i])
           {
-            if (DOF_to_DOF_map[dof_i] != -1)
-              rhs->add(DOF_to_DOF_map[dof_i], StateReassemblyHelper<Scalar>::prev_dirichlet_lift_rhs->get(dof_i));
+            for (unsigned int dof_i = running_count; dof_i < running_count + prev_ref_spaces[space_i]->get_num_dofs(); dof_i++)
+            {
+              if (DOF_to_DOF_map[dof_i] != -1)
+                rhs->add(DOF_to_DOF_map[dof_i], StateReassemblyHelper<Scalar>::prev_dirichlet_lift_rhs->get(dof_i));
+            }
           }
+          running_count += prev_ref_spaces[space_i]->get_num_dofs();
         }
-        running_count += prev_ref_spaces[space_i]->get_num_dofs();
       }
 
       cpu_time.tick();
@@ -411,7 +415,6 @@ namespace Hermes
       //this->solver->output_rhs();
       this->solver->set_rhs_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
 
-      this->solver->dp->set_reassembled_states_reuse_linear_system_fn(&get_states_to_reassemble<Scalar>);
       this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
       this->adaptivity_internal->set_verbose_output(this->get_verbose_output());
 
@@ -495,6 +498,7 @@ namespace Hermes
 
         // Perform solution.
         this->info("\tSolving on reference mesh, %i DOFs.", Space<Scalar>::get_num_dofs(ref_spaces));
+        this->solver->dp->set_reassembled_states_reuse_linear_system_fn(&get_states_to_reassemble<Scalar>);
         this->solver->solve();
         this->solver->get_linear_matrix_solver()->free();
 
@@ -511,13 +515,17 @@ namespace Hermes
         if (this->prev_rhs)
           delete this->prev_rhs;
         this->prev_rhs = this->solver->get_residual()->duplicate();
-        this->prev_rhs->subtract_vector(this->solver->dp->dirichlet_lift_rhs);
+        if (this->solver->dp->add_dirichlet_lift)
+          this->prev_rhs->subtract_vector(this->solver->dp->dirichlet_lift_rhs);
         StateReassemblyHelper<Scalar>::prev_rhs = this->prev_rhs;
 
-        if (this->prev_dirichlet_lift_rhs)
-          delete this->prev_dirichlet_lift_rhs;
-        this->prev_dirichlet_lift_rhs = this->solver->dp->dirichlet_lift_rhs->duplicate();
-        StateReassemblyHelper<Scalar>::prev_dirichlet_lift_rhs = this->prev_dirichlet_lift_rhs;
+        if (this->solver->dp->add_dirichlet_lift)
+        {
+          if (this->prev_dirichlet_lift_rhs)
+            delete this->prev_dirichlet_lift_rhs;
+          this->prev_dirichlet_lift_rhs = this->solver->dp->dirichlet_lift_rhs->duplicate();
+          StateReassemblyHelper<Scalar>::prev_dirichlet_lift_rhs = this->prev_dirichlet_lift_rhs;
+        }
 
         // Translate the resulting coefficient vector into the instance of Solution.
         Solution<Scalar>::vector_to_solutions(solver->get_sln_vector(), ref_spaces, ref_slns);
@@ -559,6 +567,7 @@ namespace Hermes
         }
 
         this->adaptivity_step++;
+        this->info("\n");
       } while (true);
 
       this->deinit_solving();
