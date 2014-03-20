@@ -48,6 +48,7 @@ int main(int argc, char* argv[])
 {
   //HermesCommonApi.set_integral_param_value(numThreads, 1);
   //HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
+  //HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_MUMPS);
 
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);

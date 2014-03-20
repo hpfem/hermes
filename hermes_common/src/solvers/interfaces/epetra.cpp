@@ -39,9 +39,6 @@ namespace Hermes
       this->grph = nullptr;
       this->std_map = nullptr;
       this->owner = true;
-
-      this->row_storage = true;
-      this->col_storage = false;
     }
 
     template<typename Scalar>
@@ -57,9 +54,6 @@ namespace Hermes
       this->grph = new Epetra_CrsGraph(this->mat->Graph());
       this->std_map = new Epetra_BlockMap(this->grph->Map());
       this->owner = true;
-
-      this->row_storage = true;
-      this->col_storage = false;
     }
 
     template<typename Scalar>
@@ -72,9 +66,6 @@ namespace Hermes
       this->grph = const_cast<Epetra_CrsGraph*>(&this->mat->Graph());
       this->std_map = const_cast<Epetra_BlockMap*>(&this->grph->Map());
       this->owner = false;
-
-      this->row_storage = true;
-      this->col_storage = false;
     }
 
     template<typename Scalar>

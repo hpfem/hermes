@@ -123,8 +123,6 @@ namespace Hermes
     {
       pages = nullptr;
       next_pages = nullptr;
-      row_storage = false;
-      col_storage = false;
     }
 
     template<typename Scalar>
@@ -134,32 +132,12 @@ namespace Hermes
       pages = nullptr;
       next_pages = nullptr;
 
-      row_storage = false;
-      col_storage = false;
     }
 
+
     template<typename Scalar>
-    SparseMatrix<Scalar>::SparseMatrix(const SparseMatrix<Scalar>& mat)
     {
-      this->size = mat.get_size();
 
-      if (mat.pages)
-        this->pages = malloc_with_check<SparseMatrix<Scalar>, Page>(this->size, this);
-      else
-        this->pages = nullptr;
-
-      if (mat.next_pages)
-      {
-        this->next_pages = malloc_with_check<SparseMatrix<Scalar>, Page *>(this->size, this);
-        memset(this->next_pages, 0, sizeof(Page*)* this->size);
-      }
-      else
-      {
-        this->next_pages = nullptr;
-      }
-
-      row_storage = false;
-      col_storage = false;
     }
 
     template<typename Scalar>

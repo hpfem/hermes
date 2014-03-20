@@ -47,20 +47,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int CSMatrix<Scalar>::find_position(int *Ai, int Alen, int idx)
+    int CSMatrix<Scalar>::find_position(int *Ai, int Alen, unsigned int idx)
     {
-      assert(Ai != nullptr);
-      assert(Alen > 0);
-      assert(idx >= 0);
-
       register int lo = 0, hi = Alen - 1, mid;
 
       while (true)
       {
         mid = (lo + hi) >> 1;
 
-        if (idx < Ai[mid]) hi = mid - 1;
-        else if (idx > Ai[mid]) lo = mid + 1;
+        if (idx < Ai[mid])
+          hi = mid - 1;
+        else if (idx > Ai[mid])
+          lo = mid + 1;
         else break;
 
         // Sparse matrix entry not found (raise an error when trying to add
@@ -102,7 +100,6 @@ namespace Hermes
     template<typename Scalar>
     void CSMatrix<Scalar>::alloc()
     {
-      assert(this->pages != nullptr);
 
       // initialize the arrays Ap and Ai
       Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
@@ -130,8 +127,7 @@ namespace Hermes
     template<typename Scalar>
     void CSMatrix<Scalar>::alloc_data()
     {
-      Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(nnz, this);
-      memset(Ax, 0, sizeof(Scalar)* nnz);
+      Ax = calloc_with_check<CSMatrix<Scalar>, Scalar>(nnz, this);
     }
 
     template<typename Scalar>
@@ -417,7 +413,7 @@ namespace Hermes
                                        sparse.nir = this->nnz;
                                        sparse.ir = Ai;
                                        sparse.njc = this->size + 1;
-                                       sparse.jc = (int *)Ap;
+                                       sparse.jc = Ap;
                                        sparse.ndata = this->nnz;
 
                                        size_t dims[2];

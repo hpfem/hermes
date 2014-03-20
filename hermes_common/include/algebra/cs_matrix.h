@@ -44,7 +44,7 @@ namespace Hermes
       void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
 
       /// Finds the correct position to insert / retrieve elements.
-      static int find_position(int *Ai, int Alen, int idx);
+      static int find_position(int *Ai, int Alen, unsigned int idx);
 
       /// \brief Default constructor.
       CSMatrix();

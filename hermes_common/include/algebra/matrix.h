@@ -104,7 +104,6 @@ namespace Hermes
       /// Constructor of sparse matrix
       /// @param[in] size size of matrix
       SparseMatrix(unsigned int size);
-      SparseMatrix(const SparseMatrix<Scalar>& mat);
       virtual ~SparseMatrix();
 
       /// prepare memory
@@ -178,9 +177,6 @@ namespace Hermes
       /// Get fill-in.
       virtual double get_fill_in() const = 0;
 
-      unsigned row_storage : 1; ///< \todo document
-      unsigned col_storage : 1; ///< \todo document
-
       /// get number of nonzero numbers in matrix
       /// @return number of nonzero numbers in matrix
       virtual unsigned int get_nnz() const;
@@ -218,9 +214,6 @@ namespace Hermes
       /// get number of indices in all pages
       /// @return number of indices
       int get_num_indices();
-
-      /// mem stat
-      int mem_size;
     };
 
     /// \brief Function returning a matrix according to the users's choice.
