@@ -783,12 +783,15 @@ namespace Hermes
     {
       if (pages[row].count >= PAGE_SIZE)
       {
-        Page* final_page = pages[row].next;
+        Page* final_page = &(pages[row]);
         while (final_page->next != nullptr && final_page->count >= PAGE_SIZE)
           final_page = final_page->next;
 
-        if (final_page->count >= PAGE_SIZE)
-          final_page->next = new Page;
+        if (final_page->next == nullptr && final_page->count >= PAGE_SIZE)
+        {
+          final_page->next = new Page(true);
+          final_page = final_page->next;
+        }
         final_page->idx[final_page->count++] = col;
       }
       else

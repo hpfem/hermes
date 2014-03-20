@@ -105,6 +105,7 @@ namespace Hermes
       void set_stopping_criterion_global(AdaptSolverCriterion* stopping_criterion_global);
 
       /// Getters.
+      SolverType* get_solver();
       SpaceSharedPtrVector<Scalar> get_initial_spaces();
       WeakFormSharedPtr<Scalar> get_wf();
       ErrorCalculator<Scalar>* get_error_calculator();

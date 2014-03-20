@@ -153,7 +153,9 @@ namespace Hermes
     template<typename Scalar>
     void AbstractParalutionLinearMatrixSolver<Scalar>::free()
     {
-      delete this->paralutionSolver;
+      if (this->paralutionSolver)
+        delete this->paralutionSolver;
+      this->paralutionSolver = nullptr;
       this->sln = nullptr;
     }
 
@@ -284,6 +286,17 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void IterativeParalutionLinearMatrixSolver<Scalar>::free()
+    {
+      if (preconditioner)
+      {
+        delete preconditioner;
+        preconditioner = nullptr;
+      }
+      AbstractParalutionLinearMatrixSolver<Scalar>::free();
+    }
+
+    template<typename Scalar>
     IterativeParalutionLinearMatrixSolver<Scalar>::IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : AbstractParalutionLinearMatrixSolver<Scalar>(matrix, rhs), IterSolver<Scalar>(matrix, rhs), LoopSolver<Scalar>(matrix, rhs), preconditioner(nullptr)
     {
       this->set_precond(new Preconditioners::ParalutionPrecond<Scalar>(ILU));
@@ -293,7 +306,10 @@ namespace Hermes
     IterativeParalutionLinearMatrixSolver<Scalar>::~IterativeParalutionLinearMatrixSolver()
     {
       if (preconditioner)
+      {
         delete preconditioner;
+        preconditioner = nullptr;
+      }
     }
 
     template<typename Scalar>

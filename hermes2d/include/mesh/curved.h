@@ -117,7 +117,7 @@ namespace Hermes
       };
 
       /// current polynomial degree of the refmap approximation
-      int order;
+      unsigned short order;
 
     private:
       PrecalcShapesetAssembling ref_map_pss;

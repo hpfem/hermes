@@ -131,13 +131,6 @@ namespace Hermes
       this->size = size;
       pages = nullptr;
       next_pages = nullptr;
-
-    }
-
-
-    template<typename Scalar>
-    {
-
     }
 
     template<typename Scalar>

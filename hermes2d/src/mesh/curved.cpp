@@ -751,10 +751,10 @@ namespace Hermes
       ref_map_pss.set_active_element(e);
 
       // allocate projection coefficients
-      int nvert = e->get_nvert();
-      int ne = order - 1;
-      int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
-      int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
+      unsigned char nvert = e->get_nvert();
+      unsigned char ne = order - 1;
+      unsigned short qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
+      unsigned short nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
       this->nc = nvert + nvert*ne + nb;
       this->coeffs = realloc_with_check<double2>(this->coeffs, nc);
 
@@ -776,17 +776,17 @@ namespace Hermes
 
       // calculation of new_ projection coefficients
       // vertex part
-      for (unsigned int i = 0; i < nvert; i++)
+      for (unsigned char i = 0; i < nvert; i++)
       {
         coeffs[i][0] = e->vn[i]->x;
         coeffs[i][1] = e->vn[i]->y;
       }
 
-      if (e->cm->toplevel == false)
+      if (!e->cm->toplevel)
         e = e->cm->parent;
 
       // edge part
-      for (int edge = 0; edge < nvert; edge++)
+      for (unsigned char edge = 0; edge < nvert; edge++)
         calc_edge_projection(e, edge, curves, order, coeffs);
 
       //bubble part

@@ -176,7 +176,8 @@ namespace Hermes
       /// Utility.
       virtual int get_matrix_size();
 
-      void free();
+      /// Free this instance.
+      virtual void free();
 
     protected:
       /// Constructor of Abstract PARALUTION solver.
@@ -236,6 +237,9 @@ namespace Hermes
 
       /// Set internal solver for the current solution.
       virtual void init_internal_solver();
+
+      /// Free this instance.
+      void free();
 
       virtual void set_precond(Precond<Scalar> *pc);
 

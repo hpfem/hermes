@@ -6,12 +6,12 @@ using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
 // Initial polynomial degree for u.
-const int P_INIT_U = 3;
+const int P_INIT_U = 4;
 // Initial polynomial degree for v.
-const int P_INIT_V = 2;
-const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refinements.
+const int P_INIT_V = 3;
+const int INIT_REF_NUM = 5;               // Number of initial uniform mesh refinements.
 // Number of initial boundary refinements
-const int INIT_REF_BDY = 5;
+const int INIT_REF_BDY = 7;
 
 // Problem parameters.
 const double D_u = 1;
@@ -57,7 +57,7 @@ public:
 int main(int argc, char* argv[])
 {
   //HermesCommonApi.set_integral_param_value(numThreads, 1);
-  //HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
+  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
 
   // Load the mesh.
   MeshSharedPtr u_mesh(new Mesh), v_mesh(new Mesh);
@@ -111,6 +111,17 @@ int main(int argc, char* argv[])
 
   adaptSolver.switch_visualization(false);
   adaptSolver.set_verbose_output(true);
+
+  try
+  {
+    adaptSolver.get_solver()->get_linear_matrix_solver()->as_IterSolver()->set_tolerance(1e-5, LoopSolverToleranceType::RelativeTolerance);
+    adaptSolver.get_solver()->get_linear_matrix_solver()->as_IterSolver()->set_max_iters(400);
+    adaptSolver.get_solver()->get_linear_matrix_solver()->as_IterSolver()->set_solver_type(IterSolverType::CG);
+    adaptSolver.get_solver()->get_linear_matrix_solver()->as_IterSolver()->set_precond(new ParalutionPrecond<double>(PreconditionerType::MultiColoredILU));
+  }
+  catch(std::exception& e)
+  {
+  }
   adaptSolver.solve(hpAdaptivity);
 
 #else

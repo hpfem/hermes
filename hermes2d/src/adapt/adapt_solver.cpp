@@ -76,10 +76,11 @@ namespace Hermes
       this->prev_mat = nullptr;
       this->prev_rhs = nullptr;
       this->prev_dirichlet_lift_rhs = nullptr;
+      this->solver = new SolverType(wf, spaces);
     }
 
     template<typename Scalar, typename SolverType>
-    AdaptSolver<Scalar, SolverType>:: ~AdaptSolver()
+    AdaptSolver<Scalar, SolverType>::~AdaptSolver()
     {
       if (this->prev_mat)
         delete this->prev_mat;
@@ -89,6 +90,8 @@ namespace Hermes
 
       if (this->prev_dirichlet_lift_rhs)
         delete this->prev_dirichlet_lift_rhs;
+
+      delete this->solver;
     }
 
     template<typename Scalar, typename SolverType>
@@ -407,7 +410,6 @@ namespace Hermes
         }
       }
 
-      this->solver = new SolverType(wf, spaces);
       this->solver->set_verbose_output(this->get_verbose_output());
       //this->solver->output_matrix();
       this->solver->set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
@@ -453,7 +455,6 @@ namespace Hermes
       }
 
       delete this->adaptivity_internal;
-      delete this->solver;
       delete StateReassemblyHelper<Scalar>::reusable_DOFs;
       delete StateReassemblyHelper<Scalar>::reusable_Dirichlet;
 
@@ -714,6 +715,7 @@ namespace Hermes
       this->spaces = spaces;
 
       this->adaptivity_internal->set_spaces(this->spaces);
+      this->solver->set_spaces(this->spaces);
     }
 
     template<typename Scalar, typename SolverType>
@@ -722,6 +724,7 @@ namespace Hermes
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked to change the weak formulation while it was running.");
       this->wf = wf;
+      this->solver->set_weak_formulation(wf);
     }
 
     template<typename Scalar, typename SolverType>
@@ -753,6 +756,12 @@ namespace Hermes
     WeakFormSharedPtr<Scalar> AdaptSolver<Scalar, SolverType>::get_wf()
     {
       return this->wf;
+    }
+
+    template<typename Scalar, typename SolverType>
+    SolverType* AdaptSolver<Scalar, SolverType>::get_solver()
+    {
+      return this->solver;
     }
 
     template<typename Scalar, typename SolverType>
