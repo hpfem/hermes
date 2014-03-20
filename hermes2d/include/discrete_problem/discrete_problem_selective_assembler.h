@@ -36,8 +36,9 @@ namespace Hermes
     /// See also Solver::keep_element_values()
     ///
     template<typename Scalar>
-    class HERMES_API DiscreteProblemSelectiveAssembler : 
+    class HERMES_API DiscreteProblemSelectiveAssembler :
       public Hermes::Mixins::TimeMeasurable,
+      public Hermes::Hermes2D::Mixins::Parallel,
       public Hermes::Mixins::Loggable,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>
@@ -82,7 +83,7 @@ namespace Hermes
 
     protected:
       /// Spaces.
-      int spaces_size;
+      unsigned int spaces_size;
 
       /// Seq numbers of Space instances in spaces.
       int* sp_seq;

@@ -101,7 +101,7 @@ namespace Hermes
       this->neighbor_searches = new NeighborSearch<Scalar>**[this->current_state->rep->nvert];
       for (int i = 0; i < this->current_state->rep->nvert; i++)
         this->neighbor_searches[i] = new NeighborSearch<Scalar>*[this->current_state->num];
-      this->num_neighbors = new int[this->current_state->rep->nvert];
+      this->num_neighbors = new unsigned int[this->current_state->rep->nvert];
       processed = new bool*[current_state->rep->nvert];
 
       if (DG_matrix_forms_present)

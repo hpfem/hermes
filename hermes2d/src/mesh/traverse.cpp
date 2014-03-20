@@ -182,7 +182,7 @@ namespace Hermes
         delete[] sub_idx;
     }
 
-    void Traverse::State::push_transform(int son, int i, bool is_triangle)
+    void Traverse::State::push_transform(unsigned char son, unsigned char i, bool is_triangle)
     {
       this->sub_idx[i] = (sub_idx[i] << 3) + son + 1;
 
@@ -215,7 +215,7 @@ namespace Hermes
       }
     }
 
-    uint64_t Traverse::State::get_transform(int i)
+    uint64_t Traverse::State::get_transform(unsigned char i)
     {
       return this->sub_idx[i];
     }
@@ -285,7 +285,7 @@ namespace Hermes
     Traverse::State** Traverse::get_states(MeshFunctionSharedPtrVector<Scalar> mesh_functions, int& states_count)
     {
       MeshSharedPtrVector meshes;
-      for (int i = 0; i < mesh_functions.size(); i++)
+      for (unsigned short i = 0; i < mesh_functions.size(); i++)
         meshes.push_back(mesh_functions[i]->get_mesh());
       return this->get_states(meshes, states_count);
     }
@@ -400,10 +400,7 @@ namespace Hermes
         if (leaf)
         {
           if (count > predictedCount - 1)
-          {
-            predictedCount *= 1.5;
-            states = realloc_with_check<State*>(states, predictedCount);
-          }
+            states = realloc_with_check<State*>(states, (int)std::ceil(predictedCount * 1.5));
 
           set_boundary_info(s);
           s->rep = nullptr;

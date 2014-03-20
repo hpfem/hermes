@@ -188,7 +188,7 @@ namespace Hermes
     protected:
       /// Size of page (max number of indices stored in one page).
       /// DO NOT CHANGE, otherwise the data types in Page struct needs to be revisited.
-      static const int PAGE_SIZE = 128;
+      static const int PAGE_SIZE = 100;
 
       /// Structure for storing indices in sparse matrix
       struct Page {

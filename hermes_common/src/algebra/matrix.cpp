@@ -64,10 +64,10 @@ namespace Hermes
     {
       if (!vector_out_initialized)
         vector_out = malloc_with_check<Scalar>(this->size);
-      for (int i = 0; i < this->size; i++)
+      for (unsigned int i = 0; i < this->size; i++)
       {
         vector_out[i] = Scalar(0.);
-        for (int j = 0; j < this->size; j++)
+        for (unsigned int j = 0; j < this->size; j++)
           vector_out[i] += this->get(i, j) * vector_in[j];
       }
     }

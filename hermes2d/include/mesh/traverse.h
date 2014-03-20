@@ -82,17 +82,17 @@ namespace Hermes
         bool isBnd;
         Element* rep;
         uint64_t rep_subidx;
-        int rep_i;
+        unsigned char rep_i;
         ~State();
-        int isurf;
-        int num;
+        unsigned char isurf;
+        unsigned char num;
         static State* clone(const State * other);
       private:
         State();
         //void operator=(const State * other);
-        void push_transform(int son, int i, bool is_triangle = false);
+        void push_transform(unsigned char son, unsigned char i, bool is_triangle = false);
         bool is_triangle();
-        uint64_t get_transform(int i);
+        uint64_t get_transform(unsigned char i);
         bool visited;
         Rect  cr;
         Rect* er;

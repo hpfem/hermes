@@ -54,7 +54,7 @@ namespace Hermes
         Traverse::State* current_state;
 
         NeighborSearch<Scalar>** neighbor_searches;
-        int num_neighbors;
+        unsigned int num_neighbors;
       };
     private:
       void evaluate_volumetric_forms(Traverse::State* current_state, int order);
@@ -72,7 +72,7 @@ namespace Hermes
 
       void evaluate_DG_form(NormFormDG<Scalar>* form, DiscontinuousFunc<Scalar>* difference_func_i, DiscontinuousFunc<Scalar>* difference_func_j, DiscontinuousFunc<Scalar>* rsln_i, DiscontinuousFunc<Scalar>* rsln_j, double* error, double* norm);
 
-      int n_quadrature_points;
+      unsigned char n_quadrature_points;
       Geom<double>* geometry;
       double* jacobian_x_weights;
       Solution<Scalar>** slns;

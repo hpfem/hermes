@@ -20,7 +20,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    void MultimeshDGNeighborTree<Scalar>::process_edge(NeighborSearch<Scalar>** neighbor_searches, int num_neighbor_searches, int& num_neighbors, bool*& processed)
+    void MultimeshDGNeighborTree<Scalar>::process_edge(NeighborSearch<Scalar>** neighbor_searches, unsigned char num_neighbor_searches, unsigned int& num_neighbors, bool*& processed)
     {
       MultimeshDGNeighborTreeNode root(nullptr, 0);
 

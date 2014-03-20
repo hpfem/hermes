@@ -163,12 +163,12 @@ namespace Hermes
       unsigned short iro_cache;
 
       /// Helper functions to obtain the index of the next or previous vertex/edge
-      inline unsigned short Element::next_vert(unsigned short i) const
+      inline unsigned char Element::next_vert(unsigned short i) const
       {
         return ((i + 1) % nvert);
       }
 
-      inline unsigned short Element::prev_vert(unsigned short i) const
+      inline unsigned char Element::prev_vert(unsigned short i) const
       {
         return ((i - 1) % nvert);
       }
@@ -182,7 +182,7 @@ namespace Hermes
       /// Internal.
       void unref_all_nodes(HashTable* ht);
 
-      unsigned nvert:30; ///< number of vertices (3 or 4)
+      unsigned char nvert; ///< number of vertices (3 or 4)
     };
 
     static Node* get_edge_node();

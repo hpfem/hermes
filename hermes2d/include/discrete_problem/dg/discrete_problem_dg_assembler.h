@@ -78,7 +78,7 @@ namespace Hermes
       void deinit_neighbors(NeighborSearch<Scalar>** neighbor_searches, Traverse::State* current_state);
 
       NeighborSearch<Scalar>*** neighbor_searches;
-      int* num_neighbors;
+      unsigned int* num_neighbors;
       bool** processed;
 
       // Neighbor psss, refmaps.
