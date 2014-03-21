@@ -222,7 +222,7 @@ namespace Hermes
       return np;
     }
 
-    unsigned char init_geometry_points_allocated(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, GeomSurf<double>& geometry, double* jacobian_x_weights)
+    unsigned char init_surface_geometry_points_allocated(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, GeomSurf<double>& geometry, double* jacobian_x_weights)
     {
       RefMap* rep_reference_mapping = nullptr;
       for (int i = 0; i < reference_mapping_count; i++)

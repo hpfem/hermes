@@ -36,36 +36,42 @@ namespace Hermes
 
 
 #pragma region Geometry
+
     /// Geometry (coordinates, normals, tangents) of either an element or an edge.
     /// @ingroup inner
     template<typename T>
-    class HERMES_API GeomVol
+    class HERMES_API GeomBasic
     {
     public:
-      /// X Coordinates[in physical domain].
+      /// x-coordinates[in physical domain].
       T x[H2D_MAX_INTEGRATION_POINTS_COUNT];
+      /// y-coordinates[in physical domain].
       T y[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
-      /// ID number of the element.
-      int id;
       /// Element marker (for both volumetric and surface forms).
       int elem_marker;
+    };
+
+    /// Geometry - volumetric.
+    /// @ingroup inner
+    template<typename T>
+    class HERMES_API GeomVol : public GeomBasic<T>
+    {
+    public:
+      /// ID number of the element.
+      int id;
 
       /// Element diameter approximation.
       T get_diam_approximation(unsigned char n);
       /// Element area.
       T get_area(unsigned char n, double* wt);
-
-      /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
-      virtual ~GeomVol() {};
     };
 
+    /// Geometry - surface.
     template<typename T>
-    class HERMES_API GeomSurf
+    class HERMES_API GeomSurf : public GeomBasic<T>
     {
     public:
-      T x[H2D_MAX_INTEGRATION_POINTS_COUNT];
-      T y[H2D_MAX_INTEGRATION_POINTS_COUNT];
       T nx[H2D_MAX_INTEGRATION_POINTS_COUNT];
       T ny[H2D_MAX_INTEGRATION_POINTS_COUNT];
       T tx[H2D_MAX_INTEGRATION_POINTS_COUNT];
@@ -74,8 +80,6 @@ namespace Hermes
       /// Internal number of an edge of the element.
       int isurf;
 
-      /// Element marker (for both volumetric and surface forms).
-      int elem_marker;
       /// Edge marker.
       int edge_marker;
 
@@ -88,6 +92,8 @@ namespace Hermes
       unsigned char np;
     };
 
+    /// Geometry - volumetric - for order calculation.
+    /// @ingroup inner
     template<>
     class HERMES_API GeomVol<Hermes::Ord>
     {
@@ -110,6 +116,8 @@ namespace Hermes
       Hermes::Ord get_area(unsigned char n, double* wt) { return Hermes::Ord(1); };
     };
 
+    /// Geometry - surface - for order calculation.
+    /// @ingroup inner
     template<>
     class HERMES_API GeomSurf<Hermes::Ord>
     {
@@ -405,8 +413,8 @@ namespace Hermes
     template<typename Scalar>
     HERMES_API void init_fn_preallocated(Func<Scalar>* u, MeshFunction<Scalar>* fu, const int order);
     /// Init UExt function - preallocated version.
-    template<typename Scalar, typename Geom>
-    HERMES_API void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom* geometry, ElementMode2D mode);
+    template<typename Scalar>
+    HERMES_API void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, GeomBasic<double>* geometry, ElementMode2D mode);
 
 
     /// Utilities follow
@@ -415,8 +423,8 @@ namespace Hermes
     HERMES_API Func<Scalar>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d = nullptr, int nc = 1);
 
     /// Init UExt function - volumetric
-    template<typename Scalar, typename Geom>
-    HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom* geometry, ElementMode2D mode);
+    template<typename Scalar>
+    HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, GeomBasic<double>* geometry, ElementMode2D mode);
 #pragma endregion
   }
 }

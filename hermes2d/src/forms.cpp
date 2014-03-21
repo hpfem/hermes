@@ -726,8 +726,8 @@ namespace Hermes
       }
     }
 
-    template<typename Scalar, typename Geom>
-    void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom* geometry, ElementMode2D mode)
+    template<typename Scalar>
+    void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, GeomBasic<double>* geometry, ElementMode2D mode)
     {
       // Sanity check.
       if (fu == nullptr)
@@ -765,8 +765,8 @@ namespace Hermes
       return u;
     }
 
-    template<typename Scalar, typename Geom>
-    Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom* geometry, ElementMode2D mode)
+    template<typename Scalar>
+    Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, GeomBasic<double>* geometry, ElementMode2D mode)
     {
       int nc = 1;
       Quad2D* quad = &g_quad_2d_std;
@@ -792,22 +792,21 @@ namespace Hermes
     template HERMES_API void init_fn_preallocated(Func<double>* u, MeshFunction<double>* fu, const int order);
     template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, MeshFunction<std::complex<double> >* fu, const int order);
 
-    template HERMES_API void init_fn_preallocated(Func<double>* u, UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
-    template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
+    template HERMES_API void init_fn_preallocated(Func<double>* u, UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, GeomBasic<double>* geometry, ElementMode2D mode);
+    template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, GeomBasic<double>* geometry, ElementMode2D mode);
 
 
     template HERMES_API Func<double>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);
     template HERMES_API Func<std::complex<double> >* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);
 
-    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, GeomVol<double>* geometry, ElementMode2D mode);
-    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, GeomSurf<double>* geometry, ElementMode2D mode);
-    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, GeomVol<double>* geometry, ElementMode2D mode);
-    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, GeomSurf<double>* geometry, ElementMode2D mode);
+    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, GeomBasic<double>* geometry, ElementMode2D mode);
+    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, GeomBasic<double>* geometry, ElementMode2D mode);
 
     template class HERMES_API DiscontinuousFunc<double>;
     template class HERMES_API DiscontinuousFunc<std::complex<double> >;
     template class HERMES_API GeomVol<double>;
     template class HERMES_API GeomSurf<double>;
+    template class HERMES_API GeomBasic<double>;
     template class HERMES_API InterfaceGeom<Hermes::Ord>;
     template class HERMES_API InterfaceGeom<double>;
   }
