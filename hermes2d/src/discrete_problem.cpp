@@ -198,8 +198,8 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spacesToSet)
     {
-      if (this->spaces_size != spacesToSet.size() && this->spaces_size > 0)
-        throw Hermes::Exceptions::LengthException(0, spacesToSet.size(), this->spaces_size);
+      if(this->spaces_size > 0)
+        Helpers::check_length(spacesToSet, this->spaces_size);
 
       for (unsigned int i = 0; i < spacesToSet.size(); i++)
       {
@@ -273,7 +273,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, MeshSharedPtrVector& meshes)
+    void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, unsigned int& num_states, Solution<Scalar>** u_ext_sln, MeshSharedPtrVector& meshes)
     {
       // Vector of meshes.
       for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
@@ -295,7 +295,7 @@ namespace Hermes
       // This must be here, because the weakforms may have changed since set_weak_formulation (where the following calls
       // used to be in development). And since the following clones the passed WeakForm, this has to be called
       // only after the weak forms are ready for calculation.
-      for (int i = 0; i < this->num_threads_used; i++)
+      for (unsigned char i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_weak_formulation(this->wf);
 
       Traverse trav(this->spaces_size);
@@ -307,7 +307,7 @@ namespace Hermes
       // Dirichlet lift rhs part.
       if (this->add_dirichlet_lift)
       {
-        int ndof = Space<Scalar>::get_num_dofs(spaces);
+        unsigned int ndof = Space<Scalar>::get_num_dofs(spaces);
         this->dirichlet_lift_rhs->alloc(ndof);
       }
     }
@@ -323,7 +323,7 @@ namespace Hermes
       bool result = this->set_matrix(mat) && this->set_rhs(rhs);
 
       // Initialize states && previous iterations.
-      int num_states;
+      unsigned int num_states;
       Traverse::State** states;
       MeshSharedPtrVector meshes;
       this->init_assembling(states, num_states, u_ext_sln, meshes);
@@ -434,9 +434,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::deinit_assembling(Traverse::State** states, int num_states)
+    void DiscreteProblem<Scalar>::deinit_assembling(Traverse::State** states, unsigned int num_states)
     {
-      for (int i = 0; i < num_states; i++)
+      for (unsigned int i = 0; i < num_states; i++)
         delete states[i];
       free_with_check(states);
 

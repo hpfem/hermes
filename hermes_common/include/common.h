@@ -219,6 +219,30 @@ namespace Hermes
 
   namespace Helpers
   {
+    /// Check length of a vector.
+    template<typename T>
+    inline void check_for_null(const T& instance)
+    {
+      if (instance == nullptr)
+        throw Hermes::Exceptions::NullException(instance.size(), length);
+    }
+
+    /// Check length of a vector.
+    template<typename T>
+    inline void check_length(const std::vector<T>& instance, const unsigned int length)
+    {
+      if (instance.size() != length)
+        throw Hermes::Exceptions::LengthException(instance.size(), length);
+    }
+
+    /// Check length of a vector.
+    template<typename T, typename U>
+    inline void check_length(const std::vector<T>& instanceT, const std::vector<U>& instanceU)
+    {
+      if (instanceT.size() != instanceU.size())
+        throw Hermes::Exceptions::LengthException();
+    }
+
     /// Number printers.
     inline void fprint_num(FILE*f, double x, char* number_format)
     {

@@ -40,7 +40,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool DiscreteProblemSelectiveAssembler<Scalar>::prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, SpaceSharedPtrVector<Scalar> spaces, Traverse::State**& states, int& num_states)
+    bool DiscreteProblemSelectiveAssembler<Scalar>::prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, SpaceSharedPtrVector<Scalar> spaces, Traverse::State**& states, unsigned int& num_states)
     {
       int ndof = Space<Scalar>::get_num_dofs(spaces);
 
@@ -69,16 +69,17 @@ namespace Hermes
 
         // Loop through all elements.
         this->tick();
-        for (int state_i = 0; state_i < num_states; state_i++)
+        for (unsigned int state_i = 0; state_i < num_states; state_i++)
         {
           Traverse::State* current_state = states[state_i];
 
           // Obtain assembly lists for the element at all spaces.
           /// \todo do not get the assembly list again if the element was not changed.
           for (unsigned int i = 0; i < spaces_size; i++)
-          if (current_state->e[i])
-            spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
-
+          {
+            if (current_state->e[i])
+              spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
+          }
           if (this->wf->is_DG() && !this->wf->mfDG.empty())
           {
             // Number of edges ( =  number of vertices).

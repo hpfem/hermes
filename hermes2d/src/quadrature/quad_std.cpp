@@ -1549,7 +1549,7 @@ namespace Hermes
       std_pts_98_99_1d, std_pts_98_99_1d
     };
 
-    static unsigned short std_np_1d[] =
+    static unsigned char std_np_1d[] =
     {
       sizeof(std_pts_0_1_1d) / sizeof(double2),
       sizeof(std_pts_0_1_1d) / sizeof(double2),
@@ -2380,7 +2380,7 @@ namespace Hermes
       { -0.978904561411718, 0.859512343113706, 0.007147818771900 }
     };
 
-    static unsigned short std_np_2d_tri[g_max_tri + 1 + 3 * g_max_tri + 3] =
+    static unsigned char std_np_2d_tri[g_max_tri + 1 + 3 * g_max_tri + 3] =
     {
       sizeof(std_pts_0_2d_tri) / sizeof(double3),
       sizeof(std_pts_1_2d_tri) / sizeof(double3),
@@ -2422,7 +2422,7 @@ namespace Hermes
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static double3* make_quad_table(int order, unsigned short& np)
+    static double3* make_quad_table(int order, unsigned char& np)
     {
       // points on a quad are calculated as a simple cartesian
       // product of 1D quadrature points...
@@ -2444,13 +2444,13 @@ namespace Hermes
       return result;
     }
 
-    static double3* make_edge_table(double2& v1, double2& v2, unsigned short& np, unsigned short order)
+    static double3* make_edge_table(double2& v1, double2& v2, unsigned char& np, unsigned short order)
     {
       np = std_np_1d[order];
       double3* result = malloc_with_check<double3>(np);
       double2* table = std_tables_1d[order];
 
-      for (int i = 0; i < np; i++)
+      for (unsigned char i = 0; i < np; i++)
       {
         double s = (table[i][0] + 1.0) * 0.5;
         double t = 1.0 - s;
@@ -2463,7 +2463,7 @@ namespace Hermes
     }
 
     static double3* std_tables_2d_quad[g_max_quad + 1 + 4 * g_max_quad + 4];
-    static unsigned short std_np_2d_quad[g_max_quad + 1 + 4 * g_max_quad + 4];
+    static unsigned char std_np_2d_quad[g_max_quad + 1 + 4 * g_max_quad + 4];
 
     static double3** std_tables_2d[2] =
     {
@@ -2471,7 +2471,7 @@ namespace Hermes
       std_tables_2d_quad
     };
 
-    static unsigned short* std_np_2d[2] =
+    static unsigned char* std_np_2d[2] =
     {
       std_np_2d_tri,
       std_np_2d_quad
@@ -2636,9 +2636,9 @@ namespace Hermes
       { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 9, 10, 11 }, { 9, 4, 8 }
     };
 
-    unsigned short lin_np_tri[2] = { 3, 12 };
-    unsigned short lin_np_quad[2] = { 4, 21 };
-    unsigned short* lin_np[2] = { lin_np_tri, lin_np_quad };
+    unsigned char lin_np_tri[2] = { 3, 12 };
+    unsigned char lin_np_quad[2] = { 4, 21 };
+    unsigned char* lin_np[2] = { lin_np_tri, lin_np_quad };
 
     double3*  lin_tables_tri[2] = { lin_pts_0_tri, lin_pts_1_tri };
     double3*  lin_tables_quad[2] = { lin_pts_0_quad, lin_pts_1_quad };

@@ -191,8 +191,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Node* Space<Scalar>::get_mid_edge_vertex_node(Element* e, int i, int j)
+    Node* Space<Scalar>::get_mid_edge_vertex_node(Element* e, unsigned char i, unsigned char j)
     {
+      unsigned char prev = e->prev_vert(i);
       if (e->is_triangle())
         return e->sons[3]->vn[e->prev_vert(i)];
       else if (e->sons[2] == nullptr)
@@ -363,7 +364,7 @@ namespace Hermes
     int Space<Scalar>::get_num_dofs(SpaceSharedPtrVector<Scalar> spaces)
     {
       int ndof = 0;
-      for (unsigned unsigned char i = 0; i < spaces.size(); i++)
+      for (unsigned char i = 0; i < spaces.size(); i++)
         ndof += spaces[i]->get_num_dofs();
       return ndof;
     }

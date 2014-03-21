@@ -181,8 +181,7 @@ namespace Hermes
         void finish(MeshFunctionSharedPtr<double>* sln);
 
         Traverse::State** states;
-
-        int num_states;
+        unsigned int num_states;
 
         double min_val, max_val;
 

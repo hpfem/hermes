@@ -27,11 +27,11 @@ namespace Hermes
   {
     static double3* cheb_tab_tri[11];
     static double3* cheb_tab_quad[11];
-    static unsigned short      cheb_np_tri[11];
-    static unsigned short      cheb_np_quad[11];
+    static unsigned char      cheb_np_tri[11];
+    static unsigned char      cheb_np_quad[11];
 
     static double3** cheb_tab[2] = { cheb_tab_tri, cheb_tab_quad };
-    static unsigned short*      cheb_np[2] = { cheb_np_tri, cheb_np_quad };
+    static unsigned char*      cheb_np[2] = { cheb_np_tri, cheb_np_quad };
 
     static class Quad2DCheb : public Quad2D
     {
@@ -248,7 +248,7 @@ namespace Hermes
     public:
       // this is a set of LU-decomposed matrices shared by all Solutions
       double** mat[2][11];
-      unsigned short* perm[2][11];
+      unsigned char* perm[2][11];
 
       mono_lu_init()
       {
@@ -284,7 +284,7 @@ namespace Hermes
         unsigned char i, j, m, row;
         char k, l;
         double x, y, xn, yn;
-        unsigned short n = this->mode ? sqr(o + 1) : (o + 1)*(o + 2) / 2;
+        unsigned char n = this->mode ? sqr(o + 1) : (o + 1)*(o + 2) / 2;
 
         // loop through all chebyshev points
         mono_lu.mat[mode][o] = new_matrix<double>(n, n);
@@ -304,7 +304,7 @@ namespace Hermes
 
         double d;
         if (mono_lu.perm[mode][o] == nullptr)
-          mono_lu.perm[mode][o] = malloc_with_check<Solution<Scalar>, unsigned short>(n, this);
+          mono_lu.perm[mode][o] = malloc_with_check<Solution<Scalar>, unsigned char>(n, this);
         ludcmp(mono_lu.mat[mode][o], n, mono_lu.perm[mode][o], &d);
       }
 
@@ -401,7 +401,7 @@ namespace Hermes
       {
         this->mode = e->get_mode();
         o = elem_orders[e->id];
-        unsigned short np = quad->get_num_points(o, e->get_mode());
+        unsigned char np = quad->get_num_points(o, e->get_mode());
 
         AsmList<Scalar> al;
         space->get_element_assembly_list(e, &al);
@@ -449,8 +449,8 @@ namespace Hermes
     {
       if (solution_vector == nullptr)
         throw Exceptions::NullException(1);
-      if (spaces.size() != solutions.size())
-        throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
+        
+        Helpers::check_length(solutions, spaces);
 
       // If start indices are not given, calculate them using the dimension of each space.
       std::vector<int> start_indices_new;
@@ -516,8 +516,8 @@ namespace Hermes
     {
       if (solution_vector == nullptr)
         throw Exceptions::NullException(1);
-      if (spaces.size() != solutions.size())
-        throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
+      
+        Helpers::check_length(solutions, spaces);
 
       // If start indices are not given, calculate them using the dimension of each space.
       std::vector<int> start_indices_new;
@@ -557,8 +557,7 @@ namespace Hermes
     {
       if (solution_vector == nullptr)
         throw Exceptions::NullException(1);
-      if (spaces.size() != solutions.size())
-        throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
+      throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
       std::vector<int> start_indices_new;
@@ -584,8 +583,7 @@ namespace Hermes
     {
       if (solution_vector == nullptr)
         throw Exceptions::NullException(1);
-      if (spaces.size() != solutions.size())
-        throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
+      Helpers::check_length(solutions, spaces);
 
       // If start indices are not given, calculate them using the dimension of each space.
       std::vector<int> start_indices_new;
@@ -863,7 +861,7 @@ namespace Hermes
     {
       int i, j, k, l;
       Quad2D* quad = this->quads[this->cur_quad];
-      unsigned short np = quad->get_num_points(order, this->mode);
+      unsigned char np = quad->get_num_points(order, this->mode);
 
       if (sln_type == HERMES_SLN)
       {

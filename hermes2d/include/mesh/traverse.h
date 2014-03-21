@@ -80,12 +80,12 @@ namespace Hermes
         uint64_t* sub_idx;
         bool bnd[H2D_MAX_NUMBER_EDGES];
         bool isBnd;
+        unsigned char isurf;
         Element* rep;
         uint64_t rep_subidx;
-        unsigned char rep_i;
+        unsigned short rep_i;
         ~State();
-        unsigned char isurf;
-        unsigned char num;
+        unsigned short num;
         static State* clone(const State * other);
       private:
         State();
@@ -106,13 +106,13 @@ namespace Hermes
       /// \param[in] meshes Meshes.
       /// \param[out] num Number of states.
       /// \return The states.
-      State** get_states(MeshSharedPtrVector meshes, int& num);
-      State** get_states(MeshSharedPtr* meshes, int meshes_count, int& states_count);
+      State** get_states(MeshSharedPtrVector meshes, unsigned int& states_count);
+      State** get_states(MeshSharedPtr* meshes, unsigned short meshes_count, unsigned int& states_count);
 
       /// Returns all states on the passed meshes.
       /// Overload for mesh functions.
       template<typename Scalar>
-      State** get_states(std::vector<MeshFunctionSharedPtr<Scalar> > mesh_functions, int& num);
+      State** get_states(std::vector<MeshFunctionSharedPtr<Scalar> > mesh_functions, unsigned int& states_count);
       
     private:
       /// Used by get_states.
@@ -120,10 +120,10 @@ namespace Hermes
       /// Used by get_states.
       void finish();
       /// Used by get_states.
-      void init_transforms(State* s, int i);
+      void init_transforms(State* s, unsigned char i);
 
 #pragma region union-mesh
-      static UniData** construct_union_mesh(int n, MeshSharedPtr* meshes, MeshSharedPtr unimesh);
+      static UniData** construct_union_mesh(unsigned char n, MeshSharedPtr* meshes, MeshSharedPtr unimesh);
       void union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, Element* uni);
       uint64_t init_idx(Rect* cr, Rect* er);
 
@@ -132,7 +132,7 @@ namespace Hermes
 #pragma endregion
 
       /// Internal.
-      int num;
+      unsigned short num;
       /// Internal.
       State* stack;
       /// Internal.
@@ -145,7 +145,7 @@ namespace Hermes
       /// Internal.
       void free_state(State* state);
       /// Internal.
-      int spaces_size;
+      unsigned char spaces_size;
 
       MeshSharedPtr unimesh;
       template<typename T> friend class Adapt;

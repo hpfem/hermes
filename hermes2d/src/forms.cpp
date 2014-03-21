@@ -332,39 +332,15 @@ namespace Hermes
       }
     }
 
-    template<typename T>
-    Geom<T>::Geom()
-    {
-      elem_marker = -1;
-      edge_marker = -1;
-      id = 0;
-      isurf = 4;
-      x = y = nullptr;
-      nx = ny = nullptr;
-      tx = ty = nullptr;
-    }
-
-    template<typename T>
-    void Geom<T>::free()
-    {
-      free_with_check(x);
-      free_with_check(tx);
-      free_with_check(nx);
-
-      free_with_check(y);
-      free_with_check(ty);
-      free_with_check(ny);
-    }
-
     template<>
-    double Geom<double>::get_diam_approximation(int n)
+    double GeomVol<double>::get_diam_approximation(unsigned char n)
     {
       double x_min = std::numeric_limits<double>::max(),
         x_max = std::numeric_limits<double>::min(),
         y_min = std::numeric_limits<double>::max(),
         y_max = std::numeric_limits<double>::min();
 
-      for (int i = 0; i < n; i++)
+      for (unsigned char i = 0; i < n; i++)
       {
         if (this->x[i] < x_min)
           x_min = this->x[i];
@@ -381,35 +357,33 @@ namespace Hermes
     }
 
     template<>
-    double Geom<double>::get_area(int n, double* wt)
+    double GeomVol<double>::get_area(unsigned char n, double* wt)
     {
       double area = 0.;
-      for (int i = 0; i < n; i++)
+      for (unsigned char i = 0; i < n; i++)
         area += wt[i];
       return area;
     }
 
     template<typename T>
-    InterfaceGeom<T>::InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam) :
-      Geom<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
+    InterfaceGeom<T>::InterfaceGeom(GeomSurf<T>* geom, int n_marker, int n_id, T n_diam) :
+      GeomSurf<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
     {
         // Let this class expose the standard Geom interface.
-        this->edge_marker = geom->edge_marker;
         this->elem_marker = geom->elem_marker;
-        this->id = geom->id;
         this->isurf = geom->isurf;
-        this->x = geom->x;
-        this->y = geom->y;
-        this->tx = geom->tx;
-        this->ty = geom->ty;
-        this->nx = geom->nx;
-        this->ny = geom->ny;
+        memcpy(this->x, geom->x, geom->np * sizeof(T));
+        memcpy(this->y, geom->y, geom->np * sizeof(T));
+        memcpy(this->tx, geom->tx, geom->np * sizeof(T));
+        memcpy(this->ty, geom->ty, geom->np * sizeof(T));
+        memcpy(this->nx, geom->nx, geom->np * sizeof(T));
+        memcpy(this->ny, geom->ny, geom->np * sizeof(T));
         this->orientation = geom->orientation;
         this->wrapped_geom = geom;
       }
 
     template<>
-    InterfaceGeom<Hermes::Ord>::InterfaceGeom(Geom<Hermes::Ord>* geom, int n_marker, int n_id, Hermes::Ord n_diam) : Geom<Hermes::Ord>()
+    InterfaceGeom<Hermes::Ord>::InterfaceGeom(GeomSurf<Hermes::Ord>* geom, int n_marker, int n_id, Hermes::Ord n_diam) : GeomSurf<Hermes::Ord>()
     {
       this->wrapped_geom = geom;
     }
@@ -417,7 +391,6 @@ namespace Hermes
     template<typename T>
     void InterfaceGeom<T>::free()
     {
-      wrapped_geom->free();
       delete wrapped_geom;
     }
 
@@ -451,59 +424,56 @@ namespace Hermes
       return neighb_diam;
     }
 
-    Geom<double>* init_geom_vol(RefMap *rm, const int order)
+    GeomVol<double>* init_geom_vol(RefMap *rm, const int order)
     {
-      Element* element = rm->get_active_element();
-      ElementMode2D mode = element->get_mode();
-      Geom<double>* e = new Geom<double>;
-      e->id = element->id;
-      e->elem_marker = element->marker;
-      Quad2D* quad = rm->get_quad_2d();
-      unsigned short np = quad->get_num_points(order, mode);
-      e->x = malloc_with_check<double>(np);
-      e->y = malloc_with_check<double>(np);
-      double* x = rm->get_phys_x(order);
-      double* y = rm->get_phys_y(order);
-      for (int i = 0; i < np; i++)
-      {
-        e->x[i] = x[i];
-        e->y[i] = y[i];
-      }
+      GeomVol<double>* e = new GeomVol<double>;
+      init_geom_vol_allocated(*e, rm, order);
       return e;
     }
 
-    Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan)
+    void init_geom_vol_allocated(GeomVol<double>& geom, RefMap *rm, const int order)
+    {
+      Element* element = rm->get_active_element();
+      ElementMode2D mode = element->get_mode();
+      geom.id = element->id;
+      geom.elem_marker = element->marker;
+      Quad2D* quad = rm->get_quad_2d();
+      unsigned char np = quad->get_num_points(order, mode);
+      memcpy(geom.x, rm->get_phys_x(order), np * sizeof(double));
+      memcpy(geom.y, rm->get_phys_y(order), np * sizeof(double));
+    }
+
+    GeomSurf<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan)
+    {
+      GeomSurf<double>* e = new GeomSurf<double>;
+      init_geom_surf_allocated(*e, rm, isurf, marker, order, tan);
+      return e;
+    }
+
+    void init_geom_surf_allocated(GeomSurf<double>& geom, RefMap *rm, int isurf, int marker, const int order, double3*& tan)
     {
       Element* element = rm->get_active_element();
       ElementMode2D mode = element->get_mode();
 
-      Geom<double>* e = new Geom<double>;
-      e->edge_marker = marker;
-      e->elem_marker = element->marker;
-      e->id = element->id;
-      e->isurf = isurf;
+      geom.edge_marker = marker;
+      geom.elem_marker = element->marker;
+      geom.isurf = isurf;
 
       tan = rm->get_tangent(isurf, order);
-      double* x = rm->get_phys_x(order);
-      double* y = rm->get_phys_y(order);
 
       Quad2D* quad = rm->get_quad_2d();
-      unsigned short np = quad->get_num_points(order, mode);
-      e->x = malloc_with_check<double>(np);
-      e->y = malloc_with_check<double>(np);
-      e->tx = malloc_with_check<double>(np);
-      e->ty = malloc_with_check<double>(np);
-      e->nx = malloc_with_check<double>(np);
-      e->ny = malloc_with_check<double>(np);
+      unsigned char np = quad->get_num_points(order, mode);
+      geom.np = np;
+
+      memcpy(geom.x, rm->get_phys_x(order), np * sizeof(double));
+      memcpy(geom.y, rm->get_phys_y(order), np * sizeof(double));
+
       for (int i = 0; i < np; i++)
       {
-        e->x[i] = x[i];
-        e->y[i] = y[i];
-        e->tx[i] = tan[i][0];  e->ty[i] = tan[i][1];
-        e->nx[i] = tan[i][1];  e->ny[i] = -tan[i][0];
+        geom.tx[i] = tan[i][0];  geom.ty[i] = tan[i][1];
+        geom.nx[i] = tan[i][1];  geom.ny[i] = -tan[i][0];
       }
-      e->orientation = rm->get_active_element()->get_edge_orientation(isurf);
-      return e;
+      geom.orientation = rm->get_active_element()->get_edge_orientation(isurf);
     }
 
     Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
@@ -548,7 +518,7 @@ namespace Hermes
 #endif
 
       int nc = fu->get_num_components();
-      unsigned short np = fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode());
+      unsigned char np = fu->get_quad_2d()->get_num_points(order, fu->get_active_element()->get_mode());
       u->np = np;
       u->nc = nc;
 
@@ -719,7 +689,7 @@ namespace Hermes
       fu->set_quad_order(order);
 #endif
       int nc = fu->get_num_components();
-      unsigned short np = quad->get_num_points(order, fu->get_active_element()->get_mode());
+      unsigned char np = quad->get_num_points(order, fu->get_active_element()->get_mode());
       u->np = np;
       u->nc = nc;
 
@@ -756,15 +726,15 @@ namespace Hermes
       }
     }
 
-    template<typename Scalar>
-    void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode)
+    template<typename Scalar, typename Geom>
+    void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom* geometry, ElementMode2D mode)
     {
       // Sanity check.
       if (fu == nullptr)
         throw Hermes::Exceptions::Exception("nullptr UExtFunction in Func<Scalar>*::init_fn().");
 
       Quad2D* quad = &g_quad_2d_std;
-      unsigned short np = quad->get_num_points(order, mode);
+      unsigned char np = quad->get_num_points(order, mode);
 
       fu->value(np, ext, u_ext, u, geometry);
     }
@@ -776,7 +746,7 @@ namespace Hermes
       if (quad == nullptr)
         quad = &g_quad_2d_std;
 
-      unsigned short np = quad->get_num_points(order, mode);
+      unsigned char np = quad->get_num_points(order, mode);
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
       if (nc == 1)
@@ -795,13 +765,13 @@ namespace Hermes
       return u;
     }
 
-    template<typename Scalar>
-    Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode)
+    template<typename Scalar, typename Geom>
+    Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom* geometry, ElementMode2D mode)
     {
       int nc = 1;
       Quad2D* quad = &g_quad_2d_std;
 
-      unsigned short np = quad->get_num_points(order, mode);
+      unsigned char np = quad->get_num_points(order, mode);
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
       // Sanity check.
@@ -829,12 +799,15 @@ namespace Hermes
     template HERMES_API Func<double>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);
     template HERMES_API Func<std::complex<double> >* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);
 
-    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
-    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
+    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, GeomVol<double>* geometry, ElementMode2D mode);
+    template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, GeomSurf<double>* geometry, ElementMode2D mode);
+    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, GeomVol<double>* geometry, ElementMode2D mode);
+    template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, GeomSurf<double>* geometry, ElementMode2D mode);
 
     template class HERMES_API DiscontinuousFunc<double>;
     template class HERMES_API DiscontinuousFunc<std::complex<double> >;
-    template class HERMES_API Geom<double>;
+    template class HERMES_API GeomVol<double>;
+    template class HERMES_API GeomSurf<double>;
     template class HERMES_API InterfaceGeom<Hermes::Ord>;
     template class HERMES_API InterfaceGeom<double>;
   }

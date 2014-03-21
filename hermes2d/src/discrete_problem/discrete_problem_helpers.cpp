@@ -102,7 +102,7 @@ namespace Hermes
       template class HERMES_API DiscreteProblemMatrixVector<std::complex<double> >;
     }
 
-    int init_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
+    unsigned char init_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int order, GeomVol<double>*& geometry, double*& jacobian_x_weights)
     {
       Element* rep_element = nullptr;
       RefMap* rep_reference_mapping = nullptr;
@@ -124,7 +124,7 @@ namespace Hermes
       Quad2D* quad = rep_reference_mapping->get_quad_2d();
 
       double3* pt = quad->get_points(order, mode);
-      unsigned short np = quad->get_num_points(order, mode);
+      unsigned char np = quad->get_num_points(order, mode);
 
       // Init geometry and jacobian*weights.
       geometry = init_geom_vol(rep_reference_mapping, order);
@@ -145,17 +145,34 @@ namespace Hermes
       return np;
     }
 
-    int init_geometry_points_allocated_jwt(RefMap* rep_reference_mapping, int order, Geom<double>*& geometry, double* jacobian_x_weights)
+    unsigned char init_geometry_points_allocated(RefMap** reference_mapping, int reference_mapping_count, int order, GeomVol<double>& geometry, double* jacobian_x_weights)
+    {
+      RefMap* rep_reference_mapping = nullptr;
+      for (int i = 0; i < reference_mapping_count; i++)
+      {
+        if (reference_mapping[i])
+        {
+          if (reference_mapping[i]->get_active_element())
+          {
+            rep_reference_mapping = reference_mapping[i];
+            break;
+          }
+        }
+      }
+      return init_geometry_points_allocated(rep_reference_mapping, order, geometry, jacobian_x_weights);
+    }
+
+    unsigned char init_geometry_points_allocated(RefMap* rep_reference_mapping, int order, GeomVol<double>& geometry, double* jacobian_x_weights)
     {
       Element* e = rep_reference_mapping->get_active_element();
       ElementMode2D mode = e->get_mode();
       Quad2D* quad = rep_reference_mapping->get_quad_2d();
 
       double3* pt = quad->get_points(order, mode);
-      unsigned short np = quad->get_num_points(order, mode);
+      unsigned char np = quad->get_num_points(order, mode);
 
       // Init geometry and jacobian*weights.
-      geometry = init_geom_vol(rep_reference_mapping, order);
+      init_geom_vol_allocated(geometry, rep_reference_mapping, order);
 
       if (rep_reference_mapping->is_jacobian_const())
       {
@@ -172,7 +189,7 @@ namespace Hermes
       return np;
     }
 
-    int init_surface_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, Geom<double>*& geometry, double*& jacobian_x_weights)
+    unsigned char init_surface_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, GeomSurf<double>*& geometry, double*& jacobian_x_weights)
     {
       RefMap* rep_reference_mapping = nullptr;
       for (int i = 0; i < reference_mapping_count; i++)
@@ -193,7 +210,7 @@ namespace Hermes
 
       int eo = quad->get_edge_points(isurf, order, mode);
       double3* pt = quad->get_points(eo, mode);
-      unsigned short np = quad->get_num_points(eo, mode);
+      unsigned char np = quad->get_num_points(eo, mode);
 
       // Init geometry and jacobian*weights.
       double3* tan;
@@ -205,7 +222,24 @@ namespace Hermes
       return np;
     }
 
-    int init_surface_geometry_points_allocated_jwt(RefMap* rep_reference_mapping, int& order, int isurf, int marker, Geom<double>*& geometry, double* jacobian_x_weights)
+    unsigned char init_geometry_points_allocated(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, GeomSurf<double>& geometry, double* jacobian_x_weights)
+    {
+      RefMap* rep_reference_mapping = nullptr;
+      for (int i = 0; i < reference_mapping_count; i++)
+      {
+        if (reference_mapping[i])
+        {
+          if (reference_mapping[i]->get_active_element())
+          {
+            rep_reference_mapping = reference_mapping[i];
+            break;
+          }
+        }
+      }
+      return init_surface_geometry_points_allocated(rep_reference_mapping, order, isurf, marker, geometry, jacobian_x_weights);
+    }
+
+    unsigned char init_surface_geometry_points_allocated(RefMap* rep_reference_mapping, int& order, int isurf, int marker, GeomSurf<double>& geometry, double* jacobian_x_weights)
     {
       Element* e = rep_reference_mapping->get_active_element();
       ElementMode2D mode = e->get_mode();
@@ -213,11 +247,11 @@ namespace Hermes
 
       int eo = quad->get_edge_points(isurf, order, mode);
       double3* pt = quad->get_points(eo, mode);
-      unsigned short np = quad->get_num_points(eo, mode);
+      unsigned char np = quad->get_num_points(eo, mode);
 
       // Init geometry and jacobian*weights.
       double3* tan;
-      geometry = init_geom_surf(rep_reference_mapping, isurf, marker, eo, tan);
+      init_geom_surf_allocated(geometry, rep_reference_mapping, isurf, marker, eo, tan);
       for (int i = 0; i < np; i++)
         jacobian_x_weights[i] = pt[i][2] * tan[i][2];
       order = eo;

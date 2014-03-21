@@ -25,7 +25,7 @@ namespace Hermes
     namespace Views
     {
       // vertices
-      static unsigned short*      ord_np[2] = { num_vert_tri, num_vert_quad };
+      static unsigned char*      ord_np[2] = { num_vert_tri, num_vert_quad };
       static double3*  ord_tables_tri[2] = { vert_tri0, vert_tri1 };
       static double3*  ord_tables_quad[2] = { vert_quad0, vert_quad1 };
       static double3** ord_tables[2] = { ord_tables_tri, ord_tables_quad };
@@ -43,7 +43,7 @@ namespace Hermes
       static int3**    ord_edge[2] = { ord_edge_tri, ord_edge_quad };
 
       // vertices_simple
-      static unsigned short*      ord_np_simple[2] = { num_vert_tri_simple, num_vert_quad_simple };
+      static unsigned char*      ord_np_simple[2] = { num_vert_tri_simple, num_vert_quad_simple };
       static double3*  ord_tables_tri_simple[2] = { vert_tri_simple, vert_tri_simple };
       static double3*  ord_tables_quad_simple[2] = { vert_quad_simple, vert_quad_simple };
       static double3** ord_tables_simple[2] = { ord_tables_tri_simple, ord_tables_quad_simple };

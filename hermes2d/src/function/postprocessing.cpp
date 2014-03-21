@@ -670,7 +670,7 @@ namespace Hermes
         int source_functions_size = this->source_functions.size();
 
         Traverse trav(source_functions_size);
-        int num_states;
+        unsigned int num_states;
         Traverse::State** states = trav.get_states(this->source_functions, num_states);
 
         for (int i = 0; i < source_functions_size; i++)
@@ -778,29 +778,27 @@ namespace Hermes
                 func[i] = init_zero_fn<Scalar>(current_state->rep->get_mode(), order_int);
             }
 
-            Geom<double>* geometry;
-            int n = init_geometry_points(&refmap, 1, order_int, geometry, jacobian_x_weights);
+            GeomVol<double> geometry;
+            unsigned char n = init_geometry_points_allocated(refmap, order_int, geometry, jacobian_x_weights);
 
-            this->integral(n, jacobian_x_weights, func, geometry, result_local);
+            this->integral(n, jacobian_x_weights, func, &geometry, result_local);
 
-            geometry->free();
-            delete geometry;
             delete[] jacobian_x_weights;
 
-            for (int i = 0; i < source_functions_size; i++)
+            for (unsigned short i = 0; i < source_functions_size; i++)
             {
               delete func_ord[i];
               delete func[i];
             }
 
-            for (int i = 0; i < this->number_of_integrals; i++)
+            for (unsigned short i = 0; i < this->number_of_integrals; i++)
               result_thread_local[i] += result_local[i];
           }
 
           this->add_results(result_thread_local, result);
           free_with_check(result_thread_local);
 
-          for (int i = 0; i < source_functions_size; i++)
+          for (unsigned short i = 0; i < source_functions_size; i++)
             delete source_functions_cloned[i];
           free_with_check(source_functions_cloned);
           free_with_check(orders);
@@ -867,7 +865,7 @@ namespace Hermes
 
         int source_functions_size = this->source_functions.size();
         Traverse trav(source_functions_size);
-        int num_states;
+        unsigned int num_states;
         Traverse::State** states = trav.get_states(this->source_functions, num_states);
 
         for (int i = 0; i < source_functions_size; i++)
@@ -959,8 +957,8 @@ namespace Hermes
               int order_int = order.get_order();
               limit_order(order_int, refmap->get_active_element()->get_mode());
 
-              Geom<double>* geometry;
-              int n = init_surface_geometry_points(&refmap, 1, order_int, edge, current_state->rep->en[edge]->marker, geometry, jacobian_x_weights);
+              GeomSurf<double> geometry;
+              int n = init_surface_geometry_points_allocated(refmap, order_int, edge, current_state->rep->en[edge]->marker, geometry, jacobian_x_weights);
 
               for (int i = 0; i < source_functions_size; i++)
               {
@@ -975,10 +973,8 @@ namespace Hermes
                   func[i] = init_zero_fn<Scalar>(current_state->rep->get_mode(), order_int);
               }
 
-              this->integral(n, jacobian_x_weights, func, geometry, result_local);
+              this->integral(n, jacobian_x_weights, func, &geometry, result_local);
 
-              geometry->free();
-              delete geometry;
               delete[] jacobian_x_weights;
 
               for (int i = 0; i < source_functions_size; i++)

@@ -96,7 +96,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DefaultNormFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const
+    Scalar DefaultNormFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomVol<double> *e) const
     {
       switch (this->normType)
       {
@@ -121,7 +121,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DefaultNormFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const
+    Scalar DefaultNormFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomSurf<double> *e) const
     {
       switch (this->normType)
       {
@@ -150,7 +150,7 @@ namespace Hermes
 
     template<typename Scalar>
     Scalar MatrixDefaultNormFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-      Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
+      Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const
     {
       switch (this->normType)
       {
@@ -172,7 +172,7 @@ namespace Hermes
 
     template<typename Scalar>
     Ord MatrixDefaultNormFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-      Geom<Ord> *e, Func<Ord> **ext) const
+      GeomVol<Ord> *e, Func<Ord> **ext) const
     {
       switch (this->normType)
       {
@@ -204,7 +204,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar VectorDefaultNormFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
+    Scalar VectorDefaultNormFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const
     {
       switch (this->normType)
       {
@@ -226,7 +226,7 @@ namespace Hermes
 
     template<typename Scalar>
     Ord VectorDefaultNormFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-      Geom<Ord> *e, Func<Ord> **ext) const
+      GeomVol<Ord> *e, Func<Ord> **ext) const
     {
       switch (this->normType)
       {

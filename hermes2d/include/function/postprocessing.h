@@ -16,6 +16,7 @@
 #ifndef __H2D_POSTPROCESSING_H
 #define __H2D_POSTPROCESSING_H
 
+#include "../forms.h"
 #include "../function/mesh_function.h"
 #include "../space/space.h"
 
@@ -133,11 +134,6 @@ namespace Hermes
         /// One marker overload.
         virtual Scalar* calculate(std::string marker);
 
-        /// The integral description.
-        /// \param[in] n - number of integration points.
-        /// \param[in] result - preallocated (see number_of_integrals in the constructor) and zeroed array for the results.
-        virtual void integral(int n, double* wt, Func<Scalar> **fns, Geom<double> *e, Scalar* result) = 0;
-
         /// The integration order calculation.
         virtual void order(Func<Hermes::Ord> **fns, Hermes::Ord* result) = 0;
       
@@ -156,6 +152,11 @@ namespace Hermes
         VolumetricIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);
         VolumetricIntegralCalculator(MeshFunctionSharedPtrVector<Scalar> source_functions, int number_of_integrals);
 
+        /// The integral description.
+        /// \param[in] n - number of integration points.
+        /// \param[in] result - preallocated (see number_of_integrals in the constructor) and zeroed array for the results.
+        virtual void integral(int n, double* wt, Func<Scalar> **fns, GeomVol<double> *e, Scalar* result) = 0;
+
         /// Main method returning the value.
         /// Not designed to be overriden.
         Scalar* calculate(std::vector<std::string> markers);
@@ -169,6 +170,11 @@ namespace Hermes
       public:
         SurfaceIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);
         SurfaceIntegralCalculator(MeshFunctionSharedPtrVector<Scalar> source_functions, int number_of_integrals);
+
+        /// The integral description.
+        /// \param[in] n - number of integration points.
+        /// \param[in] result - preallocated (see number_of_integrals in the constructor) and zeroed array for the results.
+        virtual void integral(int n, double* wt, Func<Scalar> **fns, GeomSurf<double> *e, Scalar* result) = 0;
 
         /// Main method returning the value.
         /// Not designed to be overriden.

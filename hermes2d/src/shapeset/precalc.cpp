@@ -55,7 +55,7 @@ namespace Hermes
     {
       Function<double>::precalculate(order, mask);
 
-      unsigned short np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
+      unsigned char np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
       double3* pt = this->quads[cur_quad]->get_points(order, this->element->get_mode());
 
       unsigned short j, k;
@@ -240,7 +240,7 @@ namespace Hermes
       {
         Function<double>::precalculate(order, mask);
 
-        unsigned short np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
+        unsigned char np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
         double3* pt = this->quads[cur_quad]->get_points(order, this->element->get_mode());
 
         unsigned short j, k;

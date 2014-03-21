@@ -55,7 +55,7 @@ namespace Hermes
       /// a matrix that has nonzeros in these blocks. The Table serves for optional
       /// weighting of matrix blocks in systems.
       /// Returns false if there are no states to assemble.
-      bool prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, SpaceSharedPtrVector<Scalar> spaces, Traverse::State**& states, int& num_states);
+      bool prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, SpaceSharedPtrVector<Scalar> spaces, Traverse::State**& states, unsigned int& num_states);
       
       /// Sets new_ spaces for the instance.
       void set_spaces(SpaceSharedPtrVector<Scalar> spaces);

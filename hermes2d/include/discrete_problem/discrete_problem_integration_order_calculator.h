@@ -47,13 +47,15 @@ namespace Hermes
       void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps);
 
       /// Matrix volumetric forms - calculate the integration order.
-      int calc_order_matrix_form(const SpaceSharedPtrVector<Scalar> spaces, MatrixForm<Scalar>* mfv, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext);
+      template<typename MatrixFormType>
+      int calc_order_matrix_form(const SpaceSharedPtrVector<Scalar>& spaces, MatrixFormType* mf, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext);
 
       /// Vector volumetric forms - calculate the integration order.
-      int calc_order_vector_form(const SpaceSharedPtrVector<Scalar> spaces, VectorForm<Scalar>* mfv, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext);
+      template<typename VectorFormType>
+      int calc_order_vector_form(const SpaceSharedPtrVector<Scalar>& spaces, VectorFormType* vf, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext);
 
       /// Order calculation.
-      int calculate_order(const SpaceSharedPtrVector<Scalar> spaces, RefMap** current_refmaps, WeakFormSharedPtr<Scalar> current_wf);
+      int calculate_order(const SpaceSharedPtrVector<Scalar>& spaces, RefMap** current_refmaps, WeakFormSharedPtr<Scalar> current_wf);
     
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for previous nonlinear iterations.

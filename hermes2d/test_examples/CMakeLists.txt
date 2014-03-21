@@ -33,3 +33,5 @@ add_subdirectory("14-error-calculation")
 add_subdirectory("15-adaptivity-matrix-reuse-simple")
 
 add_subdirectory("16-adaptivity-matrix-reuse-system")
+
+add_subdirectory("17-adaptivity-matrix-reuse-layer-interior")

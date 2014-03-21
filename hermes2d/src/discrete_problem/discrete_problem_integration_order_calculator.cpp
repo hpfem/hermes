@@ -34,7 +34,8 @@ namespace Hermes
   namespace Hermes2D
   {
     /// Geometry instance for order calculation.
-    static Geom<Hermes::Ord> geom_order;
+    static GeomVol<Hermes::Ord> geom_order_vol;
+    static GeomSurf<Hermes::Ord> geom_order_surf;
     /// "Fake" integration weight for order calculation.
     double wt_order = 1.0;
 
@@ -76,7 +77,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(const SpaceSharedPtrVector<Scalar> spaces, RefMap** current_refmaps, WeakFormSharedPtr<Scalar> current_wf)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(const SpaceSharedPtrVector<Scalar>& spaces, RefMap** current_refmaps, WeakFormSharedPtr<Scalar> current_wf)
     {
       // Order set to constant.
       if (current_wf->global_integration_order_set)
@@ -167,7 +168,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(const SpaceSharedPtrVector<Scalar> spaces, MatrixForm<Scalar> *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
+    template<typename MatrixFormType>
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(const SpaceSharedPtrVector<Scalar>& spaces, MatrixFormType *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
     {
       int order;
 
@@ -202,7 +204,11 @@ namespace Hermes
       Func<Hermes::Ord>* ov = &func_order[max_order_i + (spaces[form->i]->shapeset->num_components > 1 ? 1 : 0)];
 
       // Total order of the vector form.
-      Hermes::Ord o = form->ord(1, &wt_order, u_ext, ou, ov, &geom_order, local_ext);
+      Hermes::Ord o;
+      if(dynamic_cast<MatrixFormVol<Scalar>*>(form))
+        o = (dynamic_cast<MatrixFormVol<Scalar>*>(form))->ord(1, &wt_order, u_ext, ou, ov, &geom_order_vol, local_ext);
+      else
+        o = (dynamic_cast<MatrixFormSurf<Scalar>*>(form))->ord(1, &wt_order, u_ext, ou, ov, &geom_order_surf, local_ext);
 
       adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
@@ -214,7 +220,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_vector_form(const SpaceSharedPtrVector<Scalar> spaces, VectorForm<Scalar> *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
+    template<typename VectorFormType>
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_vector_form(const SpaceSharedPtrVector<Scalar>& spaces, VectorFormType *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
     {
       int order;
 
@@ -239,7 +246,11 @@ namespace Hermes
       Func<Hermes::Ord>* ov = &func_order[max_order_i + (spaces[form->i]->shapeset->num_components > 1 ? 1 : 0)];
 
       // Total order of the vector form.
-      Hermes::Ord o = form->ord(1, &wt_order, u_ext, ov, &geom_order, local_ext);
+      Hermes::Ord o;
+      if (dynamic_cast<VectorFormVol<Scalar>*>(form))
+        o = (dynamic_cast<VectorFormVol<Scalar>*>(form))->ord(1, &wt_order, u_ext, ov, &geom_order_vol, local_ext);
+      else
+        o = (dynamic_cast<VectorFormSurf<Scalar>*>(form))->ord(1, &wt_order, u_ext, ov, &geom_order_surf, local_ext);
 
       adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
@@ -395,7 +406,7 @@ namespace Hermes
     {
       NeighborSearch<Scalar>* nbs_u = neighbor_searches[mfDG->j];
 
-      unsigned int prev_size = this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset;
+      unsigned short prev_size = this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset;
 
       // Order to return.
       int order = 0;
@@ -403,7 +414,7 @@ namespace Hermes
       DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset];
 
       if (current_u_ext)
-      for (int i = 0; i < prev_size; i++)
+      for (unsigned short i = 0; i < prev_size; i++)
       if (current_u_ext[i + mfDG->u_ext_offset])
         u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + mfDG->u_ext_offset]);
       else
@@ -434,7 +445,7 @@ namespace Hermes
       // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
 
       // Total order of the matrix form.
-      Ord o = mfDG->ord(1, &wt_order, u_ext_ord, ou, ov, &geom_order, ext_ord);
+      Ord o = mfDG->ord(1, &wt_order, u_ext_ord, ou, ov, &geom_order_surf, ext_ord);
 
       adjust_order_to_refmaps(mfDG, order, &o, current_refmaps);
 
@@ -483,7 +494,7 @@ namespace Hermes
       DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(&func_order[max_order_i], neighbor_supp_v);
 
       // Total order of the matrix form.
-      Ord o = vfDG->ord(1, &wt_order, u_ext_ord, ov, &geom_order, ext_ord);
+      Ord o = vfDG->ord(1, &wt_order, u_ext_ord, ov, &geom_order_surf, ext_ord);
 
       adjust_order_to_refmaps(vfDG, order, &o, current_refmaps);
 

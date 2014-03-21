@@ -40,7 +40,7 @@ namespace Hermes
       protected:
         Parallel();
       protected:
-        int num_threads_used;
+        unsigned char num_threads_used;
         std::string exceptionMessageCaughtInParallelBlock;
       };
     }

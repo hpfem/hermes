@@ -84,8 +84,12 @@ namespace Hermes
       this->filename = e.filename;
     }
 
+    NullException::NullException() : Exception()
+    {
+      this->message << "A pointer is invalid (nullptr)";
+    }
 
-    NullException::NullException(int param_idx) : Exception()
+    NullException::NullException(unsigned int param_idx) : Exception()
     {
       this->param_idx = param_idx;
       this->item_idx = -1;
@@ -93,7 +97,7 @@ namespace Hermes
       this->message << "Parameter number " << param_idx << " is nullptr";
     }
 
-    NullException::NullException(int param_idx, int item_idx) : Exception()
+    NullException::NullException(unsigned int param_idx, unsigned int item_idx) : Exception()
     {
       this->param_idx = param_idx;
       this->item_idx = item_idx;
@@ -101,12 +105,12 @@ namespace Hermes
       this->message << "Element number " << item_idx << " of parameter number " << param_idx << " is nullptr";
     }
 
-    int NullException::get_param_idx() const
+    unsigned int NullException::get_param_idx() const
     {
       return param_idx;
     }
 
-    int NullException::get_item_idx() const
+    unsigned int NullException::get_item_idx() const
     {
       return item_idx;
     }
@@ -119,7 +123,21 @@ namespace Hermes
       item_idx = e.get_item_idx();
     }
 
-    LengthException::LengthException(int param_idx, int wrong, int right) : Exception()
+    LengthException::LengthException() : Exception()
+    {
+      this->message.clear();
+      this->message << "Two instances do not have the same length and they should";
+    }
+
+    LengthException::LengthException(unsigned int wrong, unsigned int right) : Exception()
+    {
+      this->wrong = wrong;
+      this->right = right;
+      this->message.clear();
+      this->message << "An instance has length " << wrong << " and should have " << right;
+    }
+
+    LengthException::LengthException(unsigned int param_idx, unsigned int wrong, unsigned int right) : Exception()
     {
       fst_param_idx = param_idx;
       this->wrong = wrong;
@@ -129,7 +147,7 @@ namespace Hermes
       this->message << "Parameter number " << fst_param_idx << " have length " << wrong << " and should have " << right;
     }
 
-    LengthException::LengthException(int fst_param_idx, int snd_param_idx, int first, int second) : Exception()
+    LengthException::LengthException(unsigned int fst_param_idx, unsigned int snd_param_idx, unsigned int first, unsigned int second) : Exception()
     {
       this->fst_param_idx = fst_param_idx;
       this->snd_param_idx = snd_param_idx;
@@ -139,22 +157,22 @@ namespace Hermes
       this->message << "Parameter number " << fst_param_idx << " have length " << wrong << " and parameter number " << snd_param_idx << " have length " << right << " The lengths should be same.";
     }
 
-    int LengthException::get_first_param_idx() const
+    unsigned int LengthException::get_first_param_idx() const
     {
       return fst_param_idx;
     }
 
-    int LengthException::get_second_param_idx() const
+    unsigned int LengthException::get_second_param_idx() const
     {
       return snd_param_idx;
     }
 
-    int LengthException::get_first_length() const
+    unsigned int LengthException::get_first_length() const
     {
       return wrong;
     }
 
-    int LengthException::get_expected_length() const
+    unsigned int LengthException::get_expected_length() const
     {
       return right;
     }

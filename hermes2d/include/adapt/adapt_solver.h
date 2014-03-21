@@ -31,23 +31,23 @@ namespace Hermes
     {
     public:
       AdaptSolverCriterion();
-      virtual bool done(double error, int iteration) = 0;
+      virtual bool done(double error, unsigned short iteration) = 0;
     };
 
     class HERMES_API AdaptSolverCriterionErrorThreshold : public AdaptSolverCriterion
     {
     public:
       AdaptSolverCriterionErrorThreshold(double error_threshold);
-      virtual bool done(double error, int iteration);
+      virtual bool done(double error, unsigned short iteration);
       double error_threshold;
     };
 
     class HERMES_API AdaptSolverCriterionFixed : public AdaptSolverCriterion
     {
     public:
-      AdaptSolverCriterionFixed(int refinement_levels);
-      virtual bool done(double error, int iteration);
-      int refinement_levels;
+      AdaptSolverCriterionFixed(unsigned short refinement_levels);
+      virtual bool done(double error, unsigned short iteration);
+      unsigned short refinement_levels;
     };
 
     /// h-, p-, hp-adaptivity
@@ -95,6 +95,9 @@ namespace Hermes
 
       /// Switch visualization on / off.
       void switch_visualization(bool on_off);
+
+      /// Add exact solutions for exact solver calculation.
+      void set_exact_solutions(MeshFunctionSharedPtrVector<Scalar> exact_slns);
 
       /// Setters.
       void set_initial_spaces(SpaceSharedPtrVector<Scalar>);
@@ -165,17 +168,18 @@ namespace Hermes
 
       /// Internal structures - Stopping criterion for each refinement step.
       /// This class changes this instance during the solve() method: no.
-      /// Can user change this during adaptation: [will be used from the following step onwards].
+      /// Can user change this during adaptation: yes [will be used from the following step onwards].
       AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step;
 
       /// Internal structures - Stopping criterion for each refinement step.
       /// This class changes this instance during the solve() method: no.
-      /// Can user change this during adaptation: [will be used from the following step onwards].
+      /// Can user change this during adaptation: yes [will be used from the following step onwards].
       RefinementSelectors::SelectorVector<Scalar> selectors;
 
       /// The solution being returned on demand.
       MeshFunctionSharedPtrVector<Scalar> ref_slns;
       MeshFunctionSharedPtrVector<Scalar> slns;
+      MeshFunctionSharedPtrVector<Scalar> exact_slns;
 
       /// Views - used only if visualization is ON.
       std::vector<Views::ScalarView*> scalar_views;
@@ -189,26 +193,31 @@ namespace Hermes
       /// Strictly private - solver.
       SolverType* solver;
 
-      /// Strictly private - counter.
-      int adaptivity_step;
+      /// Strictly private - adaptivity steps counter.
+      unsigned short adaptivity_step;
 
       /// Strictly private - elements to reassemble.
       /// Internal data: std::pair: [0] - element id, [1] - component (for multimesh).
       std::set<std::pair<int, unsigned char> > elements_to_reassemble;
       std::set<std::pair<int, unsigned char> > DOFs_to_reassemble;
 
+      /// Previous algebraic structures for reusal - matrix.
       CSCMatrix<Scalar>* prev_mat;
+      /// Previous algebraic structures for reusal - rhs.
       Vector<Scalar>* prev_rhs, *prev_dirichlet_lift_rhs;
 
-      /// use Hermes views to display stuff.
+      /// Use Hermes views to display stuff.
       bool visualization;
 
       /// For info only.
-      int total_elements_prev_spaces;
+      unsigned int total_elements_prev_spaces;
 
       /// Utility simple selectors.
       RefinementSelectors::SelectorVector<Scalar> hOnlySelectors;
       RefinementSelectors::SelectorVector<Scalar> pOnlySelectors;
+
+      /// Strictly private - size of the system (this dimension is what the size of all other data structures is compared to).
+      unsigned char number_of_equations;
     };
   }
 }

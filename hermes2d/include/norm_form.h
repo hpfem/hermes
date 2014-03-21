@@ -66,7 +66,7 @@ namespace Hermes
     public:
       NormFormVol(int i, int j);
 
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const = 0;
+      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomVol<double> *e) const = 0;
     };
 
     template<typename Scalar>
@@ -75,7 +75,7 @@ namespace Hermes
     public:
       NormFormSurf(int i, int j);
 
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const = 0;
+      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomSurf<double> *e) const = 0;
     };
 
     template<typename Scalar>
@@ -84,7 +84,7 @@ namespace Hermes
     public:
       NormFormDG(int i, int j);
 
-      virtual Scalar value(int n, double *wt, DiscontinuousFunc<Scalar> *u, DiscontinuousFunc<Scalar> *v, Geom<double> *e) const = 0;
+      virtual Scalar value(int n, double *wt, DiscontinuousFunc<Scalar> *u, DiscontinuousFunc<Scalar> *v, GeomSurf<double> *e) const = 0;
     };
 
     template <typename Scalar>
@@ -93,7 +93,7 @@ namespace Hermes
     public:
       DefaultNormFormVol(int i, int j, NormType normType);
       
-      Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
+      Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomVol<double> *e) const;
 
     protected:
       NormType normType;
@@ -105,7 +105,7 @@ namespace Hermes
     public:
       DefaultNormFormSurf(int i, int j, NormType normType);
       
-      Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
+      Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomSurf<double> *e) const;
 
     protected:
       NormType normType;
@@ -118,10 +118,10 @@ namespace Hermes
       MatrixDefaultNormFormVol(int i, int j, NormType normType);
 
       Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-                           Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const;
+                           Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const;
 
       Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                      Geom<Ord> *e, Func<Ord> **ext) const;
+                      GeomVol<Ord> *e, Func<Ord> **ext) const;
     
       MatrixFormVol<Scalar>* clone() const;
 
@@ -135,9 +135,9 @@ namespace Hermes
     public:
       VectorDefaultNormFormVol(int i, NormType normType);
 
-      Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const;
+      Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const;
 
-      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, Func<Ord> **ext) const;
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, GeomVol<Ord> *e, Func<Ord> **ext) const;
     
       VectorFormVol<Scalar>* clone() const;
 

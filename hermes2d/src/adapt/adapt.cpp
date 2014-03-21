@@ -200,9 +200,8 @@ namespace Hermes
         throw Exceptions::Exception("element errors have to be calculated first, call ErrorCalculator::calculate_errors().");
       if (refinement_selectors.empty())
         throw Exceptions::NullException(1);
-      if (spaces.size() != refinement_selectors.size())
-        throw Exceptions::LengthException(1, refinement_selectors.size(), spaces.size());
-
+      Helpers::check_length(refinement_selectors, this->spaces);
+      
       // Get meshes
       for (int j = 0; j < this->num; j++)
       {
@@ -439,7 +438,7 @@ namespace Hermes
         // Traverse
         this->meshes.push_back(union_mesh);
         Traverse trav(this->meshes.size());
-        int num_states;
+        unsigned int num_states;
         Traverse::State** states = trav.get_states(meshes, num_states);
 #pragma omp parallel num_threads(this->num_threads_used)
         {

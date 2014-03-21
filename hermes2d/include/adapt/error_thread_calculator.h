@@ -17,6 +17,7 @@
 #define __H2D_ERROR_THREAD_CALCULATOR_H
 
 #include "error_calculator.h"
+#include "../forms.h"
 
 namespace Hermes
 {
@@ -24,6 +25,8 @@ namespace Hermes
   {
     template<typename Scalar> class ErrorCalculator;
     template<typename Scalar> class NeighborSearch;
+    template<typename Scalar> class GeomVol;
+    template<typename Scalar> class GeomSurf;
 
     template<typename Scalar>
     class ErrorThreadCalculator
@@ -73,7 +76,8 @@ namespace Hermes
       void evaluate_DG_form(NormFormDG<Scalar>* form, DiscontinuousFunc<Scalar>* difference_func_i, DiscontinuousFunc<Scalar>* difference_func_j, DiscontinuousFunc<Scalar>* rsln_i, DiscontinuousFunc<Scalar>* rsln_j, double* error, double* norm);
 
       unsigned char n_quadrature_points;
-      Geom<double>* geometry;
+      GeomVol<double> geometry_vol;
+      GeomSurf<double> geometry_surf;
       double* jacobian_x_weights;
       Solution<Scalar>** slns;
       Solution<Scalar>** rslns;

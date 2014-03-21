@@ -289,7 +289,7 @@ namespace Hermes
     void RefMap::calc_tangent(int edge, int eo)
     {
       int i, j;
-      unsigned short np = quad_2d->get_num_points(eo, element->get_mode());
+      unsigned char np = quad_2d->get_num_points(eo, element->get_mode());
       double3* tan = this->tan[edge];
       int a = edge, b = element->next_vert(edge);
 

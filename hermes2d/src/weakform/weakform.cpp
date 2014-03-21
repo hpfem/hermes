@@ -402,21 +402,7 @@ namespace Hermes
     {
     }
 
-    template<typename Scalar>
-    Scalar MatrixForm<Scalar>::value(int n, double *wt, Func<Scalar> **u_ext, Func<double> *u, Func<double> *v,
-      Geom<double> *e, Func<Scalar> **ext) const
-    {
-      throw Hermes::Exceptions::MethodNotOverridenException("MatrixForm<Scalar>::value");
-      return 0.0;
-    }
-
-    template<typename Scalar>
-    Hermes::Ord MatrixForm<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> **u_ext, Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-      Geom<Hermes::Ord> *e, Func<Ord> **ext) const
-    {
-      throw Hermes::Exceptions::MethodNotOverridenException("MatrixForm<Scalar>::ord");
-      return Hermes::Ord();
-    }
+    
 
     template<typename Scalar>
     MatrixFormVol<Scalar>::MatrixFormVol(unsigned int i, unsigned int j) :
@@ -442,6 +428,22 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Scalar MatrixFormVol<Scalar>::value(int n, double *wt, Func<Scalar> **u_ext, Func<double> *u, Func<double> *v,
+      GeomVol<double> *e, Func<Scalar> **ext) const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormVol<Scalar>::value");
+      return 0.0;
+    }
+
+    template<typename Scalar>
+    Hermes::Ord MatrixFormVol<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> **u_ext, Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
+      GeomVol<Hermes::Ord> *e, Func<Ord> **ext) const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormVol<Scalar>::ord");
+      return Hermes::Ord();
+    }
+
+    template<typename Scalar>
     MatrixFormVol<Scalar>* MatrixFormVol<Scalar>::clone() const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormVol<Scalar>::clone()");
@@ -452,6 +454,22 @@ namespace Hermes
     MatrixFormSurf<Scalar>::MatrixFormSurf(unsigned int i, unsigned int j) :
       MatrixForm<Scalar>(i, j)
     {
+    }
+
+    template<typename Scalar>
+    Scalar MatrixFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> **u_ext, Func<double> *u, Func<double> *v,
+      GeomSurf<double> *e, Func<Scalar> **ext) const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormSurf<Scalar>::value");
+      return 0.0;
+    }
+
+    template<typename Scalar>
+    Hermes::Ord MatrixFormSurf<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> **u_ext, Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
+      GeomSurf<Hermes::Ord> *e, Func<Ord> **ext) const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormSurf<Scalar>::ord");
+      return Hermes::Ord();
     }
 
     template<typename Scalar>
@@ -480,7 +498,7 @@ namespace Hermes
 
     template<typename Scalar>
     Scalar MatrixFormDG<Scalar>::value(int n, double *wt, DiscontinuousFunc<Scalar> **u_ext, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v,
-      Geom<double> *e, DiscontinuousFunc<Scalar> **ext) const
+      GeomSurf<double> *e, DiscontinuousFunc<Scalar> **ext) const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormDG<Scalar>::value");
       return 0.0;
@@ -488,7 +506,7 @@ namespace Hermes
 
     template<typename Scalar>
     Hermes::Ord MatrixFormDG<Scalar>::ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> **u_ext, DiscontinuousFunc<Hermes::Ord> *u, DiscontinuousFunc<Hermes::Ord> *v,
-      Geom<Hermes::Ord> *e, DiscontinuousFunc<Ord> **ext) const
+      GeomSurf<Hermes::Ord> *e, DiscontinuousFunc<Ord> **ext) const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormDG<Scalar>::ord");
       return Hermes::Ord();
@@ -524,21 +542,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar VectorForm<Scalar>::value(int n, double *wt, Func<Scalar> **u_ext, Func<double> *v,
-      Geom<double> *e, Func<Scalar> **ext) const
+    Scalar VectorFormVol<Scalar>::value(int n, double *wt, Func<Scalar> **u_ext, Func<double> *v,
+      GeomVol<double> *e, Func<Scalar> **ext) const
     {
-      throw Hermes::Exceptions::MethodNotOverridenException("VectorForm<Scalar>::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorFormVol<Scalar>::value");
       return 0.0;
     }
 
     template<typename Scalar>
-    Hermes::Ord VectorForm<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> **u_ext, Func<Hermes::Ord> *v,
-      Geom<Hermes::Ord> *e, Func<Ord> **ext) const
+    Hermes::Ord VectorFormVol<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> **u_ext, Func<Hermes::Ord> *v,
+      GeomVol<Hermes::Ord> *e, Func<Ord> **ext) const
     {
-      throw Hermes::Exceptions::MethodNotOverridenException("VectorForm<Scalar>::ord");
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorFormVol<Scalar>::ord");
       return Hermes::Ord();
     }
-
+    
     template<typename Scalar>
     VectorFormVol<Scalar>* VectorFormVol<Scalar>::clone() const
     {
@@ -546,10 +564,27 @@ namespace Hermes
       return nullptr;
     }
 
+
     template<typename Scalar>
     VectorFormSurf<Scalar>::VectorFormSurf(unsigned int i) :
       VectorForm<Scalar>(i)
     {
+    }
+
+    template<typename Scalar>
+    Scalar VectorFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> **u_ext, Func<double> *v,
+      GeomSurf<double> *e, Func<Scalar> **ext) const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorFormSurf<Scalar>::value");
+      return 0.0;
+    }
+
+    template<typename Scalar>
+    Hermes::Ord VectorFormSurf<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> **u_ext, Func<Hermes::Ord> *v,
+      GeomSurf<Hermes::Ord> *e, Func<Ord> **ext) const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorFormSurf<Scalar>::ord");
+      return Hermes::Ord();
     }
 
     template<typename Scalar>
@@ -578,7 +613,7 @@ namespace Hermes
 
     template<typename Scalar>
     Scalar VectorFormDG<Scalar>::value(int n, double *wt, DiscontinuousFunc<Scalar> **u_ext, Func<double> *v,
-      Geom<double> *e, DiscontinuousFunc<Scalar> **ext) const
+      GeomSurf<double> *e, DiscontinuousFunc<Scalar> **ext) const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("VectorFormDG<Scalar>::value");
       return 0.0;
@@ -586,7 +621,7 @@ namespace Hermes
 
     template<typename Scalar>
     Hermes::Ord VectorFormDG<Scalar>::ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> **u_ext, Func<Hermes::Ord> *v,
-      Geom<Hermes::Ord> *e, DiscontinuousFunc<Ord> **ext) const
+      GeomSurf<Hermes::Ord> *e, DiscontinuousFunc<Ord> **ext) const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("VectorFormDG<Scalar>::ord");
       return Hermes::Ord();

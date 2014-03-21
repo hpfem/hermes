@@ -31,22 +31,20 @@ namespace Hermes
     {
     }
 
-    AdaptSolverCriterionErrorThreshold::AdaptSolverCriterionErrorThreshold(double error_tolerance) : AdaptSolverCriterion()
+    AdaptSolverCriterionErrorThreshold::AdaptSolverCriterionErrorThreshold(double error_tolerance) : AdaptSolverCriterion(), error_threshold(error_threshold)
     {
-      this->error_threshold = error_threshold;
     }
 
-    bool AdaptSolverCriterionErrorThreshold::done(double error, int iteration)
+    bool AdaptSolverCriterionErrorThreshold::done(double error, unsigned short iteration)
     {
       return error < this->error_threshold;
     }
 
-    AdaptSolverCriterionFixed::AdaptSolverCriterionFixed(int refinement_levels) : AdaptSolverCriterion()
+    AdaptSolverCriterionFixed::AdaptSolverCriterionFixed(unsigned short refinement_levels) : AdaptSolverCriterion(), refinement_levels(refinement_levels)
     {
-      this->refinement_levels = refinement_levels;
     }
 
-    bool AdaptSolverCriterionFixed::done(double error, int iteration)
+    bool AdaptSolverCriterionFixed::done(double error, unsigned short iteration)
     {
       return iteration >= this->refinement_levels;
     }
@@ -71,6 +69,8 @@ namespace Hermes
     template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::init()
     {
+      this->number_of_equations = this->spaces.size();
+      Helpers::check_length(this->selectors, this->number_of_equations);
       this->solve_method_running = false;
       this->visualization = false;
       this->prev_mat = nullptr;
@@ -117,9 +117,11 @@ namespace Hermes
       static std::set<std::pair<int, unsigned char> >* current_DOFs_to_reassemble;
       static SpaceSharedPtrVector<Scalar>* current_ref_spaces;
       static SpaceSharedPtrVector<Scalar>* current_prev_ref_spaces;
-      static CSCMatrix<Scalar>* prev_mat;
-      static Vector<Scalar>* prev_rhs;
-      static Vector<Scalar>* prev_dirichlet_lift_rhs;
+      static unsigned char current_number_of_equations;
+      static CSCMatrix<Scalar>* current_prev_mat;
+      static Vector<Scalar>* current_prev_rhs;
+      static Vector<Scalar>* current_prev_dirichlet_lift_rhs;
+
       static bool** reusable_DOFs;
       static bool** reusable_Dirichlet;
     };
@@ -140,13 +142,16 @@ namespace Hermes
     SpaceSharedPtrVector<Scalar>* StateReassemblyHelper<Scalar>::current_prev_ref_spaces;
 
     template<typename Scalar>
-    CSCMatrix<Scalar>* StateReassemblyHelper<Scalar>::prev_mat;
+    CSCMatrix<Scalar>* StateReassemblyHelper<Scalar>::current_prev_mat;
 
     template<typename Scalar>
-    Vector<Scalar>* StateReassemblyHelper<Scalar>::prev_rhs;
+    Vector<Scalar>* StateReassemblyHelper<Scalar>::current_prev_rhs;
 
     template<typename Scalar>
-    Vector<Scalar>* StateReassemblyHelper<Scalar>::prev_dirichlet_lift_rhs;
+    Vector<Scalar>* StateReassemblyHelper<Scalar>::current_prev_dirichlet_lift_rhs;
+
+    template<typename Scalar>
+    unsigned char StateReassemblyHelper<Scalar>::current_number_of_equations;
 
     template<typename Scalar>
     bool** StateReassemblyHelper<Scalar>::reusable_DOFs;
@@ -157,7 +162,7 @@ namespace Hermes
     //#define DEBUG_VIEWS
 
     template<typename Scalar>
-    void get_states_to_reassemble(Traverse::State**& states, int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    void get_states_to_reassemble(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
       if (StateReassemblyHelper<Scalar>::current_iteration == 1)
       {
@@ -170,14 +175,13 @@ namespace Hermes
       // - time measurement
       Hermes::Mixins::TimeMeasurable cpu_time;
       // - size of spaces
-      int spaces_size = StateReassemblyHelper<Scalar>::current_ref_spaces->size();
       // - shortcuts for spaces, to speed up indirect accesses
-      Space<Scalar>** prev_ref_spaces = new Space<Scalar>*[spaces_size];
-      Space<Scalar>** ref_spaces = new Space<Scalar>*[spaces_size];
+      Space<Scalar>** prev_ref_spaces = new Space<Scalar>*[StateReassemblyHelper<Scalar>::current_number_of_equations];
+      Space<Scalar>** ref_spaces = new Space<Scalar>*[StateReassemblyHelper<Scalar>::current_number_of_equations];
       // - number of elements of all new reference spaces combined
       int total_elements_new_spaces = 0;
       // - fill the above structures
-      for (int i = 0; i < spaces_size; i++)
+      for (unsigned short i = 0; i < StateReassemblyHelper<Scalar>::current_number_of_equations; i++)
       {
         prev_ref_spaces[i] = StateReassemblyHelper<Scalar>::current_prev_ref_spaces->at(i).get();
         ref_spaces[i] = StateReassemblyHelper<Scalar>::current_ref_spaces->at(i).get();
@@ -187,28 +191,28 @@ namespace Hermes
       // -- we could maybe directly used the resulting states (in which we are interested), but it would be complicated.
       std::set<std::pair<int, unsigned char> > newSpace_elements_to_reassemble;
       // - number of DOFs of the previous spaces.
-      int prev_ref_system_size = StateReassemblyHelper<Scalar>::prev_mat->get_size();
-      int ref_system_size = Space<Scalar>::get_num_dofs(*StateReassemblyHelper<Scalar>::current_ref_spaces);
+      unsigned int prev_ref_system_size = StateReassemblyHelper<Scalar>::current_prev_mat->get_size();
+      unsigned int ref_system_size = Space<Scalar>::get_num_dofs(*StateReassemblyHelper<Scalar>::current_ref_spaces);
       // - DOF to DOF map of those DOFs we can reuse. -1s are there to distinguish those we cannot.
       int* DOF_to_DOF_map = malloc_with_check<int>(prev_ref_system_size);
-      for (int i = 0; i < prev_ref_system_size; i++)
+      for (unsigned int i = 0; i < prev_ref_system_size; i++)
         DOF_to_DOF_map[i] = -1;
       // - DOF to reassemble.
       (*StateReassemblyHelper<Scalar>::reusable_DOFs) = calloc_with_check<bool>(ref_system_size);
-      (*StateReassemblyHelper<Scalar>::reusable_Dirichlet) = calloc_with_check<bool>(spaces_size);
+      (*StateReassemblyHelper<Scalar>::reusable_Dirichlet) = calloc_with_check<bool>(StateReassemblyHelper<Scalar>::current_number_of_equations);
       // - utility assembly lists.
       AsmList<Scalar> al, al_prev;
       // - dummy functions for traversing the previous and current reference spaces together
       MeshFunctionSharedPtrVector<Scalar> dummy_fns;
-      for (int i = 0; i < spaces_size; i++)
+      for (unsigned short i = 0; i < StateReassemblyHelper<Scalar>::current_number_of_equations; i++)
         dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_prev_ref_spaces->at(i)->get_mesh()));
-      for (int i = 0; i < spaces_size; i++)
+      for (unsigned short i = 0; i < StateReassemblyHelper<Scalar>::current_number_of_equations; i++)
         dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_ref_spaces->at(i)->get_mesh()));
       // - (for reporting) count of DOFs needed to be reassembled
       int reusable_DOFs_count = 0;
       // Dirichlet edge markers with components.
       std::set<std::pair<int, unsigned char> > Dirichlet_markers;
-      for (unsigned char space_i = 0; space_i < spaces_size; space_i++)
+      for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
       {
         std::vector<std::string> markers = ref_spaces[space_i]->get_essential_bcs()->get_markers();
         for (unsigned short marker_i = 0; marker_i < markers.size(); marker_i++)
@@ -224,13 +228,13 @@ namespace Hermes
       cpu_time.tick();
 
       // Traverse the previous and current reference Spaces at once.
-      Traverse trav(spaces_size * 2);
-      int num_states_local;
+      Traverse trav(StateReassemblyHelper<Scalar>::current_number_of_equations * 2);
+      unsigned int num_states_local;
       Traverse::State** states_local = trav.get_states(dummy_fns, num_states_local);
       for (int local_state_i = 0; local_state_i < num_states_local; local_state_i++)
       {
         Traverse::State* current_local_state = states_local[local_state_i];
-        for (int space_i = 0; space_i < spaces_size; space_i++)
+        for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
         {
           // Dirichlet
           if (StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->find(std::pair<int, unsigned char>(-1, space_i)) == StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->end())
@@ -238,7 +242,7 @@ namespace Hermes
 
           // Mark the appropriate elements
           Element* prev_ref_element = current_local_state->e[space_i];
-          Element* ref_element = current_local_state->e[space_i + spaces_size];
+          Element* ref_element = current_local_state->e[space_i + StateReassemblyHelper<Scalar>::current_number_of_equations];
           // If the element is changed on the previous ref space, mark the appropriate element on the new ref space as to-reassemble.
           bool element_added = false;
           if (StateReassemblyHelper<Scalar>::current_elements_to_reassemble->find(std::pair<int, unsigned char>(prev_ref_element->id, space_i)) != StateReassemblyHelper<Scalar>::current_elements_to_reassemble->end())
@@ -299,9 +303,9 @@ namespace Hermes
 #endif
       Traverse::State** new_states = malloc_with_check<Traverse::State*>(num_states, true);
       int new_num_states = 0;
-      for (int state_i = 0; state_i < num_states; state_i++)
+      for (unsigned int state_i = 0; state_i < num_states; state_i++)
       {
-        for (int space_i = 0; space_i < spaces_size; space_i++)
+        for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
         {
           if (newSpace_elements_to_reassemble.find(std::pair<int, unsigned char>(states[state_i]->e[space_i]->id, space_i)) != newSpace_elements_to_reassemble.end())
           {
@@ -322,7 +326,7 @@ namespace Hermes
       ::free(reassembled);
 #endif
 
-      for (int i = 0; i < num_states; i++)
+      for (unsigned int i = 0; i < num_states; i++)
         delete states[i];
       free_with_check(states);
       new_states = realloc_with_check<Traverse::State*>(new_states, new_num_states);
@@ -335,13 +339,13 @@ namespace Hermes
       cpu_time.tick();
 
       // Now we have to use the DOF to DOF map to fill in the necessary entries in the new matrix and rhs from the old ones.
-      Scalar* Ax = StateReassemblyHelper<Scalar>::prev_mat->get_Ax();
-      int* Ai = StateReassemblyHelper<Scalar>::prev_mat->get_Ai();
-      int* Ap = StateReassemblyHelper<Scalar>::prev_mat->get_Ap();
+      Scalar* Ax = StateReassemblyHelper<Scalar>::current_prev_mat->get_Ax();
+      int* Ai = StateReassemblyHelper<Scalar>::current_prev_mat->get_Ai();
+      int* Ap = StateReassemblyHelper<Scalar>::current_prev_mat->get_Ap();
       int total_entries = 0;
       int used_entries = 0;
       unsigned short current_row_entries;
-      for (int i = 0; i < prev_ref_system_size; i++)
+      for (unsigned int i = 0; i < prev_ref_system_size; i++)
       {
         current_row_entries = Ap[i + 1] - Ap[i];
         total_entries += current_row_entries;
@@ -356,20 +360,20 @@ namespace Hermes
             }
           }
           if(rhs)
-            rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::prev_rhs->get(i));
+            rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::current_prev_rhs->get(i));
         }
       }
       if (rhs)
       {
         unsigned int running_count = 0;
-        for (int space_i = 0; space_i < spaces_size; space_i++)
+        for (unsigned short space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
         {
           if ((*StateReassemblyHelper<Scalar>::reusable_Dirichlet)[space_i])
           {
             for (unsigned int dof_i = running_count; dof_i < running_count + prev_ref_spaces[space_i]->get_num_dofs(); dof_i++)
             {
               if (DOF_to_DOF_map[dof_i] != -1)
-                rhs->add(DOF_to_DOF_map[dof_i], StateReassemblyHelper<Scalar>::prev_dirichlet_lift_rhs->get(dof_i));
+                rhs->add(DOF_to_DOF_map[dof_i], StateReassemblyHelper<Scalar>::current_prev_dirichlet_lift_rhs->get(dof_i));
             }
           }
           running_count += prev_ref_spaces[space_i]->get_num_dofs();
@@ -423,6 +427,7 @@ namespace Hermes
       StateReassemblyHelper<Scalar>::reusable_DOFs = new bool*;
       StateReassemblyHelper<Scalar>::reusable_Dirichlet = new bool*;
       this->solver->dp->set_reusable_DOFs(StateReassemblyHelper<Scalar>::reusable_DOFs, StateReassemblyHelper<Scalar>::reusable_Dirichlet);
+      StateReassemblyHelper<Scalar>::current_number_of_equations = this->number_of_equations;
 
       this->elements_to_reassemble.clear();
       this->DOFs_to_reassemble.clear();
@@ -446,7 +451,7 @@ namespace Hermes
       this->solve_method_running = false;
 
       if (this->visualization)
-      for (unsigned short i = 0; i < this->spaces.size(); i++)
+      for (unsigned short i = 0; i < this->number_of_equations; i++)
       {
         delete this->scalar_views[i];
         delete this->base_views[i];
@@ -479,7 +484,7 @@ namespace Hermes
         // Construct globally refined reference meshes and setup reference spaces.
         prev_ref_spaces = ref_spaces;
         ref_spaces.clear();
-        for (unsigned short i = 0; i < this->spaces.size(); i++)
+        for (unsigned short i = 0; i < number_of_equations; i++)
         {
           Mesh::ReferenceMeshCreator ref_mesh_creator(spaces[i]->get_mesh());
           MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
@@ -511,21 +516,21 @@ namespace Hermes
         if (this->prev_mat)
           delete this->prev_mat;
         this->prev_mat = (Hermes::Algebra::CSCMatrix<Scalar>*)(this->solver->get_jacobian()->duplicate());
-        StateReassemblyHelper<Scalar>::prev_mat = this->prev_mat;
+        StateReassemblyHelper<Scalar>::current_prev_mat = this->prev_mat;
 
         if (this->prev_rhs)
           delete this->prev_rhs;
         this->prev_rhs = this->solver->get_residual()->duplicate();
         if (this->solver->dp->add_dirichlet_lift)
           this->prev_rhs->subtract_vector(this->solver->dp->dirichlet_lift_rhs);
-        StateReassemblyHelper<Scalar>::prev_rhs = this->prev_rhs;
+        StateReassemblyHelper<Scalar>::current_prev_rhs = this->prev_rhs;
 
         if (this->solver->dp->add_dirichlet_lift)
         {
           if (this->prev_dirichlet_lift_rhs)
             delete this->prev_dirichlet_lift_rhs;
           this->prev_dirichlet_lift_rhs = this->solver->dp->dirichlet_lift_rhs->duplicate();
-          StateReassemblyHelper<Scalar>::prev_dirichlet_lift_rhs = this->prev_dirichlet_lift_rhs;
+          StateReassemblyHelper<Scalar>::current_prev_dirichlet_lift_rhs = this->prev_dirichlet_lift_rhs;
         }
 
         // Translate the resulting coefficient vector into the instance of Solution.
@@ -539,6 +544,14 @@ namespace Hermes
         OGProjection<Scalar>::project_global(spaces, ref_slns, slns);
 
         // Calculate element errors.
+        if (!this->exact_slns.empty())
+        {
+          this->info("\tCalculating exact error.");
+          this->error_calculator->calculate_errors(slns, exact_slns, false);
+          double error = this->error_calculator->get_total_error_squared() * 100;
+          this->info("\tExact error: %f.", error);
+        }
+
         this->info("\tCalculating error estimate.");
         this->error_calculator->calculate_errors(slns, ref_slns, true);
         double error = this->error_calculator->get_total_error_squared() * 100;
@@ -554,7 +567,7 @@ namespace Hermes
         {
           this->info("\tAdapting coarse mesh.");
           total_elements_prev_spaces = 0;
-          for (unsigned short i = 0; i < this->spaces.size(); i++)
+          for (unsigned short i = 0; i < number_of_equations; i++)
             total_elements_prev_spaces += this->spaces[i]->get_mesh()->get_num_active_elements();
           // For hp-adaptivity, we use the provided selectors.
           if (adaptivityType == hpAdaptivity)
@@ -583,7 +596,7 @@ namespace Hermes
       this->DOFs_to_reassemble.clear();
 
       int total_elements_prev_ref_spaces = 0;
-      for (unsigned short i = 0; i < this->spaces.size(); i++)
+      for (unsigned short i = 0; i < number_of_equations; i++)
         total_elements_prev_ref_spaces += this->ref_spaces[i]->get_mesh()->get_num_active_elements();
 
       // Identify elements that changed.
@@ -628,7 +641,7 @@ namespace Hermes
 
       // Take a look at other elements if they share a DOF that changed.
       /// \todo This is ineffective, a more effective way is to employ an improved neighbor searching.
-      for (unsigned char space_i = 0; space_i < this->ref_spaces.size(); space_i++)
+      for (unsigned char space_i = 0; space_i < this->number_of_equations; space_i++)
       {
         for_all_active_elements_fast(this->ref_spaces[space_i]->get_mesh())
         {
@@ -652,7 +665,7 @@ namespace Hermes
     template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::visualize(std::vector<SpaceSharedPtr<Scalar> >& ref_spaces)
     {
-      for (unsigned short i = 0; i < this->spaces.size(); i++)
+      for (unsigned short i = 0; i < this->number_of_equations; i++)
       {
         this->scalar_views[i]->show(this->ref_slns[i]);
         this->base_views[i]->show(ref_spaces[i]);
@@ -708,10 +721,19 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
+    void AdaptSolver<Scalar, SolverType>::set_exact_solutions(MeshFunctionSharedPtrVector<Scalar> exact_slns)
+    {
+      if (this->solve_method_running)
+        throw Exceptions::Exception("AdaptSolver asked to change the exact_slns while it was running.");
+      this->exact_slns = exact_slns;
+    }
+
+    template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::set_initial_spaces(SpaceSharedPtrVector<Scalar> spaces)
     {
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked to change the initial spaces while it was running.");
+      Helpers::check_length(this->spaces, spaces);
       this->spaces = spaces;
 
       this->adaptivity_internal->set_spaces(this->spaces);
@@ -743,6 +765,7 @@ namespace Hermes
     template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::set_selectors(RefinementSelectors::SelectorVector<Scalar> selectors)
     {
+      Helpers::check_length(this->selectors, selectors);
       this->selectors = selectors;
     }
 
@@ -786,7 +809,7 @@ namespace Hermes
     bool AdaptSolver<Scalar, SolverType>::isOkay() const
     {
       this->adaptivity_internal->check();
-      for (unsigned short i = 0; i < this->spaces.size(); i++)
+      for (unsigned short i = 0; i < this->number_of_equations; i++)
         this->spaces[i]->check();
 
       return true;

@@ -126,7 +126,7 @@ namespace Hermes
       int marker;
 
       // returns the edge orientation. This works for the unconstrained edges.
-      int get_edge_orientation(int ie) const;
+      bool get_edge_orientation(int ie) const;
       
       inline ElementMode2D  get_mode() const { 
         return (nvert == 3) ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD; 
@@ -163,14 +163,14 @@ namespace Hermes
       unsigned short iro_cache;
 
       /// Helper functions to obtain the index of the next or previous vertex/edge
-      inline unsigned char Element::next_vert(unsigned short i) const
+      inline unsigned char Element::next_vert(unsigned char i) const
       {
         return ((i + 1) % nvert);
       }
 
-      inline unsigned char Element::prev_vert(unsigned short i) const
+      inline unsigned char Element::prev_vert(unsigned char i) const
       {
-        return ((i - 1) % nvert);
+        return ((i + nvert - 1) % nvert);
       }
 
       /// Returns a pointer to the neighboring element across the edge 'ie', or

@@ -67,9 +67,9 @@ namespace Hermes
 
     extern unsigned short tri_indices[5][3];
 
-    extern unsigned short lin_np_tri[2];
-    extern unsigned short lin_np_quad[2];
-    extern unsigned short* lin_np[2];
+    extern unsigned char lin_np_tri[2];
+    extern unsigned char lin_np_quad[2];
+    extern unsigned char* lin_np[2];
 
     extern double3*  lin_tables_tri[2];
     extern double3*  lin_tables_quad[2];

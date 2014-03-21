@@ -199,15 +199,15 @@ namespace Hermes
       Scalar* target_vec, std::vector<NormType> proj_norms,
       double newton_tol, int newton_max_iter)
     {
-      int n = spaces.size();
-
       // Sanity checks.
-      if(n != source_meshfns.size()) throw Exceptions::LengthException(1, 2, n, source_meshfns.size());
-      if(target_vec == nullptr) throw Exceptions::NullException(3);
-      if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
-
-      int start_index = 0;
-      for (int i = 0; i < n; i++)
+      Helpers::check_length(source_meshfns, spaces);
+      if(!proj_norms.empty())
+        Helpers::check_length(proj_norms, spaces);
+      if(target_vec == nullptr)
+        throw Exceptions::NullException(3);
+      
+      int start_index = 0, spaces_size = spaces.size();
+      for (int i = 0; i < spaces_size; i++)
       {
         if(proj_norms.empty())
           project_global(spaces[i], source_meshfns[i], target_vec + start_index, HERMES_UNSET_NORM, newton_tol, newton_max_iter);
@@ -223,15 +223,15 @@ namespace Hermes
       Scalar* target_vec, std::vector<NormType> proj_norms,
       double newton_tol, int newton_max_iter)
     {
-      int n = spaces.size();
-
       // Sanity checks.
-      if(n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
-      if(target_vec == nullptr) throw Exceptions::NullException(3);
-      if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+      Helpers::check_length(source_slns, spaces);
+      if(!proj_norms.empty())
+        Helpers::check_length(proj_norms, spaces);
+      if(target_vec == nullptr)
+        throw Exceptions::NullException(3);
 
-      int start_index = 0;
-      for (int i = 0; i < n; i++)
+      int start_index = 0, spaces_size = spaces.size();
+      for (int i = 0; i < spaces_size; i++)
       {
         if(proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_vec + start_index, HERMES_UNSET_NORM, newton_tol, newton_max_iter);
@@ -247,15 +247,14 @@ namespace Hermes
       std::vector<NormType> proj_norms, bool delete_old_meshes,
       double newton_tol, int newton_max_iter)
     {
-      int n = spaces.size();
-
       // Sanity checks.
-      if(n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
-      if(n != target_slns.size()) throw Exceptions::LengthException(1, 2, n, target_slns.size());
-      if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
-
-      int start_index = 0;
-      for (int i = 0; i < n; i++)
+      Helpers::check_length(source_slns, spaces);
+      Helpers::check_length(target_slns, spaces);
+      if(!proj_norms.empty())
+        Helpers::check_length(proj_norms, spaces);
+      
+      int start_index = 0, spaces_size = spaces.size();
+      for (int i = 0; i < spaces_size; i++)
       {
         if(proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_slns[i], HERMES_UNSET_NORM, newton_tol, newton_max_iter);

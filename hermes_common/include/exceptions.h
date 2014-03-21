@@ -101,21 +101,23 @@ namespace Hermes
     class HERMES_API NullException : public Exception
     {
     public:
+      /// Constructor - simple.
+      NullException();
       /// Constructor
       /// \param[in] paramnIdx index of null parameter.
-      NullException(int param_idx);
+      NullException(unsigned int param_idx);
       /// Null item is passed in vector or array.
       /// \param[in] paramnIdx index of parameter.
       /// \param[in] elementIdx index of null item in array parameter.
-      NullException(int param_idx, int item_idx);
+      NullException(unsigned int param_idx, unsigned int item_idx);
       /// \return index of null parameter.
-      int get_param_idx() const;
+      unsigned int get_param_idx() const;
       /// \return index of null item in array parameter. Returns -1 if bad parrameter is not array with null item.
-      int get_item_idx() const;
+      unsigned int get_item_idx() const;
       virtual ~NullException() throw() {};
       NullException(const NullException & e);
     private:
-      int param_idx, item_idx;
+      unsigned int param_idx, item_idx;
     };
 
     /// \brief Parameter length parameter exception.
@@ -124,29 +126,35 @@ namespace Hermes
     class HERMES_API LengthException : public Exception
     {
     public:
+      /// Two parameters do not have equal length.
+      LengthException();
+      /// A parameter has wrong length - simple case.
+      /// \param[in] wrong actual length of parameter.
+      /// \param[in] right right length of parameter.
+      LengthException(unsigned int wrong, unsigned int right);
       /// One parameter has wrong length.
       /// \param[in] paramnIdx index wrong parameter.
       /// \param[in] wrong actual length of parameter.
       /// \param[in] right right length of parameter.
-      LengthException(int param_idx, int wrong, int right);
+      LengthException(unsigned int param_idx, unsigned int wrong, unsigned int right);
       /// Two parameters should have same length and they dont have.
       /// \param[in] fstParamnIdx index first parameter.
       /// \param[in] sndParamnIdx index second parameter.
       /// \param[in] first actual length of first parameter.
       /// \param[in] second actual length of second parameter.
-      LengthException(int fst_param_idx, int snd_param_idx, int first, int second);
+      LengthException(unsigned int fst_param_idx, unsigned int snd_param_idx, unsigned int first, unsigned int second);
       /// \return index of first wrong parameter.
-      int get_first_param_idx() const;
+      unsigned int get_first_param_idx() const;
       /// \return index of second wrong parameter. Returns -1 when only one parameter is wrong.
-      int get_second_param_idx() const;
+      unsigned int get_second_param_idx() const;
       /// \return length of first parameter.
-      int get_first_length() const;
+      unsigned int get_first_length() const;
       /// \return expected length of first parameter.
-      int get_expected_length() const;
+      unsigned int get_expected_length() const;
       virtual ~LengthException() throw() {};
       LengthException(const LengthException & e);
     private:
-      int fst_param_idx, snd_param_idx, wrong, right;
+      unsigned int fst_param_idx, snd_param_idx, wrong, right;
     };
 
     /// \brief Linear solver failed.

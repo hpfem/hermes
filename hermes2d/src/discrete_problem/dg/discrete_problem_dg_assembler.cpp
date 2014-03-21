@@ -228,9 +228,9 @@ namespace Hermes
       // The computation takes place here.
       typename NeighborSearch<Scalar>::ExtendedShapeset** ext_asmlist = new typename NeighborSearch<Scalar>::ExtendedShapeset*[this->spaces_size];
       int n_quadrature_points;
-      Geom<double>** geometry = malloc_with_check<Geom<double>*>(this->spaces_size);
+      GeomSurf<double>** geometry = malloc_with_check<GeomSurf<double>*>(this->spaces_size);
       double** jacobian_x_weights = malloc_with_check<double*>(this->spaces_size);
-      Geom<double>** e = malloc_with_check<Geom<double>*>(this->spaces_size);
+      GeomSurf<double>** e = malloc_with_check<GeomSurf<double>*>(this->spaces_size);
       DiscontinuousFunc<double>*** testFunctions = malloc_with_check<DiscontinuousFunc<double>**>(this->spaces_size);
 
       // Create the extended shapeset on the union of the central element and its current neighbor.
@@ -410,7 +410,6 @@ namespace Hermes
         if (this->spaces[i]->get_type() != HERMES_L2_SPACE)
           continue;
         delete[] jacobian_x_weights[i];
-        e[i]->free();
         delete e[i];
       }
 

@@ -79,19 +79,16 @@ namespace Hermes
       const std::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
       Scalar* target_vec)
     {
-      int n = spaces.size();
-
       // Sanity checks.
       if (target_vec == nullptr) throw Exceptions::NullException(3);
-      if (n != custom_projection_jacobians.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
-      if (n != custom_projection_residuals.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
+      // Sanity checks.
+      Helpers::check_length(custom_projection_jacobians, spaces);
+      Helpers::check_length(custom_projection_residuals, spaces);
 
-      int start_index = 0;
-      for (int i = 0; i < n; i++)
+      int start_index = 0, spaces_size = spaces.size();
+      for (int i = 0; i < spaces_size; i++)
       {
-
         project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_vec + start_index);
-
         start_index += spaces[i]->get_num_dofs();
       }
     }
@@ -102,17 +99,14 @@ namespace Hermes
       const std::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
       const MeshFunctionSharedPtrVector<Scalar>& target_slns)
     {
-      int n = spaces.size();
-
       // Sanity checks.
-      if (n != target_slns.size()) throw Exceptions::LengthException(1, 2, n, target_slns.size());
-      if (n != custom_projection_jacobians.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
-      if (n != custom_projection_residuals.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
+      Helpers::check_length(target_slns, spaces);
+      Helpers::check_length(custom_projection_jacobians, spaces);
+      Helpers::check_length(custom_projection_residuals, spaces);
 
-      for (int i = 0; i < n; i++)
-      {
-        project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_slns[i]);
-      }
+      int spaces_size = spaces.size();
+      for (int i = 0; i < spaces_size; i++)
+      project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_slns[i]);
     }
 
     template<typename Scalar>
@@ -203,18 +197,15 @@ namespace Hermes
     void OGProjection<Scalar>::project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_slns,
       Scalar* target_vec, std::vector<NormType> proj_norms)
     {
-      int n = spaces.size();
-
       // Sanity checks.
-      if (n != source_slns.size())
-        throw Exceptions::LengthException(1, 2, n, source_slns.size());
+      Helpers::check_length(source_slns, spaces);
       if (target_vec == nullptr)
         throw Exceptions::NullException(3);
-      if (!proj_norms.empty() && n != proj_norms.size())
-        throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+      if (!proj_norms.empty())
+        Helpers::check_length(proj_norms, spaces); 
 
-      int start_index = 0;
-      for (int i = 0; i < n; i++)
+      int start_index = 0, spaces_size = spaces.size();
+      for (int i = 0; i < spaces_size; i++)
       {
         if (proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_vec + start_index, HERMES_UNSET_NORM);

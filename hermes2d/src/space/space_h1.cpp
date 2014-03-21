@@ -414,7 +414,8 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::update_constrained_nodes(Element* e, typename Space<Scalar>::EdgeInfo* ei0, typename Space<Scalar>::EdgeInfo* ei1, typename Space<Scalar>::EdgeInfo* ei2, typename Space<Scalar>::EdgeInfo* ei3)
     {
-      int j, k;
+      unsigned char i, j;
+      unsigned int k;
       typename Space<Scalar>::EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
       typename Space<Scalar>::NodeData* nd;
 
@@ -423,7 +424,7 @@ namespace Hermes
       // on non-refined elements all we have to do is update edge nodes lying on constrained edges
       if (e->active)
       {
-        for (unsigned char i = 0; i < e->get_nvert(); i++)
+        for (i = 0; i < e->get_nvert(); i++)
         {
           if (ei[i] != nullptr)
           {
@@ -440,7 +441,7 @@ namespace Hermes
       {
         // create new_ edge infos where we don't have them yet
         typename Space<Scalar>::EdgeInfo ei_data[4];
-        for (unsigned char i = 0; i < e->get_nvert(); i++)
+        for (i = 0; i < e->get_nvert(); i++)
         {
           if (ei[i] == nullptr)
           {
@@ -463,7 +464,7 @@ namespace Hermes
         }
 
         // create a baselist for each mid-edge vertex node
-        for (unsigned char i = 0; i < e->get_nvert(); i++)
+        for (i = 0; i < e->get_nvert(); i++)
         {
           if (ei[i] == nullptr) continue;
           j = e->next_vert(i);
@@ -513,9 +514,9 @@ namespace Hermes
         // create edge infos for half-edges
         typename Space<Scalar>::EdgeInfo  half_ei_data[4][2];
         typename Space<Scalar>::EdgeInfo* half_ei[4][2];
-        for (unsigned char i = 0; i < e->get_nvert(); i++)
+        for (i = 0; i < e->get_nvert(); i++)
         {
-          if (ei[i] == nullptr)
+          if (!ei[i])
           {
             half_ei[i][0] = half_ei[i][1] = nullptr;
           }

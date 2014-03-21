@@ -73,9 +73,9 @@ namespace Hermes
       this->calc_diameter();
     }
 
-    int Element::get_edge_orientation(int ie) const
+    bool Element::get_edge_orientation(int ie) const
     {
-      return (this->vn[ie]->id < this->vn[this->next_vert(ie)]->id) ? 0 : 1;
+      return !(this->vn[ie]->id < this->vn[this->next_vert(ie)]->id);
     }
 
     void Element::unref_all_nodes(HashTable* ht)
@@ -162,7 +162,7 @@ namespace Hermes
         {
           // 0 - prepare data structures.
           int eo = g_quad_2d_std.get_edge_points(isurf, this->get_mode() == HERMES_MODE_TRIANGLE ? g_max_tri : g_max_quad, this->get_mode());
-          unsigned short np = g_quad_2d_std.get_num_points(eo, this->get_mode());
+          unsigned char np = g_quad_2d_std.get_num_points(eo, this->get_mode());
           double* x_curv = new double[np];
           double* y_curv = new double[np];
           double* x_straight = new double[np];
@@ -170,19 +170,18 @@ namespace Hermes
 
           // 1 - get the x,y coordinates for the curved element.
           refmap_curv.set_active_element(this);
-          Geom<double>* geometry = init_geom_surf(&refmap_curv, isurf, this->en[isurf]->marker, eo, tan);
-          memcpy(x_curv, geometry->x, np*sizeof(double));
-          memcpy(y_curv, geometry->y, np*sizeof(double));
-          delete geometry;
+          GeomSurf<double> geometry;
+          init_geom_surf_allocated(geometry, &refmap_curv, isurf, this->en[isurf]->marker, eo, tan);
+          memcpy(x_curv, geometry.x, np*sizeof(double));
+          memcpy(y_curv, geometry.y, np*sizeof(double));
 
           // 2. - act if there was no curvature
           CurvMap* cm_temp = this->cm;
           this->cm = nullptr;
           refmap_straight.set_active_element(this);
-          geometry = init_geom_surf(&refmap_straight, isurf, this->en[isurf]->marker, eo, tan);
-          memcpy(x_straight, geometry->x, np*sizeof(double));
-          memcpy(y_straight, geometry->y, np*sizeof(double));
-          delete geometry;
+          init_geom_surf_allocated(geometry, &refmap_straight, isurf, this->en[isurf]->marker, eo, tan);
+          memcpy(x_straight, geometry.x, np*sizeof(double));
+          memcpy(y_straight, geometry.y, np*sizeof(double));
 
           // 3. - compare the two, get the updated area.
           double previous_distance;

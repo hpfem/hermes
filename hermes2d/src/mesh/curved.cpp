@@ -551,7 +551,7 @@ namespace Hermes
     {
       unsigned short i, j, k;
       unsigned short mo1 = g_quad_1d_std.get_max_order();
-      unsigned short np = g_quad_1d_std.get_num_points(mo1);
+      unsigned char np = g_quad_1d_std.get_num_points(mo1);
       unsigned short ne = order - 1;
       unsigned short mode = e->get_mode();
 
@@ -646,7 +646,7 @@ namespace Hermes
     void CurvMap::old_projection(Element* e, unsigned short order, double2* proj, double* old[2])
     {
       unsigned short mo2 = g_quad_2d_std.get_max_order(e->get_mode());
-      unsigned short np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
+      unsigned char np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
       unsigned short nvert = e->get_nvert();
 
       for (unsigned int k = 0; k < nvert; k++) // loop over vertices
@@ -682,7 +682,7 @@ namespace Hermes
 
       unsigned short i, j, k;
       unsigned short mo2 = g_quad_2d_std.get_max_order(e->get_mode());
-      unsigned short np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
+      unsigned char np = g_quad_2d_std.get_num_points(mo2, e->get_mode());
       unsigned short qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
       unsigned short nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
 

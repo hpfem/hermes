@@ -53,7 +53,7 @@ namespace Hermes
       void init_u_ext(const SpaceSharedPtrVector<Scalar> spaces, Solution<Scalar>** u_ext_sln);
 
       /// Initializes the Transformable array for doing transformations.
-      void init_assembling(Solution<Scalar>** u_ext_sln, const SpaceSharedPtrVector<Scalar> spaces, bool add_dirichlet_lift);
+      void init_assembling(Solution<Scalar>** u_ext_sln, const SpaceSharedPtrVector<Scalar>& spaces, bool add_dirichlet_lift);
 
       /// Initialize Func storages.
       void init_funcs_wf();
@@ -72,18 +72,21 @@ namespace Hermes
       /// Initializitation of u-ext values into Funcs
       void init_u_ext_values(int order);
       /// Initializitation of ext values into Funcs
-      void init_ext_values(Func<Scalar>** target_array, MeshFunctionSharedPtrVector<Scalar>& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom<double>* geometry);
+      template<typename Geom>
+      void init_ext_values(Func<Scalar>** target_array, MeshFunctionSharedPtrVector<Scalar>& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom* geometry);
 
       /// Sets active elements & transformations
-      void init_assembling_one_state(const SpaceSharedPtrVector<Scalar> spaces, Traverse::State* current_state);
+      void init_assembling_one_state(const SpaceSharedPtrVector<Scalar>& spaces, Traverse::State* current_state);
       /// Assemble the state.
       void assemble_one_state();
       /// Matrix volumetric forms - assemble the form.
-      void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns,
-        AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
+      template<typename MatrixFormType, typename Geom>
+      void assemble_matrix_form(MatrixFormType* form, int order, Func<double>** base_fns, Func<double>** test_fns,
+        AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, int n_quadrature_points, Geom* geometry, double* jacobian_x_weights);
       /// Vector volumetric forms - assemble the form.
-      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, AsmList<Scalar>* current_als,
-        int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
+      template<typename VectorFormType, typename Geom>
+      void assemble_vector_form(VectorFormType* form, int order, Func<double>** test_fns, AsmList<Scalar>* current_als,
+        int n_quadrature_points, Geom* geometry, double* jacobian_x_weights);
       /// De-initialization of 1 state assembly
       void deinit_assembling_one_state();
       
@@ -127,8 +130,8 @@ namespace Hermes
       void deinit_calculation_variables();
       Func<double>* funcs[H2D_MAX_COMPONENTS][H2D_MAX_LOCAL_BASIS_SIZE];
       Func<double>* funcsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_COMPONENTS][H2D_MAX_LOCAL_BASIS_SIZE];
-      Geom<double>* geometry;
-      Geom<double>* geometrySurface[H2D_MAX_NUMBER_EDGES];
+      GeomVol<double> geometry;
+      GeomSurf<double> geometrySurface[H2D_MAX_NUMBER_EDGES];
       double jacobian_x_weights[H2D_MAX_INTEGRATION_POINTS_COUNT];
       double jacobian_x_weightsSurface[H2D_MAX_NUMBER_EDGES][H2D_MAX_INTEGRATION_POINTS_COUNT];
       int n_quadrature_points;

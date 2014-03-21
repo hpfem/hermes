@@ -350,7 +350,7 @@ namespace Hermes
       /// Returns true if the space is ready for computation, false otherwise.
       bool is_up_to_date() const;
 
-      static Node* get_mid_edge_vertex_node(Element* e, int i, int j);
+      static Node* get_mid_edge_vertex_node(Element* e, unsigned char i, unsigned char j);
 
       /// State querying helpers.
       virtual bool isOkay() const;

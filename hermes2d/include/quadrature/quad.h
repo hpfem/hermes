@@ -48,7 +48,7 @@ namespace Hermes
     public:
 
       inline double2* get_points(int order) const { return tables[order]; }
-      inline unsigned short get_num_points(int order) const { return np[order]; };
+      inline unsigned char get_num_points(int order) const { return np[order]; };
 
       inline unsigned short get_max_order() const { return max_order; }
       inline double get_ref_vertex(int n) const { return ref_vert[n]; }
@@ -56,7 +56,7 @@ namespace Hermes
     protected:
 
       double2** tables;
-      unsigned short* np;
+      unsigned char* np;
 
       double ref_vert[H2D_NUM_MODES];
       unsigned short max_order;
@@ -70,7 +70,7 @@ namespace Hermes
     class HERMES_API Quad2D
     {
     public:
-      inline unsigned short get_num_points(int order, ElementMode2D mode)  const { assert(order < num_tables[mode]); return np[mode][order]; };
+      inline unsigned char get_num_points(int order, ElementMode2D mode)  const { assert(order < num_tables[mode]); return np[mode][order]; };
       inline double3* get_points(int order, ElementMode2D mode) const { assert(order < num_tables[mode]); return tables[mode][order]; }
       inline unsigned short get_edge_points(int edge, unsigned short order, ElementMode2D mode) { assert(order < num_tables[mode]);  return  max_order[mode] + 1 + (3 * (1 - mode) + 4 * mode)*order + edge; }
 
@@ -83,7 +83,7 @@ namespace Hermes
       virtual unsigned char get_id() = 0;
     protected:
       double3*** tables;
-      unsigned short** np;
+      unsigned char** np;
 
       unsigned short num_tables[2];
       unsigned short max_order[2], safe_max_order[2];

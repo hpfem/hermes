@@ -212,7 +212,7 @@ namespace Hermes
     Scalar* Function<Scalar>::deep_copy_array(int component, int item) const
     {
       assert(this->values_valid);
-      unsigned short np = this->quads[this->cur_quad]->get_num_points(this->order, this->element->get_mode());
+      unsigned char np = this->quads[this->cur_quad]->get_num_points(this->order, this->element->get_mode());
       Scalar* toReturn = malloc_with_check<Scalar>(np);
       memcpy(toReturn, this->get_values(component, item), sizeof(Scalar)* np);
       return toReturn;

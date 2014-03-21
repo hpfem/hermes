@@ -8,10 +8,10 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 // Initial polynomial degree for u.
 const int P_INIT_U = 4;
 // Initial polynomial degree for v.
-const int P_INIT_V = 3;
+const int P_INIT_V = 2;
 const int INIT_REF_NUM = 5;               // Number of initial uniform mesh refinements.
 // Number of initial boundary refinements
-const int INIT_REF_BDY = 7;
+const int INIT_REF_BDY = 6;
 
 // Problem parameters.
 const double D_u = 1;
@@ -57,7 +57,7 @@ public:
 int main(int argc, char* argv[])
 {
   //HermesCommonApi.set_integral_param_value(numThreads, 1);
-  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
+  //HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
 
   // Load the mesh.
   MeshSharedPtr u_mesh(new Mesh), v_mesh(new Mesh);
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
   {
     if ((i % 33) == 0) selector_v.element_ids.push_back(i);
   }
-  AdaptSolverCriterionFixed global_criterion(2);
+  AdaptSolverCriterionFixed global_criterion(1);
 
   AdaptSolver<double, NewtonSolver<double> > adaptSolver({ u_space, v_space }, wf, &errorCalculator, &criterion, { &selector_u, &selector_v }, &global_criterion);
 

@@ -92,7 +92,7 @@ namespace Hermes
       }
     }
 
-    void Traverse::init_transforms(Traverse::State* s, int i)
+    void Traverse::init_transforms(Traverse::State* s, unsigned char i)
     {
       Rect r;
       memcpy(&r, s->er + i, sizeof(Rect));
@@ -282,7 +282,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Traverse::State** Traverse::get_states(MeshFunctionSharedPtrVector<Scalar> mesh_functions, int& states_count)
+    Traverse::State** Traverse::get_states(MeshFunctionSharedPtrVector<Scalar> mesh_functions, unsigned int& states_count)
     {
       MeshSharedPtrVector meshes;
       for (unsigned short i = 0; i < mesh_functions.size(); i++)
@@ -290,12 +290,12 @@ namespace Hermes
       return this->get_states(meshes, states_count);
     }
 
-    Traverse::State** Traverse::get_states(MeshSharedPtrVector meshes, int& states_count)
+    Traverse::State** Traverse::get_states(MeshSharedPtrVector meshes, unsigned int& states_count)
     {
       return Traverse::get_states(&meshes[0], meshes.size(), states_count);
     }
 
-    Traverse::State** Traverse::get_states(MeshSharedPtr* meshes, int meshes_count, int& states_count)
+    Traverse::State** Traverse::get_states(MeshSharedPtr* meshes, unsigned short meshes_count, unsigned int& states_count)
     {
       // This will be returned.
       int count = 0, predictedCount = 0;
@@ -853,7 +853,7 @@ namespace Hermes
       delete[] idx_new;
     }
 
-    UniData** Traverse::construct_union_mesh(int n, MeshSharedPtr* meshes, MeshSharedPtr unimesh)
+    UniData** Traverse::construct_union_mesh(unsigned char n, MeshSharedPtr* meshes, MeshSharedPtr unimesh)
     {
       // Initial check.
       testMeshesCompliance(n, meshes);
@@ -901,7 +901,7 @@ namespace Hermes
       return traverse.unidata;
     }
 
-    template HERMES_API Traverse::State** Traverse::get_states<double>(MeshFunctionSharedPtrVector<double> mesh_functions, int& states_count);
-    template HERMES_API Traverse::State** Traverse::get_states<std::complex<double> >(std::vector<MeshFunctionSharedPtr<std::complex<double> > > mesh_functions, int& states_count);
+    template HERMES_API Traverse::State** Traverse::get_states<double>(MeshFunctionSharedPtrVector<double> mesh_functions, unsigned int& states_count);
+    template HERMES_API Traverse::State** Traverse::get_states<std::complex<double> >(std::vector<MeshFunctionSharedPtr<std::complex<double> > > mesh_functions, unsigned int& states_count);
   }
 }

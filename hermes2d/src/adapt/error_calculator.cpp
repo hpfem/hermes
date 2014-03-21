@@ -131,10 +131,14 @@ namespace Hermes
     {
       bool okay = true;
 
-      if (fine_solutions.size() != this->component_count)
+      try
+      {
+        Helpers::check_length(this->fine_solutions, this->component_count);
+      }
+      catch (...)
       {
         okay = false;
-        throw Exceptions::LengthException(0, fine_solutions.size(), this->component_count);
+        throw;
       }
 
       if (this->mfvol.empty() && this->mfsurf.empty() && this->mfDG.empty())
@@ -165,7 +169,7 @@ namespace Hermes
       for (int i = 0; i < this->component_count; i++)
         meshes.push_back(fine_solutions[i]->get_mesh());
 
-      int num_states;
+      unsigned int num_states;
       Traverse trav(this->component_count);
       Traverse::State** states = trav.get_states(meshes, num_states);
 
@@ -394,7 +398,7 @@ namespace Hermes
     double DefaultNormCalculator<Scalar, normType>::calculate_norms(MeshFunctionSharedPtrVector<Scalar>& solutions)
     {
       MeshFunctionSharedPtrVector<Scalar> zero_fine_solutions;
-      for (int i = 0; i < solutions.size(); i++)
+      for (unsigned short i = 0; i < solutions.size(); i++)
         zero_fine_solutions.push_back(MeshFunctionSharedPtr<Scalar>(new ZeroSolution<Scalar>(solutions[i]->get_mesh())));
       this->calculate_errors(solutions, zero_fine_solutions, false);
 
@@ -413,14 +417,14 @@ namespace Hermes
     template<typename Scalar, NormType normType>
     DefaultErrorCalculator<Scalar, normType>::~DefaultErrorCalculator()
     {
-      for (int i = 0; i < this->mfvol.size(); i++)
+      for (unsigned short i = 0; i < this->mfvol.size(); i++)
         delete this->mfvol[i];
     }
 
     template<typename Scalar, NormType normType>
     DefaultNormCalculator<Scalar, normType>::~DefaultNormCalculator()
     {
-      for (int i = 0; i < this->mfvol.size(); i++)
+      for (unsigned short i = 0; i < this->mfvol.size(); i++)
         delete this->mfvol[i];
     }
 

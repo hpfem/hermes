@@ -256,7 +256,7 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("SimpleFilter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
-      unsigned short np = quad->get_num_points(order, this->element->get_mode());
+      unsigned char np = quad->get_num_points(order, this->element->get_mode());
 
       // precalculate all solutions
       for (int i = 0; i < this->num; i++)
@@ -370,7 +370,7 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Filter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
-      unsigned short np = quad->get_num_points(order, this->element->get_mode());
+      unsigned char np = quad->get_num_points(order, this->element->get_mode());
 
       this->sln_complex->set_quad_order(order, H2D_FN_VAL);
 
@@ -440,7 +440,7 @@ namespace Hermes
     void DXDYFilter<Scalar>::precalculate(unsigned short order, unsigned short mask)
     {
       Quad2D* quad = this->quads[this->cur_quad];
-      unsigned short np = quad->get_num_points(order, this->element->get_mode());
+      unsigned char np = quad->get_num_points(order, this->element->get_mode());
 
       // precalculate all solutions
       for (int i = 0; i < this->num; i++)
@@ -904,7 +904,7 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("VonMisesFilter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
-      unsigned short np = quad->get_num_points(order, this->element->get_mode());
+      unsigned char np = quad->get_num_points(order, this->element->get_mode());
 
       this->sln[0]->set_quad_order(order, H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY);
       this->sln[1]->set_quad_order(order, H2D_FN_DX | H2D_FN_DY);
@@ -975,7 +975,7 @@ namespace Hermes
     void LinearFilter<Scalar>::precalculate(unsigned short order, unsigned short mask)
     {
       Quad2D* quad = this->quads[this->cur_quad];
-      unsigned short np = quad->get_num_points(order, this->element->get_mode());
+      unsigned char np = quad->get_num_points(order, this->element->get_mode());
       struct Filter<Scalar>::Node* node = this->new_node(H2D_FN_DEFAULT, np);
 
       // precalculate all solutions

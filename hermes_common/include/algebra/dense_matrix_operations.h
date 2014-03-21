@@ -174,9 +174,9 @@ namespace Hermes
       void transpose(T *matrix, unsigned int m, unsigned int n, unsigned int size)
       {
         unsigned int min = std::min(m, n);
-        for (int i = 0; i < min; i++)
+        for (unsigned int i = 0; i < min; i++)
         {
-          for (int j = i + 1; j < min; j++)
+          for (unsigned int j = i + 1; j < min; j++)
           {
             std::swap(matrix[i * size + j], matrix[j * size + i]);
           }

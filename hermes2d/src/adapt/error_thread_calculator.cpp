@@ -269,7 +269,7 @@ namespace Hermes
       RefMap** refmaps = malloc_with_check<ErrorThreadCalculator<Scalar>::DGErrorCalculator, RefMap*>(this->errorThreadCalculator->errorCalculator->component_count, this);
       for (int i = 0; i < this->errorThreadCalculator->errorCalculator->component_count; i++)
         refmaps[i] = this->errorThreadCalculator->slns[i]->get_refmap();
-      this->errorThreadCalculator->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorThreadCalculator->errorCalculator->component_count, order_base, current_state->isurf, current_state->rep->marker, this->errorThreadCalculator->geometry, this->errorThreadCalculator->jacobian_x_weights);
+      this->errorThreadCalculator->n_quadrature_points = init_surface_geometry_points_allocated(refmaps, this->errorThreadCalculator->errorCalculator->component_count, order_base, current_state->isurf, current_state->rep->marker, this->errorThreadCalculator->geometry_surf, this->errorThreadCalculator->jacobian_x_weights);
       free_with_check(refmaps);
 
       for(unsigned short current_mfDG_i = 0; current_mfDG_i < this->errorThreadCalculator->errorCalculator->mfDG.size(); current_mfDG_i++)
@@ -291,8 +291,6 @@ namespace Hermes
       }
 
       free_with_check(this->errorThreadCalculator->jacobian_x_weights);
-      this->errorThreadCalculator->geometry->free();
-      delete this->errorThreadCalculator->geometry;
 
       // This is just cleaning after ourselves.
       // Clear the transformations from the RefMaps and all functions.
@@ -379,7 +377,7 @@ namespace Hermes
       RefMap** refmaps = malloc_with_check<ErrorThreadCalculator<Scalar>, RefMap*>(this->errorCalculator->component_count, this);
       for (int i = 0; i < this->errorCalculator->component_count; i++)
         refmaps[i] = slns[i]->get_refmap();
-      this->n_quadrature_points = init_geometry_points(refmaps, this->errorCalculator->component_count, order, this->geometry, this->jacobian_x_weights);
+      this->n_quadrature_points = init_geometry_points_allocated(refmaps, this->errorCalculator->component_count, order, this->geometry_vol, this->jacobian_x_weights);
 
       free_with_check(refmaps);
 
@@ -398,8 +396,6 @@ namespace Hermes
       }
 
       // deinitialize points & geometry & jacobian times weights
-      geometry->free();
-      delete geometry;
       free_with_check(this->jacobian_x_weights);
     }
 
@@ -409,7 +405,7 @@ namespace Hermes
       RefMap** refmaps = malloc_with_check<ErrorThreadCalculator<Scalar>, RefMap*>(this->errorCalculator->component_count, this);
       for (int i = 0; i < this->errorCalculator->component_count; i++)
         refmaps[i] = slns[i]->get_refmap();
-      this->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorCalculator->component_count, order, current_state->isurf, current_state->rep->marker, this->geometry, this->jacobian_x_weights);
+      this->n_quadrature_points = init_surface_geometry_points_allocated(refmaps, this->errorCalculator->component_count, order, current_state->isurf, current_state->rep->marker, this->geometry_surf, this->jacobian_x_weights);
       free_with_check(refmaps);
 
       for(unsigned short i = 0; i < this->errorCalculator->mfsurf.size(); i++)
@@ -458,19 +454,17 @@ namespace Hermes
       }
 
       // deinitialize points & geometry & jacobian times weights
-      geometry->free();
-      delete geometry;
       free_with_check(this->jacobian_x_weights);
     }
 
     template<typename Scalar>
     void ErrorThreadCalculator<Scalar>::evaluate_volumetric_form(NormFormVol<Scalar>* form, Func<Scalar>* difference_func_i, Func<Scalar>* difference_func_j, Func<Scalar>* rsln_i, Func<Scalar>* rsln_j, double* error, double* norm)
     {
-      double error_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, difference_func_i, difference_func_j, this->geometry));
+      double error_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, difference_func_i, difference_func_j, &this->geometry_vol));
 #pragma omp atomic
       (*error) += error_value;
 
-      double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, this->geometry));
+      double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, &this->geometry_vol));
 
 #pragma omp atomic
       (*norm) += norm_value;
@@ -479,7 +473,7 @@ namespace Hermes
     template<typename Scalar>
     void ErrorThreadCalculator<Scalar>::evaluate_surface_form(NormFormSurf<Scalar>* form, Func<Scalar>* difference_func_i, Func<Scalar>* difference_func_j, Func<Scalar>* rsln_i, Func<Scalar>* rsln_j, double* error, double* norm)
     {
-      double error_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, difference_func_i, difference_func_j, this->geometry));
+      double error_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, difference_func_i, difference_func_j, &this->geometry_surf));
 
       // 1D quadrature has the weights summed to 2.
       error_value *= 0.5;
@@ -487,7 +481,7 @@ namespace Hermes
 #pragma omp atomic
       (*error) += error_value;
 
-      double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, this->geometry));
+      double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, &this->geometry_surf));
 
       // 1D quadrature has the weights summed to 2.
       norm_value *= 0.5;
@@ -499,7 +493,7 @@ namespace Hermes
     template<typename Scalar>
     void ErrorThreadCalculator<Scalar>::evaluate_DG_form(NormFormDG<Scalar>* form, DiscontinuousFunc<Scalar>* difference_func_i, DiscontinuousFunc<Scalar>* difference_func_j, DiscontinuousFunc<Scalar>* rsln_i, DiscontinuousFunc<Scalar>* rsln_j, double* error, double* norm)
     {
-      double error_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, difference_func_i, difference_func_j, this->geometry));
+      double error_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, difference_func_i, difference_func_j, &this->geometry_surf));
 
       // 1D quadrature has the weights summed to 2.
       error_value *= 0.5;
@@ -507,7 +501,7 @@ namespace Hermes
 #pragma omp atomic
       (*error) += error_value;
 
-      double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, this->geometry));
+      double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, &this->geometry_surf));
 
 #pragma omp atomic
       (*norm) += norm_value;

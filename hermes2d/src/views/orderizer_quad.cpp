@@ -1,6 +1,6 @@
 /// Simple quad.
 
-static unsigned short num_vert_quad_simple[2]  = { 13, 13 };
+static unsigned char num_vert_quad_simple[2] = { 13, 13 };
 
 static double3 vert_quad_simple[] =
 {
@@ -40,7 +40,7 @@ static int3 edge_quad_simple[] =
 };
 
 // triangles
-static unsigned short num_vert_tri_simple[2]  = { 4, 4 };
+static unsigned char num_vert_tri_simple[2] = { 4, 4 };
 
 static double3 vert_tri_simple[] =
 {
@@ -71,7 +71,7 @@ static int3 edge_tri_simple[] =
 
 /// Edge orders.
 
-static unsigned short num_vert_quad[2]  = { 29, 77 };
+static unsigned char num_vert_quad[2] = { 29, 77 };
 
 static double3 vert_quad0[] =
 {
@@ -326,7 +326,7 @@ static int3 edge_quad1[] =
 };
 
 // triangles
-static unsigned short num_vert_tri[2]  = { 16, 38 };
+static unsigned char num_vert_tri[2]  = { 16, 38 };
 
 static double3 vert_tri0[] =
 {

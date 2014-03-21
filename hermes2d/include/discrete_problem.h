@@ -101,7 +101,7 @@ namespace Hermes
       SpaceSharedPtrVector<Scalar> get_spaces();
 
       /// Experimental.
-      typedef void(*reassembled_states_reuse_linear_system_fn)(Traverse::State**& states, int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs);
+      typedef void(*reassembled_states_reuse_linear_system_fn)(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs);
       void set_reassembled_states_reuse_linear_system_fn(reassembled_states_reuse_linear_system_fn fn) {
         this->reassembled_states_reuse_linear_system = fn;
       }
@@ -120,8 +120,8 @@ namespace Hermes
 
     protected:
       /// Initialize states.
-      void init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, MeshSharedPtrVector& meshes);
-      void deinit_assembling(Traverse::State** states, int num_states);
+      void init_assembling(Traverse::State**& states, unsigned int& num_states, Solution<Scalar>** u_ext_sln, MeshSharedPtrVector& meshes);
+      void deinit_assembling(Traverse::State** states, unsigned  int num_states);
 
       /// RungeKutta helpers.
       void set_RK(int original_spaces_count, bool force_diagonal_blocks = nullptr, Table* block_weights = nullptr);
