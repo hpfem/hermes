@@ -121,7 +121,8 @@ namespace Hermes
       static CSCMatrix<Scalar>* current_prev_mat;
       static Vector<Scalar>* current_prev_rhs;
       static Vector<Scalar>* current_prev_dirichlet_lift_rhs;
-
+      
+      static bool use_Dirichlet;
       static bool** reusable_DOFs;
       static bool** reusable_Dirichlet;
     };
@@ -159,7 +160,28 @@ namespace Hermes
     template<typename Scalar>
     bool** StateReassemblyHelper<Scalar>::reusable_Dirichlet;
 
+    template<typename Scalar>
+    bool StateReassemblyHelper<Scalar>::use_Dirichlet;
+
     //#define DEBUG_VIEWS
+
+    template<typename Scalar>
+    static bool compare(Scalar a, Scalar b);
+
+    template<>
+    static bool compare(std::complex<double> a, std::complex<double> b)
+    {
+      if (a.real() < b.real() && a.imag() < b.imag())
+        return true;
+      else
+      return false;
+    }
+
+    template<>
+    static bool compare(double a, double b)
+    {
+      return a < b;
+    }
 
     template<typename Scalar>
     void get_states_to_reassemble(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
@@ -273,18 +295,17 @@ namespace Hermes
             {
               if (al.dof[j_al] < 0)
                 continue;
-              if (al_prev.idx[i_al_prev] == al.idx[j_al])
+              if (al_prev.idx[i_al_prev] == al.idx[j_al] && compare<Scalar>(-HermesEpsilon, al_prev.coef[i_al_prev] - al.coef[j_al]) && compare<Scalar>(al_prev.coef[i_al_prev] - al.coef[j_al], HermesEpsilon))
               {
-                last_matched_index = j_al;
+                last_matched_index = j_al + 1;
                 if (StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->find(std::pair<int, unsigned char>(al_prev.dof[i_al_prev], space_i)) == StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->end())
                 {
                   if (!(*StateReassemblyHelper<Scalar>::reusable_DOFs)[al.dof[j_al]])
-                  {
                     reusable_DOFs_count++;
-                    (*StateReassemblyHelper<Scalar>::reusable_DOFs)[al.dof[j_al]] = true;
-                    DOF_to_DOF_map[al_prev.dof[i_al_prev]] = al.dof[j_al];
-                  }
+                  (*StateReassemblyHelper<Scalar>::reusable_DOFs)[al.dof[j_al]] = true;
+                  DOF_to_DOF_map[al_prev.dof[i_al_prev]] = al.dof[j_al];
                 }
+                break;
               }
             }
           }
@@ -363,7 +384,7 @@ namespace Hermes
             rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::current_prev_rhs->get(i));
         }
       }
-      if (rhs)
+      if (rhs && StateReassemblyHelper<Scalar>::use_Dirichlet)
       {
         unsigned int running_count = 0;
         for (unsigned short space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
@@ -427,6 +448,7 @@ namespace Hermes
       StateReassemblyHelper<Scalar>::reusable_DOFs = new bool*;
       StateReassemblyHelper<Scalar>::reusable_Dirichlet = new bool*;
       this->solver->dp->set_reusable_DOFs(StateReassemblyHelper<Scalar>::reusable_DOFs, StateReassemblyHelper<Scalar>::reusable_Dirichlet);
+      StateReassemblyHelper<Scalar>::use_Dirichlet = this->solver->dp->add_dirichlet_lift;
       StateReassemblyHelper<Scalar>::current_number_of_equations = this->number_of_equations;
 
       this->elements_to_reassemble.clear();

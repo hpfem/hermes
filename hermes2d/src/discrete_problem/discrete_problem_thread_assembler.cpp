@@ -510,7 +510,7 @@ namespace Hermes
       // Assemble surface integrals now: loop through surfaces of the element.
       if (current_state->isBnd && (this->wf->mfsurf.size() > 0 || this->wf->vfsurf.size() > 0))
       {
-        for (int isurf = 0; isurf < current_state->rep->nvert; isurf++)
+        for (unsigned char isurf = 0; isurf < current_state->rep->nvert; isurf++)
         {
           if (!current_state->bnd[isurf])
             continue;

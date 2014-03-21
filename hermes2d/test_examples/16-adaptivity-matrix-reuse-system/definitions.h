@@ -116,10 +116,10 @@ public:
     : VectorFormVol<double>(0), d_u(d_u), sigma(sigma), g1(g1) {};
 
   virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
-                       Geom<double> *e, Func<double> **ext) const;
+    GeomVol<double> *e, Func<double> **ext) const;
 
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                  Geom<Ord> *e, Func<Ord> **ext) const;
+    GeomVol<Ord> *e, Func<Ord> **ext) const;
 
   virtual VectorFormVol<double>* clone() const;
 
@@ -136,10 +136,10 @@ public:
     : VectorFormVol<double>(1), d_v(d_v), g2(g2) {};
 
   virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
-                       Geom<double> *e, Func<double> **ext) const;
+    GeomVol<double> *e, Func<double> **ext) const;
   
   virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                  Geom<Ord> *e, Func<Ord> **ext) const;
+    GeomVol<Ord> *e, Func<Ord> **ext) const;
   
   virtual VectorFormVol<double>* clone() const;
   

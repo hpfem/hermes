@@ -78,7 +78,7 @@ namespace Hermes
       T ty[H2D_MAX_INTEGRATION_POINTS_COUNT];
       
       /// Internal number of an edge of the element.
-      int isurf;
+      unsigned char isurf;
 
       /// Edge marker.
       int edge_marker;
@@ -134,7 +134,7 @@ namespace Hermes
       Hermes::Ord ny[1];
 
       /// Internal number of an edge of the element.
-      int isurf;
+      unsigned char isurf;
 
       /// Element marker (for both volumetric and surface forms).
       int elem_marker;
@@ -181,9 +181,9 @@ namespace Hermes
     /// Init element geometry for volumetric integrals.
     HERMES_API void init_geom_vol_allocated(GeomVol<double>& geom, RefMap *rm, const int order);
     /// Init element geometry for surface integrals.
-    HERMES_API GeomSurf<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan);
+    HERMES_API GeomSurf<double>* init_geom_surf(RefMap *rm, unsigned char isurf, int marker, const int order, double3*& tan);
     /// Init element geometry for surface integrals.
-    HERMES_API void init_geom_surf_allocated(GeomSurf<double>& geom, RefMap *rm, int isurf, int marker, const int order, double3*& tan);
+    HERMES_API void init_geom_surf_allocated(GeomSurf<double>& geom, RefMap *rm, unsigned char isurf, int marker, const int order, double3*& tan);
 #pragma endregion
 
 #pragma region Func

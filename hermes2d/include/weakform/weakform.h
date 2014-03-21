@@ -125,13 +125,13 @@ namespace Hermes
       /// For parameters that only depend on element and edge and that do
       /// not have to be calculated for every form.
       /// This is rarely used and typically only for multi-physical tasks where there is a multitude of forms.
-      virtual void set_active_edge_state(Element** e, int isurf);
+      virtual void set_active_edge_state(Element** e, unsigned char isurf);
 
       /// Provides possibility of setup edge-wise parameters.
       /// For parameters that only depend on element and inner edge and that do
       /// not have to be calculated for every form.
       /// This is rarely used and typically only for multi-physical tasks where there is a multitude of forms.
-      virtual void set_active_DG_state(Element** e, int isurf);
+      virtual void set_active_DG_state(Element** e, unsigned char isurf);
 
       /// Returns the number of equations.
       inline unsigned char get_neq() const { return neq; }

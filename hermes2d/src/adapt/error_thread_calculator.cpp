@@ -290,8 +290,6 @@ namespace Hermes
         this->errorThreadCalculator->deinitialize_error_and_norm_functions(mfs, error_func, norm_func);
       }
 
-      free_with_check(this->errorThreadCalculator->jacobian_x_weights);
-
       // This is just cleaning after ourselves.
       // Clear the transformations from the RefMaps and all functions.
       for (unsigned int fns_i = 0; fns_i < this->errorThreadCalculator->errorCalculator->component_count; fns_i++)
@@ -394,9 +392,6 @@ namespace Hermes
         this->evaluate_volumetric_form(form, error_func[0], error_func[1], norm_func[0], norm_func[1], error, norm);
         this->deinitialize_error_and_norm_functions(form, error_func, norm_func);
       }
-
-      // deinitialize points & geometry & jacobian times weights
-      free_with_check(this->jacobian_x_weights);
     }
 
     template<typename Scalar>
@@ -452,9 +447,6 @@ namespace Hermes
         this->evaluate_surface_form(form, error_func[0], error_func[0], norm_func[1], norm_func[1], error, norm);
         this->deinitialize_error_and_norm_functions(form, error_func, norm_func);
       }
-
-      // deinitialize points & geometry & jacobian times weights
-      free_with_check(this->jacobian_x_weights);
     }
 
     template<typename Scalar>

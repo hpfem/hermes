@@ -153,7 +153,7 @@ ExactSolutionFitzHughNagumo2::~ExactSolutionFitzHughNagumo2()
 }
 
 double CustomResidual1::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
-                              Geom<double> *e, Func<double> **ext) const
+                              GeomVol<double> *e, Func<double> **ext) const
 {
    double result = 0;
    for (int i = 0; i < n; i++) 
@@ -169,7 +169,7 @@ double CustomResidual1::value(int n, double *wt, Func<double> *u_ext[], Func<dou
 }
 
 Ord CustomResidual1::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                         Geom<Ord> *e, Func<Ord> **ext) const 
+  GeomVol<Ord> *e, Func<Ord> **ext) const
 {
   return Ord(20);
 }
@@ -180,7 +180,7 @@ VectorFormVol<double>* CustomResidual1::clone() const
 }
 
 double CustomResidual2::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
-                              Geom<double> *e, Func<double> **ext) const
+  GeomVol<double> *e, Func<double> **ext) const
 {
    double result = 0;
    for (int i = 0; i < n; i++) 
@@ -196,7 +196,7 @@ double CustomResidual2::value(int n, double *wt, Func<double> *u_ext[], Func<dou
   }
 
 Ord CustomResidual2::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                         Geom<Ord> *e, Func<Ord> **ext) const 
+  GeomVol<Ord> *e, Func<Ord> **ext) const
 {
   return Ord(20);
 } 

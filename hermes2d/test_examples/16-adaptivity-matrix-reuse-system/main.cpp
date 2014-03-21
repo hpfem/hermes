@@ -6,12 +6,12 @@ using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
 // Initial polynomial degree for u.
-const int P_INIT_U = 4;
+const int P_INIT_U = 3;
 // Initial polynomial degree for v.
 const int P_INIT_V = 2;
-const int INIT_REF_NUM = 5;               // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refinements.
 // Number of initial boundary refinements
-const int INIT_REF_BDY = 6;
+const int INIT_REF_BDY = 2;
 
 // Problem parameters.
 const double D_u = 1;
@@ -92,7 +92,8 @@ int main(int argc, char* argv[])
   // Weak Form
   WeakFormSharedPtr<double> wf(new CustomWeakForm(&g1, &g2));
 
-#ifdef ADAPT_SOLVER
+
+  // Adapt solver
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 2);
   AdaptStoppingCriterionSingleElement<double> criterion(0.);
   CustomSelector selector_u(0);
@@ -105,7 +106,7 @@ int main(int argc, char* argv[])
   {
     if ((i % 33) == 0) selector_v.element_ids.push_back(i);
   }
-  AdaptSolverCriterionFixed global_criterion(1);
+  AdaptSolverCriterionFixed global_criterion(11);
 
   AdaptSolver<double, NewtonSolver<double> > adaptSolver({ u_space, v_space }, wf, &errorCalculator, &criterion, { &selector_u, &selector_v }, &global_criterion);
 
@@ -124,49 +125,6 @@ int main(int argc, char* argv[])
   }
   adaptSolver.solve(hpAdaptivity);
 
-#else
-
-  LinearSolver<double> solver(wf, space);
-  //solver.set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
-  //solver.output_matrix();
-  solver.solve();
-  MeshFunctionSharedPtr<double> sln(new Solution<double>);
-  Solution<double>::vector_to_solution(solver.get_sln_vector(), space, sln);
-
-  ScalarView s;
-  s.get_linearizer()->set_criterion(LinearizerCriterionFixed(3));
-  s.show(sln);
-
-  MeshSharedPtr meshf(new Mesh);
-  meshf->copy(mesh);
-  SpaceSharedPtr<double> spacef(new H1Space<double>(meshf, &bcs, 1));
-  spacef->set_element_order(1, 5);
-  spacef->set_element_order(2, 2);
-  spacef->set_element_order(3, 2);
-  spacef->set_element_order(4, 2);
-  spacef->set_element_order(5, 2);
-  spacef->assign_dofs();
-
-  BaseView<double> bf("Fine space");
-  bf.get_linearizer()->set_criterion(LinearizerCriterionFixed(3));
-  bf.show(spacef);
-
-  WeakFormSharedPtr<double> wff(new WeakFormsH1::DefaultWeakFormPoissonLinear<double>(HERMES_ANY, new Hermes2DFunction<double>(13.0)));
-
-  LinearSolver<double> solverf(wff, spacef);
-  solverf.set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
-  solverf.output_matrix();
-  solverf.solve();
-
-  MeshFunctionSharedPtr<double> slnf(new Solution<double>);
-
-  Solution<double>::vector_to_solution(solverf.get_sln_vector(), spacef, slnf);
-
-  ScalarView sf;
-  sf.get_linearizer()->set_criterion(LinearizerCriterionFixed(3));
-  sf.show(slnf);
-
-#endif
   View::wait();
   return 0;
 }

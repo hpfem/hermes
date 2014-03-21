@@ -81,12 +81,10 @@ namespace Hermes
 
     /// \ingroup Helper methods inside {calc_order_*, assemble_*}
     /// Init geometry, jacobian * weights, return the number of integration points.
-    HERMES_API unsigned char init_geometry_points_allocated(RefMap** reference_mapping, int reference_mapping_count, int order, GeomVol<double>& geometry, double* jacobian_x_weights);
+    HERMES_API unsigned char init_geometry_points_allocated(RefMap** reference_mapping, unsigned short reference_mapping_count, int order, GeomVol<double>& geometry, double* jacobian_x_weights);
     HERMES_API unsigned char init_geometry_points_allocated(RefMap* rep_reference_mapping, int order, GeomVol<double>& geometry, double* jacobian_x_weights);
-    HERMES_API unsigned char init_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int order, GeomVol<double>*& geometry, double*& jacobian_x_weights);
-    HERMES_API unsigned char init_surface_geometry_points_allocated(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, GeomSurf<double>& geometry, double* jacobian_x_weights);
-    HERMES_API unsigned char init_surface_geometry_points_allocated(RefMap* rep_reference_mapping, int& order, int isurf, int marker, GeomSurf<double>& geometry, double* jacobian_x_weights);
-    HERMES_API unsigned char init_surface_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, GeomSurf<double>*& geometry, double*& jacobian_x_weights);
+    HERMES_API unsigned char init_surface_geometry_points_allocated(RefMap** reference_mapping, unsigned short reference_mapping_count, int& order, unsigned char isurf, int marker, GeomSurf<double>& geometry, double* jacobian_x_weights);
+    HERMES_API unsigned char init_surface_geometry_points_allocated(RefMap* rep_reference_mapping, int& order, unsigned char isurf, int marker, GeomSurf<double>& geometry, double* jacobian_x_weights);
   }
 }
 #endif

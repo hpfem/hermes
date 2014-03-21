@@ -443,14 +443,14 @@ namespace Hermes
       memcpy(geom.y, rm->get_phys_y(order), np * sizeof(double));
     }
 
-    GeomSurf<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan)
+    GeomSurf<double>* init_geom_surf(RefMap *rm, unsigned char isurf, int marker, const int order, double3*& tan)
     {
       GeomSurf<double>* e = new GeomSurf<double>;
       init_geom_surf_allocated(*e, rm, isurf, marker, order, tan);
       return e;
     }
 
-    void init_geom_surf_allocated(GeomSurf<double>& geom, RefMap *rm, int isurf, int marker, const int order, double3*& tan)
+    void init_geom_surf_allocated(GeomSurf<double>& geom, RefMap *rm, unsigned char isurf, int marker, const int order, double3*& tan)
     {
       Element* element = rm->get_active_element();
       ElementMode2D mode = element->get_mode();

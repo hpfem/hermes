@@ -78,7 +78,7 @@ namespace Hermes
       unsigned char n_quadrature_points;
       GeomVol<double> geometry_vol;
       GeomSurf<double> geometry_surf;
-      double* jacobian_x_weights;
+      double jacobian_x_weights[H2D_MAX_INTEGRATION_POINTS_COUNT];
       Solution<Scalar>** slns;
       Solution<Scalar>** rslns;
 

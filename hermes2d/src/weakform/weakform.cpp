@@ -94,13 +94,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::set_active_edge_state(Element** e, int isurf)
+    void WeakForm<Scalar>::set_active_edge_state(Element** e, unsigned char isurf)
     {
       // Nothing here, supposed to be overriden if necessary.
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::set_active_DG_state(Element** e, int isurf)
+    void WeakForm<Scalar>::set_active_DG_state(Element** e, unsigned char isurf)
     {
       // Nothing here, supposed to be overriden if necessary.
     }
