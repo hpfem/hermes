@@ -66,8 +66,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++)  mesh->refine_all_elements();
 
   // Initialize boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst< ::complex > bc_essential(std::vector<std::string>("Corner_horizontal",
-    "Corner_vertical"), 0);
+  Hermes::Hermes2D::DefaultEssentialBCConst< ::complex > bc_essential(std::vector<std::string>({ "Corner_horizontal", "Corner_vertical" }), 0);
   EssentialBCs< ::complex > bcs(&bc_essential);
 
   // Create an Hcurl space with default shapeset.

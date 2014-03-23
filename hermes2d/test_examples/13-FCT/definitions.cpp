@@ -8,7 +8,7 @@
 
     template<typename Real, typename Scalar>
     Scalar CustomMatrixFormVolMassmatrix::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                       Func<Real> *v, Geom<Real> *e, Func<Scalar>  **ext) const 
+      Func<Real> *v, GeomVol<Real> *e, Func<Scalar>  **ext) const
    {
 				Scalar result = Scalar(0); 
 				for (int i = 0; i < n; i++)
@@ -17,13 +17,13 @@
     };
 
    double CustomMatrixFormVolMassmatrix::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, Func<double>  **ext) const 
+     Func<double> *v, GeomVol<double> *e, Func<double>  **ext) const
     {
       return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
     };
 
     Ord CustomMatrixFormVolMassmatrix::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-            Geom<Ord> *e, Func<Ord>  **ext) const 
+      GeomVol<Ord> *e, Func<Ord>  **ext) const
     {
       return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
     };
@@ -44,7 +44,7 @@ MatrixFormVol<double>* CustomMatrixFormVolMassmatrix::clone() const
 
   template<typename Real, typename Scalar>
   Scalar CustomMatrixFormVolConvection::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-                     Func<Real> *v, Geom<Real> *e, Func<Scalar>  **ext) const
+                     Func<Real> *v, GeomVol<Real> *e, Func<Scalar>  **ext) const
   {
 		Scalar result = Scalar(0); 
 		for (int i = 0; i < n; i++)
@@ -54,13 +54,13 @@ MatrixFormVol<double>* CustomMatrixFormVolMassmatrix::clone() const
   };
 
 	double CustomMatrixFormVolConvection::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
-               Func<double> *v, Geom<double> *e, Func<double>  **ext) const                  
+    Func<double> *v, GeomVol<double> *e, Func<double>  **ext) const
   {
     return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
   };
 
  Ord CustomMatrixFormVolConvection::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-          Geom<Ord> *e, Func<Ord>  **ext) const 
+          GeomVol<Ord> *e, Func<Ord>  **ext) const 
  {
     return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
   };

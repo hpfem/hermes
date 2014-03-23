@@ -30,17 +30,17 @@ CustomNormFormDG::CustomNormFormDG(int i, int j) : NormFormDG<double>(i, j)
 {
 }
 
-double CustomNormFormVol::value(int n, double *wt, Func<double> *u, Func<double> *v, Geom<double> *e) const
+double CustomNormFormVol::value(int n, double *wt, Func<double> *u, Func<double> *v, GeomVol<double> *e) const
 {
   return custom_fn(n, wt, u, v);
 }
 
-double CustomNormFormSurf::value(int n, double *wt, Func<double> *u, Func<double> *v, Geom<double> *e) const
+double CustomNormFormSurf::value(int n, double *wt, Func<double> *u, Func<double> *v, GeomSurf<double> *e) const
 {
   return custom_fn(n, wt, u, v);
 }
 
-double CustomNormFormDG::value(int n, double *wt, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v, Geom<double> *e) const
+double CustomNormFormDG::value(int n, double *wt, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v, GeomSurf<double> *e) const
 {
   return custom_fn(n, wt, u, v);
 }

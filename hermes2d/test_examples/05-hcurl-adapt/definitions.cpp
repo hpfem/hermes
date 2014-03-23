@@ -133,7 +133,7 @@ public:
     }
 
     virtual std::complex<double> value(int n, double *wt, Func<std::complex<double> > *u_ext[], 
-      Func<double> *v, Geom<double> *e, Func<std::complex<double> > **ext) const 
+      Func<double> *v, GeomSurf<double> *e, Func<std::complex<double> > **ext) const 
     {
       std::complex<double> result = 0;
 #pragma omp critical (jv)

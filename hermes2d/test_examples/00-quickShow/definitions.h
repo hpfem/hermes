@@ -65,7 +65,7 @@ public:
   {
     CustomMatrixFormVol(int i, int j);
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, Func<double> **ext) const;
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, GeomVol<double> *e, Func<double> **ext) const;
 
     virtual MatrixFormVol<double>* clone() const;
 
@@ -76,7 +76,7 @@ public:
   {
     CustomVectorFormVol(int i);
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, Func<double> **ext) const;
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<double> **ext) const;
 
     virtual VectorFormVol<double>* clone() const;
 
@@ -87,7 +87,7 @@ public:
   {
     CustomResidualFormVol(int i);
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, Func<double> **ext) const;
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<double> **ext) const;
 
     virtual VectorFormVol<double>* clone() const;
 

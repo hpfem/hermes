@@ -48,8 +48,7 @@ int main(int argc, char* argv[])
     "Outer", ALPHA, T_EXTERIOR);
 
   // Initialize boundary conditions.
-  CustomDirichletCondition bc_essential(std::vector<std::string>("Bottom", "Inner", "Left"),
-    BDY_A_PARAM, BDY_B_PARAM, BDY_C_PARAM);
+  CustomDirichletCondition bc_essential({ "Bottom", "Inner", "Left" }, BDY_A_PARAM, BDY_B_PARAM, BDY_C_PARAM);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.

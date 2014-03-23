@@ -109,9 +109,9 @@ int main(int argc, char* argv[])
 
   // Initialize coarse and reference mesh solutions.
   MeshFunctionSharedPtr<double> u_sln(new Solution<double>()), v_sln(new Solution<double>()), u_ref_sln(new Solution<double>()), v_ref_sln(new Solution<double>());
-  MeshFunctionSharedPtrVector<double> slns(u_sln, v_sln);
-  MeshFunctionSharedPtrVector<double> ref_slns(u_ref_sln, v_ref_sln);
-  MeshFunctionSharedPtrVector<double> exact_slns(exact_u, exact_v);
+  MeshFunctionSharedPtrVector<double> slns({ u_sln, v_sln });
+  MeshFunctionSharedPtrVector<double> ref_slns({ u_ref_sln, v_ref_sln });
+  MeshFunctionSharedPtrVector<double> exact_slns({ exact_u, exact_v });
 
   // Initialize refinement selector.
   H1ProjBasedSelector<double> selector(CAND_LIST);
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     Space<double>::ReferenceSpaceCreator v_ref_space_creator(v_space, MULTI ? v_ref_mesh : u_ref_mesh);
     SpaceSharedPtr<double> v_ref_space = v_ref_space_creator.create_ref_space();
 
-    std::vector<SpaceSharedPtr<double> > ref_spaces_const(u_ref_space, v_ref_space);
+    std::vector<SpaceSharedPtr<double> > ref_spaces_const({ u_ref_space, v_ref_space });
 
     newton.set_spaces(ref_spaces_const);
 
@@ -176,11 +176,11 @@ int main(int argc, char* argv[])
     }
 
     // Translate the resulting coefficient vector into the instance of Solution.
-    Solution<double>::vector_to_solutions(newton.get_sln_vector(), ref_spaces_const, MeshFunctionSharedPtrVector<double>(u_ref_sln, v_ref_sln));
+    Solution<double>::vector_to_solutions(newton.get_sln_vector(), ref_spaces_const, { u_ref_sln, v_ref_sln });
 
     // Project the fine mesh solution onto the coarse mesh.
     Hermes::Mixins::Loggable::Static::info("Projecting reference solution on coarse mesh.");
-    OGProjection<double> ogProjection; ogProjection.project_global(std::vector<SpaceSharedPtr<double> >(u_space, v_space), ref_slns, slns);
+    OGProjection<double> ogProjection; ogProjection.project_global({u_space, v_space }, ref_slns, slns);
 
     cpu_time.tick();
 
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
     err_est_rel.push_back(errorCalculator.get_error_squared(0) * 100);
     err_est_rel.push_back(errorCalculator.get_error_squared(1) * 100);
 
-    adaptivity.set_spaces(std::vector<SpaceSharedPtr<double> >(u_space, v_space));
+    adaptivity.set_spaces({ u_space, v_space });
 
     // Time measurement.
     cpu_time.tick();
@@ -217,18 +217,18 @@ int main(int argc, char* argv[])
       v_space->get_num_dofs(), v_ref_space->get_num_dofs());
     Hermes::Mixins::Loggable::Static::info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1], err_exact_rel[1]);
     Hermes::Mixins::Loggable::Static::info("ndof_coarse_total: %d, ndof_fine_total: %d",
-      Space<double>::get_num_dofs(std::vector<SpaceSharedPtr<double> >(u_space, v_space)),
+      Space<double>::get_num_dofs({ u_space, v_space }),
       Space<double>::get_num_dofs(ref_spaces_const));
     Hermes::Mixins::Loggable::Static::info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(Space<double>::get_num_dofs(std::vector<SpaceSharedPtr<double> >(u_space, v_space)),
+    graph_dof_est.add_values(Space<double>::get_num_dofs({ u_space, v_space }),
       err_est_rel_total);
     graph_dof_est.save("conv_dof_est.dat");
     graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
     graph_cpu_est.save("conv_cpu_est.dat");
 
-    graph_dof_exact.add_values(Space<double>::get_num_dofs(std::vector<SpaceSharedPtr<double> >(u_space, v_space)),
+    graph_dof_exact.add_values(Space<double>::get_num_dofs({ u_space, v_space }),
       err_exact_rel_total);
     graph_dof_exact.save("conv_dof_exact.dat");
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
@@ -240,8 +240,7 @@ int main(int argc, char* argv[])
     else
     {
       Hermes::Mixins::Loggable::Static::info("Adapting coarse mesh.");
-      std::vector<RefinementSelectors::Selector<double> *> selectors(&selector, &selector);
-      done = adaptivity.adapt(selectors);
+      done = adaptivity.adapt({ &selector, &selector });
     }
 
     // Increase counter.

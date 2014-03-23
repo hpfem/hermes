@@ -186,6 +186,7 @@ namespace Hermes
     template<typename Scalar>
     void get_states_to_reassemble(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
+      int current_iteration = StateReassemblyHelper<Scalar>::current_iteration;
       if (StateReassemblyHelper<Scalar>::current_iteration == 1)
       {
         (*StateReassemblyHelper<Scalar>::reusable_DOFs) = nullptr;
@@ -695,7 +696,7 @@ namespace Hermes
         this->order_views[i]->show(spaces[i]->get_mesh());
       }
 
-      Views::View::wait_for_keypress();
+      //Views::View::wait_for_keypress();
     }
 
     template<typename Scalar, typename SolverType>

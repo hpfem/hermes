@@ -9,7 +9,7 @@ class CustomNormFormVol : public NormFormVol<double>
 public:
   CustomNormFormVol(int i, int j);
 
-  virtual double value(int n, double *wt, Func<double> *u, Func<double> *v, Geom<double> *e) const;
+  virtual double value(int n, double *wt, Func<double> *u, Func<double> *v, GeomVol<double> *e) const;
 };
 
 class CustomNormFormSurf : public NormFormSurf<double>
@@ -17,7 +17,7 @@ class CustomNormFormSurf : public NormFormSurf<double>
 public:
   CustomNormFormSurf(int i, int j);
 
-  virtual double value(int n, double *wt, Func<double> *u, Func<double> *v, Geom<double> *e) const;
+  virtual double value(int n, double *wt, Func<double> *u, Func<double> *v, GeomSurf<double> *e) const;
 };
 
 class CustomNormFormDG : public NormFormDG<double>
@@ -25,7 +25,7 @@ class CustomNormFormDG : public NormFormDG<double>
 public:
   CustomNormFormDG(int i, int j);
 
-  virtual double value(int n, double *wt, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v, Geom<double> *e) const;
+  virtual double value(int n, double *wt, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v, GeomSurf<double> *e) const;
 };
 
 /*

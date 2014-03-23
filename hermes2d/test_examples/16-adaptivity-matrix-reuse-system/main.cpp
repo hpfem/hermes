@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
   AdaptSolver<double, NewtonSolver<double> > adaptSolver({ u_space, v_space }, wf, &errorCalculator, &criterion, { &selector_u, &selector_v }, &global_criterion);
 
-  adaptSolver.switch_visualization(false);
+  adaptSolver.switch_visualization(true);
   adaptSolver.set_verbose_output(true);
 
   try

@@ -115,7 +115,7 @@ CustomWeakFormTimeDependent::CustomMatrixFormVol::CustomMatrixFormVol(int i, int
 {
 }
 
-double CustomWeakFormTimeDependent::CustomMatrixFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, Func<double> **ext) const
+double CustomWeakFormTimeDependent::CustomMatrixFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, GeomVol<double> *e, Func<double> **ext) const
 {
   return DefaultMatrixFormVol<double>::value(n, wt, u_ext, u, v, e, ext) / this->wf->get_current_time_step();
 }
@@ -129,7 +129,7 @@ CustomWeakFormTimeDependent::CustomVectorFormVol::CustomVectorFormVol(int i) : D
 {
 }
 
-double CustomWeakFormTimeDependent::CustomVectorFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, Func<double> **ext) const
+double CustomWeakFormTimeDependent::CustomVectorFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<double> **ext) const
 {
   double result = 0;
   
@@ -148,7 +148,7 @@ CustomWeakFormTimeDependent::CustomResidualFormVol::CustomResidualFormVol(int i)
 {
 }
 
-double CustomWeakFormTimeDependent::CustomResidualFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, Func<double> **ext) const
+double CustomWeakFormTimeDependent::CustomResidualFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<double> **ext) const
 {
   double result = 0;
   
