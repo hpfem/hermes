@@ -6,12 +6,12 @@ using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
 // Initial polynomial degree for u.
-const int P_INIT_U = 3;
+const int P_INIT_U = 1;
 // Initial polynomial degree for v.
-const int P_INIT_V = 2;
-const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refinements.
+const int P_INIT_V = 1;
+const int INIT_REF_NUM = 1;               // Number of initial uniform mesh refinements.
 // Number of initial boundary refinements
-const int INIT_REF_BDY = 2;
+const int INIT_REF_BDY = 0;
 
 // Problem parameters.
 const double D_u = 1;
@@ -97,14 +97,16 @@ int main(int argc, char* argv[])
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 2);
   AdaptStoppingCriterionSingleElement<double> criterion(0.);
   CustomSelector selector_u(0);
-  for (int i = 0; i < u_mesh->get_max_element_id(); i++)
+  for (int i = 0; i < 10000; i++)
   {
-    if ((i % 33) == 0) selector_u.element_ids.push_back(i);
+    if ((i % 5) == 0) selector_u.element_ids.push_back(i);
+    selector_u.element_ids.push_back(1);
   }
   CustomSelector selector_v(1);
-  for (int i = 0; i < v_mesh->get_max_element_id(); i++)
+  for (int i = 0; i < 10000; i++)
   {
-    if ((i % 33) == 0) selector_v.element_ids.push_back(i);
+    if ((i % 5) == 0) selector_v.element_ids.push_back(i);
+    selector_v.element_ids.push_back(1);
   }
   AdaptSolverCriterionFixed global_criterion(11);
 

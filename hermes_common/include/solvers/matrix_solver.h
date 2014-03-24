@@ -72,6 +72,9 @@ namespace Hermes
       /// Verbose output.
       virtual void set_verbose_output(bool to_set);
 
+      /// The solution vector.
+      Scalar* sln_vector;
+
     protected:
       /// Linear solver.
       Hermes::Solvers::LinearMatrixSolver<Scalar>* linear_matrix_solver;
@@ -96,8 +99,6 @@ namespace Hermes
       /// Data for UMFPACK reporting.
       double UMFPACK_reporting_data[3];
 #endif
-      /// The solution vector.
-      Scalar* sln_vector;
     };
   }
 }

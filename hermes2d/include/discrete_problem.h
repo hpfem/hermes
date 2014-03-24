@@ -72,10 +72,10 @@ namespace Hermes
       virtual ~DiscreteProblem();
 
       /// Assembling.
-      bool assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = nullptr);
+      bool assemble(Scalar*& coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = nullptr);
       /// Assembling.
       /// Without the matrix.
-      bool assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = nullptr);
+      bool assemble(Scalar*& coeff_vec, Vector<Scalar>* rhs = nullptr);
       /// Light version passing nullptr for the coefficient vector. External solutions
       /// are initialized with zeros.
       bool assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = nullptr);
@@ -83,8 +83,6 @@ namespace Hermes
       /// are initialized with zeros.
       /// Without the matrix.
       bool assemble(Vector<Scalar>* rhs);
-      /// Assembling.
-      bool assemble(Solution<Scalar>** u_ext_sln, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs);
 
       /// set time information for time-dependent problems.
       void set_time(double time);
@@ -101,7 +99,7 @@ namespace Hermes
       SpaceSharedPtrVector<Scalar> get_spaces();
 
       /// Experimental.
-      typedef void(*reassembled_states_reuse_linear_system_fn)(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Vector<Scalar>* dirichlet_lift_rhs);
+      typedef void(*reassembled_states_reuse_linear_system_fn)(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Vector<Scalar>* dirichlet_lift_rhs, Scalar*& coeff_vec);
       void set_reassembled_states_reuse_linear_system_fn(reassembled_states_reuse_linear_system_fn fn) {
         this->reassembled_states_reuse_linear_system = fn;
       }
@@ -120,7 +118,7 @@ namespace Hermes
 
     protected:
       /// Initialize states.
-      void init_assembling(Traverse::State**& states, unsigned int& num_states, Solution<Scalar>** u_ext_sln, MeshSharedPtrVector& meshes);
+      void init_assembling(Traverse::State**& states, unsigned int& num_states, MeshSharedPtrVector& meshes);
       void deinit_assembling(Traverse::State** states, unsigned  int num_states);
 
       /// RungeKutta helpers.

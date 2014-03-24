@@ -228,11 +228,12 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
-      return assemble((Solution<Scalar>**)nullptr, mat, rhs);
+      Scalar* coeff_vec = nullptr;
+      return assemble(coeff_vec, mat, rhs);
     }
 
     template<typename Scalar>
-    bool DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(Scalar*& coeff_vec, Vector<Scalar>* rhs)
     {
       return assemble(coeff_vec, nullptr, rhs);
     }
@@ -240,40 +241,12 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::assemble(Vector<Scalar>* rhs)
     {
-      return assemble((Solution<Scalar>**)nullptr, nullptr, rhs);
+      Scalar* coeff_vec = nullptr;
+      return assemble(coeff_vec, nullptr, rhs);
     }
-
+    
     template<typename Scalar>
-    bool DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
-    {
-      Solution<Scalar>** u_ext_sln = nullptr;
-
-      if (this->nonlinear && coeff_vec)
-      {
-        u_ext_sln = new Solution<Scalar>*[spaces_size];
-        int first_dof = 0;
-        for (int i = 0; i < this->spaces_size; i++)
-        {
-          u_ext_sln[i] = new Solution<Scalar>(spaces[i]->get_mesh());
-          Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], u_ext_sln[i], !this->rungeKutta, first_dof);
-          first_dof += spaces[i]->get_num_dofs();
-        }
-      }
-
-      bool result = assemble(u_ext_sln, mat, rhs);
-
-      if (this->nonlinear && coeff_vec)
-      {
-        for (int i = 0; i < this->spaces_size; i++)
-          delete u_ext_sln[i];
-        delete[] u_ext_sln;
-      }
-
-      return result;
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, unsigned int& num_states, Solution<Scalar>** u_ext_sln, MeshSharedPtrVector& meshes)
+    void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, unsigned int& num_states, MeshSharedPtrVector& meshes)
     {
       // Vector of meshes.
       for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
@@ -313,7 +286,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool DiscreteProblem<Scalar>::assemble(Solution<Scalar>** u_ext_sln, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    bool DiscreteProblem<Scalar>::assemble(Scalar*& coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
       // Check.
       this->check();
@@ -326,7 +299,7 @@ namespace Hermes
       unsigned int num_states;
       Traverse::State** states;
       MeshSharedPtrVector meshes;
-      this->init_assembling(states, num_states, u_ext_sln, meshes);
+      this->init_assembling(states, num_states, meshes);
       this->tick();
       this->info("\tDiscreteProblem: Initialization: %s.", this->last_str().c_str());
       this->tick();
@@ -340,7 +313,20 @@ namespace Hermes
 
         // The following does not make much sense to do just for rhs)
         if (this->current_mat && this->reassembled_states_reuse_linear_system)
-          this->reassembled_states_reuse_linear_system(states, num_states, this->current_mat, this->current_rhs, this->dirichlet_lift_rhs);
+          this->reassembled_states_reuse_linear_system(states, num_states, this->current_mat, this->current_rhs, this->dirichlet_lift_rhs, coeff_vec);
+
+        Solution<Scalar>** u_ext_sln = nullptr;
+        if (this->nonlinear && coeff_vec)
+        {
+          u_ext_sln = new Solution<Scalar>*[spaces_size];
+          int first_dof = 0;
+          for (int i = 0; i < this->spaces_size; i++)
+          {
+            u_ext_sln[i] = new Solution<Scalar>(spaces[i]->get_mesh());
+            Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], u_ext_sln[i], !this->rungeKutta, first_dof);
+            first_dof += spaces[i]->get_num_dofs();
+          }
+        }
 
         if (num_states > 0)
         {
@@ -400,6 +386,13 @@ namespace Hermes
               this->exceptionMessageCaughtInParallelBlock = e.what();
             }
           }
+        }
+
+        if (this->nonlinear && coeff_vec)
+        {
+          for (int i = 0; i < this->spaces_size; i++)
+            delete u_ext_sln[i];
+          delete[] u_ext_sln;
         }
       }
 

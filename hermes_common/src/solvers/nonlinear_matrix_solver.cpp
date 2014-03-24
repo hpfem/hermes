@@ -56,7 +56,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::free()
     {
-      free_with_check(this->sln_vector);
+      free_with_check(this->sln_vector, true);
     }
 
     template<typename Scalar>
@@ -97,8 +97,8 @@ namespace Hermes
       // Number of DOFs.
       assert(this->problem_size > 0);
 
-      free_with_check(this->sln_vector);
-      this->sln_vector = malloc_with_check<NonlinearMatrixSolver<Scalar>, Scalar>(this->problem_size, this);
+      free_with_check(this->sln_vector, true);
+      this->sln_vector = malloc_with_check<NonlinearMatrixSolver<Scalar>, Scalar>(this->problem_size, this, true);
 
       if (coeff_vec == nullptr)
         memset(this->sln_vector, 0, this->problem_size*sizeof(Scalar));
@@ -106,7 +106,7 @@ namespace Hermes
         memcpy(this->sln_vector, coeff_vec, this->problem_size*sizeof(Scalar));
 
       // previous_sln_vector
-      this->previous_sln_vector = calloc_with_check<NonlinearMatrixSolver<Scalar>, Scalar>(this->problem_size, this);
+      this->previous_sln_vector = calloc_with_check<NonlinearMatrixSolver<Scalar>, Scalar>(this->problem_size, this, true);
 
       // Backup vector for unsuccessful reuse of Jacobian.
       residual_back = create_vector<Scalar>();
@@ -288,10 +288,7 @@ namespace Hermes
       // If we have not converged and everything else is ok, we finish.
       if (state == NotConverged)
         return false;
-
-      // And now the finishing states (both good and bad).
-      this->finalize_solving();
-
+      
       // Act upon the state.
       switch (state)
       {
@@ -314,6 +311,9 @@ namespace Hermes
         throw Exceptions::Exception("Unknown ConvergenceState in NonlinearMatrixSolver.");
         break;
       }
+
+      // And now the finishing states (both good and bad).
+      this->finalize_solving();
 
       // Return that we should finish.
       return true;
@@ -371,7 +371,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::deinit_solving()
     {
-      free_with_check(this->previous_sln_vector);
+      free_with_check(this->previous_sln_vector, true);
       delete residual_back;
       this->problem_size = -1;
       if (this->previous_jacobian)
@@ -536,12 +536,12 @@ namespace Hermes
           this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
 
           // Test convergence - if in this loop we found a solution.
-          this->info("\t\t\tconvergence test");
+          this->info("\tNonlinearSolver: Convergence test...");
           if (this->handle_convergence_state_return_finished(this->get_convergence_state()))
             return;
 
           // Inspect the damping factor.
-          this->info("\t\tprobing the damping factor...");
+          this->info("\tNonlinearSolver: Probing the damping factor...");
           try
           {
             // Calculate damping factor, and return whether or not was this a successful step.
@@ -587,7 +587,7 @@ namespace Hermes
           this->residual_back->set_vector(this->get_residual());
 
           // Info & handle the situation as necessary.
-          this->info("\t\treusing Jacobian.");
+          this->info("\tNonlinearSolver: Reusing Jacobian.");
           this->on_reused_jacobian_step_begin();
 
           // Solve the system.
@@ -602,7 +602,7 @@ namespace Hermes
           // Test whether it was okay to reuse the jacobian.
           if (!this->jacobian_reused_okay(successful_steps_jacobian))
           {
-            this->warn("\t\treused Jacobian disapproved.");
+            this->warn("\tNonlinearSolver: Reused Jacobian disapproved.");
             this->get_parameter_value(this->p_residual_norms).pop_back();
             this->get_parameter_value(this->p_solution_norms).pop_back();
             this->get_parameter_value(this->p_solution_change_norms).pop_back();
@@ -634,7 +634,7 @@ namespace Hermes
 #pragma endregion
 
         // Reassemble the jacobian once not reusable anymore.
-        this->info("\t\tre-calculating Jacobian.");
+        this->info("\tNonlinearSolver: Re-calculating Jacobian.");
         
         // Set factorization scheme.
         this->assemble_jacobian(true);

@@ -163,7 +163,7 @@ namespace Hermes
     template<typename Scalar>
     bool StateReassemblyHelper<Scalar>::use_Dirichlet;
 
-    #define DEBUG_VIEWS
+    //#define DEBUG_VIEWS
 
     template<typename Scalar>
     static bool compare(Scalar a, Scalar b);
@@ -184,7 +184,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void get_states_to_reassemble(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Vector<Scalar>* dirichlet_lift_rhs)
+    void get_states_to_reassemble(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Vector<Scalar>* dirichlet_lift_rhs, Scalar*& coeff_vec)
     {
       int current_iteration = StateReassemblyHelper<Scalar>::current_iteration;
       if (StateReassemblyHelper<Scalar>::current_iteration == 1)
@@ -416,6 +416,9 @@ namespace Hermes
       Scalar* Ax = StateReassemblyHelper<Scalar>::current_prev_mat->get_Ax();
       int* Ai = StateReassemblyHelper<Scalar>::current_prev_mat->get_Ai();
       int* Ap = StateReassemblyHelper<Scalar>::current_prev_mat->get_Ap();
+      Scalar* new_coeff_vec = nullptr;
+      if (coeff_vec)
+        new_coeff_vec = calloc_with_check<Scalar>(ref_system_size, true);
       int total_entries = 0;
       int used_entries = 0;
       unsigned short current_row_entries;
@@ -435,6 +438,8 @@ namespace Hermes
           }
           if(rhs)
             rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::current_prev_rhs->get(i));
+          if (coeff_vec)
+            new_coeff_vec[DOF_to_DOF_map[i]] = coeff_vec[i];
         }
       }
       if (dirichlet_lift_rhs && StateReassemblyHelper<Scalar>::use_Dirichlet)
@@ -454,6 +459,11 @@ namespace Hermes
         }
       }
 
+      if (coeff_vec)
+      {
+        free_with_check(coeff_vec, true);
+        coeff_vec = new_coeff_vec;
+      }
       cpu_time.tick();
       Hermes::Mixins::Loggable::Static::info("\t      Reused matrix entries: %i / %i total - %2.0f%%.", used_entries, total_entries, ((float)used_entries / (float)total_entries) * 100.);
       Hermes::Mixins::Loggable::Static::info("\t      Copying the linear system: %4.3f s", cpu_time.last());
@@ -474,13 +484,14 @@ namespace Hermes
         if (this->visualization)
         {
           this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * 410, 0, 300, 300)));
-          this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(1));
+          this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(4));
           this->scalar_views.back()->set_title("Reference solution #%i", i);
 
           this->order_views.push_back(new Views::OrderView("", new Views::WinGeom(i * 410, 320, 300, 300)));
           this->order_views.back()->set_title("Reference space #%i - orders", i);
 
           this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 410, 640, 300, 300)));
+          this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(4));
         }
       }
 
@@ -576,7 +587,17 @@ namespace Hermes
         // Perform solution.
         this->info("\tSolving on reference mesh, %i DOFs.", Space<Scalar>::get_num_dofs(ref_spaces));
         this->solver->dp->set_reassembled_states_reuse_linear_system_fn(&get_states_to_reassemble<Scalar>);
-        this->solver->solve();
+        if (adaptivity_step > 1 && dynamic_cast<NewtonSolver<Scalar>*>(this->solver))
+        {
+          Scalar* new_sln_vector = realloc_with_check<Scalar>(this->solver->sln_vector, Space<Scalar>::get_num_dofs(ref_spaces));
+          this->solver->sln_vector = nullptr;
+          memset(new_sln_vector + Space<Scalar>::get_num_dofs(prev_ref_spaces), 0, (Space<Scalar>::get_num_dofs(ref_spaces) - Space<Scalar>::get_num_dofs(prev_ref_spaces)) * sizeof(Scalar));
+          this->solver->solve(new_sln_vector);
+          free_with_check(new_sln_vector, true);
+        }
+        else
+          this->solver->solve();
+
         this->solver->get_linear_matrix_solver()->free();
 
         // Free reusable DOFs data structures for this run.
