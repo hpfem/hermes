@@ -340,7 +340,7 @@ namespace Hermes
 
         // The following does not make much sense to do just for rhs)
         if (this->current_mat && this->reassembled_states_reuse_linear_system)
-          this->reassembled_states_reuse_linear_system(states, num_states, this->current_mat, this->current_rhs);
+          this->reassembled_states_reuse_linear_system(states, num_states, this->current_mat, this->current_rhs, this->dirichlet_lift_rhs);
 
         if (num_states > 0)
         {

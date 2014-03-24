@@ -6,7 +6,7 @@ using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
 const int P_INIT = 3;                     // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 4;               // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 2;               // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -75,9 +75,9 @@ int main(int argc, char* argv[])
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 1);
   AdaptStoppingCriterionSingleElement<double> criterion(0.);
   CustomSelector selector;
-  for (int i = 0; i < mesh->get_max_element_id(); i++)
+  for (int i = 0; i < 10000; i++)
   {
-    if ((i % 13) == 0) selector.element_ids.push_back(i);
+    if ((i % 7) == 0) selector.element_ids.push_back(i);
     selector.element_ids.push_back(6);
   }
   AdaptSolverCriterionFixed global_criterion(22);

@@ -113,8 +113,8 @@ namespace Hermes
     {
     public:
       static int current_iteration;
-      static std::set<std::pair<int, unsigned char> >* current_elements_to_reassemble;
-      static std::set<std::pair<int, unsigned char> >* current_DOFs_to_reassemble;
+      static std::unordered_set<unsigned int>* current_elements_to_reassemble[H2D_MAX_COMPONENTS];
+      static std::unordered_set<int>* current_DOFs_to_reassemble[H2D_MAX_COMPONENTS];
       static SpaceSharedPtrVector<Scalar>* current_ref_spaces;
       static SpaceSharedPtrVector<Scalar>* current_prev_ref_spaces;
       static unsigned char current_number_of_equations;
@@ -131,10 +131,10 @@ namespace Hermes
     int StateReassemblyHelper<Scalar>::current_iteration;
 
     template<typename Scalar>
-    std::set<std::pair<int, unsigned char> >* StateReassemblyHelper<Scalar>::current_elements_to_reassemble;
+    std::unordered_set<unsigned int>* StateReassemblyHelper<Scalar>::current_elements_to_reassemble[H2D_MAX_COMPONENTS];
 
     template<typename Scalar>
-    std::set<std::pair<int, unsigned char> >* StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble;
+    std::unordered_set<int>* StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble[H2D_MAX_COMPONENTS];
 
     template<typename Scalar>
     SpaceSharedPtrVector<Scalar>* StateReassemblyHelper<Scalar>::current_ref_spaces;
@@ -163,7 +163,7 @@ namespace Hermes
     template<typename Scalar>
     bool StateReassemblyHelper<Scalar>::use_Dirichlet;
 
-    //#define DEBUG_VIEWS
+    #define DEBUG_VIEWS
 
     template<typename Scalar>
     static bool compare(Scalar a, Scalar b);
@@ -184,7 +184,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void get_states_to_reassemble(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    void get_states_to_reassemble(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Vector<Scalar>* dirichlet_lift_rhs)
     {
       int current_iteration = StateReassemblyHelper<Scalar>::current_iteration;
       if (StateReassemblyHelper<Scalar>::current_iteration == 1)
@@ -212,7 +212,7 @@ namespace Hermes
       }
       // - elements to reassemble on the new space
       // -- we could maybe directly used the resulting states (in which we are interested), but it would be complicated.
-      std::set<std::pair<int, unsigned char> > newSpace_elements_to_reassemble;
+      std::unordered_set<unsigned int> newSpace_elements_to_reassemble[H2D_MAX_COMPONENTS];
       // - number of DOFs of the previous spaces.
       unsigned int prev_ref_system_size = StateReassemblyHelper<Scalar>::current_prev_mat->get_size();
       unsigned int ref_system_size = Space<Scalar>::get_num_dofs(*StateReassemblyHelper<Scalar>::current_ref_spaces);
@@ -233,79 +233,126 @@ namespace Hermes
         dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_ref_spaces->at(i)->get_mesh()));
       // - (for reporting) count of DOFs needed to be reassembled
       int reusable_DOFs_count = 0;
-      // Dirichlet edge markers with components.
-      std::set<std::pair<int, unsigned char> > Dirichlet_markers;
-      for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
-      {
-        std::vector<std::string> markers = ref_spaces[space_i]->get_essential_bcs()->get_markers();
-        for (unsigned short marker_i = 0; marker_i < markers.size(); marker_i++)
-        {
-          Mesh::MarkersConversion::IntValid marker = ref_spaces[space_i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(markers[marker_i]);
-          if (marker.valid)
-            Dirichlet_markers.insert(std::pair<int, unsigned char>(marker.marker, space_i));
-        }
-      }
-
+      
       // Start.
       Hermes::Mixins::Loggable::Static::info("\t   Handling Reusing matrix entries on the new Ref. Space:");
       cpu_time.tick();
+
+      // Find out if Dirichlet is not directly changed.
+      for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
+      {
+        if (StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble[space_i]->find(-1) == StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble[space_i]->end())
+          (*StateReassemblyHelper<Scalar>::reusable_Dirichlet)[space_i] = true;
+      }
 
       // Traverse the previous and current reference Spaces at once.
       Traverse trav(StateReassemblyHelper<Scalar>::current_number_of_equations * 2);
       unsigned int num_states_local;
       Traverse::State** states_local = trav.get_states(dummy_fns, num_states_local);
-      for (int local_state_i = 0; local_state_i < num_states_local; local_state_i++)
+      for (unsigned int local_state_i = 0; local_state_i < num_states_local; local_state_i++)
       {
         Traverse::State* current_local_state = states_local[local_state_i];
         for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
         {
-          // Dirichlet
-          if (StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->find(std::pair<int, unsigned char>(-1, space_i)) == StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->end())
-            (*StateReassemblyHelper<Scalar>::reusable_Dirichlet)[space_i] = true;
-
           // Mark the appropriate elements
           Element* prev_ref_element = current_local_state->e[space_i];
           Element* ref_element = current_local_state->e[space_i + StateReassemblyHelper<Scalar>::current_number_of_equations];
           // If the element is changed on the previous ref space, mark the appropriate element on the new ref space as to-reassemble.
           bool element_added = false;
-          if (StateReassemblyHelper<Scalar>::current_elements_to_reassemble->find(std::pair<int, unsigned char>(prev_ref_element->id, space_i)) != StateReassemblyHelper<Scalar>::current_elements_to_reassemble->end())
+          if (StateReassemblyHelper<Scalar>::current_elements_to_reassemble[space_i]->find(prev_ref_element->id) != StateReassemblyHelper<Scalar>::current_elements_to_reassemble[space_i]->end())
           {
-            newSpace_elements_to_reassemble.insert(std::pair<int, unsigned char>(ref_element->id, space_i));
+            newSpace_elements_to_reassemble[space_i].insert(ref_element->id);
             element_added = true;
           }
           // Get assembly lists.
           prev_ref_spaces[space_i]->get_element_assembly_list(prev_ref_element, &al_prev);
           ref_spaces[space_i]->get_element_assembly_list(ref_element, &al);
-
-          // Fun begins here - we need to figure out which DOFs on the new reference spaces can be reused and which cannot.
-          unsigned short last_matched_index = 0;
+          // Different assembly lists => reassemble element.
           if (!element_added && al_prev.cnt != al.cnt)
           {
-            newSpace_elements_to_reassemble.insert(std::pair<int, unsigned char>(ref_element->id, space_i));
+            newSpace_elements_to_reassemble[space_i].insert(ref_element->id);
             element_added = true;
           }
 
+          // Fun begins here - we need to figure out which DOFs on the new reference spaces can be reused and which cannot.
+          unsigned short last_matched_index = 0;
+          bool contains_Dirichlet = false, anything_changed = al_prev.cnt != al.cnt;
           for (unsigned short i_al_prev = 0; i_al_prev < al_prev.cnt; i_al_prev++)
           {
+            bool reused = false;
             if (!element_added && al_prev.idx[i_al_prev] != al.idx[i_al_prev])
             {
-              newSpace_elements_to_reassemble.insert(std::pair<int, unsigned char>(ref_element->id, space_i));
+              newSpace_elements_to_reassemble[space_i].insert(ref_element->id);
               element_added = true;
+            }
+            if (al_prev.dof[i_al_prev] < 0)
+            {
+              contains_Dirichlet = true;
+              continue;
             }
             for (unsigned short j_al = last_matched_index; j_al < al.cnt; j_al++)
             {
               if (al.dof[j_al] < 0)
+              {
+                contains_Dirichlet = true;
                 continue;
+              }
               if (al_prev.idx[i_al_prev] == al.idx[j_al] && compare<Scalar>(-HermesEpsilon, al_prev.coef[i_al_prev] - al.coef[j_al]) && compare<Scalar>(al_prev.coef[i_al_prev] - al.coef[j_al], HermesEpsilon))
               {
                 last_matched_index = j_al + 1;
-                if (StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->find(std::pair<int, unsigned char>(al_prev.dof[i_al_prev], space_i)) == StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble->end())
+                if (StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble[space_i]->find(al_prev.dof[i_al_prev]) == StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble[space_i]->end())
                 {
                   if (!(*StateReassemblyHelper<Scalar>::reusable_DOFs)[al.dof[j_al]])
                     reusable_DOFs_count++;
                   (*StateReassemblyHelper<Scalar>::reusable_DOFs)[al.dof[j_al]] = true;
                   DOF_to_DOF_map[al_prev.dof[i_al_prev]] = al.dof[j_al];
+                  reused = true;
                 }
+                break;
+              }
+            }
+            if (!reused)
+            {
+              assert(DOF_to_DOF_map[al_prev.dof[i_al_prev]] == -1);
+              anything_changed = true;
+            }
+          }
+          // Dirichlet - indirectly changed.
+          if (anything_changed && contains_Dirichlet)
+            (*StateReassemblyHelper<Scalar>::reusable_Dirichlet)[space_i] = false;
+        }
+      }
+
+      // Now we have to add all elements containing Dirichlet DOF (changed or not)
+      if (StateReassemblyHelper<Scalar>::use_Dirichlet)
+      {
+        for (unsigned int local_state_i = 0; local_state_i < num_states_local; local_state_i++)
+        {
+          Traverse::State* current_local_state = states_local[local_state_i];
+          for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
+          {
+            // If Dirichlet is not necessary to be recalculated, go on.
+            if ((*StateReassemblyHelper<Scalar>::reusable_Dirichlet)[space_i])
+              continue;
+            // Get current element.
+            Element* ref_element = current_local_state->e[space_i + StateReassemblyHelper<Scalar>::current_number_of_equations];
+            // If element is already being recalculated, continue.
+            if (newSpace_elements_to_reassemble[space_i].find(ref_element->id) != newSpace_elements_to_reassemble[space_i].end())
+              continue;
+
+            // Mark the previous element.
+            Element* prev_ref_element = current_local_state->e[space_i];
+
+            // Get assembly lists.
+            prev_ref_spaces[space_i]->get_element_assembly_list(prev_ref_element, &al_prev);
+            ref_spaces[space_i]->get_element_assembly_list(ref_element, &al);
+
+            // Since the element has not been added before we know the length of the prev and current assembly lists is the same.
+            for (unsigned short al_i = 0; al_i < al_prev.cnt; al_i++)
+            {
+              if (al_prev.dof[al_i] < 0 || al.dof[al_i] < 0)
+              {
+                newSpace_elements_to_reassemble[space_i].insert(ref_element->id);
                 break;
               }
             }
@@ -314,14 +361,14 @@ namespace Hermes
       }
 
       cpu_time.tick();
-      Hermes::Mixins::Loggable::Static::info("\t      No. of elements to reassemble: %i / %i total - %2.0f%%.", newSpace_elements_to_reassemble.size(), total_elements_new_spaces, ((float)newSpace_elements_to_reassemble.size() / (float)total_elements_new_spaces) * 100.);
       Hermes::Mixins::Loggable::Static::info("\t      No. of DOFs to reassemble: %i / %i total - %2.0f%%.", ref_system_size - reusable_DOFs_count, ref_system_size, ((float)(ref_system_size - reusable_DOFs_count) / (float)ref_system_size) * 100.);
       Hermes::Mixins::Loggable::Static::info("\t      Search for elements to reassemble: %4.3f s", cpu_time.last());
       cpu_time.tick();
 
       // Using the changed element on the new reference space, select the states from the original states that need to be recalculated.
 #ifdef DEBUG_VIEWS
-      bool* reassembled = (bool*)calloc(ref_spaces[0]->get_mesh()->get_max_element_id() + 1, sizeof(bool));
+      bool* reassembled_0 = (bool*)calloc(ref_spaces[0]->get_mesh()->get_max_element_id() + 1, sizeof(bool));
+      bool* reassembled_1 = (bool*)calloc(ref_spaces[1]->get_mesh()->get_max_element_id() + 1, sizeof(bool));
 #endif
       Traverse::State** new_states = malloc_with_check<Traverse::State*>(num_states, true);
       int new_num_states = 0;
@@ -329,11 +376,12 @@ namespace Hermes
       {
         for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
         {
-          if (newSpace_elements_to_reassemble.find(std::pair<int, unsigned char>(states[state_i]->e[space_i]->id, space_i)) != newSpace_elements_to_reassemble.end())
+          if (newSpace_elements_to_reassemble[space_i].find(states[state_i]->e[space_i]->id) != newSpace_elements_to_reassemble[space_i].end())
           {
             new_states[new_num_states++] = Traverse::State::clone(states[state_i]);
 #ifdef DEBUG_VIEWS
-            reassembled[states[state_i]->e[0]->id] = true;
+            reassembled_0[states[state_i]->e[0]->id] = true;
+            reassembled_1[states[state_i]->e[1]->id] = true;
 #endif
             break;
           }
@@ -341,11 +389,15 @@ namespace Hermes
       }
 
 #ifdef DEBUG_VIEWS
-      Views::ScalarView sc_temp("Reassembled states", new Views::WinGeom(600, 10, 600, 600));
-      MeshFunctionSharedPtr<double> reassembled_states_function(new ExactSolutionConstantArray<double, bool>(ref_spaces[0]->get_mesh(), reassembled));
-      sc_temp.show(reassembled_states_function);
+      Views::ScalarView sc_temp_0("Reassembled states", new Views::WinGeom(600, 10, 600, 600));
+      Views::ScalarView sc_temp_1("Reassembled states", new Views::WinGeom(1230, 10, 600, 600));
+      MeshFunctionSharedPtr<double> reassembled_states_function_0(new ExactSolutionConstantArray<double, bool>(ref_spaces[0]->get_mesh(), reassembled_0));
+      MeshFunctionSharedPtr<double> reassembled_states_function_1(new ExactSolutionConstantArray<double, bool>(ref_spaces[1]->get_mesh(), reassembled_1));
+      sc_temp_0.show(reassembled_states_function_0);
+      sc_temp_1.show(reassembled_states_function_1);
       Views::View::wait_for_keypress();
-      ::free(reassembled);
+      ::free(reassembled_0);
+      ::free(reassembled_1);
 #endif
 
       for (unsigned int i = 0; i < num_states; i++)
@@ -385,7 +437,7 @@ namespace Hermes
             rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::current_prev_rhs->get(i));
         }
       }
-      if (rhs && StateReassemblyHelper<Scalar>::use_Dirichlet)
+      if (dirichlet_lift_rhs && StateReassemblyHelper<Scalar>::use_Dirichlet)
       {
         unsigned int running_count = 0;
         for (unsigned short space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
@@ -395,7 +447,7 @@ namespace Hermes
             for (unsigned int dof_i = running_count; dof_i < running_count + prev_ref_spaces[space_i]->get_num_dofs(); dof_i++)
             {
               if (DOF_to_DOF_map[dof_i] != -1)
-                rhs->add(DOF_to_DOF_map[dof_i], StateReassemblyHelper<Scalar>::current_prev_dirichlet_lift_rhs->get(dof_i));
+                dirichlet_lift_rhs->add(DOF_to_DOF_map[dof_i], StateReassemblyHelper<Scalar>::current_prev_dirichlet_lift_rhs->get(dof_i));
             }
           }
           running_count += prev_ref_spaces[space_i]->get_num_dofs();
@@ -415,24 +467,20 @@ namespace Hermes
       this->solve_method_running = true;
       ref_slns.clear();
       slns.clear();
-      for (unsigned short i = 0; i < this->spaces.size(); i++)
+      for (unsigned char i = 0; i < this->spaces.size(); i++)
       {
         ref_slns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>));
         slns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>));
         if (this->visualization)
         {
-          this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * 410, 10, 400, 300)));
+          this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * 410, 0, 300, 300)));
           this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(1));
           this->scalar_views.back()->set_title("Reference solution #%i", i);
 
-          this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 410, 340, 400, 300)));
-          this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
+          this->order_views.push_back(new Views::OrderView("", new Views::WinGeom(i * 410, 320, 300, 300)));
+          this->order_views.back()->set_title("Reference space #%i - orders", i);
 
-          this->order_viewsRef.push_back(new Views::OrderView("", new Views::WinGeom(i * 410, 670, 400, 300)));
-          this->order_viewsRef.back()->set_title("Reference space #%i - orders", i);
-
-          this->order_views.push_back(new Views::MeshView("", new Views::WinGeom(i * 410, 1030, 400, 300)));
-          this->order_views.back()->set_title("Coarse space #%i - mesh", i);
+          this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 410, 640, 300, 300)));
         }
       }
 
@@ -452,8 +500,6 @@ namespace Hermes
       StateReassemblyHelper<Scalar>::use_Dirichlet = this->solver->dp->add_dirichlet_lift;
       StateReassemblyHelper<Scalar>::current_number_of_equations = this->number_of_equations;
 
-      this->elements_to_reassemble.clear();
-      this->DOFs_to_reassemble.clear();
       this->ref_spaces.clear();
 
       if (adaptivityType == hAdaptivity)
@@ -477,9 +523,8 @@ namespace Hermes
       for (unsigned short i = 0; i < this->number_of_equations; i++)
       {
         delete this->scalar_views[i];
-        delete this->base_views[i];
-        delete this->order_viewsRef[i];
         delete this->order_views[i];
+        delete this->base_views[i];
       }
 
       delete this->adaptivity_internal;
@@ -507,7 +552,7 @@ namespace Hermes
         // Construct globally refined reference meshes and setup reference spaces.
         prev_ref_spaces = ref_spaces;
         ref_spaces.clear();
-        for (unsigned short i = 0; i < number_of_equations; i++)
+        for (unsigned char i = 0; i < number_of_equations; i++)
         {
           Mesh::ReferenceMeshCreator ref_mesh_creator(spaces[i]->get_mesh());
           MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
@@ -522,8 +567,11 @@ namespace Hermes
         StateReassemblyHelper<Scalar>::current_iteration = this->adaptivity_step;
         StateReassemblyHelper<Scalar>::current_ref_spaces = &ref_spaces;
         StateReassemblyHelper<Scalar>::current_prev_ref_spaces = &prev_ref_spaces;
-        StateReassemblyHelper<Scalar>::current_elements_to_reassemble = &this->elements_to_reassemble;
-        StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble = &this->DOFs_to_reassemble;
+        for (unsigned char i = 0; i < number_of_equations; i++)
+        {
+          StateReassemblyHelper<Scalar>::current_elements_to_reassemble[i] = &this->elements_to_reassemble[i];
+          StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble[i] = &this->DOFs_to_reassemble[i];
+        }
 
         // Perform solution.
         this->info("\tSolving on reference mesh, %i DOFs.", Space<Scalar>::get_num_dofs(ref_spaces));
@@ -615,8 +663,13 @@ namespace Hermes
     {
       Hermes::Mixins::Loggable::Static::info("\t   Marking elements to reassemble on the already used Ref. Space:");
       this->tick();
-      this->elements_to_reassemble.clear();
-      this->DOFs_to_reassemble.clear();
+
+      // Clear the arrays.
+      for (unsigned char i = 0; i < this->spaces.size(); i++)
+      {
+        this->elements_to_reassemble[i].clear();
+        this->DOFs_to_reassemble[i].clear();
+      }
 
       int total_elements_prev_ref_spaces = 0;
       for (unsigned short i = 0; i < number_of_equations; i++)
@@ -624,6 +677,7 @@ namespace Hermes
 
       // Identify elements that changed.
       int valid_elements_to_refine_count = 0;
+      int ref_elements_changed_count = 0;
       for (int i = 0; i < this->adaptivity_internal->elements_to_refine_count; i++)
       {
         ElementToRefine* element_to_refine = &this->adaptivity_internal->elements_to_refine[i];
@@ -634,28 +688,36 @@ namespace Hermes
         int component = element_to_refine->comp;
         Element* e = this->ref_spaces[component]->get_mesh()->get_element_fast(element_to_refine->id);
         if (e->active)
-          this->elements_to_reassemble.insert(std::pair<int, unsigned char>(e->id, component));
+        {
+          this->elements_to_reassemble[component].insert(e->id);
+          ref_elements_changed_count++;
+        }
         else
         {
           for (int son_i = 0; son_i < H2D_MAX_ELEMENT_SONS; son_i++)
-            this->elements_to_reassemble.insert(std::pair<int, unsigned char>(e->sons[son_i]->id, component));
+          {
+            this->elements_to_reassemble[component].insert(e->sons[son_i]->id);
+            ref_elements_changed_count++;
+          }
         }
       }
       Hermes::Mixins::Loggable::Static::info("\t      No. of coarse mesh elements refined: %i / %i total - %2.0f%%.", valid_elements_to_refine_count, total_elements_prev_spaces, ((float)valid_elements_to_refine_count / (float)total_elements_prev_spaces) * 100.);
-      Hermes::Mixins::Loggable::Static::info("\t      No. of fine mesh elements directly changed: %i / %i total - %2.0f%%.", this->elements_to_reassemble.size(), total_elements_prev_ref_spaces, ((float)this->elements_to_reassemble.size() / (float)total_elements_prev_ref_spaces) * 100.);
+      Hermes::Mixins::Loggable::Static::info("\t      No. of fine mesh elements directly changed: %i / %i total - %2.0f%%.", ref_elements_changed_count, total_elements_prev_ref_spaces, ((float)ref_elements_changed_count / (float)total_elements_prev_ref_spaces) * 100.);
       this->tick();
       Hermes::Mixins::Loggable::Static::info("\t      Identify elements that changed: %4.3f s", this->last());
       this->tick();
 
       // Identify DOFs of the changed elements.
       AsmList<Scalar> al;
-      for (std::set<std::pair<int, unsigned char> >::iterator it = elements_to_reassemble.begin(); it != elements_to_reassemble.end(); ++it)
+      for (unsigned char space_i = 0; space_i < this->number_of_equations; space_i++)
       {
-        int component = it->second;
-        Element* e = this->ref_spaces[component]->get_mesh()->get_element_fast(it->first);
-        this->ref_spaces[component]->get_element_assembly_list(e, &al);
-        for (int j = 0; j < al.cnt; j++)
-          this->DOFs_to_reassemble.insert(std::pair<int, unsigned char>(al.dof[j], component));
+        for (std::unordered_set<unsigned int>::iterator it = elements_to_reassemble[space_i].begin(); it != elements_to_reassemble[space_i].end(); ++it)
+        {
+          Element* e = this->ref_spaces[space_i]->get_mesh()->get_element_fast(*it);
+          this->ref_spaces[space_i]->get_element_assembly_list(e, &al);
+          for (int j = 0; j < al.cnt; j++)
+            this->DOFs_to_reassemble[space_i].insert(al.dof[j]);
+        }
       }
 
       this->tick();
@@ -664,6 +726,7 @@ namespace Hermes
 
       // Take a look at other elements if they share a DOF that changed.
       /// \todo This is ineffective, a more effective way is to employ an improved neighbor searching.
+      ref_elements_changed_count = 0;
       for (unsigned char space_i = 0; space_i < this->number_of_equations; space_i++)
       {
         for_all_active_elements_fast(this->ref_spaces[space_i]->get_mesh())
@@ -671,16 +734,17 @@ namespace Hermes
           this->ref_spaces[space_i]->get_element_assembly_list(e, &al);
           for (int j = 0; j < al.cnt; j++)
           {
-            if (this->DOFs_to_reassemble.find(std::pair<int, unsigned char>(al.dof[j], space_i)) != this->DOFs_to_reassemble.end())
+            if (this->DOFs_to_reassemble[space_i].find(al.dof[j]) != this->DOFs_to_reassemble[space_i].end())
             {
-              this->elements_to_reassemble.insert(std::pair<int, unsigned char>(e->id, space_i));
+              this->elements_to_reassemble[space_i].insert(e->id);
+              ref_elements_changed_count++;
               break;
             }
           }
         }
       }
 
-      Hermes::Mixins::Loggable::Static::info("\t      No. of all fine mesh elements that need to be reassembled: %i / %i total - %2.0f%%.", this->elements_to_reassemble.size(), total_elements_prev_ref_spaces, ((float)this->elements_to_reassemble.size() / (float)total_elements_prev_ref_spaces) * 100.);
+      Hermes::Mixins::Loggable::Static::info("\t      No. of all fine mesh elements that need to be reassembled: %i / %i total - %2.0f%%.", ref_elements_changed_count, total_elements_prev_ref_spaces, ((float)ref_elements_changed_count / (float)total_elements_prev_ref_spaces) * 100.);
       this->tick();
       Hermes::Mixins::Loggable::Static::info("\t      Looking for elements containing a changed DOF: %4.3f s", this->last());
     }
@@ -691,12 +755,11 @@ namespace Hermes
       for (unsigned short i = 0; i < this->number_of_equations; i++)
       {
         this->scalar_views[i]->show(this->ref_slns[i]);
+        this->order_views[i]->show(ref_spaces[i]);
         this->base_views[i]->show(ref_spaces[i]);
-        this->order_viewsRef[i]->show(ref_spaces[i]);
-        this->order_views[i]->show(spaces[i]->get_mesh());
       }
 
-      //Views::View::wait_for_keypress();
+      Views::View::wait_for_keypress();
     }
 
     template<typename Scalar, typename SolverType>

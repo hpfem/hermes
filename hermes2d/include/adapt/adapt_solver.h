@@ -22,6 +22,7 @@
 #include "../solver/newton_solver.h"
 #include "../solver/picard_solver.h"
 #include "../refinement_selectors/selector.h"
+#include <unordered_set>
 
 namespace Hermes
 {
@@ -183,8 +184,7 @@ namespace Hermes
 
       /// Views - used only if visualization is ON.
       std::vector<Views::ScalarView*> scalar_views;
-      std::vector<Views::OrderView*> order_viewsRef;
-      std::vector<Views::MeshView*> order_views;
+      std::vector<Views::OrderView*> order_views;
       std::vector<Views::BaseView<Scalar>*> base_views;
 
       /// Strictly private - Adapt instance.
@@ -198,8 +198,8 @@ namespace Hermes
 
       /// Strictly private - elements to reassemble.
       /// Internal data: std::pair: [0] - element id, [1] - component (for multimesh).
-      std::set<std::pair<int, unsigned char> > elements_to_reassemble;
-      std::set<std::pair<int, unsigned char> > DOFs_to_reassemble;
+      std::unordered_set<unsigned int> elements_to_reassemble[H2D_MAX_COMPONENTS];
+      std::unordered_set<int> DOFs_to_reassemble[H2D_MAX_COMPONENTS];
 
       /// Previous algebraic structures for reusal - matrix.
       CSCMatrix<Scalar>* prev_mat;
