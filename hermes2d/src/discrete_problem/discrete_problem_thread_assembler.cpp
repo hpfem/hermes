@@ -461,7 +461,7 @@ namespace Hermes
         for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
         {
           if (u_ext_fns[ext_i])
-            init_fn_preallocated(target_array[ext_i], u_ext_fns[ext_i].get(), target_array + u_ext_fns_size, u_ext_func, order, geometry, current_state->rep->get_mode());
+            init_fn_preallocated(target_array[ext_i], u_ext_fns[ext_i].get(), target_array, u_ext_func, order, geometry, current_state->rep->get_mode());
         }
       }
 
