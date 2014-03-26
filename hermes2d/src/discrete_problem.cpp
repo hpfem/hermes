@@ -412,13 +412,8 @@ namespace Hermes
 
       Element* e;
       for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
-      {
         for_all_active_elements(e, spaces[space_i]->get_mesh())
-        {
-          spaces[space_i]->edata[e->id].changed_in_last_adaptation = false;
           e->visited = false;
-        }
-      }
 
       this->tick();
       this->info("\tDiscreteProblem: De-initialization: %s.", this->last_str().c_str());

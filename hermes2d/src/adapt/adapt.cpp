@@ -403,22 +403,6 @@ namespace Hermes
       // since space changed, assign dofs:
       for (unsigned int i = 0; i < this->spaces.size(); i++)
         this->spaces[i]->assign_dofs();
-
-      Element* e;
-      for (int i = 0; i < this->num; i++)
-      {
-        for_all_active_elements(e, this->meshes[i])
-          this->spaces[i]->edata[e->id].changed_in_last_adaptation = false;
-      }
-
-      // EXTREMELY important - set the changed_in_last_adaptation to changed elements.
-      for (int i = 0; i < element_refinements_count; i++)
-      {
-        typename ErrorCalculator<Scalar>::ElementReference element_reference = this->errorCalculator->get_element_reference(i);
-        int element_id = element_reference.element_id;
-        int component = element_reference.comp;
-        this->spaces[component]->edata[element_id].changed_in_last_adaptation = true;
-      }
     }
 
     template<typename Scalar>
@@ -656,7 +640,6 @@ namespace Hermes
       if (elem_ref.split == H2D_REFINEMENT_P)
       {
         space->set_element_order_internal(elem_ref.id, elem_ref.refinement_polynomial_order[0]);
-        space->edata[elem_ref.id].changed_in_last_adaptation = true;
       }
       else if (elem_ref.split == H2D_REFINEMENT_H)
       {
@@ -665,7 +648,6 @@ namespace Hermes
         for (int j = 0; j < 4; j++)
         {
           space->set_element_order_internal(e->sons[j]->id, elem_ref.refinement_polynomial_order[j]);
-          space->edata[e->sons[j]->id].changed_in_last_adaptation = true;
         }
       }
       else
@@ -677,7 +659,6 @@ namespace Hermes
         for (int j = 0; j < 2; j++)
         {
           space->set_element_order_internal(e->sons[(elem_ref.split == H2D_REFINEMENT_H_ANISO_H) ? j : j + 2]->id, elem_ref.refinement_polynomial_order[j]);
-          space->edata[e->sons[(elem_ref.split == H2D_REFINEMENT_H_ANISO_H) ? j : j + 2]->id].changed_in_last_adaptation = true;
         }
       }
     }

@@ -204,6 +204,19 @@ namespace Hermes
         break;
 
       case EXPORT_FORMAT_PLAIN_ASCII:
+      {
+                                      FILE* file = fopen(filename, "w");
+                                      if (!file)
+                                        throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+                                      for (unsigned int i = 0; i < this->size; i++)
+                                      {
+                                        fprintf(file, "%i ", i + 1);
+                                        Hermes::Helpers::fprint_num(file, v[i], number_format);
+                                        fprintf(file, "\n");
+                                      }
+                                      fclose(file);
+      }
+        break;
       case EXPORT_FORMAT_MATLAB_SIMPLE:
       {
                                       FILE* file = fopen(filename, "w");

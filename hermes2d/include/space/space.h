@@ -419,10 +419,9 @@ namespace Hermes
       class ElementData
       {
       public:
-        ElementData() : changed_in_last_adaptation(true) {};
+        ElementData() {};
         int order;
         int bdof, n;
-        bool changed_in_last_adaptation;
       };
 
       /// node data table

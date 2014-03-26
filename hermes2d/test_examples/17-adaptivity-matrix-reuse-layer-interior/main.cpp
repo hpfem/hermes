@@ -7,9 +7,9 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 
 
 // Initial polynomial degree of mesh elements.
-const int P_INIT = 2;                             
+const int P_INIT = 1;                             
 // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM = 3;
+const int INIT_REF_NUM = 1;
 
 // Problem parameters.
 // Slope of the layer.
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   Hermes::Hermes1DFunction<double> lambda(1.0);
-  WeakFormSharedPtr<double> wf(new DefaultWeakFormPoissonLinear<double>(HERMES_ANY, &f));
+  WeakFormSharedPtr<double> wf(new DefaultWeakFormPoisson<double>(HERMES_ANY, &lambda, &f));
   
   // Initialize boundary conditions
   DefaultEssentialBCNonConst<double> bc_essential("Bdy", exact_sln);
@@ -55,10 +55,10 @@ int main(int argc, char* argv[])
   
   AdaptSolverCriterionFixed global_criterion(20);
 
-  AdaptSolver<double, LinearSolver<double> > adaptSolver(space, wf, &errorCalculator, &criterion, &selector, &global_criterion);
+  AdaptSolver<double, NewtonSolver<double> > adaptSolver(space, wf, &errorCalculator, &criterion, &selector, &global_criterion);
 
   adaptSolver.switch_visualization(true);
   adaptSolver.set_verbose_output(true);
-  adaptSolver.solve(hpAdaptivity);
+  adaptSolver.solve(hAdaptivity);
   return 0;
 }

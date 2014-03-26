@@ -163,7 +163,7 @@ namespace Hermes
     template<typename Scalar>
     bool StateReassemblyHelper<Scalar>::use_Dirichlet;
 
-    //#define DEBUG_VIEWS
+    #define DEBUG_VIEWS
 
     template<typename Scalar>
     static bool compare(Scalar a, Scalar b);
@@ -367,8 +367,9 @@ namespace Hermes
 
       // Using the changed element on the new reference space, select the states from the original states that need to be recalculated.
 #ifdef DEBUG_VIEWS
-      bool* reassembled_0 = (bool*)calloc(ref_spaces[0]->get_mesh()->get_max_element_id() + 1, sizeof(bool));
-      bool* reassembled_1 = (bool*)calloc(ref_spaces[1]->get_mesh()->get_max_element_id() + 1, sizeof(bool));
+      bool** reassembled = new bool*[StateReassemblyHelper<Scalar>::current_number_of_equations];
+      for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
+        reassembled[space_i] = (bool*)calloc(ref_spaces[space_i]->get_mesh()->get_max_element_id() + 1, sizeof(bool));
 #endif
       Traverse::State** new_states = malloc_with_check<Traverse::State*>(num_states, true);
       int new_num_states = 0;
@@ -380,25 +381,13 @@ namespace Hermes
           {
             new_states[new_num_states++] = Traverse::State::clone(states[state_i]);
 #ifdef DEBUG_VIEWS
-            reassembled_0[states[state_i]->e[0]->id] = true;
-            reassembled_1[states[state_i]->e[1]->id] = true;
+            for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
+              reassembled[space_i][states[state_i]->e[space_i]->id] = true;
 #endif
             break;
           }
         }
       }
-
-#ifdef DEBUG_VIEWS
-      Views::ScalarView sc_temp_0("Reassembled states", new Views::WinGeom(600, 10, 600, 600));
-      Views::ScalarView sc_temp_1("Reassembled states", new Views::WinGeom(1230, 10, 600, 600));
-      MeshFunctionSharedPtr<double> reassembled_states_function_0(new ExactSolutionConstantArray<double, bool>(ref_spaces[0]->get_mesh(), reassembled_0));
-      MeshFunctionSharedPtr<double> reassembled_states_function_1(new ExactSolutionConstantArray<double, bool>(ref_spaces[1]->get_mesh(), reassembled_1));
-      sc_temp_0.show(reassembled_states_function_0);
-      sc_temp_1.show(reassembled_states_function_1);
-      Views::View::wait_for_keypress();
-      ::free(reassembled_0);
-      ::free(reassembled_1);
-#endif
 
       for (unsigned int i = 0; i < num_states; i++)
         delete states[i];
@@ -459,14 +448,75 @@ namespace Hermes
         }
       }
 
+      cpu_time.tick();
+      Hermes::Mixins::Loggable::Static::info("\t      Reused matrix entries: %i / %i total - %2.0f%%.", used_entries, total_entries, ((float)used_entries / (float)total_entries) * 100.);
+      Hermes::Mixins::Loggable::Static::info("\t      Copying the linear system: %4.3f s", cpu_time.last());
+
+      mat->export_to_file("MatrixAfterReuse", "A", EXPORT_FORMAT_MATLAB_SIMPLE, "%16.16f");
+      if(rhs)
+        rhs->export_to_file("RhsAfterReuse", "b", EXPORT_FORMAT_PLAIN_ASCII, "%16.16f");
+      if (dirichlet_lift_rhs && StateReassemblyHelper<Scalar>::use_Dirichlet)
+        dirichlet_lift_rhs->export_to_file("DirLiftAfterReuse", "bd", EXPORT_FORMAT_PLAIN_ASCII, "%16.16f");
+      
+      if (coeff_vec)
+      {
+        FILE* coeff_vec_prev_file = fopen("CoeffVecPrev", "w");
+        FILE* coeff_vec_file = fopen("CoeffVec", "w");
+        for (unsigned int i = 0; i < prev_ref_system_size; i++)
+          fprintf(coeff_vec_prev_file, "%i (-> %i): %f\n", i, DOF_to_DOF_map[i], coeff_vec[i]);
+        for (unsigned int i = 0; i < ref_system_size; i++)
+          fprintf(coeff_vec_file, "%i, %f\n", i, new_coeff_vec[i]);
+        fclose(coeff_vec_file);
+        fclose(coeff_vec_prev_file);
+      }
+
+      FILE* DOF_to_DOF_file = fopen("DOF_to_DOF", "w");
+      for (unsigned int i = 0; i < prev_ref_system_size; i++)
+        fprintf(DOF_to_DOF_file, "%i -> %i\n", i, DOF_to_DOF_map[i]);
+      fclose(DOF_to_DOF_file);
+
+      FILE* DOF_to_DOF_plus_1_file = fopen("DOF_to_DOF_plus1", "w");
+      for (unsigned int i = 0; i < prev_ref_system_size; i++)
+        fprintf(DOF_to_DOF_plus_1_file, "%i -> %i\n", i + 1, DOF_to_DOF_map[i] + 1);
+      fclose(DOF_to_DOF_plus_1_file);
+
+#ifdef DEBUG_VIEWS
+
+      std::vector<Views::ScalarView*> reassembled_views;
+      std::vector<Views::BaseView<Scalar>*> base_views_prev;
+      std::vector<Views::BaseView<Scalar>*> base_views_curr;
+
+      for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
+      {
+        reassembled_views.push_back(new Views::ScalarView("", new Views::WinGeom(630 + space_i * 310, 630, 300, 300)));
+        reassembled_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(1));
+        MeshFunctionSharedPtr<double> reassembled_states_function(new ExactSolutionConstantArray<double, bool>(ref_spaces[space_i]->get_mesh(), reassembled[space_i]));
+        reassembled_views.back()->show(reassembled_states_function);
+        base_views_prev.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(630, space_i * 310, 300, 300)));
+        base_views_curr.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(950, space_i * 310, 300, 300)));
+        base_views_prev.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
+        base_views_prev.back()->show(prev_ref_spaces[space_i]);
+        base_views_curr.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
+        base_views_curr.back()->show(ref_spaces[space_i]);
+      }
+
+      Views::View::wait_for_keypress();
+      for (unsigned char space_i = 0; space_i < StateReassemblyHelper<Scalar>::current_number_of_equations; space_i++)
+      {
+        ::free(reassembled[space_i]);
+        delete reassembled_views[space_i];
+        //delete base_views_prev[space_i];
+        //delete base_views_curr[space_i];
+      }
+      delete[] reassembled;
+#endif
+
       if (coeff_vec)
       {
         free_with_check(coeff_vec, true);
         coeff_vec = new_coeff_vec;
       }
-      cpu_time.tick();
-      Hermes::Mixins::Loggable::Static::info("\t      Reused matrix entries: %i / %i total - %2.0f%%.", used_entries, total_entries, ((float)used_entries / (float)total_entries) * 100.);
-      Hermes::Mixins::Loggable::Static::info("\t      Copying the linear system: %4.3f s", cpu_time.last());
+
       free_with_check(DOF_to_DOF_map);
     }
 
@@ -483,24 +533,24 @@ namespace Hermes
         slns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>));
         if (this->visualization)
         {
-          this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * 410, 0, 300, 300)));
+          this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * 320, 0, 300, 300)));
           this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(4));
           this->scalar_views.back()->set_title("Reference solution #%i", i);
 
-          this->order_views.push_back(new Views::OrderView("", new Views::WinGeom(i * 410, 320, 300, 300)));
+          this->order_views.push_back(new Views::OrderView("", new Views::WinGeom(i * 320, 320, 300, 300)));
           this->order_views.back()->set_title("Reference space #%i - orders", i);
 
-          this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 410, 640, 300, 300)));
+          this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 320, 640, 300, 300)));
           this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(4));
         }
       }
 
       this->solver->set_verbose_output(this->get_verbose_output());
-      //this->solver->output_matrix();
+      this->solver->output_matrix();
       this->solver->set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
 
-      //this->solver->output_rhs();
-      this->solver->set_rhs_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
+      this->solver->output_rhs();
+      this->solver->set_rhs_export_format(EXPORT_FORMAT_PLAIN_ASCII);
 
       this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
       this->adaptivity_internal->set_verbose_output(this->get_verbose_output());
@@ -567,7 +617,7 @@ namespace Hermes
         {
           Mesh::ReferenceMeshCreator ref_mesh_creator(spaces[i]->get_mesh());
           MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-          Space<Scalar>::ReferenceSpaceCreator u_ref_space_creator(spaces[i], adaptivityType == pAdaptivity ? spaces[i]->get_mesh() : ref_mesh, adaptivityType == hAdaptivity ? 0 : 1);
+          Space<Scalar>::ReferenceSpaceCreator u_ref_space_creator(spaces[i], adaptivityType == pAdaptivity ? spaces[i]->get_mesh() : ref_mesh, adaptivityType == hAdaptivity ? 0 : 0);
           ref_spaces.push_back(u_ref_space_creator.create_ref_space());
         }
 
@@ -597,6 +647,9 @@ namespace Hermes
         }
         else
           this->solver->solve();
+
+        if (this->solver->dp->add_dirichlet_lift)
+          this->solver->dp->dirichlet_lift_rhs->export_to_file("DirLift", "bd", EXPORT_FORMAT_PLAIN_ASCII, "%16.16f");
 
         this->solver->get_linear_matrix_solver()->free();
 
@@ -777,7 +830,7 @@ namespace Hermes
       {
         this->scalar_views[i]->show(this->ref_slns[i]);
         this->order_views[i]->show(ref_spaces[i]);
-        this->base_views[i]->show(ref_spaces[i]);
+        //this->base_views[i]->show(ref_spaces[i]);
       }
 
       Views::View::wait_for_keypress();

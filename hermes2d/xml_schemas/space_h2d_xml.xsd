@@ -9,7 +9,6 @@
             <attribute name="ord" type="integer" use="required" />
             <attribute name="bd" type="integer" use="required" />
             <attribute name="n" type="integer" use="required" />
-            <attribute name="chgd" type="boolean" use="required" />
           </complexType>
         </element>
       </sequence>

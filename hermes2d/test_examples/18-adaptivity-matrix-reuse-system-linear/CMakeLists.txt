@@ -1,4 +1,4 @@
-project(16-adaptivity-matrix-reuse-system)
+project(18-adaptivity-matrix-reuse-system-linear)
 
 add_executable(${PROJECT_NAME} main.cpp definitions.cpp)
 

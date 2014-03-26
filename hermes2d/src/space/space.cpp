@@ -235,7 +235,6 @@ namespace Hermes
           edata[i].order = -1;
           edata[i].bdof = 0;
           edata[i].n = -1;
-          edata[i].changed_in_last_adaptation = true;
         }
       }
     }
@@ -264,14 +263,6 @@ namespace Hermes
       }
 
       this->seq = g_space_seq++;
-
-      for_all_active_elements(e, this->mesh)
-      {
-        if (space->edata[e->id].changed_in_last_adaptation)
-          this->edata[e->id].changed_in_last_adaptation = true;
-        else
-          this->edata[e->id].changed_in_last_adaptation = false;
-      }
 
       this->assign_dofs();
     }
@@ -569,10 +560,6 @@ namespace Hermes
         if (!only_unrefine_space_data)
           this->mesh->unrefine_element_id(list[i]);
       }
-
-      // Recalculate all integrals, do not use previous adaptivity step.
-      for_all_active_elements(e, this->mesh)
-        this->edata[e->id].changed_in_last_adaptation = true;
     }
 
     template<typename Scalar>
@@ -728,21 +715,6 @@ namespace Hermes
     void Space<Scalar>::ReferenceSpaceCreator::finish_construction(SpaceSharedPtr<Scalar> ref_space)
     {
       ref_space->seq = g_space_seq++;
-
-      Element *e;
-      for_all_active_elements(e, coarse_space->get_mesh())
-      {
-        bool to_set = this->coarse_space->edata[e->id].changed_in_last_adaptation;
-        {
-          if (ref_space->mesh->get_element(e->id)->active)
-            ref_space->edata[e->id].changed_in_last_adaptation = to_set;
-          else
-          for (unsigned int i = 0; i < 4; i++)
-          if (ref_space->mesh->get_element(e->id)->sons[i] != nullptr)
-          if (ref_space->mesh->get_element(e->id)->sons[i]->active)
-            ref_space->edata[ref_space->mesh->get_element(e->id)->sons[i]->id].changed_in_last_adaptation = to_set;
-        }
-      }
     }
 
     template<typename Scalar>
@@ -1099,7 +1071,7 @@ namespace Hermes
       // Utility pointer.
       Element *e;
       for_all_used_elements(e, this->get_mesh())
-        xmlspace.element_data().push_back(XMLSpace::space::element_data_type(e->id, this->edata[e->id].order, this->edata[e->id].bdof, this->edata[e->id].n, this->edata[e->id].changed_in_last_adaptation));
+        xmlspace.element_data().push_back(XMLSpace::space::element_data_type(e->id, this->edata[e->id].order, this->edata[e->id].bdof, this->edata[e->id].n));
 
       ::xml_schema::namespace_infomap namespace_info_map;
       std::ofstream out(filename);
@@ -1316,7 +1288,6 @@ namespace Hermes
           space->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].order = parsed_xml_space->element_data().at(elem_data_i).ord();
           space->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].bdof = parsed_xml_space->element_data().at(elem_data_i).bd();
           space->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].n = parsed_xml_space->element_data().at(elem_data_i).n();
-          space->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).chgd();
         }
 
         space->seq = g_space_seq++;
@@ -1355,7 +1326,6 @@ namespace Hermes
           this->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].order = parsed_xml_space->element_data().at(elem_data_i).ord();
           this->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].bdof = parsed_xml_space->element_data().at(elem_data_i).bd();
           this->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].n = parsed_xml_space->element_data().at(elem_data_i).n();
-          this->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).chgd();
         }
 
         this->seq = g_space_seq++;

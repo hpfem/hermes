@@ -117,10 +117,12 @@ int main(int argc, char* argv[])
 
   try
   {
+#ifdef HAVE_PARALUTION
     adaptSolver.get_solver()->get_linear_matrix_solver()->as_IterSolver()->set_tolerance(1e-5, LoopSolverToleranceType::RelativeTolerance);
     adaptSolver.get_solver()->get_linear_matrix_solver()->as_IterSolver()->set_max_iters(400);
     adaptSolver.get_solver()->get_linear_matrix_solver()->as_IterSolver()->set_solver_type(IterSolverType::CG);
     adaptSolver.get_solver()->get_linear_matrix_solver()->as_IterSolver()->set_precond(new ParalutionPrecond<double>(PreconditionerType::MultiColoredILU));
+#endif
   }
   catch(std::exception& e)
   {
