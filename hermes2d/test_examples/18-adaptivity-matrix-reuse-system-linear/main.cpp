@@ -6,7 +6,7 @@ using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
 const int P_INIT = 1;                     // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 1;               // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 2;               // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.

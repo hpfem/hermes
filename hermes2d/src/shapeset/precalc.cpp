@@ -146,9 +146,9 @@ namespace Hermes
       return H2D_MAKE_EDGE_ORDER(element->get_mode(), edge, shapeset->get_order(index, element->get_mode()));
     }
 
-    std::vector<PrecalcShapesetAssemblingStorage*> PrecalcShapesetAssembling::tables;
+    std::vector<PrecalcShapesetFastStorage*> PrecalcShapesetFast::tables;
 
-    PrecalcShapesetAssembling::PrecalcShapesetAssembling(Shapeset* shapeset) : PrecalcShapeset(shapeset), storage(nullptr)
+    PrecalcShapesetFast::PrecalcShapesetFast(Shapeset* shapeset) : PrecalcShapeset(shapeset), storage(nullptr)
     {
       for(unsigned short i = 0; i < tables.size(); i++)
       {
@@ -162,65 +162,66 @@ namespace Hermes
       {
 #pragma omp critical (pss_table_creation)
         {
-          this->storage = new PrecalcShapesetAssemblingStorage(this->shapeset);
+          this->storage = new PrecalcShapesetFastStorage(this->shapeset);
           tables.push_back(storage);
         }
       }
     }
 
-    PrecalcShapesetAssembling::~PrecalcShapesetAssembling()
+
+    PrecalcShapesetFast::~PrecalcShapesetFast()
     {
 
     }
 
-    const double* PrecalcShapesetAssembling::get_fn_values(int component) const
+    const double* PrecalcShapesetFast::get_fn_values(int component) const
     {
       unsigned char mode = this->element->get_mode();
-      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][0][this->order][this->index])
+      if (this->index > 0 && this->sub_idx == 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][this->order][this->index])
         return this->storage->PrecalculatedValues[mode][0][this->order][this->index];
       assert(this->values_valid);
       return &values[component][0][0];
     }
 
-    const double* PrecalcShapesetAssembling::get_dx_values(int component) const
+    const double* PrecalcShapesetFast::get_dx_values(int component) const
     {
       unsigned char mode = this->element->get_mode();
-      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][0][this->order][this->index])
+      if (this->index > 0 && this->sub_idx == 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][this->order][this->index])
         return this->storage->PrecalculatedValues[mode][1][this->order][this->index];
       assert(this->values_valid);
       return &values[component][1][0];
     }
 
-    const double* PrecalcShapesetAssembling::get_dy_values(int component) const
+    const double* PrecalcShapesetFast::get_dy_values(int component) const
     {
       unsigned char mode = this->element->get_mode();
-      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][0][this->order][this->index])
+      if (this->index > 0 && this->sub_idx == 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][this->order][this->index])
         return this->storage->PrecalculatedValues[mode][2][this->order][this->index];
       assert(this->values_valid);
       return &values[component][2][0];
     }
 
 #ifdef H2D_USE_SECOND_DERIVATIVES
-    const double* PrecalcShapesetAssembling::get_dxx_values(int component) const
+    const double* PrecalcShapesetFast::get_dxx_values(int component) const
     {
       assert(this->values_valid);
       return &values[component][3][0];
     }
 
-    const double* PrecalcShapesetAssembling::get_dyy_values(int component) const
+    const double* PrecalcShapesetFast::get_dyy_values(int component) const
     {
       assert(this->values_valid);
       return &values[component][4][0];
     }
 
-    const double* PrecalcShapesetAssembling::get_dxy_values(int component) const
+    const double* PrecalcShapesetFast::get_dxy_values(int component) const
     {
       assert(this->values_valid);
       return &values[component][5][0];
     }
 #endif
 
-    const double* PrecalcShapesetAssembling::get_values(int component, unsigned short item) const
+    const double* PrecalcShapesetFast::get_values(int component, unsigned short item) const
     {
       if (item == 0)
         return this->get_fn_values(component);
@@ -232,9 +233,9 @@ namespace Hermes
         return Function<double>::get_values(component, item);
     }
 
-    void PrecalcShapesetAssembling::precalculate(unsigned short order, unsigned short mask)
+    void PrecalcShapesetFast::precalculate(unsigned short order, unsigned short mask)
     {
-      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][order][index])
+      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][order][index])
         return;
       else
       {
@@ -270,7 +271,7 @@ namespace Hermes
             {
 #pragma omp critical (precalculatingPSS)
               {
-                if (!this->storage->PrecalculatedInfo[mode][0][order][index])
+                if (!this->storage->PrecalculatedInfo[mode][order][index])
                 {
                   double* valuePointer;
                   if (mode == HERMES_MODE_TRIANGLE)
@@ -287,7 +288,7 @@ namespace Hermes
                     for (short i = 0; i < np; i++)
                       valuePointer[i] = shapeset->get_dy_value_0_tri(index, pt[i][0], pt[i][1]);
 
-                    this->storage->PrecalculatedInfo[HERMES_MODE_TRIANGLE][0][order][index] = true;
+                    this->storage->PrecalculatedInfo[HERMES_MODE_TRIANGLE][order][index] = true;
                   }
                   else
                   {
@@ -303,7 +304,7 @@ namespace Hermes
                     for (short i = 0; i < np; i++)
                       valuePointer[i] = shapeset->get_dy_value_0_quad(index, pt[i][0], pt[i][1]);
 
-                    this->storage->PrecalculatedInfo[HERMES_MODE_QUAD][0][order][index] = true;
+                    this->storage->PrecalculatedInfo[HERMES_MODE_QUAD][order][index] = true;
                   }
                 }
               }
@@ -348,7 +349,7 @@ namespace Hermes
       }
     }
 
-    PrecalcShapesetAssemblingStorage::PrecalcShapesetAssemblingStorage(Shapeset* shapeset) : shapeset(shapeset)
+    PrecalcShapesetFastStorage::PrecalcShapesetFastStorage(Shapeset* shapeset) : shapeset(shapeset)
     {
       for (int i = 0; i < H2D_NUM_MODES; i++)
       {
@@ -369,12 +370,12 @@ namespace Hermes
         for (int j = 0; j < H2D_NUM_FUNCTION_VALUES; j++)
         {
           this->PrecalculatedValues[i][j] = malloc_with_check<double**>(g_max);
-          this->PrecalculatedInfo[i][j] = malloc_with_check<bool*>(g_max);
+          this->PrecalculatedInfo[i] = malloc_with_check<bool*>(g_max);
 
           for (int k = 0; k < g_max; k++)
           {
             this->PrecalculatedValues[i][j][k] = malloc_with_check<double*>(local_base_size);
-            this->PrecalculatedInfo[i][j][k] = calloc_with_check<bool>(local_base_size);
+            this->PrecalculatedInfo[i][k] = calloc_with_check<bool>(local_base_size);
 
             for (int l = 0; l < local_base_size; l++)
               this->PrecalculatedValues[i][j][k][l] = malloc_with_check<double>(np);
@@ -383,7 +384,7 @@ namespace Hermes
       }
     }
 
-    PrecalcShapesetAssemblingStorage::~PrecalcShapesetAssemblingStorage()
+    PrecalcShapesetFastStorage::~PrecalcShapesetFastStorage()
     {
       for (int i = 0; i < H2D_NUM_MODES; i++)
       {
@@ -402,11 +403,11 @@ namespace Hermes
             for (int l = 0; l < local_base_size; l++)
               free_with_check(this->PrecalculatedValues[i][j][k][l]);
             free_with_check(this->PrecalculatedValues[i][j][k]);
-            free_with_check(this->PrecalculatedInfo[i][j][k]);
+            free_with_check(this->PrecalculatedInfo[i][k]);
           }
 
           free_with_check(this->PrecalculatedValues[i][j]);
-          free_with_check(this->PrecalculatedInfo[i][j]);
+          free_with_check(this->PrecalculatedInfo[i]);
         }
       }
     }

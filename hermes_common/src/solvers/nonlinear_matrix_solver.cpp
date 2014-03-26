@@ -57,6 +57,9 @@ namespace Hermes
     void NonlinearMatrixSolver<Scalar>::free()
     {
       free_with_check(this->sln_vector, true);
+
+      if (this->previous_residual)
+        delete this->previous_residual;
     }
 
     template<typename Scalar>
@@ -376,8 +379,6 @@ namespace Hermes
       this->problem_size = -1;
       if (this->previous_jacobian)
         delete this->previous_jacobian;
-      if (this->previous_residual)
-        delete this->previous_residual;
     }
 
     template<typename Scalar>
@@ -418,7 +419,7 @@ namespace Hermes
       else
       {
         this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
-        this->assemble(false, false);
+        this->assemble(false, true);
         this->jacobian_reusable = true;
         this->get_parameter_value(this->p_iterations_with_recalculated_jacobian).push_back(true);
       }
@@ -531,7 +532,7 @@ namespace Hermes
         do
         {
           // Assemble just the residual.
-          this->assemble_residual(false);
+          this->assemble_residual(true);
           // Current residual norm.
           this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
 
@@ -595,7 +596,7 @@ namespace Hermes
           this->solve_linear_system();
 
           // Assemble next residual for both reusage and convergence test.
-          this->assemble_residual(false);
+          this->assemble_residual(true);
           // Current residual norm.
           this->get_parameter_value(this->p_residual_norms).push_back(this->calculate_residual_norm());
 

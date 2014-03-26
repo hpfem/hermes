@@ -495,9 +495,9 @@ namespace Hermes
         base_views_prev.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(630, space_i * 310, 300, 300)));
         base_views_curr.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(950, space_i * 310, 300, 300)));
         base_views_prev.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
-        base_views_prev.back()->show(prev_ref_spaces[space_i]);
+        base_views_prev.back()->show(StateReassemblyHelper<Scalar>::current_prev_ref_spaces->at(space_i));
         base_views_curr.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
-        base_views_curr.back()->show(ref_spaces[space_i]);
+        base_views_curr.back()->show(StateReassemblyHelper<Scalar>::current_ref_spaces->at(space_i));
       }
 
       Views::View::wait_for_keypress();
@@ -505,8 +505,8 @@ namespace Hermes
       {
         ::free(reassembled[space_i]);
         delete reassembled_views[space_i];
-        //delete base_views_prev[space_i];
-        //delete base_views_curr[space_i];
+        delete base_views_prev[space_i];
+        delete base_views_curr[space_i];
       }
       delete[] reassembled;
 #endif
@@ -605,6 +605,7 @@ namespace Hermes
     {
       // Initialization - allocations etc.
       this->init_solving(adaptivityType);
+      NewtonSolver<Scalar>* newtonSolver = dynamic_cast<NewtonSolver<Scalar>*>(this->solver);
 
       do
       {
@@ -617,7 +618,7 @@ namespace Hermes
         {
           Mesh::ReferenceMeshCreator ref_mesh_creator(spaces[i]->get_mesh());
           MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-          Space<Scalar>::ReferenceSpaceCreator u_ref_space_creator(spaces[i], adaptivityType == pAdaptivity ? spaces[i]->get_mesh() : ref_mesh, adaptivityType == hAdaptivity ? 0 : 0);
+          Space<Scalar>::ReferenceSpaceCreator u_ref_space_creator(spaces[i], adaptivityType == pAdaptivity ? spaces[i]->get_mesh() : ref_mesh, adaptivityType == hAdaptivity ? 0 : 1);
           ref_spaces.push_back(u_ref_space_creator.create_ref_space());
         }
 
@@ -637,13 +638,9 @@ namespace Hermes
         // Perform solution.
         this->info("\tSolving on reference mesh, %i DOFs.", Space<Scalar>::get_num_dofs(ref_spaces));
         this->solver->dp->set_reassembled_states_reuse_linear_system_fn(&get_states_to_reassemble<Scalar>);
-        if (adaptivity_step > 1 && dynamic_cast<NewtonSolver<Scalar>*>(this->solver))
+        if (adaptivity_step > 1 && newtonSolver)
         {
-          Scalar* new_sln_vector = realloc_with_check<Scalar>(this->solver->sln_vector, Space<Scalar>::get_num_dofs(ref_spaces));
-          this->solver->sln_vector = nullptr;
-          memset(new_sln_vector + Space<Scalar>::get_num_dofs(prev_ref_spaces), 0, (Space<Scalar>::get_num_dofs(ref_spaces) - Space<Scalar>::get_num_dofs(prev_ref_spaces)) * sizeof(Scalar));
-          this->solver->solve(new_sln_vector);
-          free_with_check(new_sln_vector, true);
+          this->solver->solve(newtonSolver->previous_sln_vector);
         }
         else
           this->solver->solve();
@@ -665,7 +662,10 @@ namespace Hermes
 
         if (this->prev_rhs)
           delete this->prev_rhs;
-        this->prev_rhs = this->solver->get_residual()->duplicate();
+        if (newtonSolver)
+          this->prev_rhs = newtonSolver->previous_residual->duplicate();
+        else
+          this->prev_rhs = this->solver->get_residual()->duplicate();
         if (this->solver->dp->add_dirichlet_lift)
           this->prev_rhs->subtract_vector(this->solver->dp->dirichlet_lift_rhs);
         StateReassemblyHelper<Scalar>::current_prev_rhs = this->prev_rhs;

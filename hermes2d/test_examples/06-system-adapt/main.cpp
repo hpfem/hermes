@@ -185,8 +185,10 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // View the coarse mesh solution and polynomial orders.
+    s_view_0.get_linearizer()->set_criterion(LinearizerCriterionFixed(3));
     s_view_0.show(u_sln);
     o_view_0.show(u_space);
+    s_view_1.get_linearizer()->set_criterion(LinearizerCriterionFixed(3));
     s_view_1.show(v_sln);
     o_view_1.show(v_space);
 

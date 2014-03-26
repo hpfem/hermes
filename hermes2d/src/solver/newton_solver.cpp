@@ -82,6 +82,12 @@ namespace Hermes
     {
       this->dp->assemble(this->sln_vector, this->get_residual());
       this->process_vector_output(this->get_residual(), this->get_current_iteration_number());
+      if (store_previous_residual)
+      {
+        if (this->previous_residual)
+          delete this->previous_residual;
+        this->previous_residual = this->residual_back->duplicate();
+      }
       this->get_residual()->change_sign();
     }
 
@@ -105,6 +111,12 @@ namespace Hermes
       this->get_residual()->change_sign();
       this->process_vector_output(this->get_residual(), this->get_current_iteration_number());
       this->process_matrix_output(this->get_jacobian(), this->get_current_iteration_number());
+      if (store_previous_residual)
+      {
+        if (this->previous_residual)
+          delete this->previous_residual;
+        this->previous_residual = this->residual_back->duplicate();
+      }
       return result;
     }
 

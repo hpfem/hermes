@@ -90,29 +90,29 @@ namespace Hermes
       friend class CurvMap;
     };
 
-    /// \brief PrecalcShapesetAssembling common storage.
-    class HERMES_API PrecalcShapesetAssemblingStorage
+    /// \brief PrecalcShapesetFast common storage.
+    class HERMES_API PrecalcShapesetFastStorage
     {
-      PrecalcShapesetAssemblingStorage(Shapeset* shapeset);
-      ~PrecalcShapesetAssemblingStorage();
+      PrecalcShapesetFastStorage(Shapeset* shapeset);
+      ~PrecalcShapesetFastStorage();
       Shapeset* shapeset;
     private:
       double*** PrecalculatedValues[H2D_NUM_MODES][H2D_NUM_FUNCTION_VALUES];
-      bool** PrecalculatedInfo[H2D_NUM_MODES][H2D_NUM_FUNCTION_VALUES];
-      friend class PrecalcShapesetAssembling;
+      bool** PrecalculatedInfo[H2D_NUM_MODES];
+      friend class PrecalcShapesetFast;
     };
 
     /// @ingroup meshFunctions
     /// \brief PrecalcShapeset variant for fast assembling.
-    class HERMES_API PrecalcShapesetAssembling : public PrecalcShapeset
+    class HERMES_API PrecalcShapesetFast : public PrecalcShapeset
     {
     public:
       /// \brief Constructs a standard (master) precalculated shapeset class.
       /// \param shapeset[in] Pointer to the shapeset to be precalculated.
-      PrecalcShapesetAssembling(Shapeset* shapeset);
+      PrecalcShapesetFast(Shapeset* shapeset);
 
       /// Destructor.
-      virtual ~PrecalcShapesetAssembling();
+      virtual ~PrecalcShapesetFast();
 
       /// \brief Returns function values.
       /// \param component[in] The component of the function (0 or 1).
@@ -151,9 +151,9 @@ namespace Hermes
     private:
       virtual void precalculate(unsigned short order, unsigned short mask);
 
-      static std::vector<PrecalcShapesetAssemblingStorage*> tables;
+      static std::vector<PrecalcShapesetFastStorage*> tables;
 
-      PrecalcShapesetAssemblingStorage* storage;
+      PrecalcShapesetFastStorage* storage;
     };
   }
 }

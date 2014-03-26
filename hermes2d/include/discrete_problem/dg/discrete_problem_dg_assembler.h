@@ -82,10 +82,10 @@ namespace Hermes
       bool** processed;
 
       // Neighbor psss, refmaps.
-      PrecalcShapesetAssembling ** npss;
+      PrecalcShapesetFast ** npss;
       RefMap ** nrefmaps;
 
-      PrecalcShapesetAssembling** pss;
+      PrecalcShapesetFast** pss;
       RefMap** refmaps;
       Solution<Scalar>** u_ext;
       AsmList<Scalar>* als;

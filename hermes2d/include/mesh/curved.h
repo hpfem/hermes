@@ -120,7 +120,7 @@ namespace Hermes
       unsigned short order;
 
     private:
-      PrecalcShapesetAssembling ref_map_pss;
+      PrecalcShapesetFast ref_map_pss;
 
       /// Transformation (2x2) matrix.
       Trf* ctm;

@@ -170,7 +170,7 @@ namespace Hermes
       void reinit_storage();
 
       H1ShapesetJacobi ref_map_shapeset;
-      PrecalcShapesetAssembling ref_map_pss;
+      PrecalcShapesetFast ref_map_pss;
 
       /// Constant reference mapping.
       bool is_const;

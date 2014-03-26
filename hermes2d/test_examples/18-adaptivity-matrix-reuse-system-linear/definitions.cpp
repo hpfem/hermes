@@ -5,7 +5,7 @@
 CustomWeakFormPoisson::CustomWeakFormPoisson(Hermes::Hermes2DFunction<double>* src_term) : Hermes::Hermes2D::WeakForm<double>(2)
 {
   // Jacobian forms.
-  add_matrix_form(new Hermes::Hermes2D::WeakFormsH1::DefaultMatrixFormVol<double>(0, 0));
+  add_matrix_form(new Hermes::Hermes2D::WeakFormsH1::DefaultMatrixFormDiffusion<double>(0, 0));
   add_matrix_form(new Hermes::Hermes2D::WeakFormsH1::DefaultMatrixFormDiffusion<double>(1, 1));
 
   // Residual forms.

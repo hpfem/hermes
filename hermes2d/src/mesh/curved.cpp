@@ -34,7 +34,7 @@ namespace Hermes
     HERMES_API Quad2DStd g_quad_2d_std;
 
     H1ShapesetJacobi ref_map_shapeset;
-    PrecalcShapesetAssembling ref_map_pss_static(&ref_map_shapeset);
+    PrecalcShapesetFast ref_map_pss_static(&ref_map_shapeset);
 
     CurvMapStatic::CurvMapStatic()
     {

@@ -153,6 +153,10 @@ namespace Hermes
       /// Frees the instances.
       virtual void free();
 
+      /// Previous structures.
+      Vector<Scalar>* previous_residual;
+      Scalar* previous_sln_vector;
+
     protected:
 
 #pragma region damping-private
@@ -271,7 +275,6 @@ namespace Hermes
 
       /// Previous structures (e.g. in Picard's residual calculation)
       SparseMatrix<Scalar>* previous_jacobian;
-      Vector<Scalar>* previous_residual;
 
 #pragma region OutputAttachable
       // For derived classes - read-only access.
@@ -298,7 +301,6 @@ namespace Hermes
       OutputParameterUnsignedInt p_iteration;
 #pragma endregion
 
-      Scalar* previous_sln_vector;
       bool use_initial_guess_for_iterative_solvers;
       friend class NonlinearConvergenceMeasurement<Scalar>;
     };

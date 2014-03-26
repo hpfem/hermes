@@ -103,7 +103,7 @@ namespace Hermes
       /// Dirichlet lift rhs part.
       Vector<Scalar>* dirichlet_lift_rhs;
 
-      PrecalcShapesetAssembling** pss;
+      PrecalcShapesetFast** pss;
       RefMap** refmaps;
       RefMap* rep_refmap;
       Solution<Scalar>** u_ext;
