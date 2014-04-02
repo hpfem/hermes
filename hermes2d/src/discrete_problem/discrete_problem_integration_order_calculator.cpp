@@ -169,9 +169,8 @@ namespace Hermes
 
       // Total order of the vector form.
       double fake_wt = 1.0;
-      Geom<Hermes::Ord> *tmp = init_geom_ord();
-      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ou, ov, tmp, local_ext);
-      delete tmp;
+      Geom<Hermes::Ord> tmp;
+      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ou, ov, &tmp, local_ext);
 
       adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
@@ -212,9 +211,8 @@ namespace Hermes
 
       // Total order of the vector form.
       double fake_wt = 1.0;
-      Geom<Hermes::Ord> *tmp = init_geom_ord();
-      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ov, tmp, local_ext);
-      delete tmp;
+      Geom<Hermes::Ord> tmp;
+      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ov, &tmp, local_ext);
 
       adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
@@ -427,12 +425,11 @@ namespace Hermes
       DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(init_fn_ord(max_order_i), neighbor_supp_v);
 
       // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-      Geom<Hermes::Ord> *tmp = init_geom_ord();
+      Geom<Hermes::Ord> tmp;
       double fake_wt = 1.0;
 
       // Total order of the matrix form.
-      Ord o = mfDG->ord(1, &fake_wt, u_ext_ord, ou, ov, tmp, ext_ord);
-      delete tmp;
+      Ord o = mfDG->ord(1, &fake_wt, u_ext_ord, ou, ov, &tmp, ext_ord);
 
       adjust_order_to_refmaps(mfDG, order, &o, current_refmaps);
 
@@ -481,13 +478,11 @@ namespace Hermes
       DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(init_fn_ord(max_order_i), neighbor_supp_v);
 
       // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-      Geom<Hermes::Ord> *tmp = init_geom_ord();
+      Geom<Hermes::Ord> tmp;
       double fake_wt = 1.0;
 
       // Total order of the matrix form.
-      Ord o = vfDG->ord(1, &fake_wt, u_ext_ord, ov, tmp, ext_ord);
-
-      delete tmp;
+      Ord o = vfDG->ord(1, &fake_wt, u_ext_ord, ov, &tmp, ext_ord);
 
       adjust_order_to_refmaps(vfDG, order, &o, current_refmaps);
 

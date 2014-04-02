@@ -375,18 +375,6 @@ namespace Hermes
       return area;
     }
 
-    template<>
-    Hermes::Ord Geom<Hermes::Ord>::get_diam_approximation(int n)
-    {
-      return Hermes::Ord(0);
-    }
-
-    template<>
-    Hermes::Ord Geom<Hermes::Ord>::get_area(int n, double* wt)
-    {
-      return Hermes::Ord(0);
-    }
-
     template<typename T>
     InterfaceGeom<T>::InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam) :
       Geom<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
@@ -435,27 +423,6 @@ namespace Hermes
     T InterfaceGeom<T>::get_neighbor_diam() const
     {
       return neighb_diam;
-    }
-
-    Geom<Hermes::Ord>* init_geom_ord()
-    {
-      Geom<Hermes::Ord>* e = new Geom<Hermes::Ord>;
-      Hermes::Ord x[] = { Hermes::Ord(1) };
-      Hermes::Ord y[] = { Hermes::Ord(1) };
-
-      Hermes::Ord nx[] = { Hermes::Ord(1) };
-      Hermes::Ord ny[] = { Hermes::Ord(1) };
-
-      Hermes::Ord tx[] = { Hermes::Ord(1) };
-      Hermes::Ord ty[] = { Hermes::Ord(1) };
-
-      Hermes::Ord diam = Hermes::Ord(1);
-
-      e->x = x; e->y = y;
-      e->nx = nx; e->ny = ny;
-      e->tx = tx; e->ty = ty;
-
-      return e;
     }
 
     Geom<double>* init_geom_vol(RefMap *rm, const int order)
@@ -855,9 +822,7 @@ namespace Hermes
 
     template class HERMES_API DiscontinuousFunc<double>;
     template class HERMES_API DiscontinuousFunc<std::complex<double> >;
-    template class HERMES_API Geom<Hermes::Ord>;
     template class HERMES_API Geom<double>;
-    template class HERMES_API InterfaceGeom<Hermes::Ord>;
     template class HERMES_API InterfaceGeom<double>;
   }
 }
