@@ -85,7 +85,7 @@ namespace Hermes
     public:
       Geom()
       {
-        x[0] = y[0] = tx[0] = ty[0] = nx[0] = ny[0] = Hermes::Ord(1);
+        x[0] = y[0] = tx[0] = ty[0] = nx[0] = ny[0] = diam = area = Hermes::Ord(1);
       }
       Hermes::Ord x[1];
       Hermes::Ord y[1];
