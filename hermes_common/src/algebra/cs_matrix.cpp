@@ -26,6 +26,26 @@ namespace Hermes
 {
   namespace Algebra
   {
+    double inline real(double x)
+    {
+      return x;
+    }
+
+    double inline imag(double x)
+    {
+      return 0;
+    }
+
+    double inline real(std::complex<double> x)
+    {
+      return x.real();
+    }
+
+    double inline imag(std::complex<double> x)
+    {
+      return x.imag();
+    }
+
     template<typename Scalar>
     int CSMatrix<Scalar>::find_position(int *Ai, int Alen, int idx)
     {
@@ -85,9 +105,9 @@ namespace Hermes
       assert(this->pages != nullptr);
 
       // initialize the arrays Ap and Ai
-      Ap = malloc_with_check<CSMatrix, int>(this->size + 1, this);
+      Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
       int aisize = this->get_num_indices();
-      Ai = malloc_with_check<CSMatrix, int>(aisize, this);
+      Ai = malloc_with_check<CSMatrix<Scalar>, int>(aisize, this);
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i;
@@ -110,7 +130,7 @@ namespace Hermes
     template<typename Scalar>
     void CSMatrix<Scalar>::alloc_data()
     {
-      Ax = malloc_with_check<CSMatrix, Scalar>(nnz, this);
+      Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(nnz, this);
       memset(Ax, 0, sizeof(Scalar)* nnz);
     }
 
@@ -142,26 +162,6 @@ namespace Hermes
       return this->nnz;
     }
 
-    double inline real(double x)
-    {
-      return x;
-    }
-
-    double inline imag(double x)
-    {
-      return 0;
-    }
-
-    double inline real(std::complex<double> x)
-    {
-      return x.real();
-    }
-
-    double inline imag(std::complex<double> x)
-    {
-      return x.imag();;
-    }
-
     template<typename Scalar>
     double CSMatrix<Scalar>::get_fill_in() const
     {
@@ -173,9 +173,9 @@ namespace Hermes
     {
       this->nnz = nnz;
       this->size = size;
-      this->Ap = malloc_with_check<CSMatrix, int>(this->size + 1, this);
-      this->Ai = malloc_with_check<CSMatrix, int>(nnz, this);
-      this->Ax = malloc_with_check<CSMatrix, Scalar>(nnz, this);
+      this->Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
+      this->Ai = malloc_with_check<CSMatrix<Scalar>, int>(nnz, this);
+      this->Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(nnz, this);
       memcpy(this->Ap, ap, (this->size + 1) * sizeof(int));
       memcpy(this->Ai, ai, this->nnz * sizeof(int));
       memcpy(this->Ax, ax, this->nnz * sizeof(Scalar));
@@ -186,9 +186,9 @@ namespace Hermes
     {
       // The variable names are so to reflect CSC -> CSR direction.
       // From the "Ap indexed by columns" to "Ap indexed by rows".
-      int* tempAp = malloc_with_check<CSMatrix, int>(this->size + 1, this);
-      int* tempAi = malloc_with_check<CSMatrix, int>(nnz, this);
-      Scalar* tempAx = malloc_with_check<CSMatrix, Scalar>(nnz, this);
+      int* tempAp = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
+      int* tempAi = malloc_with_check<CSMatrix<Scalar>, int>(nnz, this);
+      Scalar* tempAx = malloc_with_check<CSMatrix<Scalar>, Scalar>(nnz, this);
 
       int run_i = 0;
       for (int target_row = 0; target_row < this->size; target_row++)
@@ -211,9 +211,9 @@ namespace Hermes
       memcpy(this->Ai, tempAi, sizeof(int)* nnz);
       memcpy(this->Ap, tempAp, sizeof(int)* (this->size + 1));
       memcpy(this->Ax, tempAx, sizeof(Scalar)* nnz);
-      ::free(tempAi);
-      ::free(tempAx);
-      ::free(tempAp);
+      free_with_check(tempAi);
+      free_with_check(tempAx);
+      free_with_check(tempAp);
     }
 
     template<typename Scalar>
@@ -461,10 +461,8 @@ namespace Hermes
                                        }
                                        if (invert_storage)
                                          this->switch_orientation();
-                                       if (Ax_re)
-                                         ::free(Ax_re);
-                                       if (Ax_im)
-                                         ::free(Ax_im);
+                                       free_with_check(Ax_re);
+                                       free_with_check(Ax_im);
                                        Mat_Close(mat);
 
                                        if (!matvar)
@@ -494,6 +492,63 @@ namespace Hermes
 
                                       fclose(file);
       }
+        break;
+#ifdef WITH_BSON
+      case EXPORT_FORMAT_BSON:
+      {
+        // Init bson
+        bson bw;
+        bson_init(&bw);
+
+        // Matrix size.
+        bson_append_int(&bw, "size", this->size);
+        // Nonzeros.
+        bson_append_int(&bw, "nnz", this->nnz);
+
+        if (invert_storage)
+          this->switch_orientation();
+
+        bson_append_start_array(&bw, "Ap");
+        for (unsigned int i = 0; i < this->size; i++)
+          bson_append_int(&bw, "p", this->Ap[i]);
+        bson_append_finish_array(&bw);
+
+        bson_append_start_array(&bw, "Ai");
+        for (unsigned int i = 0; i < this->nnz; i++)
+          bson_append_int(&bw, "i", this->Ai[i]);
+        bson_append_finish_array(&bw);
+
+        bson_append_start_array(&bw, "Ax");
+        for (unsigned int i = 0; i < this->nnz; i++)
+          bson_append_double(&bw, "x", real(this->Ax[i]));
+        bson_append_finish_array(&bw);
+
+        if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+        {
+          bson_append_start_array(&bw, "Ax-imag");
+          for (unsigned int i = 0; i < this->nnz; i++)
+            bson_append_double(&bw, "x-i", imag(this->Ax[i]));
+          bson_append_finish_array(&bw);
+        }
+        bson_append_finish_array(&bw);
+
+        if (invert_storage)
+          this->switch_orientation();
+
+        // Done.
+        bson_finish(&bw);
+
+        // Write to disk.
+        FILE *fpw;
+        fpw = fopen(filename, "wb");
+        const char *dataw = (const char *)bson_data(&bw);
+        fwrite(dataw, bson_size(&bw), 1, fpw);
+        fclose(fpw);
+
+        bson_destroy(&bw);
+      }
+        break;
+#endif
       }
     }
 
@@ -512,6 +567,8 @@ namespace Hermes
     template<typename Scalar>
     void CSMatrix<Scalar>::import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt, bool invert_storage)
     {
+      this->free();
+
       switch (fmt)
       {
       case EXPORT_FORMAT_MATRIX_MARKET:
@@ -526,10 +583,7 @@ namespace Hermes
                                        matfp = Mat_Open(filename, MAT_ACC_RDONLY);
 
                                        if (!matfp)
-                                       {
                                          throw Exceptions::IOException(Exceptions::IOException::Read, filename);
-                                         return;
-                                       }
 
                                        matvar = Mat_VarRead(matfp, var_name);
 
@@ -540,7 +594,7 @@ namespace Hermes
                                          this->nnz = sparse->nir;
                                          this->Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(this->nnz, this);
                                          this->Ai = malloc_with_check<CSMatrix<Scalar>, int>(this->nnz, this);
-                                         this->size = sparse->njc - 1;
+                                         this->size = sparse->njc;
                                          this->Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
 
                                          void* data = nullptr;
@@ -557,8 +611,9 @@ namespace Hermes
                                          }
                                          memcpy(this->Ax, data, this->nnz * sizeof(Scalar));
                                          if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
-                                           ::free(data);
-                                         memcpy(this->Ap, sparse->jc, (this->size + 1) * sizeof(Scalar));
+                                           free_with_check(data);
+                                         memcpy(this->Ap, sparse->jc, this->size * sizeof(int));
+                                         this->Ap[this->size] = this->nnz;
                                          memcpy(this->Ai, sparse->ir, this->nnz * sizeof(int));
 
                                          if (invert_storage)
@@ -577,6 +632,78 @@ namespace Hermes
 
       case EXPORT_FORMAT_PLAIN_ASCII:
         throw Exceptions::MethodNotOverridenException("CSMatrix<Scalar>::import_from_file - Simple format");
+
+#ifdef WITH_BSON
+      case EXPORT_FORMAT_BSON:
+      {
+                               FILE *fpr;
+                               fpr = fopen(filename, "rb");
+
+                               // file size:
+                               fseek(fpr, 0, SEEK_END);
+                               int size = ftell(fpr);
+                               rewind(fpr);
+
+                               // allocate memory to contain the whole file:
+                               char *datar = malloc_with_check<char>(size);
+                               fread(datar, size, 1, fpr);
+                               fclose(fpr);
+
+                               bson br;
+                               bson_init_finished_data(&br, datar, 0);
+
+                               bson_iterator it;
+                               bson sub;
+                               bson_find(&it, &br, "size");
+                               this->size = bson_iterator_int(&it);
+                               bson_find(&it, &br, "nnz");
+                               this->nnz = bson_iterator_int(&it);
+
+                               this->Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
+                               this->Ai = malloc_with_check<CSMatrix<Scalar>, int>(nnz, this);
+                               this->Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(nnz, this);
+
+                               // coeffs
+                               bson_iterator it_coeffs;
+                               bson_find(&it_coeffs, &br, "Ap");
+                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                               bson_iterator_init(&it, &sub);
+                               int index_coeff = 0;
+                               while (bson_iterator_next(&it))
+                                 this->Ap[index_coeff++] = bson_iterator_int(&it);
+                               this->Ap[this->size] = this->nnz;
+
+                               bson_find(&it_coeffs, &br, "Ai");
+                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                               bson_iterator_init(&it, &sub);
+                               index_coeff = 0;
+                               while (bson_iterator_next(&it))
+                                 this->Ai[index_coeff++] = bson_iterator_int(&it);
+
+                                bson_find(&it_coeffs, &br, "Ax");
+                                bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                                bson_iterator_init(&it, &sub);
+                                index_coeff = 0;
+                                while (bson_iterator_next(&it))
+                                  this->Ax[index_coeff++] = bson_iterator_double(&it);
+                               
+                                if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+                               {
+                                 bson_find(&it_coeffs, &br, "Ax-imag");
+                                 bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                                 bson_iterator_init(&it, &sub);
+                                 index_coeff = 0;
+                                 while (bson_iterator_next(&it))
+                                   ((std::complex<double>)this->Ax[index_coeff++]).imag(bson_iterator_double(&it));
+                               }
+
+                                if (invert_storage)
+                                  this->switch_orientation();
+
+                               bson_destroy(&br);
+                               free_with_check(datar);
+      }
+#endif
         break;
       }
     }

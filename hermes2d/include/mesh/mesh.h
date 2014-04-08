@@ -190,7 +190,7 @@ namespace Hermes
       /// is removed and all elements become top-level elements. Also, total
       /// regularization does not work on curved elements.
       /// Returns an array of new_ element parents which can be passed to
-      /// Space::distribute_orders(). The array must be deallocated with ::free().
+      /// Space::distribute_orders(). The array must be deallocated with free_with_check().
       int* regularize(int n);
 
       /// Recursively removes all son elements of the given element and
@@ -297,9 +297,32 @@ namespace Hermes
       /// For internal use.
       void set_seq(unsigned seq);
 
-    private:/// For internal use.
+      int nbase, ntopvert, ninitial, nactive;
+
+      class ElementMarkersConversion : public MarkersConversion
+      {
+      public:
+        ElementMarkersConversion();
+        virtual MarkersConversionType get_type() const;
+      };
+
+      class BoundaryMarkersConversion : public MarkersConversion
+      {
+      public:
+        BoundaryMarkersConversion();
+        virtual MarkersConversionType get_type() const;
+      };
+
+      ElementMarkersConversion element_markers_conversion;
+      BoundaryMarkersConversion boundary_markers_conversion;
+      Array<Element> elements;
+
+      unsigned seq;
+
+      /// For internal use.
       void initial_single_check();
 
+    private:
       /// Refines all quad elements to triangles.
       /// It refines a quadrilateral element into two triangles.
       /// Note: this function creates a base mesh.
@@ -326,19 +349,12 @@ namespace Hermes
       void convert_triangles_to_base(Element* e);
       void convert_quads_to_base(Element* e);
 
-      Array<Element> elements;
-      int nactive;
-      unsigned seq;
-
       /// Bounding box.
       double bottom_left_x, bottom_left_y, top_right_x, top_right_y;
       /// Bounding box calculated.
       bool bounding_box_calculated;
       /// Bounding box calculation.
       void calc_bounding_box();
-
-      int nbase, ntopvert;
-      int ninitial;
 
       void unrefine_element_internal(Element* e);
 
@@ -365,23 +381,6 @@ namespace Hermes
       private:
         int elementId;
       };
-
-      class ElementMarkersConversion : public MarkersConversion
-      {
-      public:
-        ElementMarkersConversion();
-        virtual MarkersConversionType get_type() const;
-      };
-
-      class BoundaryMarkersConversion : public MarkersConversion
-      {
-      public:
-        BoundaryMarkersConversion();
-        virtual MarkersConversionType get_type() const;
-      };
-
-      ElementMarkersConversion element_markers_conversion;
-      BoundaryMarkersConversion boundary_markers_conversion;
 
       friend class MeshHashGrid;
       friend class MeshReaderH2D;
@@ -483,7 +482,7 @@ namespace Hermes
 
       /// Internal marker for eggshell elements.
       static const std::string eggShellMarker;
-      
+
       /// Verboseness of the static egg shell creation.
       /// Default: true.
       static bool egg_shell_verbose;

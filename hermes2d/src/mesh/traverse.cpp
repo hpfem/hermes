@@ -303,7 +303,7 @@ namespace Hermes
       for (int i = 0; i < meshes_count; i++)
       if (meshes[i]->get_num_active_elements() > predictedCount)
         predictedCount = meshes[i]->get_num_active_elements();
-      State** states = (State**)malloc(sizeof(State*)*predictedCount);
+      State** states = malloc_with_check<State*>(predictedCount);
 
       this->begin(num);
 
@@ -402,7 +402,7 @@ namespace Hermes
           if (count > predictedCount - 1)
           {
             predictedCount *= 1.5;
-            states = (State**)realloc(states, sizeof(State*)* predictedCount);
+            states = realloc_with_check<State*>(states, predictedCount);
           }
 
           set_boundary_info(s);
@@ -615,7 +615,7 @@ namespace Hermes
           areas[counter] = 0.0;
         else
         {
-          areas[counter] = e->get_area();
+          areas[counter] = e->area;
           if (areas[counter] < min_elem_area)
             min_elem_area = areas[counter];
         }
@@ -634,7 +634,7 @@ namespace Hermes
         for_all_base_elements_incl_inactive(e, meshes[i])
         {
           if (e->used)
-          if (fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] > Hermes::HermesSqrtEpsilon)
+          if (fabs(areas[counter] - e->area) > tolerance && areas[counter] > Hermes::HermesSqrtEpsilon)
           {
             throw Hermes::Exceptions::Exception("An element is probably too distorted, try different meshing.");
           }

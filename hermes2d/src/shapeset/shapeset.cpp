@@ -94,7 +94,7 @@ namespace Hermes
 
       // cleanup
       free_with_check(iperm);
-      delete[] a;
+      free_with_check(a, true);
 
       return b;
     }
@@ -104,29 +104,45 @@ namespace Hermes
       int index = 2 * ((max_order + 1 - ebias)*part + (order - ebias)) + ori;
 
       // allocate/reallocate the array if necessary
-      if (comb_table == nullptr)
+      if (!this->comb_table)
       {
-        table_size = 1024;
-        while (table_size <= index) table_size *= 2;
-        comb_table = (double**)malloc(table_size * sizeof(double*));
-        memset(comb_table, 0, table_size * sizeof(double*));
+#pragma omp critical
+        {
+          if (!this->comb_table)
+          {
+            table_size = 1024;
+            while (table_size <= index)
+              table_size *= 2;
+            comb_table = calloc_with_check<double*>(table_size, true);
+          }
+        }
       }
       else if (index >= table_size)
       {
-        // adjust table_size to accommodate the required depth
-        int old_size = table_size;
-        while (index >= table_size) table_size *= 2;
+#pragma omp critical
+        {
+          // adjust table_size to accommodate the required depth
+          int old_size = table_size;
+          while (index >= table_size)
+            table_size *= 2;
 
-        // reallocate the table
-        comb_table = (double**)realloc(comb_table, table_size * sizeof(double*));
-        memset(comb_table + old_size, 0, (table_size - old_size) * sizeof(double*));
+          // reallocate the table
+          comb_table = realloc_with_check<double*>(comb_table, table_size);
+          memset(comb_table + old_size, 0, (table_size - old_size) * sizeof(double*));
+        }
       }
 
       // do we have the required linear combination yet?
-      if (comb_table[index] == nullptr)
+      if (!comb_table[index])
       {
-        // no, calculate it
-        comb_table[index] = calculate_constrained_edge_combination(order, part, ori, mode);
+#pragma omp critical
+        {
+          if (!comb_table[index])
+          {
+            // no, calculate it
+            comb_table[index] = calculate_constrained_edge_combination(order, part, ori, mode);
+          }
+        }
       }
 
       nitems = order + 1 - ebias;
@@ -135,13 +151,12 @@ namespace Hermes
 
     void Shapeset::free_constrained_edge_combinations()
     {
-      if (comb_table != nullptr)
+      if (comb_table)
       {
         for (int i = 0; i < table_size; i++)
           free_with_check(comb_table[i]);
 
-        free(comb_table);
-        comb_table = nullptr;
+        free_with_check(comb_table, true);
       }
     }
 
@@ -249,21 +264,7 @@ namespace Hermes
     double Shapeset::get_value(int n, int index, double x, double y, int component, ElementMode2D mode)
     {
       if (index >= 0)
-      {
-        Shapeset::shape_fn_t** shape_expansion = shape_table[n][mode];
-        if (shape_expansion == nullptr)
-        { // requested exansion (f, df/dx, df/dy, ddf/dxdx, ...) is not defined.
-          //just to keep the number of warnings low: warn just once about a given combinations of n, mode, and index.
-          static int warned_mode = -1, warned_index = -1, warned_n = 1;
-          this->warn_if(warned_mode != mode || warned_index != index || warned_n != n, "Requested undefined expansion %d (mode: %d) of a shape %d, returning 0", n, mode, index);
-          warned_mode = mode;
-          warned_index = index;
-          warned_n = n;
-          return 0.;
-        }
-        else
-          return shape_expansion[component][index](x, y);
-      }
+        return shape_table[n][mode][component][index](x, y);
       else
         return get_constrained_value(n, index, x, y, component, mode);
     }

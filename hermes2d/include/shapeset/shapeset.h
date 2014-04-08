@@ -103,7 +103,7 @@ namespace Hermes
       int get_min_order() const;
 
       /// Returns the highest shape function index.
-      virtual int get_max_index(ElementMode2D mode) = 0;
+      virtual int get_max_index(ElementMode2D mode) const = 0;
 
       /// Returns the index of a vertex shape function associated with the specified vertex.
       int get_vertex_index(int vertex, ElementMode2D mode) const;

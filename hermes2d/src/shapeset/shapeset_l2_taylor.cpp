@@ -508,6 +508,6 @@ namespace Hermes
     }
 
     const int L2ShapesetTaylor::max_index[2] = { 5, 5 };
-    int L2ShapesetTaylor::get_max_index(ElementMode2D mode) { return max_index[mode]; }
+    int L2ShapesetTaylor::get_max_index(ElementMode2D mode) const { return max_index[mode]; }
   }
 }

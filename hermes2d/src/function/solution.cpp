@@ -263,10 +263,8 @@ namespace Hermes
         {
           for (int i = 0; i <= 10; i++)
           {
-            if (mat[m][i])
-              delete[] mat[m][i];
-            if (perm[m][i])
-              delete[] perm[m][i];
+            free_with_check(mat[m][i], true);
+            free_with_check(perm[m][i]);
           }
         }
       }
@@ -318,7 +316,7 @@ namespace Hermes
       Scalar* coeffs = malloc_with_check<Solution<Scalar>, Scalar>(vec->get_size(), this);
       vec->extract(coeffs);
       this->set_coeff_vector(space, coeffs, add_dir_lift, start_index);
-      ::free(coeffs);
+      free_with_check(coeffs);
     }
 
     template<typename Scalar>
@@ -330,7 +328,8 @@ namespace Hermes
       if (space->shapeset == nullptr)
         throw Exceptions::Exception("Space->shapeset == nullptr in Solution<Scalar>::set_coeff_vector().");
       PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
-      if (pss == nullptr) throw Exceptions::Exception("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
+      if (pss == nullptr)
+        throw Exceptions::Exception("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
       set_coeff_vector(space, pss, coeffs, add_dir_lift, start_index);
       delete pss;
     }
@@ -346,8 +345,10 @@ namespace Hermes
       if (space->get_mesh() == nullptr)
         throw Exceptions::Exception("Mesh == nullptr in Solution<Scalar>::set_coeff_vector().");
       if (pss == nullptr) throw Exceptions::NullException(2);
-      if (coeff_vec == nullptr) throw Exceptions::NullException(3);
-      if (coeff_vec == nullptr) throw Exceptions::Exception("Coefficient vector == nullptr in Solution<Scalar>::set_coeff_vector().");
+      if (coeff_vec == nullptr)
+        throw Exceptions::NullException(3);
+      if (coeff_vec == nullptr)
+        throw Exceptions::Exception("Coefficient vector == nullptr in Solution<Scalar>::set_coeff_vector().");
       if (!space->is_up_to_date())
         throw Exceptions::Exception("Provided 'space' is not up to date.");
       if (space->shapeset != pss->shapeset)
@@ -368,16 +369,12 @@ namespace Hermes
 
       // Allocate the coefficient arrays.
       num_elems = this->mesh->get_max_element_id();
-      if (elem_orders != nullptr)
-        ::free(elem_orders);
-      elem_orders = malloc_with_check<Solution<Scalar>, int>(num_elems, this);
-      memset(elem_orders, 0, sizeof(int)* num_elems);
+      free_with_check(elem_orders);
+      elem_orders = calloc_with_check<Solution<Scalar>, int>(num_elems, this);
       for (int l = 0; l < this->num_components; l++)
       {
-        if (elem_coeffs[l] != nullptr)
-          ::free(elem_coeffs[l]);
-        elem_coeffs[l] = malloc_with_check<Solution<Scalar>, int>(num_elems, this);
-        memset(elem_coeffs[l], 0, sizeof(int)* num_elems);
+        free_with_check(elem_coeffs[l]);
+        elem_coeffs[l] = calloc_with_check<Solution<Scalar>, int>(num_elems, this);
       }
 
       // Obtain element orders, allocate mono_coeffs.
@@ -404,8 +401,7 @@ namespace Hermes
         elem_orders[e->id] = o;
       }
       num_coeffs *= this->num_components;
-      if (mono_coeffs != nullptr)
-        ::free(mono_coeffs);
+      free_with_check(mono_coeffs);
       mono_coeffs = malloc_with_check<Solution<Scalar>, Scalar>(num_coeffs, this);
 
       // Express the solution on elements as a linear combination of monomials.
@@ -695,6 +691,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int Solution<Scalar>::get_edge_fn_order(int edge)
+    {
+        return MeshFunction<Scalar>::get_edge_fn_order(edge);
+    }
+
+    template<typename Scalar>
     void Solution<Scalar>::set_dirichlet_lift(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss)
     {
       space_type = space->get_type();
@@ -704,14 +706,14 @@ namespace Hermes
       bool add_dir_lift = true;
       int start_index = 0;
       this->set_coeff_vector(space, pss, temp, add_dir_lift, start_index);
-      ::free(temp);
+      free_with_check(temp);
     }
 
     template<typename Scalar>
     void Solution<Scalar>::enable_transform(bool enable)
     {
       if (transform != enable)
-        this->update_nodes_ptr();
+        this->invalidate_values();
       transform = enable;
     }
 
@@ -782,26 +784,14 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::init_dxdy_buffer()
     {
-      if (dxdy_buffer != nullptr)
-      {
-        ::free(dxdy_buffer);
-        dxdy_buffer = nullptr;
-      }
+      free_with_check(dxdy_buffer);
       dxdy_buffer = malloc_with_check<Solution<Scalar>, Scalar>(this->num_components * 5 * 121, this);
     }
 
     template<typename Scalar>
     void Solution<Scalar>::set_active_element(Element* e)
     {
-      if (e == this->element)
-        return;
-
-      if (!e->active)
-        throw Hermes::Exceptions::Exception("Cannot select inactive element. Wrong mesh?");
-
       MeshFunction<Scalar>::set_active_element(e);
-
-      // try finding an existing table for e
 
       if (sln_type == HERMES_SLN)
       {
@@ -815,9 +805,11 @@ namespace Hermes
 
           make_dx_coeffs(this->mode, o, mono, dxdy_coeffs[i][1] = dxdy_buffer + m);  m += n;
           make_dy_coeffs(this->mode, o, mono, dxdy_coeffs[i][2] = dxdy_buffer + m);  m += n;
+#ifdef H2D_USE_SECOND_DERIVATIVES
           make_dx_coeffs(this->mode, o, dxdy_coeffs[i][1], dxdy_coeffs[i][3] = dxdy_buffer + m);  m += n;
           make_dy_coeffs(this->mode, o, dxdy_coeffs[i][2], dxdy_coeffs[i][4] = dxdy_buffer + m);  m += n;
           make_dx_coeffs(this->mode, o, dxdy_coeffs[i][2], dxdy_coeffs[i][5] = dxdy_buffer + m);  m += n;
+#endif
         }
       }
       else if (sln_type == HERMES_EXACT)
@@ -828,8 +820,6 @@ namespace Hermes
       }
       else
         throw Hermes::Exceptions::Exception("Uninitialized solution.");
-
-      this->update_nodes_ptr();
     }
 
     template<typename Scalar>
@@ -853,10 +843,6 @@ namespace Hermes
         y[i] = y[i] * x[i] + z[i];
     }
 
-    static const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
-    static const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
-    static const int H2D_CURL = H2D_FN_DX | H2D_FN_DY;
-
     template<typename Scalar>
     void Solution<Scalar>::transform_values(int order, int mask, int np)
     {
@@ -874,15 +860,15 @@ namespace Hermes
           double3x2 *mm, *mat2 = this->refmap->get_second_ref_map(order);
           for (i = 0, m = mat, mm = mat2; i < np; i++, m++, mm++)
           {
-            Scalar vx = this->cur_node.values[0][1][i];
-            Scalar vy = this->cur_node.values[0][2][i];
-            Scalar vxx = this->cur_node.values[0][3][i];
-            Scalar vyy = this->cur_node.values[0][4][i];
-            Scalar vxy = this->cur_node.values[0][5][i];
+            Scalar vx = this->values[0][1][i];
+            Scalar vy = this->values[0][2][i];
+            Scalar vxx = this->values[0][3][i];
+            Scalar vyy = this->values[0][4][i];
+            Scalar vxy = this->values[0][5][i];
 
-            this->cur_node.values[0][3][i] = sqr((*m)[0][0])*vxx + 2 * (*m)[0][1] * (*m)[0][0] * vxy + sqr((*m)[0][1])*vyy + (*mm)[0][0] * vx + (*mm)[0][1] * vy;   // dxx
-            this->cur_node.values[0][4][i] = sqr((*m)[1][0])*vxx + 2 * (*m)[1][1] * (*m)[1][0] * vxy + sqr((*m)[1][1])*vyy + (*mm)[2][0] * vx + (*mm)[2][1] * vy;   // dyy
-            this->cur_node.values[0][5][i] = (*m)[0][0] * (*m)[1][0] * vxx + ((*m)[0][0] * (*m)[1][1] + (*m)[1][0] * (*m)[0][1])*vxy + (*m)[0][1] * (*m)[1][1] * vyy + (*mm)[1][0] * vx + (*mm)[1][1] * vy;   //dxy
+            this->values[0][3][i] = sqr((*m)[0][0])*vxx + 2 * (*m)[0][1] * (*m)[0][0] * vxy + sqr((*m)[0][1])*vyy + (*mm)[0][0] * vx + (*mm)[0][1] * vy;   // dxx
+            this->values[0][4][i] = sqr((*m)[1][0])*vxx + 2 * (*m)[1][1] * (*m)[1][0] * vxy + sqr((*m)[1][1])*vyy + (*mm)[2][0] * vx + (*mm)[2][1] * vy;   // dyy
+            this->values[0][5][i] = (*m)[0][0] * (*m)[1][0] * vxx + ((*m)[0][0] * (*m)[1][1] + (*m)[1][0] * (*m)[0][1])*vxy + (*m)[0][1] * (*m)[1][1] * vyy + (*mm)[1][0] * vx + (*mm)[1][1] * vy;   //dxy
           }
         }
 #endif
@@ -894,10 +880,10 @@ namespace Hermes
 
           for (i = 0, m = mat; i < np; i++, m += mstep)
           {
-            Scalar vx = this->cur_node.values[0][1][i];
-            Scalar vy = this->cur_node.values[0][2][i];
-            this->cur_node.values[0][1][i] = (*m)[0][0] * vx + (*m)[0][1] * vy;
-            this->cur_node.values[0][2][i] = (*m)[1][0] * vx + (*m)[1][1] * vy;
+            Scalar vx = this->values[0][1][i];
+            Scalar vy = this->values[0][2][i];
+            this->values[0][1][i] = (*m)[0][0] * vx + (*m)[0][1] * vy;
+            this->values[0][2][i] = (*m)[1][0] * vx + (*m)[1][1] * vy;
           }
         }
       }
@@ -913,17 +899,17 @@ namespace Hermes
           {
             if ((mask & H2D_FN_VAL) == H2D_FN_VAL)
             {
-              Scalar vx = this->cur_node.values[0][0][i];
-              Scalar vy = this->cur_node.values[1][0][i];
-              this->cur_node.values[0][0][i] = (*m)[0][0] * vx + (*m)[0][1] * vy;
-              this->cur_node.values[1][0][i] = (*m)[1][0] * vx + (*m)[1][1] * vy;
+              Scalar vx = this->values[0][0][i];
+              Scalar vy = this->values[1][0][i];
+              this->values[0][0][i] = (*m)[0][0] * vx + (*m)[0][1] * vy;
+              this->values[1][0][i] = (*m)[1][0] * vx + (*m)[1][1] * vy;
             }
             if ((mask & H2D_CURL) == H2D_CURL)
             {
-              Scalar e0x = this->cur_node.values[0][1][i], e0y = this->cur_node.values[0][2][i];
-              Scalar e1x = this->cur_node.values[1][1][i], e1y = this->cur_node.values[1][2][i];
-              this->cur_node.values[1][1][i] = (*m)[0][0] * ((*m)[1][0] * e0x + (*m)[1][1] * e1x) + (*m)[0][1] * ((*m)[1][0] * e0y + (*m)[1][1] * e1y);
-              this->cur_node.values[0][2][i] = (*m)[1][0] * ((*m)[0][0] * e0x + (*m)[0][1] * e1x) + (*m)[1][1] * ((*m)[0][0] * e0y + (*m)[0][1] * e1y);
+              Scalar e0x = this->values[0][1][i], e0y = this->values[0][2][i];
+              Scalar e1x = this->values[1][1][i], e1y = this->values[1][2][i];
+              this->values[1][1][i] = (*m)[0][0] * ((*m)[1][0] * e0x + (*m)[1][1] * e1x) + (*m)[0][1] * ((*m)[1][0] * e0y + (*m)[1][1] * e1y);
+              this->values[0][2][i] = (*m)[1][0] * ((*m)[0][0] * e0x + (*m)[0][1] * e1x) + (*m)[1][1] * ((*m)[0][0] * e0y + (*m)[0][1] * e1y);
             }
         }
       }
@@ -939,10 +925,10 @@ namespace Hermes
 
           for (i = 0, m = mat; i < np; i++, m += mstep)
           {
-            Scalar vx = this->cur_node.values[0][0][i];
-            Scalar vy = this->cur_node.values[1][0][i];
-            this->cur_node.values[0][0][i] = (*m)[1][1] * vx - (*m)[1][0] * vy;
-            this->cur_node.values[1][0][i] = -(*m)[0][1] * vx + (*m)[0][0] * vy;
+            Scalar vx = this->values[0][0][i];
+            Scalar vy = this->values[1][0][i];
+            this->values[0][0][i] = (*m)[1][1] * vx - (*m)[1][0] * vy;
+            this->values[1][0][i] = -(*m)[0][1] * vx + (*m)[0][0] * vy;
           }
         }
       }
@@ -958,22 +944,24 @@ namespace Hermes
       if (sln_type == HERMES_SLN)
       {
         // if we are required to transform vectors, we must precalculate both their components
-        const int H2D_GRAD = H2D_FN_DX_0 | H2D_FN_DY_0;
-        const int H2D_SECOND = H2D_FN_DXX_0 | H2D_FN_DXY_0 | H2D_FN_DYY_0;
-        const int H2D_CURL = H2D_FN_DX | H2D_FN_DY; // sic
         if (transform)
         {
-          if (this->num_components == 1)                                            // H1 space or L2 space
+          // H1 space or L2 space
+          if (this->num_components == 1)
           {
             if ((mask & H2D_FN_DX_0) || (mask & H2D_FN_DY_0))  mask |= H2D_GRAD;
+#ifdef H2D_USE_SECOND_DERIVATIVES
             if ((mask & H2D_FN_DXX_0) || (mask & H2D_FN_DXY_0) || (mask & H2D_FN_DYY_0))  mask |= H2D_SECOND;
+#endif
           }
-          else if (space_type == HERMES_HCURL_SPACE)                                           // Hcurl space
+          // Hcurl space
+          else if (space_type == HERMES_HCURL_SPACE)
           {
             if ((mask & H2D_FN_VAL_0) || (mask & H2D_FN_VAL_1)) mask |= H2D_FN_VAL;
             if ((mask & H2D_FN_DX_1) || (mask & H2D_FN_DY_0))  mask |= H2D_CURL;
           }
-          else                                                                // Hdiv space
+          // Hdiv space
+          else
           {
             if ((mask & H2D_FN_VAL_0) || (mask & H2D_FN_VAL_1)) mask |= H2D_FN_VAL;
           }
@@ -991,11 +979,11 @@ namespace Hermes
         int o = elem_orders[this->element->id];
         for (l = 0; l < this->num_components; l++)
         {
-          for (k = 0; k < 6; k++)
+          for (k = 0; k < H2D_NUM_FUNCTION_VALUES; k++)
           {
             if (mask & this->idx2mask[k][l])
             {
-              Scalar* result = this->cur_node.values[l][k];
+              Scalar* result = this->values[l][k];
 
               // calculate the solution values using Horner's scheme
               Scalar* mono = dxdy_coeffs[l][k];
@@ -1043,9 +1031,9 @@ namespace Hermes
               double jac = (*m)[0][0] * (*m)[1][1] - (*m)[1][0] * (*m)[0][1];
               Scalar val, dx = 0.0, dy = 0.0;
               val = (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
-              this->cur_node.values[0][0][i] = val * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
-              this->cur_node.values[0][1][i] = ((*m)[1][1] * dx - (*m)[0][1] * dy) / jac * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
-              this->cur_node.values[0][2][i] = (-(*m)[1][0] * dx + (*m)[0][0] * dy) / jac * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
+              this->values[0][0][i] = val * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
+              this->values[0][1][i] = ((*m)[1][1] * dx - (*m)[0][1] * dy) / jac * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
+              this->values[0][2][i] = (-(*m)[1][0] * dx + (*m)[0][0] * dy) / jac * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
             }
           }
           else
@@ -1054,9 +1042,9 @@ namespace Hermes
             {
               Scalar val, dx = 0.0, dy = 0.0;
               val = (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
-              this->cur_node.values[0][0][i] = val * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
-              this->cur_node.values[0][1][i] = dx * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
-              this->cur_node.values[0][2][i] = dy * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
+              this->values[0][0][i] = val * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
+              this->values[0][1][i] = dx * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
+              this->values[0][2][i] = dy * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
             }
           }
         }
@@ -1068,9 +1056,9 @@ namespace Hermes
             Scalar2<Scalar> val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
             for (j = 0; j < 2; j++)
             {
-              this->cur_node.values[j][0][i] = val[j] * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
-              this->cur_node.values[j][1][i] = dx[j] * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
-              this->cur_node.values[j][2][i] = dy[j] * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
+              this->values[j][0][i] = val[j] * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
+              this->values[j][1][i] = dx[j] * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
+              this->values[j][2][i] = dy[j] * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
             }
           }
         }
@@ -1081,6 +1069,8 @@ namespace Hermes
           "not calculated yet or you used the assignment operator which destroys "
           "the solution on its right-hand side.");
       }
+
+      Function<Scalar>::precalculate(order, mask);
     }
 
     template<>
@@ -1461,7 +1451,7 @@ namespace Hermes
           this->num_elems = parsed_xml_solution->nel();
           this->num_components = parsed_xml_solution->ncmp();
 
-          this->mono_coeffs = malloc_with_check<Solution<std::complex<double> >, std::complex<double>>(num_coeffs, this);
+          this->mono_coeffs = malloc_with_check<Solution<std::complex<double> >, std::complex<double> >(num_coeffs, this);
           memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(std::complex<double>));
 
           for (unsigned int component_i = 0; component_i < num_components; component_i++)
@@ -1505,7 +1495,7 @@ namespace Hermes
       rewind(fpr);
 
       // allocate memory to contain the whole file:
-      char *datar = (char*)malloc(sizeof(char)*size);
+      char *datar = malloc_with_check<char>(size);
       fread(datar, size, 1, fpr);
       fclose(fpr);
 
@@ -1602,7 +1592,7 @@ namespace Hermes
       }
 
       bson_destroy(&br);
-      ::free(datar);
+      free_with_check(datar);
 
       init_dxdy_buffer();
     }
@@ -1623,7 +1613,7 @@ namespace Hermes
       rewind(fpr);
 
       // allocate memory to contain the whole file:
-      char *datar = (char*)malloc(sizeof(char)*size);
+      char *datar = malloc_with_check<char>(size);
       fread(datar, size, 1, fpr);
       fclose(fpr);
 
@@ -1729,7 +1719,7 @@ namespace Hermes
       }
 
       bson_destroy(&br);
-      ::free(datar);
+      free_with_check(datar);
 
       init_dxdy_buffer();
     }
@@ -1794,6 +1784,8 @@ namespace Hermes
           row = row * xi1 + mono[k++];
         result = result * xi2 + row;
       }
+
+      this->invalidate_values();
       return result;
     }
 
@@ -1822,6 +1814,7 @@ namespace Hermes
           if (b == 1) return m[0][0] * dx + m[0][1] * dy; // H2D_FN_DX
           if (b == 2) return m[1][0] * dx + m[1][1] * dy; // H2D_FN_DY
         }
+#ifdef H2D_USE_SECOND_DERIVATIVES
         else
         {
           double2x2 mat;
@@ -1829,13 +1822,13 @@ namespace Hermes
           double xx, yy;
 
           this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, mat);
-          this->refmap->second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
 
           Scalar vx = get_ref_value(e, xi1, xi2, a, 1);
           Scalar vy = get_ref_value(e, xi1, xi2, a, 2);
           Scalar vxx = get_ref_value(e, xi1, xi2, a, 3);
           Scalar vyy = get_ref_value(e, xi1, xi2, a, 4);
           Scalar vxy = get_ref_value(e, xi1, xi2, a, 5);
+          this->refmap->second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
           if (b == 3)
             return sqr(mat[0][0])*vxx + 2 * mat[0][1] * mat[0][0] * vxy + sqr(mat[0][1])*vyy + mat2[0][0] * vx + mat2[0][1] * vy;   // dxx
           if (b == 4)
@@ -1843,6 +1836,9 @@ namespace Hermes
           if (b == 5)
             return mat[0][0] * mat[1][0] * vxx + (mat[0][0] * mat[1][1] + mat[1][0] * mat[0][1])*vxy + mat[0][1] * mat[1][1] * vyy + mat2[1][0] * vx + mat2[1][1] * vy;   //dxy
         }
+#else
+        throw Exceptions::Exception("Hermes not built with second derivatives support. Consult the macro H2D_USE_SECOND_DERIVATIVES.");
+#endif
       }
       else // vector solution
       {
@@ -1876,22 +1872,15 @@ namespace Hermes
 
       Scalar** toReturn = malloc_with_check<Solution<Scalar>, Scalar*>(2, this);
       double2x2 mat;
-      double3x2 mat2;
       this->refmap->inv_ref_map_at_point(x_ref, y_ref, x_dummy, y_dummy, mat);
-      this->refmap->second_ref_map_at_point(x_ref, y_ref, x_dummy, y_dummy, mat2);
-
       if (this->num_components == 1)
       {
         toReturn[0] = malloc_with_check<Solution<Scalar>, Scalar>(6, this);
 
         int o = elem_orders[e->id];
 
-        Scalar result[6];
-#ifdef H2D_USE_SECOND_DERIVATIVES
-        for (int item = 0; item < 6; item++)
-#else
-        for (int item = 0; item < 3; item++)
-#endif
+        Scalar result[H2D_NUM_FUNCTION_VALUES];
+        for (int item = 0; item < H2D_NUM_FUNCTION_VALUES; item++)
         {
           Scalar* mono = dxdy_coeffs[0][item];
           Scalar result_local = 0.0;
@@ -1909,6 +1898,9 @@ namespace Hermes
         toReturn[0][1] = mat[0][0] * result[1] + mat[0][1] * result[2];
         toReturn[0][2] = mat[1][0] * result[1] + mat[1][1] * result[2];
 #ifdef H2D_USE_SECOND_DERIVATIVES
+        double3x2 mat2;
+        this->refmap->second_ref_map_at_point(x_ref, y_ref, x_dummy, y_dummy, mat2);
+
         toReturn[0][3] = sqr(mat[0][0])*result[3] + 2 * mat[0][1] * mat[0][0] * result[5] + sqr(mat[0][1])*result[4] + mat2[0][0] * result[1] + mat2[0][1] * result[2];
         toReturn[0][4] = sqr(mat[1][0])*result[3] + 2 * mat[1][1] * mat[1][0] * result[5] + sqr(mat[1][1])*result[4] + mat2[2][0] * result[1] + mat2[2][1] * result[2];
         toReturn[0][5] = mat[0][0] * mat[1][0] * result[3] + (mat[0][0] * mat[1][1] + mat[1][0] * mat[0][1])*result[5] + mat[0][1] * mat[1][1] * result[4] + mat2[1][0] * result[1] + mat2[1][1] * result[2];
@@ -1924,6 +1916,7 @@ namespace Hermes
         toReturn[1][0] = mat[1][0] * vx + mat[1][1] * vy;
       }
 
+      this->invalidate_values();
       return toReturn;
     }
 

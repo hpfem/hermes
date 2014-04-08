@@ -193,7 +193,7 @@ namespace Hermes
         }
 
         free_with_check(al);
-        delete [] blocks;
+        free_with_check(blocks, true);
 
         mat->alloc();
       }

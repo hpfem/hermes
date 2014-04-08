@@ -22,6 +22,8 @@
 #ifndef __HERMES_COMMON_ALGEBRA_UTILITIES_H
 #define __HERMES_COMMON_ALGEBRA_UTILITIES_H
 
+#include "config.h"
+
 namespace Hermes
 {
   enum MatrixSolverType
@@ -71,7 +73,11 @@ namespace Hermes
       /// Binary MATio format
       EXPORT_FORMAT_MATLAB_MATIO = 4,
       /// \brief Matrix Market which can be read by pysparse library
-      EXPORT_FORMAT_MATRIX_MARKET = 3
+      EXPORT_FORMAT_MATRIX_MARKET = 3,
+#ifdef WITH_BSON
+      /// \brief Own binary BSON-based import-export
+      EXPORT_FORMAT_BSON = 2
+#endif
     };
   }
 }

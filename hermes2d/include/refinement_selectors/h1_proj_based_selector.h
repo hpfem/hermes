@@ -58,7 +58,10 @@ namespace Hermes
 
         /// Returns an array of values of the reference solution at integration points.
         /**  Overriden function. For details, see ProjBasedSelector::precalc_ref_solution(). */
-        virtual const Scalar** precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order);
+        virtual void precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]);
+
+        /// Frees the data allocated in precalc_ref_solution.
+        virtual void free_ref_solution_data(int inx_son, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]);
 
         /// Calculates values of shape function at GIP for all transformations.
         /**  Overriden function. For details, see ProjBasedSelector::precalc_shapes(). */
@@ -74,11 +77,11 @@ namespace Hermes
 
         /// Evaluates a value of the right-hande side in a subdomain.
         /**  Overriden function. For details, see ProjBasedSelector::evaluate_rhs_subdomain(). */
-        virtual Scalar evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemSubShapeFunc& sub_shape);
+        virtual Scalar evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemSubShapeFunc& sub_shape, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]);
 
         /// Evaluates an squared error of a projection of an element of a candidate onto subdomains.
         /**  Overriden function. For details, see ProjBasedSelector::evaluate_error_squared_subdomain(). */
-        virtual double evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj);
+        virtual double evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]);
 
         /// If the shapeset is not from the user, we shall delete it in the destructor.
         bool user_shapeset;

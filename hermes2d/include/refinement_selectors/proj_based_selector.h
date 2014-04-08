@@ -95,7 +95,7 @@ namespace Hermes
           /// Assignment operator. Prevent unauthorized copying of the pointer.
           const TrfShapeExp& operator = (const TrfShapeExp& other)
           {
-            ::free(values);
+            free_with_check(values);
             values = nullptr;
 
             if (other.values == nullptr)
@@ -267,7 +267,7 @@ namespace Hermes
         *  \param[in] sub_ortho_svals
         *  \param[in] info Information about candidates: range of orders, etc.
         *  \param[out] errors_squared Calculated squared errors for all orders specified through \a info. */
-        void calc_error_cand_element(const ElementMode2D mode, double3* gip_points, int num_gip_points, const int num_sub, Element** sub_domains, Trf** sub_trfs, const Scalar*** sub_rvals, Hermes::vector<TrfShapeExp>** sub_nonortho_svals, Hermes::vector<TrfShapeExp>** sub_ortho_svals, const typename OptimumSelector<Scalar>::CandsInfo& info, CandElemProjError errors_squared);
+        void calc_error_cand_element(const ElementMode2D mode, double3* gip_points, int num_gip_points, const int num_sub, Element** sub_domains, Trf** sub_trfs, int* sons, Hermes::vector<TrfShapeExp>** sub_nonortho_svals, Hermes::vector<TrfShapeExp>** sub_ortho_svals, const typename OptimumSelector<Scalar>::CandsInfo& info, CandElemProjError errors_squared, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]);
 
       protected: //projection
         /// Projection of an element of a candidate.
@@ -284,7 +284,6 @@ namespace Hermes
         struct ElemGIP {
           double3* gip_points; ///< Integration points and weights. The first index is an index of an integration point, the second index is defined through the enum GIP2DIndices.
           int num_gip_points; ///< A number of integration points.
-          const Scalar** rvals; ///< Values of a reference solution at the integration points. The first index is an index of the function expansion (f, df/dx, ...), the second index is an index of the integration point. The meaning of the second index is defined through the method precalc_ref_solution().
         };
 
         /// A transformation from a reference domain of a subdomain to a reference domain of an element of a candidate.
@@ -313,7 +312,10 @@ namespace Hermes
         *  \param[in] element An element of the coarse solution. An element of both the same geometry and the same ID have to be present in the mesh of the reference solution.
         *  \param[in] intr_gip_order An order of quadrature integration. The number of quadrature points should be retrieved through a quadrature stored in the paremeter \a rsln.
         *  \return A pointer to 2D array. The first index is an index of the function expansion (f, df/dx, ...), the second index is an index of the integration point. */
-        virtual const Scalar** precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order) = 0;
+        virtual void precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]) = 0;
+        
+        /// Frees the data allocated in precalc_ref_solution.
+        virtual void free_ref_solution_data(int inx_son, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]) = 0;
 
         /// Builds projection matrix using a given set of shapes.
         /** Override to calculate a projection matrix.
@@ -331,7 +333,7 @@ namespace Hermes
         *  \param[in] sub_trf A transformation from a reference domain of a subdomain to the reference domain of an element of a candidate.
         *  \param[in] sub_shape Information about a shape function: shape index and calculated expansions at integration points, if any.
         *  \return A value of the righ-hand size of a given shape function. */
-        virtual Scalar evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape) = 0;
+        virtual Scalar evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, int son, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]) = 0;
 
         /// Evaluates an squared error of a projection of an element of a candidate onto subdomains.
         /** Override to calculate an error using a provided projection and subdomains.
@@ -340,7 +342,7 @@ namespace Hermes
         *  \param[in] sub_trf A transformation from a reference domain of a subdomain to the reference domain of an element of a candidate.
         *  \param[in] elem_proj A projection of an element of a candidate on subdomains.
         *  \return A squared error of an element of a candidate. */
-        virtual double evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj) = 0;
+        virtual double evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, int son, const ElemSubTrf& sub_trf, const ElemProj& elem_proj, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]) = 0;
       };
     }
   }

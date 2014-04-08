@@ -23,7 +23,9 @@
 #ifndef __HERMES_COMMON_COMPAT_H
 #define __HERMES_COMMON_COMPAT_H
 #include <stdio.h>
+#include "stddef.h"
 #include "config.h"
+#include <cstddef>
 
 #ifndef HAVE_FMEMOPEN
 /// Implementation of GNU fmemopen. Intended to be used if the current platform does not support it.
@@ -78,5 +80,17 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
     #define __attribute__(x)
   #endif
 #endif
+
+// If C++ 11 is not supported
+namespace std
+{
+#if defined(__GNUC__) && ((__GNUC__ == 4 && __GNUC_MINOR__ >= 7) || (__GNUC__ >= 5))
+# define HACK_GCC_ITS_CPP0X 1
+#endif
+#if defined(nullptr_t) || (__cplusplus >= 199711L) || defined(HACK_GCC_ITS_CPP0X)
+#else
+#define nullptr NULL
+#endif
+}
 
 #endif

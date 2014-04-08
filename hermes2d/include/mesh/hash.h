@@ -47,6 +47,10 @@ namespace Hermes
 
       static const int H2D_DEFAULT_HASH_SIZE = 0x8000; // 32K entries
 
+      Node* add_node();
+
+      /// Returns an edge node with parent id's p1 and p2 if it exists, nullptr otherwise.
+      Node* peek_edge_node(int p1, int p2) const;
 
     protected:
       HashTable();
@@ -57,9 +61,6 @@ namespace Hermes
 
       /// Returns a vertex node with parent id's p1 and p2 if it exists, nullptr otherwise.
       Node* peek_vertex_node(int p1, int p2) const;
-
-      /// Returns an edge node with parent id's p1 and p2 if it exists, nullptr otherwise.
-      Node* peek_edge_node(int p1, int p2) const;
 
       /// Central function: obtains a vertex node pointer given the id
       /// numbers of its parents. If the vertex node does not exist, it is

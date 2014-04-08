@@ -24,7 +24,9 @@
 
 #include "util/compat.h"
 #include "common.h"
-
+#if defined __GNUC__ && defined HAVE_BFD
+#include "signal.h"
+#endif
 namespace Hermes
 {
   /// Enumeration of potential keys in the Api::parameters storage.
@@ -90,6 +92,10 @@ namespace Hermes
   public:
     int get_integral_param_value(HermesCommonApiParam);
     void set_integral_param_value(HermesCommonApiParam, int value);
+
+#if defined __GNUC__ && defined HAVE_BFD
+    struct sigaction act;
+#endif
   };
 
   /// Global instance used inside Hermes which is also accessible to users.

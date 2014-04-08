@@ -169,9 +169,8 @@ namespace Hermes
 
       // Total order of the vector form.
       double fake_wt = 1.0;
-      Geom<Hermes::Ord> *tmp = init_geom_ord();
-      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ou, ov, tmp, local_ext);
-      delete tmp;
+      Geom<Hermes::Ord> tmp;
+      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ou, ov, &tmp, local_ext);
 
       adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
@@ -212,9 +211,8 @@ namespace Hermes
 
       // Total order of the vector form.
       double fake_wt = 1.0;
-      Geom<Hermes::Ord> *tmp = init_geom_ord();
-      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ov, tmp, local_ext);
-      delete tmp;
+      Geom<Hermes::Ord> tmp;
+      Hermes::Ord o = form->ord(1, &fake_wt, u_ext, ov, &tmp, local_ext);
 
       adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
@@ -272,22 +270,16 @@ namespace Hermes
     template<typename Scalar>
     Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& ext, Hermes::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func)
     {
-      Func<Hermes::Ord>** ext_func = nullptr;
-      bool surface_form = (this->current_state->isurf > -1);
-      if (ext.size() > 0 || u_ext_fns.size() > 0)
-      {
-        ext_func = new Func<Hermes::Ord>*[ext.size() + u_ext_fns.size()];
-        for (int ext_i = 0; ext_i < u_ext_fns.size(); ext_i++)
-        {
-          if (u_ext_fns[ext_i])
-          {
-            ext_func[ext_i] = init_fn_ord(0);
-            u_ext_fns[ext_i]->ord(u_ext_func, ext_func[ext_i]);
-          }
-          else
-            ext_func[ext_i] = nullptr;
-        }
+      int ext_size = ext.size();
+      int u_ext_fns_size = u_ext_fns.size();
 
+      Func<Hermes::Ord>** ext_func = nullptr;
+
+      bool surface_form = (this->current_state->isurf > -1);
+
+      if (ext_size > 0 || u_ext_fns_size > 0)
+      {
+        ext_func = new Func<Hermes::Ord>*[ext_size + u_ext_fns_size];
         for (int ext_i = 0; ext_i < ext.size(); ext_i++)
         {
           if (ext[ext_i])
@@ -295,15 +287,26 @@ namespace Hermes
             if (ext[ext_i]->get_active_element())
             {
               if (surface_form)
-                ext_func[u_ext_fns.size() + ext_i] = init_fn_ord(ext[ext_i]->get_edge_fn_order(this->current_state->isurf) + (ext[ext_i]->get_num_components() > 1 ? 1 : 0));
+                ext_func[u_ext_fns_size + ext_i] = init_fn_ord(ext[ext_i]->get_edge_fn_order(this->current_state->isurf) + (ext[ext_i]->get_num_components() > 1 ? 1 : 0));
               else
-                ext_func[u_ext_fns.size() + ext_i] = init_fn_ord(ext[ext_i]->get_fn_order() + (ext[ext_i]->get_num_components() > 1 ? 1 : 0));
+                ext_func[u_ext_fns_size + ext_i] = init_fn_ord(ext[ext_i]->get_fn_order() + (ext[ext_i]->get_num_components() > 1 ? 1 : 0));
             }
             else
-              ext_func[u_ext_fns.size() + ext_i] = nullptr;
+              ext_func[u_ext_fns_size + ext_i] = nullptr;
           }
           else
-            ext_func[u_ext_fns.size() + ext_i] = nullptr;
+            ext_func[u_ext_fns_size + ext_i] = nullptr;
+        }
+        
+        for (int ext_i = 0; ext_i < u_ext_fns_size; ext_i++)
+        {
+          if (u_ext_fns[ext_i])
+          {
+            ext_func[ext_i] = init_fn_ord(0);
+            u_ext_fns[ext_i]->ord(ext_func + u_ext_fns_size, u_ext_func, ext_func[ext_i]);
+          }
+          else
+            ext_func[ext_i] = nullptr;
         }
       }
 
@@ -422,12 +425,11 @@ namespace Hermes
       DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(init_fn_ord(max_order_i), neighbor_supp_v);
 
       // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-      Geom<Hermes::Ord> *tmp = init_geom_ord();
+      Geom<Hermes::Ord> tmp;
       double fake_wt = 1.0;
 
       // Total order of the matrix form.
-      Ord o = mfDG->ord(1, &fake_wt, u_ext_ord, ou, ov, tmp, ext_ord);
-      delete tmp;
+      Ord o = mfDG->ord(1, &fake_wt, u_ext_ord, ou, ov, &tmp, ext_ord);
 
       adjust_order_to_refmaps(mfDG, order, &o, current_refmaps);
 
@@ -476,13 +478,11 @@ namespace Hermes
       DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(init_fn_ord(max_order_i), neighbor_supp_v);
 
       // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-      Geom<Hermes::Ord> *tmp = init_geom_ord();
+      Geom<Hermes::Ord> tmp;
       double fake_wt = 1.0;
 
       // Total order of the matrix form.
-      Ord o = vfDG->ord(1, &fake_wt, u_ext_ord, ov, tmp, ext_ord);
-
-      delete tmp;
+      Ord o = vfDG->ord(1, &fake_wt, u_ext_ord, ov, &tmp, ext_ord);
 
       adjust_order_to_refmaps(vfDG, order, &o, current_refmaps);
 

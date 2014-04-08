@@ -20,7 +20,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    void MeshUtil::assign_nurbs(Node* en, Nurbs* nurbs, int p1, int p2)
+    void MeshUtil::assign_curve(Node* en, Curve* curve, int p1, int p2)
     {
       // assign the arc to the elements sharing the edge node
       for (unsigned int node_i = 0; node_i < 2; node_i++)
@@ -32,8 +32,7 @@ namespace Hermes
         if (e->cm == nullptr)
         {
           e->cm = new CurvMap;
-          memset(e->cm, 0, sizeof(CurvMap));
-          e->cm->toplevel = 1;
+          e->cm->toplevel = true;
           e->cm->order = 4;
         }
 
@@ -49,43 +48,48 @@ namespace Hermes
         assert(idx >= 0);
 
         if (e->vn[idx]->id == p1)
-        {
-          e->cm->nurbs[idx] = nurbs;
-          nurbs->ref++;
-        }
+          e->cm->curves[idx] = curve;
         else
         {
-          Nurbs* nurbs_rev = MeshUtil::reverse_nurbs(nurbs);
-          e->cm->nurbs[idx] = nurbs_rev;
-          nurbs_rev->ref++;
+          Curve* curve_rev = MeshUtil::reverse_curve(curve);
+          e->cm->curves[idx] = curve_rev;
         }
       }
-      if (!nurbs->ref) delete nurbs;
     }
 
-    Nurbs* MeshUtil::reverse_nurbs(Nurbs* nurbs)
+    Curve* MeshUtil::reverse_curve(Curve* curve)
     {
-      Nurbs* rev = new Nurbs;
-      *rev = *nurbs;
-      rev->twin = true;
-
-      rev->pt = new double3[nurbs->np];
-      for (int i = 0; i < nurbs->np; i++)
+      if (curve->type == ArcType)
       {
-        rev->pt[nurbs->np - 1 - i][0] = nurbs->pt[i][0];
-        rev->pt[nurbs->np - 1 - i][1] = nurbs->pt[i][1];
-        rev->pt[nurbs->np - 1 - i][2] = nurbs->pt[i][2];
+        Arc* toReturn = new Arc((Arc*)curve);
+        ((Arc*)toReturn)->angle = -((Arc*)toReturn)->angle;
+        for (int i = 0; i < toReturn->np; i++)
+        {
+          toReturn->pt[((Arc*)curve)->np - 1 - i][0] = ((Arc*)curve)->pt[i][0];
+          toReturn->pt[((Arc*)curve)->np - 1 - i][1] = ((Arc*)curve)->pt[i][1];
+          toReturn->pt[((Arc*)curve)->np - 1 - i][2] = ((Arc*)curve)->pt[i][2];
+        }
+
+        return toReturn;
       }
+      else
+      {
+        Nurbs* toReturn = new Nurbs((Nurbs*)curve);
 
-      rev->kv = new double[nurbs->nk];
-      for (int i = 0; i < nurbs->nk; i++)
-        rev->kv[i] = nurbs->kv[i];
-      for (int i = nurbs->degree + 1; i < nurbs->nk - nurbs->degree - 1; i++)
-        rev->kv[nurbs->nk - 1 - i] = 1.0 - nurbs->kv[i];
+        for (int i = 0; i < ((Nurbs*)curve)->np; i++)
+        {
+          toReturn->pt[((Nurbs*)curve)->np - 1 - i][0] = ((Nurbs*)curve)->pt[i][0];
+          toReturn->pt[((Nurbs*)curve)->np - 1 - i][1] = ((Nurbs*)curve)->pt[i][1];
+          toReturn->pt[((Nurbs*)curve)->np - 1 - i][2] = ((Nurbs*)curve)->pt[i][2];
+        }
 
-      rev->arc = nurbs->arc;
-      rev->angle = -nurbs->angle;
-      return rev;
+        for (int i = 0; i < ((Nurbs*)curve)->nk; i++)
+          toReturn->kv[i] = ((Nurbs*)curve)->kv[i];
+        for (int i = ((Nurbs*)curve)->degree + 1; i < ((Nurbs*)curve)->nk - ((Nurbs*)curve)->degree - 1; i++)
+          toReturn->kv[((Nurbs*)curve)->nk - 1 - i] = 1.0 - ((Nurbs*)curve)->kv[i];
+
+          return toReturn;
+      }
     }
 
     Node* MeshUtil::get_base_edge_node(Element* base, int edge)
@@ -125,10 +129,9 @@ namespace Hermes
       return 2;
     }
 
-    Nurbs* MeshUtil::load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check)
+    Arc* MeshUtil::load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check)
     {
-      Nurbs* nurbs = new Nurbs;
-      nurbs->arc = true;
+      Arc* curve = new Arc(angle);
 
       *en = mesh->peek_edge_node(p1, p2);
 
@@ -139,43 +142,25 @@ namespace Hermes
         else
           return nullptr;
       }
-
-      // degree of an arc == 2.
-      nurbs->degree = 2;
-      // there are three control points.
-      nurbs->np = 3;
-      // there are 6 knots: {0, 0, 0, 1, 1, 1}
-      nurbs->nk = 6;
-      nurbs->kv = new double[nurbs->nk];
-
-      for (int i = 0; i < 3; i++)
-        nurbs->kv[i] = 0.0;
-
-      for (int i = 3; i < nurbs->nk; i++)
-        nurbs->kv[i] = 1.0;
-
+    
       // edge endpoints control points.
-      nurbs->pt = new double3[3];
-      nurbs->pt[0][0] = mesh->nodes[p1].x;
-      nurbs->pt[0][1] = mesh->nodes[p1].y;
-      nurbs->pt[0][2] = 1.0;
-      nurbs->pt[2][0] = mesh->nodes[p2].x;
-      nurbs->pt[2][1] = mesh->nodes[p2].y;
-      nurbs->pt[2][2] = 1.0;
+      curve->pt[0][0] = mesh->nodes[p1].x;
+      curve->pt[0][1] = mesh->nodes[p1].y;
+      curve->pt[0][2] = 1.0;
+      curve->pt[2][0] = mesh->nodes[p2].x;
+      curve->pt[2][1] = mesh->nodes[p2].y;
+      curve->pt[2][2] = 1.0;
 
       // read the arc angle
-      nurbs->angle = angle;
-      double a = (180.0 - nurbs->angle) / 180.0 * M_PI;
+      double a = (180.0 - angle) / 180.0 * M_PI;
 
       // generate one inner control point
       double x = 1.0 / std::tan(a * 0.5);
-      nurbs->pt[1][0] = 0.5*((nurbs->pt[2][0] + nurbs->pt[0][0]) + (nurbs->pt[2][1] - nurbs->pt[0][1]) * x);
-      nurbs->pt[1][1] = 0.5*((nurbs->pt[2][1] + nurbs->pt[0][1]) - (nurbs->pt[2][0] - nurbs->pt[0][0]) * x);
-      nurbs->pt[1][2] = Hermes::cos((M_PI - a) * 0.5);
+      curve->pt[1][0] = 0.5*((curve->pt[2][0] + curve->pt[0][0]) + (curve->pt[2][1] - curve->pt[0][1]) * x);
+      curve->pt[1][1] = 0.5*((curve->pt[2][1] + curve->pt[0][1]) - (curve->pt[2][0] - curve->pt[0][0]) * x);
+      curve->pt[1][2] = Hermes::cos((M_PI - a) * 0.5);
 
-      nurbs->ref = 0;
-
-      return nurbs;
+      return curve;
     }
 
     MeshHashGrid::MeshHashGrid(Mesh* mesh) : mesh_seq(mesh->get_seq())
@@ -422,7 +407,8 @@ namespace Hermes
       {
         if (elem->marker == marker)
         {
-          area += elem->get_area(true);
+          elem->calc_area(true);
+          area += elem->area;
         }
       }
     }

@@ -219,7 +219,7 @@ namespace Hermes
           for (int i = 0; i < this->num_states; i++)
             delete states[i];
 
-          ::free(this->states);
+          free_with_check(this->states);
           this->states = nullptr;
           this->num_states = 0;
         }
@@ -558,7 +558,7 @@ namespace Hermes
       {
         while (this->current_thread_size == 0)
         {
-          if (this->current_thread_size == this->thread_sizes.size() - 1)
+          if (this->current_thread_size == this->thread_sizes[this->thread_sizes.size() - 1])
           {
             this->end = true;
             break;
@@ -759,7 +759,7 @@ namespace Hermes
         return count;
       }
 
-      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>>;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >;
       template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t>;
       template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t>;
       template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>;
@@ -767,7 +767,7 @@ namespace Hermes
       template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >;
       template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t>;
       template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t>;
-      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE >>::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE > >::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>;
     }
   }
 }

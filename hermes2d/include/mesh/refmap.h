@@ -141,14 +141,16 @@ namespace Hermes
         return this->inv_ref_map;
       }
 
-      /// Returns coefficients for weak forms with second derivatives.
-      double3x2* get_second_ref_map(int order);
-
       /// Calculates the inverse Jacobi matrix of reference map at a particular point (xi1, xi2).
       void inv_ref_map_at_point(double xi1, double xi2, double& x, double& y, double2x2& m);
 
+#ifdef H2D_USE_SECOND_DERIVATIVES
+      /// Returns coefficients for weak forms with second derivatives.
+      double3x2* get_second_ref_map(int order);
+      
       /// Calculates the second reference map at a particular point (xi1, xi2).
       void second_ref_map_at_point(double xi1, double xi2, double& x, double& y, double3x2& mm);
+#endif
 
       /// See Transformable::push_transform()
       virtual void push_transform(int son);
@@ -160,6 +162,8 @@ namespace Hermes
       void force_transform(uint64_t sub_idx, Trf* ctm);
 
       static bool is_parallelogram(Element* e);
+
+      static void set_element_iro_cache(Element* element);
 
     private:
       /// re-init the storage
@@ -204,8 +208,9 @@ namespace Hermes
       /// (ie., linear triangles and linear parallelogram quads).
       void calc_const_inv_ref_map();
 
+#ifdef H2D_USE_SECOND_DERIVATIVES
       void calc_second_ref_map(int order);
-
+#endif
       void calc_phys_x(int order);
 
       void calc_phys_y(int order);

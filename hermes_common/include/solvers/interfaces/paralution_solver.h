@@ -119,6 +119,8 @@ namespace Hermes
       paralution::FSAI<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePoint_p_k;
       /// Helper precond for saddle point.
       paralution::SPAI<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePoint_p_s;
+      /// Helper precond for Multi elimination precond.
+      paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >* mcilu_p;
 #endif
     };
   }
@@ -167,9 +169,6 @@ namespace Hermes
 
       /// Get the residual value.
       virtual double get_residual_norm();
-
-      /// Sets the verboseness.
-      virtual void set_verbose_output(bool to_set);
 
       /// Utility.
       virtual int get_matrix_size();

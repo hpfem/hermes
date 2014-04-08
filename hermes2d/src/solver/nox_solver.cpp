@@ -54,7 +54,7 @@ namespace Hermes
       Scalar* coeff_vec = malloc_with_check(xx.get_size(), this);
       xx.extract(coeff_vec);
       this->assemble(coeff_vec, nullptr, &rhs); // nullptr is for the global matrix.
-      ::free(coeff_vec);
+      free_with_check(coeff_vec);
 
       return true;
     }
@@ -73,7 +73,7 @@ namespace Hermes
       Scalar* coeff_vec = malloc_with_check(xx.get_size(), this);
       xx.extract(coeff_vec);
       this->assemble(coeff_vec, &jacob, nullptr); // nullptr is for the right-hand side.
-      ::free(coeff_vec);
+      free_with_check(coeff_vec);
       //jacob.finish();
 
       return true;
@@ -88,7 +88,7 @@ namespace Hermes
       Scalar* coeff_vec = malloc_with_check(xx.get_size(), this);
       xx.extract(coeff_vec);
       this->assemble(coeff_vec, &jacobian);
-      ::free(coeff_vec);
+      free_with_check(coeff_vec);
 
       precond->create(&jacobian);
       precond->compute();
@@ -375,7 +375,7 @@ namespace Hermes
           (dynamic_cast<const NOX::Epetra::Vector &>(f_grp.getX())).getEpetraVector();
         // extract solution
         if(this->sln_vector)
-          ::free(this->sln_vector);
+          free_with_check(this->sln_vector);
         this->sln_vector = (Scalar*)calloc(ndofs, sizeof(Scalar));
         
         f_sln.ExtractCopy(this->sln_vector);

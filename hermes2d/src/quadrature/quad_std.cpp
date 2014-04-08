@@ -2428,7 +2428,7 @@ namespace Hermes
       // product of 1D quadrature points...
 
       np = Hermes::sqr(std_np_1d[order]);
-      double3* result = (double3*)malloc(np * sizeof(double3));
+      double3* result = malloc_with_check<double3>(np);
       double2* table = std_tables_1d[order];
 
       for (int i = 0, n = 0; i < std_np_1d[order]; i++)
@@ -2447,7 +2447,7 @@ namespace Hermes
     static double3* make_edge_table(double2& v1, double2& v2, int& np, int order)
     {
       np = std_np_1d[order];
-      double3* result = (double3*)malloc(np * sizeof(double3));
+      double3* result = malloc_with_check<double3>(np);
       double2* table = std_tables_1d[order];
 
       for (int i = 0; i < np; i++)
@@ -2538,18 +2538,17 @@ namespace Hermes
         {
           k = max_order[0] + 1 + 3 * i + j;
           l = j < 2 ? j + 1 : 0;
-          ::free(std_tables_2d_tri[k]);
+          free_with_check(std_tables_2d_tri[k]);
         }
       }
 
       for (i = 0; i <= max_order[1]; i++)
       {
-        ::free(std_tables_2d_quad[i]);
+        free_with_check(std_tables_2d_quad[i]);
         for (j = 0; j < 4; j++)
         {
           k = max_order[1] + 1 + 4 * i + j;
-          l = j < 3 ? j + 1 : 0;
-          ::free(std_tables_2d_quad[k]);
+          free_with_check(std_tables_2d_quad[k]);
         }
       }
     }
@@ -2557,9 +2556,6 @@ namespace Hermes
     //// global standard 1d and 2d quadrature //////////////////////////////////////////////////////////
 
     // ... for use in any module
-
-    HERMES_API Quad1DStd g_quad_1d_std;
-    HERMES_API Quad2DStd g_quad_2d_std;
 
     Quad2DLin g_quad_lin;
 

@@ -129,11 +129,7 @@ namespace Hermes
       MeshSharedPtr mesh;
       RefMap* refmap;
 
-      void force_transform(MeshFunctionSharedPtr<Scalar> mf);
-
       void update_refmap();
-
-      void force_transform(uint64_t sub_idx, Trf* ctm);
 
       friend class RefMap;
       template<typename T> friend class KellyTypeAdapt;

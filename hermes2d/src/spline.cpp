@@ -172,8 +172,11 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Could not open a spline file for writing.");
 
       if (coeffs.size() == 0)
+      {
+        fclose(f);
         throw Hermes::Exceptions::Exception("The cubic spline has no coefficients. Calculate using calculate_coeffs.");
-
+      }
+      
       // Plotting on the left of the area of definition.
       double x_left = point_left - extension;
       double h = extension / subdiv;
@@ -374,7 +377,7 @@ namespace Hermes
       int* perm = malloc_with_check<CubicSpline, int>(n, this);
       ludcmp(matrix, n, perm, &d);
       lubksb<double>(matrix, n, perm, rhs);
-      ::free(perm);
+      free_with_check(perm);
 
       // Copy the solution into the coeffs array.
       coeffs.clear();
@@ -399,8 +402,8 @@ namespace Hermes
       derivative_right = get_derivative_from_interval(point_right, points.size() - 2);
 
       // Free the matrix and rhs vector.
-      ::free(matrix);
-      ::free(rhs);
+      free_with_check(matrix);
+      free_with_check(rhs);
 
       return;
     }

@@ -75,8 +75,14 @@ namespace Hermes
 
     void Transformable::set_active_element(Element* e)
     {
-      if(e==nullptr) throw Exceptions::NullException(1);
-      element = e;
+      if (e == this->element)
+        return;
+
+      if (e == nullptr)
+        throw Exceptions::NullException(1);
+      
+      this->element = e;
+
       this->reset_transform();
     }
 
@@ -92,6 +98,12 @@ namespace Hermes
       reset_transform();
       for (int k = i-1; k >= 0; k--)
         push_transform(son[k]);
+    }
+
+    void Transformable::force_transform(uint64_t sub_idx, Trf* ctm)
+    {
+      this->sub_idx = sub_idx;
+      this->ctm = ctm;
     }
 
     void Transformable::push_transform(int son)

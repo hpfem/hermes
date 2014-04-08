@@ -199,7 +199,7 @@ namespace Hermes
             value_range_avg += vertex[2];
         }
 
-        value_range_avg /= lin->get_vertex_count();;
+        value_range_avg /= lin->get_vertex_count();
         lin_updated = true;
       }
 

@@ -37,8 +37,8 @@ namespace Hermes
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
 
-      central_transformations = (Transformations**)calloc(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS, sizeof(Transformations*));
-      neighbor_transformations = (Transformations**)calloc(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS, sizeof(Transformations*));
+      central_transformations = calloc_with_check<NeighborSearch<Scalar>, Transformations*>(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS, this);
+      neighbor_transformations = calloc_with_check<NeighborSearch<Scalar>, Transformations*>(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS, this);
 
       ignore_errors = false;
       n_neighbors = 0;
@@ -180,10 +180,7 @@ namespace Hermes
       active_edge = edge;
 
       if (!this->ignore_errors && central_el->en[active_edge]->bnd == 1)
-      {
         throw Hermes::Exceptions::Exception("The given edge isn't inner");
-        return;
-      }
       else
       {
         neighb_el = central_el->get_neighbor(active_edge);
@@ -246,7 +243,7 @@ namespace Hermes
 
             find_act_elem_up(parent, orig_vertex_id, par_mid_vertices, n_parents);
 
-            ::free(par_mid_vertices);
+            free_with_check(par_mid_vertices);
           }
           else
           {
@@ -737,7 +734,6 @@ namespace Hermes
             }
             if (neighbor_edge.local_num_of_edge == -1) throw Hermes::Exceptions::Exception("Neighbor edge wasn't found");
 
-            Node* n = nullptr;
 
             // Add to the array of neighbor_transformations one that transforms central el. to its parent completely
             // adjacent to the single big neighbor.
@@ -754,7 +750,7 @@ namespace Hermes
             // neighbor_transformations into the array 'neighbor_transformations'.
             for (int j = n_parents - 1; j > 0; j--)
             {
-              n = mesh->peek_vertex_node(par_mid_vertices[j]->id, p1);
+              Node* n = mesh->peek_vertex_node(par_mid_vertices[j]->id, p1);
               if (n == nullptr)
               {
                 neighbor_transforms->transf[n_parents - j - 1] = neighbor_edge.local_num_of_edge;
@@ -765,6 +761,7 @@ namespace Hermes
                 if (n->id == par_mid_vertices[j - 1]->id)
                 {
                   neighbor_transforms->transf[n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->get_nvert();
+                  /// \todo This is never used. Why?
                   p2 = par_mid_vertices[j]->id;
                 }
                 else
@@ -1066,7 +1063,7 @@ namespace Hermes
     template<typename Scalar>
     NeighborSearch<Scalar>::ExtendedShapeset::~ExtendedShapeset()
     {
-      ::free(dof);
+      free_with_check(dof);
       delete neighbor_al;
     }
 
@@ -1079,7 +1076,7 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::ExtendedShapeset::update(NeighborSearch* neighborhood, SpaceSharedPtr<Scalar> space)
     {
-      ::free(this->dof);
+      free_with_check(this->dof);
       space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
       combine_assembly_lists();
     }

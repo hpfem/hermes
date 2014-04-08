@@ -35,19 +35,6 @@ namespace Hermes
       return quad_2d;
     }
 
-    /// Returns coefficients for weak forms with second derivatives.
-    double3x2* RefMap::get_second_ref_map(int order)
-    {
-      if (this->is_const)
-        throw Hermes::Exceptions::Exception("RefMap::get_second_ref_map() called with a const jacobian.");
-      if (order != this->second_ref_map_calculated)
-        this->calc_second_ref_map(order);
-      return this->second_ref_map;
-    }
-
-    /// Returns the x-coordinates of the integration points transformed to the
-    /// physical domain of the element. Intended for integrals containing spatial
-    /// variables.
     double* RefMap::get_phys_x(int order)
     {
       if (order != this->phys_x_calculated)
@@ -55,9 +42,6 @@ namespace Hermes
       return this->phys_x;
     }
 
-    /// Returns he y-coordinates of the integration points transformed to the
-    /// physical domain of the element. Intended for integrals containing spatial
-    /// variables.
     double* RefMap::get_phys_y(int order)
     {
       if (order != this->phys_y_calculated)
@@ -65,11 +49,6 @@ namespace Hermes
       return this->phys_y;
     }
 
-    /// Returns the triples[x, y, norm] of the tangent to the specified (possibly
-    /// curved) edge at the 1D integration points along the edge. The maximum
-    /// 1D quadrature rule is used by default, but the user may specify his own
-    /// order. In this case, the edge pseudo-order is expected (as returned by
-    /// Quad2D::get_edge_points).
     double3* RefMap::get_tangent(int edge, int order)
     {
       if (order == -1)
@@ -128,31 +107,32 @@ namespace Hermes
         nc = e->cm->nc;
       }
 
-      // calculate the order of the inverse reference map
-      int& element_iro_cache = element->iro_cache;
-      int iro_cache;
-
-      // Critical section - read
-#pragma omp critical (element_iro_cache_setting)
-      iro_cache = element_iro_cache;
-
-      if (is_const)
-        iro_cache = 0;
-      else
-      if (iro_cache == -1)
-        iro_cache = calc_inv_ref_order();
-
-      this->inv_ref_order = iro_cache;
-
-      // Critical section - write
-#pragma omp critical (element_iro_cache_setting)
-      element_iro_cache = iro_cache;
+      this->inv_ref_order = this->element->iro_cache;
 
       // constant inverse reference map
       if (is_const)
         calc_const_inv_ref_map();
       else
         const_jacobian = 0.0;
+    }
+
+    void RefMap::set_element_iro_cache(Element* element)
+    {
+      bool is_const = !element->is_curved() && (element->is_triangle() || is_parallelogram(element));
+
+      if (is_const)
+      {
+#ifdef _DEBUG
+        assert(element->iro_cache == 0);
+#endif
+        return;
+      }
+#pragma omp critical (element_iro_cache_setting)
+      {
+        RefMap rm;
+        rm.set_active_element(element);
+        element->iro_cache = rm.calc_inv_ref_order();
+      }
     }
 
     void RefMap::reinit_storage()
@@ -217,7 +197,6 @@ namespace Hermes
         }
       }
 
-
       // calculate the jacobian and inverted matrix
       double trj = get_transform_jacobian();
       double2x2* irm = this->inv_ref_map;
@@ -244,59 +223,6 @@ namespace Hermes
 
       this->inv_ref_map_calculated = order;
       this->jacobian_calculated = order;
-    }
-
-    void RefMap::calc_second_ref_map(int order)
-    {
-      int i, j, np = quad_2d->get_num_points(order, element->get_mode());
-
-      double3x2* k = calloc_with_check<double3x2>(np);
-      ref_map_pss.force_transform(sub_idx, ctm);
-      for (i = 0; i < nc; i++)
-      {
-        ref_map_pss.set_active_shape(indices[i]);
-        ref_map_pss.set_quad_order(order, H2D_FN_ALL);
-        const double *dxx = ref_map_pss.get_dxx_values();
-        const double *dyy = ref_map_pss.get_dyy_values();
-        const double *dxy = ref_map_pss.get_dxy_values();
-        for (j = 0; j < np; j++)
-        {
-          k[j][0][0] += coeffs[i][0] * dxx[j];
-          k[j][0][1] += coeffs[i][1] * dxx[j];
-          k[j][1][0] += coeffs[i][0] * dxy[j];
-          k[j][1][1] += coeffs[i][1] * dxy[j];
-          k[j][2][0] += coeffs[i][0] * dyy[j];
-          k[j][2][1] += coeffs[i][1] * dyy[j];
-        }
-      }
-
-      double3x2* mm = this->second_ref_map;
-      double2x2* m = get_inv_ref_map(order);
-      for (j = 0; j < np; j++)
-      {
-        double a, b;
-        // coefficients in second derivative with respect to xx
-        a = sqr(m[j][0][0])*k[j][0][0] + 2 * m[j][0][0] * m[j][0][1] * k[j][1][0] + sqr(m[j][0][1])*k[j][2][0];
-        b = sqr(m[j][0][0])*k[j][0][1] + 2 * m[j][0][0] * m[j][0][1] * k[j][1][1] + sqr(m[j][0][1])*k[j][2][1];
-        mm[j][0][0] = -(a * m[j][0][0] + b * m[j][1][0]); // du/dx
-        mm[j][0][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
-
-        // coefficients in second derivative with respect to xy
-        a = m[j][0][0] * m[j][1][0] * k[j][0][0] + (m[j][0][1] * m[j][1][0] + m[j][0][0] * m[j][1][1])*k[j][1][0] + m[j][0][1] * m[j][1][1] * k[j][2][0];
-        b = m[j][0][0] * m[j][1][0] * k[j][0][1] + (m[j][0][1] * m[j][1][0] + m[j][0][0] * m[j][1][1])*k[j][1][1] + m[j][0][1] * m[j][1][1] * k[j][2][1];
-        mm[j][1][0] = -(a * m[j][0][0] + b * m[j][1][0]); // du/dx
-        mm[j][1][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
-
-        // coefficients in second derivative with respect to yy
-        a = sqr(m[j][1][0])*k[j][0][0] + 2 * m[j][1][0] * m[j][1][1] * k[j][1][0] + sqr(m[j][1][1])*k[j][2][0];
-        b = sqr(m[j][1][0])*k[j][0][1] + 2 * m[j][1][0] * m[j][1][1] * k[j][1][1] + sqr(m[j][1][1])*k[j][2][1];
-        mm[j][2][0] = -(a * m[j][0][0] + b * m[j][1][0]); // du/dx
-        mm[j][2][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
-      }
-
-      ::free(k);
-
-      this->second_ref_map_calculated = order;
     }
 
     bool RefMap::is_parallelogram(Element* e)
@@ -498,6 +424,60 @@ namespace Hermes
       m[1][1] = tmp[0][0] / jac;
     }
 
+#ifdef H2D_USE_SECOND_DERIVATIVES
+    void RefMap::calc_second_ref_map(int order)
+    {
+      int i, j, np = quad_2d->get_num_points(order, element->get_mode());
+
+      double3x2* k = calloc_with_check<double3x2>(np);
+      ref_map_pss.force_transform(sub_idx, ctm);
+      for (i = 0; i < nc; i++)
+      {
+        ref_map_pss.set_active_shape(indices[i]);
+        ref_map_pss.set_quad_order(order, H2D_FN_ALL);
+        const double *dxx = ref_map_pss.get_dxx_values();
+        const double *dyy = ref_map_pss.get_dyy_values();
+        const double *dxy = ref_map_pss.get_dxy_values();
+        for (j = 0; j < np; j++)
+        {
+          k[j][0][0] += coeffs[i][0] * dxx[j];
+          k[j][0][1] += coeffs[i][1] * dxx[j];
+          k[j][1][0] += coeffs[i][0] * dxy[j];
+          k[j][1][1] += coeffs[i][1] * dxy[j];
+          k[j][2][0] += coeffs[i][0] * dyy[j];
+          k[j][2][1] += coeffs[i][1] * dyy[j];
+        }
+      }
+
+      double3x2* mm = this->second_ref_map;
+      double2x2* m = get_inv_ref_map(order);
+      for (j = 0; j < np; j++)
+      {
+        double a, b;
+        // coefficients in second derivative with respect to xx
+        a = sqr(m[j][0][0])*k[j][0][0] + 2 * m[j][0][0] * m[j][0][1] * k[j][1][0] + sqr(m[j][0][1])*k[j][2][0];
+        b = sqr(m[j][0][0])*k[j][0][1] + 2 * m[j][0][0] * m[j][0][1] * k[j][1][1] + sqr(m[j][0][1])*k[j][2][1];
+        mm[j][0][0] = -(a * m[j][0][0] + b * m[j][1][0]); // du/dx
+        mm[j][0][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
+
+        // coefficients in second derivative with respect to xy
+        a = m[j][0][0] * m[j][1][0] * k[j][0][0] + (m[j][0][1] * m[j][1][0] + m[j][0][0] * m[j][1][1])*k[j][1][0] + m[j][0][1] * m[j][1][1] * k[j][2][0];
+        b = m[j][0][0] * m[j][1][0] * k[j][0][1] + (m[j][0][1] * m[j][1][0] + m[j][0][0] * m[j][1][1])*k[j][1][1] + m[j][0][1] * m[j][1][1] * k[j][2][1];
+        mm[j][1][0] = -(a * m[j][0][0] + b * m[j][1][0]); // du/dx
+        mm[j][1][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
+
+        // coefficients in second derivative with respect to yy
+        a = sqr(m[j][1][0])*k[j][0][0] + 2 * m[j][1][0] * m[j][1][1] * k[j][1][0] + sqr(m[j][1][1])*k[j][2][0];
+        b = sqr(m[j][1][0])*k[j][0][1] + 2 * m[j][1][0] * m[j][1][1] * k[j][1][1] + sqr(m[j][1][1])*k[j][2][1];
+        mm[j][2][0] = -(a * m[j][0][0] + b * m[j][1][0]); // du/dx
+        mm[j][2][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
+      }
+
+      free_with_check(k);
+
+      this->second_ref_map_calculated = order;
+    }
+
     void RefMap::second_ref_map_at_point(double xi1, double xi2, double& x, double& y, double3x2& mm)
     {
       double3x2 k;
@@ -545,6 +525,16 @@ namespace Hermes
       mm[2][0] = -(a * m[0][0] + b * m[1][0]); // du/dx
       mm[2][1] = -(a * m[0][1] + b * m[1][1]); // du/dy
     }
+
+    double3x2* RefMap::get_second_ref_map(int order)
+    {
+      if (this->is_const)
+        throw Hermes::Exceptions::Exception("RefMap::get_second_ref_map() called with a const jacobian.");
+      if (order != this->second_ref_map_calculated)
+        this->calc_second_ref_map(order);
+      return this->second_ref_map;
+    }
+#endif
 
     void RefMap::untransform(Element* e, double x, double y, double& xi1, double& xi2)
     {

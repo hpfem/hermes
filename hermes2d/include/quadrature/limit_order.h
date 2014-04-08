@@ -28,8 +28,6 @@ namespace Hermes
     extern HERMES_API int  g_safe_max_order;
     extern HERMES_API int  g_max_order;
 
-    extern HERMES_API void reset_warn_order(); ///< Resets warn order flag.
-    extern HERMES_API void warn_order(); ///< Warns about integration order iff ward order flags it not set. Sets warn order flag.
     extern HERMES_API void update_limit_table(ElementMode2D mode);
     extern HERMES_API void limit_order(int& o, ElementMode2D mode);
     extern HERMES_API void limit_order_nowarn(int& o, ElementMode2D mode);

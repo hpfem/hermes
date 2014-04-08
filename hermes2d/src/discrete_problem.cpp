@@ -361,10 +361,7 @@ namespace Hermes
         this->current_rhs->finish();
 
       if (!this->exceptionMessageCaughtInParallelBlock.empty())
-      {
         throw Hermes::Exceptions::Exception(this->exceptionMessageCaughtInParallelBlock.c_str());
-        return;
-      }
 
       Element* e;
       for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
@@ -382,7 +379,7 @@ namespace Hermes
     {
       for (int i = 0; i < num_states; i++)
         delete states[i];
-      free(states);
+      free_with_check(states);
     }
 
     template class HERMES_API DiscreteProblem<double>;

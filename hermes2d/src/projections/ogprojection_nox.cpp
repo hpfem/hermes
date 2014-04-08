@@ -84,7 +84,7 @@ namespace Hermes
       // Perform Newton's iteration via NOX
       newton_nox.solve(coeff_vec);
 
-      ::free(coeff_vec);
+      free_with_check(coeff_vec);
 
       if(target_vec != nullptr)
         for (int i = 0; i < ndof; i++)
@@ -190,7 +190,7 @@ namespace Hermes
       Solution<Scalar>::vector_to_solution(target_vec, space, target_sln);
 
       // Clean up.
-      ::free(target_vec);
+      free_with_check(target_vec);
     }
 
     template<typename Scalar>

@@ -832,9 +832,7 @@ namespace Hermes
         BitmapInfoHeader info_header;
 
         // alloc memory for pixel data (4 bytes per pixel)
-        char* pixels = nullptr;
-        if ((pixels = (char*)malloc(4 * output_width * output_height)) == nullptr)
-          throw Hermes::Exceptions::Exception("Could not allocate memory for pixel data");
+        char* pixels = malloc_with_check_direct_size<char>(4 * output_width * output_height);
 
         // get pixels from framebuffer
 #ifdef GL_BGRA_EXT

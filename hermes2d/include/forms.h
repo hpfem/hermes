@@ -79,6 +79,32 @@ namespace Hermes
       ///< Only for edge.
     };
 
+    template<>
+    class HERMES_API Geom<Hermes::Ord>
+    {
+    public:
+      Geom()
+      {
+        x[0] = y[0] = tx[0] = ty[0] = nx[0] = ny[0] = diam = area = Hermes::Ord(1);
+      }
+      Hermes::Ord x[1];
+      Hermes::Ord y[1];
+      Hermes::Ord tx[1];
+      Hermes::Ord ty[1];
+      Hermes::Ord nx[1];
+      Hermes::Ord ny[1];
+
+      Hermes::Ord diam;           ///< Element diameter (for edge, diameter of the parent element).
+      Hermes::Ord area;           ///< Element area (for edge, area of the parent element).
+      int id;           ///< ID number of the element (undefined for edge).
+      int isurf;        ///< Order number of an edge of the element.
+
+      int elem_marker;       ///< Element marker (for both volumetric and surface forms).
+      int edge_marker;       ///< Edge marker (for surface forms only).
+
+      int orientation;  ///< 0 .... if(nx, ny) is equal to the global normal,
+    };
+
     /// Small class which contains information about the element on the other side of an interface.
     ///
     /// It just appends three new_ parameters to an instance of Geom. During destruction, the wrapped
@@ -108,8 +134,6 @@ namespace Hermes
       template<typename Scalar> friend class KellyTypeAdapt;
     };
 
-    /// Init element geometry for calculating the integration order.
-    HERMES_API Geom<Hermes::Ord>* init_geom_ord();
     /// Init element geometry for volumetric integrals.
     HERMES_API Geom<double>* init_geom_vol(RefMap *rm, const int order);
     /// Init element geometry for surface integrals.
@@ -346,7 +370,7 @@ namespace Hermes
     HERMES_API void init_fn_preallocated(Func<Scalar>* u, MeshFunction<Scalar>* fu, const int order);
     /// Init UExt function - preallocated version.
     template<typename Scalar>
-    HERMES_API void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
+    HERMES_API void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
 
 
     /// Utilities follow
@@ -356,7 +380,7 @@ namespace Hermes
 
     /// Init UExt function
     template<typename Scalar>
-    HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** u_ext, int u_ext_size, const int order, Geom<double>* geometry, ElementMode2D mode);
+    HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
 #pragma endregion
   }
 }

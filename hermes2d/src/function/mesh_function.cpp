@@ -166,7 +166,7 @@ namespace Hermes
       {
         this->set_active_element(e);
         this->set_quad_order(1, item);
-        double* val = this->get_values(component, value_type);
+        const double* val = this->get_values(component, value_type);
         for (int i = 0; i < (e->is_triangle() ? 3 : 4); i++)
         {
           double v = val[i];
@@ -183,8 +183,8 @@ namespace Hermes
     std::complex<double> MeshFunction<std::complex<double> >::get_approx_max_value(int item_)
     {
       this->check();
-      return std::numeric_limits<std::complex<double> >::min();
       this->warn("Asked for a max value of a complex function.");
+      return std::numeric_limits<std::complex<double> >::min();
     }
 
     template<>
@@ -219,7 +219,7 @@ namespace Hermes
       {
         this->set_active_element(e);
         this->set_quad_order(1, item);
-        double* val = this->get_values(component, value_type);
+        const double* val = this->get_values(component, value_type);
         for (int i = 0; i < (e->is_triangle() ? 3 : 4); i++)
         {
           double v = val[i];
@@ -236,8 +236,8 @@ namespace Hermes
     std::complex<double> MeshFunction<std::complex<double> >::get_approx_min_value(int item_)
     {
       this->check();
-      return std::numeric_limits<std::complex<double> >::max();
       this->warn("Asked for a min value of a complex function.");
+      return std::numeric_limits<std::complex<double> >::max();
     }
 
     template<typename Scalar>
@@ -279,29 +279,18 @@ namespace Hermes
     template<typename Scalar>
     void MeshFunction<Scalar>::set_active_element(Element* e)
     {
-      Transformable::set_active_element(e);
+      if (e && !e->active)
+        throw Hermes::Exceptions::Exception("Cannot select inactive element. Wrong mesh?");
+
+      Function<Scalar>::set_active_element(e);
       mode = e->get_mode();
       refmap->set_active_element(e);
-      Function<Scalar>::reset_transform();
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::force_transform(MeshFunctionSharedPtr<Scalar> mf)
-    {
-      Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());
     }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::update_refmap()
     {
       refmap->force_transform(this->sub_idx, this->ctm);
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::force_transform(uint64_t sub_idx, Trf* ctm)
-    {
-      this->sub_idx = sub_idx;
-      this->ctm = ctm;
     }
 
     template class HERMES_API MeshFunction<double>;
