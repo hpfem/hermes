@@ -40,7 +40,7 @@ namespace Hermes
           if (elem[1] == nullptr)
             elem[1] = e;
           else
-            throw Hermes::Exceptions::Exception(false, "No free slot 'elem'");
+            throw Hermes::Exceptions::Exception("No free slot 'elem'");
         }
       }
       ref++;
