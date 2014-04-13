@@ -22,6 +22,11 @@
 #include "views/base_view.h"
 #include "views/order_view.h"
 #include "views/mesh_view.h"
+#include "mesh/mesh_reader_h2d_xml.h"
+
+
+//#define DEBUG_VIEWS
+//#define DEBUG_ALGEBRA
 
 namespace Hermes
 {
@@ -50,7 +55,19 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    AdaptSolver<Scalar, SolverType>::AdaptSolver(SpaceSharedPtrVector<Scalar> initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::SelectorVector<Scalar> selectors, AdaptSolverCriterion* stopping_criterion_global)
+    unsigned short AdaptSolver<Scalar, SolverType>::view_size = 320;
+    template<typename Scalar, typename SolverType>
+    bool AdaptSolver<Scalar, SolverType>::scalar_views_switch = true;
+    template<typename Scalar, typename SolverType>
+    bool AdaptSolver<Scalar, SolverType>::order_views_switch = true;
+    template<typename Scalar, typename SolverType>
+    bool AdaptSolver<Scalar, SolverType>::base_views_switch = true;
+    template<typename Scalar, typename SolverType>
+    bool AdaptSolver<Scalar, SolverType>::wait_on_show = false;
+    
+
+    template<typename Scalar, typename SolverType>
+    AdaptSolver<Scalar, SolverType>::AdaptSolver(std::vector<SpaceSharedPtr<Scalar> > initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, std::vector<RefinementSelectors::Selector<Scalar>*> selectors, AdaptSolverCriterion* stopping_criterion_global)
       : spaces(initial_spaces), wf(wf), error_calculator(error_calculator), stopping_criterion_single_step(stopping_criterion_single_step), selectors(selectors), stopping_criterion_global(stopping_criterion_global)
     {
       this->init();
@@ -115,12 +132,13 @@ namespace Hermes
       static int current_iteration;
       static std::unordered_set<unsigned int>* current_elements_to_reassemble[H2D_MAX_COMPONENTS];
       static std::unordered_set<int>* current_DOFs_to_reassemble[H2D_MAX_COMPONENTS];
-      static SpaceSharedPtrVector<Scalar>* current_ref_spaces;
-      static SpaceSharedPtrVector<Scalar>* current_prev_ref_spaces;
+      static std::vector<SpaceSharedPtr<Scalar> >* current_ref_spaces;
+      static std::vector<SpaceSharedPtr<Scalar> >* current_prev_ref_spaces;
       static unsigned char current_number_of_equations;
       static CSCMatrix<Scalar>* current_prev_mat;
       static Vector<Scalar>* current_prev_rhs;
       static Vector<Scalar>* current_prev_dirichlet_lift_rhs;
+      static Hermes::Mixins::Loggable* loggable;
       
       static bool use_Dirichlet;
       static bool** reusable_DOFs;
@@ -137,10 +155,10 @@ namespace Hermes
     std::unordered_set<int>* StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble[H2D_MAX_COMPONENTS];
 
     template<typename Scalar>
-    SpaceSharedPtrVector<Scalar>* StateReassemblyHelper<Scalar>::current_ref_spaces;
+    std::vector<SpaceSharedPtr<Scalar> >* StateReassemblyHelper<Scalar>::current_ref_spaces;
 
     template<typename Scalar>
-    SpaceSharedPtrVector<Scalar>* StateReassemblyHelper<Scalar>::current_prev_ref_spaces;
+    std::vector<SpaceSharedPtr<Scalar> >* StateReassemblyHelper<Scalar>::current_prev_ref_spaces;
 
     template<typename Scalar>
     CSCMatrix<Scalar>* StateReassemblyHelper<Scalar>::current_prev_mat;
@@ -161,9 +179,10 @@ namespace Hermes
     bool** StateReassemblyHelper<Scalar>::reusable_Dirichlet;
 
     template<typename Scalar>
-    bool StateReassemblyHelper<Scalar>::use_Dirichlet;
+    Hermes::Mixins::Loggable* StateReassemblyHelper<Scalar>::loggable;
 
-    #define DEBUG_VIEWS
+    template<typename Scalar>
+    bool StateReassemblyHelper<Scalar>::use_Dirichlet;
 
     template<typename Scalar>
     static bool compare(Scalar a, Scalar b);
@@ -226,7 +245,7 @@ namespace Hermes
       // - utility assembly lists.
       AsmList<Scalar> al, al_prev;
       // - dummy functions for traversing the previous and current reference spaces together
-      MeshFunctionSharedPtrVector<Scalar> dummy_fns;
+      std::vector<MeshFunctionSharedPtr<Scalar> > dummy_fns;
       for (unsigned short i = 0; i < StateReassemblyHelper<Scalar>::current_number_of_equations; i++)
         dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_prev_ref_spaces->at(i)->get_mesh()));
       for (unsigned short i = 0; i < StateReassemblyHelper<Scalar>::current_number_of_equations; i++)
@@ -235,7 +254,7 @@ namespace Hermes
       int reusable_DOFs_count = 0;
       
       // Start.
-      Hermes::Mixins::Loggable::Static::info("\t   Handling Reusing matrix entries on the new Ref. Space:");
+      StateReassemblyHelper<Scalar>::loggable->info("\t   Handling Reusing matrix entries on the new Ref. Space:");
       cpu_time.tick();
 
       // Find out if Dirichlet is not directly changed.
@@ -290,6 +309,11 @@ namespace Hermes
               contains_Dirichlet = true;
               continue;
             }
+
+            if ((i_al_prev < al_prev.cnt - 1 && al_prev.idx[i_al_prev] == al_prev.idx[i_al_prev + 1]) ||
+              (i_al_prev > 0 && al_prev.idx[i_al_prev] == al_prev.idx[i_al_prev - 1]))
+              continue;
+
             for (unsigned short j_al = last_matched_index; j_al < al.cnt; j_al++)
             {
               if (al.dof[j_al] < 0)
@@ -361,8 +385,8 @@ namespace Hermes
       }
 
       cpu_time.tick();
-      Hermes::Mixins::Loggable::Static::info("\t      No. of DOFs to reassemble: %i / %i total - %2.0f%%.", ref_system_size - reusable_DOFs_count, ref_system_size, ((float)(ref_system_size - reusable_DOFs_count) / (float)ref_system_size) * 100.);
-      Hermes::Mixins::Loggable::Static::info("\t      Search for elements to reassemble: %4.3f s", cpu_time.last());
+      StateReassemblyHelper<Scalar>::loggable->info("\t      No. of DOFs to reassemble: %i / %i total - %2.0f%%.", ref_system_size - reusable_DOFs_count, ref_system_size, ((float)(ref_system_size - reusable_DOFs_count) / (float)ref_system_size) * 100.);
+      StateReassemblyHelper<Scalar>::loggable->info("\t      Search for elements to reassemble: %4.3f s", cpu_time.last());
       cpu_time.tick();
 
       // Using the changed element on the new reference space, select the states from the original states that need to be recalculated.
@@ -396,9 +420,9 @@ namespace Hermes
       states = new_states;
 
       cpu_time.tick();
-      Hermes::Mixins::Loggable::Static::info("\t      No. of states to reassemble: %i / %i total - %2.0f%%.", new_num_states, num_states, ((float)new_num_states / (float)num_states) * 100.);
+      StateReassemblyHelper<Scalar>::loggable->info("\t      No. of states to reassemble: %i / %i total - %2.0f%%.", new_num_states, num_states, ((float)new_num_states / (float)num_states) * 100.);
       num_states = new_num_states;
-      Hermes::Mixins::Loggable::Static::info("\t      Picking the new states: %4.3f s", cpu_time.last());
+      StateReassemblyHelper<Scalar>::loggable->info("\t      Picking the new states: %4.3f s", cpu_time.last());
       cpu_time.tick();
 
       // Now we have to use the DOF to DOF map to fill in the necessary entries in the new matrix and rhs from the old ones.
@@ -449,9 +473,10 @@ namespace Hermes
       }
 
       cpu_time.tick();
-      Hermes::Mixins::Loggable::Static::info("\t      Reused matrix entries: %i / %i total - %2.0f%%.", used_entries, total_entries, ((float)used_entries / (float)total_entries) * 100.);
-      Hermes::Mixins::Loggable::Static::info("\t      Copying the linear system: %4.3f s", cpu_time.last());
+      StateReassemblyHelper<Scalar>::loggable->info("\t      Reused matrix entries: %i / %i total - %2.0f%%.", used_entries, total_entries, ((float)used_entries / (float)total_entries) * 100.);
+      StateReassemblyHelper<Scalar>::loggable->info("\t      Copying the linear system: %4.3f s", cpu_time.last());
 
+#ifdef DEBUG_ALGEBRA
       mat->export_to_file("MatrixAfterReuse", "A", EXPORT_FORMAT_MATLAB_SIMPLE, "%16.16f");
       if(rhs)
         rhs->export_to_file("RhsAfterReuse", "b", EXPORT_FORMAT_PLAIN_ASCII, "%16.16f");
@@ -479,6 +504,7 @@ namespace Hermes
       for (unsigned int i = 0; i < prev_ref_system_size; i++)
         fprintf(DOF_to_DOF_plus_1_file, "%i -> %i\n", i + 1, DOF_to_DOF_map[i] + 1);
       fclose(DOF_to_DOF_plus_1_file);
+#endif
 
 #ifdef DEBUG_VIEWS
 
@@ -494,9 +520,9 @@ namespace Hermes
         reassembled_views.back()->show(reassembled_states_function);
         base_views_prev.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(630, space_i * 310, 300, 300)));
         base_views_curr.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(950, space_i * 310, 300, 300)));
-        base_views_prev.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
+        base_views_prev.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(2));
         base_views_prev.back()->show(StateReassemblyHelper<Scalar>::current_prev_ref_spaces->at(space_i));
-        base_views_curr.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
+        base_views_curr.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(2));
         base_views_curr.back()->show(StateReassemblyHelper<Scalar>::current_ref_spaces->at(space_i));
       }
 
@@ -533,23 +559,32 @@ namespace Hermes
         slns.push_back(MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>));
         if (this->visualization)
         {
-          this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * 320, 0, 300, 300)));
-          this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(4));
-          this->scalar_views.back()->set_title("Reference solution #%i", i);
+          if (scalar_views_switch)
+          {
+            this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * (view_size + 20), 0, view_size, view_size)));
+            this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionAdaptive(Views::HERMES_EPS_LOW * 10.));
+            this->scalar_views.back()->set_title("Reference solution #%i", i);
+          }
 
-          this->order_views.push_back(new Views::OrderView("", new Views::WinGeom(i * 320, 320, 300, 300)));
-          this->order_views.back()->set_title("Reference space #%i - orders", i);
+          if (order_views_switch)
+          {
+            this->order_views.push_back(new Views::OrderView("", new Views::WinGeom(i * (view_size + 20), (view_size + 20), view_size, view_size)));
+            this->order_views.back()->set_title("Reference space #%i - orders", i);
+          }
 
-          this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * 320, 640, 300, 300)));
-          this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(4));
+          if (base_views_switch)
+          {
+            this->base_views.push_back(new Views::BaseView<Scalar>("", new Views::WinGeom(i * (view_size + 20), 2 * (view_size + 20), view_size, view_size)));
+            this->base_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionAdaptive(Views::HERMES_EPS_LOW * 10.));
+          }
         }
       }
 
       this->solver->set_verbose_output(this->get_verbose_output());
-      this->solver->output_matrix();
+      //this->solver->output_matrix();
       this->solver->set_matrix_export_format(EXPORT_FORMAT_MATLAB_SIMPLE);
 
-      this->solver->output_rhs();
+      //this->solver->output_rhs();
       this->solver->set_rhs_export_format(EXPORT_FORMAT_PLAIN_ASCII);
 
       this->adaptivity_internal = new Adapt<Scalar>(spaces, error_calculator, stopping_criterion_single_step);
@@ -581,11 +616,15 @@ namespace Hermes
       this->solve_method_running = false;
 
       if (this->visualization)
-      for (unsigned short i = 0; i < this->number_of_equations; i++)
       {
-        delete this->scalar_views[i];
-        delete this->order_views[i];
-        delete this->base_views[i];
+        for (unsigned short i = 0; i < this->scalar_views.size(); i++)
+          delete this->scalar_views[i];
+
+        for (unsigned short i = 0; i < this->order_views.size(); i++)
+          delete this->order_views[i];
+        
+        for (unsigned short i = 0; i < this->base_views.size(); i++)
+          delete this->base_views[i];
       }
 
       delete this->adaptivity_internal;
@@ -627,6 +666,7 @@ namespace Hermes
 
         // Initialize the states handler.
         StateReassemblyHelper<Scalar>::current_iteration = this->adaptivity_step;
+        StateReassemblyHelper<Scalar>::loggable = this;
         StateReassemblyHelper<Scalar>::current_ref_spaces = &ref_spaces;
         StateReassemblyHelper<Scalar>::current_prev_ref_spaces = &prev_ref_spaces;
         for (unsigned char i = 0; i < number_of_equations; i++)
@@ -645,9 +685,11 @@ namespace Hermes
         else
           this->solver->solve();
 
+
+#ifdef DEBUG_ALGEBRA
         if (this->solver->dp->add_dirichlet_lift)
           this->solver->dp->dirichlet_lift_rhs->export_to_file("DirLift", "bd", EXPORT_FORMAT_PLAIN_ASCII, "%16.16f");
-
+#endif
         this->solver->get_linear_matrix_solver()->free();
 
         // Free reusable DOFs data structures for this run.
@@ -722,6 +764,12 @@ namespace Hermes
           else
             this->adaptivity_internal->adapt(pOnlySelectors);
 
+          Hermes::Hermes2D::MeshReaderH2DXML reader;
+          std::vector<MeshSharedPtr> meshes;
+          for (unsigned short i = 0; i < number_of_equations; i++)
+            meshes.push_back(this->spaces[i]->get_mesh());
+          //reader.save("meshes.xml", meshes);
+
           this->mark_elements_to_reassemble();
         }
 
@@ -735,7 +783,7 @@ namespace Hermes
     template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::mark_elements_to_reassemble()
     {
-      Hermes::Mixins::Loggable::Static::info("\t   Marking elements to reassemble on the already used Ref. Space:");
+      StateReassemblyHelper<Scalar>::loggable->info("\t   Marking elements to reassemble on the already used Ref. Space:");
       this->tick();
 
       // Clear the arrays.
@@ -775,10 +823,10 @@ namespace Hermes
           }
         }
       }
-      Hermes::Mixins::Loggable::Static::info("\t      No. of coarse mesh elements refined: %i / %i total - %2.0f%%.", valid_elements_to_refine_count, total_elements_prev_spaces, ((float)valid_elements_to_refine_count / (float)total_elements_prev_spaces) * 100.);
-      Hermes::Mixins::Loggable::Static::info("\t      No. of fine mesh elements directly changed: %i / %i total - %2.0f%%.", ref_elements_changed_count, total_elements_prev_ref_spaces, ((float)ref_elements_changed_count / (float)total_elements_prev_ref_spaces) * 100.);
+      StateReassemblyHelper<Scalar>::loggable->info("\t      No. of coarse mesh elements refined: %i / %i total - %2.0f%%.", valid_elements_to_refine_count, total_elements_prev_spaces, ((float)valid_elements_to_refine_count / (float)total_elements_prev_spaces) * 100.);
+      StateReassemblyHelper<Scalar>::loggable->info("\t      No. of fine mesh elements directly changed: %i / %i total - %2.0f%%.", ref_elements_changed_count, total_elements_prev_ref_spaces, ((float)ref_elements_changed_count / (float)total_elements_prev_ref_spaces) * 100.);
       this->tick();
-      Hermes::Mixins::Loggable::Static::info("\t      Identify elements that changed: %4.3f s", this->last());
+      StateReassemblyHelper<Scalar>::loggable->info("\t      Identify elements that changed: %4.3f s", this->last());
       this->tick();
 
       // Identify DOFs of the changed elements.
@@ -795,7 +843,7 @@ namespace Hermes
       }
 
       this->tick();
-      Hermes::Mixins::Loggable::Static::info("\t      Identify DOFs that changed: %4.3f s", this->last());
+      StateReassemblyHelper<Scalar>::loggable->info("\t      Identify DOFs that changed: %4.3f s", this->last());
       this->tick();
 
       // Take a look at other elements if they share a DOF that changed.
@@ -818,26 +866,31 @@ namespace Hermes
         }
       }
 
-      Hermes::Mixins::Loggable::Static::info("\t      No. of all fine mesh elements that need to be reassembled: %i / %i total - %2.0f%%.", ref_elements_changed_count, total_elements_prev_ref_spaces, ((float)ref_elements_changed_count / (float)total_elements_prev_ref_spaces) * 100.);
+      StateReassemblyHelper<Scalar>::loggable->info("\t      No. of all fine mesh elements that need to be reassembled: %i / %i total - %2.0f%%.", ref_elements_changed_count, total_elements_prev_ref_spaces, ((float)ref_elements_changed_count / (float)total_elements_prev_ref_spaces) * 100.);
       this->tick();
-      Hermes::Mixins::Loggable::Static::info("\t      Looking for elements containing a changed DOF: %4.3f s", this->last());
+      StateReassemblyHelper<Scalar>::loggable->info("\t      Looking for elements containing a changed DOF: %4.3f s", this->last());
     }
 
     template<typename Scalar, typename SolverType>
     void AdaptSolver<Scalar, SolverType>::visualize(std::vector<SpaceSharedPtr<Scalar> >& ref_spaces)
     {
-      for (unsigned short i = 0; i < this->number_of_equations; i++)
+      if (this->visualization)
       {
-        this->scalar_views[i]->show(this->ref_slns[i]);
-        this->order_views[i]->show(ref_spaces[i]);
-        //this->base_views[i]->show(ref_spaces[i]);
+        for (unsigned short i = 0; i < this->scalar_views.size(); i++)
+          this->scalar_views[i]->show(this->ref_slns[i]);
+
+        for (unsigned short i = 0; i < this->order_views.size(); i++)
+          this->order_views[i]->show(ref_spaces[i]);
+
+        for (unsigned short i = 0; i < this->base_views.size(); i++)
+          this->base_views[i]->show(ref_spaces[i]);
       }
 
-      Views::View::wait_for_keypress();
+      //Views::View::wait_for_keypress();
     }
 
     template<typename Scalar, typename SolverType>
-    MeshFunctionSharedPtrVector<Scalar> AdaptSolver<Scalar, SolverType>::get_slns()
+    std::vector<MeshFunctionSharedPtr<Scalar> > AdaptSolver<Scalar, SolverType>::get_slns()
     {
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked for solutions while it was running.");
@@ -853,7 +906,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    MeshFunctionSharedPtrVector<Scalar> AdaptSolver<Scalar, SolverType>::get_ref_slns()
+    std::vector<MeshFunctionSharedPtr<Scalar> > AdaptSolver<Scalar, SolverType>::get_ref_slns()
     {
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked for solutions while it was running.");
@@ -881,7 +934,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::set_exact_solutions(MeshFunctionSharedPtrVector<Scalar> exact_slns)
+    void AdaptSolver<Scalar, SolverType>::set_exact_solutions(std::vector<MeshFunctionSharedPtr<Scalar> > exact_slns)
     {
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked to change the exact_slns while it was running.");
@@ -889,7 +942,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::set_initial_spaces(SpaceSharedPtrVector<Scalar> spaces)
+    void AdaptSolver<Scalar, SolverType>::set_initial_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked to change the initial spaces while it was running.");
@@ -923,14 +976,14 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::set_selectors(RefinementSelectors::SelectorVector<Scalar> selectors)
+    void AdaptSolver<Scalar, SolverType>::set_selectors(std::vector<RefinementSelectors::Selector<Scalar>*> selectors)
     {
       Helpers::check_length(this->selectors, selectors);
       this->selectors = selectors;
     }
 
     template<typename Scalar, typename SolverType>
-    SpaceSharedPtrVector<Scalar> AdaptSolver<Scalar, SolverType>::get_initial_spaces()
+    std::vector<SpaceSharedPtr<Scalar> > AdaptSolver<Scalar, SolverType>::get_initial_spaces()
     {
       return this->spaces;
     }
@@ -960,7 +1013,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    RefinementSelectors::SelectorVector<Scalar> AdaptSolver<Scalar, SolverType>::get_selectors()
+    std::vector<RefinementSelectors::Selector<Scalar>*> AdaptSolver<Scalar, SolverType>::get_selectors()
     {
       return this->selectors;
     }

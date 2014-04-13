@@ -48,7 +48,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces, bool force_use_direct_solver) : Solver<Scalar>(false), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
+    LinearSolver<Scalar>::LinearSolver(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces, bool force_use_direct_solver) : Solver<Scalar>(false), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
     {
       this->dp = new DiscreteProblem<Scalar>(wf, spaces, true);
       this->own_dp = true;
@@ -79,7 +79,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LinearSolver<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spaces)
+    void LinearSolver<Scalar>::set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       Solver<Scalar>::set_spaces(spaces);
       this->jacobian_reusable = false;

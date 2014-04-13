@@ -549,7 +549,7 @@ namespace Hermes
       bson_destroy(&bw);
     }
 
-    void MeshReaderH2DBSON::save(const char *filename, MeshSharedPtrVector meshes)
+    void MeshReaderH2DBSON::save(const char *filename, std::vector<MeshSharedPtr> meshes)
     {
       // For mapping of physical coordinates onto top vertices.
       std::map<std::pair<double, double>, unsigned int> points_to_vertices;
@@ -736,7 +736,7 @@ namespace Hermes
       bson_destroy(&bw);
     }
 
-    void MeshReaderH2DBSON::load(const char *filename, MeshSharedPtrVector meshes)
+    void MeshReaderH2DBSON::load(const char *filename, std::vector<MeshSharedPtr> meshes)
     {
       FILE *fpr;
       fpr = fopen(filename, "rb");

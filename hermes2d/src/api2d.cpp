@@ -44,7 +44,7 @@ namespace Hermes
     Api2D::Api2D()
     {
       // Xerces initialization - for better performance.
-      XMLPlatformUtils::Initialize();
+      // XMLPlatformUtils::Initialize();
 
       this->text_parameters.insert(std::pair<Hermes2DApiParam, Parameter<std::string>*>(Hermes::Hermes2D::xmlSchemasDirPath, new Parameter<std::string>(std::string(H2D_XML_SCHEMAS_DIRECTORY))));
       std::stringstream ss;

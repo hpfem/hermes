@@ -55,10 +55,10 @@ namespace Hermes
       /// This method loads multiple meshes according to subdomains described in the meshfile.
       /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the file.
       ///&nbsp;         also the order is determined by the order in the file.
-      void load(const char *filename, MeshSharedPtrVector meshes);
+      void load(const char *filename, std::vector<MeshSharedPtr> meshes);
 
       /// This method saves multiple meshes according to subdomains in the vector meshes.
-      void save(const char *filename, MeshSharedPtrVector meshes);
+      void save(const char *filename, std::vector<MeshSharedPtr> meshes);
 
     private:
       struct vertex_BSON

@@ -41,7 +41,7 @@ namespace Hermes
     {
     public:
       /// Constructor copying data from DiscreteProblemThreadAssembler.
-      DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const SpaceSharedPtrVector<Scalar> spaces, MeshSharedPtrVector& meshes);
+      DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshSharedPtr>& meshes);
       
       /// Destructor.
       ~DiscreteProblemDGAssembler();
@@ -69,7 +69,7 @@ namespace Hermes
       void deinit_assembling_one_neighbor();
 
       /// Initialize external functions for DG forms.
-      DiscontinuousFunc<Scalar>** init_ext_fns(MeshFunctionSharedPtrVector<Scalar> ext,
+      DiscontinuousFunc<Scalar>** init_ext_fns(std::vector<MeshFunctionSharedPtr<Scalar> > ext,
         NeighborSearch<Scalar>** neighbor_searches, int order);
 
       /// Initialize neighbors.
@@ -102,8 +102,8 @@ namespace Hermes
       /// Current local matrix.
       Scalar local_stiffness_matrix[H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_LOCAL_BASIS_SIZE * 4];
 
-      const SpaceSharedPtrVector<Scalar> spaces;
-      const MeshSharedPtrVector& meshes;
+      const std::vector<SpaceSharedPtr<Scalar> > spaces;
+      const std::vector<MeshSharedPtr>& meshes;
 
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemIntegrationOrderCalculator;

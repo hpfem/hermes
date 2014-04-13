@@ -32,7 +32,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces) : DiscreteProblem<Scalar>(wf, spaces)
+    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces) : DiscreteProblem<Scalar>(wf, spaces)
     {
       this->precond = Teuchos::null;
     }

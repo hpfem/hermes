@@ -282,15 +282,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Traverse::State** Traverse::get_states(MeshFunctionSharedPtrVector<Scalar> mesh_functions, unsigned int& states_count)
+    Traverse::State** Traverse::get_states(std::vector<MeshFunctionSharedPtr<Scalar> > mesh_functions, unsigned int& states_count)
     {
-      MeshSharedPtrVector meshes;
+      std::vector<MeshSharedPtr> meshes;
       for (unsigned short i = 0; i < mesh_functions.size(); i++)
         meshes.push_back(mesh_functions[i]->get_mesh());
       return this->get_states(meshes, states_count);
     }
 
-    Traverse::State** Traverse::get_states(MeshSharedPtrVector meshes, unsigned int& states_count)
+    Traverse::State** Traverse::get_states(std::vector<MeshSharedPtr> meshes, unsigned int& states_count)
     {
       return Traverse::get_states(&meshes[0], meshes.size(), states_count);
     }
@@ -303,7 +303,7 @@ namespace Hermes
       for (int i = 0; i < meshes_count; i++)
       if (meshes[i]->get_num_active_elements() > predictedCount)
         predictedCount = meshes[i]->get_num_active_elements();
-      State** states = malloc_with_check<State*>(predictedCount);
+      State** states = malloc_with_check<State*>(predictedCount, true);
 
       this->begin(num);
 
@@ -400,8 +400,10 @@ namespace Hermes
         if (leaf)
         {
           if (count > predictedCount - 1)
-            states = realloc_with_check<State*>(states, (int)std::ceil(predictedCount * 1.5));
-
+          {
+            predictedCount = (int)std::ceil(predictedCount * 1.5);
+            states = realloc_with_check<State*>(states, predictedCount);
+          }
           set_boundary_info(s);
           s->rep = nullptr;
           // EXTREMELY IMPORTANT.
@@ -901,7 +903,7 @@ namespace Hermes
       return traverse.unidata;
     }
 
-    template HERMES_API Traverse::State** Traverse::get_states<double>(MeshFunctionSharedPtrVector<double> mesh_functions, unsigned int& states_count);
+    template HERMES_API Traverse::State** Traverse::get_states<double>(std::vector<MeshFunctionSharedPtr<double> > mesh_functions, unsigned int& states_count);
     template HERMES_API Traverse::State** Traverse::get_states<std::complex<double> >(std::vector<MeshFunctionSharedPtr<std::complex<double> > > mesh_functions, unsigned int& states_count);
   }
 }

@@ -106,7 +106,7 @@ namespace Hermes
       /// \param[in] meshes Meshes.
       /// \param[out] num Number of states.
       /// \return The states.
-      State** get_states(MeshSharedPtrVector meshes, unsigned int& states_count);
+      State** get_states(std::vector<MeshSharedPtr> meshes, unsigned int& states_count);
       State** get_states(MeshSharedPtr* meshes, unsigned short meshes_count, unsigned int& states_count);
 
       /// Returns all states on the passed meshes.

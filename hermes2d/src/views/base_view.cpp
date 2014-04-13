@@ -130,6 +130,16 @@ namespace Hermes
           update_solution();
           break;
 
+        case GLUT_KEY_PAGE_DOWN:
+          if (base_index > 8) base_index-=10;
+          update_solution();
+          break;
+
+        case GLUT_KEY_PAGE_UP:
+          if (base_index < ndof - 10) base_index+=10;
+          update_solution();
+          break;
+
         default:
           ScalarView::on_special_key(key, x, y);
         }
@@ -145,6 +155,8 @@ namespace Hermes
           "  Right mouse - zoom\n"
           "  Left arrow - previous basis function\n"
           "  Right arrow - next basis function\n"
+          "  Page down - basis function -10 step\n"
+          "  Page up - basis function +10 step\n"
           "  3 - toggle 3D mode\n"
           "  C - center image\n"
           "  F - toggle smooth palette\n"

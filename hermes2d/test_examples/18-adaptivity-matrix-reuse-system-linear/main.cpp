@@ -23,19 +23,27 @@ public:
   {
   };
 
-  CustomSelector(std::vector<int> element_ids) : Selector<double>(), element_ids(element_ids)
-  {
-  };
-
   virtual bool select_refinement(Element* element, int quad_order, MeshFunction<double>* rsln, ElementToRefine& refinement)
   {
-    for (unsigned short i = 0; i < this->element_ids.size(); i++)
-    if (element->id == this->element_ids[i])
-    {
-      refinement.split = H2D_REFINEMENT_H;
-      refinement.refinement_polynomial_order[0] = refinement.refinement_polynomial_order[1] = refinement.refinement_polynomial_order[2] = refinement.refinement_polynomial_order[3] = P_INIT;
-      return true;
-    }
+    std::vector<int> ids1({ 9, 37, 80, 55, 88, 54, 46, 36, 61, 94 });
+    std::vector<int> ids2({ 65, 106, 55, 49, 122, 92, 124 });
+   
+    int refine = std::rand() % 10;
+    for(int i = 0; i < ids1.size(); i++)
+      if (rsln->get_mesh()->get_seq() == 136 && ids1[i] == element->id)
+      {
+        refinement.split = H2D_REFINEMENT_H;
+        refinement.refinement_polynomial_order[0] = refinement.refinement_polynomial_order[1] = refinement.refinement_polynomial_order[2] = refinement.refinement_polynomial_order[3] = P_INIT;
+        return true;
+      }
+
+    for (int i = 0; i < ids2.size(); i++)
+      if (rsln->get_mesh()->get_seq() == 237 && ids2[i] == element->id)
+      {
+        refinement.split = H2D_REFINEMENT_H;
+        refinement.refinement_polynomial_order[0] = refinement.refinement_polynomial_order[1] = refinement.refinement_polynomial_order[2] = refinement.refinement_polynomial_order[3] = P_INIT;
+        return true;
+      }
     return false;
   }
 
@@ -53,6 +61,9 @@ int main(int argc, char* argv[])
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh), mesh1(new Mesh), mesh2(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
+  std::vector<MeshSharedPtr> meshes({ mesh, mesh1 });
+
+#ifdef NEW_MESHES
   mloader.load("quad.xml", mesh);
 
   // Refine all elements, do it INIT_REF_NUM-times.
@@ -60,19 +71,19 @@ int main(int argc, char* argv[])
     mesh->refine_all_elements();
   mesh1->copy(mesh);
   mesh2->copy(mesh);
+#else
+  mloader.load("meshes.xml", meshes);
+#endif
 
   // Initialize essential boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential0(std::vector<std::string>({ "0", "1"}), FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs0(&bc_essential0);
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential1(std::vector<std::string>({ "0", "1"}), FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs1(&bc_essential1);
-  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential2(std::vector<std::string>({ "0", "1", "2" }), FIXED_BDY_TEMP);
-  Hermes::Hermes2D::EssentialBCs<double> bcs2(&bc_essential1);
 
   // Initialize space->
   SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs0, P_INIT));
   SpaceSharedPtr<double> space1(new Hermes::Hermes2D::H1Space<double>(mesh1, &bcs1, P_INIT));
-  SpaceSharedPtr<double> space2(new Hermes::Hermes2D::H1Space<double>(mesh2, &bcs2, P_INIT));
 
   std::cout << "Ndofs: " << space->get_num_dofs() << std::endl;
 
@@ -82,16 +93,7 @@ int main(int argc, char* argv[])
 #ifdef ADAPT_SOLVER
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 2);
   AdaptStoppingCriterionSingleElement<double> criterion(0.);
-  CustomSelector selector[3];
-  for (int j = 0; j < 3; j++)
-  {
-    for (int i = 0; i < 1000; i++)
-    {
-      if (((rand() % 2) + i) % 5 == 0)
-        selector[j].element_ids.push_back(i);
-    }
-    selector[j].element_ids.push_back(j);
-  }
+  CustomSelector selector[2];
   AdaptSolverCriterionFixed global_criterion(22);
 
   AdaptSolver<double, LinearSolver<double> > adaptSolver({ space, space1 }, wf, &errorCalculator, &criterion, { &selector[0], &selector[1] }, &global_criterion);

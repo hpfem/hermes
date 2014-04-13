@@ -45,7 +45,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_spaces(const SpaceSharedPtrVector<Scalar> spaces)
+    void DiscreteProblemThreadAssembler<Scalar>::init_spaces(const std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       this->free_spaces();
 
@@ -80,7 +80,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_u_ext(const SpaceSharedPtrVector<Scalar> spaces, Solution<Scalar>** u_ext_sln)
+    void DiscreteProblemThreadAssembler<Scalar>::init_u_ext(const std::vector<SpaceSharedPtr<Scalar> > spaces, Solution<Scalar>** u_ext_sln)
     {
       assert(this->spaces_size == spaces.size() && this->pss);
 
@@ -107,7 +107,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const SpaceSharedPtrVector<Scalar>& spaces, bool add_dirichlet_lift_)
+    void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const std::vector<SpaceSharedPtr<Scalar> >& spaces, bool add_dirichlet_lift_)
     {
       // Basic settings.
       this->add_dirichlet_lift = add_dirichlet_lift_;
@@ -327,7 +327,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_assembling_one_state(const SpaceSharedPtrVector<Scalar>& spaces, Traverse::State* current_state_)
+    void DiscreteProblemThreadAssembler<Scalar>::init_assembling_one_state(const std::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state_)
     {
       current_state = current_state_;
       this->integrationOrderCalculator.current_state = this->current_state;
@@ -442,7 +442,7 @@ namespace Hermes
 
     template<typename Scalar>
     template<typename Geom>
-    void DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Func<Scalar>** target_array, MeshFunctionSharedPtrVector<Scalar>& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom* geometry)
+    void DiscreteProblemThreadAssembler<Scalar>::init_ext_values(Func<Scalar>** target_array, std::vector<MeshFunctionSharedPtr<Scalar> >& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom* geometry)
     {
       int ext_size = ext.size();
       int u_ext_fns_size = u_ext_fns.size();

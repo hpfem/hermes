@@ -52,7 +52,7 @@ namespace Hermes
       /// Calculates the errors between coarse_solutions and fine_solutions.
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
       /// IMPORTANT: if the parameter is passed as false, this, and also any previous error calculations are lost and it is not possible to get back to them.
-      void calculate_errors(MeshFunctionSharedPtrVector<Scalar> coarse_solutions, MeshFunctionSharedPtrVector<Scalar> fine_solutions, bool sort_and_store = true);
+      void calculate_errors(std::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions, std::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions, bool sort_and_store = true);
 
       /// Calculates the errors between coarse_solutions and fine_solutions.
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
@@ -117,8 +117,8 @@ namespace Hermes
       void postprocess_error();
 
       /// Data.
-      MeshFunctionSharedPtrVector<Scalar> coarse_solutions;
-      MeshFunctionSharedPtrVector<Scalar> fine_solutions;
+      std::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions;
+      std::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions;
 
       /// Absolute / Relative error.
       CalculatedErrorType errorType;
@@ -184,7 +184,7 @@ namespace Hermes
       virtual ~DefaultNormCalculator();
 
       /// Norms calculation.
-      double calculate_norms(MeshFunctionSharedPtrVector<Scalar>& solutions);
+      double calculate_norms(std::vector<MeshFunctionSharedPtr<Scalar> >& solutions);
       /// Norms calculation.
       double calculate_norm(MeshFunctionSharedPtr<Scalar> solution);
     };

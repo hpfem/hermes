@@ -77,7 +77,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(const SpaceSharedPtrVector<Scalar>& spaces, RefMap** current_refmaps, WeakFormSharedPtr<Scalar> current_wf)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(const std::vector<SpaceSharedPtr<Scalar> >& spaces, RefMap** current_refmaps, WeakFormSharedPtr<Scalar> current_wf)
     {
       // Order set to constant.
       if (current_wf->global_integration_order_set)
@@ -169,7 +169,7 @@ namespace Hermes
 
     template<typename Scalar>
     template<typename MatrixFormType>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(const SpaceSharedPtrVector<Scalar>& spaces, MatrixFormType *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(const std::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixFormType *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
     {
       int order;
 
@@ -221,7 +221,7 @@ namespace Hermes
 
     template<typename Scalar>
     template<typename VectorFormType>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_vector_form(const SpaceSharedPtrVector<Scalar>& spaces, VectorFormType *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_vector_form(const std::vector<SpaceSharedPtr<Scalar> >& spaces, VectorFormType *form, RefMap** current_refmaps, Func<Hermes::Ord>** ext, Func<Hermes::Ord>** u_ext)
     {
       int order;
 
@@ -297,7 +297,7 @@ namespace Hermes
 
 
     template<typename Scalar>
-    Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(MeshFunctionSharedPtrVector<Scalar>& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func)
+    Func<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(std::vector<MeshFunctionSharedPtr<Scalar> >& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, Func<Hermes::Ord>** u_ext_func)
     {
       int ext_size = ext.size();
       int u_ext_fns_size = u_ext_fns.size();
@@ -368,7 +368,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscontinuousFunc<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_fns_ord(MeshFunctionSharedPtrVector<Scalar> &ext,
+    DiscontinuousFunc<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_fns_ord(std::vector<MeshFunctionSharedPtr<Scalar> > &ext,
       NeighborSearch<Scalar>** neighbor_searches)
     {
       DiscontinuousFunc<Ord>** fake_ext_fns = new DiscontinuousFunc<Ord>*[ext.size()];
@@ -402,7 +402,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_matrix_form(const SpaceSharedPtrVector<Scalar> spaces, Traverse::State* current_state, MatrixFormDG<Scalar>* mfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_u, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_matrix_form(const std::vector<SpaceSharedPtr<Scalar> > spaces, Traverse::State* current_state, MatrixFormDG<Scalar>* mfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_u, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches)
     {
       NeighborSearch<Scalar>* nbs_u = neighbor_searches[mfDG->j];
 
@@ -422,7 +422,7 @@ namespace Hermes
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
-      MeshFunctionSharedPtrVector<Scalar> ext_ord_fns = mfDG->ext.size() ? mfDG->ext : mfDG->wf->ext;
+      std::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = mfDG->ext.size() ? mfDG->ext : mfDG->wf->ext;
       if (ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
 
@@ -459,7 +459,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_vector_form(const SpaceSharedPtrVector<Scalar> spaces, Traverse::State* current_state, VectorFormDG<Scalar>* vfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_vector_form(const std::vector<SpaceSharedPtr<Scalar> > spaces, Traverse::State* current_state, VectorFormDG<Scalar>* vfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches)
     {
       NeighborSearch<Scalar>* nbs_u = neighbor_searches[vfDG->i];
 
@@ -479,7 +479,7 @@ namespace Hermes
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
-      MeshFunctionSharedPtrVector<Scalar> ext_ord_fns = vfDG->ext.size() ? vfDG->ext : vfDG->wf->ext;
+      std::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = vfDG->ext.size() ? vfDG->ext : vfDG->wf->ext;
       if (ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
 

@@ -28,7 +28,6 @@ namespace Hermes
     class Nurbs;
 
     typedef std::tr1::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
-    typedef std::vector<std::tr1::shared_ptr<Hermes::Hermes2D::Mesh> > MeshSharedPtrVector;
 
     class MeshHashGridElement
     {

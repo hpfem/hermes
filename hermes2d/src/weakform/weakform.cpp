@@ -180,7 +180,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::cloneMemberExtFunctions(MeshFunctionSharedPtrVector<Scalar> source_ext, MeshFunctionSharedPtrVector<Scalar>& cloned_ext)
+    void WeakForm<Scalar>::cloneMemberExtFunctions(std::vector<MeshFunctionSharedPtr<Scalar> > source_ext, std::vector<MeshFunctionSharedPtr<Scalar> >& cloned_ext)
     {
       cloned_ext.clear();
       for(unsigned int i = 0; i < source_ext.size(); i++)
@@ -225,7 +225,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::set_ext(MeshFunctionSharedPtrVector<Scalar> ext)
+    void WeakForm<Scalar>::set_ext(std::vector<MeshFunctionSharedPtr<Scalar> > ext)
     {
       this->ext = ext;
     }
@@ -245,7 +245,7 @@ namespace Hermes
 
     template<typename Scalar>
     template<typename FormType>
-    void WeakForm<Scalar>::processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces, bool surface, std::vector<FormType> forms_to_process)
+    void WeakForm<Scalar>::processFormMarkers(const std::vector<SpaceSharedPtr<Scalar> > spaces, bool surface, std::vector<FormType> forms_to_process)
     {
       for(unsigned short form_i = 0; form_i < forms_to_process.size(); form_i++)
       {
@@ -275,7 +275,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces)
+    void WeakForm<Scalar>::processFormMarkers(const std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       processFormMarkers(spaces, false, this->mfvol);
       processFormMarkers(spaces, false, this->vfvol);
@@ -292,7 +292,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MeshFunctionSharedPtrVector<Scalar> WeakForm<Scalar>::get_ext() const
+    std::vector<MeshFunctionSharedPtr<Scalar> > WeakForm<Scalar>::get_ext() const
     {
       return this->ext;
     }
@@ -359,7 +359,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Form<Scalar>::set_ext(MeshFunctionSharedPtrVector<Scalar> ext)
+    void Form<Scalar>::set_ext(std::vector<MeshFunctionSharedPtr<Scalar> > ext)
     {
       this->ext = ext;
     }
@@ -378,7 +378,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MeshFunctionSharedPtrVector<Scalar> Form<Scalar>::get_ext() const
+    std::vector<MeshFunctionSharedPtr<Scalar> > Form<Scalar>::get_ext() const
     {
       return this->ext;
     }

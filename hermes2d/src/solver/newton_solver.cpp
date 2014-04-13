@@ -47,7 +47,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces) : Solver<Scalar>(wf, spaces), NewtonMatrixSolver<Scalar>()
+    NewtonSolver<Scalar>::NewtonSolver(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces) : Solver<Scalar>(wf, spaces), NewtonMatrixSolver<Scalar>()
     {
       this->dp = new DiscreteProblem<Scalar>(wf, spaces, false, true);
       this->own_dp = true;
@@ -141,7 +141,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spaces)
+    void NewtonSolver<Scalar>::set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       Solver<Scalar>::set_spaces(spaces);
       this->jacobian_reusable = false;
