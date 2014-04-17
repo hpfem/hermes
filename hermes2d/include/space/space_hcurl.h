@@ -44,7 +44,7 @@ namespace Hermes
 
 			virtual ~HcurlSpace();
 
-			virtual void set_shapeset(Shapeset* shapeset);
+      virtual void set_shapeset(Shapeset* shapeset, bool clone = falsev);
 
 			virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc);
 

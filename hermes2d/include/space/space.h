@@ -209,7 +209,7 @@ namespace Hermes
 
 #pragma region Setters
       /// Sets the shapeset.
-      virtual void set_shapeset(Shapeset* shapeset) = 0;
+      virtual void set_shapeset(Shapeset* shapeset, bool clone = false) = 0;
 
       /// \brief Sets a (new) mesh and calls assign_dofs().
       void set_mesh(MeshSharedPtr mesh);
