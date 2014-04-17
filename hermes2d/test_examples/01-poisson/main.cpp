@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
-  // Initialize space->
+  // Initialize space.
   SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT));
 
   std::cout << "Ndofs: " << space->get_num_dofs() << std::endl;
