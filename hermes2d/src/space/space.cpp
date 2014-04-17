@@ -1069,7 +1069,7 @@ namespace Hermes
       Element* e;
       for_all_active_elements(e, mesh)
       {
-        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        for (int i = 0; i < e->get_nvert(); i++)
         {
           int j = e->next_vert(i);
           if (e->vn[i]->bnd && e->vn[j]->bnd)
