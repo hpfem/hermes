@@ -51,7 +51,7 @@ namespace Hermes
         return H2D_MAKE_EDGE_ORDER(e->get_mode(), edge, this->edata[e->id].order);
       }
 
-      virtual void set_shapeset(Shapeset* shapeset);
+      virtual void set_shapeset(Shapeset* shapeset, bool clone = false);
 
       virtual SpaceType get_type() const { return HERMES_L2_SPACE; }
 

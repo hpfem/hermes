@@ -55,8 +55,8 @@ namespace Hermes
     L2Space<Scalar>::L2Space(MeshSharedPtr mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, nullptr)
     {
-      init(shapeset, p_init);
-    }
+        init(shapeset, p_init);
+      }
 
     template<typename Scalar>
     L2Space<Scalar>::~L2Space()
@@ -67,19 +67,29 @@ namespace Hermes
     template<typename Scalar>
     void L2Space<Scalar>::copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh)
     {
+      this->set_shapeset(space->get_shapeset(), true);
+      
       Space<Scalar>::copy(space, new_mesh);
     }
 
     template<typename Scalar>
-    void L2Space<Scalar>::set_shapeset(Shapeset *shapeset)
+    void L2Space<Scalar>::set_shapeset(Shapeset *shapeset, bool clone)
     {
-      if (shapeset->get_id() < 40 && shapeset->get_id() > 29)
+      if (!(shapeset->get_id() < 40 && shapeset->get_id() > 29))
+        throw Hermes::Exceptions::Exception("Wrong shapeset type in L2Space<Scalar>::set_shapeset()");
+
+      if (clone)
+      {
+        if (this->own_shapeset)
+          delete this->shapeset;
+
+        this->shapeset = shapeset->clone();
+      }
+      else
       {
         this->shapeset = shapeset;
         this->own_shapeset = false;
       }
-      else
-        throw Hermes::Exceptions::Exception("Wrong shapeset type in L2Space<Scalar>::set_shapeset()");
     }
 
     template<typename Scalar>

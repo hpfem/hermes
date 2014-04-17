@@ -75,21 +75,31 @@ namespace Hermes
     template<typename Scalar>
     void HdivSpace<Scalar>::copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh)
     {
-      Space<Scalar>::copy(space, new_mesh);
+      this->set_shapeset(space->get_shapeset(), true);
 
       this->precalculate_projection_matrix(0, this->proj_mat, this->chol_p);
+
+      Space<Scalar>::copy(space, new_mesh);
     }
 
     template<typename Scalar>
-    void HdivSpace<Scalar>::set_shapeset(Shapeset *shapeset)
+    void HdivSpace<Scalar>::set_shapeset(Shapeset *shapeset, bool clone)
     {
-      if (shapeset->get_id() < 30 && shapeset->get_id() > 19)
+      if (!(shapeset->get_id() < 30 && shapeset->get_id() > 19))
+        throw Hermes::Exceptions::Exception("Wrong shapeset type in HdivSpace<Scalar>::set_shapeset()");
+
+      if (clone)
+      {
+        if (this->own_shapeset)
+          delete this->shapeset;
+
+        this->shapeset = shapeset->clone();
+      }
+      else
       {
         this->shapeset = shapeset;
         this->own_shapeset = false;
       }
-      else
-        throw Hermes::Exceptions::Exception("Wrong shapeset type in HdivSpace<Scalar>::set_shapeset()");
     }
 
     template<typename Scalar>

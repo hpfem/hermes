@@ -247,11 +247,6 @@ namespace Hermes
 
       this->essential_bcs = space->essential_bcs;
 
-      if (this->own_shapeset)
-        delete this->shapeset;
-
-      this->shapeset = space->shapeset->clone();
-
       if (new_mesh->get_seq() != space->get_mesh()->get_seq())
       {
         new_mesh->copy(space->get_mesh());
