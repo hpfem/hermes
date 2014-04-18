@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
   // Visualize the solution.
   if(HERMES_VISUALIZATION) {
     Hermes::Hermes2D::Views::ScalarView view("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 440, 350));
-    view.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(2));
+    //view.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(2));
     view.show(sln);
     Hermes::Hermes2D::Views::View::wait();
   }
