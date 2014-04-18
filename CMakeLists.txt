@@ -63,7 +63,7 @@ project(hermes)
   # UMFPACK is chosen by default.
   set(WITH_UMFPACK YES)
   
-  # PARALUTION is chosen by default.
+  # PARALUTION
   set(WITH_PARALUTION NO)
     
   # MUMPS
