@@ -26,8 +26,8 @@
 #include "matrix.h"
 #include "solvers/interfaces/paralution_solver.h"
 #if defined __GNUC__ && defined HAVE_BFD
-#include <signal.h>
-#include "third_party/backtrace.c"
+  #include <signal.h>
+  #include "third_party/backtrace.c"
 #endif
 namespace Hermes
 {

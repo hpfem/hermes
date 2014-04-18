@@ -626,6 +626,7 @@ project(hermes2d)
       ${ANTTWEAKBAR_LIBRARY}
       ${XSD_LIBRARY}
       ${XERCES_LIBRARY}
+      ${LIBIBERTY_LIBRARY}
       ${PJLIB_LIBRARY}
       ${LAPACK_LIBRARY}
       ${CLAPACK_LIBRARY} ${BLAS_LIBRARY}

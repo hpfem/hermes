@@ -461,6 +461,11 @@ project(hermes)
   if(NOT H2D_WITH_GLUT)
     set(NOGLUT  YES)
   endif(NOT H2D_WITH_GLUT)
+  
+  if(HAVE_BFD)
+    find_package(LIBIBERTY REQUIRED)
+    include_directories(${LIBIBERTY_INCLUDE_DIR})
+  endif()
 
   # Main CMakeLists.txt for each library are in the following directories.
   add_subdirectory(hermes_common)
