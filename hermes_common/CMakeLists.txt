@@ -238,6 +238,7 @@ project(hermes_common)
       ${F2C_LIBRARY}
       ${PJLIB_LIBRARY}
       ${BFD_LIBRARY}
+      ${LIBIBERTY_LIBRARY}
       ${BSON_LIBRARY}
       ${MATIO_LIBRARY}
       ${WINBLAS_LIBRARY} 
