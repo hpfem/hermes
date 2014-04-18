@@ -58,6 +58,9 @@ project(hermes)
   # MATIO
   set(WITH_MATIO NO)
   set(MATIO_WITH_HDF5 NO)
+  
+  # BFD
+  set(WITH_BFD NO)
 
   #### Solvers ###
   # UMFPACK is chosen by default.
@@ -65,6 +68,7 @@ project(hermes)
   
   # PARALUTION
   set(WITH_PARALUTION NO)
+  
     
   # MUMPS
   # Sequential version of MUMPS may be enabled by setting YES on the following line
@@ -267,7 +271,7 @@ project(hermes)
     return 0;
     } " BFD_WORKS)
 
-    if (BFD_LIBRARY AND BFD_WORKS)
+    if (BFD_LIBRARY AND BFD_WORKS AND WITH_BFD)
       set( HAVE_BFD YES )
     else()
       set(BFD_LIBRARY "")
