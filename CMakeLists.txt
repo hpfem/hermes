@@ -484,7 +484,7 @@ project(hermes)
     add_subdirectory(hermes2d)
   endif(WITH_H2D)
 
-  #------------------------------------------------------------------------------
+  #-------
   # Report.
   #~~~~~~~~
   message("\nHermes Configuration results")
