@@ -69,7 +69,6 @@ project(hermes)
   # PARALUTION
   set(WITH_PARALUTION NO)
   
-    
   # MUMPS
   # Sequential version of MUMPS may be enabled by setting YES on the following line
   # and pointing to the package installation directory with MUMPS_ROOT. To enable the
