@@ -42,6 +42,7 @@ namespace Hermes
     {
     public:
       AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
+      void free();
       virtual ~AztecOOSolver();
 
       /// Set the type of the solver

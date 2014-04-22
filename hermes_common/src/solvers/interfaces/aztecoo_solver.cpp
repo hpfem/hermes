@@ -37,9 +37,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void AztecOOSolver<Scalar>::free()
+    {
+      this->free_permutation_data();
+    }
+
+    template<typename Scalar>
     AztecOOSolver<Scalar>::~AztecOOSolver()
     {
-      free_permutation_data();
+      this->free();
     }
 
     template<typename Scalar>
@@ -179,8 +185,8 @@ namespace Hermes
       int j = 0, jc = 0;
       int k = 0, kc = 0;
 
-      this->row_perm = malloc_with_check(ndof, this);
-      this->col_perm = malloc_with_check(ndof, this);
+      this->row_perm = malloc_with_check<AztecOOSolver<Scalar>, int>(ndof, this);
+      this->col_perm = malloc_with_check<AztecOOSolver<Scalar>, int>(ndof, this);
 
       for (int i = 0; i < ndof; i++)
       {
@@ -248,10 +254,12 @@ namespace Hermes
         aztec.SetUserMatrix(final_matrix->mat);
       }
 
-      EpetraExt::Permutation<Epetra_MultiVector> Pv(Copy, rhs->vec->Map(), row_perm);
       Epetra_Vector *final_rhs; 
       if (row_perm)
+      {
+        EpetraExt::Permutation<Epetra_MultiVector> Pv(Copy, rhs->vec->Map(), row_perm);
         final_rhs = Pv(*rhs->vec)(0);
+      }
       else
         final_rhs = rhs->vec;
 
@@ -291,7 +299,8 @@ namespace Hermes
       this->time = this->accumulated();
 
       free_with_check(this->sln);
-      this->sln = malloc_with_check(final_matrix->size, this);
+      this->sln = malloc_with_check<AztecOOSolver<double>, double>(final_matrix->size, this);
+
       memset(this->sln, 0, final_matrix->size * sizeof(double));
 
       // copy the solution into sln vector
@@ -350,10 +359,12 @@ namespace Hermes
         aztec.SetUserMatrix(final_matrix->mat);
       }
 
-      EpetraExt::Permutation<Epetra_MultiVector> Pv(Copy, rhs->vec->Map(), row_perm);
       Epetra_Vector *final_rhs; 
       if (row_perm)
+      {
+        EpetraExt::Permutation<Epetra_MultiVector> Pv(Copy, rhs->vec->Map(), row_perm);
         final_rhs = Pv(*rhs->vec)(0);
+      }
       else
         final_rhs = rhs->vec;
 
@@ -404,7 +415,7 @@ namespace Hermes
       this->time = this->accumulated();
 
       free_with_check(this->sln);
-      this->sln = malloc_with_check(final_matrix->size, this);
+      this->sln = malloc_with_check<AztecOOSolver<double>, double>(final_matrix->size, this);
       memset(this->sln, 0, final_matrix->size * sizeof(double));
 
       // copy the solution into sln vector
@@ -440,7 +451,7 @@ namespace Hermes
       kp.ExtractSolution(xr, xi);
 
       free_with_check(this->sln);
-      this->sln = malloc_with_check(m->size, this);
+      this->sln = malloc_with_check<AztecOOSolver<std::complex<double> >, std::complex<double> >(m->size, this);
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
       // copy the solution into sln vector
@@ -483,7 +494,7 @@ namespace Hermes
       kp.ExtractSolution(xr, xi);
 
       free_with_check(this->sln);
-      this->sln = malloc_with_check(m->size, this);
+      this->sln = malloc_with_check<AztecOOSolver<std::complex<double> >, std::complex<double> >(m->size, this);
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
       // copy the solution into sln vector

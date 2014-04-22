@@ -49,6 +49,7 @@ namespace Hermes
 
       AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
 
+      void free();
       virtual ~AmesosSolver();
       virtual void solve();
       virtual int get_matrix_size();

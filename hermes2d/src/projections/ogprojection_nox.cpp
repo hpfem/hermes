@@ -26,12 +26,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    OGProjectionNOX<Scalar>::OGProjectionNOX() : ndof(0)
-    {
-    }
-
-    template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_internal(SpaceSharedPtr<Scalar> space, WeakFormSharedPtr<Scalar> wf,
+    void OGProjectionNOX<Scalar>::project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* wf,
       Scalar* target_vec, double newton_tol, int newton_max_iter)
     {
         // Sanity check.
@@ -45,8 +40,7 @@ namespace Hermes
       DiscreteProblemNOX<Scalar> dp(wf, space);
 
       // Initial coefficient vector for the Newton's method.
-      Scalar* coeff_vec = malloc_with_check(ndof, this);
-      memset(coeff_vec, 0, ndof*sizeof(Scalar));
+      Scalar* coeff_vec = calloc_with_check<Scalar>(ndof);
 
       const char* iterative_method = "GMRES";           // Name of the iterative method employed by AztecOO (ignored
       // by the other solvers).
@@ -99,7 +93,7 @@ namespace Hermes
       double newton_tol, int newton_max_iter)
     {
       // Define projection weak form.
-      WeakFormSharedPtr<Scalar> proj_wf = new WeakForm<Scalar>(1);
+      WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
       proj_wf->add_matrix_form(custom_projection_jacobian);
       proj_wf->add_vector_form(custom_projection_residual);
 
@@ -138,7 +132,7 @@ namespace Hermes
       else norm = proj_norm;
 
       // Define temporary projection weak form.
-      WeakFormSharedPtr<Scalar> proj_wf = new WeakForm<Scalar>(1);
+      WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
       proj_wf->set_ext(source_meshfn);
       // Add Jacobian.
       proj_wf->add_matrix_form(new ProjectionMatrixFormVol(0, 0, norm));
@@ -183,7 +177,7 @@ namespace Hermes
 
       // Calculate the coefficient vector.
       int ndof = space->get_num_dofs();
-      Scalar* target_vec = malloc_with_check(ndof, this);
+      Scalar* target_vec = malloc_with_check<Scalar>(ndof);
       project_global(space, source_sln, target_vec, proj_norm, newton_tol, newton_max_iter);
 
       // Translate coefficient vector into a Solution.
@@ -194,20 +188,20 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(SpaceSharedPtrVector<Scalar> spaces,
-      std::vector<MeshFunction<Scalar>* > source_meshfns,
-      Scalar* target_vec, std::vector<NormType> proj_norms,
+    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
+      Hermes::vector<MeshFunction<Scalar>* > source_meshfns,
+      Scalar* target_vec, Hermes::vector<NormType> proj_norms,
       double newton_tol, int newton_max_iter)
     {
+      int n = spaces.size();
+
       // Sanity checks.
-      Helpers::check_length(source_meshfns, spaces);
-      if(!proj_norms.empty())
-        Helpers::check_length(proj_norms, spaces);
-      if(target_vec == nullptr)
-        throw Exceptions::NullException(3);
-      
-      int start_index = 0, spaces_size = spaces.size();
-      for (int i = 0; i < spaces_size; i++)
+      if(n != source_meshfns.size()) throw Exceptions::LengthException(1, 2, n, source_meshfns.size());
+      if(target_vec == nullptr) throw Exceptions::NullException(3);
+      if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+
+      int start_index = 0;
+      for (int i = 0; i < n; i++)
       {
         if(proj_norms.empty())
           project_global(spaces[i], source_meshfns[i], target_vec + start_index, HERMES_UNSET_NORM, newton_tol, newton_max_iter);
@@ -219,19 +213,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_slns,
-      Scalar* target_vec, std::vector<NormType> proj_norms,
+    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
+      Scalar* target_vec, Hermes::vector<NormType> proj_norms,
       double newton_tol, int newton_max_iter)
     {
-      // Sanity checks.
-      Helpers::check_length(source_slns, spaces);
-      if(!proj_norms.empty())
-        Helpers::check_length(proj_norms, spaces);
-      if(target_vec == nullptr)
-        throw Exceptions::NullException(3);
+      int n = spaces.size();
 
-      int start_index = 0, spaces_size = spaces.size();
-      for (int i = 0; i < spaces_size; i++)
+      // Sanity checks.
+      if(n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
+      if(target_vec == nullptr) throw Exceptions::NullException(3);
+      if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+
+      int start_index = 0;
+      for (int i = 0; i < n; i++)
       {
         if(proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_vec + start_index, HERMES_UNSET_NORM, newton_tol, newton_max_iter);
@@ -242,19 +236,20 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_slns,
-      MeshFunctionSharedPtrVector<Scalar> target_slns,
-      std::vector<NormType> proj_norms, bool delete_old_meshes,
+    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
+      Hermes::vector<NormType> proj_norms, bool delete_old_meshes,
       double newton_tol, int newton_max_iter)
     {
+      int n = spaces.size();
+
       // Sanity checks.
-      Helpers::check_length(source_slns, spaces);
-      Helpers::check_length(target_slns, spaces);
-      if(!proj_norms.empty())
-        Helpers::check_length(proj_norms, spaces);
-      
-      int start_index = 0, spaces_size = spaces.size();
-      for (int i = 0; i < spaces_size; i++)
+      if(n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
+      if(n != target_slns.size()) throw Exceptions::LengthException(1, 2, n, target_slns.size());
+      if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+
+      int start_index = 0;
+      for (int i = 0; i < n; i++)
       {
         if(proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_slns[i], HERMES_UNSET_NORM, newton_tol, newton_max_iter);
