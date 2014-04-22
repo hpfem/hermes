@@ -51,7 +51,7 @@ namespace Hermes
 
       rhs.zero();
 
-      Scalar* coeff_vec = malloc_with_check(xx.get_size(), this);
+      Scalar* coeff_vec = malloc_with_check<DiscreteProblemNOX<Scalar>, Scalar>(xx.get_size(), this);
       xx.extract(coeff_vec);
       this->assemble(coeff_vec, nullptr, &rhs); // nullptr is for the global matrix.
       free_with_check(coeff_vec);
@@ -70,7 +70,7 @@ namespace Hermes
 
       jacob.zero();
 
-      Scalar* coeff_vec = malloc_with_check(xx.get_size(), this);
+      Scalar* coeff_vec = malloc_with_check<DiscreteProblemNOX<Scalar>, Scalar>(xx.get_size(), this);
       xx.extract(coeff_vec);
       this->assemble(coeff_vec, &jacob, nullptr); // nullptr is for the right-hand side.
       free_with_check(coeff_vec);
@@ -85,7 +85,7 @@ namespace Hermes
     {
       EpetraVector<Scalar> xx(x);      // wrap our structures around core Epetra objects
 
-      Scalar* coeff_vec = malloc_with_check(xx.get_size(), this);
+      Scalar* coeff_vec = malloc_with_check<DiscreteProblemNOX<Scalar>, Scalar>(xx.get_size(), this);
       xx.extract(coeff_vec);
       this->assemble(coeff_vec, &jacobian);
       free_with_check(coeff_vec);

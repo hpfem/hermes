@@ -76,12 +76,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void DiscreteProblem<Scalar>::free()
+    {
+      if (this->threadAssembler)
+      {
+        for (int i = 0; i < this->num_threads_used; i++)
+          delete this->threadAssembler[i];
+        delete[] this->threadAssembler;
+        this->threadAssembler = nullptr;
+      }
+    }
+
+    template<typename Scalar>
     DiscreteProblem<Scalar>::~DiscreteProblem()
     {
-
-      for (int i = 0; i < this->num_threads_used; i++)
-        delete this->threadAssembler[i];
-      delete[] this->threadAssembler;
+      this->free();
     }
 
     template<typename Scalar>

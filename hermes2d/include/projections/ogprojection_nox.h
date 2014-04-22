@@ -42,22 +42,20 @@ namespace Hermes
     class HERMES_API OGProjectionNOX : public Hermes::Mixins::Loggable
     {
     public:
-      OGProjectionNOX();
-
       /// Main functionality is in the protected method project_internal().
       /// This is a wrapper that allows the user to specify his own projection form.
-      void project_global(SpaceSharedPtr<Scalar> space,
-          MatrixFormVol<Scalar>* custom_projection_jacobian,
-          VectorFormVol<Scalar>* custom_projection_residual,
-          Scalar* target_vec, double newton_tol = 1e-6, int newton_max_iter = 10);
+      static void project_global(SpaceSharedPtr<Scalar> space,
+        MatrixFormVol<Scalar>* custom_projection_jacobian,
+        VectorFormVol<Scalar>* custom_projection_residual,
+        Scalar* target_vec, double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /**
        \fn  static void OGProjection::project_global(SpaceSharedPtr<Scalar> space,
-        MeshFunction<Scalar>* source_meshfn, Scalar* target_vec,
-        NormType proj_norm = HERMES_UNSET_NORM, double newton_tol = 1e-6, int newton_max_iter = 10);
+       MeshFunction<Scalar>* source_meshfn, Scalar* target_vec,
+       NormType proj_norm = HERMES_UNSET_NORM, double newton_tol = 1e-6, int newton_max_iter = 10);
 
        \brief The method checks source_meshfn if it is an instance of Solution, if so, it checks its sln_vector, and space_seq
-              if they can be used directly.
+       if they can be used directly.
 
        \author  LK
        \date  10/29/2011
@@ -70,35 +68,35 @@ namespace Hermes
        \param newton_tol              (optional) the newton tolerance.
        \param newton_max_iter         (optional) the newton maximum iterator.
        */
-      void project_global(SpaceSharedPtr<Scalar> space, MeshFunction<Scalar>* source_meshfn,
-          Scalar* target_vec, NormType proj_norm = HERMES_UNSET_NORM,
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+      static void project_global(SpaceSharedPtr<Scalar> space, MeshFunction<Scalar>* source_meshfn,
+        Scalar* target_vec, NormType proj_norm = HERMES_UNSET_NORM,
+        double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper that accepts MeshFunctionSharedPtr instead of the ordinary MeshFunction pointer.
-      void project_global(SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> source_meshfn,
-          Scalar* target_vec, NormType proj_norm = HERMES_UNSET_NORM,
-          double newton_tol = 1e-6, int newton_max_iter = 10);
-          
+      static void project_global(SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> source_meshfn,
+        Scalar* target_vec, NormType proj_norm = HERMES_UNSET_NORM,
+        double newton_tol = 1e-6, int newton_max_iter = 10);
+
       /// Wrapper that delivers a MeshFunctionSharedPtr instead of coefficient vector.
-      void project_global(SpaceSharedPtr<Scalar> space,
-          MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar> target_sln,
-          NormType proj_norm = HERMES_UNSET_NORM,
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+      static void project_global(SpaceSharedPtr<Scalar> space,
+        MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar> target_sln,
+        NormType proj_norm = HERMES_UNSET_NORM,
+        double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper for multiple source MeshFunction pointers that delivers coefficient vector.
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunction<Scalar>* > source_meshfns,
-          Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(),
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+      static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunction<Scalar>* > source_meshfns,
+        Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(),
+        double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper for multiple source MeshFunctionSharedPtrs that delivers coefficient vector.
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
-          Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(),
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+      static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
+        Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(),
+        double newton_tol = 1e-6, int newton_max_iter = 10);
 
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
-          Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(), bool delete_old_mesh = false,
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+      static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
+        Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(), bool delete_old_mesh = false,
+        double newton_tol = 1e-6, int newton_max_iter = 10);
 
     protected:
       /// Underlying function for global orthogonal projection.
@@ -106,7 +104,7 @@ namespace Hermes
       /// a special projection weak form, which is different from
       /// the weak form of the PDE. If you supply a weak form of the
       /// PDE, the PDE will just be solved.
-      void project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* proj_wf, Scalar* target_vec,
+      static void project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* proj_wf, Scalar* target_vec,
         double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Jacobian matrix (same as stiffness matrix since projections are linear).
@@ -289,8 +287,8 @@ namespace Hermes
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * ((u_ext[this->i]->val[i] - ext[0]->val[i]) * v->val[i]
-          + (u_ext[this->i]->dx[i] - ext[0]->dx[i]) * v->dx[i]
-          + (u_ext[this->i]->dy[i] - ext[0]->dy[i]) * v->dy[i]);
+            + (u_ext[this->i]->dx[i] - ext[0]->dx[i]) * v->dx[i]
+            + (u_ext[this->i]->dy[i] - ext[0]->dy[i]) * v->dy[i]);
           return result;
         }
 
@@ -301,7 +299,7 @@ namespace Hermes
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * ((u_ext[this->i]->dx[i] - ext[0]->dx[i]) * v->dx[i]
-          + (u_ext[this->i]->dy[i] - ext[0]->dy[i]) * v->dy[i]);
+            + (u_ext[this->i]->dy[i] - ext[0]->dy[i]) * v->dy[i]);
           return result;
         }
 
@@ -343,8 +341,6 @@ namespace Hermes
           return result;
         }
       };
-
-      int ndof;
     };
   }
 }

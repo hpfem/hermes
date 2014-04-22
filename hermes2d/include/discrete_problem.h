@@ -54,6 +54,8 @@ namespace Hermes
       DiscreteProblem();
       /// Destuctor.
       virtual ~DiscreteProblem();
+      /// Free
+      virtual void free();
 
       /// Make this DiscreteProblem linear.
       /// Does 2 things

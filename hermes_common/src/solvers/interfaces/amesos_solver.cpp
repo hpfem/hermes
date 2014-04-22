@@ -44,9 +44,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void AmesosSolver<Scalar>::free()
+    {
+      if (solver)
+      {
+        delete solver;
+        solver = nullptr;
+      }
+    }
+
+    template<typename Scalar>
     AmesosSolver<Scalar>::~AmesosSolver()
     {
-      delete solver;
+      this->free();
     }
 
     template<typename Scalar>
@@ -97,7 +107,7 @@ namespace Hermes
       this->time = this->accumulated();
 
       free_with_check(this->sln);
-      this->sln = malloc_with_check(m->size, this);
+      this->sln = malloc_with_check<AmesosSolver<double>, double>(m->size, this);
       // copy the solution into sln vector
       memset(this->sln, 0, m->size * sizeof(double));
 
@@ -126,7 +136,7 @@ namespace Hermes
       this->time = this->accumulated();
 
       free_with_check(this->sln);
-      this->sln = malloc_with_check(m->size, this);
+      this->sln = malloc_with_check<AmesosSolver<std::complex<double> >, std::complex<double>>(m->size, this);
       // copy the solution into sln vector
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
     }

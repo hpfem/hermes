@@ -174,7 +174,7 @@ namespace Hermes
     template<typename Scalar>
     void EpetraMatrix<Scalar>::extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs)
     {
-      int* idxs_to_pass = malloc_with_check(len, this);
+      int* idxs_to_pass = malloc_with_check<EpetraMatrix<Scalar>, int>(len, this);
       for (unsigned int i = 0; i < len; i++)
         idxs_to_pass[i] = idxs[i];
       int n_entries_to_pass = n_entries;
@@ -203,7 +203,7 @@ namespace Hermes
         int n_to_pass = n;
 #pragma omp critical (EpetraMatrixAdd)
         {
-          int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n_to_pass);
+          int ierr = mat->SumIntoMyValues(m, 1, &v, &n_to_pass);
           if (ierr != 0)
             throw Hermes::Exceptions::Exception("Failed to insert into Epetra matrix");
         }
@@ -217,11 +217,11 @@ namespace Hermes
       {    // ignore zero values
         double v_r = std::real<double>(v);
         int n_to_pass = n;
-        int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n_to_pass);
+        int ierr = mat->SumIntoMyValues(m, 1, &v_r, &n_to_pass);
         if (ierr != 0) throw Hermes::Exceptions::Exception("Failed to insert into Epetra matrix");
         assert(ierr == 0);
         double v_i = std::imag<double>(v);
-        ierr = mat_im->SumIntoGlobalValues(m, 1, &v_i, &n_to_pass);
+        ierr = mat_im->SumIntoMyValues(m, 1, &v_i, &n_to_pass);
         assert(ierr == 0);
       }
     }

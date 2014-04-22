@@ -26,11 +26,6 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    OGProjectionNOX<Scalar>::OGProjectionNOX() : ndof(0)
-    {
-    }
-
-    template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* wf,
       Scalar* target_vec, double newton_tol, int newton_max_iter)
     {
@@ -45,8 +40,7 @@ namespace Hermes
       DiscreteProblemNOX<Scalar> dp(wf, space);
 
       // Initial coefficient vector for the Newton's method.
-      Scalar* coeff_vec = malloc_with_check(ndof, this);
-      memset(coeff_vec, 0, ndof*sizeof(Scalar));
+      Scalar* coeff_vec = calloc_with_check<Scalar>(ndof);
 
       const char* iterative_method = "GMRES";           // Name of the iterative method employed by AztecOO (ignored
       // by the other solvers).
@@ -183,7 +177,7 @@ namespace Hermes
 
       // Calculate the coefficient vector.
       int ndof = space->get_num_dofs();
-      Scalar* target_vec = malloc_with_check(ndof, this);
+      Scalar* target_vec = malloc_with_check<Scalar>(ndof);
       project_global(space, source_sln, target_vec, proj_norm, newton_tol, newton_max_iter);
 
       // Translate coefficient vector into a Solution.
