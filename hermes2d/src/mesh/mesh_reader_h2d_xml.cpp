@@ -612,9 +612,9 @@ namespace Hermes
           {
             int new_i = points_to_vertices.size();
             vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, new_i));
-            points_to_vertices.insert(std::pair<std::pair<double, double>, unsigned int>(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y), points_to_vertices.size()));
+            points_to_vertices.insert(std::pair<std::pair<double, double>, unsigned int>(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y), new_i));
             
-            vertices.v().push_back(std::auto_ptr<XMLMesh::v>(new XMLMesh::v(std::to_string((long double)meshes[meshes_i]->nodes[i].x), std::to_string((long double)meshes[meshes_i]->nodes[i].y), i)));
+            vertices.v().push_back(std::auto_ptr<XMLMesh::v>(new XMLMesh::v(std::to_string((long double)meshes[meshes_i]->nodes[i].x), std::to_string((long double)meshes[meshes_i]->nodes[i].y), new_i)));
           }
           if (!hasAllElements)
             subdomain.vertices()->i().push_back(vertices_to_vertices.find(i)->second);
