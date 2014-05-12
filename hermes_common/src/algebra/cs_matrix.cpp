@@ -783,13 +783,13 @@ namespace Hermes
     {
       if (this->pages[row].count >= SparseMatrix<Scalar>::PAGE_SIZE)
       {
-        SparseMatrix<Scalar>::Page* final_page = &(this->pages[row]);
+        typename SparseMatrix<Scalar>::Page* final_page = &(this->pages[row]);
         while (final_page->next != nullptr && final_page->count >= SparseMatrix<Scalar>::PAGE_SIZE)
           final_page = final_page->next;
 
         if (final_page->next == nullptr && final_page->count >= SparseMatrix<Scalar>::PAGE_SIZE)
         {
-          final_page->next = new SparseMatrix<Scalar>::Page(true);
+          final_page->next = new typename SparseMatrix<Scalar>::Page(true);
           final_page = final_page->next;
         }
         final_page->idx[final_page->count++] = col;
