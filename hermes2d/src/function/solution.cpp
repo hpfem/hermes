@@ -329,31 +329,28 @@ namespace Hermes
     void Solution<Scalar>::set_coeff_vector(SpaceSharedPtr<Scalar> space,
       const Scalar* coeff_vec, bool add_dir_lift, int start_index)
     {
-      int o;
       PrecalcShapeset pss(space->shapeset);
+
       if (Solution<Scalar>::static_verbose_output)
         Hermes::Mixins::Loggable::Static::info("Solution: set_coeff_vector called.");
+
       // Sanity checks.
       if (space->get_mesh() == nullptr)
         throw Exceptions::Exception("Mesh == nullptr in Solution<Scalar>::set_coeff_vector().");
-      if (coeff_vec == nullptr)
-        throw Exceptions::NullException(3);
-      if (coeff_vec == nullptr)
-        throw Exceptions::Exception("Coefficient vector == nullptr in Solution<Scalar>::set_coeff_vector().");
+      Helpers::check_for_null(space->get_mesh());
+      Helpers::check_for_null(coeff_vec);
+      
       if (!space->is_up_to_date())
         throw Exceptions::Exception("Provided 'space' is not up to date.");
 
       if (Solution<Scalar>::static_verbose_output)
         Hermes::Mixins::Loggable::Static::info("Solution: set_coeff_vector - solution being freed.");
 
-      free();
+      this->free();
 
       this->space_type = space->get_type();
-
       this->num_components = pss.get_num_components();
-      sln_type = HERMES_SLN;
-
-      // Copy the mesh.
+      this->sln_type = HERMES_SLN;
       this->mesh = space->get_mesh();
 
       // Allocate the coefficient arrays.
@@ -368,6 +365,7 @@ namespace Hermes
 
       // Obtain element orders, allocate mono_coeffs.
       Element* e;
+      int o;
       num_coeffs = 0;
       for_all_active_elements(e, this->mesh)
       {
@@ -435,7 +433,6 @@ namespace Hermes
         }
       }
 
-      if (this->mesh == nullptr) throw Hermes::Exceptions::Exception("mesh == nullptr");
       init_dxdy_buffer();
       this->element = nullptr;
       if (Solution<Scalar>::static_verbose_output)
@@ -447,10 +444,8 @@ namespace Hermes
       SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> solutions,
       std::vector<bool> add_dir_lift, std::vector<int> start_indices)
     {
-      if (solution_vector == nullptr)
-        throw Exceptions::NullException(1);
-        
-        Helpers::check_length(solutions, spaces);
+      Helpers::check_for_null(solution_vector);
+      Helpers::check_length(solutions, spaces);
 
       // If start indices are not given, calculate them using the dimension of each space.
       std::vector<int> start_indices_new;
@@ -488,10 +483,7 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space,
       Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
-      // Sanity checks.
-      if (solution_vector == nullptr)
-        throw Exceptions::NullException(1);
-
+      Helpers::check_for_null(solution_vector);
       solution->set_coeff_vector(space, solution_vector, add_dir_lift, start_index);
     }
 
@@ -499,9 +491,7 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space,
       MeshFunctionSharedPtr<Scalar> solution, bool add_dir_lift, int start_index)
     {
-      // Sanity checks.
-      if (solution_vector == nullptr)
-        throw Exceptions::NullException(1);
+      Helpers::check_for_null(solution_vector);
 
       Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(solution.get());
       if (sln == nullptr)
@@ -514,10 +504,8 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
       MeshFunctionSharedPtrVector<Scalar> solutions, std::vector<bool> add_dir_lift, std::vector<int> start_indices)
     {
-      if (solution_vector == nullptr)
-        throw Exceptions::NullException(1);
-      
-        Helpers::check_length(solutions, spaces);
+      Helpers::check_for_null(solution_vector);
+      Helpers::check_length(solutions, spaces);
 
       // If start indices are not given, calculate them using the dimension of each space.
       std::vector<int> start_indices_new;
@@ -555,9 +543,8 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Vector<Scalar>* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
       MeshFunctionSharedPtrVector<Scalar> solutions, bool add_dir_lift)
     {
-      if (solution_vector == nullptr)
-        throw Exceptions::NullException(1);
-      throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
+      Helpers::check_for_null(solution_vector);
+      Helpers::check_length(spaces, solutions);
 
       // If start indices are not given, calculate them using the dimension of each space.
       std::vector<int> start_indices_new;
@@ -581,8 +568,7 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
       MeshFunctionSharedPtrVector<Scalar> solutions, bool add_dir_lift)
     {
-      if (solution_vector == nullptr)
-        throw Exceptions::NullException(1);
+      Helpers::check_for_null(solution_vector);
       Helpers::check_length(solutions, spaces);
 
       // If start indices are not given, calculate them using the dimension of each space.
@@ -608,8 +594,7 @@ namespace Hermes
       MeshFunctionSharedPtr<Scalar> solution, bool add_dir_lift, int start_index)
     {
       // Sanity checks.
-      if (solution_vector == nullptr)
-        throw Exceptions::NullException(1);
+      Helpers::check_for_null(solution_vector);
 
       Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(solution.get());
       if (sln == nullptr)
@@ -813,26 +798,26 @@ namespace Hermes
       // Hcurl space
       else if (space_type == HERMES_HCURL_SPACE)
       {
-          this->update_refmap();
-          mat = this->refmap.get_const_inv_ref_map();
-          if (!this->refmap.is_jacobian_const()) { mat = this->refmap.get_inv_ref_map(order); mstep = 1; }
+        this->update_refmap();
+        mat = this->refmap.get_const_inv_ref_map();
+        if (!this->refmap.is_jacobian_const()) { mat = this->refmap.get_inv_ref_map(order); mstep = 1; }
 
-          for (i = 0, m = mat; i < np; i++, m += mstep)
+        for (i = 0, m = mat; i < np; i++, m += mstep)
+        {
+          if ((mask & H2D_FN_VAL) == H2D_FN_VAL)
           {
-            if ((mask & H2D_FN_VAL) == H2D_FN_VAL)
-            {
-              Scalar vx = this->values[0][0][i];
-              Scalar vy = this->values[1][0][i];
-              this->values[0][0][i] = (*m)[0][0] * vx + (*m)[0][1] * vy;
-              this->values[1][0][i] = (*m)[1][0] * vx + (*m)[1][1] * vy;
-            }
-            if ((mask & H2D_CURL) == H2D_CURL)
-            {
-              Scalar e0x = this->values[0][1][i], e0y = this->values[0][2][i];
-              Scalar e1x = this->values[1][1][i], e1y = this->values[1][2][i];
-              this->values[1][1][i] = (*m)[0][0] * ((*m)[1][0] * e0x + (*m)[1][1] * e1x) + (*m)[0][1] * ((*m)[1][0] * e0y + (*m)[1][1] * e1y);
-              this->values[0][2][i] = (*m)[1][0] * ((*m)[0][0] * e0x + (*m)[0][1] * e1x) + (*m)[1][1] * ((*m)[0][0] * e0y + (*m)[0][1] * e1y);
-            }
+            Scalar vx = this->values[0][0][i];
+            Scalar vy = this->values[1][0][i];
+            this->values[0][0][i] = (*m)[0][0] * vx + (*m)[0][1] * vy;
+            this->values[1][0][i] = (*m)[1][0] * vx + (*m)[1][1] * vy;
+          }
+          if ((mask & H2D_CURL) == H2D_CURL)
+          {
+            Scalar e0x = this->values[0][1][i], e0y = this->values[0][2][i];
+            Scalar e1x = this->values[1][1][i], e1y = this->values[1][2][i];
+            this->values[1][1][i] = (*m)[0][0] * ((*m)[1][0] * e0x + (*m)[1][1] * e1x) + (*m)[0][1] * ((*m)[1][0] * e0y + (*m)[1][1] * e1y);
+            this->values[0][2][i] = (*m)[1][0] * ((*m)[0][0] * e0x + (*m)[0][1] * e1x) + (*m)[1][1] * ((*m)[0][0] * e0y + (*m)[0][1] * e1y);
+          }
         }
       }
 
@@ -932,7 +917,7 @@ namespace Hermes
       {
         if (mask & ~H2D_FN_DEFAULT)
           throw Hermes::Exceptions::Exception("Cannot obtain second derivatives of an exact solution.");
-        
+
         this->update_refmap();
         double* x = this->refmap.get_phys_x(order);
         double* y = this->refmap.get_phys_y(order);
@@ -1690,9 +1675,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int component, int item)
     {
-      if (e == nullptr)
-        throw Exceptions::NullException(1);
-
+      Helpers::check_for_null(e);
       set_active_element(e);
 
       int o = elem_orders[e->id];
@@ -1714,8 +1697,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b)
     {
-      if (e == nullptr)
-        throw Exceptions::NullException(1);
+      Helpers::check_for_null(e);
 
       if (this->sln_type != HERMES_SLN)
         throw Exceptions::Exception("Solution::get_ref_value_transformed only works for solutions wrt. FE space, project if you want to use the method for exact solutions.");

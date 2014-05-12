@@ -231,7 +231,7 @@ namespace Hermes
     inline void check_for_null(const T& instance)
     {
       if (instance == nullptr)
-        throw Hermes::Exceptions::NullException(instance.size(), length);
+        throw Hermes::Exceptions::NullException();
     }
 
     /// Check length of a vector.
