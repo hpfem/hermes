@@ -12,7 +12,7 @@ public:
   {
   }
   
-  virtual void value(int n, Func<double>** ext, Func<double>** u_ext, Func<double>* result, GeomBasic<double>* geometry) const
+  virtual void value(int n, Func<double>** ext, Func<double>** u_ext, Func<double>* result, Geom<double>* geometry) const
   {
     for(int i = 0; i < n; i++)
     {

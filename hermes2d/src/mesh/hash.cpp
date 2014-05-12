@@ -62,11 +62,6 @@ namespace Hermes
       return &(nodes[id]);
     }
 
-    Node* HashTable::add_node()
-    {
-      return this->nodes.add();
-    }
-
     /// Returns the total number of nodes stored.
     int HashTable::get_num_nodes() const
     {

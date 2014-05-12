@@ -36,7 +36,6 @@ namespace Hermes
       template<typename Scalar> class H1ProjBasedSelector;
       template<typename Scalar> class HcurlProjBasedSelector;
     };
-    template<typename Scalar> class Geom;
 
     /// Precalculation masks
     enum
@@ -242,7 +241,6 @@ namespace Hermes
       friend class CurvMap;
 
       template<typename T> friend class Func;
-      template<typename T> friend class Geom;
       template<typename T> friend class Filter;
       template<typename T> friend class SimpleFilter;
       template<typename T> friend class DXDYFilter;

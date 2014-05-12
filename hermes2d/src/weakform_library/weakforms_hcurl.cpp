@@ -65,16 +65,6 @@ namespace Hermes
     }
 
     template<typename Real, typename Scalar>
-    static Scalar int_e_tau_f_tau(int n, double *wt, Func<Real> *u, Func<Real> *v, GeomVol<Real> *e)
-    {
-      Scalar result = Scalar(0);
-      for (int i = 0; i < n; i++)
-        result += wt[i] * ((u->val0[i] * e->tx[i] + u->val1[i] * e->ty[i]) *
-        conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));
-      return result;
-    }
-
-    template<typename Real, typename Scalar>
     static Scalar int_e_tau_f_tau(int n, double *wt, Func<Real> *u, Func<Real> *v, GeomSurf<Real> *e)
     {
       Scalar result = Scalar(0);

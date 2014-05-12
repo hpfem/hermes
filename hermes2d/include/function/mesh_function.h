@@ -135,7 +135,6 @@ namespace Hermes
       template<typename T> friend class Adapt;
 
       template<typename T> friend class Func;
-      template<typename T> friend class Geom;
 
       template<typename T> friend HERMES_API Func<T>* init_fn(MeshFunction<T>*fu, const int order);
 

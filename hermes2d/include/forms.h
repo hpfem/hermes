@@ -40,7 +40,7 @@ namespace Hermes
     /// Geometry (coordinates, normals, tangents) of either an element or an edge.
     /// @ingroup inner
     template<typename T>
-    class HERMES_API GeomBasic
+    class HERMES_API Geom
     {
     public:
       /// x-coordinates[in physical domain].
@@ -55,7 +55,7 @@ namespace Hermes
     /// Geometry - volumetric.
     /// @ingroup inner
     template<typename T>
-    class HERMES_API GeomVol : public GeomBasic<T>
+    class HERMES_API GeomVol : public Geom<T>
     {
     public:
       /// ID number of the element.
@@ -69,7 +69,7 @@ namespace Hermes
 
     /// Geometry - surface.
     template<typename T>
-    class HERMES_API GeomSurf : public GeomBasic<T>
+    class HERMES_API GeomSurf : public Geom<T>
     {
     public:
       T nx[H2D_MAX_INTEGRATION_POINTS_COUNT];
@@ -414,7 +414,7 @@ namespace Hermes
     HERMES_API void init_fn_preallocated(Func<Scalar>* u, MeshFunction<Scalar>* fu, const int order);
     /// Init UExt function - preallocated version.
     template<typename Scalar>
-    HERMES_API void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, GeomBasic<double>* geometry, ElementMode2D mode);
+    HERMES_API void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
 
 
     /// Utilities follow
@@ -424,7 +424,7 @@ namespace Hermes
 
     /// Init UExt function - volumetric
     template<typename Scalar>
-    HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, GeomBasic<double>* geometry, ElementMode2D mode);
+    HERMES_API Func<Scalar>* init_fn(UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
 #pragma endregion
   }
 }
