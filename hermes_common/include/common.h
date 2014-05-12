@@ -218,6 +218,12 @@ namespace Hermes
   // For internal use.
   const int HERMES_ANY_INT = -1234;
 
+  namespace Exceptions
+  {
+    class NullException;
+    class LengthException;
+  }
+
   namespace Helpers
   {
     /// Check length of a vector.
