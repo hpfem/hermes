@@ -89,7 +89,7 @@ namespace Hermes
       /// This instance owns its DP.
       bool own_dp;
 
-      template<typename Scalar, typename SolverType> friend class AdaptSolver;
+      template<typename Scalar2, typename SolverType> friend class AdaptSolver;
     };
   }
 }
