@@ -163,12 +163,12 @@ namespace Hermes
       unsigned short iro_cache;
 
       /// Helper functions to obtain the index of the next or previous vertex/edge
-      inline unsigned char Element::next_vert(unsigned char i) const
+      inline unsigned char next_vert(unsigned char i) const
       {
         return ((i + 1) % nvert);
       }
 
-      inline unsigned char Element::prev_vert(unsigned char i) const
+      inline unsigned char prev_vert(unsigned char i) const
       {
         return ((i + nvert - 1) % nvert);
       }
