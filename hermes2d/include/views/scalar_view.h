@@ -192,6 +192,12 @@ class HERMES_API ScalarView : public View
         void show(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0,
           MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
+        void show(MeshFunctionSharedPtr<std::complex<double> > sln, int item = H2D_FN_VAL_0,
+          MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0)
+        {
+          throw Exceptions::Exception("Visualization of complex 2D solution is not possible, please use a filter that converts the solution into a real function, then display that one.");
+        }
+
         void show_linearizer_data(double eps, int item = H2D_FN_VAL_0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         inline void show_mesh(bool show = true) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
@@ -201,6 +207,8 @@ class HERMES_API ScalarView : public View
         inline void set_3d_mode(bool enable = true) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_vertical_scaling(double sc) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_min_max_range(double min, double max) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        Linearizer* get_linearizer()  { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
+
       };
 #endif
     }

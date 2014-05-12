@@ -169,7 +169,7 @@ namespace Hermes
     static bool compare(Scalar a, Scalar b);
 
     template<>
-    static bool compare(std::complex<double> a, std::complex<double> b)
+    bool compare(std::complex<double> a, std::complex<double> b)
     {
       if (a.real() < b.real() && a.imag() < b.imag())
         return true;
@@ -178,7 +178,7 @@ namespace Hermes
     }
 
     template<>
-    static bool compare(double a, double b)
+    bool compare(double a, double b)
     {
       return a < b;
     }
@@ -567,7 +567,7 @@ namespace Hermes
         {
           Mesh::ReferenceMeshCreator ref_mesh_creator(spaces[i]->get_mesh());
           MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-          Space<Scalar>::ReferenceSpaceCreator u_ref_space_creator(spaces[i], adaptivityType == pAdaptivity ? spaces[i]->get_mesh() : ref_mesh, adaptivityType == hAdaptivity ? 0 : 1);
+          typename Space<Scalar>::ReferenceSpaceCreator u_ref_space_creator(spaces[i], adaptivityType == pAdaptivity ? spaces[i]->get_mesh() : ref_mesh, adaptivityType == hAdaptivity ? 0 : 1);
           ref_spaces.push_back(u_ref_space_creator.create_ref_space());
         }
 
