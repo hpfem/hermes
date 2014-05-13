@@ -152,7 +152,7 @@ namespace Hermes
     {
       for(unsigned short i = 0; i < tables.size(); i++)
       {
-        if (tables[i]->shapeset->get_id() == shapeset->get_id())
+        if (tables[i]->shapeset_id == shapeset->get_id())
         {
           this->storage = (tables[i]);
           break;
@@ -348,8 +348,11 @@ namespace Hermes
       }
     }
 
-    PrecalcShapesetAssemblingStorage::PrecalcShapesetAssemblingStorage(Shapeset* shapeset) : shapeset(shapeset)
+    PrecalcShapesetAssemblingStorage::PrecalcShapesetAssemblingStorage(Shapeset* shapeset) : shapeset_id(shapeset->get_id())
     {
+      this->max_index[0] = shapeset->get_max_index(HERMES_MODE_TRIANGLE);
+      this->max_index[1] = shapeset->get_max_index(HERMES_MODE_QUAD);
+
       for (int i = 0; i < H2D_NUM_MODES; i++)
       {
         unsigned short g_max, np;
@@ -364,7 +367,7 @@ namespace Hermes
           np = H2D_MAX_INTEGRATION_POINTS_COUNT_QUAD;
         }
 
-        unsigned short local_base_size = this->shapeset->get_max_index((ElementMode2D)i) + 1;
+        unsigned short local_base_size = this->max_index[i] + 1;
 
         for (int j = 0; j < H2D_NUM_FUNCTION_VALUES; j++)
         {
@@ -393,7 +396,7 @@ namespace Hermes
         else
           g_max = g_max_quad + 1 + 4 * g_max_quad + 4;
 
-        unsigned short local_base_size = this->shapeset->get_max_index((ElementMode2D)i) + 1;
+        unsigned short local_base_size = this->max_index[i] + 1;
 
         for (int j = 0; j < H2D_NUM_FUNCTION_VALUES; j++)
         {
