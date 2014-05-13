@@ -58,8 +58,11 @@ int main(int argc, char* argv[])
   std::cout << "Total error nonconst: " << errorCalculator.get_total_error_squared() << std::endl;
 #endif
 
-  if(std::abs(errorCalculator.get_total_error_squared() - 13.0) > 1e-10)
+  if (std::abs(errorCalculator.get_total_error_squared() - 13.0) > 1e-10)
+  {
+    std::cout << "Failure!";
     return -1;
+  }
 
   std::cout << "Success!";
   return 0;
