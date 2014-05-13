@@ -19,8 +19,8 @@ int main(int argc, char* argv[])
   EssentialBCs<double> bcs_fine(&bc_fine);
 
   // Create an H1 space with default shapeset.
-  SpaceSharedPtr<double> space_coarse(new H1Space<double>(mesh_coarse, &bcs_coarse, 1));
-  SpaceSharedPtr<double> space_fine(new H1Space<double>(mesh_fine, &bcs_fine, 1));
+  SpaceSharedPtr<double> space_coarse(new H1Space<double>(mesh_coarse, &bcs_coarse, 2));
+  SpaceSharedPtr<double> space_fine(new H1Space<double>(mesh_fine, &bcs_fine, 3));
 
   // Translate the coefficient vector into a Solution. 
   MeshFunctionSharedPtr<double> fn_coarse(new ConstantSolution<double>(mesh_coarse, 1.0));
