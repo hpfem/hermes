@@ -16,69 +16,69 @@ namespace Hermes
         max_order, Shapeset* shapeset, const Range& vertex_order, const
         Range& edge_bubble_order) : Selector<Scalar>(shapeset->get_min_order(), max_order), cand_list(cand_list), shapeset(shapeset), dof_score_exponent(1.0)
       {
-        if(shapeset == nullptr)
-          throw Exceptions::NullException(3);
+          if (shapeset == nullptr)
+            throw Exceptions::NullException(3);
 
-        num_shapes = new int***[2];
-        for(int i = 0; i < 2; i++)
-        {
-          /// Why H2DRS_MAX_ORDER + 3?
-          /// Because H2DRS_MAX_ORDER ( = 9 ) is the max order refinement selectors support (\todo verify the purpose of this).
-          /// But we need to know number of shapes for polynomial degrees 0, ..., 10 ( = 11 ) + 1 special (any order - at 0th position).
-          num_shapes[i] = new int**[H2D_NUM_SHAPES_SIZE];
-          for(int j = 0; j < H2D_NUM_SHAPES_SIZE; j++)
+          num_shapes = new int***[2];
+          for (int i = 0; i < 2; i++)
           {
-            num_shapes[i][j] = new int*[H2D_NUM_SHAPES_SIZE];
-            for(int k = 0; k < H2D_NUM_SHAPES_SIZE; k++)
+            /// Why H2DRS_MAX_ORDER + 3?
+            /// Because H2DRS_MAX_ORDER ( = 9 ) is the max order refinement selectors support (\todo verify the purpose of this).
+            /// But we need to know number of shapes for polynomial degrees 0, ..., 10 ( = 11 ) + 1 special (any order - at 0th position).
+            num_shapes[i] = new int**[H2D_NUM_SHAPES_SIZE];
+            for (int j = 0; j < H2D_NUM_SHAPES_SIZE; j++)
             {
-              num_shapes[i][j][k] = new int[6];
-              memset(num_shapes[i][j][k], 0, 6*sizeof(int));
+              num_shapes[i][j] = new int*[H2D_NUM_SHAPES_SIZE];
+              for (int k = 0; k < H2D_NUM_SHAPES_SIZE; k++)
+              {
+                num_shapes[i][j][k] = new int[6];
+                memset(num_shapes[i][j][k], 0, 6 * sizeof(int));
+              }
             }
           }
-        }
 
-        //build shape indices
-        build_shape_indices(HERMES_MODE_TRIANGLE, vertex_order, edge_bubble_order);
-        build_shape_indices(HERMES_MODE_QUAD, vertex_order, edge_bubble_order);
-      }
+          //build shape indices
+          build_shape_indices(HERMES_MODE_TRIANGLE, vertex_order, edge_bubble_order);
+          build_shape_indices(HERMES_MODE_QUAD, vertex_order, edge_bubble_order);
+        }
 
       template<typename Scalar>
       OptimumSelector<Scalar>::~OptimumSelector()
       {
-        for(int i = 0; i < 2; i++)
+        for (int i = 0; i < 2; i++)
         {
-          for(int j = 0; j < H2D_NUM_SHAPES_SIZE; j++)
+          for (int j = 0; j < H2D_NUM_SHAPES_SIZE; j++)
           {
-            for(int k = 0; k < H2D_NUM_SHAPES_SIZE; k++)
+            for (int k = 0; k < H2D_NUM_SHAPES_SIZE; k++)
             {
-              delete [] num_shapes[i][j][k];
+              delete[] num_shapes[i][j][k];
             }
-            delete [] num_shapes[i][j];
+            delete[] num_shapes[i][j];
           }
-          delete [] num_shapes[i];
+          delete[] num_shapes[i];
         }
-        delete [] num_shapes;
+        delete[] num_shapes;
       }
-      
+
       template<typename Scalar>
       void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, std::vector<ShapeInx>& indices, ElementMode2D mode)
       {
         int quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
         const int num_bubbles = shapeset->get_num_bubbles(quad_order, mode);
         unsigned short* bubble_inxs = shapeset->get_bubble_indices(quad_order, mode);
-        for(int j = 0; j < num_bubbles; j++)
+        for (int j = 0; j < num_bubbles; j++)
         {
           int inx_bubble = bubble_inxs[j];
-          if(used_shape_index.find(inx_bubble) == used_shape_index.end())
+          if (used_shape_index.find(inx_bubble) == used_shape_index.end())
           {
             used_shape_index[inx_bubble] = true;
             indices.push_back(ShapeInx(order_h, order_v, inx_bubble, H2DST_BUBBLE));
-            for(int order_h_i = order_h+1; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
-              for(int order_v_i = order_v+1; order_v_i < H2D_NUM_SHAPES_SIZE; order_v_i++)
-              {
-                num_shapes[mode][order_h_i][order_v_i][H2DSI_BUBBLE]++;
-                num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
-              }
+            for (int order_h_i = order_h + 1; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
+            for (int order_v_i = order_v + 1; order_v_i < H2D_NUM_SHAPES_SIZE; order_v_i++)
+            {
+              num_shapes[mode][order_h_i][order_v_i][H2DSI_BUBBLE]++;
+              num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
+            }
             num_shapes[mode][0][0][H2DSI_BUBBLE]++;
             num_shapes[mode][0][0][H2DSI_ANY]++;
           }
@@ -112,119 +112,122 @@ namespace Hermes
         int examined_shape = 0;
         for (unsigned char i = order_range.lower(); i <= 10; i++)
         {
-          //vertex functions
-          if(vertex_order.is_in_closed(i))
+          if (shapeset->get_space_type() != HERMES_L2_SPACE && shapeset->get_space_type() != HERMES_L2_MARKERWISE_CONST_SPACE)
           {
-            for (int j = 0; j < num_edges; j++)
+            //vertex functions
+            if (vertex_order.is_in_closed(i))
             {
-              int inx = shapeset->get_vertex_index(j, mode);
-              if(inx >= 0)
+              for (int j = 0; j < num_edges; j++)
               {
-                used_shape_index[inx] = true;
-                indices.push_back(ShapeInx(1, 1, inx, H2DST_VERTEX));
-                if(mode == HERMES_MODE_QUAD)
+                int inx = shapeset->get_vertex_index(j, mode);
+                if (inx >= 0)
                 {
-                  for(int order_h_i = 2; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
-                    for(int order_v_i = 2; order_v_i < H2D_NUM_SHAPES_SIZE; order_v_i++)
+                  used_shape_index[inx] = true;
+                  indices.push_back(ShapeInx(1, 1, inx, H2DST_VERTEX));
+                  if (mode == HERMES_MODE_QUAD)
+                  {
+                    for (int order_h_i = 2; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
+                    for (int order_v_i = 2; order_v_i < H2D_NUM_SHAPES_SIZE; order_v_i++)
                     {
                       num_shapes[mode][order_h_i][order_v_i][H2DSI_VERTEX]++;
                       num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
                     }
-                  num_shapes[mode][0][0][H2DSI_VERTEX]++;
-                  num_shapes[mode][0][0][H2DSI_ANY]++;
-                }
-                else
-                {
-                  for(int order_h_i = 2; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
-                  {
-                    num_shapes[mode][order_h_i][0][H2DSI_VERTEX]++;
-                    num_shapes[mode][order_h_i][0][H2DSI_ANY]++;
+                    num_shapes[mode][0][0][H2DSI_VERTEX]++;
+                    num_shapes[mode][0][0][H2DSI_ANY]++;
                   }
-                  num_shapes[mode][0][0][H2DSI_VERTEX]++;
-                  num_shapes[mode][0][0][H2DSI_ANY]++;
+                  else
+                  {
+                    for (int order_h_i = 2; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
+                    {
+                      num_shapes[mode][order_h_i][0][H2DSI_VERTEX]++;
+                      num_shapes[mode][order_h_i][0][H2DSI_ANY]++;
+                    }
+                    num_shapes[mode][0][0][H2DSI_VERTEX]++;
+                    num_shapes[mode][0][0][H2DSI_ANY]++;
+                  }
+                  has_vertex = true;
                 }
-                has_vertex = true;
               }
             }
-          }
 
-          //edge functions
-          if(edge_bubble_order.is_in_closed(i))
-          {
             //edge functions
-            if(mode == HERMES_MODE_QUAD)
+            if (edge_bubble_order.is_in_closed(i))
             {
-              for (int j = 0; j < num_edges; j++)
+              //edge functions
+              if (mode == HERMES_MODE_QUAD)
               {
-                int inx = shapeset->get_edge_index(j, 0, i, HERMES_MODE_QUAD);
-                if(inx >= 0)
+                for (int j = 0; j < num_edges; j++)
                 {
-                  used_shape_index[inx] = true;
-                  if((j&1) == 0)//horizontal edge
+                  int inx = shapeset->get_edge_index(j, 0, i, HERMES_MODE_QUAD);
+                  if (inx >= 0)
                   {
-                    indices.push_back(ShapeInx(i, 0, inx, H2DST_HORIZ_EDGE));
-                    for(int order_h_i = i+1; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
-                      for(int order_v_i = 1; order_v_i < H2D_NUM_SHAPES_SIZE; order_v_i++)
+                    used_shape_index[inx] = true;
+                    if ((j & 1) == 0)//horizontal edge
+                    {
+                      indices.push_back(ShapeInx(i, 0, inx, H2DST_HORIZ_EDGE));
+                      for (int order_h_i = i + 1; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
+                      for (int order_v_i = 1; order_v_i < H2D_NUM_SHAPES_SIZE; order_v_i++)
                       {
                         num_shapes[mode][order_h_i][order_v_i][H2DST_HORIZ_EDGE]++;
                         num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
                       }
-                    num_shapes[mode][0][0][H2DST_HORIZ_EDGE]++;
-                    num_shapes[mode][0][0][H2DSI_ANY]++;
-                  }
-                  else  //vertical edge
-                  {
-                    indices.push_back(ShapeInx(0, i, inx, H2DST_VERT_EDGE));
-                    for(int order_h_i = 1; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
-                      for(int order_v_i = i+1; order_v_i < H2D_NUM_SHAPES_SIZE; order_v_i++)
+                      num_shapes[mode][0][0][H2DST_HORIZ_EDGE]++;
+                      num_shapes[mode][0][0][H2DSI_ANY]++;
+                    }
+                    else  //vertical edge
+                    {
+                      indices.push_back(ShapeInx(0, i, inx, H2DST_VERT_EDGE));
+                      for (int order_h_i = 1; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
+                      for (int order_v_i = i + 1; order_v_i < H2D_NUM_SHAPES_SIZE; order_v_i++)
                       {
                         num_shapes[mode][order_h_i][order_v_i][H2DSI_VERT_EDGE]++;
                         num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
                       }
-                    num_shapes[mode][0][0][H2DSI_VERT_EDGE]++;
-                    num_shapes[mode][0][0][H2DSI_ANY]++;
+                      num_shapes[mode][0][0][H2DSI_VERT_EDGE]++;
+                      num_shapes[mode][0][0][H2DSI_ANY]++;
+                    }
+                    has_edge = true;
                   }
-                  has_edge = true;
                 }
               }
-            }
-            else
-            {
-              for (int j = 0; j < num_edges; j++)
+              else
               {
-                int inx = shapeset->get_edge_index(j, 0, i, HERMES_MODE_TRIANGLE);
-                if(inx >= 0)
+                for (int j = 0; j < num_edges; j++)
                 {
-                  used_shape_index[inx] = true;
-                  indices.push_back(ShapeInx(i, i, inx, H2DST_TRI_EDGE));
-                  for(int order_h_i = i+1; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
+                  int inx = shapeset->get_edge_index(j, 0, i, HERMES_MODE_TRIANGLE);
+                  if (inx >= 0)
                   {
-                    num_shapes[mode][order_h_i][0][H2DSI_TRI_EDGE]++;
-                    num_shapes[mode][order_h_i][0][H2DSI_ANY]++;
+                    used_shape_index[inx] = true;
+                    indices.push_back(ShapeInx(i, i, inx, H2DST_TRI_EDGE));
+                    for (int order_h_i = i + 1; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
+                    {
+                      num_shapes[mode][order_h_i][0][H2DSI_TRI_EDGE]++;
+                      num_shapes[mode][order_h_i][0][H2DSI_ANY]++;
+                    }
+                    num_shapes[mode][0][0][H2DSI_TRI_EDGE]++;
+                    num_shapes[mode][0][0][H2DSI_ANY]++;
+                    has_edge = true;
                   }
-                  num_shapes[mode][0][0][H2DSI_TRI_EDGE]++;
-                  num_shapes[mode][0][0][H2DSI_ANY]++;
-                  has_edge = true;
                 }
               }
             }
 
             //bubble functions
-            if(mode == HERMES_MODE_QUAD)
+            if (mode == HERMES_MODE_QUAD)
             {
               //NOTE: shapeset returns a set of all possible bubble functions and it is not possible to identify which is the smallest
               // order of an element which contains this function, e.g., in a case of a Hcurl and an element of an order 1/1, it returns
               // a list that contains a function of poly-order 2/0. Also, order of indices is not given.
               int order = i;
               unsigned num_indices_prev = indices.size();
-              for(int order_other = edge_bubble_order.lower(); order_other <= order; order_other++)
+              for (int order_other = edge_bubble_order.lower(); order_other <= order; order_other++)
               {
                 add_bubble_shape_index(order, order_other, used_shape_index, indices, mode);
                 add_bubble_shape_index(order_other, order, used_shape_index, indices, mode);
               }
 
               //check if indices were added
-              if(num_indices_prev < indices.size())
+              if (num_indices_prev < indices.size())
                 has_bubble = true;
             }
             else { //triangles
@@ -234,11 +237,11 @@ namespace Hermes
               for (unsigned short j = 0; j < num_bubbles; j++)
               {
                 int inx_bubble = bubble_inxs[j];
-                if(used_shape_index.find(inx_bubble) == used_shape_index.end())
+                if (used_shape_index.find(inx_bubble) == used_shape_index.end())
                 {
                   used_shape_index[inx_bubble] = true;
                   indices.push_back(ShapeInx(order, order, inx_bubble, H2DST_BUBBLE));
-                  for(int order_h_i = order+1; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
+                  for (int order_h_i = order + 1; order_h_i < H2D_NUM_SHAPES_SIZE; order_h_i++)
                   {
                     num_shapes[mode][order_h_i][0][H2DSI_BUBBLE]++;
                     num_shapes[mode][order_h_i][0][H2DSI_ANY]++;
@@ -254,7 +257,7 @@ namespace Hermes
             next_order[i] = (int)indices.size();
 
             //update maximum
-            while(examined_shape < next_order[i])
+            while (examined_shape < next_order[i])
             {
               max_shape_inx = std::max(max_shape_inx, indices[examined_shape].inx);
               examined_shape++;
@@ -270,24 +273,24 @@ namespace Hermes
       {
         //test whether the evaluation is necessary
         bool full_eval = false;
-        if((allowed_type_mask & H2DST_VERTEX) != 0)
+        if ((allowed_type_mask & H2DST_VERTEX) != 0)
           full_eval |= has_vertex_shape[mode];
-        if((allowed_type_mask & (H2DST_HORIZ_EDGE | H2DST_VERT_EDGE | H2DST_TRI_EDGE)) != 0)
+        if ((allowed_type_mask & (H2DST_HORIZ_EDGE | H2DST_VERT_EDGE | H2DST_TRI_EDGE)) != 0)
           full_eval |= has_edge_shape[mode];
-        if((allowed_type_mask & H2DST_BUBBLE) != 0)
+        if ((allowed_type_mask & H2DST_BUBBLE) != 0)
           full_eval |= has_bubble_shape[mode];
 
         //evaluate
-        if(full_eval)
+        if (full_eval)
         {
           std::vector<ShapeInx>& shapes = shape_indices[mode];
           int num = 0;
           typename std::vector<ShapeInx>::const_iterator shape = shapes.begin();
           while (shape != shapes.end())
           {
-            if(((int)shape->type & allowed_type_mask) != 0)
+            if (((int)shape->type & allowed_type_mask) != 0)
             {
-              if((order_h == H2DRS_ORDER_ANY || shape->order_h <= order_h) && (order_v == H2DRS_ORDER_ANY || shape->order_v <= order_v))
+              if ((order_h == H2DRS_ORDER_ANY || shape->order_h <= order_h) && (order_v == H2DRS_ORDER_ANY || shape->order_v <= order_v))
                 num++;
             }
             shape++;
@@ -302,9 +305,9 @@ namespace Hermes
       void OptimumSelector<Scalar>::append_candidates_split(std::vector<Cand>& candidates, const int start_order, const int last_order, const RefinementType split, bool iso_p)
       {
         //check whether end orders are not lower than start orders
-        if(last_order < 0 || start_order < 0)
+        if (last_order < 0 || start_order < 0)
           return;
-        if(H2D_GET_H_ORDER(start_order) > H2D_GET_H_ORDER(last_order) || H2D_GET_V_ORDER(start_order) > H2D_GET_V_ORDER(last_order))
+        if (H2D_GET_H_ORDER(start_order) > H2D_GET_H_ORDER(last_order) || H2D_GET_V_ORDER(start_order) > H2D_GET_V_ORDER(last_order))
           return;
 
         //get number of sons
@@ -313,17 +316,17 @@ namespace Hermes
         //initialize orders
         unsigned short quad_orders[H2D_MAX_ELEMENT_SONS];
         OrderPermutator quad_perms[H2D_MAX_ELEMENT_SONS];
-        for(int i = 0; i < num_sons; i++)
+        for (int i = 0; i < num_sons; i++)
         {
           quad_orders[i] = start_order;
           quad_perms[i] = OrderPermutator(start_order, last_order, iso_p, &quad_orders[i]);
         }
-        for(int i = num_sons; i < H2D_MAX_ELEMENT_SONS; i++)
+        for (int i = num_sons; i < H2D_MAX_ELEMENT_SONS; i++)
           quad_orders[i] = 0;
 
         //generate permutations of orders
         bool quit = false;
-        while(!quit)
+        while (!quit)
         {
           do { //create permutation of son 0
             candidates.push_back(Cand(split, quad_orders));
@@ -339,7 +342,7 @@ namespace Hermes
             quad_perms[inx_son].reset(); //reset order of the son
             inx_son++;
           }
-          if(inx_son >= num_sons)
+          if (inx_son >= num_sons)
             quit = true;
         }
       }
@@ -355,7 +358,7 @@ namespace Hermes
 
         int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
 
-        if(current_max_order < std::max(order_h, order_v))
+        if (current_max_order < std::max(order_h, order_v))
           current_max_order = std::max(order_h, order_v);
 
         bool tri = e->is_triangle();
@@ -368,7 +371,7 @@ namespace Hermes
         bool iso_p = false;
         int last_order_h = std::min(current_max_order, order_h + H2DRS_MAX_ORDER_INC), last_order_v = std::min(current_max_order, order_v + H2DRS_MAX_ORDER_INC);
         int last_order = H2D_MAKE_QUAD_ORDER(last_order_h, last_order_v);
-        switch(cand_list)
+        switch (cand_list)
         {
         case H2D_H_ISO:
         case H2D_H_ANISO: last_order = quad_order; break; //no P-candidates except the original candidate
@@ -384,7 +387,7 @@ namespace Hermes
         int start_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
         last_order_h = std::min(current_max_order, order_h + H2DRS_MAX_ORDER_INC), last_order_v = std::min(current_max_order, order_v + H2DRS_MAX_ORDER_INC);
         last_order = H2D_MAKE_QUAD_ORDER(last_order_h, last_order_v);
-        switch(cand_list)
+        switch (cand_list)
         {
         case H2D_H_ISO:
         case H2D_H_ANISO:
@@ -398,14 +401,14 @@ namespace Hermes
 
         //generate all ANISO-candidates
         /** \todo Find and why is iro_cache compared with the number 8. What does the number 8 mean? */
-        if(!tri && e->iro_cache < 8 && (cand_list == H2D_H_ANISO || cand_list == H2D_HP_ANISO_H || cand_list == H2D_HP_ANISO))
+        if (!tri && e->iro_cache < 8 && (cand_list == H2D_H_ANISO || cand_list == H2D_HP_ANISO_H || cand_list == H2D_HP_ANISO))
         {
           iso_p = false;
           int start_order_hz = H2D_MAKE_QUAD_ORDER(order_h, std::max(current_min_order, (order_v - 1)));
           int last_order_hz = H2D_MAKE_QUAD_ORDER(std::min(current_max_order, order_h + H2DRS_MAX_ORDER_INC), std::min(order_v, H2D_GET_V_ORDER(start_order) + H2DRS_MAX_ORDER_INC));
           int start_order_vt = H2D_MAKE_QUAD_ORDER(std::max(current_min_order, (order_h - 1)), order_v);
           int last_order_vt = H2D_MAKE_QUAD_ORDER(std::min(order_h, H2D_GET_H_ORDER(start_order) + H2DRS_MAX_ORDER_INC), std::min(current_max_order, order_v + H2DRS_MAX_ORDER_INC));
-          switch(cand_list)
+          switch (cand_list)
           {
           case H2D_H_ANISO:
             last_order_hz = start_order_hz = quad_order;
@@ -413,7 +416,7 @@ namespace Hermes
             break; //only one candidate will be created
           case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
           }
-          if(iso_p) { //make orders uniform: take mininmum order since nonuniformity is caused by different handling of orders along directions
+          if (iso_p) { //make orders uniform: take mininmum order since nonuniformity is caused by different handling of orders along directions
             int order = std::min(H2D_GET_H_ORDER(start_order_hz), H2D_GET_V_ORDER(start_order_hz));
             start_order_hz = H2D_MAKE_QUAD_ORDER(order, order);
             order = std::min(H2D_GET_H_ORDER(start_order_vt), H2D_GET_V_ORDER(start_order_vt));
@@ -434,23 +437,23 @@ namespace Hermes
       template<typename Scalar>
       void OptimumSelector<Scalar>::update_cands_info(std::vector<Cand>& candidates, CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const
       {
-        for(unsigned short i = 0; i < candidates.size(); i++)
+        for (unsigned short i = 0; i < candidates.size(); i++)
         {
           CandsInfo* info = nullptr;
           Cand& cand = candidates[i];
-          if(cand.split == H2D_REFINEMENT_H) info = &info_h;
-          else if(cand.split == H2D_REFINEMENT_P) info = &info_p;
-          else if(cand.split == H2D_REFINEMENT_H_ANISO_H || cand.split == H2D_REFINEMENT_H_ANISO_V) info = &info_aniso;
+          if (cand.split == H2D_REFINEMENT_H) info = &info_h;
+          else if (cand.split == H2D_REFINEMENT_P) info = &info_p;
+          else if (cand.split == H2D_REFINEMENT_H_ANISO_H || cand.split == H2D_REFINEMENT_H_ANISO_V) info = &info_aniso;
           else { throw Hermes::Exceptions::Exception("Invalid candidate type: %d.", cand.split); };
 
           //evaluate elements of candidates
           const int num_elems = cand.get_num_elems();
-          for(int i = 0; i < num_elems; i++)
+          for (int i = 0; i < num_elems; i++)
           {
             int elem_order_h = H2D_GET_H_ORDER(cand.p[i]), elem_order_v = H2D_GET_V_ORDER(cand.p[i]);
-            if(elem_order_h != elem_order_v)
+            if (elem_order_h != elem_order_v)
               info->uniform_orders = false;
-            if(info->min_quad_order < 0 || info->max_quad_order < 0)
+            if (info->min_quad_order < 0 || info->max_quad_order < 0)
               info->min_quad_order = info->max_quad_order = H2D_MAKE_QUAD_ORDER(elem_order_h, elem_order_v);
             else
             {
@@ -469,24 +472,24 @@ namespace Hermes
         for (unsigned i = 0; i < candidates.size(); i++)
         {
           Cand& c = candidates[i];
-          if(tri) { //triangle
-            switch(c.split)
+          if (tri) { //triangle
+            switch (c.split)
             {
             case H2D_REFINEMENT_H:
-              {
-                const int central = 3; //central triangle
-                c.dofs = 0;
-                for(int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
-                {
-                  c.dofs += num_shapes[HERMES_MODE_TRIANGLE][H2D_GET_H_ORDER(c.p[j]) + 1][H2DRS_ORDER_ANY + 1][H2DSI_ANY];
-                  if(j != central)
-                  {
-                    c.dofs -= num_shapes[HERMES_MODE_TRIANGLE][std::min(H2D_GET_H_ORDER(c.p[j]) , H2D_GET_H_ORDER(c.p[central])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_TRI_EDGE] / 3; //shared edge: since triangle has three edges which are identified by a single order this will find 3 x different edge of a given order
-                  }
-                }
-                if(has_vertex_shape[HERMES_MODE_TRIANGLE])
-                  c.dofs -= 2*3; // Every vertex function belonging to vertices of the middle triangle is added 3-times, so it has to be deducted 2 times.
-              }
+            {
+                                   const int central = 3; //central triangle
+                                   c.dofs = 0;
+                                   for (int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
+                                   {
+                                     c.dofs += num_shapes[HERMES_MODE_TRIANGLE][H2D_GET_H_ORDER(c.p[j]) + 1][H2DRS_ORDER_ANY + 1][H2DSI_ANY];
+                                     if (j != central)
+                                     {
+                                       c.dofs -= num_shapes[HERMES_MODE_TRIANGLE][std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[central])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_TRI_EDGE] / 3; //shared edge: since triangle has three edges which are identified by a single order this will find 3 x different edge of a given order
+                                     }
+                                   }
+                                   if (has_vertex_shape[HERMES_MODE_TRIANGLE])
+                                     c.dofs -= 2 * 3; // Every vertex function belonging to vertices of the middle triangle is added 3-times, so it has to be deducted 2 times.
+            }
               break;
 
             case H2D_REFINEMENT_P:
@@ -498,17 +501,17 @@ namespace Hermes
             }
           }
           else { //quad
-            switch(c.split)
+            switch (c.split)
             {
             case H2D_REFINEMENT_H:
               c.dofs = 0;
-              for(int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
+              for (int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
                 c.dofs += num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[j]) + 1][H2D_GET_V_ORDER(c.p[j]) + 1][H2DSI_ANY];
-              for(int j = 0; j < 2; j++) { //shared edge functions
-                c.dofs -= num_shapes[HERMES_MODE_QUAD][H2DRS_ORDER_ANY + 1][std::min(H2D_GET_V_ORDER(c.p[2*j]), H2D_GET_V_ORDER(c.p[2*j + 1])) + 1][H2DSI_VERT_EDGE] / 2; //shared vertical edge functions: every edge is twice there
-                c.dofs -= num_shapes[HERMES_MODE_QUAD][std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[j^3])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_HORIZ_EDGE] / 2; //shared horizontal edge functions: every edge is twice there
+              for (int j = 0; j < 2; j++) { //shared edge functions
+                c.dofs -= num_shapes[HERMES_MODE_QUAD][H2DRS_ORDER_ANY + 1][std::min(H2D_GET_V_ORDER(c.p[2 * j]), H2D_GET_V_ORDER(c.p[2 * j + 1])) + 1][H2DSI_VERT_EDGE] / 2; //shared vertical edge functions: every edge is twice there
+                c.dofs -= num_shapes[HERMES_MODE_QUAD][std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[j ^ 3])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_HORIZ_EDGE] / 2; //shared horizontal edge functions: every edge is twice there
               }
-              if(has_vertex_shape[HERMES_MODE_QUAD])
+              if (has_vertex_shape[HERMES_MODE_QUAD])
                 c.dofs -= 4 + 3; //edge vertex + central vertex
               break;
 
@@ -516,7 +519,7 @@ namespace Hermes
               c.dofs = num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[0]) + 1][H2D_GET_V_ORDER(c.p[0]) + 1][H2DSI_ANY];
               c.dofs += num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[1]) + 1][H2D_GET_V_ORDER(c.p[1]) + 1][H2DSI_ANY];
               c.dofs -= num_shapes[HERMES_MODE_QUAD][std::min(H2D_GET_H_ORDER(c.p[0]), H2D_GET_H_ORDER(c.p[1])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_HORIZ_EDGE] / 2; //shared edge functions
-              if(has_vertex_shape[HERMES_MODE_QUAD])
+              if (has_vertex_shape[HERMES_MODE_QUAD])
                 c.dofs -= 2; //shared vertex functions
               break;
 
@@ -524,7 +527,7 @@ namespace Hermes
               c.dofs = num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[0]) + 1][H2D_GET_V_ORDER(c.p[0]) + 1][H2DSI_ANY];
               c.dofs += num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[1]) + 1][H2D_GET_V_ORDER(c.p[1]) + 1][H2DSI_ANY];
               c.dofs -= num_shapes[HERMES_MODE_QUAD][H2DRS_ORDER_ANY + 1][std::min(H2D_GET_V_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[1])) + 1][H2DSI_VERT_EDGE] / 2; //shared edge functions
-              if(has_vertex_shape[HERMES_MODE_QUAD])
+              if (has_vertex_shape[HERMES_MODE_QUAD])
                 c.dofs -= 2; //shared vertex functions
               break;
 
@@ -563,12 +566,12 @@ namespace Hermes
         // Original candidate score is zero.
         unrefined.score = 0;
 
-        for(unsigned short i = 1; i < candidates.size(); i++)
+        for (unsigned short i = 1; i < candidates.size(); i++)
         {
           Cand& candidate = candidates[i];
 
           // We are only interested in candidates decreasing the error.
-          if(candidate.error < unrefined.error)
+          if (candidate.error < unrefined.error)
             candidate.score = (log(unrefined.error / candidate.error)) / std::pow(candidate.dofs - unrefined.dofs, this->dof_score_exponent);
           else
             candidate.score = 0;
@@ -586,48 +589,48 @@ namespace Hermes
       {
         //sort according to the score
         const int num_cands = (int)candidates.size();
-        
-        if(num_cands > 2)
+
+        if (num_cands > 2)
           std::sort(candidates.begin() + 1, candidates.end(), compare_cand_score);
 
         // Overall best candidate.
-        if(candidates[1].score == 0)
+        if (candidates[1].score == 0)
           // This means that the best candidate is the 'do-nothing' one.
           best_candidate = &candidates[0];
         else
           // The one with the highest score is the best.
           best_candidate = &candidates[1];
 
-        for(int i = 0; i < num_cands; i++)
+        for (int i = 0; i < num_cands; i++)
         {
-          if(candidates[i].split == H2D_REFINEMENT_P)
+          if (candidates[i].split == H2D_REFINEMENT_P)
           {
             best_candidates_specific_type[H2D_REFINEMENT_P] = &candidates[i];
             break;
           }
         }
 
-        for(int i = 0; i < num_cands; i++)
+        for (int i = 0; i < num_cands; i++)
         {
-          if(candidates[i].split == H2D_REFINEMENT_H)
+          if (candidates[i].split == H2D_REFINEMENT_H)
           {
             best_candidates_specific_type[H2D_REFINEMENT_H] = &candidates[i];
             break;
           }
         }
 
-        for(int i = 0; i < num_cands; i++)
+        for (int i = 0; i < num_cands; i++)
         {
-          if(candidates[i].split == H2D_REFINEMENT_H_ANISO_H)
+          if (candidates[i].split == H2D_REFINEMENT_H_ANISO_H)
           {
             best_candidates_specific_type[H2D_REFINEMENT_H_ANISO_H] = &candidates[i];
             break;
           }
         }
 
-        for(int i = 0; i < num_cands; i++)
+        for (int i = 0; i < num_cands; i++)
         {
-          if(candidates[i].split == H2D_REFINEMENT_H_ANISO_V)
+          if (candidates[i].split == H2D_REFINEMENT_H_ANISO_V)
           {
             best_candidates_specific_type[H2D_REFINEMENT_H_ANISO_V] = &candidates[i];
             break;
@@ -640,7 +643,7 @@ namespace Hermes
       {
         //make an uniform order in a case of a triangle
         int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
-        if(element->is_triangle())
+        if (element->is_triangle())
         {
           order_v = order_h;
           quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v); //in a case of a triangle, order_v is zero. Set it to order_h in order to simplify the routines.
@@ -653,8 +656,8 @@ namespace Hermes
         Cand* best_candidates_specific_type[4];
         memset(best_candidates_specific_type, 0, 4 * sizeof(Cand*));
 
-        if(candidates.size() > 1)
-        { 
+        if (candidates.size() > 1)
+        {
           // evaluate candidates (sum partial projection errors, calculate dofs)
           evaluate_candidates(candidates, element, rsln);
 
@@ -664,32 +667,32 @@ namespace Hermes
 
         //there is not candidate to choose from, select the original candidate
         else
-        { 
+        {
           best_candidate = &candidates[0];
         }
 
-        if(best_candidate == &candidates[0])
+        if (best_candidate == &candidates[0])
           return false;
 
         //copy result to output
         refinement.split = best_candidate->split;
         ElementToRefine::copy_orders(refinement.refinement_polynomial_order, best_candidate->p);
-        for(int i = 1; i < 4; i++)
-          if(best_candidates_specific_type[i] != nullptr)
-            ElementToRefine::copy_orders(refinement.best_refinement_polynomial_order_type[i], best_candidates_specific_type[i]->p);
+        for (int i = 1; i < 4; i++)
+        if (best_candidates_specific_type[i] != nullptr)
+          ElementToRefine::copy_orders(refinement.best_refinement_polynomial_order_type[i], best_candidates_specific_type[i]->p);
 
         ElementToRefine::copy_errors(refinement.errors, best_candidate->errors);
 
         //modify orders in a case of a triangle such that order_v is zero
-        if(element->is_triangle())
+        if (element->is_triangle())
         {
-          for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
+          for (int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
           {
             assert(H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i]) == 0 || H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]) == H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i]));
 
             refinement.refinement_polynomial_order[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]), 0);
 
-            for(int poly_order_type_i = 1; poly_order_type_i < 4; poly_order_type_i++)
+            for (int poly_order_type_i = 1; poly_order_type_i < 4; poly_order_type_i++)
               refinement.best_refinement_polynomial_order_type[poly_order_type_i][i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.best_refinement_polynomial_order_type[poly_order_type_i][i]), 0);
           }
         }

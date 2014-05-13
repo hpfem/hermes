@@ -355,12 +355,12 @@ namespace Hermes
         unsigned short g_max, np;
         if (i == HERMES_MODE_TRIANGLE)
         {
-          g_max = g_max_tri + 1;
+          g_max = g_max_tri + 1 + 3 * g_max_tri + 3;
           np = H2D_MAX_INTEGRATION_POINTS_COUNT_TRI;
         }
         else
         {
-          g_max = g_max_quad + 1;
+          g_max = g_max_quad + 1 + 4 * g_max_quad + 4;
           np = H2D_MAX_INTEGRATION_POINTS_COUNT_QUAD;
         }
 
@@ -389,9 +389,9 @@ namespace Hermes
       {
         unsigned short g_max;
         if (i == HERMES_MODE_TRIANGLE)
-          g_max = g_max_tri + 1;
+          g_max = g_max_tri + 1 + 3 * g_max_tri + 3;
         else
-          g_max = g_max_quad + 1;
+          g_max = g_max_quad + 1 + 4 * g_max_quad + 4;
 
         unsigned short local_base_size = this->shapeset->get_max_index((ElementMode2D)i) + 1;
 
