@@ -22,7 +22,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Limiter<Scalar>::Limiter(SpaceSharedPtrVector<Scalar> spaces, Scalar* solution_vector) : spaces(spaces), component_count(spaces.size())
+      Limiter<Scalar>::Limiter(std::vector<SpaceSharedPtr<Scalar> > spaces, Scalar* solution_vector) : spaces(spaces), component_count(spaces.size())
       {
         this->init(solution_vector);
       }
@@ -61,14 +61,14 @@ namespace Hermes
         warn_if(this->component_count > 1, "One solution asked from a Limiter, but multiple solutions exist for limiting.");
 
         MeshFunctionSharedPtr<Scalar> solution(new Solution<Scalar>());
-        MeshFunctionSharedPtrVector<Scalar> solutions;
+        std::vector<MeshFunctionSharedPtr<Scalar> > solutions;
         solutions.push_back(solution);
         this->get_solutions(solutions);
         return solutions.back();
       }
 
       template<typename Scalar>
-      void Limiter<Scalar>::get_solutions(MeshFunctionSharedPtrVector<Scalar> solutions)
+      void Limiter<Scalar>::get_solutions(std::vector<MeshFunctionSharedPtr<Scalar> > solutions)
       {
         if (solutions.size() != this->component_count)
           throw Exceptions::Exception("Limiter does not have correct number of spaces, solutions.");
@@ -586,7 +586,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      IntegralCalculator<Scalar>::IntegralCalculator(MeshFunctionSharedPtrVector<Scalar> source_functions, int number_of_integrals) : Hermes::Mixins::Loggable(false), source_functions(source_functions), number_of_integrals(number_of_integrals)
+      IntegralCalculator<Scalar>::IntegralCalculator(std::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals) : Hermes::Mixins::Loggable(false), source_functions(source_functions), number_of_integrals(number_of_integrals)
       {
       }
 
@@ -624,7 +624,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VolumetricIntegralCalculator<Scalar>::VolumetricIntegralCalculator(MeshFunctionSharedPtrVector<Scalar> source_functions, int number_of_integrals) : IntegralCalculator<Scalar>(source_functions, number_of_integrals)
+      VolumetricIntegralCalculator<Scalar>::VolumetricIntegralCalculator(std::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals) : IntegralCalculator<Scalar>(source_functions, number_of_integrals)
       {
       }
 
@@ -821,7 +821,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      SurfaceIntegralCalculator<Scalar>::SurfaceIntegralCalculator(MeshFunctionSharedPtrVector<Scalar> source_functions, int number_of_integrals) : IntegralCalculator<Scalar>(source_functions, number_of_integrals)
+      SurfaceIntegralCalculator<Scalar>::SurfaceIntegralCalculator(std::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals) : IntegralCalculator<Scalar>(source_functions, number_of_integrals)
       {
       }
 

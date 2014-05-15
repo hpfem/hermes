@@ -50,7 +50,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    AdaptSolver<Scalar, SolverType>::AdaptSolver(SpaceSharedPtrVector<Scalar> initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::SelectorVector<Scalar> selectors, AdaptSolverCriterion* stopping_criterion_global)
+    AdaptSolver<Scalar, SolverType>::AdaptSolver(std::vector<SpaceSharedPtr<Scalar> > initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::SelectorVector<Scalar> selectors, AdaptSolverCriterion* stopping_criterion_global)
       : spaces(initial_spaces), wf(wf), error_calculator(error_calculator), stopping_criterion_single_step(stopping_criterion_single_step), selectors(selectors), stopping_criterion_global(stopping_criterion_global)
     {
       this->init();
@@ -115,8 +115,8 @@ namespace Hermes
       static int current_iteration;
       static std::unordered_set<unsigned int>* current_elements_to_reassemble[H2D_MAX_COMPONENTS];
       static std::unordered_set<int>* current_DOFs_to_reassemble[H2D_MAX_COMPONENTS];
-      static SpaceSharedPtrVector<Scalar>* current_ref_spaces;
-      static SpaceSharedPtrVector<Scalar>* current_prev_ref_spaces;
+      static std::vector<SpaceSharedPtr<Scalar> >* current_ref_spaces;
+      static std::vector<SpaceSharedPtr<Scalar> >* current_prev_ref_spaces;
       static unsigned char current_number_of_equations;
       static CSCMatrix<Scalar>* current_prev_mat;
       static Vector<Scalar>* current_prev_rhs;
@@ -137,10 +137,10 @@ namespace Hermes
     std::unordered_set<int>* StateReassemblyHelper<Scalar>::current_DOFs_to_reassemble[H2D_MAX_COMPONENTS];
 
     template<typename Scalar>
-    SpaceSharedPtrVector<Scalar>* StateReassemblyHelper<Scalar>::current_ref_spaces;
+    std::vector<SpaceSharedPtr<Scalar> >* StateReassemblyHelper<Scalar>::current_ref_spaces;
 
     template<typename Scalar>
-    SpaceSharedPtrVector<Scalar>* StateReassemblyHelper<Scalar>::current_prev_ref_spaces;
+    std::vector<SpaceSharedPtr<Scalar> >* StateReassemblyHelper<Scalar>::current_prev_ref_spaces;
 
     template<typename Scalar>
     CSCMatrix<Scalar>* StateReassemblyHelper<Scalar>::current_prev_mat;
@@ -226,7 +226,7 @@ namespace Hermes
       // - utility assembly lists.
       AsmList<Scalar> al, al_prev;
       // - dummy functions for traversing the previous and current reference spaces together
-      MeshFunctionSharedPtrVector<Scalar> dummy_fns;
+      std::vector<MeshFunctionSharedPtr<Scalar> > dummy_fns;
       for (unsigned short i = 0; i < StateReassemblyHelper<Scalar>::current_number_of_equations; i++)
         dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_prev_ref_spaces->at(i)->get_mesh()));
       for (unsigned short i = 0; i < StateReassemblyHelper<Scalar>::current_number_of_equations; i++)
@@ -784,7 +784,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    MeshFunctionSharedPtrVector<Scalar> AdaptSolver<Scalar, SolverType>::get_slns()
+    std::vector<MeshFunctionSharedPtr<Scalar> > AdaptSolver<Scalar, SolverType>::get_slns()
     {
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked for solutions while it was running.");
@@ -800,7 +800,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    MeshFunctionSharedPtrVector<Scalar> AdaptSolver<Scalar, SolverType>::get_ref_slns()
+    std::vector<MeshFunctionSharedPtr<Scalar> > AdaptSolver<Scalar, SolverType>::get_ref_slns()
     {
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked for solutions while it was running.");
@@ -828,7 +828,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::set_exact_solutions(MeshFunctionSharedPtrVector<Scalar> exact_slns)
+    void AdaptSolver<Scalar, SolverType>::set_exact_solutions(std::vector<MeshFunctionSharedPtr<Scalar> > exact_slns)
     {
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked to change the exact_slns while it was running.");
@@ -836,7 +836,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::set_initial_spaces(SpaceSharedPtrVector<Scalar> spaces)
+    void AdaptSolver<Scalar, SolverType>::set_initial_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       if (this->solve_method_running)
         throw Exceptions::Exception("AdaptSolver asked to change the initial spaces while it was running.");
@@ -877,7 +877,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    SpaceSharedPtrVector<Scalar> AdaptSolver<Scalar, SolverType>::get_initial_spaces()
+    std::vector<SpaceSharedPtr<Scalar> > AdaptSolver<Scalar, SolverType>::get_initial_spaces()
     {
       return this->spaces;
     }

@@ -441,7 +441,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector,
-      SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> solutions,
+      std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshFunctionSharedPtr<Scalar> > solutions,
       std::vector<bool> add_dir_lift, std::vector<int> start_indices)
     {
       Helpers::check_for_null(solution_vector);
@@ -501,8 +501,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
-      MeshFunctionSharedPtrVector<Scalar> solutions, std::vector<bool> add_dir_lift, std::vector<int> start_indices)
+    void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, std::vector<SpaceSharedPtr<Scalar> > spaces,
+      std::vector<MeshFunctionSharedPtr<Scalar> > solutions, std::vector<bool> add_dir_lift, std::vector<int> start_indices)
     {
       Helpers::check_for_null(solution_vector);
       Helpers::check_length(solutions, spaces);
@@ -540,8 +540,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Vector<Scalar>* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
-      MeshFunctionSharedPtrVector<Scalar> solutions, bool add_dir_lift)
+    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Vector<Scalar>* solution_vector, std::vector<SpaceSharedPtr<Scalar> > spaces,
+      std::vector<MeshFunctionSharedPtr<Scalar> > solutions, bool add_dir_lift)
     {
       Helpers::check_for_null(solution_vector);
       Helpers::check_length(spaces, solutions);
@@ -565,8 +565,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Scalar* solution_vector, SpaceSharedPtrVector<Scalar> spaces,
-      MeshFunctionSharedPtrVector<Scalar> solutions, bool add_dir_lift)
+    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Scalar* solution_vector, std::vector<SpaceSharedPtr<Scalar> > spaces,
+      std::vector<MeshFunctionSharedPtr<Scalar> > solutions, bool add_dir_lift)
     {
       Helpers::check_for_null(solution_vector);
       Helpers::check_length(solutions, spaces);

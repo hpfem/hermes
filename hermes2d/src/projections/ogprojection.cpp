@@ -74,7 +74,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(const SpaceSharedPtrVector<Scalar> spaces,
+    void OGProjection<Scalar>::project_global(const std::vector<SpaceSharedPtr<Scalar> > spaces,
       const std::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
       const std::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
       Scalar* target_vec)
@@ -94,10 +94,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(const SpaceSharedPtrVector<Scalar> spaces,
+    void OGProjection<Scalar>::project_global(const std::vector<SpaceSharedPtr<Scalar> > spaces,
       const std::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
       const std::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
-      const MeshFunctionSharedPtrVector<Scalar>& target_slns)
+      const std::vector<MeshFunctionSharedPtr<Scalar> >& target_slns)
     {
       // Sanity checks.
       Helpers::check_length(target_slns, spaces);
@@ -194,7 +194,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_slns,
+    void OGProjection<Scalar>::project_global(std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
       Scalar* target_vec, std::vector<NormType> proj_norms)
     {
       // Sanity checks.
@@ -216,7 +216,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_slns,
+    void OGProjection<Scalar>::project_global(std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
       Hermes::Algebra::Vector<Scalar>* target_vec, std::vector<NormType> proj_norms)
     {
       if (target_vec->get_size() != Space<Scalar>::get_num_dofs(spaces))
@@ -229,8 +229,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(SpaceSharedPtrVector<Scalar> spaces, MeshFunctionSharedPtrVector<Scalar> source_slns,
-      MeshFunctionSharedPtrVector<Scalar> target_slns, std::vector<NormType> proj_norms, bool delete_old_meshes)
+    void OGProjection<Scalar>::project_global(std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
+      std::vector<MeshFunctionSharedPtr<Scalar> > target_slns, std::vector<NormType> proj_norms, bool delete_old_meshes)
     {
       int n = spaces.size();
 

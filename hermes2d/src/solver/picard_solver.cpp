@@ -48,7 +48,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces) : Solver<Scalar>(false), PicardMatrixSolver<Scalar>()
+    PicardSolver<Scalar>::PicardSolver(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces) : Solver<Scalar>(false), PicardMatrixSolver<Scalar>()
     {
       this->dp = new DiscreteProblem<Scalar>(wf, spaces, false, false);
       this->own_dp = true;
@@ -142,7 +142,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spaces)
+    void PicardSolver<Scalar>::set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       Solver<Scalar>::set_spaces(spaces);
       this->jacobian_reusable = false;

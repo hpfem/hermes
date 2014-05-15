@@ -119,9 +119,9 @@ namespace Hermes
     template<typename Scalar>
     void ErrorCalculator<Scalar>::calculate_errors(MeshFunctionSharedPtr<Scalar> coarse_solution, MeshFunctionSharedPtr<Scalar> fine_solution, bool sort_and_store)
     {
-      MeshFunctionSharedPtrVector<Scalar> coarse_solutions;
+      std::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions;
       coarse_solutions.push_back(coarse_solution);
-      MeshFunctionSharedPtrVector<Scalar> fine_solutions;
+      std::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions;
       fine_solutions.push_back(fine_solution);
       this->calculate_errors(coarse_solutions, fine_solutions, sort_and_store);
     }
@@ -151,7 +151,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::calculate_errors(MeshFunctionSharedPtrVector<Scalar> coarse_solutions_, MeshFunctionSharedPtrVector<Scalar> fine_solutions_, bool sort_and_store)
+    void ErrorCalculator<Scalar>::calculate_errors(std::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions_, std::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions_, bool sort_and_store)
     {
       this->coarse_solutions = coarse_solutions_;
       this->fine_solutions = fine_solutions_;
@@ -162,7 +162,7 @@ namespace Hermes
       this->init_data_storage();
 
       // Prepare multi-mesh traversal and error arrays.
-      MeshSharedPtrVector meshes;
+      std::vector<MeshSharedPtr> meshes;
 
       for (int i = 0; i < this->component_count; i++)
         meshes.push_back(coarse_solutions[i]->get_mesh());
@@ -395,9 +395,9 @@ namespace Hermes
     }
 
     template<typename Scalar, NormType normType>
-    double DefaultNormCalculator<Scalar, normType>::calculate_norms(MeshFunctionSharedPtrVector<Scalar>& solutions)
+    double DefaultNormCalculator<Scalar, normType>::calculate_norms(std::vector<MeshFunctionSharedPtr<Scalar> >& solutions)
     {
-      MeshFunctionSharedPtrVector<Scalar> zero_fine_solutions;
+      std::vector<MeshFunctionSharedPtr<Scalar> > zero_fine_solutions;
       for (unsigned short i = 0; i < solutions.size(); i++)
         zero_fine_solutions.push_back(MeshFunctionSharedPtr<Scalar>(new ZeroSolution<Scalar>(solutions[i]->get_mesh())));
       this->calculate_errors(solutions, zero_fine_solutions, false);

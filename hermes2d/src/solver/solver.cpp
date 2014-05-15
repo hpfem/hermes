@@ -52,7 +52,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces) :  dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
+    Solver<Scalar>::Solver(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces) :  dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
     {
     }
     
@@ -86,7 +86,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solver<Scalar>::solve(MeshFunctionSharedPtrVector<Scalar>& initial_guess)
+    void Solver<Scalar>::solve(std::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess)
     {
       Scalar* coeff_vec = new Scalar[Space<Scalar>::get_num_dofs(this->dp->get_spaces())];
       OGProjection<Scalar>::project_global(this->dp->get_spaces(), initial_guess, coeff_vec);
@@ -120,13 +120,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solver<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spaces)
+    void Solver<Scalar>::set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       this->dp->set_spaces(spaces);
     }
     
     template<typename Scalar>
-    SpaceSharedPtrVector<Scalar> Solver<Scalar>::get_spaces()
+    std::vector<SpaceSharedPtr<Scalar> > Solver<Scalar>::get_spaces()
     {
       return this->dp->get_spaces();
     }

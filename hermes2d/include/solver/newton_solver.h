@@ -75,7 +75,7 @@ namespace Hermes
       NewtonSolver();
       NewtonSolver(DiscreteProblem<Scalar>* dp);
       NewtonSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space);
-      NewtonSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces);
+      NewtonSolver(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces);
       virtual ~NewtonSolver();
 
       // See the base class for details, the following serves only for avoiding C++ name-hiding.
@@ -89,7 +89,7 @@ namespace Hermes
       Scalar* get_sln_vector();
 
       /// DiscreteProblemWeakForm helper.
-      virtual void set_spaces(SpaceSharedPtrVector<Scalar> spaces);
+      virtual void set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces);
 
       /// DiscreteProblemWeakForm helper.
       virtual void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);

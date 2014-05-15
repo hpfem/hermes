@@ -128,7 +128,7 @@ namespace Hermes
     public:
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
       /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
-      Adapt(SpaceSharedPtrVector<Scalar> spaces, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
+      Adapt(std::vector<SpaceSharedPtr<Scalar> > spaces, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
       Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
       Adapt(ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
@@ -159,7 +159,7 @@ namespace Hermes
       inline std::string getClassName() const { return "Adapt"; }
 
       /// Set spaces.
-      void set_spaces(SpaceSharedPtrVector<Scalar> spaces);
+      void set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces);
       void set_space(SpaceSharedPtr<Scalar> space);
 
       /// Return the error mesh function - for postprocessing the information about which elements have been refined.
@@ -212,9 +212,9 @@ namespace Hermes
       int regularization;
 
       /// Meshes.
-      MeshSharedPtrVector meshes;
+      std::vector<MeshSharedPtr> meshes;
       /// Spaces.
-      SpaceSharedPtrVector<Scalar> spaces;
+      std::vector<SpaceSharedPtr<Scalar> > spaces;
 
       /// Error calculator.
       ErrorCalculator<Scalar>* errorCalculator;

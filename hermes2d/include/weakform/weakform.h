@@ -173,11 +173,11 @@ namespace Hermes
       /// External functions.
       /// Set external functions.
       /// IMPORTANT: These functions will appear at the END (after those functions coming via set_u_ext_fn) of the Func<Scalar>** ext array in the value(), and ord() methods of individual forms.
-      void set_ext(MeshFunctionSharedPtrVector<Scalar> ext);
+      void set_ext(std::vector<MeshFunctionSharedPtr<Scalar> > ext);
 
       /// External functions.
       /// Get external functions.
-      MeshFunctionSharedPtrVector<Scalar> get_ext() const;
+      std::vector<MeshFunctionSharedPtr<Scalar> > get_ext() const;
 
       /// Cloning.
       virtual WeakForm* clone() const;
@@ -199,7 +199,7 @@ namespace Hermes
 
     protected:
       /// External solutions.
-      MeshFunctionSharedPtrVector<Scalar> ext;
+      std::vector<MeshFunctionSharedPtr<Scalar> > ext;
       std::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
 
       double current_time;
@@ -244,12 +244,12 @@ namespace Hermes
       // Internal.
       virtual void cloneMembers(const WeakFormSharedPtr<Scalar>& other_wf);
       // Internal.
-      void cloneMemberExtFunctions(MeshFunctionSharedPtrVector<Scalar> source_ext, MeshFunctionSharedPtrVector<Scalar>& cloned_ext);
+      void cloneMemberExtFunctions(std::vector<MeshFunctionSharedPtr<Scalar> > source_ext, std::vector<MeshFunctionSharedPtr<Scalar> >& cloned_ext);
 
       // Internal - processes markers, translates from strings to ints.
       template<typename FormType>
-      void processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces, bool surface, std::vector<FormType> forms_to_process);
-      void processFormMarkers(const SpaceSharedPtrVector<Scalar> spaces);
+      void processFormMarkers(const std::vector<SpaceSharedPtr<Scalar> > spaces, bool surface, std::vector<FormType> forms_to_process);
+      void processFormMarkers(const std::vector<SpaceSharedPtr<Scalar> > spaces);
 
     private:
       void free_ext();
@@ -284,9 +284,9 @@ namespace Hermes
 
       /// External functions.
       /// Set more external functions.
-      void set_ext(MeshFunctionSharedPtrVector<Scalar> ext);
+      void set_ext(std::vector<MeshFunctionSharedPtr<Scalar> > ext);
       void set_u_ext_fn(std::vector<UExtFunctionSharedPtr<Scalar> > ext);
-      MeshFunctionSharedPtrVector<Scalar> get_ext() const;
+      std::vector<MeshFunctionSharedPtr<Scalar> > get_ext() const;
 
       /// scaling factor
       void setScalingFactor(double scalingFactor);
@@ -314,7 +314,7 @@ namespace Hermes
       int u_ext_offset;
 
       /// External solutions.
-      MeshFunctionSharedPtrVector<Scalar> ext;
+      std::vector<MeshFunctionSharedPtr<Scalar> > ext;
       std::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
 
       double get_current_stage_time() const;

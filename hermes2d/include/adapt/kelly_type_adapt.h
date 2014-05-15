@@ -92,12 +92,12 @@ namespace Hermes
       public:
         int i; ///< Component.
         std::string area; ///< Geometric region where this estimator is applied.
-        MeshFunctionSharedPtrVector<Scalar> ext; ///< Additional functions required by the estimator.
+        std::vector<MeshFunctionSharedPtr<Scalar> > ext; ///< Additional functions required by the estimator.
         /// Set this error form to be an interface one.
         void setAsInterface();
         /// Constructor.
         ErrorEstimatorForm(int i, std::string area = HERMES_ANY,
-                           MeshFunctionSharedPtrVector<Scalar> ext = MeshFunctionSharedPtrVector<Scalar>())
+                           std::vector<MeshFunctionSharedPtr<Scalar> > ext = std::vector<MeshFunctionSharedPtr<Scalar> >())
           : i(i), area(area), ext(ext) {}
 
         /// Value calculation.
@@ -174,7 +174,7 @@ namespace Hermes
       /// their normalizations. If called with a pair of solutions, the version from Adapt is used (this is e.g.
       /// done when comparing approximate solution to the exact one - in this case, we do not want to compute
       /// the Kelly estimator value, but rather the ordinary difference between the solutions).
-      virtual double calc_err_internal(MeshFunctionSharedPtrVector<Scalar> slns,
+      virtual double calc_err_internal(std::vector<MeshFunctionSharedPtr<Scalar> > slns,
                                        std::vector<double>* component_errors,
                                        unsigned int error_flags);
 
@@ -209,7 +209,7 @@ namespace Hermes
       ///&nbsp;                    If not specified, they are defined according to the spaces.
       ///
       ///
-      KellyTypeAdapt(SpaceSharedPtrVector<Scalar> spaces,
+      KellyTypeAdapt(std::vector<SpaceSharedPtr<Scalar> > spaces,
                      bool ignore_visited_segments = true,
                      std::vector<const InterfaceEstimatorScalingFunction*>
                        interface_scaling_fns_ = std::vector<const InterfaceEstimatorScalingFunction*>(),
@@ -271,12 +271,12 @@ namespace Hermes
       {
         if(this->num != 1)
           throw Exceptions::Exception("Wrong number of solutions.");
-        MeshFunctionSharedPtrVector<Scalar> slns;
+        std::vector<MeshFunctionSharedPtr<Scalar> > slns;
         slns.push_back(sln);
         return calc_err_est(slns, nullptr, error_flags);
       }
 
-      double calc_err_est(MeshFunctionSharedPtrVector<Scalar> slns,
+      double calc_err_est(std::vector<MeshFunctionSharedPtr<Scalar> > slns,
                           std::vector<double>* component_errors = nullptr,
                           unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
       {
@@ -351,7 +351,7 @@ namespace Hermes
       ///
       /// For the equation \f$ -K \Delta u = f \f$, the argument \c const_by_laplacian is equal to \$ K \$.
       ///
-      BasicKellyAdapt(SpaceSharedPtrVector<Scalar> spaces_,
+      BasicKellyAdapt(std::vector<SpaceSharedPtr<Scalar> > spaces_,
                       double const_by_laplacian = 1.0,
                       std::vector<NormType> norms_ = std::vector<NormType>())
         : KellyTypeAdapt<Scalar>(spaces_, true, std::vector<const InterfaceEstimatorScalingFunction*>(), norms_)

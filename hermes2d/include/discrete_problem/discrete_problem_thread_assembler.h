@@ -46,14 +46,14 @@ namespace Hermes
       ~DiscreteProblemThreadAssembler();
 
       /// Initialization of all structures concerning space - assembly lists, precalculated shapesets, ..
-      void init_spaces(const SpaceSharedPtrVector<Scalar> spaces);
+      void init_spaces(const std::vector<SpaceSharedPtr<Scalar> > spaces);
       /// Initialization of the weak formulation.
       void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);
       /// Initialization of previous iterations for non-linear solvers.
-      void init_u_ext(const SpaceSharedPtrVector<Scalar> spaces, Solution<Scalar>** u_ext_sln);
+      void init_u_ext(const std::vector<SpaceSharedPtr<Scalar> > spaces, Solution<Scalar>** u_ext_sln);
 
       /// Initializes the Transformable array for doing transformations.
-      void init_assembling(Solution<Scalar>** u_ext_sln, const SpaceSharedPtrVector<Scalar>& spaces, bool add_dirichlet_lift);
+      void init_assembling(Solution<Scalar>** u_ext_sln, const std::vector<SpaceSharedPtr<Scalar> >& spaces, bool add_dirichlet_lift);
 
       /// Initialize Func storages.
       void init_funcs_wf();
@@ -73,10 +73,10 @@ namespace Hermes
       void init_u_ext_values(int order);
       /// Initializitation of ext values into Funcs
       template<typename Geom>
-      void init_ext_values(Func<Scalar>** target_array, MeshFunctionSharedPtrVector<Scalar>& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom* geometry);
+      void init_ext_values(Func<Scalar>** target_array, std::vector<MeshFunctionSharedPtr<Scalar> >& ext, std::vector<UExtFunctionSharedPtr<Scalar> >& u_ext_fns, int order, Func<Scalar>** u_ext_func, Geom* geometry);
 
       /// Sets active elements & transformations
-      void init_assembling_one_state(const SpaceSharedPtrVector<Scalar>& spaces, Traverse::State* current_state);
+      void init_assembling_one_state(const std::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state);
       /// Assemble the state.
       void assemble_one_state();
       /// Matrix volumetric forms - assemble the form.

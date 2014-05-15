@@ -156,7 +156,7 @@ namespace Hermes
 
         void init(MeshFunctionSharedPtr<double>* sln, int* item);
 
-        MeshSharedPtrVector meshes;
+        std::vector<MeshSharedPtr> meshes;
 
         /// Standard and curvature epsilon.
         double curvature_epsilon;

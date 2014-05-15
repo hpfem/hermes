@@ -48,7 +48,7 @@ namespace Hermes
       Solver(bool initialize_discrete_problem = true);
       Solver(DiscreteProblem<Scalar>* dp);
       Solver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space);
-      Solver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces);
+      Solver(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces);
       virtual ~Solver();
 
       /// Basic solve method.
@@ -67,15 +67,15 @@ namespace Hermes
 
       /// Solve.
       /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
-      virtual void solve(MeshFunctionSharedPtrVector<Scalar>& initial_guess);
+      virtual void solve(std::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess);
 
       /// set time information for time-dependent problems.
       virtual void set_time(double time);
       virtual void set_time_step(double time_step);
 
       /// SettableSpaces helper.
-      virtual void set_spaces(SpaceSharedPtrVector<Scalar> spaces);
-      virtual SpaceSharedPtrVector<Scalar> get_spaces();
+      virtual void set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces);
+      virtual std::vector<SpaceSharedPtr<Scalar> > get_spaces();
 
       /// DiscreteProblemWeakForm helper.
       virtual void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);

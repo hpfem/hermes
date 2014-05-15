@@ -29,7 +29,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_,SpaceSharedPtrVector<Scalar> spaces, bool to_set, bool dirichlet_lift_accordingly)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_,std::vector<SpaceSharedPtr<Scalar> > spaces, bool to_set, bool dirichlet_lift_accordingly)
     {
       this->init(to_set, dirichlet_lift_accordingly);
       this->set_spaces(spaces);
@@ -127,7 +127,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    SpaceSharedPtrVector<Scalar> DiscreteProblem<Scalar>::get_spaces()
+    std::vector<SpaceSharedPtr<Scalar> > DiscreteProblem<Scalar>::get_spaces()
     {
       return this->spaces;
     }
@@ -196,7 +196,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spacesToSet)
+    void DiscreteProblem<Scalar>::set_spaces(std::vector<SpaceSharedPtr<Scalar> > spacesToSet)
     {
       if(this->spaces_size > 0)
         Helpers::check_length(spacesToSet, this->spaces_size);
@@ -220,7 +220,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
     {
-      SpaceSharedPtrVector<Scalar> spaces;
+      std::vector<SpaceSharedPtr<Scalar> > spaces;
       spaces.push_back(space);
       this->set_spaces(spaces);
     }
@@ -246,7 +246,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, unsigned int& num_states, MeshSharedPtrVector& meshes)
+    void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, unsigned int& num_states, std::vector<MeshSharedPtr>& meshes)
     {
       // Vector of meshes.
       for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
@@ -298,7 +298,7 @@ namespace Hermes
       // Initialize states && previous iterations.
       unsigned int num_states;
       Traverse::State** states;
-      MeshSharedPtrVector meshes;
+      std::vector<MeshSharedPtr> meshes;
       this->init_assembling(states, num_states, meshes);
       this->tick();
       this->info("\tDiscreteProblem: Initialization: %s.", this->last_str().c_str());

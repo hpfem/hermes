@@ -343,7 +343,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::update_essential_bc_values(SpaceSharedPtrVector<Scalar> spaces, double time)
+    void Space<Scalar>::update_essential_bc_values(std::vector<SpaceSharedPtr<Scalar> > spaces, double time)
     {
       int n = spaces.size();
       for (int i = 0; i < n; i++)
@@ -362,7 +362,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_num_dofs(SpaceSharedPtrVector<Scalar> spaces)
+    int Space<Scalar>::get_num_dofs(std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       int ndof = 0;
       for (unsigned char i = 0; i < spaces.size(); i++)
@@ -377,7 +377,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::assign_dofs(SpaceSharedPtrVector<Scalar> spaces)
+    int Space<Scalar>::assign_dofs(std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       int n = spaces.size();
 
@@ -584,7 +584,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::unrefine_all_mesh_elements(SpaceSharedPtrVector<Scalar> spaces, bool keep_initial_refinements)
+    void Space<Scalar>::unrefine_all_mesh_elements(std::vector<SpaceSharedPtr<Scalar> > spaces, bool keep_initial_refinements)
     {
       for (unsigned char i = 0; i < spaces.size() - 1; i++)
         spaces[i]->unrefine_all_mesh_elements_internal(keep_initial_refinements, true);
@@ -1527,7 +1527,7 @@ namespace Hermes
     namespace Mixins
     {
       template<typename Scalar>
-      SpaceSharedPtrVector<Scalar> SettableSpaces<Scalar>::get_spaces()
+      std::vector<SpaceSharedPtr<Scalar> > SettableSpaces<Scalar>::get_spaces()
       {
         throw Hermes::Exceptions::MethodNotOverridenException("SettableSpaces<Scalar>::get_spaces()");
       }
@@ -1541,7 +1541,7 @@ namespace Hermes
       template<typename Scalar>
       void SettableSpaces<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
       {
-        SpaceSharedPtrVector<Scalar> spaces;
+        std::vector<SpaceSharedPtr<Scalar> > spaces;
         spaces.push_back(space);
         this->set_spaces(spaces);
       }

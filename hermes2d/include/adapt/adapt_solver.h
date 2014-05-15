@@ -70,7 +70,7 @@ namespace Hermes
     {
     public:
       /// Constructor.
-      AdaptSolver(SpaceSharedPtrVector<Scalar> initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::SelectorVector<Scalar> selectors, AdaptSolverCriterion* stopping_criterion_global);
+      AdaptSolver(std::vector<SpaceSharedPtr<Scalar> > initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::SelectorVector<Scalar> selectors, AdaptSolverCriterion* stopping_criterion_global);
       AdaptSolver(SpaceSharedPtr<Scalar> initial_space, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::Selector<Scalar>* selector, AdaptSolverCriterion* stopping_criterion_global);
 
       /// Common code for the constructors.
@@ -83,13 +83,13 @@ namespace Hermes
       void solve(AdaptivityType adaptivityType);
 
       /// Get the solutions.
-      MeshFunctionSharedPtrVector<Scalar> get_slns();
+      std::vector<MeshFunctionSharedPtr<Scalar> > get_slns();
 
       /// Get i-th solution.
       MeshFunctionSharedPtr<Scalar> get_sln(int index);
 
       /// Get the solutions.
-      MeshFunctionSharedPtrVector<Scalar> get_ref_slns();
+      std::vector<MeshFunctionSharedPtr<Scalar> > get_ref_slns();
 
       /// Get i-th solution.
       MeshFunctionSharedPtr<Scalar> get_ref_sln(int index);
@@ -98,10 +98,10 @@ namespace Hermes
       void switch_visualization(bool on_off);
 
       /// Add exact solutions for exact solver calculation.
-      void set_exact_solutions(MeshFunctionSharedPtrVector<Scalar> exact_slns);
+      void set_exact_solutions(std::vector<MeshFunctionSharedPtr<Scalar> > exact_slns);
 
       /// Setters.
-      void set_initial_spaces(SpaceSharedPtrVector<Scalar>);
+      void set_initial_spaces(std::vector<SpaceSharedPtr<Scalar> >);
       void set_wf(WeakFormSharedPtr<Scalar>);
       void set_error_calculator(ErrorCalculator<Scalar>*);
       void set_stopping_criterion_single_step(AdaptivityStoppingCriterion<Scalar>*);
@@ -110,7 +110,7 @@ namespace Hermes
 
       /// Getters.
       SolverType* get_solver();
-      SpaceSharedPtrVector<Scalar> get_initial_spaces();
+      std::vector<SpaceSharedPtr<Scalar> > get_initial_spaces();
       WeakFormSharedPtr<Scalar> get_wf();
       ErrorCalculator<Scalar>* get_error_calculator();
       AdaptivityStoppingCriterion<Scalar>* get_stopping_criterion_single_step();
@@ -151,11 +151,11 @@ namespace Hermes
       /// Internal structures - Spaces.
       /// This class changes this instance during the solve() method: yes.
       /// Can user change this during adaptation: no.
-      SpaceSharedPtrVector<Scalar> spaces;
+      std::vector<SpaceSharedPtr<Scalar> > spaces;
 
       /// This is to hold the ref_spaces for matrix reuse.
-      SpaceSharedPtrVector<Scalar> ref_spaces;
-      SpaceSharedPtrVector<Scalar> prev_ref_spaces;
+      std::vector<SpaceSharedPtr<Scalar> > ref_spaces;
+      std::vector<SpaceSharedPtr<Scalar> > prev_ref_spaces;
 
       /// Internal structures - Weak form.
       /// This class changes this instance during the solve() method: no.
@@ -178,9 +178,9 @@ namespace Hermes
       RefinementSelectors::SelectorVector<Scalar> selectors;
 
       /// The solution being returned on demand.
-      MeshFunctionSharedPtrVector<Scalar> ref_slns;
-      MeshFunctionSharedPtrVector<Scalar> slns;
-      MeshFunctionSharedPtrVector<Scalar> exact_slns;
+      std::vector<MeshFunctionSharedPtr<Scalar> > ref_slns;
+      std::vector<MeshFunctionSharedPtr<Scalar> > slns;
+      std::vector<MeshFunctionSharedPtr<Scalar> > exact_slns;
 
       /// Views - used only if visualization is ON.
       std::vector<Views::ScalarView*> scalar_views;

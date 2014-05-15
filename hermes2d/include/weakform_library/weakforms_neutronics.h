@@ -840,7 +840,7 @@ namespace Hermes
 
                 OuterIterationForm( unsigned int g,
                   const MaterialPropertyMaps& matprop,
-                  MeshFunctionSharedPtrVector<Scalar>& iterates,
+                  std::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
                   : VectorFormVol<Scalar>(g),
@@ -854,7 +854,7 @@ namespace Hermes
 
                 OuterIterationForm( unsigned int g, std::string area,
                   const MaterialPropertyMaps& matprop,
-                  MeshFunctionSharedPtrVector<Scalar>& iterates,
+                  std::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
                   : VectorFormVol<Scalar>(g),
@@ -869,7 +869,7 @@ namespace Hermes
 
                 OuterIterationForm( unsigned int g,
                   const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-                  MeshFunctionSharedPtrVector<Scalar>& iterates,
+                  std::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
                   : VectorFormVol<Scalar>(g),
@@ -883,7 +883,7 @@ namespace Hermes
 
                 OuterIterationForm( unsigned int g, std::string area,
                   const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-                  MeshFunctionSharedPtrVector<Scalar>& iterates,
+                  std::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
                   : VectorFormVol<Scalar>(g),
@@ -1212,7 +1212,7 @@ namespace Hermes
 
             public:
               DefaultWeakFormSourceIteration( const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-                MeshFunctionSharedPtrVector<Scalar>& iterates,
+                std::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
                 double initial_keff_guess,
                 GeomType geom_type = HERMES_PLANAR );
 

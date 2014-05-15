@@ -38,9 +38,6 @@ namespace Hermes
       Hermes::Hermes2D::Solution<Scalar>* get_solution();
     };
 
-    template <typename Scalar>
-    using MeshFunctionSharedPtrVector = std::vector<MeshFunctionSharedPtr<Scalar> >;
-
     /** \defgroup meshFunctions Mesh functions
     * \brief Collection of classes that represent various functions of the mesh coordinates, i.e. defined on the Mesh.
     * These comprise solutions, exact &amp; initial solutions, filters (functions of the solutions) etc.

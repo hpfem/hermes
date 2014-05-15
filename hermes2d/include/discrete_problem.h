@@ -53,7 +53,7 @@ namespace Hermes
       /// 2 - allows for assembling Dirichlet boundary conditions using a Dirichlet lift.
       /// \param[in] dirichlet_lift_accordingly If true, the appropriate settings for (linear / nonlinear)
       /// problem will be used (use Dirichlet lift iff the problem is linear). If false, the other way round.
-      DiscreteProblem(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces, bool linear = false, bool dirichlet_lift_accordingly = true);
+      DiscreteProblem(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces, bool linear = false, bool dirichlet_lift_accordingly = true);
       /// Constructor for one equation.
       /// Making this DiscreteProblem linear does 2 things
       /// 1 - turns off initialization of previous iterations for nonlinear solvers.
@@ -89,14 +89,14 @@ namespace Hermes
       void set_time_step(double time_step);
 
       /// Sets new_ spaces for the instance.
-      void set_spaces(SpaceSharedPtrVector<Scalar> spaces);
+      void set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces);
       void set_space(SpaceSharedPtr<Scalar> space);
 
       /// Set the weak forms.
       void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);
 
       /// Get all spaces as a std::vector.
-      SpaceSharedPtrVector<Scalar> get_spaces();
+      std::vector<SpaceSharedPtr<Scalar> > get_spaces();
 
       /// Experimental.
       typedef void(*reassembled_states_reuse_linear_system_fn)(Traverse::State**& states, unsigned int& num_states, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Vector<Scalar>* dirichlet_lift_rhs, Scalar*& coeff_vec);
@@ -118,7 +118,7 @@ namespace Hermes
 
     protected:
       /// Initialize states.
-      void init_assembling(Traverse::State**& states, unsigned int& num_states, MeshSharedPtrVector& meshes);
+      void init_assembling(Traverse::State**& states, unsigned int& num_states, std::vector<MeshSharedPtr>& meshes);
       void deinit_assembling(Traverse::State** states, unsigned  int num_states);
 
       /// RungeKutta helpers.
@@ -132,7 +132,7 @@ namespace Hermes
       void init(bool linear, bool dirichlet_lift_accordingly);
 
       /// Space instances for all equations in the system.
-      SpaceSharedPtrVector<Scalar> spaces;
+      std::vector<SpaceSharedPtr<Scalar> > spaces;
       int spaces_size;
 
       /// Dirichlet lift rhs part.

@@ -83,7 +83,7 @@ namespace Hermes
       /// Constructor.
       /// Parameter start_from_zero_K_vector: if set to true, the last K_vector will NOT be used
       /// as an initial guess for the Newton's method, instead zero vector will be used.
-      RungeKutta(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtrVector<Scalar> spaces, ButcherTable* bt);
+      RungeKutta(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces, ButcherTable* bt);
 
       /// Constructor for one equation.
       RungeKutta(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space, ButcherTable* bt);
@@ -106,12 +106,12 @@ namespace Hermes
       //                    iteration of the Newton's method.
       // block_diagonal_jacobian... if true then the tensor product block Jacobian is
       //                            reduced to just the diagonal blocks.
-      void rk_time_step_newton(MeshFunctionSharedPtrVector<Scalar> slns_time_prev, MeshFunctionSharedPtrVector<Scalar> slns_time_new, MeshFunctionSharedPtrVector<Scalar> error_fns);
+      void rk_time_step_newton(std::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev, std::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new, std::vector<MeshFunctionSharedPtr<Scalar> > error_fns);
       void rk_time_step_newton(MeshFunctionSharedPtr<Scalar> slns_time_prev, MeshFunctionSharedPtr<Scalar> slns_time_new, MeshFunctionSharedPtr<Scalar> error_fn);
 
       // This is a wrapper for the previous function if error_fn is not provided
       // (adaptive time stepping is not wanted).
-      void rk_time_step_newton(MeshFunctionSharedPtrVector<Scalar> slns_time_prev, MeshFunctionSharedPtrVector<Scalar> slns_time_new);
+      void rk_time_step_newton(std::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev, std::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new);
       void rk_time_step_newton(MeshFunctionSharedPtr<Scalar> sln_time_prev, MeshFunctionSharedPtr<Scalar> sln_time_new);
 
       void set_freeze_jacobian();
@@ -120,9 +120,9 @@ namespace Hermes
       void set_newton_damping_coeff(double newton_damping_coeff);
       void set_newton_max_allowed_residual_norm(double newton_max_allowed_residual_norm);
 
-      virtual void set_spaces(SpaceSharedPtrVector<Scalar> spaces);
+      virtual void set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces);
       virtual void set_space(SpaceSharedPtr<Scalar> space);
-      virtual SpaceSharedPtrVector<Scalar> get_spaces();
+      virtual std::vector<SpaceSharedPtr<Scalar> > get_spaces();
 
       /**
        \fn  void RungeKutta::set_filters_to_reinit(std::vector<Filter<Scalar>*> filters_to_reinit);
@@ -158,7 +158,7 @@ namespace Hermes
       void create_stage_wf(unsigned int size, bool block_diagonal_jacobian);
       
       /// Updates the augmented weak formulation.
-      void update_stage_wf(MeshFunctionSharedPtrVector<Scalar> slns_time_prev);
+      void update_stage_wf(std::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev);
 
       // Prepare u_ext_vec.
       void prepare_u_ext_vec();
@@ -177,7 +177,7 @@ namespace Hermes
       const WeakFormSharedPtr<Scalar> wf;
 
       /// Space instances for all equations in the system.
-      SpaceSharedPtrVector<Scalar> spaces;
+      std::vector<SpaceSharedPtr<Scalar> > spaces;
       std::vector<unsigned int> spaces_seqs;
 
       /// ButcherTable.
@@ -209,7 +209,7 @@ namespace Hermes
       double newton_damping_coeff;
       double newton_max_allowed_residual_norm;
       
-      MeshFunctionSharedPtrVector<Scalar> residuals_vector;
+      std::vector<MeshFunctionSharedPtr<Scalar> > residuals_vector;
 
       /// Vector K_vector of length num_stages * ndof. will represent
       /// the 'K_i' vectors in the usual R-K notation.

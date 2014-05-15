@@ -80,7 +80,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(SpaceSharedPtrVector<Scalar> spaces_, ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), strategy(strategy)
+    Adapt<Scalar>::Adapt(std::vector<SpaceSharedPtr<Scalar> > spaces_, ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), strategy(strategy)
     {
       this->set_spaces(spaces_);
       this->init();
@@ -129,7 +129,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::set_spaces(SpaceSharedPtrVector<Scalar> spaces)
+    void Adapt<Scalar>::set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       this->spaces = spaces;
       this->num = spaces.size();
@@ -273,7 +273,7 @@ namespace Hermes
       this->elements_to_refine = malloc_with_check<Adapt<Scalar>, ElementToRefine>(elements_to_refine_count, this);
 
       // Projected solutions obtaining.
-      MeshFunctionSharedPtrVector<Scalar> rslns;
+      std::vector<MeshFunctionSharedPtr<Scalar> > rslns;
 
       for (unsigned int i = 0; i < this->num; i++)
       {
@@ -302,7 +302,7 @@ namespace Hermes
           end = attempted_element_refinements_count;
 
         // rslns cloning.
-        MeshFunctionSharedPtrVector<Scalar> current_rslns;
+        std::vector<MeshFunctionSharedPtr<Scalar> > current_rslns;
         for (unsigned int i = 0; i < this->num; i++)
           current_rslns.push_back(rslns[i]->clone());
 

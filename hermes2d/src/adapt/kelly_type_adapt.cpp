@@ -111,7 +111,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double KellyTypeAdapt<Scalar>::calc_err_internal(MeshFunctionSharedPtrVector<Scalar> slns,
+    double KellyTypeAdapt<Scalar>::calc_err_internal(std::vector<MeshFunctionSharedPtr<Scalar> > slns,
                                                      std::vector<double>* component_errors,
                                                      unsigned int error_flags)
     {
@@ -721,7 +721,7 @@ namespace Hermes
                                                             int neighbor_index)
     {
       NeighborSearch<Scalar>* nbs = neighbor_searches.get(neighbor_index);
-      MeshFunctionSharedPtrVector<Scalar> slns;
+      std::vector<MeshFunctionSharedPtr<Scalar> > slns;
       for (int i = 0; i < this->num; i++)
         slns.push_back(this->sln[i]);
 

@@ -31,7 +31,7 @@ namespace Hermes
     unsigned int DiscreteProblemDGAssembler<Scalar>::dg_order = 20;
 
     template<typename Scalar>
-    DiscreteProblemDGAssembler<Scalar>::DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const SpaceSharedPtrVector<Scalar> spaces, MeshSharedPtrVector& meshes)
+    DiscreteProblemDGAssembler<Scalar>::DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshSharedPtr>& meshes)
       : pss(threadAssembler->pss),
       refmaps(threadAssembler->refmaps),
       u_ext(threadAssembler->u_ext),
@@ -438,7 +438,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscontinuousFunc<Scalar>** DiscreteProblemDGAssembler<Scalar>::init_ext_fns(MeshFunctionSharedPtrVector<Scalar> ext,
+    DiscontinuousFunc<Scalar>** DiscreteProblemDGAssembler<Scalar>::init_ext_fns(std::vector<MeshFunctionSharedPtr<Scalar> > ext,
       NeighborSearch<Scalar>** current_neighbor_searches, int order)
     {
       DiscontinuousFunc<Scalar>** ext_fns = new DiscontinuousFunc<Scalar>*[ext.size()];
