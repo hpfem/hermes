@@ -199,7 +199,7 @@ namespace Hermes
     class HERMES_API TopValFilter : public SimpleFilter<double>
     {
     public:
-      TopValFilter(MeshFunctionSharedPtrVector<double> solutions, std::vector<double> limits, std::vector<int> items = *(new std::vector<int>));
+      TopValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> limits, std::vector<int> items = *(new std::vector<int>));
 
       TopValFilter(MeshFunctionSharedPtr<double> sln, double limit, int item = H2D_FN_VAL_0); ///< for vector-valued sln1
       virtual MeshFunction<double>* clone() const;
@@ -215,7 +215,7 @@ namespace Hermes
     class HERMES_API BottomValFilter : public SimpleFilter<double>
     {
     public:
-      BottomValFilter(MeshFunctionSharedPtrVector<double> solutions, std::vector<double> limits, std::vector<int> items = *(new std::vector<int>));
+      BottomValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> limits, std::vector<int> items = *(new std::vector<int>));
 
       BottomValFilter(MeshFunctionSharedPtr<double> sln, double limit, int item = H2D_FN_VAL_0); ///< for vector-valued sln1
       virtual MeshFunction<double>* clone() const;
@@ -231,7 +231,7 @@ namespace Hermes
     class HERMES_API ValFilter : public SimpleFilter<double>
     {
     public:
-      ValFilter(MeshFunctionSharedPtrVector<double> solutions, std::vector<double> low_limits, std::vector<double> high_limits, std::vector<int> items = *(new std::vector<int>));
+      ValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> low_limits, std::vector<double> high_limits, std::vector<int> items = *(new std::vector<int>));
 
       ValFilter(MeshFunctionSharedPtr<double> sln, double low_limit, double high_limit, int item = H2D_FN_VAL_0); ///< for vector-valued sln1
       virtual MeshFunction<double>* clone() const;
@@ -290,7 +290,7 @@ namespace Hermes
     class HERMES_API AbsFilter : public SimpleFilter<double>
     {
     public:
-      AbsFilter(MeshFunctionSharedPtrVector<double> solutions, std::vector<int> items = *(new std::vector<int>));
+      AbsFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<int> items = *(new std::vector<int>));
       AbsFilter(MeshFunctionSharedPtr<double> solution);
       virtual MeshFunction<double>* clone() const;
       virtual ~AbsFilter();
@@ -363,7 +363,7 @@ namespace Hermes
     {
     public: /// \todo cylindrical coordinates
 
-      VonMisesFilter(MeshFunctionSharedPtrVector<double> solutions, double lambda, double mu,
+      VonMisesFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, double lambda, double mu,
         int cyl = 0, int item1 = H2D_FN_VAL, int item2 = H2D_FN_VAL);
       VonMisesFilter(MeshFunctionSharedPtr<double>* solutions, int num, double lambda, double mu,
         int cyl = 0, int item1 = H2D_FN_VAL, int item2 = H2D_FN_VAL);

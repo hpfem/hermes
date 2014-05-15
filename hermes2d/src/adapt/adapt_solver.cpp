@@ -50,7 +50,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    AdaptSolver<Scalar, SolverType>::AdaptSolver(std::vector<SpaceSharedPtr<Scalar> > initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::SelectorVector<Scalar> selectors, AdaptSolverCriterion* stopping_criterion_global)
+    AdaptSolver<Scalar, SolverType>::AdaptSolver(std::vector<SpaceSharedPtr<Scalar> > initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, std::vector<RefinementSelectors::Selector<Scalar>*> selectors, AdaptSolverCriterion* stopping_criterion_global)
       : spaces(initial_spaces), wf(wf), error_calculator(error_calculator), stopping_criterion_single_step(stopping_criterion_single_step), selectors(selectors), stopping_criterion_global(stopping_criterion_global)
     {
       this->init();
@@ -870,7 +870,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::set_selectors(RefinementSelectors::SelectorVector<Scalar> selectors)
+    void AdaptSolver<Scalar, SolverType>::set_selectors(std::vector<RefinementSelectors::Selector<Scalar>*> selectors)
     {
       Helpers::check_length(this->selectors, selectors);
       this->selectors = selectors;
@@ -907,7 +907,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    RefinementSelectors::SelectorVector<Scalar> AdaptSolver<Scalar, SolverType>::get_selectors()
+    std::vector<RefinementSelectors::Selector<Scalar>*> AdaptSolver<Scalar, SolverType>::get_selectors()
     {
       return this->selectors;
     }

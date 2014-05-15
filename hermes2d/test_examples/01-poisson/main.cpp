@@ -45,7 +45,7 @@ public:
   {
   }
 
-  MyVolumetricIntegralCalculator(MeshFunctionSharedPtrVector<double> source_functions, int number_of_integrals) : PostProcessing::SurfaceIntegralCalculator<double>(source_functions, number_of_integrals)
+  MyVolumetricIntegralCalculator(std::vector<MeshFunctionSharedPtr<double> > source_functions, int number_of_integrals) : PostProcessing::SurfaceIntegralCalculator<double>(source_functions, number_of_integrals)
   {
   }
 

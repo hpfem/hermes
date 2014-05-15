@@ -56,11 +56,11 @@ namespace Hermes
         /// Save a MeshFunction (Solution, Filter) in VTK format.
         void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, bool mode_3D = true, int item = H2D_FN_VAL_0);
         /// Save multiple MeshFunctions (Solutions, Filters) in VTK format.
-        void save_solution_vtk(MeshFunctionSharedPtrVector<double> slns, std::vector<int> items, const char* filename, const char* quantity_name, bool mode_3D = true);
+        void save_solution_vtk(std::vector<MeshFunctionSharedPtr<double> > slns, std::vector<int> items, const char* filename, const char* quantity_name, bool mode_3D = true);
         /// Save a MeshFunction (Solution, Filter) in Tecplot format.
         void save_solution_tecplot(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name, int item = H2D_FN_VAL_0);
         /// Save multiple MeshFunctions (Solutions, Filters) in Tecplot format.
-        void save_solution_tecplot(MeshFunctionSharedPtrVector<double> slns, std::vector<int> items, const char* filename, std::vector<std::string> quantity_names);
+        void save_solution_tecplot(std::vector<MeshFunctionSharedPtr<double> > slns, std::vector<int> items, const char* filename, std::vector<std::string> quantity_names);
 
         /// Sets the criterion to use for the linearization process.
         /// This criterion is used in ThreadLinearizerMultidimensional class instances (see threadLinearizerMultidimensional array).

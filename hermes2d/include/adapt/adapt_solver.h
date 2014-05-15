@@ -70,7 +70,7 @@ namespace Hermes
     {
     public:
       /// Constructor.
-      AdaptSolver(std::vector<SpaceSharedPtr<Scalar> > initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::SelectorVector<Scalar> selectors, AdaptSolverCriterion* stopping_criterion_global);
+      AdaptSolver(std::vector<SpaceSharedPtr<Scalar> > initial_spaces, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, std::vector<RefinementSelectors::Selector<Scalar>*> selectors, AdaptSolverCriterion* stopping_criterion_global);
       AdaptSolver(SpaceSharedPtr<Scalar> initial_space, WeakFormSharedPtr<Scalar> wf, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* stopping_criterion_single_step, RefinementSelectors::Selector<Scalar>* selector, AdaptSolverCriterion* stopping_criterion_global);
 
       /// Common code for the constructors.
@@ -105,7 +105,7 @@ namespace Hermes
       void set_wf(WeakFormSharedPtr<Scalar>);
       void set_error_calculator(ErrorCalculator<Scalar>*);
       void set_stopping_criterion_single_step(AdaptivityStoppingCriterion<Scalar>*);
-      void set_selectors(RefinementSelectors::SelectorVector<Scalar>);
+      void set_selectors(std::vector<RefinementSelectors::Selector<Scalar>*>);
       void set_stopping_criterion_global(AdaptSolverCriterion* stopping_criterion_global);
 
       /// Getters.
@@ -114,7 +114,7 @@ namespace Hermes
       WeakFormSharedPtr<Scalar> get_wf();
       ErrorCalculator<Scalar>* get_error_calculator();
       AdaptivityStoppingCriterion<Scalar>* get_stopping_criterion_single_step();
-      RefinementSelectors::SelectorVector<Scalar> get_selectors();
+      std::vector<RefinementSelectors::Selector<Scalar>*> get_selectors();
       AdaptSolverCriterion* get_stopping_criterion_global();
 
       /// See Hermes::Mixins::Loggable.
@@ -175,7 +175,7 @@ namespace Hermes
       /// Internal structures - Stopping criterion for each refinement step.
       /// This class changes this instance during the solve() method: no.
       /// Can user change this during adaptation: yes [will be used from the following step onwards].
-      RefinementSelectors::SelectorVector<Scalar> selectors;
+      std::vector<RefinementSelectors::Selector<Scalar>*> selectors;
 
       /// The solution being returned on demand.
       std::vector<MeshFunctionSharedPtr<Scalar> > ref_slns;
@@ -213,8 +213,8 @@ namespace Hermes
       unsigned int total_elements_prev_spaces;
 
       /// Utility simple selectors.
-      RefinementSelectors::SelectorVector<Scalar> hOnlySelectors;
-      RefinementSelectors::SelectorVector<Scalar> pOnlySelectors;
+      std::vector<RefinementSelectors::Selector<Scalar>*> hOnlySelectors;
+      std::vector<RefinementSelectors::Selector<Scalar>*> pOnlySelectors;
 
       /// Strictly private - size of the system (this dimension is what the size of all other data structures is compared to).
       unsigned char number_of_equations;

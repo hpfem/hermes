@@ -51,9 +51,6 @@ namespace Hermes
     /// Namespace which encapsulates all refinement selectors. \ingroup g_selectors
     namespace RefinementSelectors
     {
-      template <typename Scalar>
-      using SelectorVector = std::vector<Selector<Scalar>*>;
-
       /// A parent of all refinement selectors. Abstract class. \ingroup g_selectors
       /** All refinement selectors have to derive from this class or its children.
       *  The interface of the class provides methods for:

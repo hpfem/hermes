@@ -187,7 +187,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::init_adapt(RefinementSelectors::SelectorVector<Scalar>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes)
+    void Adapt<Scalar>::init_adapt(std::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes)
     {
       // Start time measurement.
       this->tick();

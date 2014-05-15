@@ -553,7 +553,10 @@ namespace Hermes
     ExactSolutionEggShell::ExactSolutionEggShell(MeshSharedPtr mesh, int polynomialOrder) : ExactSolutionScalar<double>(mesh)
     {
       WeakFormSharedPtr<double> wf(new WeakFormsH1::DefaultWeakFormLaplaceLinear<double>());
-      EssentialBCs<double> bcs({ new DefaultEssentialBCConst<double>(EggShell::eggShell0Marker, 0.), new DefaultEssentialBCConst<double>(EggShell::eggShell1Marker, 1.) });
+      std::vector<EssentialBoundaryCondition<double>*> bcVector;
+      bcVector.push_back(new DefaultEssentialBCConst<double>(EggShell::eggShell0Marker, 0.));
+      bcVector.push_back(new DefaultEssentialBCConst<double>(EggShell::eggShell1Marker, 1.));
+      EssentialBCs<double> bcs(bcVector);
       SpaceSharedPtr<double> space(new H1Space<double>(mesh, &bcs, polynomialOrder));
       Hermes::Hermes2D::LinearSolver<double> linear_solver(wf, space);
       MeshFunctionSharedPtr<double> sln(new Solution<double>());
