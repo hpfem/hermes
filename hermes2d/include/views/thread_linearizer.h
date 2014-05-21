@@ -18,7 +18,9 @@
 
 #include "linearizer.h"
 #include "linearizer_utils.h"
-#include <pthread.h>
+#ifndef NOGLUT
+  #include <pthread.h>
+#endif
 #include "../function/mesh_function.h"
 
 namespace Hermes
