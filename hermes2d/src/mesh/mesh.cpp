@@ -2875,7 +2875,7 @@ namespace Hermes
         for (int edge = 0; edge < e->get_nvert(); edge++)
         {
           // This has been taken care of above.
-          if (e->en[edge]->marker == eggShell_marker_1)
+          if (e->en[edge]->marker == eggShell_marker_1 || e->en[edge]->bnd)
             continue;
 
           // Find out if all neighbors are eggShell (should be).
