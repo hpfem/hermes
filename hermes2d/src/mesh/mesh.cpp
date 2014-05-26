@@ -648,7 +648,7 @@ namespace Hermes
       for (i = 0; i < 4; i++)
       if (sons[i])
       {
-        if(sons[i]->cm)
+        if (sons[i]->cm)
           sons[i]->cm->update_refmap_coeffs(sons[i]);
       }
 
@@ -735,9 +735,9 @@ namespace Hermes
       }
       else refine_quad(e, refinement);
 
-      for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
-        if(e->sons[i])
-          e->sons[i]->iro_cache = e->iro_cache;
+      for (int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
+      if (e->sons[i])
+        e->sons[i]->iro_cache = e->iro_cache;
 
       this->seq = g_mesh_seq++;
     }
@@ -1275,8 +1275,8 @@ namespace Hermes
       this->refinements.clear();
       this->seq = -1;
 
-      for(std::map<int, MarkerArea*>::iterator p = marker_areas.begin(); p != marker_areas.end(); p++)
-      delete p->second;
+      for (std::map<int, MarkerArea*>::iterator p = marker_areas.begin(); p != marker_areas.end(); p++)
+        delete p->second;
       marker_areas.clear();
     }
 
@@ -1621,9 +1621,9 @@ namespace Hermes
             }
 
             Arc* curve = new Arc(angle2);
-            
+
             int inner = 1, outer = 0;
-            
+
             curve->pt[0][0] = nodes[p1].x;
             curve->pt[0][1] = nodes[p1].y;
             curve->pt[0][2] = 1.0;
@@ -2186,7 +2186,7 @@ namespace Hermes
           if (p1 > p2) std::swap(p1, p2);
 
           Arc* curve = new Arc(angle2);
-          
+
           curve->pt[0][0] = nodes[p1].x;
           curve->pt[0][1] = nodes[p1].y;
           curve->pt[0][2] = 1.0;
@@ -2344,7 +2344,7 @@ namespace Hermes
               curve->pt[1][0] = 0.5*((curve->pt[2][0] + curve->pt[0][0]) + (curve->pt[2][1] - curve->pt[0][1]) * x);
               curve->pt[1][1] = 0.5*((curve->pt[2][1] + curve->pt[0][1]) - (curve->pt[2][0] - curve->pt[0][0]) * x);
               curve->pt[1][2] = cos((M_PI - a) * 0.5);
-              
+
               cm[idx]->toplevel = true;
               cm[idx]->order = 4;
               cm[idx]->curves[idx % 4] = curve;
@@ -2771,7 +2771,7 @@ namespace Hermes
     const std::string EggShell::eggShellMarker = "Eggshell";
     bool EggShell::egg_shell_verbose = false;
 
-    MeshSharedPtr EggShell::get_egg_shell(MeshSharedPtr mesh, std::string marker, unsigned int levels, int n_element_guess)
+    MeshSharedPtr EggShell::get_egg_shell(MeshSharedPtr mesh, std::string marker, unsigned int levels)
     {
       if (levels < 2)
       {
@@ -2780,41 +2780,154 @@ namespace Hermes
       }
       Hermes::vector<std::string> markers;
       markers.push_back(marker);
-      return get_egg_shell(mesh, markers, levels, n_element_guess);
+      return get_egg_shell(mesh, markers, levels);
     }
 
-    MeshSharedPtr EggShell::get_egg_shell(MeshSharedPtr mesh, Hermes::vector<std::string> markers, unsigned int levels, int n_element_guess)
+    MeshSharedPtr EggShell::get_egg_shell(MeshSharedPtr mesh, Hermes::vector<std::string> markers, unsigned int levels)
     {
       if (levels < 2)
       {
         throw Hermes::Exceptions::ValueException("levels", levels, 2);
         return MeshSharedPtr(new Mesh);
       }
+
       MeshSharedPtr target_mesh(new Mesh);
       target_mesh->copy(mesh);
 
-      Element** elements = nullptr;
-      int n_elements;
+      int eggShell_marker_0 = target_mesh->get_boundary_markers_conversion().insert_marker(eggShell0Marker);
+      int eggShell_marker_1 = target_mesh->get_boundary_markers_conversion().insert_marker(eggShell1Marker);
+      int eggShell_marker_inner = target_mesh->get_boundary_markers_conversion().insert_marker(eggShellInnerMarker);
+      int eggShell_marker_volume = target_mesh->get_element_markers_conversion().insert_marker(eggShellMarker);
 
-      get_egg_shell_structures(target_mesh, elements, n_elements, markers, levels, n_element_guess);
-      make_egg_shell_mesh(target_mesh, elements, n_elements);
+      // Search for the adjacent element with the basic logic + vertex-based lookup.
+      // This only:
+      // - fills the "1" marker where appropriate
+      // - fills the volumetric marker
+      get_egg_shell_structures(target_mesh, markers, levels);
 
-      free_with_check(elements);
+      // Fix hanging nodes.
+      // This only:
+      // - adds the volumetric marker where necessary
+      EggShell::fix_hanging_nodes(target_mesh);
+
+      Element* e;
+
+      // Fill holes.
+      for_all_active_elements(e, target_mesh)
+      {
+        NeighborSearch<double> ns(e, target_mesh);
+        ns.set_ignore_errors(true);
+        int edges_eggShell = 0;
+        for (int edge = 0; edge < e->get_nvert(); edge++)
+        {
+          // This has been taken care of above.
+          if (e->en[edge]->marker == eggShell_marker_1 || e->en[edge]->bnd)
+            continue;
+
+          ns.set_active_edge(edge);
+          for (int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
+          {
+            Element* neighbor_el = ns.get_neighb_el();
+            if (neighbor_el && neighbor_el->marker == eggShell_marker_volume)
+            {
+              edges_eggShell++;
+              break;
+            }
+          }
+        }
+        if (edges_eggShell > 2)
+          e->marker = eggShell_marker_volume;
+      }
+
+      // Mark used / not used elements according to the marker.
+      for_all_active_elements(e, target_mesh)
+      {
+        e->used = false;
+        Element* elem = e;
+        while (elem->parent)
+        {
+          elem->parent->used = false;
+          elem = elem->parent;
+        }
+      }
+
+      for_all_elements(e, target_mesh)
+      {
+        if (e->marker == eggShell_marker_volume)
+        {
+          e->used = true;
+          Element* elem = e;
+          while (elem->parent)
+          {
+            elem->parent->used = true;
+            elem = elem->parent;
+          }
+        }
+      }
+
+      // Now mark the boundaries + calculate active elements.
+      target_mesh->nactive = 0;
+      for_all_active_elements(e, target_mesh)
+      {
+        target_mesh->nactive++;
+        NeighborSearch<double> ns(e, target_mesh);
+        ns.set_ignore_errors(true);
+        for (int edge = 0; edge < e->get_nvert(); edge++)
+        {
+          // This has been taken care of above.
+          if (e->en[edge]->marker == eggShell_marker_1)
+            continue;
+
+          // Find out if all neighbors are eggShell (should be).
+          bool neighbors_eggshell = false;
+          ns.set_active_edge(edge);
+          for (int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
+          {
+            Element* neighbor_el = ns.get_neighb_el();
+            if (neighbors_eggshell)
+              assert(neighbor_el->marker == eggShell_marker_volume);
+            else if (neighbor_el->marker == eggShell_marker_volume)
+              neighbors_eggshell = true;
+
+            if (neighbors_eggshell)
+            {
+              e->en[edge]->marker = eggShell_marker_inner;
+              neighbor_el->en[ns.get_neighbor_edge().local_num_of_edge]->marker = eggShell_marker_inner;
+            }
+            else if (e->en[edge]->marker != eggShell_marker_1)
+            {
+              e->en[edge]->marker = eggShell_marker_0;
+            }
+          }
+        }
+
+        for_all_active_elements(e, target_mesh)
+        {
+          for (int edge = 0; edge < e->get_nvert(); edge++)
+          {
+            if (e->en[edge]->marker == eggShell_marker_0 || e->en[edge]->marker == eggShell_marker_1)
+            {
+              e->en[edge]->bnd = true;
+              e->vn[edge]->bnd = true;
+              e->vn[(edge + 1) % e->get_nvert()]->bnd = true;
+            }
+          }
+        }
+      }
 
       fix_markers(target_mesh, mesh);
 
       return target_mesh;
     }
 
-    void EggShell::get_egg_shell_structures(MeshSharedPtr target_mesh, Element**& elements, int& n_elements, Hermes::vector<std::string> markers, unsigned int levels, int n_element_guess)
+    void EggShell::get_egg_shell_structures(MeshSharedPtr target_mesh, Hermes::vector<std::string> markers, unsigned int levels)
     {
-      int eggShell_marker_1 = target_mesh->get_boundary_markers_conversion().insert_marker(eggShell1Marker);
-      int eggShell_marker_inner = target_mesh->get_boundary_markers_conversion().insert_marker(eggShellInnerMarker);
-      int eggShell_marker_volume = target_mesh->get_element_markers_conversion().insert_marker(eggShellMarker);
-
       // Check.
       if (levels < 1)
         throw Exceptions::ValueException("levels", levels, 1);
+
+      int eggShell_marker_1 = target_mesh->get_boundary_markers_conversion().get_internal_marker(eggShell1Marker).marker;
+      int eggShell_marker_volumetric = target_mesh->get_element_markers_conversion().get_internal_marker(eggShellMarker).marker;
 
       Hermes::vector<int> internal_markers;
       for (int i = 0; i < markers.size(); i++)
@@ -2826,14 +2939,9 @@ namespace Hermes
           throw Exceptions::Exception("Marker %s not valid in target_mesh::get_egg_shell.", markers[i].c_str());
       }
 
-      // Initial allocation
-      int n_elements_alloc = n_element_guess == -1 ? (int)std::sqrt((double)target_mesh->get_num_active_elements()) : n_element_guess;
-      elements = malloc_with_check<Element*>(n_elements_alloc);
-      n_elements = 0;
-
       // Initial setup.
       int* neighbors_target = calloc_with_check<int>(target_mesh->get_max_element_id());
-      int* neighbors_target_local = calloc_with_check<int>(target_mesh->get_max_element_id());
+      int* neighbor_targets_local = calloc_with_check<int>(target_mesh->get_max_element_id());
       Element* e;
       for_all_active_elements(e, target_mesh)
       {
@@ -2847,169 +2955,125 @@ namespace Hermes
           }
         }
         if (target_marker)
-          neighbors_target_local[e->id] = 1;
+          neighbor_targets_local[e->id] = 1;
       }
 
       // And calculation.
       for (int level = 1; level <= levels; level++)
       {
-        if (EggShell::egg_shell_verbose)
-          Hermes::Mixins::Loggable::Static::info("Level: %i.", level);
-        memcpy(neighbors_target, neighbors_target_local, target_mesh->get_max_element_id() * sizeof(int));
+        memcpy(neighbors_target, neighbor_targets_local, target_mesh->get_max_element_id() * sizeof(int));
         for_all_active_elements(e, target_mesh)
         {
           if (neighbors_target[e->id] == level)
           {
-            if (EggShell::egg_shell_verbose)
-              Hermes::Mixins::Loggable::Static::info("\tElement: %i.", e->id);
             NeighborSearch<double> ns(e, target_mesh);
             for (int edge = 0; edge < e->get_nvert(); edge++)
             {
+              // Vertices handling.
+              if (level == 1)
+                handle_vertex_on_target_mesh(e, edge, target_mesh, internal_markers, neighbor_targets_local);
+
               if (e->en[edge]->bnd)
                 continue;
-
-              if (EggShell::egg_shell_verbose)
-                Hermes::Mixins::Loggable::Static::info("\t\tEdge: %i.", edge);
 
               ns.set_active_edge(edge);
               for (int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
               {
-                if (EggShell::egg_shell_verbose)
-                  Hermes::Mixins::Loggable::Static::info("\t\t\tNeighbor: %i.", neighbor);
-
                 ns.set_active_segment(neighbor);
                 Element* neighbor_el = ns.get_neighb_el();
-                if (neighbors_target_local[neighbor_el->id] > 0)
+
+                // The neighbor has been already visited.
+                // This respects the vertex-based lookup, because that had already set the value.
+                if (neighbor_targets_local[neighbor_el->id] > 0 && level > 1)
                   continue;
-                e->en[edge]->marker = eggShell_marker_1;
-                neighbor_el->en[ns.get_neighbor_edge().local_num_of_edge]->marker = eggShell_marker_1;
-                if (n_elements == n_elements_alloc)
+
+                // Mark the appropriate boundary as "1".
+                if (level == 1)
                 {
-                  int new_n_elements_alloc = std::max(n_elements_alloc * 2, n_elements_alloc + 1);
-                  elements = (Element**)realloc(elements, new_n_elements_alloc * sizeof(Element*));
-                  memset(elements + new_n_elements_alloc - n_elements_alloc, 0, sizeof(Element*));
-                  n_elements_alloc = new_n_elements_alloc;
+                  e->en[edge]->marker = eggShell_marker_1;
+                  neighbor_el->en[ns.get_neighbor_edge().local_num_of_edge]->marker = eggShell_marker_1;
                 }
-                elements[n_elements++] = ns.get_neighb_el();
-                ns.get_neighb_el()->marker = eggShell_marker_volume;
-                neighbors_target_local[ns.get_neighb_el()->id] = level + 1;
+
+                if (neighbor_targets_local[neighbor_el->id] > 0)
+                  continue;
+
+                // Store the level.
+                neighbor_targets_local[ns.get_neighb_el()->id] = level + 1;
+                ns.get_neighb_el()->marker = eggShell_marker_volumetric;
               }
             }
           }
         }
       }
       free_with_check(neighbors_target);
-      free_with_check(neighbors_target_local);
     }
 
-    void EggShell::make_egg_shell_mesh(MeshSharedPtr target_mesh, Element** elements, int n_elements)
+    void EggShell::handle_vertex_on_target_mesh(Element* e, int vertex, MeshSharedPtr target_mesh, Hermes::vector<int> markers, int* neighbor_targets_local)
     {
-      Element* elem;
-
-      for_all_active_elements(elem, target_mesh)
+      int eggShell_marker_volumetric = target_mesh->get_element_markers_conversion().get_internal_marker(eggShellMarker).marker;
+      Node* n;
+      Node* v = e->vn[vertex];
+      for_all_edge_nodes(n, target_mesh)
       {
-        elem->used = false;
-        while (elem->parent)
+        if (n->p1 == v->id || n->p2 == v->id)
         {
-          elem->parent->used = false;
-          elem = elem->parent;
-        }
-      }
-      target_mesh->nactive = 0;
-
-      for (int i = 0; i < n_elements; i++)
-      {
-        elem = elements[i];
-        elem->used = true;
-        while (elem->parent)
-        {
-          elem->parent->used = true;
-          elem = elem->parent;
-        }
-        target_mesh->nactive++;
-      }
-
-      EggShell::fix_hanging_nodes(target_mesh, elements, n_elements);
-
-      int marker_temp = target_mesh->get_boundary_markers_conversion().get_internal_marker(eggShellInnerMarker).marker;
-      int marker_1 = target_mesh->get_boundary_markers_conversion().get_internal_marker(eggShell1Marker).marker;
-      int marker_0 = target_mesh->get_boundary_markers_conversion().insert_marker(eggShell0Marker);
-      int marker_volume = target_mesh->get_element_markers_conversion().insert_marker(eggShellMarker);
-
-      for_all_active_elements(elem, target_mesh)
-      {
-        NeighborSearch<double> ns(elem, target_mesh);
-
-        for (int edge = 0; edge < elem->get_nvert(); edge++)
-        {
-          if (elem->en[edge]->bnd)
-            continue;
-
-          bool egg_shell_neighbor = false;
-          ns.set_active_edge(edge);
-          for (int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
+          bool marker_check_failed[2] = { false, false };
+          for (unsigned short marker_i = 0; marker_i < markers.size(); marker_i++)
           {
-            ns.set_active_segment(neighbor);
-            Element* neighbor_el = ns.get_neighb_el();
-            if (neighbor_el->marker == marker_volume)
-            {
-              elem->en[edge]->marker = marker_temp;
-              egg_shell_neighbor = true;
-              break;
-            }
+            if (n->elem[0])
+            if (n->elem[0]->marker == markers[marker_i])
+              marker_check_failed[0] = true;
+            if (n->elem[1])
+            if (n->elem[1]->marker == markers[marker_i])
+              marker_check_failed[1] = true;
           }
-
-          // If this is not the 1-marker, it is the 0- one now.
-          if (!egg_shell_neighbor && elem->en[edge]->marker != marker_1)
-            elem->en[edge]->marker = marker_0;
-
-          if (elem->en[edge]->marker == marker_1 || elem->en[edge]->marker == marker_0)
+          for (unsigned char i = 0; i < 2; i++)
+          if (n->elem[i] && !marker_check_failed[i])
           {
-            elem->en[edge]->bnd = true;
-            elem->vn[edge]->bnd = true;
-            elem->vn[(edge + 1) % elem->get_nvert()]->bnd = true;
+            // Store the level.
+            //neighbor_targets_local[n->elem[i]->id] = 2;
+            n->elem[i]->marker = eggShell_marker_volumetric;
           }
         }
       }
     }
 
-    void EggShell::fix_hanging_nodes(MeshSharedPtr target_mesh, Element** elements, int n_elements)
+    void EggShell::fix_hanging_nodes(MeshSharedPtr target_mesh)
     {
-      int marker_1 = target_mesh->get_boundary_markers_conversion().get_internal_marker(eggShell1Marker).marker;
-      int marker_0 = target_mesh->get_boundary_markers_conversion().insert_marker(eggShell0Marker);
-      int marker_temp = target_mesh->get_boundary_markers_conversion().get_internal_marker(eggShellInnerMarker).marker;
       int marker = target_mesh->get_element_markers_conversion().get_internal_marker(eggShellMarker).marker;
-      for (int i = 0; i < n_elements; i++)
+      for_all_active_elements_fast(target_mesh)
       {
-        for (int e = 0; e < elements[i]->nvert; e++)
+        if (e->marker != marker)
+          continue;
+
+        for (int edge = 0; edge < e->nvert; edge++)
         {
-          Node* edge = elements[i]->en[e];
-          if (edge->bnd)
+          Node* en = e->en[edge];
+          if (en->bnd)
             continue;
 
           // eliminate good elements.
-          if (!(edge->elem[0] && edge->elem[1]))
+          if (!(en->elem[0] && en->elem[1]))
           {
             // eliminate go-down (smaller neighbor)
-            if (!target_mesh->peek_vertex_node(edge->p1, edge->p2))
+            if (!target_mesh->peek_vertex_node(en->p1, en->p2))
             {
-              Element* elem = elements[i];
               bool processed = false;
-              while (elem->parent)
+              while (e->parent)
               {
-                Node* parent_edge = target_mesh->peek_edge_node(elem->parent->vn[e]->id, elem->parent->vn[(e + 1) % elem->nvert]->id);
+                Node* parent_edge = target_mesh->peek_edge_node(e->parent->vn[edge]->id, e->parent->vn[(edge + 1) % e->nvert]->id);
                 // Found edge -> make sure it has some elements (should have)
                 if (parent_edge)
                 {
                   if (parent_edge->elem[0] || parent_edge->elem[1])
                   {
-                    mark_elements_down_used(marker, elem->parent);
+                    mark_elements_down_used(marker, e->parent);
                     processed = true;
                     break;
                   }
                 }
                 // Not found edge -> have to go up
-                elem = elem->parent;
+                e = e->parent;
               }
               // In the worst case, the original (base) element should pass with the correct edge.
               assert(processed);
@@ -3021,12 +3085,9 @@ namespace Hermes
 
     void EggShell::mark_elements_down_used(int eggShell_marker_volume, Element* element)
     {
-      if (!element->used && element->active)
-      {
+      if (element->active)
         element->marker = eggShell_marker_volume;
-      }
-
-      if (!element->active)
+      else
       {
         for (int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
         {
@@ -3034,17 +3095,13 @@ namespace Hermes
             EggShell::mark_elements_down_used(eggShell_marker_volume, element->sons[i]);
         }
       }
-
-      element->used = true;
     }
 
     void EggShell::fix_markers(MeshSharedPtr target_mesh, MeshSharedPtr original_mesh)
     {
       Element* e;
       for_all_active_elements(e, target_mesh)
-      {
         e->marker = original_mesh->get_element(e->id)->marker;
-      }
     }
   }
 }
