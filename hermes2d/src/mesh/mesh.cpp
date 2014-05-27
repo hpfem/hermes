@@ -3013,9 +3013,11 @@ namespace Hermes
       int eggShell_marker_volumetric = target_mesh->get_element_markers_conversion().get_internal_marker(eggShellMarker).marker;
       Node* n;
       Node* v = e->vn[vertex];
-      for_all_edge_nodes(n, target_mesh)
+      int max_id = target_mesh->get_max_node_id();
+      for (int i = 0; i < max_id; i++)
       {
-        if (n->p1 == v->id || n->p2 == v->id)
+        n = &target_mesh->nodes[i];
+        if ((n->p1 == v->id || n->p2 == v->id) && n->used && n->type)
         {
           bool marker_check_failed[2] = { false, false };
           for (unsigned short marker_i = 0; marker_i < markers.size(); marker_i++)
