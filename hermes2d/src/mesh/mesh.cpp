@@ -2911,6 +2911,10 @@ namespace Hermes
               e->vn[edge]->bnd = true;
               e->vn[(edge + 1) % e->get_nvert()]->bnd = true;
             }
+            else if (e->en[edge]->bnd)
+            {
+              e->en[edge]->marker = eggShell_marker_0;
+            }
           }
         }
       }
