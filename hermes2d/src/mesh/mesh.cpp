@@ -2812,32 +2812,46 @@ namespace Hermes
 
       Element* e;
 
+      /*
+      bool elements_added;
       // Fill holes.
-      for_all_active_elements(e, target_mesh)
+      while (true)
       {
-        NeighborSearch<double> ns(e, target_mesh);
-        ns.set_ignore_errors(true);
-        int edges_eggShell = 0;
-        for (int edge = 0; edge < e->get_nvert(); edge++)
+        elements_added = false;
+        for_all_active_elements(e, target_mesh)
         {
-          // This has been taken care of above.
-          if (e->en[edge]->marker == eggShell_marker_1 || e->en[edge]->bnd)
-            continue;
-
-          ns.set_active_edge(edge);
-          for (int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
+          NeighborSearch<double> ns(e, target_mesh);
+          ns.set_ignore_errors(true);
+          int edges_eggShell = 0;
+          for (int edge = 0; edge < e->get_nvert(); edge++)
           {
-            Element* neighbor_el = ns.get_neighb_el();
-            if (neighbor_el && neighbor_el->marker == eggShell_marker_volume)
+            // This has been taken care of above.
+            if (e->en[edge]->marker == eggShell_marker_1 || e->en[edge]->bnd)
+              continue;
+
+            ns.set_active_edge(edge);
+            for (int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
             {
-              edges_eggShell++;
-              break;
+              Element* neighbor_el = ns.get_neighb_el();
+              if (neighbor_el && neighbor_el->marker == eggShell_marker_volume)
+              {
+                edges_eggShell++;
+                break;
+              }
             }
           }
+          if (edges_eggShell > 2)
+          {
+            e->marker = eggShell_marker_volume;
+            elements_added = true;
+          }
         }
-        if (edges_eggShell > 2)
-          e->marker = eggShell_marker_volume;
+        if (elements_added)
+          EggShell::fix_hanging_nodes(target_mesh);
+        else
+          break;
       }
+      */
 
       // Mark used / not used elements according to the marker.
       for_all_active_elements(e, target_mesh)
