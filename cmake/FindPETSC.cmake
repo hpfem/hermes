@@ -35,6 +35,7 @@ SET(COMMON_PETSC_INCLUDE_DIRS
 )
 
 SET(COMMON_PETSC_LIB_DIRS
+    ${PETSC_ROOT}/lib
     ${PETSC_ROOT}/${PETSC_ARCH}/lib
     /usr/lib
     /usr/local/lib
