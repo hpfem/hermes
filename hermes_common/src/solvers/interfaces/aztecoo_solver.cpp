@@ -23,7 +23,9 @@
 #ifdef HAVE_AZTECOO
 #include "aztecoo_solver.h"
 #include "callstack.h"
-#include "Komplex_LinearProblem.h"
+#ifdef HAVE_KOMPLEX
+	#include "Komplex_LinearProblem.h"
+#endif
 
 namespace Hermes
 {
@@ -424,10 +426,10 @@ namespace Hermes
       else
         for (unsigned int i = 0; i < final_matrix->size; i++) this->sln[i] = x[i];  
     }
-
     template<>
     void AztecOOSolver<std::complex<double> >::solve()
     {
+#ifdef HAVE_KOMPLEX
       assert(m != nullptr);
       assert(rhs != nullptr);
       assert(m->size == rhs->size);
@@ -457,11 +459,13 @@ namespace Hermes
       // copy the solution into sln vector
       for (unsigned int i = 0; i < m->size; i++)
         this->sln[i] = std::complex<double>(xr[i], xi[i]);
+#endif
     }
 
     template<>
     void AztecOOSolver<std::complex<double> >::solve(std::complex<double>* initial_guess)
     {
+#ifdef HAVE_KOMPLEX	
       assert(m != nullptr);
       assert(rhs != nullptr);
       assert(m->size == rhs->size);
@@ -500,6 +504,7 @@ namespace Hermes
       // copy the solution into sln vector
       for (unsigned int i = 0; i < m->size; i++)
         this->sln[i] = std::complex<double>(xr[i], xi[i]);
+#endif
     }
 
     template<typename Scalar>
