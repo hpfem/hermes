@@ -1,13 +1,18 @@
-[[[ IMPORTANT: Please read ]]]
-------------------------------
-Information about branches:
+Information about branches
+--------------------------
 
 master
 
-- current stable development branch
+- current work-in-progress development branch
+- NOT tested as a release branch
+- for actual use, please use the latest tagged branch below:
+
+master-3.0
+
+- current latest stable branch
 - stable, used in Agros2D (http://www.agros2d.org)
-- NOT SUITABLE for learning / examples running (repositories hermes-examples (http://www.github.com/hpfem/hermes-examples) and hermes-tutorial (http://www.github.com/hpfem/hermes-tutorial) are not kept up-to-date with this branch)
-- for such a purpose, use the FOLLOWING:
+- for learning use hermes-tutorial (http://www.github.com/hpfem/hermes-tutorial)
+- for examples running use hermes-examples (http://www.github.com/hpfem/hermes-examples)
 
 master-2.0
 
@@ -38,7 +43,7 @@ This is a basic README file with generic information relevant for both Hermes Co
 Copyright
 =========
 
-Copyright (c) 2008-2013 hp-FEM group at the University of Nevada, Reno (UNR) and University of West Bohemia, Pilsen.
+Copyright (c) 2008-2014 hp-FEM group at the University of West Bohemia, Pilsen and University of Nevada, Reno (UNR).
 Email: hermes2d@googlegroups.com, home page: http://hpfem.org/.
 
 License
