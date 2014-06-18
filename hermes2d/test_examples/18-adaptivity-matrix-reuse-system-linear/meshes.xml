@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<domain:domain xmlns:domain="XMLSubdomains" xmlns:mesh="XMLMesh" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="XMLSubdomains C:/hpfem/hermes/l-korous/hermes/hermes2d/xml_schemas/subdomains_h2d_xml.xsd XMLMesh C:/hpfem/hermes/l-korous/hermes/hermes2d/xml_schemas/mesh_h2d_xml.xsd">
+
+  <vertices>
+    <v i="0" x="0.000000" y="0.000000"/>
+    <v i="1" x="1.000000" y="0.000000"/>
+    <v i="2" x="1.000000" y="1.000000"/>
+    <v i="3" x="0.000000" y="1.000000"/>
+  </vertices>
+
+  <elements>
+    <domain:q i="0" m="0" v1="0" v2="1" v3="2" v4="3"/>
+  </elements>
+
+  <edges>
+    <ed i="0" m="0" v1="0" v2="1"/>
+    <ed i="1" m="1" v1="1" v2="2"/>
+    <ed i="2" m="2" v1="2" v2="3"/>
+    <ed i="3" m="5" v1="3" v2="0"/>
+  </edges>
+
+  <curves/>
+
+  <subdomains>
+    <subdomain name="A subdomain">
+      <vertices/>
+      <elements/>
+      <boundary_edges/>
+      <refinements>
+        <ref element_id="0" refinement_type="0"/>
+        <ref element_id="1" refinement_type="0"/>
+        <ref element_id="2" refinement_type="0"/>
+        <ref element_id="3" refinement_type="0"/>
+        <ref element_id="4" refinement_type="0"/>
+        <ref element_id="5" refinement_type="0"/>
+        <ref element_id="24" refinement_type="0"/>
+        <ref element_id="11" refinement_type="0"/>
+        <ref element_id="26" refinement_type="0"/>
+        <ref element_id="19" refinement_type="0"/>
+        <ref element_id="18" refinement_type="0"/>
+        <ref element_id="34" refinement_type="0"/>
+        <ref element_id="6" refinement_type="0"/>
+        <ref element_id="21" refinement_type="0"/>
+        <ref element_id="42" refinement_type="0"/>
+        <ref element_id="45" refinement_type="0"/>
+        <ref element_id="58" refinement_type="0"/>
+        <ref element_id="60" refinement_type="0"/>
+        <ref element_id="13" refinement_type="0"/>
+        <ref element_id="20" refinement_type="0"/>
+        <ref element_id="29" refinement_type="0"/>
+        <ref element_id="52" refinement_type="0"/>
+        <ref element_id="62" refinement_type="0"/>
+        <ref element_id="64" refinement_type="0"/>
+      </refinements>
+    </subdomain>
+    <subdomain name="A subdomain">
+      <vertices/>
+      <elements/>
+      <boundary_edges/>
+      <refinements>
+        <ref element_id="0" refinement_type="0"/>
+        <ref element_id="1" refinement_type="0"/>
+        <ref element_id="2" refinement_type="0"/>
+        <ref element_id="3" refinement_type="0"/>
+        <ref element_id="4" refinement_type="0"/>
+        <ref element_id="20" refinement_type="0"/>
+        <ref element_id="14" refinement_type="0"/>
+        <ref element_id="9" refinement_type="0"/>
+        <ref element_id="13" refinement_type="0"/>
+        <ref element_id="11" refinement_type="0"/>
+        <ref element_id="16" refinement_type="0"/>
+        <ref element_id="28" refinement_type="0"/>
+        <ref element_id="22" refinement_type="0"/>
+        <ref element_id="24" refinement_type="0"/>
+        <ref element_id="17" refinement_type="0"/>
+        <ref element_id="35" refinement_type="0"/>
+        <ref element_id="25" refinement_type="0"/>
+        <ref element_id="10" refinement_type="0"/>
+        <ref element_id="6" refinement_type="0"/>
+        <ref element_id="60" refinement_type="0"/>
+        <ref element_id="61" refinement_type="0"/>
+        <ref element_id="52" refinement_type="0"/>
+        <ref element_id="67" refinement_type="0"/>
+        <ref element_id="15" refinement_type="0"/>
+        <ref element_id="33" refinement_type="0"/>
+        <ref element_id="26" refinement_type="0"/>
+        <ref element_id="75" refinement_type="0"/>
+        <ref element_id="69" refinement_type="0"/>
+        <ref element_id="21" refinement_type="0"/>
+        <ref element_id="63" refinement_type="0"/>
+        <ref element_id="78" refinement_type="0"/>
+        <ref element_id="79" refinement_type="0"/>
+        <ref element_id="56" refinement_type="0"/>
+      </refinements>
+    </subdomain>
+  </subdomains>
+
+</domain:domain>

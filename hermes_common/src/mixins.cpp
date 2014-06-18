@@ -44,7 +44,8 @@ namespace Hermes
       erase_on_beginning(false),
       file_output_only(false),
       log_file_written(false),
-      add_newline(add_newline)
+      add_newline(add_newline),
+      code('I')
     {
     }
 
@@ -353,7 +354,7 @@ namespace Hermes
       va_start(arglist, msg);
       vsprintf(text_contents, msg, arglist);
       va_end(arglist);
-      hermes_log_message(HERMES_EC_INFO, text_contents);
+      hermes_log_message(this->code, text_contents);
     }
     void Loggable::info_if(bool cond, const char* msg, ...) const
     {
@@ -374,7 +375,7 @@ namespace Hermes
         va_start(arglist, msg);
         vsprintf(text_contents, msg, arglist);
         va_end(arglist);
-        hermes_log_message(HERMES_EC_INFO, text_contents);
+        hermes_log_message(this->code, text_contents);
       }
     }
 

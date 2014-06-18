@@ -36,13 +36,13 @@ namespace Hermes
     {
     }
 
-    AdaptSolverCriterionErrorThreshold::AdaptSolverCriterionErrorThreshold(double error_tolerance) : AdaptSolverCriterion(), error_threshold(error_threshold)
+    AdaptSolverCriterionErrorThreshold::AdaptSolverCriterionErrorThreshold(double error_tolerance) : AdaptSolverCriterion(), error_threshold(error_tolerance)
     {
     }
 
     bool AdaptSolverCriterionErrorThreshold::done(double error, unsigned short iteration)
     {
-      return error < this->error_threshold;
+      return (error < this->error_threshold);
     }
 
     AdaptSolverCriterionFixed::AdaptSolverCriterionFixed(unsigned short refinement_levels) : AdaptSolverCriterion(), refinement_levels(refinement_levels)
@@ -562,13 +562,13 @@ namespace Hermes
           if (scalar_views_switch)
           {
             this->scalar_views.push_back(new Views::ScalarView("", new Views::WinGeom(i * (view_size + 20), 0, view_size, view_size)));
-            this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionAdaptive(Views::HERMES_EPS_LOW * 10.));
+            this->scalar_views.back()->get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(3));
             this->scalar_views.back()->set_title("Reference solution #%i", i);
           }
 
           if (order_views_switch)
           {
-            this->order_views.push_back(new Views::OrderView("", new Views::WinGeom(i * (view_size + 20), (view_size + 20), view_size, view_size)));
+            this->order_views.push_back(new Views::OrderView("", new Views::WinGeom((i +1) * (view_size + 20), 0, view_size, view_size)));
             this->order_views.back()->set_title("Reference space #%i - orders", i);
           }
 
@@ -592,7 +592,7 @@ namespace Hermes
 
       StateReassemblyHelper<Scalar>::reusable_DOFs = new bool*;
       StateReassemblyHelper<Scalar>::reusable_Dirichlet = new bool*;
-      this->solver->dp->set_reusable_DOFs(StateReassemblyHelper<Scalar>::reusable_DOFs, StateReassemblyHelper<Scalar>::reusable_Dirichlet);
+      //this->solver->dp->set_reusable_DOFs(StateReassemblyHelper<Scalar>::reusable_DOFs, StateReassemblyHelper<Scalar>::reusable_Dirichlet);
       StateReassemblyHelper<Scalar>::use_Dirichlet = this->solver->dp->add_dirichlet_lift;
       StateReassemblyHelper<Scalar>::current_number_of_equations = this->number_of_equations;
 
@@ -676,8 +676,11 @@ namespace Hermes
         }
 
         // Perform solution.
-        this->info("\tSolving on reference mesh, %i DOFs.", Space<Scalar>::get_num_dofs(ref_spaces));
-        this->solver->dp->set_reassembled_states_reuse_linear_system_fn(&get_states_to_reassemble<Scalar>);
+        this->info("\tSolving on reference mesh.");
+        this->code = 'E';
+        this->info("\tNDOF: %i.", Space<Scalar>::get_num_dofs(ref_spaces));
+        this->code = 'I';
+        //this->solver->dp->set_reassembled_states_reuse_linear_system_fn(&get_states_to_reassemble<Scalar>);
         if (adaptivity_step > 1 && newtonSolver)
         {
           this->solver->solve(newtonSolver->previous_sln_vector);
@@ -690,35 +693,6 @@ namespace Hermes
         if (this->solver->dp->add_dirichlet_lift)
           this->solver->dp->dirichlet_lift_rhs->export_to_file("DirLift", "bd", EXPORT_FORMAT_PLAIN_ASCII, "%16.16f");
 #endif
-        this->solver->get_linear_matrix_solver()->free();
-
-        // Free reusable DOFs data structures for this run.
-        free_with_check<bool>(*StateReassemblyHelper<Scalar>::reusable_DOFs);
-        free_with_check<bool>(*StateReassemblyHelper<Scalar>::reusable_Dirichlet);
-
-        // Update the stored (previous) linear system.
-        if (this->prev_mat)
-          delete this->prev_mat;
-        this->prev_mat = (Hermes::Algebra::CSCMatrix<Scalar>*)(this->solver->get_jacobian()->duplicate());
-        StateReassemblyHelper<Scalar>::current_prev_mat = this->prev_mat;
-
-        if (this->prev_rhs)
-          delete this->prev_rhs;
-        if (newtonSolver)
-          this->prev_rhs = newtonSolver->previous_residual->duplicate();
-        else
-          this->prev_rhs = this->solver->get_residual()->duplicate();
-        if (this->solver->dp->add_dirichlet_lift)
-          this->prev_rhs->subtract_vector(this->solver->dp->dirichlet_lift_rhs);
-        StateReassemblyHelper<Scalar>::current_prev_rhs = this->prev_rhs;
-
-        if (this->solver->dp->add_dirichlet_lift)
-        {
-          if (this->prev_dirichlet_lift_rhs)
-            delete this->prev_dirichlet_lift_rhs;
-          this->prev_dirichlet_lift_rhs = this->solver->dp->dirichlet_lift_rhs->duplicate();
-          StateReassemblyHelper<Scalar>::current_prev_dirichlet_lift_rhs = this->prev_dirichlet_lift_rhs;
-        }
 
         // Translate the resulting coefficient vector into the instance of Solution.
         Solution<Scalar>::vector_to_solutions(solver->get_sln_vector(), ref_spaces, ref_slns);
@@ -730,19 +704,25 @@ namespace Hermes
         this->info("\tProjecting reference solution on coarse mesh.");
         OGProjection<Scalar>::project_global(spaces, ref_slns, slns);
 
+        double error;
         // Calculate element errors.
         if (!this->exact_slns.empty())
         {
           this->info("\tCalculating exact error.");
-          this->error_calculator->calculate_errors(slns, exact_slns, false);
-          double error = this->error_calculator->get_total_error_squared() * 100;
+          MeshFunctionSharedPtr<Scalar> temp(new Solution<Scalar>());
+          OGProjection<Scalar>::project_global(this->ref_spaces[0], this->exact_slns[0], temp);
+
+          this->error_calculator->calculate_errors(slns[0], temp, true);
+          error = this->error_calculator->get_total_error_squared() * 100.;
           this->info("\tExact error: %f.", error);
         }
-
-        this->info("\tCalculating error estimate.");
-        this->error_calculator->calculate_errors(slns, ref_slns, true);
-        double error = this->error_calculator->get_total_error_squared() * 100;
-        this->info("\tThe error estimate: %f.", error);
+        else
+        {
+          this->info("\tCalculating error estimate.");
+          this->error_calculator->calculate_errors(slns, ref_slns, true);
+          error = this->error_calculator->get_total_error_squared() * 100.;
+          this->info("\tThe error estimate: %f.", error);
+        }
 
         // If err_est too large, adapt the mesh.
         if (this->stopping_criterion_global->done(error, this->adaptivity_step))
@@ -757,12 +737,7 @@ namespace Hermes
           for (unsigned short i = 0; i < number_of_equations; i++)
             total_elements_prev_spaces += this->spaces[i]->get_mesh()->get_num_active_elements();
           // For hp-adaptivity, we use the provided selectors.
-          if (adaptivityType == hpAdaptivity)
-            this->adaptivity_internal->adapt(this->selectors);
-          else if (adaptivityType == hAdaptivity)
-            this->adaptivity_internal->adapt(hOnlySelectors);
-          else
-            this->adaptivity_internal->adapt(pOnlySelectors);
+          this->adaptivity_internal->adapt(this->selectors);
 
           Hermes::Hermes2D::MeshReaderH2DXML reader;
           std::vector<MeshSharedPtr> meshes;
@@ -770,7 +745,7 @@ namespace Hermes
             meshes.push_back(this->spaces[i]->get_mesh());
           //reader.save("meshes.xml", meshes);
 
-          this->mark_elements_to_reassemble();
+          // this->mark_elements_to_reassemble();
         }
 
         this->adaptivity_step++;
@@ -931,6 +906,15 @@ namespace Hermes
     void AdaptSolver<Scalar, SolverType>::set_stopping_criterion_global(AdaptSolverCriterion* stopping_criterion_global)
     {
       this->stopping_criterion_global = stopping_criterion_global;
+    }
+
+    template<typename Scalar, typename SolverType>
+    void AdaptSolver<Scalar, SolverType>::set_exact_solution(MeshFunctionSharedPtr<Scalar> exact_sln)
+    {
+      if (this->solve_method_running)
+        throw Exceptions::Exception("AdaptSolver asked to change the exact_slns while it was running.");
+      this->exact_slns.clear();
+      this->exact_slns.push_back(exact_sln);
     }
 
     template<typename Scalar, typename SolverType>

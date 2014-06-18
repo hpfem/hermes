@@ -1,3 +1,4 @@
+#pragma region notInterestingForThisPresentation
 #include "definitions.h"
 
 using namespace Hermes;
@@ -5,16 +6,33 @@ using namespace Hermes::Hermes2D;
 using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
-
-// Initial polynomial degree of mesh elements.
-const int P_INIT = 3;                             
-// Number of initial uniform mesh refinements.
-const int INIT_REF_NUM = 3;
-
-// Problem parameters.
 // Slope of the layer.
 double slope = 60;
 
+#pragma endregion
+
+// Initial polynomial degree of mesh elements.
+const int P_INIT = 2;    
+
+// Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 3;
+
+// Adaptivity type to use.
+AdaptivityType adaptivityType = pAdaptivity;
+
+// Global adaptivity criterion - either fixed (number of adaptive steps) or 
+AdaptSolverCriterionErrorThreshold global_criterion(1e-1);
+
+// Error calculator.
+DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 1);
+
+// Criterion for stopping to refine elements within one adaptive step.
+AdaptStoppingCriterionCumulative<double> criterion(0.5);
+
+// Refinement selector.
+H1ProjBasedSelector<double> selector(adaptivityType == pAdaptivity ? H2D_P_ANISO : (adaptivityType == hAdaptivity ? H2D_H_ANISO : H2D_HP_ANISO));
+
+////// The main function ///////
 int main(int argc, char* argv[])
 {
   // Load the mesh.
@@ -47,22 +65,14 @@ int main(int argc, char* argv[])
   // Initialize approximate solution.
   MeshFunctionSharedPtr<double> sln(new Solution<double>());
 
-  // Initialize refinement selector.
-  H1ProjBasedSelector<double> selector(H2D_HP_ANISO);
-
-  DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 1);
-  AdaptStoppingCriterionCumulative<double> criterion(0.35);
-  
-  AdaptSolverCriterionFixed global_criterion(50);
-
   AdaptSolver<double, LinearSolver<double> >::view_size = 600;
   AdaptSolver<double, LinearSolver<double> >::scalar_views_switch = true;
-  AdaptSolver<double, LinearSolver<double> >::order_views_switch = false;
+  AdaptSolver<double, LinearSolver<double> >::order_views_switch = true;
   AdaptSolver<double, LinearSolver<double> >::base_views_switch = false;
   AdaptSolver<double, LinearSolver<double> > adaptSolver(space, wf, &errorCalculator, &criterion, &selector, &global_criterion);
 
   adaptSolver.switch_visualization(true);
   adaptSolver.set_verbose_output(true);
-  adaptSolver.solve(hAdaptivity);
+  adaptSolver.solve(adaptivityType);
   return 0;
 }

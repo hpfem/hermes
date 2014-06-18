@@ -111,6 +111,7 @@ namespace Hermes
       /// Logfile name.
       char* logFileName;
       static char* staticLogFileName;
+      char code;
     protected:
 
       /* file operations */

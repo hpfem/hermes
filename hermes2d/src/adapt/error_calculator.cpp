@@ -17,6 +17,7 @@
 #include "function/exact_solution.h"
 #include "adapt/error_thread_calculator.h"
 #include "norm_form.h"
+#include "ogprojection.h"
 
 namespace Hermes
 {

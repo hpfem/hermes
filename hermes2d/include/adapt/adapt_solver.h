@@ -98,6 +98,7 @@ namespace Hermes
       void switch_visualization(bool on_off);
 
       /// Add exact solutions for exact solver calculation.
+      void set_exact_solution(MeshFunctionSharedPtr<Scalar> exact_sln);
       void set_exact_solutions(std::vector<MeshFunctionSharedPtr<Scalar> > exact_slns);
 
       /// Setters.

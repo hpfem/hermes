@@ -23,7 +23,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    AdaptStoppingCriterionCumulative<Scalar>::AdaptStoppingCriterionCumulative(double threshold) : threshold(threshold)
+    AdaptStoppingCriterionCumulative<Scalar>::AdaptStoppingCriterionCumulative(double threshold) : threshold(threshold), original_threshold(threshold)
     {
     }
 
@@ -34,6 +34,18 @@ namespace Hermes
         return false;
       else
         return true;
+    }
+
+    template<typename Scalar>
+    void AdaptStoppingCriterionCumulative<Scalar>::increase_thresholds()
+    {
+      this->threshold = std::sqrt(this->threshold);
+    }
+
+    template<typename Scalar>
+    void AdaptStoppingCriterionCumulative<Scalar>::reset_to_base()
+    {
+      this->threshold = this->original_threshold;
     }
 
     template<typename Scalar>
@@ -49,6 +61,18 @@ namespace Hermes
         return true;
       else
         return false;
+    }
+
+    template<typename Scalar>
+    void AdaptStoppingCriterionSingleElement<Scalar>::increase_thresholds()
+    {
+      this->threshold = this->threshold * this->threshold;
+    }
+
+    template<typename Scalar>
+    void AdaptStoppingCriterionSingleElement<Scalar>::reset_to_base()
+    {
+      this->threshold = this->original_threshold;
     }
 
     template<typename Scalar>
@@ -70,6 +94,18 @@ namespace Hermes
         else
           return false;
       }
+    }
+
+    template<typename Scalar>
+    void AdaptStoppingCriterionLevels<Scalar>::increase_thresholds()
+    {
+      this->threshold = this->threshold * this->threshold;
+    }
+
+    template<typename Scalar>
+    void AdaptStoppingCriterionLevels<Scalar>::reset_to_base()
+    {
+      this->threshold = this->original_threshold;
     }
 
     template<typename Scalar>
@@ -292,6 +328,8 @@ namespace Hermes
           rslns.push_back(this->errorCalculator->fine_solutions[i]);
       }
 
+      int refined_elements = 0;
+
       // Parallel section
 #pragma omp parallel num_threads(this->num_threads_used)
       {
@@ -326,6 +364,8 @@ namespace Hermes
               elem_ref.valid = true;
               elements_to_refine[id_to_refine] = elem_ref;
               element_refinement_location[component][element_id] = &elements_to_refine[id_to_refine];
+#pragma omp atomic
+              refined_elements++;
             }
             else
               elements_to_refine[id_to_refine] = ElementToRefine();
@@ -366,6 +406,14 @@ namespace Hermes
       this->deinit_adapt(element_refinement_location);
 
       this->adapt_postprocess(meshes, attempted_element_refinements_count);
+
+      if (!refined_elements)
+      {
+        this->strategy->increase_thresholds();
+        this->adapt(refinement_selectors);
+      }
+      else
+        this->strategy->reset_to_base();
 
       return false;
     }

@@ -373,9 +373,9 @@ project(hermes)
         find_package(CLAPACK REQUIRED)
         include_directories(${CLAPACK_INCLUDE_DIRS})
     endif(WITH_PETSC OR WITH_TRILINOS OR WITH_SUPERLU)
-    if(WITH_MUMPS)
+    if(WITH_UMFPACK OR WITH_MUMPS)
       find_package(WINBLAS REQUIRED)
-    endif(WITH_MUMPS)
+    endif(WITH_UMFPACK OR WITH_MUMPS)
   else(MSVC)
     # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
     # FindLAPACK is Fortran-only so Fortran must be enabled as well.

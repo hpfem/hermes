@@ -99,8 +99,8 @@ namespace Hermes
     public:
       Element();
       int id;              ///< element id number
-      bool active;   ///< 0 = active, no sons; 1 = inactive (refined), has sons
-      bool used;     ///< array item usage flag
+      bool active;         ///< 0 = active, no sons; 1 = inactive (refined), has sons
+      bool used;           ///< array item usage flag
       Element* parent;     ///< pointer to the parent element for the current son
       bool visited;        ///< true if the element has been visited during assembling
 

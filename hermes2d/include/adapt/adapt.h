@@ -53,6 +53,8 @@ namespace Hermes
       /// The loop ends with the first negative result of a call to this method.
       /// Decide if the refinement at hand will be carried out.
       virtual bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i) = 0;
+      virtual void increase_thresholds() = 0;
+      virtual void reset_to_base() = 0;
     };
 
     /// Stopping criterion based on cumulative processed error.
@@ -69,10 +71,12 @@ namespace Hermes
       /// Will return false as soon as the already processed refinements counted for AdaptStoppingCriterionCumulative::threshold
       /// of the total error.
       bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
+      void increase_thresholds();
+      void reset_to_base();
     private:
       /// The quantity representing the portion (fraction) of total error that is processed.
       /// See comments above.
-      double threshold;
+      double threshold, original_threshold;
     };
 
     /// Stopping criterion based on maximum element error.
@@ -87,10 +91,12 @@ namespace Hermes
 
       /// Decide if the refinement at hand will be carried out.
       bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
+      void increase_thresholds();
+      void reset_to_base();
     private:
       /// The quantity representing the portion (fraction) of maximum error that the processed elements contain.
       /// See comments above.
-      double threshold;
+      double threshold, original_threshold;
     };
 
     /// Stopping criterion based on refining elements with similar errors.
@@ -105,10 +111,12 @@ namespace Hermes
 
       /// Decide if the refinement at hand will be carried out.
       bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
+      void increase_thresholds();
+      void reset_to_base();
     private:
       /// The quantity representing the portion (fraction) of the current element error to the previous one for those that will be refined..
       /// See comments above.
-      double threshold;
+      double threshold, original_threshold;
     };
 
     /// Evaluation of an error between a (coarse) solution and a reference solution and adaptivity.
