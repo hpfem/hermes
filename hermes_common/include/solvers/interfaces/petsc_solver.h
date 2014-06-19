@@ -22,14 +22,22 @@
 #ifndef __HERMES_COMMON_PETSC_SOLVER_H_
 #define __HERMES_COMMON_PETSC_SOLVER_H_
 
+#include "config.h"
+
 #include "algebra/matrix.h"
 #include "solvers/linear_matrix_solver.h"
 
 #ifdef WITH_PETSC
+
+extern "C" {
 #include <petsc.h>
 #include <petscmat.h>
 #include <petscvec.h>
 #include <petscksp.h>
+#include <petscerror.h>
+}
+
+#define CHKERRQ(n)
 
 namespace Hermes
 {
@@ -81,7 +89,7 @@ namespace Hermes
       ///  @todo same input parameters acts differen as in superlu
       void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
       // Duplicates a matrix (including allocation).
-      PetscMatrix* duplicate();
+      PetscMatrix* duplicate() const;
     protected:
       /// Add matrix - PETSc.
       /// @param[in] mat matrix to be added

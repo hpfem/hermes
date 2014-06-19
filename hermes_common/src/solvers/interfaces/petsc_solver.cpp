@@ -23,6 +23,8 @@
 #ifdef WITH_PETSC
 #include "petsc_solver.h"
 #include "callstack.h"
+#include "common.h"
+#include "util/memory_handling.h"
 
 /// \todo Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
 
@@ -39,7 +41,7 @@ namespace Hermes
 
     void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], double y[])
     {
-      PetscScalar *py = malloc_with_check(ni, this);
+      PetscScalar *py = malloc_with_check<PetscScalar>(ni);
       VecGetValues(x, ni, ix, py);
       for (int i = 0; i < ni; i++)y[i] = py[i].real();
       free_with_check(py);
@@ -58,7 +60,7 @@ namespace Hermes
       {
         int ierr = PetscFinalize();
         CHKERRQ(ierr);
-        this->info("PETSc finalized. No more PETSc usage allowed until application restart.");
+        //FIXME this->info("PETSc finalized. No more PETSc usage allowed until application restart.");
       }
     }
 
@@ -102,11 +104,11 @@ namespace Hermes
       assert(this->pages != nullptr);
 
       // calc nnz
-      int *nnz_array = malloc_with_check(this->size, this);
+      int *nnz_array = malloc_with_check<int>(this->size);
 
       // fill in nnz_array
       int aisize = this->get_num_indices();
-      int *ai = malloc_with_check(aisize, this);
+      int *ai = malloc_with_check<int>(aisize);
 
       // sort the indices and remove duplicities, insert into ai
       int pos = 0;
@@ -117,7 +119,7 @@ namespace Hermes
       }
       // stote the number of nonzeros
       nnz = pos;
-      free_with_check(this->pages; this->pages = nullptr);
+      free_with_check(this->pages);
       free_with_check(ai);
 
       //
@@ -188,7 +190,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscMatrix<Scalar>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void PetscMatrix<Scalar>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       throw Exceptions::MethodNotImplementedException("PetscVector<double>::export_to_file");
       /*
@@ -244,7 +246,7 @@ namespace Hermes
     {
       this->size = size;
       this->nnz = nnz;
-      PetscScalar* pax = malloc_with_check(nnz, this);
+      PetscScalar* pax = malloc_with_check<PetscScalar>(nnz, this);
       for (unsigned i = 0; i < nnz; i++)
         pax[i] = to_petsc(ax[i]);
       MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, size, size, ap, ai, pax, &matrix);
@@ -319,7 +321,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::extract(Scalar *v) const
     {
-      int *idx = malloc_with_check(this->size, this);
+      int *idx = malloc_with_check<int>(this->size);
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       vec_get_value(vec, this->size, idx, v);
       free_with_check(idx);
@@ -334,8 +336,8 @@ namespace Hermes
     template<typename Scalar>
     Vector<Scalar>* PetscVector<Scalar>::change_sign()
     {
-      PetscScalar* y = malloc_with_check(this->size, this);
-      int *idx = malloc_with_check(this->size, this);
+      PetscScalar* y = malloc_with_check<PetscScalar>(this->size);
+      int *idx = malloc_with_check<int>(this->size);
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       VecGetValues(vec, this->size, idx, y);
       for (unsigned int i = 0; i < this->size; i++) y[i] *= -1.;
@@ -372,7 +374,7 @@ namespace Hermes
     Vector<Scalar>* PetscVector<Scalar>::add_vector(Vector<Scalar>* vec)
     {
       assert(this->->get_size() == vec->->get_size());
-      for (unsigned int i = 0; i < this->->get_size(); i++)
+      for (unsigned int i = 0; i < this->get_size(); i++)
         this->add(i, vec->get(i));
       return this;
     }
@@ -380,7 +382,7 @@ namespace Hermes
     template<typename Scalar>
     Vector<Scalar>* PetscVector<Scalar>::add_vector(Scalar* vec)
     {
-      for (unsigned int i = 0; i < this->->get_size(); i++)
+      for (unsigned int i = 0; i < this->get_size(); i++)
         this->add(i, vec[i]);
       return this;
     }
@@ -422,7 +424,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscLinearMatrixSolver<Scalar>::get_matrix_size()
+    int PetscLinearMatrixSolver<Scalar>::get_matrix_size()
     {
       return m->size();
     }
@@ -446,18 +448,18 @@ namespace Hermes
       VecDuplicate(rhs->vec, &x);
 
       ec = KSPSolve(ksp, rhs->vec, x);
-      if (ec) return false;
+      //FIXME if (ec) return false;
 
       this->tick();
       this->time = this->accumulated();
 
       // allocate memory for solution vector
       free_with_check(this->sln);
-      this->sln = malloc_with_check(m->size, this);
+      this->sln = malloc_with_check<Scalar>(m->size);
       memset(this->sln, 0, m->size * sizeof(Scalar));
 
       // index map vector (basic serial code uses the map sln[i] = x[i] for all dofs.
-      int *idx = malloc_with_check(m->size, this);
+      int *idx = malloc_with_check<int>(m->size);
       for (unsigned int i = 0; i < m->size; i++) idx[i] = i;
 
       // copy solution to the output solution vector
