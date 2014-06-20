@@ -35,8 +35,6 @@
 #include <petscksp.h>
 
 
-#define CHKERRQ(n)
-
 namespace Hermes
 {
   namespace Solvers
@@ -63,11 +61,8 @@ namespace Hermes
       virtual Scalar get(unsigned int m, unsigned int n) const;
       virtual void zero();
       virtual void add(unsigned int m, unsigned int n, Scalar v);
-      virtual void add_to_diagonal(Scalar v);
-      virtual void add(unsigned int m, unsigned int n, Scalar *mat, int *rows, int *cols);
       using Matrix<Scalar>::export_to_file;
       virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
-      virtual unsigned int get_matrix_size() const;
       virtual unsigned int get_nnz() const;
       virtual double get_fill_in() const;
 
