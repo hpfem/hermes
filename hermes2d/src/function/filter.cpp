@@ -996,26 +996,18 @@ namespace Hermes
         if (this->num == 2)
         for (int i = 0; i < np; i++)
         {
-          node->values[j][0][i] = tau_frac * (val[1][i] - val[0][i]) + val[1][i];
-          node->values[j][1][i] = tau_frac * (dx[1][i] - dx[0][i]) + dx[1][i];
-          node->values[j][2][i] = tau_frac * (dy[1][i] - dy[0][i]) + dy[1][i];
+          this->values[j][0][i] = tau_frac * (val[1][i] - val[0][i]) + val[1][i];
+          this->values[j][1][i] = tau_frac * (dx[1][i] - dx[0][i]) + dx[1][i];
+          this->values[j][2][i] = tau_frac * (dy[1][i] - dy[0][i]) + dy[1][i];
         }
         else
         for (int i = 0; i < np; i++)
         {
-          node->values[j][0][i] = val[0][i];
-          node->values[j][1][i] = dx[0][i];
-          node->values[j][2][i] = dy[0][i];
+          this->values[j][0][i] = val[0][i];
+          this->values[j][1][i] = dx[0][i];
+          this->values[j][2][i] = dy[0][i];
         }
       }
-
-      if (this->nodes->present(order))
-      {
-        assert(this->nodes->get(order) == this->cur_node);
-        free_with_check(this->nodes->get(order));
-      }
-      this->nodes->add(node, order);
-      this->cur_node = node;
     }
 
     template<typename Scalar>
