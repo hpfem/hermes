@@ -34,6 +34,7 @@ namespace Hermes
   {
     static int num_petsc_objects = 0;
 
+#ifdef PETSC_USE_COMPLEX
     inline void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], std::complex<double> y[])
     {
       VecGetValues(x, ni, ix, y);
@@ -46,6 +47,16 @@ namespace Hermes
       for (int i = 0; i < ni; i++)y[i] = py[i].real();
       free_with_check(py);
     }
+#else
+    inline void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], double y[])
+    {
+      VecGetValues(x, ni, ix, y);
+    }
+    inline void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], std::complex<double> y[])
+    {
+      throw(Exceptions::Exception("PETSc with complex numbers support required."));
+    }
+#endif
 
     int remove_petsc_object()
     {
@@ -148,13 +159,12 @@ namespace Hermes
     template<>
     double PetscMatrix<double>::get(unsigned int m, unsigned int n) const
     {
-      double v = 0.0;
       PetscScalar pv;
       MatGetValues(matrix, 1, (PetscInt*)&m, 1, (PetscInt*)&n, &pv);
-      v = pv.real();
-      return v;
+      return PetscRealPart(pv);
     }
 
+#ifdef PETSC_USE_COMPLEX
     template<>
     std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n) const
     {
@@ -162,6 +172,13 @@ namespace Hermes
       MatGetValues(matrix, 1, (PetscInt*)&m, 1, (PetscInt*)&n, &v);
       return v;
     }
+#else
+    template<>
+    std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n) const
+    {
+      throw(Exceptions::Exception("PETSc with complex numbers support required."));
+    }
+#endif
 
     template<typename Scalar>
     void PetscMatrix<Scalar>::zero()
@@ -169,6 +186,7 @@ namespace Hermes
       MatZeroEntries(matrix);
     }
 
+#ifdef PETSC_USE_COMPLEX
     inline PetscScalar to_petsc(double x)
     {
       return std::complex<double>(x, 0);
@@ -178,6 +196,16 @@ namespace Hermes
     {
       return x;
     }
+#else
+    inline PetscScalar to_petsc(double x)
+    {
+      return x;
+    }
+    inline PetscScalar to_petsc(std::complex<double> x)
+    {
+      throw(Exceptions::Exception("PETSc with complex numbers support required."));
+    }
+#endif
 
     template<typename Scalar>
     void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
@@ -261,7 +289,7 @@ namespace Hermes
       ptscmatrix->size = this->size;
       ptscmatrix->nnz = nnz;
       return ptscmatrix;
-    };
+    }
 
     template<typename Scalar>
     PetscVector<Scalar>::PetscVector()
@@ -303,13 +331,11 @@ namespace Hermes
     template<>
     double PetscVector<double>::get(unsigned int idx) const
     {
-      double y = 0;
       PetscScalar py;
       VecGetValues(vec, 1, (PetscInt*)&idx, &py);
-      y = py.real();
-      return y;
+      return PetscRealPart(py);
     }
-
+#ifdef PETSC_USE_COMPLEX
     template<>
     std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) const
     {
@@ -317,6 +343,13 @@ namespace Hermes
       VecGetValues(vec, 1, (PetscInt*)&idx, &y);
       return y;
     }
+#else
+    template<>
+    std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) const
+    {
+        throw(Exceptions::Exception("PETSc with complex numbers support required."));
+    }
+#endif
 
     template<typename Scalar>
     void PetscVector<Scalar>::extract(Scalar *v) const
