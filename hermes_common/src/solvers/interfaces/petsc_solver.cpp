@@ -49,7 +49,7 @@ namespace Hermes
 
     int remove_petsc_object()
     {
-      PetscTruth petsc_initialized, petsc_finalized;
+      PetscBool petsc_initialized, petsc_finalized;
       int ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
       ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
       if (petsc_finalized == PETSC_TRUE || petsc_initialized == PETSC_FALSE)
@@ -67,7 +67,7 @@ namespace Hermes
     int add_petsc_object()
     {
       int ierr;
-      PetscTruth petsc_initialized, petsc_finalized;
+      PetscBool petsc_initialized, petsc_finalized;
       ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
 
       if (petsc_finalized == PETSC_TRUE)
@@ -134,7 +134,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::free()
     {
-      if (inited) MatDestroy(matrix);
+      if (inited) MatDestroy(&matrix);
       inited = false;
     }
 
@@ -289,7 +289,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::free()
     {
-      if (inited) VecDestroy(vec);
+      if (inited) VecDestroy(&vec);
       inited = false;
     }
 
@@ -373,7 +373,7 @@ namespace Hermes
     template<typename Scalar>
     Vector<Scalar>* PetscVector<Scalar>::add_vector(Vector<Scalar>* vec)
     {
-      assert(this->->get_size() == vec->->get_size());
+      assert(this->get_size() == vec->get_size());
       for (unsigned int i = 0; i < this->get_size(); i++)
         this->add(i, vec->get(i));
       return this;
@@ -426,7 +426,7 @@ namespace Hermes
     template<typename Scalar>
     int PetscLinearMatrixSolver<Scalar>::get_matrix_size()
     {
-      return m->size();
+      return m->get_size();
     }
 
     template<typename Scalar>
@@ -455,19 +455,19 @@ namespace Hermes
 
       // allocate memory for solution vector
       free_with_check(this->sln);
-      this->sln = malloc_with_check<Scalar>(m->size);
-      memset(this->sln, 0, m->size * sizeof(Scalar));
+      this->sln = malloc_with_check<Scalar>(m->get_size());
+      memset(this->sln, 0, m->get_size() * sizeof(Scalar));
 
       // index map vector (basic serial code uses the map sln[i] = x[i] for all dofs.
-      int *idx = malloc_with_check<int>(m->size);
-      for (unsigned int i = 0; i < m->size; i++) idx[i] = i;
+      int *idx = malloc_with_check<int>(m->get_size());
+      for (unsigned int i = 0; i < m->get_size(); i++) idx[i] = i;
 
       // copy solution to the output solution vector
-      vec_get_value(x, m->size, idx, this->sln);
+      vec_get_value(x, m->get_size(), idx, this->sln);
       free_with_check(idx);
 
-      KSPDestroy(ksp);
-      VecDestroy(x);
+      KSPDestroy(&ksp);
+      VecDestroy(&x);
     }
 
     template class HERMES_API PetscLinearMatrixSolver<double>;

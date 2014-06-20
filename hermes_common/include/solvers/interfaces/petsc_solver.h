@@ -29,13 +29,11 @@
 
 #ifdef WITH_PETSC
 
-extern "C" {
 #include <petsc.h>
 #include <petscmat.h>
 #include <petscvec.h>
 #include <petscksp.h>
-#include <petscerror.h>
-}
+
 
 #define CHKERRQ(n)
 
