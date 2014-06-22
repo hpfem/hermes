@@ -1,4 +1,0 @@
-rm *~  
-./P04-04-complex-adapt
-python plot_graph.py &
-
