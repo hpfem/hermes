@@ -342,8 +342,8 @@ namespace Hermes
       free_with_check(ny);
     }
 
-    template<>
-    double Geom<double>::get_diam_approximation(int n)
+    template<typename T>
+    double Geom<T>::get_diam_approximation(int n)
     {
       double x_min = std::numeric_limits<double>::max(),
         x_max = std::numeric_limits<double>::min(),
@@ -366,8 +366,8 @@ namespace Hermes
       return std::sqrt((x_max - x_min) * (x_max - x_min) + (y_max - y_min) * (y_max - y_min));
     }
 
-    template<>
-    double Geom<double>::get_area(int n, double* wt)
+    template<typename T>
+    double Geom<T>::get_area(int n, double* wt)
     {
       double area = 0.;
       for (int i = 0; i < n; i++)
@@ -820,9 +820,9 @@ namespace Hermes
     template HERMES_API Func<double>* init_fn(UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
     template HERMES_API Func<std::complex<double> >* init_fn(UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
 
-    template class HERMES_API DiscontinuousFunc<double>;
-    template class HERMES_API DiscontinuousFunc<std::complex<double> >;
-    template class HERMES_API Geom<double>;
-    template class HERMES_API InterfaceGeom<double>;
+    template HERMES_API class DiscontinuousFunc<double>;
+    template HERMES_API class DiscontinuousFunc<std::complex<double> >;
+    template HERMES_API class Geom<double>;
+    template HERMES_API class InterfaceGeom<double>;
   }
 }

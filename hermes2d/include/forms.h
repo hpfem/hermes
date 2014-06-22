@@ -61,9 +61,9 @@ namespace Hermes
       virtual T   get_neighbor_diam()   const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
 
       /// Element diameter (for edge, diameter of the parent element).
-      T get_diam_approximation(int n);
+      double get_diam_approximation(int n);
       /// Element area (for edge, area of the parent element).
-      T get_area(int n, double* wt);
+      double get_area(int n, double* wt);
 
       /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
       virtual ~Geom() {};
@@ -93,6 +93,15 @@ namespace Hermes
       Hermes::Ord ty[1];
       Hermes::Ord nx[1];
       Hermes::Ord ny[1];
+
+      /// Element diameter (for edge, diameter of the parent element).
+      Hermes::Ord get_diam_approximation(int n) {
+        return this->diam;
+      }
+      /// Element area (for edge, area of the parent element).
+      Hermes::Ord get_area(int n, double* wt) {
+        return this->area;
+      }
 
       Hermes::Ord diam;           ///< Element diameter (for edge, diameter of the parent element).
       Hermes::Ord area;           ///< Element area (for edge, area of the parent element).
