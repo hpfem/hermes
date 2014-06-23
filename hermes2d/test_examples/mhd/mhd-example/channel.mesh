@@ -1,0 +1,21 @@
+# Everything is in meters:
+a = 4.1
+b = 1
+
+vertices = [
+  [ 0, 0 ],
+  [ a, 0 ],
+  [ a, b ],
+  [ 0, b ]
+]
+
+elements = [
+  [ 0, 1, 2, 3, 0 ]
+]
+
+boundaries = [
+  [ 0, 1, 1 ],
+  [ 1, 2, 2 ],
+  [ 2, 3, 3 ],
+  [ 3, 0, 4 ]
+]
