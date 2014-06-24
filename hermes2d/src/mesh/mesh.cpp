@@ -847,7 +847,7 @@ namespace Hermes
       return 0;
     }
 
-    void Mesh::refine_towards_boundary(Hermes::vector<std::string> markers, int depth, bool aniso, bool mark_as_initial)
+    void Mesh::refine_towards_boundary(std::vector<std::string> markers, int depth, bool aniso, bool mark_as_initial)
     {
       rtb_aniso = aniso;
       bool refined = true;
@@ -929,14 +929,14 @@ namespace Hermes
 
     void Mesh::refine_in_area(std::string marker, int depth, int refinement, bool mark_as_initial)
     {
-      Hermes::vector<std::string> markers;
+      std::vector<std::string> markers;
       markers.push_back(marker);
       this->refine_in_areas(markers, depth, refinement, mark_as_initial);
     }
 
-    void Mesh::refine_in_areas(Hermes::vector<std::string> markers, int depth, int refinement, bool mark_as_initial)
+    void Mesh::refine_in_areas(std::vector<std::string> markers, int depth, int refinement, bool mark_as_initial)
     {
-      Hermes::vector<int> internal_markers;
+      std::vector<int> internal_markers;
       bool any_marker = false;
       for (unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
       {
@@ -1000,7 +1000,7 @@ namespace Hermes
     void Mesh::unrefine_all_elements(bool keep_initial_refinements)
     {
       // find inactive elements with active sons
-      Hermes::vector<int> list;
+      std::vector<int> list;
       Element* e;
       for_all_inactive_elements(e, this)
       {
@@ -2778,12 +2778,12 @@ namespace Hermes
         throw Hermes::Exceptions::ValueException("levels", levels, 2);
         return MeshSharedPtr(new Mesh());
       }
-      Hermes::vector<std::string> markers;
+      std::vector<std::string> markers;
       markers.push_back(marker);
       return get_egg_shell(mesh, markers, levels);
     }
 
-    MeshSharedPtr EggShell::get_egg_shell(MeshSharedPtr mesh, Hermes::vector<std::string> markers, unsigned int levels)
+    MeshSharedPtr EggShell::get_egg_shell(MeshSharedPtr mesh, std::vector<std::string> markers, unsigned int levels)
     {
       if (levels < 2)
       {
@@ -2938,7 +2938,7 @@ namespace Hermes
       return target_mesh;
     }
 
-    void EggShell::get_egg_shell_structures(MeshSharedPtr target_mesh, Hermes::vector<std::string> markers, unsigned int levels)
+    void EggShell::get_egg_shell_structures(MeshSharedPtr target_mesh, std::vector<std::string> markers, unsigned int levels)
     {
       // Check.
       if (levels < 1)
@@ -2947,7 +2947,7 @@ namespace Hermes
       int eggShell_marker_1 = target_mesh->get_boundary_markers_conversion().get_internal_marker(eggShell1Marker).marker;
       int eggShell_marker_volumetric = target_mesh->get_element_markers_conversion().get_internal_marker(eggShellMarker).marker;
 
-      Hermes::vector<int> internal_markers;
+      std::vector<int> internal_markers;
       for (int i = 0; i < markers.size(); i++)
       {
         Hermes::Hermes2D::Mesh::MarkersConversion::IntValid internalMarker = target_mesh->get_element_markers_conversion().get_internal_marker(markers[i]);
@@ -3026,7 +3026,7 @@ namespace Hermes
       free_with_check(neighbors_target);
     }
 
-    void EggShell::handle_vertex_on_target_mesh(Element* e, int vertex, MeshSharedPtr target_mesh, Hermes::vector<int> markers, int* neighbor_targets_local)
+    void EggShell::handle_vertex_on_target_mesh(Element* e, int vertex, MeshSharedPtr target_mesh, std::vector<int> markers, int* neighbor_targets_local)
     {
       int eggShell_marker_volumetric = target_mesh->get_element_markers_conversion().get_internal_marker(eggShellMarker).marker;
       Node* n;

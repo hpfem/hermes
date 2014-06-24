@@ -42,10 +42,10 @@ int main(int argc, char* argv[])
     mesh->refine_all_elements();
 
   // Initialize the weak formulation.
-  CustomWeakFormPoissonNewton wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL),
+  WeakFormSharedPtr<double> wf(new CustomWeakFormPoissonNewton("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL),
     "Copper", new Hermes::Hermes1DFunction<double>(LAMBDA_CU),
     new Hermes::Hermes2DFunction<double>(-VOLUME_HEAT_SRC),
-    "Outer", ALPHA, T_EXTERIOR);
+    "Outer", ALPHA, T_EXTERIOR));
 
   // Initialize boundary conditions.
   CustomDirichletCondition bc_essential({ "Bottom", "Inner", "Left" }, BDY_A_PARAM, BDY_B_PARAM, BDY_C_PARAM);
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;
 
-  newton.set_weak_formulation(&wf);
+  newton.set_weak_formulation(wf);
   newton.set_space(space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.

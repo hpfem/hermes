@@ -472,7 +472,7 @@ namespace Hermes
       /// \param[in] mesh The source mesh
       /// \param[in] markers The markers
       /// \param[in] levels the number of layers of elements forming the "eggshell". Must be > 1.
-      static MeshSharedPtr get_egg_shell(MeshSharedPtr mesh, Hermes::vector<std::string> markers, unsigned int levels);
+      static MeshSharedPtr get_egg_shell(MeshSharedPtr mesh, std::vector<std::string> markers, unsigned int levels);
 
       /// The mesh returned from get_egg_shell has this marker on the "1" boundary.
       static const std::string eggShell1Marker;
@@ -495,12 +495,12 @@ namespace Hermes
       /// \param[in/out] n_elements Size of the array.
       /// \param[in] markers The markers
       /// \param[in] n_element_guess(optional) Approximate number of elements that will be in this method. Used as an allocation hint. -1 for not-known.
-      static void get_egg_shell_structures(MeshSharedPtr target_mesh, Hermes::vector<std::string> markers, unsigned int levels);
+      static void get_egg_shell_structures(MeshSharedPtr target_mesh, std::vector<std::string> markers, unsigned int levels);
 
 
       /// Internal.
       /// Handle vertices.
-      static void handle_vertex_on_target_mesh(Element* e, int vertex, MeshSharedPtr target_mesh, Hermes::vector<int> markers, int* neighbor_targets_local);
+      static void handle_vertex_on_target_mesh(Element* e, int vertex, MeshSharedPtr target_mesh, std::vector<int> markers, int* neighbor_targets_local);
 
       /// Internal.
       /// Handle hanging nodes.

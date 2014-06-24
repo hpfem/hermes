@@ -84,7 +84,7 @@ int main(int argc, char* args[])
   CustomWeakForm wf("Bdy_bottom_left", mesh);
 
   // Initialize the FE problem.
-  DiscreteProblemLinear<double> dp(&wf, space);
+  DiscreteProblemLinear<double> dp(wf, space);
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp);

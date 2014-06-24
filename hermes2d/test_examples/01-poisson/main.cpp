@@ -27,38 +27,16 @@ using namespace Hermes::Hermes2D;
 //
 // The following parameters can be changed:
 
-const bool HERMES_VISUALIZATION = false;   // Set to "false" to suppress Hermes OpenGL visualization.
+const bool HERMES_VISUALIZATION = true;   // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = false;     // Set to "true" to enable VTK output.
 const int P_INIT = 3;                     // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 6;               // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
 const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
 const double VOLUME_HEAT_SRC = 5;        // Volume heat sources generated (for example) by electric current.
 const double FIXED_BDY_TEMP = 20;        // Fixed temperature on the boundary.
-
-class MyVolumetricIntegralCalculator : public PostProcessing::SurfaceIntegralCalculator<double>
-{
-public:
-  MyVolumetricIntegralCalculator(MeshFunctionSharedPtr<double> source_function, int number_of_integrals) : PostProcessing::SurfaceIntegralCalculator<double>(source_function, number_of_integrals)
-  {
-  }
-
-  MyVolumetricIntegralCalculator(std::vector<MeshFunctionSharedPtr<double> > source_functions, int number_of_integrals) : PostProcessing::SurfaceIntegralCalculator<double>(source_functions, number_of_integrals)
-  {
-  }
-
-  virtual void integral(int n, double* wt, Func<double> **fns, Geom<double> *e, double* result)
-  {
-    for (int i = 0; i < n; i++)
-      result[0] += wt[i] * fns[0]->val[i];
-  };
-
-  virtual void order(Func<Hermes::Ord> **fns, Hermes::Ord* result) {
-    result[0] = Hermes::Ord(21);
-  }
-};
 
 int main(int argc, char* argv[])
 {

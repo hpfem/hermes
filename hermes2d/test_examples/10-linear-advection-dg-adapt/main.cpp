@@ -13,7 +13,7 @@
 //  The following parameters can be changed:
 
 // Number of initial uniform mesh refinements.
-const int INIT_REF = 3;
+const int INIT_REF = 1;
 // Initial polynomial degrees of mesh elements in vertical and horizontal directions.
 const int P_INIT = 2;
 // This is a quantitative parameter of the adapt(...) function and
@@ -53,13 +53,13 @@ int main(int argc, char* args[])
   MeshFunctionSharedPtr<double> refsln(new Solution<double>);
 
   // Initialize the weak formulation.
-  CustomWeakForm wf("Bdy_bottom_left", mesh);
+  WeakFormSharedPtr<double> wf(new CustomWeakForm("Bdy_bottom_left", mesh));
   ScalarView view1("Solution", new WinGeom(900, 0, 450, 350));
   view1.fix_scale_width(60);
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver;
-  linear_solver.set_weak_formulation(&wf);
+  linear_solver.set_weak_formulation(wf);
 
   adaptivity.set_space(fine_space);
 

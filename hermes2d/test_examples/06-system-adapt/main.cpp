@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
   CustomRightHandSide2 g2(K, D_v);
 
   // Initialize the weak formulation.
-  CustomWeakForm wf(&g1, &g2);
+  WeakFormSharedPtr<double> wf(new CustomWeakForm(&g1, &g2));
 
   // Initialize boundary conditions
   DefaultEssentialBCConst<double> bc_u("Bdy", 0.0);
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof_exact, graph_cpu_exact;
 
   NewtonSolver<double> newton;
-  newton.set_weak_formulation(&wf);
+  newton.set_weak_formulation(wf);
 
   // Adaptivity loop:
   int as = 1;

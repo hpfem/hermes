@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof_est, graph_cpu_est,
     graph_dof_exact, graph_cpu_exact;
 
-  DiscreteProblem< ::complex > dp(&wf, space);
+  DiscreteProblem< ::complex > dp(wf, space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver< ::complex > newton(&dp);

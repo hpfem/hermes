@@ -188,9 +188,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-      Hermes::vector<MeshFunction<Scalar>* > source_meshfns,
-      Scalar* target_vec, Hermes::vector<NormType> proj_norms,
+    void OGProjectionNOX<Scalar>::project_global(std::vector<SpaceSharedPtr<Scalar> > spaces,
+      std::vector<MeshFunction<Scalar>* > source_meshfns,
+      Scalar* target_vec, std::vector<NormType> proj_norms,
       double newton_tol, int newton_max_iter)
     {
       int n = spaces.size();
@@ -213,8 +213,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
-      Scalar* target_vec, Hermes::vector<NormType> proj_norms,
+    void OGProjectionNOX<Scalar>::project_global(std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
+      Scalar* target_vec, std::vector<NormType> proj_norms,
       double newton_tol, int newton_max_iter)
     {
       int n = spaces.size();
@@ -236,9 +236,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
-      Hermes::vector<NormType> proj_norms, bool delete_old_meshes,
+    void OGProjectionNOX<Scalar>::project_global(std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
+      std::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
+      std::vector<NormType> proj_norms, bool delete_old_meshes,
       double newton_tol, int newton_max_iter)
     {
       int n = spaces.size();

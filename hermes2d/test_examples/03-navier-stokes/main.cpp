@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 #include "setup.cpp"
 
   // Initialize the Newton solver.
-  Hermes::Hermes2D::NewtonSolver<double> newton(&wf, spaces);
+  Hermes::Hermes2D::NewtonSolver<double> newton(wf, spaces);
   //newton.output_matrix();
   newton.set_matrix_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);
   newton.set_rhs_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);

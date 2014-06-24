@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 	// space->
 	SpaceSharedPtr<double> space1(new H1Space<double>(mesh, &bcs, P_INIT));
 	SpaceSharedPtr<double> space2(new H1Space<double>(mesh, &bcs, P_INIT + 1));
-  SpaceSharedPtrVector<double> spaces({ space1, space2 });
+  std::vector<SpaceSharedPtr<double> > spaces({ space1, space2 });
 
 	// Solution pointer.
 	MeshFunctionSharedPtr<double> sln_time_prev1(new ConstantSolution<double>(mesh, TEMP_INIT));
@@ -103,8 +103,8 @@ int main(int argc, char* argv[])
 	MeshFunctionSharedPtr<double> sln_time_new2(new Solution<double>(mesh));
   std::vector<MeshFunctionSharedPtr<double> > sln_time_new({ sln_time_new1, sln_time_new2 });
 
-  CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
-		&current_time, TEMP_INIT, T_FINAL);
+  WeakFormSharedPtr<double> wf(new CustomWeakFormHeatRK("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
+		&current_time, TEMP_INIT, T_FINAL));
 
 	// Initialize views.
 	Hermes::Hermes2D::Views::ScalarView Tview("Temperature", new Hermes::Hermes2D::Views::WinGeom(0, 0, 450, 600));
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 	Tview.fix_scale_width(30);
 
 	// Initialize Runge-Kutta time stepping.
-	RungeKutta<double> runge_kutta(&wf, spaces, &bt);
+	RungeKutta<double> runge_kutta(wf, spaces, &bt);
   runge_kutta.set_tolerance(NEWTON_TOL);
 	runge_kutta.set_verbose_output(true);
 	runge_kutta.set_time_step(time_step);

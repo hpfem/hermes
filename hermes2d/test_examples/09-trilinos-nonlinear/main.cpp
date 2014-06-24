@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   CustomWeakForm wf1;
 
   // Initialize the discrete problem.
-  DiscreteProblem<double> dp1(&wf1, space1);
+  DiscreteProblem<double> dp1(wf1, space1);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   MeshFunctionSharedPtr<double> sln1(new Hermes::Hermes2D::Solution<double>());
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
   CustomWeakForm wf2(JFNK, PRECOND == 1, PRECOND == 2);
 
   // Initialize DiscreteProblem.
-  DiscreteProblemNOX<double> dp2(&wf2, space2);
+  DiscreteProblemNOX<double> dp2(wf2, space2);
 
   // Initialize the NOX solver with the vector "coeff_vec".
   NewtonSolverNOX<double> nox_solver(&dp2);

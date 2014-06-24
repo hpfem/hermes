@@ -46,18 +46,18 @@ std::vector<NormType> proj_norms({ vel_proj_norm, vel_proj_norm, p_proj_norm });
 MeshFunctionSharedPtr<double> xvel_prev_time(new ConstantSolution<double>(mesh, 0.0));
 MeshFunctionSharedPtr<double> yvel_prev_time(new ConstantSolution<double>(mesh, 0.0));
 MeshFunctionSharedPtr<double> p_prev_time(new ConstantSolution<double>(mesh, 0.0));
-MeshFunctionSharedPtrVector<double> sln_prev_time = { xvel_prev_time, yvel_prev_time, p_prev_time };
+std::vector<MeshFunctionSharedPtr<double> > sln_prev_time = { xvel_prev_time, yvel_prev_time, p_prev_time };
 double* coeff_vec = new double[Space<double>::get_num_dofs(spaces)];
 
 // Project the initial condition on the FE space to obtain initial coefficient vector for the Newton's method.
 OGProjection<double>::project_global(spaces, sln_prev_time, coeff_vec, proj_norms);
 
 // Initialize weak formulation.
-WeakFormNSNewton wf(STOKES, RE, TAU, xvel_prev_time, yvel_prev_time);
+WeakFormSharedPtr<double> wf(new WeakFormNSNewton(STOKES, RE, TAU, xvel_prev_time, yvel_prev_time));
 UExtFunctionSharedPtr<double> fn_0(new CustomUExtFunction(0));
 UExtFunctionSharedPtr<double> fn_1(new CustomUExtFunction(1));
-wf.set_ext({ xvel_prev_time, yvel_prev_time });
-wf.set_u_ext_fn({fn_0, fn_1});
+wf->set_ext({ xvel_prev_time, yvel_prev_time });
+wf->set_u_ext_fn({fn_0, fn_1});
 
 // Initialize views.
 Views::VectorView vview("velocity[m/s]", new Views::WinGeom(0, 0, 750, 240));

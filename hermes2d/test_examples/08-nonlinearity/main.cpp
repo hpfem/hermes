@@ -52,10 +52,10 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation
   CustomNonlinearity lambda(alpha);
   Hermes2DFunction<double> src(-heat_src);
-  WeakFormSharedPtr<double>wf(new DefaultWeakFormPoisson<double>(HERMES_ANY, &lambda, &src));
+  WeakFormSharedPtr<double> wf(new DefaultWeakFormPoisson<double>(HERMES_ANY, &lambda, &src));
 
   // Initialize the FE problem.
-  DiscreteProblem<double> dp(&wf, space);
+  DiscreteProblem<double> dp(wf, space);
 
   // Project the initial condition on the FE space to obtain initial 
   // coefficient vector for the Newton's method.
