@@ -345,6 +345,18 @@ namespace Hermes
       }
 
       template<typename LinearizerDataDimensions>
+      void LinearizerMultidimensional<LinearizerDataDimensions>::set_max_absolute_value(double max_abs)
+      {
+        if (max_abs < 0.0)
+          this->warn("Setting of maximum absolute value in LinearizerMultidimensional with a negative value");
+        else
+        {
+          this->max_val = max_abs;
+        }
+        return;
+      }
+
+      template<typename LinearizerDataDimensions>
       double LinearizerMultidimensional<LinearizerDataDimensions>::get_min_value() const
       {
         return min_val;

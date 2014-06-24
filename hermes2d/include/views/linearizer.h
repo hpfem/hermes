@@ -18,7 +18,9 @@
 
 #include "thread_linearizer.h"
 #include "linearizer_utils.h"
-#include <pthread.h>
+#ifndef NOGLUT
+  #include <pthread.h>
+#endif
 #include "../function/solution.h"
 
 namespace Hermes
@@ -114,6 +116,8 @@ namespace Hermes
         int get_edge_count() const;
         /// Triangle index count per all threads.
         int get_triangle_index_count() const;
+
+        void set_max_absolute_value(double max_abs);
 
         double get_min_value() const;
         double get_max_value() const;

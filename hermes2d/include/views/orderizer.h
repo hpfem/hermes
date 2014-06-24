@@ -18,7 +18,9 @@
 
 #include "../space/space.h"
 #include "global.h"
-#include <pthread.h>
+#ifndef NOGLUT
+  #include <pthread.h>
+#endif
 #include "../quadrature/quad_all.h"
 #include "../mesh/traverse.h"
 

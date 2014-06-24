@@ -442,10 +442,7 @@ namespace Hermes
       // update coefficients of curved reference mapping
       for (int i = 0; i < 4; i++)
       if (sons[i]->is_curved())
-      {
         sons[i]->cm->update_refmap_coeffs(sons[i]);
-        sons[i]->iro_cache = e->iro_cache;
-      }
 
       // deactivate this element and unregister from its nodes
       e->active = 0;
@@ -651,11 +648,8 @@ namespace Hermes
       for (i = 0; i < 4; i++)
       if (sons[i])
       {
-        if(sons[i]->cm)
-        {
+        if (sons[i]->cm)
           sons[i]->cm->update_refmap_coeffs(sons[i]);
-          sons[i]->iro_cache = e->iro_cache;
-          }
       }
 
       // set pointers to parent element for sons
@@ -683,7 +677,7 @@ namespace Hermes
 
       // obtain markers and bnds from son elements
       int mrk[H2D_MAX_NUMBER_EDGES], bnd[H2D_MAX_NUMBER_EDGES];
-      for (unsigned char i = 0; i < e->get_nvert(); i++)
+      for (unsigned i = 0; i < e->get_nvert(); i++)
       {
         MeshUtil::get_edge_sons(e, i, s1, s2);
         assert(e->sons[s1]->active);
@@ -741,9 +735,9 @@ namespace Hermes
       }
       else refine_quad(e, refinement);
 
-      for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
-        if(e->sons[i])
-          e->sons[i]->iro_cache = e->iro_cache;
+      for (int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
+      if (e->sons[i])
+        e->sons[i]->iro_cache = e->iro_cache;
 
       this->seq = g_mesh_seq++;
     }
@@ -806,7 +800,7 @@ namespace Hermes
 
     static int rtv_criterion(Element* e)
     {
-      for (unsigned char i = 0; i < e->get_nvert(); i++)
+      for (unsigned int i = 0; i < e->get_nvert(); i++)
       if (e->vn[i]->id == rtv_id)
         return 0;
       return -1;
@@ -853,7 +847,7 @@ namespace Hermes
       return 0;
     }
 
-    void Mesh::refine_towards_boundary(std::vector<std::string> markers, int depth, bool aniso, bool mark_as_initial)
+    void Mesh::refine_towards_boundary(Hermes::vector<std::string> markers, int depth, bool aniso, bool mark_as_initial)
     {
       rtb_aniso = aniso;
       bool refined = true;
@@ -868,7 +862,7 @@ namespace Hermes
 
         Element* e;
         for_all_active_elements(e, this)
-        for (unsigned char j = 0; j < e->get_nvert(); j++)
+        for (unsigned int j = 0; j < e->get_nvert(); j++)
         {
           bool marker_matched = false;
           for (unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
@@ -913,7 +907,7 @@ namespace Hermes
 
           Element* e;
           for_all_active_elements(e, this)
-          for (unsigned char j = 0; j < e->get_nvert(); j++)
+          for (unsigned int j = 0; j < e->get_nvert(); j++)
           {
             if (e->en[j]->marker == rtb_marker)
             {
@@ -935,14 +929,14 @@ namespace Hermes
 
     void Mesh::refine_in_area(std::string marker, int depth, int refinement, bool mark_as_initial)
     {
-      std::vector<std::string> markers;
+      Hermes::vector<std::string> markers;
       markers.push_back(marker);
       this->refine_in_areas(markers, depth, refinement, mark_as_initial);
     }
 
-    void Mesh::refine_in_areas(std::vector<std::string> markers, int depth, int refinement, bool mark_as_initial)
+    void Mesh::refine_in_areas(Hermes::vector<std::string> markers, int depth, int refinement, bool mark_as_initial)
     {
-      std::vector<int> internal_markers;
+      Hermes::vector<int> internal_markers;
       bool any_marker = false;
       for (unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
       {
@@ -1006,7 +1000,7 @@ namespace Hermes
     void Mesh::unrefine_all_elements(bool keep_initial_refinements)
     {
       // find inactive elements with active sons
-      std::vector<int> list;
+      Hermes::vector<int> list;
       Element* e;
       for_all_inactive_elements(e, this)
       {
@@ -1238,7 +1232,7 @@ namespace Hermes
           enew = this->create_quad(e->marker, v0, v1, v2, &nodes[e->vn[3]->id], nullptr);
 
         // copy edge markers
-        for (unsigned char j = 0; j < e->get_nvert(); j++)
+        for (unsigned int j = 0; j < e->get_nvert(); j++)
         {
           Node* en = MeshUtil::get_base_edge_node(e, j);
           enew->en[j]->bnd = en->bnd; // copy bnd data from the active el.
@@ -1281,8 +1275,8 @@ namespace Hermes
       this->refinements.clear();
       this->seq = -1;
 
-      for(std::map<int, MarkerArea*>::iterator p = marker_areas.begin(); p != marker_areas.end(); p++)
-      delete p->second;
+      for (std::map<int, MarkerArea*>::iterator p = marker_areas.begin(); p != marker_areas.end(); p++)
+        delete p->second;
       marker_areas.clear();
     }
 
@@ -1336,7 +1330,7 @@ namespace Hermes
       this->element_markers_conversion = mesh->element_markers_conversion;
 
       // clear reference for all nodes
-      for(unsigned short i = 0; i < nodes.get_size(); i++)
+      for (int i = 0; i < nodes.get_size(); i++)
       {
         Node& node = nodes[i];
         if (node.type == HERMES_TYPE_EDGE) { //process only edge nodes
@@ -1397,7 +1391,7 @@ namespace Hermes
         }
 
         // copy edge markers
-        for (unsigned char j = 0; j < e->get_nvert(); j++)
+        for (unsigned int j = 0; j < e->get_nvert(); j++)
         {
           Node* en = MeshUtil::get_base_edge_node(e, j);
           enew->en[j]->bnd = en->bnd;
@@ -1627,9 +1621,9 @@ namespace Hermes
             }
 
             Arc* curve = new Arc(angle2);
-            
+
             int inner = 1, outer = 0;
-            
+
             curve->pt[0][0] = nodes[p1].x;
             curve->pt[0][1] = nodes[p1].y;
             curve->pt[0][2] = 1.0;
@@ -1662,10 +1656,7 @@ namespace Hermes
       // update coefficients of curved reference mapping
       for (int i = 0; i < 3; i++)
       if (sons[i]->is_curved())
-      {
         sons[i]->cm->update_refmap_coeffs(sons[i]);
-        sons[i]->iro_cache = e->iro_cache;
-        }
 
       // deactivate this element and unregister from its nodes
       e->active = 0;
@@ -1838,7 +1829,6 @@ namespace Hermes
         if (sons[i]->is_curved())
         {
           sons[i]->cm->update_refmap_coeffs(sons[i]);
-          sons[i]->iro_cache = e->iro_cache;
         }
       }
       nactive += 2;
@@ -2106,7 +2096,6 @@ namespace Hermes
       if (enew->is_curved())
       {
         enew->cm->update_refmap_coeffs(enew);
-        enew->iro_cache = e->iro_cache;
       }
 
       // now the original edge nodes may no longer exist...
@@ -2156,7 +2145,7 @@ namespace Hermes
 
       // FIXME:
       if (rtb_aniso)
-      for (unsigned char i = 0; i < e->get_nvert(); i++)
+      for (unsigned int i = 0; i < e->get_nvert(); i++)
         refinement_angle[i] = refinement_angle[i] * 2;
 
       // deactivate this element and unregister from its nodes
@@ -2172,7 +2161,7 @@ namespace Hermes
       if ((e->is_curved()) && (!e_inter))
       {
         bool create_new = false;
-        for (unsigned char i = 0; i < e->get_nvert(); i++)
+        for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
           if (fabs(refinement_angle[i] - 0.0) > 1e-4)
           {
@@ -2197,7 +2186,7 @@ namespace Hermes
           if (p1 > p2) std::swap(p1, p2);
 
           Arc* curve = new Arc(angle2);
-          
+
           curve->pt[0][0] = nodes[p1].x;
           curve->pt[0][1] = nodes[p1].y;
           curve->pt[0][2] = 1.0;
@@ -2228,7 +2217,6 @@ namespace Hermes
       if (enew->is_curved())
       {
         enew->cm->update_refmap_coeffs(enew);
-        enew->iro_cache = e->iro_cache;
       }
 
       // now the original edge nodes may no longer exist...
@@ -2316,7 +2304,7 @@ namespace Hermes
         if ((e->is_curved()) && (!e_inter))
         {
           //bool create_new_ = false;
-          for (unsigned char i = 0; i < e->get_nvert(); i++)
+          for (unsigned int i = 0; i < e->get_nvert(); i++)
           {
             if (fabs(refinement_angle[i] - 0.0) > 1e-4)
             {
@@ -2356,7 +2344,7 @@ namespace Hermes
               curve->pt[1][0] = 0.5*((curve->pt[2][0] + curve->pt[0][0]) + (curve->pt[2][1] - curve->pt[0][1]) * x);
               curve->pt[1][1] = 0.5*((curve->pt[2][1] + curve->pt[0][1]) - (curve->pt[2][0] - curve->pt[0][0]) * x);
               curve->pt[1][2] = cos((M_PI - a) * 0.5);
-              
+
               cm[idx]->toplevel = true;
               cm[idx]->order = 4;
               cm[idx]->curves[idx % 4] = curve;
@@ -2419,10 +2407,7 @@ namespace Hermes
       // update coefficients of curved reference mapping
       for (i = 0; i < 4; i++)
       if (sons[i] != nullptr && sons[i]->cm != nullptr)
-      {
         sons[i]->cm->update_refmap_coeffs(sons[i]);
-        sons[i]->iro_cache = e->iro_cache;
-      }
 
       //set pointers to parent element for sons
       for (int i = 0; i < 4; i++)
@@ -2720,7 +2705,7 @@ namespace Hermes
           int iso = -1;
           if (e->is_triangle())
           {
-            for (unsigned char i = 0; i < e->get_nvert(); i++)
+            for (unsigned int i = 0; i < e->get_nvert(); i++)
             {
               j = e->next_vert(i);
               if (get_edge_degree(e->vn[i], e->vn[j]) > n)
@@ -2743,7 +2728,7 @@ namespace Hermes
             }
             else
             {
-              for (unsigned char i = 0; i < e->get_nvert(); i++)
+              for (unsigned int i = 0; i < e->get_nvert(); i++)
               {
                 j = e->next_vert(i);
                 if (get_edge_degree(e->vn[i], e->vn[j]) > n)

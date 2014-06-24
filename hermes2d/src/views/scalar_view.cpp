@@ -111,6 +111,9 @@ namespace Hermes
         // For preservation of the sln's active element. Will be set back after the visualization.
         Element* active_element = sln->get_active_element();
 
+        if (!range_auto)
+          lin->set_max_absolute_value(std::max(fabs(range_min), fabs(range_max)));
+
         lin->set_displacement(xdisp, ydisp, dmult);
         lin->lock_data();
 
