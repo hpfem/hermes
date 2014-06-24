@@ -17,13 +17,13 @@ const double time_interval_length = 20.;
 
 // Equation parameters.
 // Exterior pressure (dimensionless).
-const double P_EXT = 2.5;         
+const double P_EXT = 2.5;
 // Inlet density (dimensionless).   
-const double RHO_EXT = 1.0;       
+const double RHO_EXT = 1.0;
 // Inlet x-velocity (dimensionless).
-const double V1_EXT = 1.25;       
+const double V1_EXT = 1.25;
 // Inlet y-velocity (dimensionless).
-const double V2_EXT = 0.0;       
+const double V2_EXT = 0.0;
 // Kappa.
 const double KAPPA = 1.4;
 ///TODO Zde bude treba doplnit zbyle slozky stavoveho vektoru na vstupu.
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
   SpaceSharedPtr<double> space_rho_v_x(new L2Space<double>(mesh, P_INIT));
   SpaceSharedPtr<double> space_rho_v_y(new L2Space<double>(mesh, P_INIT));
   SpaceSharedPtr<double> space_e(new L2Space<double>(mesh, P_INIT));
-  /// TODO Zde bude treba doplnit zbyle 4 prostory
+  ///TODO Zde bude treba doplnit zbyle 4 prostory
   Hermes::vector<SpaceSharedPtr<double> > spaces(space_rho, space_rho_v_x, space_rho_v_y, space_e);
 
   // Initialize solutions.
@@ -61,16 +61,26 @@ int main(int argc, char* argv[])
   MeshFunctionSharedPtr<double> sln_rho_v_x(new Solution<double>(mesh));
   MeshFunctionSharedPtr<double> sln_rho_v_y(new Solution<double>(mesh));
   MeshFunctionSharedPtr<double> sln_e(new Solution<double>(mesh));
-  /// TODO Zde bude treba doplnit zbyle 4 reseni
+  ///TODO Zde bude treba doplnit zbyle 4 reseni
   Hermes::vector<MeshFunctionSharedPtr<double> > slns(sln_rho, sln_rho_v_x, sln_rho_v_y, sln_e);
 
   // Set initial conditions.
   // These are also used for storing the previous iteration solution - which is at time = 0 the initial condition.
   MeshFunctionSharedPtr<double> prev_rho(new ConstantSolution<double>(mesh, RHO_EXT));
-  MeshFunctionSharedPtr<double> prev_rho_v_x(new ConstantSolution<double> (mesh, RHO_EXT * V1_EXT));
-  MeshFunctionSharedPtr<double> prev_rho_v_y(new ConstantSolution<double> (mesh, RHO_EXT * V2_EXT));
-  MeshFunctionSharedPtr<double> prev_e(new ConstantSolution<double> (mesh, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA)));
-  /// TODO Zde bude treba doplnit zbyle 4 pocatecni podminky
+  MeshFunctionSharedPtr<double> prev_rho_v_x(new ConstantSolution<double>(mesh, RHO_EXT * V1_EXT));
+  MeshFunctionSharedPtr<double> prev_rho_v_y(new ConstantSolution<double>(mesh, RHO_EXT * V2_EXT));
+  MeshFunctionSharedPtr<double> prev_e(new ConstantSolution<double>(mesh, QuantityCalculator::calc_energy(RHO_EXT, RHO_EXT * V1_EXT, RHO_EXT * V2_EXT, P_EXT, KAPPA)));
+  Hermes::vector<MeshFunctionSharedPtr<double> > prev_slns(prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e);
+  ///TODO Zde bude treba doplnit zbyle 4 pocatecni podminky.
+
+  MeshFunctionSharedPtr<double>  Mach_number(new MachNumberFilter(prev_slns, KAPPA));
+  MeshFunctionSharedPtr<double>  pressure(new PressureFilter(prev_slns, KAPPA));
+
+  ScalarView pressure_view("Pressure", new WinGeom(0, 0, 600, 300));
+  ScalarView Mach_number_view("Mach number", new WinGeom(650, 0, 600, 300));
+  ScalarView eview("Error - density", new WinGeom(0, 330, 600, 300));
+  ScalarView eview1("Error - momentum", new WinGeom(0, 660, 600, 300));
+  OrderView order_view("Orders", new WinGeom(650, 330, 600, 300));
 
   // Initialize markers for the weak formulation.
   Hermes::vector<std::string> solid_wall_markers(BDY_SOLID_WALL_BOTTOM, BDY_SOLID_WALL_TOP);
@@ -79,9 +89,42 @@ int main(int argc, char* argv[])
   Hermes::vector<std::string> outlet_markers;
   outlet_markers.push_back(BDY_OUTLET);
 
-  // Initialize the weak formulation
-  EulerEquationsWeakFormSemiImplicit wf(KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT,solid_wall_markers,
-    inlet_markers, outlet_markers, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e, (P_INIT == 0));
+  // Initialize the numerical flux.
+  UpWindNumericalFlux num_flux(KAPPA);
 
-#include "../euler-time-loop.cpp"
+  // Initialize the weak formulation
+  MHDWeakForm wf(KAPPA, RHO_EXT, V1_EXT, V2_EXT, P_EXT, inlet_markers, outlet_markers, &num_flux, prev_rho, prev_rho_v_x, prev_rho_v_y, prev_e);
+  wf.set_current_time_step(time_step_length);
+
+  LinearSolver<double> solver(&wf, spaces);
+
+#pragma region 5. Time stepping loop.
+  int iteration = 0;
+  for (double t = 0.0; t < time_interval_length; t += time_step_length)
+  {
+    // Info.
+    Hermes::Mixins::Loggable::Static::info("---- Time step %d, time %3.5f.", iteration++, t);
+
+    try
+    {
+      // Solve.
+      solver.solve();
+
+      // Get the solution vector.
+      Solution<double>::vector_to_solutions(solver.get_sln_vector(), spaces, prev_slns);
+    }
+    catch (std::exception& e)
+    {
+      std::cout << e.what();
+    }
+
+    Mach_number->reinit();
+    pressure->reinit();
+    pressure_view.show(pressure);
+    Mach_number_view.show(Mach_number);
+    order_view.show(space_rho);
+  }
+
+  // Done.
+  return 0;
 }
