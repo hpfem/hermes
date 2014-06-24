@@ -327,26 +327,26 @@ namespace Hermes
     Shapeset::shape_fn_t* mode_shape_fn_table_dxy[1]  = { fn_dxy };
     Shapeset::shape_fn_t* mode_shape_fn_table_dyy[1]  = { fn_dyy };
 
-    static unsigned short qb_0[] = { 0, };
-    static unsigned short qb_1_contains_means[] = { 0, 1, 2, };
-    static unsigned short qb_1[] = { 1, 2, };
-    static unsigned short qb_2_contains_means[] = { 0, 1, 2, 3, 4, 5 };
-    static unsigned short qb_2[] = { 1, 2, 3, 4, 5 };
+    static short qb_0[] = { 0, };
+    static short qb_1_contains_means[] = { 0, 1, 2, };
+    static short qb_1[] = { 1, 2, };
+    static short qb_2_contains_means[] = { 0, 1, 2, 3, 4, 5 };
+    static short qb_2[] = { 1, 2, 3, 4, 5 };
 
-    unsigned short* mode_bubble_indices_contains_means[3] = {  qb_0,   qb_1_contains_means,  qb_2_contains_means };
-    unsigned short* mode_bubble_indices[3] = {  qb_0,   qb_1,  qb_2 };
+    short* mode_bubble_indices_contains_means[3] = {  qb_0,   qb_1_contains_means,  qb_2_contains_means };
+    short* mode_bubble_indices[3] = {  qb_0,   qb_1,  qb_2 };
 
     unsigned short mode_bubble_count_contains_means[3] = { 1,  3,  6 };
     unsigned short mode_bubble_count[3] = { 1,  2,  5 };
 
-    unsigned short mode_vertex_indices[4] = { -1, -1, -1, -1 };
+    short mode_vertex_indices[4] = { -1, -1, -1, -1 };
 
-    static unsigned short edge_indices_0[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
-    static unsigned short edge_indices_1[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
-    static unsigned short edge_indices_2[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
-    static unsigned short edge_indices_3[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
+    static short edge_indices_0[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
+    static short edge_indices_1[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
+    static short edge_indices_2[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
+    static short edge_indices_3[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
 
-    unsigned short* mode_edge_indices[4] =
+    short* mode_edge_indices[4] =
     {
       edge_indices_0,
       edge_indices_1,
@@ -395,25 +395,25 @@ namespace Hermes
       mode_shape_fn_table_dxy
     };
 
-    static unsigned short* s_vertex_indices[2] =
+    static short* s_vertex_indices[2] =
     {
       mode_vertex_indices,
       mode_vertex_indices
     };
 
-    static unsigned short** s_edge_indices[2] =
+    static short** s_edge_indices[2] =
     {
       mode_edge_indices,
       mode_edge_indices
     };
 
-    static unsigned short** s_bubble_indices_contains_means[2] =
+    static short** s_bubble_indices_contains_means[2] =
     {
       mode_bubble_indices_contains_means,
       mode_bubble_indices_contains_means
     };
 
-    static unsigned short** s_bubble_indices[2] =
+    static short** s_bubble_indices[2] =
     {
       mode_bubble_indices,
       mode_bubble_indices
@@ -485,7 +485,7 @@ namespace Hermes
       comb_table = nullptr;
     }
 
-    unsigned short* L2ShapesetTaylor::get_bubble_indices(int order, ElementMode2D mode) const
+    short* L2ShapesetTaylor::get_bubble_indices(unsigned short order, ElementMode2D mode) const
     {
       if(mode == HERMES_MODE_QUAD)
       {
@@ -496,7 +496,7 @@ namespace Hermes
         return Shapeset::get_bubble_indices(order, mode);
     }
 
-    unsigned short L2ShapesetTaylor::get_num_bubbles(int order, ElementMode2D mode) const
+    unsigned short L2ShapesetTaylor::get_num_bubbles(unsigned short order, ElementMode2D mode) const
     {
       if(mode == HERMES_MODE_QUAD)
       {

@@ -6,10 +6,9 @@ MeshReaderH2D mloader;
 mloader.load("domain.mesh", mesh);
 
 // Initial mesh refinements.
-mesh->refine_towards_boundary(BDY_OBSTACLE, 3, false);
-mesh->refine_towards_boundary(BDY_TOP, 3, true);     // '4' is the number of levels,
-mesh->refine_towards_boundary(BDY_BOTTOM, 3, true);  // 'true' stands for anisotropic refinements.
-mesh->refine_all_elements();
+mesh->refine_towards_boundary(BDY_OBSTACLE, 2, false);
+mesh->refine_towards_boundary(BDY_TOP, 2, true);     // '4' is the number of levels,
+mesh->refine_towards_boundary(BDY_BOTTOM, 2, true);  // 'true' stands for anisotropic refinements.
 mesh->refine_all_elements();
 
 // Initialize boundary conditions.

@@ -51,11 +51,11 @@ namespace Hermes
 
       /// Returns a complete set of indices of bubble functions for an element of the given order.
       /// Reimplemented because this shapeset uses linear (not bi-linear), quadratic (not bi-quadratic) etc. polynomials.
-      unsigned short* get_bubble_indices(int order, ElementMode2D mode) const;
+      short* get_bubble_indices(unsigned short order, ElementMode2D mode) const;
 
       /// Returns the number of bubble functions for an element of the given order.
       /// Reimplemented because this shapeset uses linear (not bi-linear), quadratic (not bi-quadratic) etc. polynomials.
-      virtual unsigned short get_num_bubbles(int order, ElementMode2D mode) const;
+      virtual unsigned short get_num_bubbles(unsigned short order, ElementMode2D mode) const;
       
       static const unsigned short max_index[H2D_NUM_MODES];
     };

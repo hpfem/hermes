@@ -65,7 +65,7 @@ namespace Hermes
       {
         int quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
         const int num_bubbles = shapeset->get_num_bubbles(quad_order, mode);
-        unsigned short* bubble_inxs = shapeset->get_bubble_indices(quad_order, mode);
+        short* bubble_inxs = shapeset->get_bubble_indices(quad_order, mode);
         for (int j = 0; j < num_bubbles; j++)
         {
           int inx_bubble = bubble_inxs[j];
@@ -233,7 +233,7 @@ namespace Hermes
             else { //triangles
               int order = i;
               unsigned short num_bubbles = shapeset->get_num_bubbles(order, mode);
-              unsigned short* bubble_inxs = shapeset->get_bubble_indices(order, mode);
+              short* bubble_inxs = shapeset->get_bubble_indices(order, mode);
               for (unsigned short j = 0; j < num_bubbles; j++)
               {
                 int inx_bubble = bubble_inxs[j];

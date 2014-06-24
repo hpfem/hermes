@@ -108,12 +108,12 @@ namespace Hermes
       virtual unsigned short get_max_index(ElementMode2D mode) const = 0;
 
       /// Returns the index of a vertex shape function associated with the specified vertex.
-      unsigned short get_vertex_index(int vertex, ElementMode2D mode) const;
+      short get_vertex_index(int vertex, ElementMode2D mode) const;
 
       /// Returns the index of an edge function associated with the specified edge and of the
       /// requested order. 'ori' can be 0 or 1 and determines edge orientation (this is for
       /// shapesets with non-symmetric edge functions).
-      unsigned short get_edge_index(unsigned char edge, unsigned short ori, unsigned short order, ElementMode2D mode) const;
+       short get_edge_index(unsigned char edge, unsigned short ori, unsigned short order, ElementMode2D mode) const;
 
       /// Returns space type.
       /// Internal.
@@ -154,7 +154,7 @@ namespace Hermes
 
     protected:
       /// Returns a complete set of indices of bubble functions for an element of the given order.
-      virtual unsigned short* get_bubble_indices(unsigned short order, ElementMode2D mode) const;
+      virtual short* get_bubble_indices(unsigned short order, ElementMode2D mode) const;
 
       /// Returns the index of a constrained edge function. 'part' is 0 or 1 for edge
       /// halves, 2, 3, 4, 5 for edge quarters, etc. See shapeset.cpp.
@@ -165,9 +165,9 @@ namespace Hermes
 
       shape_fn_t*** shape_table[6];
 
-      unsigned short**  vertex_indices;
-      unsigned short*** edge_indices;
-      unsigned short*** bubble_indices;
+      short**  vertex_indices;
+      short*** edge_indices;
+      short*** bubble_indices;
       unsigned short**  bubble_count;
       unsigned short**  index_to_order;
 

@@ -71,7 +71,7 @@ namespace Hermes
       free_with_check(bubble_quad_p);
     }
 
-    double** CurvMapStatic::calculate_bubble_projection_matrix(unsigned short* indices, ElementMode2D mode)
+    double** CurvMapStatic::calculate_bubble_projection_matrix(short* indices, ElementMode2D mode)
     {
       unsigned short nb;
       double** mat;
@@ -91,7 +91,7 @@ namespace Hermes
       {
         for (unsigned short j = i; j < nb; j++)
         {
-          unsigned short ii = indices[i], ij = indices[j];
+          short ii = indices[i], ij = indices[j];
           unsigned short o = ref_map_shapeset.get_order(ii, mode) + ref_map_shapeset.get_order(ij, mode);
           o = std::max(H2D_GET_V_ORDER(o), H2D_GET_H_ORDER(o));
 
@@ -123,7 +123,7 @@ namespace Hermes
         Element e;
         e.nvert = 3;
         ref_map_pss_static.set_active_element(&e);
-        unsigned short* indices = ref_map_shapeset.get_bubble_indices(ref_map_shapeset.get_max_order(), HERMES_MODE_TRIANGLE);
+        short* indices = ref_map_shapeset.get_bubble_indices(ref_map_shapeset.get_max_order(), HERMES_MODE_TRIANGLE);
         curvMapStatic.bubble_proj_matrix_tri = calculate_bubble_projection_matrix(indices, HERMES_MODE_TRIANGLE);
 
         // cholesky factorization of the matrix
@@ -136,7 +136,7 @@ namespace Hermes
       Element e;
       e.nvert = 4;
       ref_map_pss_static.set_active_element(&e);
-      unsigned short *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
+      short *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
       curvMapStatic.bubble_proj_matrix_quad = calculate_bubble_projection_matrix(indices, HERMES_MODE_QUAD);
 
       // cholesky factorization of the matrix

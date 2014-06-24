@@ -3925,7 +3925,7 @@ namespace Hermes
       jacobi_f66_dxy
     };
 
-    static unsigned short jacobi_tri_bubble_indices_all_orders[] =
+    static short jacobi_tri_bubble_indices_all_orders[] =
     {
       12,
       16, 17,
@@ -3937,7 +3937,7 @@ namespace Hermes
       70, 71, 72, 73, 74, 75, 76, 77
     };
 
-    static unsigned short* jacobi_tri_bubble_indices[11] =
+    static short* jacobi_tri_bubble_indices[11] =
     {
       nullptr, nullptr, nullptr,
       jacobi_tri_bubble_indices_all_orders,
@@ -3952,18 +3952,18 @@ namespace Hermes
 
     static unsigned short jacobi_tri_bubble_count[11] = { 0, 0, 0, 1, 3, 6, 10, 15, 21, 28, 36 };
 
-    static unsigned short jacobi_tri_edge_indices_0[22] =  { 0, 1, 1, 0, 3, 3, 6,  7,  13, 13, 18, 19, 27, 27, 34, 35, 45, 45, 54, 55, 67, 67 };
-    static unsigned short jacobi_tri_edge_indices_1[22] =  { 1, 2, 2, 1, 4, 4, 8,  9,  14, 14, 20, 21, 28, 28, 36, 37, 46, 46, 56, 57, 68, 68 };
-    static unsigned short jacobi_tri_edge_indices_2[22] =  { 2, 0, 0, 2, 5, 5, 10, 11, 15, 15, 22, 23, 29, 29, 38, 39, 47, 47, 58, 59, 69, 69 };
+    static short jacobi_tri_edge_indices_0[22] =  { 0, 1, 1, 0, 3, 3, 6,  7,  13, 13, 18, 19, 27, 27, 34, 35, 45, 45, 54, 55, 67, 67 };
+    static short jacobi_tri_edge_indices_1[22] =  { 1, 2, 2, 1, 4, 4, 8,  9,  14, 14, 20, 21, 28, 28, 36, 37, 46, 46, 56, 57, 68, 68 };
+    static short jacobi_tri_edge_indices_2[22] =  { 2, 0, 0, 2, 5, 5, 10, 11, 15, 15, 22, 23, 29, 29, 38, 39, 47, 47, 58, 59, 69, 69 };
 
-    static unsigned short* jacobi_tri_edge_indices[3] =
+    static short* jacobi_tri_edge_indices[3] =
     {
       jacobi_tri_edge_indices_0,
       jacobi_tri_edge_indices_1,
       jacobi_tri_edge_indices_2
     };
 
-    static unsigned short jacobi_tri_vertex_indices[3] = { 0, 1, 2 };
+    static short jacobi_tri_vertex_indices[3] = { 0, 1, 2 };
 
     static unsigned short jacobi_tri_index_to_order[78] =
     {
@@ -4042,19 +4042,19 @@ namespace Hermes
       simple_quad_shape_fn_table_dxy
     };
 
-    static unsigned short* jacobi_vertex_indices[2] =
+    static short* jacobi_vertex_indices[2] =
     {
       jacobi_tri_vertex_indices,
       simple_quad_vertex_indices
     };
 
-    static unsigned short** jacobi_edge_indices[2] =
+    static short** jacobi_edge_indices[2] =
     {
       jacobi_tri_edge_indices,
       simple_quad_edge_indices
     };
 
-    static unsigned short** jacobi_bubble_indices[2] =
+    static short** jacobi_bubble_indices[2] =
     {
       jacobi_tri_bubble_indices,
       simple_quad_bubble_indices

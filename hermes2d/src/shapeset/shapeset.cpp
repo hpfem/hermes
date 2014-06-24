@@ -194,7 +194,7 @@ namespace Hermes
 
     unsigned char Shapeset::get_num_components() const { return num_components; }
 
-    unsigned short Shapeset::get_vertex_index(int vertex, ElementMode2D mode) const
+    short Shapeset::get_vertex_index(int vertex, ElementMode2D mode) const
     {
 #ifdef _DEBUG
       if (mode == HERMES_MODE_TRIANGLE)
@@ -205,7 +205,7 @@ namespace Hermes
       return vertex_indices[mode][vertex];
     }
 
-    unsigned short Shapeset::get_edge_index(unsigned char edge, unsigned short ori, unsigned short order, ElementMode2D mode) const
+    short Shapeset::get_edge_index(unsigned char edge, unsigned short ori, unsigned short order, ElementMode2D mode) const
     {
 #ifdef _DEBUG
       if (mode == HERMES_MODE_TRIANGLE)
@@ -218,7 +218,7 @@ namespace Hermes
       return edge_indices[mode][edge][2 * order + ori];
     }
 
-    unsigned short* Shapeset::get_bubble_indices(unsigned short order, ElementMode2D mode) const
+    short* Shapeset::get_bubble_indices(unsigned short order, ElementMode2D mode) const
     {
 #ifdef _DEBUG
       assert(H2D_GET_H_ORDER(order) >= 0 && H2D_GET_H_ORDER(order) <= max_order);

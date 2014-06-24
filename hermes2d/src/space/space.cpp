@@ -989,7 +989,7 @@ namespace Hermes
 
       if (!ed->n) return;
 
-      unsigned short* indices = shapeset->get_bubble_indices(ed->order, e->get_mode());
+      short* indices = shapeset->get_bubble_indices(ed->order, e->get_mode());
       for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof++, indices++)
         al->add_triplet(*indices, dof, 1.0);
     }

@@ -198,7 +198,7 @@ namespace Hermes
       /// Preparation of projection matrices, Cholesky factorization
       void precalculate_cholesky_projection_matrix_edge();
       /// Calculate the H1 seminorm products (\phi_i, \phi_j) for all 0 <= i, j < n, n is the number of bubble functions
-      double** calculate_bubble_projection_matrix(unsigned short* indices, ElementMode2D mode);
+      double** calculate_bubble_projection_matrix(short* indices, ElementMode2D mode);
       void precalculate_cholesky_projection_matrices_bubble();
 
       double** edge_proj_matrix;  ///< projection matrix for each edge is the same

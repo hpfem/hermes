@@ -61,7 +61,8 @@ namespace Hermes
     template<typename Scalar>
     void AsmList<Scalar>::add_triplet(int i, int d, Scalar c)
     {
-      assert(cnt < H2D_MAX_LOCAL_BASIS_SIZE - 1);
+      if (!(cnt < H2D_MAX_LOCAL_BASIS_SIZE - 1))
+        assert(cnt < H2D_MAX_LOCAL_BASIS_SIZE - 1);
 
       idx[cnt] = i;
       dof[cnt] = d;

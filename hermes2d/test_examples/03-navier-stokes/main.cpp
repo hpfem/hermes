@@ -68,7 +68,7 @@ double current_time = 0;
 const double STARTUP_TIME = 1.0;
 
 const double TAU = 0.1;                           // Time step.
-const double T_FINAL = 0.3;                      // Time interval length.
+const double T_FINAL = 10.0;                      // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const double H = 5;                               // Domain height (necessary to define the parabolic velocity profile at inlet).
 
