@@ -129,8 +129,9 @@ namespace Hermes
       }
 #pragma omp critical (element_iro_cache_setting)
       {
-        this->set_active_element(element);
-        element->iro_cache = this->calc_inv_ref_order();
+        RefMap rm;
+        rm.set_active_element(element);
+        element->iro_cache = rm.calc_inv_ref_order();
       }
     }
 

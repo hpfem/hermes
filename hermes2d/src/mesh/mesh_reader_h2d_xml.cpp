@@ -525,7 +525,7 @@ namespace Hermes
             {
               if (e->cm != nullptr)
                 e->cm->update_refmap_coeffs(e);
-              this->ref_map.set_element_iro_cache(e);
+              RefMap::set_element_iro_cache(e);
             }
 
             // refinements.
@@ -928,7 +928,7 @@ namespace Hermes
         {
           if (e->cm != nullptr)
             e->cm->update_refmap_coeffs(e);
-          this->ref_map.set_element_iro_cache(e);
+          RefMap::set_element_iro_cache(e);
         }
       }
       catch (const xml_schema::exception& e)
@@ -1173,7 +1173,7 @@ namespace Hermes
         {
           if (e->cm != nullptr)
             e->cm->update_refmap_coeffs(e);
-          this->ref_map.set_element_iro_cache(e);
+          //RefMap::set_element_iro_cache(e);
         }
       }
       catch (const xml_schema::exception& e)

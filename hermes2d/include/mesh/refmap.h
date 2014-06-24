@@ -147,7 +147,7 @@ namespace Hermes
 #ifdef H2D_USE_SECOND_DERIVATIVES
       /// Returns coefficients for weak forms with second derivatives.
       double3x2* get_second_ref_map(int order);
-
+      
       /// Calculates the second reference map at a particular point (xi1, xi2).
       void second_ref_map_at_point(double xi1, double xi2, double& x, double& y, double3x2& mm);
 #endif
@@ -163,7 +163,7 @@ namespace Hermes
 
       static bool is_parallelogram(Element* e);
 
-      void set_element_iro_cache(Element* element);
+      static void set_element_iro_cache(Element* element);
 
     private:
       /// re-init the storage
