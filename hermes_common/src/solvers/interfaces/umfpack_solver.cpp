@@ -74,8 +74,6 @@ namespace Hermes
       // Perform both factorization phases for the first time.
       if (reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH && symbolic == nullptr && numeric == nullptr)
         reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
-      else
-        reuse_scheme = reuse_scheme;
 
       int status;
       switch (reuse_scheme)

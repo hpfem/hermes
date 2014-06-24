@@ -1,7 +1,7 @@
 # Always use inlining.
 # Disable some warnings.
 # Use multi-processor.
-set(HERMES_MSVC_CXX_FLAGS "/Ob2 /wd4275 /wd4251 /wd4251 /wd4661 /wd4996 /MP")
+set(HERMES_MSVC_CXX_FLAGS "/Ob2 /wd4275 /wd4251 /wd4018 /wd4251 /wd4661 /wd4996 /MP")
 if(WITH_OPENMP)
   SET(HERMES_MSVC_CXX_FLAGS "${HERMES_MSVC_CXX_FLAGS} /openmp")
 endif(WITH_OPENMP)

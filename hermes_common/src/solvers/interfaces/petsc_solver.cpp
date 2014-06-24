@@ -23,6 +23,8 @@
 #ifdef WITH_PETSC
 #include "petsc_solver.h"
 #include "callstack.h"
+#include "common.h"
+#include "util/memory_handling.h"
 
 /// \todo Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
 
@@ -32,6 +34,7 @@ namespace Hermes
   {
     static int num_petsc_objects = 0;
 
+#ifdef PETSC_USE_COMPLEX
     inline void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], std::complex<double> y[])
     {
       VecGetValues(x, ni, ix, y);
@@ -39,15 +42,25 @@ namespace Hermes
 
     void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], double y[])
     {
-      PetscScalar *py = malloc_with_check(ni, this);
+      PetscScalar *py = malloc_with_check<PetscScalar>(ni);
       VecGetValues(x, ni, ix, py);
       for (int i = 0; i < ni; i++)y[i] = py[i].real();
       free_with_check(py);
     }
+#else
+    inline void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], double y[])
+    {
+      VecGetValues(x, ni, ix, y);
+    }
+    inline void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], std::complex<double> y[])
+    {
+      throw(Exceptions::Exception("PETSc with complex numbers support required."));
+    }
+#endif
 
     int remove_petsc_object()
     {
-      PetscTruth petsc_initialized, petsc_finalized;
+      PetscBool petsc_initialized, petsc_finalized;
       int ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
       ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
       if (petsc_finalized == PETSC_TRUE || petsc_initialized == PETSC_FALSE)
@@ -58,14 +71,14 @@ namespace Hermes
       {
         int ierr = PetscFinalize();
         CHKERRQ(ierr);
-        this->info("PETSc finalized. No more PETSc usage allowed until application restart.");
+        //FIXME this->info("PETSc finalized. No more PETSc usage allowed until application restart.");
       }
     }
 
     int add_petsc_object()
     {
       int ierr;
-      PetscTruth petsc_initialized, petsc_finalized;
+      PetscBool petsc_initialized, petsc_finalized;
       ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
 
       if (petsc_finalized == PETSC_TRUE)
@@ -102,11 +115,11 @@ namespace Hermes
       assert(this->pages != nullptr);
 
       // calc nnz
-      int *nnz_array = malloc_with_check(this->size, this);
+      int *nnz_array = malloc_with_check<int>(this->size);
 
       // fill in nnz_array
       int aisize = this->get_num_indices();
-      int *ai = malloc_with_check(aisize, this);
+      int *ai = malloc_with_check<int>(aisize);
 
       // sort the indices and remove duplicities, insert into ai
       int pos = 0;
@@ -117,7 +130,7 @@ namespace Hermes
       }
       // stote the number of nonzeros
       nnz = pos;
-      free_with_check(this->pages; this->pages = nullptr);
+      free_with_check(this->pages);
       free_with_check(ai);
 
       //
@@ -132,7 +145,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::free()
     {
-      if (inited) MatDestroy(matrix);
+      if (inited) MatDestroy(&matrix);
       inited = false;
     }
 
@@ -146,13 +159,12 @@ namespace Hermes
     template<>
     double PetscMatrix<double>::get(unsigned int m, unsigned int n) const
     {
-      double v = 0.0;
       PetscScalar pv;
       MatGetValues(matrix, 1, (PetscInt*)&m, 1, (PetscInt*)&n, &pv);
-      v = pv.real();
-      return v;
+      return PetscRealPart(pv);
     }
 
+#ifdef PETSC_USE_COMPLEX
     template<>
     std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n) const
     {
@@ -160,6 +172,13 @@ namespace Hermes
       MatGetValues(matrix, 1, (PetscInt*)&m, 1, (PetscInt*)&n, &v);
       return v;
     }
+#else
+    template<>
+    std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n) const
+    {
+      throw(Exceptions::Exception("PETSc with complex numbers support required."));
+    }
+#endif
 
     template<typename Scalar>
     void PetscMatrix<Scalar>::zero()
@@ -167,6 +186,7 @@ namespace Hermes
       MatZeroEntries(matrix);
     }
 
+#ifdef PETSC_USE_COMPLEX
     inline PetscScalar to_petsc(double x)
     {
       return std::complex<double>(x, 0);
@@ -176,6 +196,16 @@ namespace Hermes
     {
       return x;
     }
+#else
+    inline PetscScalar to_petsc(double x)
+    {
+      return x;
+    }
+    inline PetscScalar to_petsc(std::complex<double> x)
+    {
+      throw(Exceptions::Exception("PETSc with complex numbers support required."));
+    }
+#endif
 
     template<typename Scalar>
     void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
@@ -188,7 +218,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscMatrix<Scalar>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void PetscMatrix<Scalar>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       throw Exceptions::MethodNotImplementedException("PetscVector<double>::export_to_file");
       /*
@@ -244,7 +274,7 @@ namespace Hermes
     {
       this->size = size;
       this->nnz = nnz;
-      PetscScalar* pax = malloc_with_check(nnz, this);
+      PetscScalar* pax = malloc_with_check<PetscScalar>(nnz, this);
       for (unsigned i = 0; i < nnz; i++)
         pax[i] = to_petsc(ax[i]);
       MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, size, size, ap, ai, pax, &matrix);
@@ -259,7 +289,7 @@ namespace Hermes
       ptscmatrix->size = this->size;
       ptscmatrix->nnz = nnz;
       return ptscmatrix;
-    };
+    }
 
     template<typename Scalar>
     PetscVector<Scalar>::PetscVector()
@@ -287,7 +317,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::free()
     {
-      if (inited) VecDestroy(vec);
+      if (inited) VecDestroy(&vec);
       inited = false;
     }
 
@@ -301,13 +331,11 @@ namespace Hermes
     template<>
     double PetscVector<double>::get(unsigned int idx) const
     {
-      double y = 0;
       PetscScalar py;
       VecGetValues(vec, 1, (PetscInt*)&idx, &py);
-      y = py.real();
-      return y;
+      return PetscRealPart(py);
     }
-
+#ifdef PETSC_USE_COMPLEX
     template<>
     std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) const
     {
@@ -315,11 +343,18 @@ namespace Hermes
       VecGetValues(vec, 1, (PetscInt*)&idx, &y);
       return y;
     }
+#else
+    template<>
+    std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) const
+    {
+        throw(Exceptions::Exception("PETSc with complex numbers support required."));
+    }
+#endif
 
     template<typename Scalar>
     void PetscVector<Scalar>::extract(Scalar *v) const
     {
-      int *idx = malloc_with_check(this->size, this);
+      int *idx = malloc_with_check<int>(this->size);
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       vec_get_value(vec, this->size, idx, v);
       free_with_check(idx);
@@ -334,8 +369,8 @@ namespace Hermes
     template<typename Scalar>
     Vector<Scalar>* PetscVector<Scalar>::change_sign()
     {
-      PetscScalar* y = malloc_with_check(this->size, this);
-      int *idx = malloc_with_check(this->size, this);
+      PetscScalar* y = malloc_with_check<PetscScalar>(this->size);
+      int *idx = malloc_with_check<int>(this->size);
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       VecGetValues(vec, this->size, idx, y);
       for (unsigned int i = 0; i < this->size; i++) y[i] *= -1.;
@@ -371,8 +406,8 @@ namespace Hermes
     template<typename Scalar>
     Vector<Scalar>* PetscVector<Scalar>::add_vector(Vector<Scalar>* vec)
     {
-      assert(this->->get_size() == vec->->get_size());
-      for (unsigned int i = 0; i < this->->get_size(); i++)
+      assert(this->get_size() == vec->get_size());
+      for (unsigned int i = 0; i < this->get_size(); i++)
         this->add(i, vec->get(i));
       return this;
     }
@@ -380,7 +415,7 @@ namespace Hermes
     template<typename Scalar>
     Vector<Scalar>* PetscVector<Scalar>::add_vector(Scalar* vec)
     {
-      for (unsigned int i = 0; i < this->->get_size(); i++)
+      for (unsigned int i = 0; i < this->get_size(); i++)
         this->add(i, vec[i]);
       return this;
     }
@@ -422,9 +457,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscLinearMatrixSolver<Scalar>::get_matrix_size()
+    int PetscLinearMatrixSolver<Scalar>::get_matrix_size()
     {
-      return m->size();
+      return m->get_size();
     }
 
     template<typename Scalar>
@@ -446,26 +481,26 @@ namespace Hermes
       VecDuplicate(rhs->vec, &x);
 
       ec = KSPSolve(ksp, rhs->vec, x);
-      if (ec) return false;
+      //FIXME if (ec) return false;
 
       this->tick();
       this->time = this->accumulated();
 
       // allocate memory for solution vector
       free_with_check(this->sln);
-      this->sln = malloc_with_check(m->size, this);
-      memset(this->sln, 0, m->size * sizeof(Scalar));
+      this->sln = malloc_with_check<Scalar>(m->get_size());
+      memset(this->sln, 0, m->get_size() * sizeof(Scalar));
 
       // index map vector (basic serial code uses the map sln[i] = x[i] for all dofs.
-      int *idx = malloc_with_check(m->size, this);
-      for (unsigned int i = 0; i < m->size; i++) idx[i] = i;
+      int *idx = malloc_with_check<int>(m->get_size());
+      for (unsigned int i = 0; i < m->get_size(); i++) idx[i] = i;
 
       // copy solution to the output solution vector
-      vec_get_value(x, m->size, idx, this->sln);
+      vec_get_value(x, m->get_size(), idx, this->sln);
       free_with_check(idx);
 
-      KSPDestroy(ksp);
-      VecDestroy(x);
+      KSPDestroy(&ksp);
+      VecDestroy(&x);
     }
 
     template class HERMES_API PetscLinearMatrixSolver<double>;

@@ -22,14 +22,18 @@
 #ifndef __HERMES_COMMON_PETSC_SOLVER_H_
 #define __HERMES_COMMON_PETSC_SOLVER_H_
 
+#include "config.h"
+
 #include "algebra/matrix.h"
 #include "solvers/linear_matrix_solver.h"
 
 #ifdef WITH_PETSC
+
 #include <petsc.h>
 #include <petscmat.h>
 #include <petscvec.h>
 #include <petscksp.h>
+
 
 namespace Hermes
 {
@@ -57,11 +61,8 @@ namespace Hermes
       virtual Scalar get(unsigned int m, unsigned int n) const;
       virtual void zero();
       virtual void add(unsigned int m, unsigned int n, Scalar v);
-      virtual void add_to_diagonal(Scalar v);
-      virtual void add(unsigned int m, unsigned int n, Scalar *mat, int *rows, int *cols);
       using Matrix<Scalar>::export_to_file;
       virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
-      virtual unsigned int get_matrix_size() const;
       virtual unsigned int get_nnz() const;
       virtual double get_fill_in() const;
 
@@ -81,7 +82,7 @@ namespace Hermes
       ///  @todo same input parameters acts differen as in superlu
       void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
       // Duplicates a matrix (including allocation).
-      PetscMatrix* duplicate();
+      PetscMatrix* duplicate() const;
     protected:
       /// Add matrix - PETSc.
       /// @param[in] mat matrix to be added

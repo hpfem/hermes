@@ -626,7 +626,7 @@ project(hermes2d)
 
     target_link_libraries(  ${HERMES_LIB}
       ${HERMES_COMMON_LIB}
-      ${GLUT_LIBRARY} ${GLEW_LIBRARY} ${PTHREAD_LIBRARY}
+      ${GLUT_LIBRARY} ${GL_LIBRARY} ${GLEW_LIBRARY} ${PTHREAD_LIBRARY}
       ${ANTTWEAKBAR_LIBRARY}
       ${XSD_LIBRARY}
       ${XERCES_LIBRARY}
