@@ -30,7 +30,8 @@
 #include <math.h>
 #include <time.h>
 #include <float.h>
-#include <limits>
+#include <climits>
+#include <limits.h>
 #include <errno.h>
 #include <cmath>
 
