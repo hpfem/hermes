@@ -50,8 +50,6 @@ public:
 
   virtual double numerical_flux(int component, double w_L[4], double w_R[4], double nx, double ny);
 
-  virtual double numerical_flux_solid_wall(int component, double w_L[4], double nx, double ny);
-
   virtual double numerical_flux_inlet(int component, double w_L[4], double w_B[4], double nx, double ny);
   
   virtual double numerical_flux_outlet(int component, double w_L[4], double w_B[4], double nx, double ny);
