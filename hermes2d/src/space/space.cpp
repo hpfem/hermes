@@ -233,7 +233,7 @@ namespace Hermes
         for (int i = oldsize; i < esize; i++)
         {
           edata[i].order = -1;
-          edata[i].bdof = 0;
+          edata[i].bdof = -1;
           edata[i].n = -1;
           edata[i].changed_in_last_adaptation = true;
         }
@@ -1019,8 +1019,9 @@ namespace Hermes
           double val = 0.0;
           for (int k = 0; k < quad1d.get_num_points(o); k++)
           {
-            val += pt[k][1] * shapeset->get_fn_value(ii, pt[k][0], -1.0, component, HERMES_MODE_QUAD)
-              * shapeset->get_fn_value(ij, pt[k][0], -1.0, component, HERMES_MODE_QUAD);
+            double val_ii = shapeset->get_fn_value(ii, pt[k][0], -1.0, component, HERMES_MODE_QUAD);
+            double val_ij = shapeset->get_fn_value(ij, pt[k][0], -1.0, component, HERMES_MODE_QUAD);
+            val += pt[k][1] * val_ii * val_ij;
           }
           mat[i][j] = val;
         }

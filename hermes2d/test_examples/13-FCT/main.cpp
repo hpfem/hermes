@@ -156,8 +156,8 @@ int main(int argc, char* argv[])
   Flux_Correction fluxCorrection(theta);
   Regularity_Estimator regEst(EPS_smooth);
 
-  DiscreteProblem<double> dp_mass(&massmatrix, space);
-  DiscreteProblem<double> dp_convection(&convection, space); 
+  DiscreteProblem<double> dp_mass(massmatrix, space);
+  DiscreteProblem<double> dp_convection(convection, space); 
 
   // Time stepping loop:
   double current_time = 0.0; 

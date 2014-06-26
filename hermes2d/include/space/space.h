@@ -417,8 +417,9 @@ namespace Hermes
       {
       public:
         ElementData() : changed_in_last_adaptation(true) {};
-        int order;
-        int bdof, n;
+        short order;
+        int bdof;
+        short n;
         bool changed_in_last_adaptation;
       };
 

@@ -434,7 +434,7 @@ namespace Hermes
       free_with_check(states);
 
       // Very important.
-      if(this->add_dirichlet_lift)
+      if(this->add_dirichlet_lift && this->current_rhs)
         this->current_rhs->add_vector(this->dirichlet_lift_rhs);
     }
 

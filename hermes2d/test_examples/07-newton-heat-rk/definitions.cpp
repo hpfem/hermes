@@ -22,7 +22,7 @@ CustomWeakFormHeatRK::CustomWeakFormHeatRK(std::string bdy_air, double alpha, do
 }
 
 template<typename Real, typename Scalar>
-Scalar CustomWeakFormHeatRK::CustomFormResidualSurf::vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, Func<Scalar> **ext) const
+Scalar CustomWeakFormHeatRK::CustomFormResidualSurf::vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, GeomSurf<Real> *e, Func<Scalar> **ext) const
 {
   Scalar T_ext = Scalar(temp_ext(get_current_stage_time()));
   Scalar result = Scalar(0);
@@ -35,7 +35,7 @@ Scalar CustomWeakFormHeatRK::CustomFormResidualSurf::vector_form_surf(int n, dou
   return alpha / (rho * heatcap) * result;
 }
 
-double CustomWeakFormHeatRK::CustomFormResidualSurf::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e,
+double CustomWeakFormHeatRK::CustomFormResidualSurf::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomSurf<double> *e,
                                                            Func<double> **ext) const
 {
   double T_ext = temp_ext(get_current_stage_time());
@@ -49,7 +49,7 @@ double CustomWeakFormHeatRK::CustomFormResidualSurf::value(int n, double *wt, Fu
   return alpha / (rho * heatcap) * result;
 }
 
-Ord CustomWeakFormHeatRK::CustomFormResidualSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, Func<Ord> **ext) const
+Ord CustomWeakFormHeatRK::CustomFormResidualSurf::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, GeomSurf<Ord> *e, Func<Ord> **ext) const
 {
   return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
 }

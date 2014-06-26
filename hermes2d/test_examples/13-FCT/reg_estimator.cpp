@@ -323,7 +323,7 @@ add_vector_form(vector_form);
 
 template<typename Real, typename Scalar>
 Scalar GradientReconstructionMatForm_1 ::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-  Func<Real> *v, Geom<Real> *e, Func<Scalar>  **ext) const 
+  Func<Real> *v, GeomVol<Real> *e, Func<Scalar>  **ext) const 
 {
 
   Scalar result = Scalar(0); 
@@ -334,13 +334,13 @@ Scalar GradientReconstructionMatForm_1 ::matrix_form(int n, double *wt, Func<Sca
 };
 
 double GradientReconstructionMatForm_1 ::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
-  Func<double> *v, Geom<double> *e, Func<double>  **ext) const 
+  Func<double> *v, GeomVol<double> *e, Func<double>  **ext) const
 {
   return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
 };
 
 Ord GradientReconstructionMatForm_1 ::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-  Geom<Ord> *e, Func<Ord>  **ext) const 
+  GeomVol<Ord> *e, Func<Ord>  **ext) const
 {
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 };
@@ -351,7 +351,7 @@ MatrixFormVol<double>* GradientReconstructionMatForm_1::clone() const
 }
 
 template<typename Real, typename Scalar>
-Scalar GradientReconstructionVectorForm_1::vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, Func<Scalar>  **ext) const {
+Scalar GradientReconstructionVectorForm_1::vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, GeomVol<Real> *e, Func<Scalar>  **ext) const {
   Scalar result = Scalar(0);
   Func<Scalar>* u_h = ext[0];
   for (int i = 0; i < n; i++) 	
@@ -360,11 +360,11 @@ Scalar GradientReconstructionVectorForm_1::vector_form(int n, double *wt, Func<S
 
 };
 
-double GradientReconstructionVectorForm_1::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, Func<double>  **ext) const {
+double GradientReconstructionVectorForm_1::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<double>  **ext) const {
   return vector_form<double, double>(n, wt, u_ext, v, e, ext);
 };
 
-Ord GradientReconstructionVectorForm_1::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, Func<Ord>  **ext) const 
+Ord GradientReconstructionVectorForm_1::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, GeomVol<Ord> *e, Func<Ord>  **ext) const
 {
   return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
 };
@@ -386,7 +386,7 @@ GradientReconstruction_2::GradientReconstruction_2( MeshFunctionSharedPtr<double
 
 template<typename Real, typename Scalar>
 Scalar GradientReconstructionMatForm_2 ::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
-  Func<Real> *v, Geom<Real> *e, Func<Scalar>  **ext) const 
+  Func<Real> *v, GeomVol<Real> *e, Func<Scalar>  **ext) const
 {
   Scalar result = Scalar(0); 
   for (int i = 0; i < n; i++) 
@@ -395,12 +395,12 @@ Scalar GradientReconstructionMatForm_2 ::matrix_form(int n, double *wt, Func<Sca
 };
 
 double GradientReconstructionMatForm_2 ::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
-  Func<double> *v, Geom<double> *e, Func<double>  **ext) const 
+  Func<double> *v, GeomVol<double> *e, Func<double>  **ext) const
 {
   return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
 };
 Ord GradientReconstructionMatForm_2 ::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
-  Geom<Ord> *e, Func<Ord>  **ext) const 
+  GeomVol<Ord> *e, Func<Ord>  **ext) const
 {
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 };
@@ -411,7 +411,7 @@ MatrixFormVol<double>* GradientReconstructionMatForm_2::clone() const
 }
 
 template<typename Real, typename Scalar>
-Scalar GradientReconstructionVectorForm_2::vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, Func<Scalar>  **ext) const {
+Scalar GradientReconstructionVectorForm_2::vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, GeomVol<Real> *e, Func<Scalar>  **ext) const {
   Scalar result = Scalar(0);
   Func<Scalar>* u_h = ext[0];
   for (int i = 0; i < n; i++) 	
@@ -420,11 +420,11 @@ Scalar GradientReconstructionVectorForm_2::vector_form(int n, double *wt, Func<S
 
 };
 
-double GradientReconstructionVectorForm_2::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, Func<double>  **ext) const {
+double GradientReconstructionVectorForm_2::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<double>  **ext) const {
   return vector_form<double, double>(n, wt, u_ext, v, e, ext);
 };
 
-Ord GradientReconstructionVectorForm_2::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, Func<Ord>  **ext) const 
+Ord GradientReconstructionVectorForm_2::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, GeomVol<Ord> *e, Func<Ord>  **ext) const
 {
   return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
 };

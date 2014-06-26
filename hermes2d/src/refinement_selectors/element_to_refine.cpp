@@ -43,7 +43,7 @@ namespace Hermes
     {
     };
 
-    ElementToRefine::ElementToRefine(int id, unsigned short comp) : id(id), comp(comp), split(H2D_REFINEMENT_H), valid(false)
+    ElementToRefine::ElementToRefine(int id, unsigned short comp, bool space_only) : id(id), comp(comp), split(H2D_REFINEMENT_H), valid(true), space_only(space_only)
     {
     };
 

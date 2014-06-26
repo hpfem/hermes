@@ -155,8 +155,7 @@ public:
       return -result;
     }
 
-    virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-      Geom<Hermes::Ord> *e, Func<Ord> **ext) const 
+    virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, GeomSurf<Hermes::Ord> *e, Func<Ord> **ext) const 
     {
       return Hermes::Ord(10);
     }

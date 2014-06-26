@@ -545,7 +545,7 @@ namespace Hermes
       double2* local_coeffs;
       double2  local_lin_coeffs[H2D_MAX_NUMBER_VERTICES];
       H1ShapesetJacobi shapeset;
-      int local_indices[70];
+      short local_indices[70];
 
       // prepare the shapes and coefficients of the reference map
       int j, k = 0;
@@ -570,9 +570,10 @@ namespace Hermes
         for (j = 2; j <= o; j++)
           local_indices[k++] = shapeset.get_edge_index(i, 0, j, e->get_mode());
 
-        if (e->is_quad()) o = H2D_MAKE_QUAD_ORDER(o, o);
+        if (e->is_quad())
+          o = H2D_MAKE_QUAD_ORDER(o, o);
         memcpy(local_indices + k, shapeset.get_bubble_indices(o, e->get_mode()),
-          shapeset.get_num_bubbles(o, e->get_mode()) * sizeof(int));
+          shapeset.get_num_bubbles(o, e->get_mode()) * sizeof(short));
 
         local_coeffs = e->cm->coeffs;
         local_nc = e->cm->nc;

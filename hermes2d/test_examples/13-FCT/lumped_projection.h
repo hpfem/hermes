@@ -33,7 +33,7 @@ protected:
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v,
-                 Geom<double> *e, Func<double>  **ext) const
+                 GeomVol<double> *e, Func<double>  **ext) const
     {      
       
         return lumped_projection_biform<double, double>(n, wt, u_ext, u, v, e, ext);
@@ -41,7 +41,7 @@ protected:
     }
 
     Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, Func<Hermes::Ord>  **ext) const
+      GeomVol<Hermes::Ord> *e, Func<Hermes::Ord>  **ext) const
     {
           
         return lumped_projection_biform<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
@@ -57,7 +57,7 @@ protected:
 
 		template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain lumped_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
-          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext) 
+          Func<TestFunctionDomain> *v, GeomVol<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
         {
      
             SolFunctionDomain result = SolFunctionDomain(0);
@@ -82,7 +82,7 @@ protected:
     }
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
-                 Geom<double> *e, Func<double> **ext) const
+      GeomVol<double> *e, Func<double> **ext) const
     {
      
       
@@ -91,7 +91,7 @@ protected:
     }
 
     Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, Func<Hermes::Ord> **ext) const
+      GeomVol<Hermes::Ord> *e, Func<Hermes::Ord> **ext) const
     {
       
         return lumped_projection_residual<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
@@ -106,7 +106,7 @@ protected:
 
    template<typename TestFunctionDomain, typename SolFunctionDomain>
         SolFunctionDomain lumped_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
-          Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext) const
+          GeomVol<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext) const
         {
 
             SolFunctionDomain result = SolFunctionDomain(0);

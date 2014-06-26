@@ -45,7 +45,7 @@ const int INIT_REF_BDY = 5;
 const bool MULTI = true;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
-const double THRESHOLD = 0.5;
+const double THRESHOLD = 0.85;
 
 // Error calculation & adaptivity.
 DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(RelativeErrorToGlobalNorm, 2);

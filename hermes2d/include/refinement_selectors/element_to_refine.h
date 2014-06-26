@@ -41,13 +41,15 @@ namespace Hermes
       /// Constructor.
       /** \param[in] id An ID of the element.
       *  \param[in] comp An index of a component. */
-      ElementToRefine(int id, unsigned short comp);
+      ElementToRefine(int id, unsigned short comp, bool space_only = false);
 
       /// Assignment operator.
       ElementToRefine& operator=(const ElementToRefine& orig);
     
       /// Validity info.
       bool valid;
+      /// For refinement of Space only for the case when mesh is shared.
+      bool space_only;
 
       /// An ID of the element.
       int id;

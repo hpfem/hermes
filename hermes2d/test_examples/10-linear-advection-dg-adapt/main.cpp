@@ -15,10 +15,13 @@
 // Number of initial uniform mesh refinements.
 const int INIT_REF = 1;
 // Initial polynomial degrees of mesh elements in vertical and horizontal directions.
-const int P_INIT = 2;
+int P_INIT = 2;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
 const double THRESHOLD = 0.5;
+// Use Taylor shapeset - which does not have order > 2 implemented.
+// This switches to h-adaptivity & turns on Vertex-based limiting.
+bool USE_TAYLOR_SHAPESET = false;
 
 // Error calculation & adaptivity.
 DefaultErrorCalculator<double, HERMES_L2_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
@@ -27,7 +30,7 @@ AdaptStoppingCriterionSingleElement<double> stoppingCriterion(THRESHOLD);
 // Adaptivity processor class.
 Adapt<double> adaptivity(&errorCalculator, &stoppingCriterion);
 // Predefined list of element refinement candidates.
-const CandList CAND_LIST = H2D_H_ANISO;
+const CandList CAND_LIST = USE_TAYLOR_SHAPESET ? H2D_H_ANISO : H2D_HP_ANISO;
 // Stopping criterion for adaptivity.
 const double ERR_STOP = 1e-2;
 
@@ -43,7 +46,7 @@ int main(int argc, char* args[])
     mesh->refine_all_elements();
 
   // Create an L2 space.
-  SpaceSharedPtr<double> fine_space(new L2Space<double>(mesh, P_INIT, new L2ShapesetTaylor));
+  SpaceSharedPtr<double> fine_space(new L2Space<double>(mesh, USE_TAYLOR_SHAPESET ? std::max(P_INIT, 2) : P_INIT, (USE_TAYLOR_SHAPESET ? (Shapeset*)(new L2ShapesetTaylor) : (Shapeset*)(new L2ShapesetLegendre))));
 
   // Initialize refinement selector.
   L2ProjBasedSelector<double> selector(CAND_LIST);
@@ -79,7 +82,7 @@ int main(int argc, char* args[])
       linear_solver.set_space(refspace);
       linear_solver.solve();
 
-      if (P_INIT < 3)
+      if (USE_TAYLOR_SHAPESET)
       {
         PostProcessing::VertexBasedLimiter limiter(refspace, linear_solver.get_sln_vector(), P_INIT);
         refsln = limiter.get_solution();

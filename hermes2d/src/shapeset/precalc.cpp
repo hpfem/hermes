@@ -176,7 +176,7 @@ namespace Hermes
     const double* PrecalcShapesetAssembling::get_fn_values(int component) const
     {
       unsigned char mode = this->element->get_mode();
-      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][0][this->order][this->index])
+      if (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][this->order][this->index])
         return this->storage->PrecalculatedValues[mode][0][this->order][this->index];
       assert(this->values_valid);
       return &values[component][0][0];
@@ -185,7 +185,7 @@ namespace Hermes
     const double* PrecalcShapesetAssembling::get_dx_values(int component) const
     {
       unsigned char mode = this->element->get_mode();
-      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][0][this->order][this->index])
+      if (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][this->order][this->index])
         return this->storage->PrecalculatedValues[mode][1][this->order][this->index];
       assert(this->values_valid);
       return &values[component][1][0];
@@ -194,7 +194,7 @@ namespace Hermes
     const double* PrecalcShapesetAssembling::get_dy_values(int component) const
     {
       unsigned char mode = this->element->get_mode();
-      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->storage->PrecalculatedInfo[mode][0][this->order][this->index])
+      if (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][this->order][this->index])
         return this->storage->PrecalculatedValues[mode][2][this->order][this->index];
       assert(this->values_valid);
       return &values[component][2][0];
@@ -234,7 +234,7 @@ namespace Hermes
 
     void PrecalcShapesetAssembling::precalculate(unsigned short order, unsigned short mask)
     {
-      if (this->index > 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][order][index])
+      if (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][order][index])
         return;
       else
       {

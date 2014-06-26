@@ -227,11 +227,11 @@ namespace Hermes
 
   namespace Helpers
   {
-    /// Check length of a vector.
+    /// Check for nullptr.
     template<typename T>
-    inline void check_for_null(const T& instance)
+    inline void check_for_null(T instance)
     {
-      if (instance == nullptr)
+      if (!instance)
         throw Hermes::Exceptions::NullException();
     }
 

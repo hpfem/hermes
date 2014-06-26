@@ -82,7 +82,6 @@ namespace Hermes
         bool isBnd;
         unsigned char isurf;
         Element* rep;
-        uint64_t rep_subidx;
         unsigned short rep_i;
         ~State();
         unsigned short num;

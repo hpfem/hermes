@@ -62,7 +62,7 @@ const double ALPHA = 10;           // Heat flux coefficient for Newton's boundar
 const double LAMBDA = 1e2;         // Thermal conductivity of the material.
 const double HEATCAP = 1e2;        // Heat capacity.
 const double RHO = 3000;           // Material density.
-const double T_FINAL = time_step * 2;      // Length of time interval (24 hours) in seconds.
+const double T_FINAL = 86400;      // Length of time interval (24 hours) in seconds.
 
 int main(int argc, char* argv[])
 {

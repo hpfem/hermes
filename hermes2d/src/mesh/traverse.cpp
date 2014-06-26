@@ -165,7 +165,6 @@ namespace Hermes
       memcpy(state->bnd, other->bnd, 4 * sizeof(bool));
 
       state->rep = other->rep;
-      state->rep_subidx = other->rep_subidx;
       state->rep_i = other->rep_i;
       state->visited = other->visited;
       state->isurf = other->isurf;
@@ -353,7 +352,6 @@ namespace Hermes
               else
               {
                 s->rep = s->e[i];
-                s->rep_subidx = 0;
                 s->rep_i = 0;
               }
               s->er[i] = H2D_UNITY;
@@ -400,7 +398,10 @@ namespace Hermes
         if (leaf)
         {
           if (count > predictedCount - 1)
-            states = realloc_with_check<State*>(states, (int)std::ceil(predictedCount * 1.5));
+          {
+            predictedCount *= 1.5;
+            states = realloc_with_check<State*>(states, predictedCount);
+          }
 
           set_boundary_info(s);
           s->rep = nullptr;
@@ -413,7 +414,6 @@ namespace Hermes
           if (s->e[j] != nullptr && s->e[j]->used)
           {
             s->rep = s->e[j];
-            s->rep_subidx = s->sub_idx[j];
             s->rep_i = j;
           }
           if (s->rep)

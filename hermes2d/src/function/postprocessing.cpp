@@ -700,7 +700,7 @@ namespace Hermes
 
           Scalar* result_thread_local = calloc_with_check<Scalar>(this->number_of_integrals);
           Scalar* result_local = malloc_with_check<Scalar>(this->number_of_integrals);
-          double* jacobian_x_weights;
+          double jacobian_x_weights[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
           for (int state_i = start; state_i < end; state_i++)
           {
@@ -782,8 +782,6 @@ namespace Hermes
             unsigned char n = init_geometry_points_allocated(refmap, order_int, geometry, jacobian_x_weights);
 
             this->integral(n, jacobian_x_weights, func, &geometry, result_local);
-
-            delete[] jacobian_x_weights;
 
             for (unsigned short i = 0; i < source_functions_size; i++)
             {
@@ -896,7 +894,7 @@ namespace Hermes
 
           Scalar* result_thread_local = calloc_with_check<Scalar>(this->number_of_integrals);
           Scalar* result_local = malloc_with_check<Scalar>(this->number_of_integrals);
-          double* jacobian_x_weights;
+          double jacobian_x_weights[H2D_MAX_INTEGRATION_POINTS_COUNT];
 
           for (int state_i = start; state_i < end; state_i++)
           {
@@ -974,8 +972,6 @@ namespace Hermes
               }
 
               this->integral(n, jacobian_x_weights, func, &geometry, result_local);
-
-              delete[] jacobian_x_weights;
 
               for (int i = 0; i < source_functions_size; i++)
               {

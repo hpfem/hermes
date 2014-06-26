@@ -230,8 +230,6 @@ namespace Hermes
       template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::OptimumSelector;
       friend class PrecalcShapeset;
-      friend void check_leg_tri(Shapeset* shapeset);
-      friend void check_gradleg_tri(Shapeset* shapeset);
       template<typename Scalar> friend class Form;
       template<typename Scalar> friend class MatrixForm;
       template<typename Scalar> friend class VectorForm;

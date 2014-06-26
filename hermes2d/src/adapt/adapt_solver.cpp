@@ -925,10 +925,12 @@ namespace Hermes
     template HERMES_API class AdaptSolver<double, LinearSolver<double> >;
     template HERMES_API class AdaptSolver<std::complex<double>, LinearSolver<std::complex<double > > >;
 
+    /** \todo Uncomment this once we figure out how to do it
     template HERMES_API class AdaptSolver<double, NewtonSolver<double> >;
     template HERMES_API class AdaptSolver<std::complex<double>, NewtonSolver<std::complex<double > > >;
 
     template HERMES_API class AdaptSolver<double, PicardSolver<double> >;
     template HERMES_API class AdaptSolver<std::complex<double>, PicardSolver<std::complex<double > > >;
+    **/
   }
 }

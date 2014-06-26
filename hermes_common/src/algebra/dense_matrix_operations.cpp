@@ -133,7 +133,7 @@ namespace Hermes
             k = i;
             while (k > 0)
             {
-              sum -= a[i][k] * a[j][k];
+              sum -= a[i][k-1] * a[j][k-1];
               k--;
             }
             if (i == j)
