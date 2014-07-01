@@ -46,17 +46,17 @@ namespace Hermes
 
   bool Range::is_in_closed(const Range& range) const
   {
-    return (range.lower_bound >= lower_bound && range.upper_bound <= upper_bound);
+    return (this->empty() ? false : (range.lower_bound >= lower_bound && range.upper_bound <= upper_bound));
   }
 
   bool Range::is_in_closed(const int& value) const
   {
-    return (value >= lower_bound && value <= upper_bound);
+    return (this->empty() ? false : (value >= lower_bound && value <= upper_bound));
   }
 
   bool Range::is_in_open(const int& value) const
   {
-    return (value > lower_bound && value < upper_bound);
+    return (this->empty() ? false : (value > lower_bound && value < upper_bound));
   }
 
   void Range::enlarge_to_include(const int& value)

@@ -61,7 +61,7 @@ namespace Hermes
           for (int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
           {
             if (proj_matrix_cache[m][i][k] != nullptr)
-              delete[] proj_matrix_cache[m][i][k];
+              free_with_check<double*>(proj_matrix_cache[m][i][k], true);
           }
         }
 
