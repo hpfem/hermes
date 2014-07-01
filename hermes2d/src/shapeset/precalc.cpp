@@ -167,10 +167,17 @@ namespace Hermes
           this->storage = new PrecalcShapesetAssemblingStorage(this->shapeset);
           this->storage->ref_count++;
           tables.push_back(storage);
+          temp.push_back(PrecalcShapesetAssembling(shapeset));
         }
-        temp.push_back(PrecalcShapesetAssembling(shapeset));
       }
     }
+
+    PrecalcShapesetAssembling::PrecalcShapesetAssembling(const PrecalcShapesetAssembling& other) : PrecalcShapeset(other.shapeset)
+    {
+      this->storage = other.storage;
+      this->storage->ref_count++;
+    }
+
 
     PrecalcShapesetAssembling::~PrecalcShapesetAssembling()
     {

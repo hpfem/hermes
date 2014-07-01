@@ -114,6 +114,9 @@ namespace Hermes
       /// \param shapeset[in] Pointer to the shapeset to be precalculated.
       PrecalcShapesetAssembling(Shapeset* shapeset);
 
+      /// Copy constructor
+      PrecalcShapesetAssembling(const PrecalcShapesetAssembling& other);
+
       /// Destructor.
       virtual ~PrecalcShapesetAssembling();
 
