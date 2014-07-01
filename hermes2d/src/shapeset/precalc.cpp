@@ -181,11 +181,14 @@ namespace Hermes
 #pragma omp critical
         {
           if (this->storage && this->storage->ref_count == 0)
-          for (std::vector<PrecalcShapesetAssemblingStorage*>::iterator it = PrecalcShapesetAssembling::tables.begin(); it != PrecalcShapesetAssembling::tables.end(); it++)
           {
-            if (*it == this->storage)
-              tables.erase(it);
-            delete this->storage;
+            for (std::vector<PrecalcShapesetAssemblingStorage*>::iterator it = PrecalcShapesetAssembling::tables.begin(); it != PrecalcShapesetAssembling::tables.end(); it++)
+            {
+              if (*it == this->storage)
+                tables.erase(it);
+              delete this->storage;
+              this->storage = nullptr;
+            }
           }
         }
       }
