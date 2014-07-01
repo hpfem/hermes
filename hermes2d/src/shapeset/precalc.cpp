@@ -147,6 +147,7 @@ namespace Hermes
     }
 
     std::vector<PrecalcShapesetAssemblingStorage*> PrecalcShapesetAssembling::tables;
+    std::vector<PrecalcShapesetAssembling> temp;
 
     PrecalcShapesetAssembling::PrecalcShapesetAssembling(Shapeset* shapeset) : PrecalcShapeset(shapeset), storage(nullptr)
     {
@@ -154,7 +155,8 @@ namespace Hermes
       {
         if (tables[i]->shapeset_id == shapeset->get_id())
         {
-          this->storage = (tables[i]);
+          this->storage = tables[i];
+          this->storage->ref_count++;
           break;
         }
       }
@@ -163,14 +165,19 @@ namespace Hermes
 #pragma omp critical (pss_table_creation)
         {
           this->storage = new PrecalcShapesetAssemblingStorage(this->shapeset);
+          this->storage->ref_count++;
           tables.push_back(storage);
         }
+        temp.push_back(PrecalcShapesetAssembling(shapeset));
       }
     }
 
     PrecalcShapesetAssembling::~PrecalcShapesetAssembling()
     {
-
+#pragma omp atomic
+      this->storage->ref_count--;
+      if (this->storage->ref_count == 0)
+        delete this->storage;
     }
 
     const double* PrecalcShapesetAssembling::get_fn_values(int component) const
@@ -348,7 +355,7 @@ namespace Hermes
       }
     }
 
-    PrecalcShapesetAssemblingStorage::PrecalcShapesetAssemblingStorage(Shapeset* shapeset) : shapeset_id(shapeset->get_id())
+    PrecalcShapesetAssemblingStorage::PrecalcShapesetAssemblingStorage(Shapeset* shapeset) : shapeset_id(shapeset->get_id()), ref_count(0)
     {
       this->max_index[0] = shapeset->get_max_index(HERMES_MODE_TRIANGLE);
       this->max_index[1] = shapeset->get_max_index(HERMES_MODE_QUAD);

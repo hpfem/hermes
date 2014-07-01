@@ -97,6 +97,7 @@ namespace Hermes
       ~PrecalcShapesetAssemblingStorage();
       unsigned char shapeset_id;
       unsigned short max_index[2];
+      unsigned short ref_count;
 
     private:
       double*** PrecalculatedValues[H2D_NUM_MODES][H2D_NUM_FUNCTION_VALUES];
