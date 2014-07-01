@@ -151,7 +151,7 @@ namespace Hermes
 
     PrecalcShapesetAssembling::PrecalcShapesetAssembling(Shapeset* shapeset) : PrecalcShapeset(shapeset), storage(nullptr)
     {
-      for(unsigned short i = 0; i < tables.size(); i++)
+      for (unsigned short i = 0; i < tables.size(); i++)
       {
         if (tables[i]->shapeset_id == shapeset->get_id())
         {
@@ -168,16 +168,18 @@ namespace Hermes
           this->storage->ref_count++;
           tables.push_back(storage);
         }
-        temp.push_back(PrecalcShapesetAssembling(shapeset)); 
+        temp.push_back(PrecalcShapesetAssembling(shapeset));
       }
     }
 
     PrecalcShapesetAssembling::~PrecalcShapesetAssembling()
     {
-#pragma omp atomic
-      this->storage->ref_count--;
-      if (this->storage->ref_count == 0)
-        delete this->storage;
+#pragma omp critical
+      {
+        this->storage->ref_count--;
+        if (this->storage->ref_count == 0)
+          delete this->storage;
+      }
     }
 
     const double* PrecalcShapesetAssembling::get_fn_values(int component) const
