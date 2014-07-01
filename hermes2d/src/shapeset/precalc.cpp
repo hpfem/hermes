@@ -174,16 +174,19 @@ namespace Hermes
 
     PrecalcShapesetAssembling::~PrecalcShapesetAssembling()
     {
-#pragma omp atomic
-      this->storage->ref_count--;
-      if (this->storage && this->storage->ref_count == 0)
+      if (this->storage)
       {
-#pragma omp critical
+#pragma omp atomic
+        this->storage->ref_count--;
+        if (this->storage && this->storage->ref_count == 0)
         {
-          if (this->storage && this->storage->ref_count == 0)
+#pragma omp critical
           {
-            delete this->storage;
-            this->storage = nullptr;
+            if (this->storage && this->storage->ref_count == 0)
+            {
+              delete this->storage;
+              this->storage = nullptr;
+            }
           }
         }
       }
