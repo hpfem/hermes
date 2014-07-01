@@ -174,7 +174,7 @@ namespace Hermes
 
     PrecalcShapesetAssembling::~PrecalcShapesetAssembling()
     {
-      if (this->storage)
+      if (this->storage && this->storage->ref_count > 0)
       {
 #pragma omp atomic
         this->storage->ref_count--;
