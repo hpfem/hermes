@@ -168,7 +168,7 @@ namespace Hermes
           this->storage->ref_count++;
           tables.push_back(storage);
         }
-        temp.push_back(PrecalcShapesetAssembling(shapeset));
+        temp.push_back(PrecalcShapesetAssembling(shapeset)); 
       }
     }
 

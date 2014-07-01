@@ -97,7 +97,7 @@ namespace Hermes
     if (size == 0)
       return nullptr;
     ArrayItem* new_array;
-    if (force_malloc && std::is_pod<ArrayItem>::value)
+    if (force_malloc)
       new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
     else
     {
@@ -124,7 +124,7 @@ namespace Hermes
     if (size == 0)
       return nullptr;
     ArrayItem* new_array;
-    if (force_malloc && std::is_pod<ArrayItem>::value)
+    if (force_malloc)
       new_array = (ArrayItem*)calloc(size, sizeof(ArrayItem));
     else
     {
@@ -152,7 +152,7 @@ namespace Hermes
 
     ArrayItem* new_array;
 
-    if (force_malloc && std::is_pod<ArrayItem>::value)
+    if (force_malloc)
       new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
     else
 #ifdef WITH_PJLIB
@@ -177,7 +177,7 @@ namespace Hermes
     if (size == 0)
       return nullptr;
     ArrayItem* new_array;
-    if (force_malloc && std::is_pod<ArrayItem>::value)
+    if (force_malloc)
       new_array = (ArrayItem*)malloc(size * sizeof(ArrayItem));
     else
 #ifdef WITH_PJLIB
@@ -274,7 +274,7 @@ namespace Hermes
   {
     if (ptr)
     {
-      if (force_malloc && std::is_pod<ArrayItem>::value)
+      if (force_malloc)
       {
         ::free(ptr);
         ptr = nullptr;
