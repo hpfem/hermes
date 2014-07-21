@@ -5,14 +5,20 @@ using namespace Hermes::Hermes2D;
 using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
-const int P_INIT = 3;                     // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 0;               // Number of initial uniform mesh refinements.
+// Uniform polynomial degree of mesh elements.
+const int P_INIT = 3;
+// Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 0;
 
 // Problem parameters.
-const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
-const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
-const double VOLUME_HEAT_SRC = 5;        // Volume heat sources generated (for example) by electric current.
-const double FIXED_BDY_TEMP = 20;        // Fixed temperature on the boundary.
+// Thermal cond. of Al for temperatures around 20 deg Celsius.
+const double LAMBDA_AL = 236.0;
+// Thermal cond. of Cu for temperatures around 20 deg Celsius.
+const double LAMBDA_CU = 386.0;
+// Volume heat sources generated (for example) by electric current.
+const double VOLUME_HEAT_SRC = 5;
+// Fixed temperature on the boundary.
+const double FIXED_BDY_TEMP = 20;
 
 /// Custom selector, selects the appropriate elements
 class CustomSelector : public Selector<double>

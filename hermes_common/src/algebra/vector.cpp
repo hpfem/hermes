@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -191,8 +191,8 @@ namespace Hermes
                                          Mat_VarFree(matvar);
                                        }
 
-                                        free_with_check(v_re);
-                                        free_with_check(v_im);
+                                       free_with_check(v_re);
+                                       free_with_check(v_im);
                                        Mat_Close(mat);
 
                                        if (!matvar)
@@ -206,15 +206,15 @@ namespace Hermes
       case EXPORT_FORMAT_PLAIN_ASCII:
       case EXPORT_FORMAT_MATLAB_SIMPLE:
       {
-                                      FILE* file = fopen(filename, "w");
-                                      if (!file)
-                                        throw Exceptions::IOException(Exceptions::IOException::Write, filename);
-                                      for (unsigned int i = 0; i < this->size; i++)
-                                      {
-                                        Hermes::Helpers::fprint_num(file, v[i], number_format);
-                                        fprintf(file, "\n");
-                                      }
-                                      fclose(file);
+                                        FILE* file = fopen(filename, "w");
+                                        if (!file)
+                                          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+                                        for (unsigned int i = 0; i < this->size; i++)
+                                        {
+                                          Hermes::Helpers::fprint_num(file, v[i], number_format);
+                                          fprintf(file, "\n");
+                                        }
+                                        fclose(file);
       }
         break;
 
@@ -240,7 +240,7 @@ namespace Hermes
                                    bson_append_double(&bw, "v_i", imag(this->v[i]));
                                  bson_append_finish_array(&bw);
                                }
-                               
+
                                // Done.
                                bson_finish(&bw);
 
@@ -373,7 +373,6 @@ namespace Hermes
         break;
 #endif
       }
-
     }
 
     template<typename Scalar>
@@ -498,7 +497,6 @@ namespace Hermes
       for (unsigned int i = 0; i < this->size; i++)
         this->v[i] -= vec->get(i);
       return this;
-
     }
 
     template<typename Scalar>
@@ -516,7 +514,6 @@ namespace Hermes
       for (unsigned int i = 0; i < this->size; i++)
         this->v[i] += vec->get(i);
       return this;
-
     }
 
     template<typename Scalar>

@@ -121,7 +121,7 @@ namespace Hermes
       static CSCMatrix<Scalar>* current_prev_mat;
       static Vector<Scalar>* current_prev_rhs;
       static Vector<Scalar>* current_prev_dirichlet_lift_rhs;
-      
+
       static bool use_Dirichlet;
       static bool** reusable_DOFs;
       static bool** reusable_Dirichlet;
@@ -174,7 +174,7 @@ namespace Hermes
       if (a.real() < b.real() && a.imag() < b.imag())
         return true;
       else
-      return false;
+        return false;
     }
 
     template<>
@@ -233,7 +233,7 @@ namespace Hermes
         dummy_fns.push_back(new ZeroSolution<Scalar>(StateReassemblyHelper<Scalar>::current_ref_spaces->at(i)->get_mesh()));
       // - (for reporting) count of DOFs needed to be reassembled
       int reusable_DOFs_count = 0;
-      
+
       // Start.
       Hermes::Mixins::Loggable::Static::info("\t   Handling Reusing matrix entries on the new Ref. Space:");
       cpu_time.tick();
@@ -436,7 +436,7 @@ namespace Hermes
               used_entries++;
             }
           }
-          if(rhs)
+          if (rhs)
             rhs->add(DOF_to_DOF_map[i], StateReassemblyHelper<Scalar>::current_prev_rhs->get(i));
           if (coeff_vec)
             new_coeff_vec[DOF_to_DOF_map[i]] = coeff_vec[i];

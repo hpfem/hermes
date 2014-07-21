@@ -383,14 +383,14 @@ namespace Hermes
 
       void Orderizer::free()
       {
-          free_with_check(verts, true);
-          free_with_check(lvert, true);
-          free_with_check(ltext, true);
-          free_with_check(lbox, true);
-          free_with_check(tris, true);
-          free_with_check(tri_markers, true);
-          free_with_check(edges, true);
-          free_with_check(edge_markers, true);
+        free_with_check(verts, true);
+        free_with_check(lvert, true);
+        free_with_check(ltext, true);
+        free_with_check(lbox, true);
+        free_with_check(tris, true);
+        free_with_check(tri_markers, true);
+        free_with_check(edges, true);
+        free_with_check(edge_markers, true);
       }
 
       template<typename Scalar>
@@ -427,7 +427,8 @@ namespace Hermes
         fprintf(f, "CELL_TYPES %d\n", this->triangle_count);
 
         for (int i = 0; i < this->triangle_count; i++)
-          fprintf(f, "5\n");    // The "5" means triangle in VTK.
+          // The "5" means triangle in VTK.
+          fprintf(f, "5\n");
 
         // This outputs double solution values. Look into Hermes2D/src/output/vtk.cpp
         // for how it is done for vectors.
@@ -474,7 +475,8 @@ namespace Hermes
         fprintf(f, "CELL_TYPES %d\n", this->triangle_count);
 
         for (int i = 0; i < this->triangle_count; i++)
-          fprintf(f, "5\n");    // The "5" means triangle in VTK.
+          // The "5" means triangle in VTK.
+          fprintf(f, "5\n");
 
         // This outputs double solution values. Look into Hermes2D/src/output/vtk.cpp
         // for how it is done for vectors.
@@ -517,7 +519,8 @@ namespace Hermes
         fprintf(f, "CELL_TYPES %d\n", this->edges_count);
 
         for (int i = 0; i < this->edges_count; i++)
-          fprintf(f, "3\n");    // The "3" means line in VTK.
+          // The "3" means line in VTK.
+          fprintf(f, "3\n");
 
         // This outputs double solution values. Look into Hermes2D/src/output/vtk.cpp
         // for how it is done for vectors.

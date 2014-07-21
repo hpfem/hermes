@@ -24,10 +24,14 @@ namespace Hermes
   {
     /// Possible refinements of an element.
     enum RefinementType {
-      H2D_REFINEMENT_P = 0, ///< P-refinement.
-      H2D_REFINEMENT_H = 1, ///< H-refinement.
-      H2D_REFINEMENT_H_ANISO_H = 2, ///< ANISO-refienement. The element is split along the horizontal axis. Quadrilaterals only.
-      H2D_REFINEMENT_H_ANISO_V = 3 ///< ANISO-refienement. The element is split along the vertical axis. Quadrilaterals only.
+      /// P-refinement.
+      H2D_REFINEMENT_P = 0,
+      /// H-refinement.
+      H2D_REFINEMENT_H = 1,
+      /// ANISO-refienement. The element is split along the horizontal axis. Quadrilaterals only.
+      H2D_REFINEMENT_H_ANISO_H = 2,
+      /// ANISO-refienement. The element is split along the vertical axis. Quadrilaterals only.
+      H2D_REFINEMENT_H_ANISO_V = 3
     };
 
     /// A refinement record. \ingroup g_adapt
@@ -45,7 +49,7 @@ namespace Hermes
 
       /// Assignment operator.
       ElementToRefine& operator=(const ElementToRefine& orig);
-    
+
       /// Validity info.
       bool valid;
       /// For refinement of Space only for the case when mesh is shared.
@@ -61,7 +65,7 @@ namespace Hermes
       unsigned short refinement_polynomial_order[H2D_MAX_ELEMENT_SONS];
       /// Encoded orders of the best refinement of a certaint type.
       /// Indexed by enum RefinementType.
-      unsigned short best_refinement_polynomial_order_type[4][H2D_MAX_ELEMENT_SONS]; 
+      unsigned short best_refinement_polynomial_order_type[4][H2D_MAX_ELEMENT_SONS];
       /// Error of the selected candidate.
       double errors[H2D_MAX_ELEMENT_SONS];
 

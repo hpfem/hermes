@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -119,9 +119,12 @@ namespace Hermes
       /// Right hand side vector.
       SimpleVector<Scalar> *rhs;
 
-      bool has_A, has_B;            ///<  Have the native SuperLU matrices been created?
-      bool inited;                  ///< Have the factorization structures been allocated?
-      bool A_changed;               ///< Indicates that the system matrix has been changed.
+      ///  Have the native SuperLU matrices been created?
+      bool has_A, has_B;
+      /// Have the factorization structures been allocated?
+      bool inited;
+      /// Indicates that the system matrix has been changed.
+      bool A_changed;
       // internally during factorization or externally by
       // the user.
 
@@ -139,13 +142,20 @@ namespace Hermes
       void free_matrix();
       void free_rhs();
 
-      SuperMatrix A, B;             ///< Native SuperLU representations of 'm' and 'rhs'.
-      SuperMatrix L, U;             ///< L/U factors of A.
-      double *R, *C;                ///< Row/column scaling factors of A.
-      int *perm_r;                  ///< Row permutations from partial pivoting.
-      int *perm_c;                  ///< Column permutations to reduce fill-in ( = > matrix Pc).
-      int *etree;                   ///< Elimination tree of Pc'*A'*A*Pc.
-      slu_options_t options;        ///< Structure holding the input options for the solver.
+      /// Native SuperLU representations of 'm' and 'rhs'.
+      SuperMatrix A, B;
+      /// L/U factors of A.
+      SuperMatrix L, U;
+      /// Row/column scaling factors of A.
+      double *R, *C;
+      /// Row permutations from partial pivoting.
+      int *perm_r;
+      /// Column permutations to reduce fill-in ( = > matrix Pc).
+      int *perm_c;
+      /// Elimination tree of Pc'*A'*A*Pc.
+      int *etree;
+      /// Structure holding the input options for the solver.
+      slu_options_t options;
 
     private:
 #ifndef SLU_MT
@@ -158,10 +168,13 @@ namespace Hermes
 #endif  //SLU_MT
 
 #ifndef SLU_MT
-      char equed[1];              ///< Form of equilibration that was done on A.
+      /// Form of equilibration that was done on A.
+      char equed[1];
 #else
-      equed_t equed;              ///< Form of equilibration that was done on A.
-      SuperMatrix AC;             ///< Matrix A permuted by perm_c.
+      /// Form of equilibration that was done on A.
+      equed_t equed;
+      /// Matrix A permuted by perm_c.
+      SuperMatrix AC;
 #endif //SLU_MT
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver = false);
     };

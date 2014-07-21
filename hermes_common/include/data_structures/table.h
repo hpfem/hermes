@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -118,13 +118,15 @@ namespace Hermes
     bool is_diagonally_implicit();
     bool is_fully_implicit();
     bool is_embedded();
-    void switch_B_rows(); ///< For experimental purposes. Switches the B and B2 rows. B2 row
-    ///< must be nonzero, otherwise error is thrown.
+    /// For experimental purposes. Switches the B and B2 rows. B2 row
+    /// must be nonzero, otherwise error is thrown.
+    void switch_B_rows();
 
   protected:
     double* B;
-    double* B2;  ///< This is the second B-row for adaptivity based
-    ///< on embedded R-K methods.
+    /// This is the second B-row for adaptivity based
+    double* B2;
+    /// on embedded R-K methods.
     double* C;
   };
 }

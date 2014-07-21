@@ -63,10 +63,13 @@ namespace Hermes
         void show_contours(double step, double orig = 0.0);
         inline void hide_contours() { contours = false; refresh(); }
         void set_3d_mode(bool enable = true);
-        void set_vertical_scaling(double sc);  ///< Sets the scaling on the vertical axis programmatically.
-        void set_min_max_range(double min, double max);  ///< Sets the limits on displayed values.
+        /// Sets the scaling on the vertical axis programmatically.
+        void set_vertical_scaling(double sc);
+        /// Sets the limits on displayed values.
+        void set_min_max_range(double min, double max);
 
-        virtual void reset_view(bool force_reset); ///< Resets 2d and 3d view.
+        /// Resets 2d and 3d view.
+        virtual void reset_view(bool force_reset);
 
         /// Returns the internal linearizer for the purpose of parameter settings.
         Linearizer* get_linearizer();
@@ -78,21 +81,30 @@ namespace Hermes
       protected:
         struct ElementInfo ///< element info structure
         {
-          float x, y; ///< location of center[in physical coordinates]
-          float width, height; ///< width, height of AABB[in physical coordinates]
-          int id; ///< element ID
+          /// location of center[in physical coordinates]
+          float x, y;
+          /// width, height of AABB[in physical coordinates]
+          float width, height;
+          /// element ID
+          int id;
           ElementInfo() : x(0), y(0), width(0), height(0), id(-1) {};
           ElementInfo(int id, float x, float y, float width, float height) : x(x), y(y), width(width), height(height), id(id) {};
         };
-        std::vector<ElementInfo> element_infos; ///< Element info.
+        /// Element info.
+        std::vector<ElementInfo> element_infos;
 
-        unsigned int element_id_widget; ///< A GL display-list denoting a element ID widget. The geometry assumes the size of a pixel is 1x1.
+        /// A GL display-list denoting a element ID widget. The geometry assumes the size of a pixel is 1x1.
+        unsigned int element_id_widget;
 
-        bool show_element_info; ///< true, to draw element info (currently ID) in 2D mode
+        /// true, to draw element info (currently ID) in 2D mode
+        bool show_element_info;
 
-        void init_element_info(MeshSharedPtr mesh); ///< Creates element info from mesh.
-        void create_element_info_widgets(); ///< Creates element ID widgets if not created already.
-        void draw_element_infos_2d(); ///< Draws elements infos in 2D mode.
+        /// Creates element info from mesh.
+        void init_element_info(MeshSharedPtr mesh);
+        /// Creates element ID widgets if not created already.
+        void create_element_info_widgets();
+        /// Draws elements infos in 2D mode.
+        void draw_element_infos_2d();
 
       protected: //values
 #define H2DV_GL_MAX_EDGE_BUFFER 128 ///< A maximum number of pairs per a buffer.
@@ -104,44 +116,67 @@ namespace Hermes
           float coord;
           GLVertex2() {};
           GLVertex2(float x, float y, float coord) : x(x), y(y), coord(coord) {};
-          static const size_t H2D_OFFSETOF_COORD = 2*sizeof(float); ///< Offset of coordinate
+          /// Offset of coordinate
+          static const size_t H2D_OFFSETOF_COORD = 2 * sizeof(float);
         };
 #pragma pack(pop)
 
-        bool lin_updated; ///< true, if lin now contains new_ values
+        /// true, if lin now contains new_ values
+        bool lin_updated;
 
-        int max_gl_verts; ///< A maximum allocated number of vertices
-        int max_gl_tris; ///< A maximum allocated number of triangles
-        int gl_tri_cnt; ///< A number of OpenGL triangles
+        /// A maximum allocated number of vertices
+        int max_gl_verts;
+        /// A maximum allocated number of triangles
+        int max_gl_tris;
+        /// A number of OpenGL triangles
+        int gl_tri_cnt;
 
-        bool show_values; ///< true to show values
+        /// true to show values
+        bool show_values;
 
-        void prepare_gl_geometry(); ///< prepares geometry in a form compatible with GL arrays; Data are updated if lin is updated. In a case of a failure (out of memory), gl_verts is nullptr and an old OpenGL rendering method has to be used.
-        void draw_values_2d(); ///< draws values
-        void draw_edges_2d(); ///< draws edges
+        /// prepares geometry in a form compatible with GL arrays; Data are updated if lin is updated. In a case of a failure (out of memory), gl_verts is nullptr and an old OpenGL rendering method has to be used.
+        void prepare_gl_geometry();
+        /// draws values
+        void draw_values_2d();
+        /// draws edges
+        void draw_edges_2d();
 
       protected: //edges
-        bool show_edges; ///< true to show edges of mesh
-        bool show_aabb;  ///< true to show the bounding box
-        float edges_color[3]; ///< color of edges
+        /// true to show edges of mesh
+        bool show_edges;
+        /// true to show the bounding box
+        bool show_aabb;
+        /// color of edges
+        float edges_color[3];
 
-        typedef void (*DrawSingleEdgeCallback)(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param); ///< A callback function that draws edge using specified vertex indices. Param is user supplied parameter.
+        /// A callback function that draws edge using specified vertex indices. Param is user supplied parameter.
+        typedef void(*DrawSingleEdgeCallback)(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param);
 
-        void calculate_mesh_aabb(double* x_min, double* x_max, double* y_min, double* y_max); ///< Calculates AABB from edges.
+        /// Calculates AABB from edges.
+        void calculate_mesh_aabb(double* x_min, double* x_max, double* y_min, double* y_max);
 
-        void draw_aabb(); ///< Draws the axes-aligned bounding box of the model. Assumes a model/view matrix to be the current matrix on the OpenGL stack.
+        /// Draws the axes-aligned bounding box of the model. Assumes a model/view matrix to be the current matrix on the OpenGL stack.
+        void draw_aabb();
 
       protected:
-        bool contours; ///< true to enable drawing of contours
-        double cont_orig, cont_step; ///< contour settings.
-        float cont_color[3]; ///< color of contours (RGB)
-        bool do_zoom_to_fit; ///< true to automatically translate the view so that the whole model si displayed
-        bool is_constant; ///< true if the function to be displayed is constant
+        /// true to enable drawing of contours
+        bool contours;
+        /// contour settings.
+        double cont_orig, cont_step;
+        /// color of contours (RGB)
+        float cont_color[3];
+        /// true to automatically translate the view so that the whole model si displayed
+        bool do_zoom_to_fit;
+        /// true if the function to be displayed is constant
+        bool is_constant;
 
         // Perspective projection parameters.
-        static const int fovy;        ///< Field of view in the vertical direction (in degrees).
-        static const double znear;  ///< Distance of the near clipping plane of the viewing frustum from the camera.
-        static const double zfar;     ///< Distance of the Far clipping plane of the viewing frustum from the camera.
+        /// Field of view in the vertical direction (in degrees).
+        static const int fovy;
+        /// Distance of the near clipping plane of the viewing frustum from the camera.
+        static const double znear;
+        /// Distance of the Far clipping plane of the viewing frustum from the camera.
+        static const double zfar;
 
         bool pmode, mode3d, panning;
         double xrot, yrot, xtrans, ytrans, ztrans;
@@ -162,12 +197,15 @@ namespace Hermes
         ///  3. Compute the distance (along z-axis) from the origin to the center of perspective projection of the point with the
         ///      biggest horizontal (x-axis) distance from the origin.
         ///  4. Take the bigger of the two distances and reverse sign (since we will translate the model, not the camera)
-        double calculate_ztrans_to_fit_view(); ///< Calculates the z-coordinate (in eye coordinates) of the closest viewpoint from which we can still see the whole model. Assumes a model/view matrix to be the current matrix on the OpenGL stack.
-        virtual void update_layout(); ///< Updates layout, i.e., centers 2d and 3d mesh.
+        /// Calculates the z-coordinate (in eye coordinates) of the closest viewpoint from which we can still see the whole model. Assumes a model/view matrix to be the current matrix on the OpenGL stack.
+        double calculate_ztrans_to_fit_view();
+        /// Updates layout, i.e., centers 2d and 3d mesh.
+        virtual void update_layout();
 
         void draw_tri_contours(ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t&);
         void init_lighting();
-        void update_mesh_info(); ///< Updates mesh info. Assumes that data lock is locked.
+        /// Updates mesh info. Assumes that data lock is locked.
+        void update_mesh_info();
 
         virtual void on_display();
         void on_display_2d();
@@ -175,22 +213,25 @@ namespace Hermes
 
         virtual void on_key_down(unsigned char key, int x, int y);
         virtual void on_mouse_move(int x, int y);
-        virtual void on_right_mouse_down(int x, int y); ///< Handles selecting/deselecting of nodes.
+        /// Handles selecting/deselecting of nodes.
+        virtual void on_right_mouse_down(int x, int y);
         virtual void on_middle_mouse_down(int x, int y);
         virtual void on_middle_mouse_up(int x, int y);
         virtual const char* get_help_text() const;
         virtual void on_close();
       };
 #else
-class HERMES_API ScalarView : public View
+      class HERMES_API ScalarView : public View
       {
       public:
-				void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         ScalarView(const char* title = "ScalarView", WinGeom* wg = nullptr) {}
         ScalarView(char* title, WinGeom* wg = nullptr) {}
 
         void show(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0,
-          MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+          MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0) {
+          throw Hermes::Exceptions::Exception("GLUT disabled.");
+        }
 
         void show(MeshFunctionSharedPtr<std::complex<double> > sln, int item = H2D_FN_VAL_0,
           MeshFunctionSharedPtr<double> xdisp = nullptr, MeshFunctionSharedPtr<double> ydisp = nullptr, double dmult = 1.0)
@@ -208,7 +249,6 @@ class HERMES_API ScalarView : public View
         void set_vertical_scaling(double sc) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_min_max_range(double min, double max) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         Linearizer* get_linearizer()  { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
-
       };
 #endif
     }

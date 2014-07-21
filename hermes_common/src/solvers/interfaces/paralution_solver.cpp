@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -71,7 +71,6 @@ namespace Hermes
       CSRMatrix<Scalar>::alloc();
       this->paralutionMatrix.SetDataPtrCSR(&this->Ap, &this->Ai, &this->Ax, "paralutionMatrix", this->nnz, this->size, this->size);
     }
-
 
     template<typename Scalar>
     ParalutionVector<Scalar>::ParalutionVector() : SimpleVector<Scalar>(), paralutionVector(new paralution::LocalVector<Scalar>)
@@ -172,7 +171,6 @@ namespace Hermes
     {
       this->solve(nullptr);
     }
-
 
     template<typename Scalar>
     void AbstractParalutionLinearMatrixSolver<Scalar>::presolve_init()
@@ -500,7 +498,7 @@ namespace Hermes
         dynamic_cast<paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>*>(this->paralutionPreconditioner);
       if (saddlePointPrecond)
         saddlePointPrecond->Init(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
-#endif  
+#endif
       return (*this->paralutionPreconditioner);
     }
 

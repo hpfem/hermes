@@ -31,12 +31,12 @@ namespace Hermes
     /// Hermes::Hermes2D::MeshReaderH2D mloader;
     /// try
     /// {
-    ///&nbsp;mloader.load("compressor.mesh", &mesh);
+    /// &nbsp;mloader.load("compressor.mesh", &mesh);
     /// }
     /// catch(Exceptions::MeshLoadFailureException& e)
     /// {
-    ///&nbsp;e.print_msg();
-    ///&nbsp;return -1;
+    /// &nbsp;e.print_msg();
+    /// &nbsp;return -1;
     /// }
     class HERMES_API MeshReaderH2D : public MeshReader
     {

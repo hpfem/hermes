@@ -46,14 +46,16 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblemNOX<Scalar>::computeF(const Epetra_Vector &x, Epetra_Vector &f, FillType flag)
     {
-      EpetraVector<Scalar> xx(x);  // wrap our structures around core Epetra objects
+      // wrap our structures around core Epetra objects
+      EpetraVector<Scalar> xx(x);
       EpetraVector<Scalar> rhs(f);
 
       rhs.zero();
 
       Scalar* coeff_vec = malloc_with_check<DiscreteProblemNOX<Scalar>, Scalar>(xx.get_size(), this);
       xx.extract(coeff_vec);
-      this->assemble(coeff_vec, nullptr, &rhs); // nullptr is for the global matrix.
+      // nullptr is for the global matrix.
+      this->assemble(coeff_vec, nullptr, &rhs);
       free_with_check(coeff_vec);
 
       return true;
@@ -65,14 +67,16 @@ namespace Hermes
       Epetra_RowMatrix *jac = dynamic_cast<Epetra_RowMatrix *>(&op);
       assert(jac != nullptr);
 
-      EpetraVector<Scalar> xx(x);      // wrap our structures around core Epetra objects
+      // wrap our structures around core Epetra objects
+      EpetraVector<Scalar> xx(x);
       EpetraMatrix<Scalar> jacob(*jac);
 
       jacob.zero();
 
       Scalar* coeff_vec = malloc_with_check<DiscreteProblemNOX<Scalar>, Scalar>(xx.get_size(), this);
       xx.extract(coeff_vec);
-      this->assemble(coeff_vec, &jacob, nullptr); // nullptr is for the right-hand side.
+      // nullptr is for the right-hand side.
+      this->assemble(coeff_vec, &jacob, nullptr);
       free_with_check(coeff_vec);
       //jacob.finish();
 
@@ -83,7 +87,8 @@ namespace Hermes
     bool DiscreteProblemNOX<Scalar>::computePreconditioner(const Epetra_Vector &x, Epetra_Operator &m,
       Teuchos::ParameterList *precParams)
     {
-      EpetraVector<Scalar> xx(x);      // wrap our structures around core Epetra objects
+      // wrap our structures around core Epetra objects
+      EpetraVector<Scalar> xx(x);
 
       Scalar* coeff_vec = malloc_with_check<DiscreteProblemNOX<Scalar>, Scalar>(xx.get_size(), this);
       xx.extract(coeff_vec);
@@ -165,7 +170,7 @@ namespace Hermes
     void NewtonSolverNOX<Scalar>::set_time(double time)
     {
     }
-      
+
     template<typename Scalar>
     void NewtonSolverNOX<Scalar>::set_time_step(double time_step)
     {
@@ -269,9 +274,9 @@ namespace Hermes
       Teuchos::RCP<Epetra_RowMatrix> jac_mat;
 
       // Create linear system
-      if(this->dp->get_weak_formulation()->is_matrix_free())
+      if (this->dp->get_weak_formulation()->is_matrix_free())
       {
-        if(precond == Teuchos::null)
+        if (precond == Teuchos::null)
         { //Matrix free without preconditioner
           lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req, init_sln));
         }
@@ -286,7 +291,7 @@ namespace Hermes
       {  // not matrix Free (with jacobian)
         Teuchos::RCP<NOX::Epetra::Interface::Jacobian> i_jac = Teuchos::rcpFromRef(*dp);
         jac_mat = Teuchos::rcp(dp->get_jacobian()->mat);
-        if(precond == Teuchos::null)
+        if (precond == Teuchos::null)
         { //Matrix  without preconditioner
           lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
             i_jac, jac_mat, init_sln));
@@ -307,28 +312,28 @@ namespace Hermes
       Teuchos::RCP<NOX::StatusTest::Combo> converged =
         Teuchos::rcp(new NOX::StatusTest::Combo(NOX::StatusTest::Combo::AND));
 
-      if(conv_flag.absresid)
+      if (conv_flag.absresid)
       {
         Teuchos::RCP<NOX::StatusTest::NormF> absresid =
           Teuchos::rcp(new NOX::StatusTest::NormF(conv.abs_resid, conv.norm_type, conv.stype));
         converged->addStatusTest(absresid);
       }
 
-      if(conv_flag.relresid)
+      if (conv_flag.relresid)
       {
         Teuchos::RCP<NOX::StatusTest::NormF> relresid =
           Teuchos::rcp(new NOX::StatusTest::NormF(*grp.get(), conv.rel_resid));
         converged->addStatusTest(relresid);
       }
 
-      if(conv_flag.update)
+      if (conv_flag.update)
       {
         Teuchos::RCP<NOX::StatusTest::NormUpdate> update =
           Teuchos::rcp(new NOX::StatusTest::NormUpdate(conv.update));
         converged->addStatusTest(update);
       }
 
-      if(conv_flag.wrms)
+      if (conv_flag.wrms)
       {
         Teuchos::RCP<NOX::StatusTest::NormWRMS> wrms =
           Teuchos::rcp(new NOX::StatusTest::NormWRMS(conv.wrms_rtol, conv.wrms_atol));
@@ -354,13 +359,14 @@ namespace Hermes
       // Create the solver
       Teuchos::RCP<NOX::Solver::Generic> solver = NOX::Solver::buildSolver(grp, cmb, final_pars);
 
-      /// Solve.
+      // Solve.
       NOX::StatusTest::StatusType status = solver->solve();
 
-      if(!this->dp->get_weak_formulation()->is_matrix_free())
-        jac_mat.release();  // release the ownership (we take care of jac_mat by ourselves)
+      if (!this->dp->get_weak_formulation()->is_matrix_free())
+        // release the ownership (we take care of jac_mat by ourselves)
+        jac_mat.release();
 
-      if(status == NOX::StatusTest::Converged)
+      if (status == NOX::StatusTest::Converged)
       {
         // get result informations
         num_iters = solver->getNumIterations();
@@ -374,10 +380,10 @@ namespace Hermes
         const Epetra_Vector &f_sln =
           (dynamic_cast<const NOX::Epetra::Vector &>(f_grp.getX())).getEpetraVector();
         // extract solution
-        if(this->sln_vector)
+        if (this->sln_vector)
           free_with_check(this->sln_vector);
         this->sln_vector = (Scalar*)calloc(ndofs, sizeof(Scalar));
-        
+
         f_sln.ExtractCopy(this->sln_vector);
       }
       else // not converged
@@ -471,9 +477,11 @@ namespace Hermes
     }
 
     template class HERMES_API DiscreteProblemNOX<double>;
-    // template class HERMES_API DiscreteProblemNOX<std::complex<double> >; //complex version of nox solver is not implemented
+    //complex version of nox solver is not implemented
+    // template class HERMES_API DiscreteProblemNOX<std::complex<double> >;
     template class HERMES_API NewtonSolverNOX<double>;
-    // template class HERMES_API NewtonSolverNOX<std::complex<double> >; //complex version of nox solver is not implemented
+    //complex version of nox solver is not implemented
+    // template class HERMES_API NewtonSolverNOX<std::complex<double> >;
   }
 }
 #endif

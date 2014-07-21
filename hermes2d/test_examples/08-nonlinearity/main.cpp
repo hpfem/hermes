@@ -57,9 +57,9 @@ int main(int argc, char* argv[])
   // Initialize the FE problem.
   DiscreteProblem<double> dp(wf, space);
 
-  // Project the initial condition on the FE space to obtain initial 
+  // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  // NOTE: If you want to start from the zero vector, just define 
+  // NOTE: If you want to start from the zero vector, just define
   // coeff_vec to be a vector of ndof zeros (no projection is needed).
   Hermes::Mixins::Loggable::Static::info("Projecting to obtain initial vector for the Newton's method.");
   double* coeff_vec = new double[ndof];
@@ -119,4 +119,3 @@ int main(int argc, char* argv[])
   View::wait();
   return 0;
 }
-

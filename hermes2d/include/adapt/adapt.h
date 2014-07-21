@@ -131,8 +131,10 @@ namespace Hermes
       Adapt(std::vector<SpaceSharedPtr<Scalar> > spaces, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
       Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
       Adapt(ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = nullptr);
-      virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
-      void free();  ///< Deallocates allocated private data.
+      /// Destructor. Deallocates allocated private data.
+      virtual ~Adapt();
+      /// Deallocates allocated private data.
+      void free();
 
       /// Refines elements based on results from the ErrorCalculator class.
       /**

@@ -42,22 +42,30 @@ namespace Hermes
       // Initial coefficient vector for the Newton's method.
       Scalar* coeff_vec = calloc_with_check<Scalar>(ndof);
 
-      const char* iterative_method = "GMRES";           // Name of the iterative method employed by AztecOO (ignored
+// Name of the iterative method employed by AztecOO (ignored
+      const char* iterative_method = "GMRES";
       // by the other solvers).
       // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
-      const char* preconditioner = "New Ifpack";           // Name of the preconditioner employed by AztecOO
+// Name of the preconditioner employed by AztecOO
+      const char* preconditioner = "New Ifpack";
       // Possibilities: None" - No preconditioning.
       // "AztecOO" - AztecOO internal preconditioner.
       // "new_ Ifpack" - Ifpack internal preconditioner.
       // "ML" - Multi level preconditione
       unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::LinearSolverDetails;
       // NOX error messages, see NOX_Utils.h.
-      double ls_tolerance = 1e-5;                       // Tolerance for linear system.
-      unsigned flag_absresid = 0;                       // Flag for absolute value of the residuum.
-      double abs_resid = 1.0e-3;                        // Tolerance for absolute value of the residuum.
-      unsigned flag_relresid = 1;                       // Flag for relative value of the residuum.
-      double rel_resid = newton_tol;                        // Tolerance for relative value of the residuum.
-      int max_iters = newton_max_iter;                  // Max number of iterations.
+// Tolerance for linear system.
+      double ls_tolerance = 1e-5;
+// Flag for absolute value of the residuum.
+      unsigned flag_absresid = 0;
+// Tolerance for absolute value of the residuum.
+      double abs_resid = 1.0e-3;
+// Flag for relative value of the residuum.
+      unsigned flag_relresid = 1;
+// Tolerance for relative value of the residuum.
+      double rel_resid = newton_tol;
+// Max number of iterations.
+      int max_iters = newton_max_iter;
 
       // Initialize NOX.
       NewtonSolverNOX<Scalar> newton_nox(&dp);
@@ -260,7 +268,8 @@ namespace Hermes
     }
 
     template class HERMES_API OGProjectionNOX<double>;
-    // template class HERMES_API OGProjectionNOX<std::complex<double> >; //complex version of nox solver is not implemented
+//complex version of nox solver is not implemented
+    // template class HERMES_API OGProjectionNOX<std::complex<double> >;
   }
 }
 

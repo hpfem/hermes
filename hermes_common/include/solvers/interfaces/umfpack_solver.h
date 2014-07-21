@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -19,7 +19,7 @@
 /*! \file umfpack_solver.h
 \brief UMFPACK solver interface.
 */
-#ifndef __HERMES_COMMON_UMFPACK_SOLVER_H_ 
+#ifndef __HERMES_COMMON_UMFPACK_SOLVER_H_
 #define __HERMES_COMMON_UMFPACK_SOLVER_H_
 #include "config.h"
 #ifdef WITH_UMFPACK
@@ -66,7 +66,8 @@ namespace Hermes
       /// \brief Reusable factorization information (A denotes matrix represented by the pointer 'm').
       /// Reordering of matrix A to reduce fill-in during factorization.
       void *symbolic;
-      void *numeric;  ///< LU factorization of matrix A.
+      /// LU factorization of matrix A.
+      void *numeric;
 
       /// \todo document
       void free_factorization_data();

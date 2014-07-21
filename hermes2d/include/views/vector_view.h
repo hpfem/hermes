@@ -45,7 +45,7 @@ namespace Hermes
 
         inline void set_grid_type(bool hexa) { this->hexa = hexa; refresh(); };
         void set_mode(int mode);
-      
+
         /// Returns the internal Linearizer for the purpose of parameter settings.
         Vectorizer* get_vectorizer();
 
@@ -54,11 +54,15 @@ namespace Hermes
         Vectorizer* vec;
 
         double gx, gy, gs;
-        bool hexa; ///< false - quad grid, true - hexa grid
-        int mode;  ///< 0 - magnitude is on the background, 1 - arrows are colored, 2 - no arrows, just magnitude on the background
+        /// false - quad grid, true - hexa grid
+        bool hexa;
+        /// 0 - magnitude is on the background, 1 - arrows are colored, 2 - no arrows, just magnitude on the background
+        int mode;
         bool lines, pmode;
-        double length_coef; ///< for extending or shortening arrows
-        void draw_edges_2d(); ///< draws edges
+        /// for extending or shortening arrows
+        double length_coef;
+        /// draws edges
+        void draw_edges_2d();
 
         void plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs);
 
@@ -79,7 +83,7 @@ namespace Hermes
 
         inline void set_grid_type(bool hexa) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_mode(int mode) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-      
+
         /// Returns the internal Linearizer for the purpose of parameter settings.
         Linearizer* get_Linearizer() { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
       };

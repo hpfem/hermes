@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -60,7 +60,7 @@ namespace Hermes
       /// Main addition method.
       /// Virtual - the method body is 1:1 for CSCMatrix, inverted for CSR.
       virtual void add(unsigned int Ai_data_index, unsigned int Ai_index, Scalar v);
-      
+
       /// Main get method.
       /// Virtual - the method body is 1:1 for CSCMatrix, inverted for CSR.
       virtual Scalar get(unsigned int Ai_data_index, unsigned int Ai_index) const;
@@ -80,12 +80,12 @@ namespace Hermes
       /// Utility version
       /// \See MatrixRhsImportExport<Scalar>::export_to_file.
       void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf", bool invert_storage = false);
-      
+
       /// Reading matrix
       /// Utility version
       /// \See Matrix<Scalar>::import_from_file.
       void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt, bool invert_storage = false);
-      
+
       /// Utility method.
       virtual unsigned int get_nnz() const;
       /// Utility method.

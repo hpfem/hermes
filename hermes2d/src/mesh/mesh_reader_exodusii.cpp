@@ -54,8 +54,10 @@ namespace Hermes
     void MeshReaderExodusII::load(const char *file_name, MeshSharedPtr mesh)
     {
       int err;
-      int cpu_ws = sizeof(double);    // use float or double
-      int io_ws = 8;            // store variables as doubles
+      // use float or double
+      int cpu_ws = sizeof(double);
+      // store variables as doubles
+      int io_ws = 8;
       float version;
       int exoid = ex_open(file_name, EX_READ, &cpu_ws, &io_ws, &version);
 
@@ -72,9 +74,12 @@ namespace Hermes
       err = ex_get_coord(exoid, x, y, nullptr);
 
       // remove duplicate vertices and build renumbering map
-      std::map<Vertex, int, VCompare> vtx_list;        // map for eliminating duplicities
-      std::map<int, int> vmap;                // reindexing map
-      std::vector<Vertex> vtx_arr;              // vertex array
+      // map for eliminating duplicities
+      std::map<Vertex, int, VCompare> vtx_list;
+      // reindexing map
+      std::map<int, int> vmap;
+      // vertex array
+      std::vector<Vertex> vtx_arr;
       int vid = 0;
       for (int i = 0; i < n_nodes; i++)
       {
@@ -102,8 +107,10 @@ namespace Hermes
         vtx[i][1] = vtx_arr[i].y;
       }
 
-      int n_tri = 0;    // number of triangles
-      int n_quad = 0;    // number of quads
+      // number of triangles
+      int n_tri = 0;
+      // number of quads
+      int n_quad = 0;
 
       // get info about element blocks
       int *eid_blocks = new int[n_eblocks];
@@ -126,14 +133,19 @@ namespace Hermes
           throw Hermes::Exceptions::Exception("Unknown type of element");
         }
       }
-      int3 *tri = n_tri > 0 ? new int3[n_tri] : nullptr;    // triangles
+      // triangles
+      int3 *tri = n_tri > 0 ? new int3[n_tri] : nullptr;
       std::string *tri_markers = n_tri > 0 ? new std::string[n_tri] : nullptr;
-      int4 *quad = n_quad > 0 ? new int4[n_quad] : nullptr;    // quads
+      // quads
+      int4 *quad = n_quad > 0 ? new int4[n_quad] : nullptr;
       std::string *quad_markers = n_quad > 0 ? new std::string[n_quad] : nullptr;
 
-      int n_els = n_tri + n_quad;                // total number of elements
-      int **els = n_els > 0 ? new int *[n_els] : nullptr;    // elements
-      int *el_nv = n_els > 0 ? new int[n_els] : nullptr;    // number of vertices for each element
+      // total number of elements
+      int n_els = n_tri + n_quad;
+      // elements
+      int **els = n_els > 0 ? new int *[n_els] : nullptr;
+      // number of vertices for each element
+      int *el_nv = n_els > 0 ? new int[n_els] : nullptr;
 
       int it = 0, iq = 0, iel = 0;
       for (int i = 0; i < n_eblocks; i++)
@@ -197,7 +209,8 @@ namespace Hermes
       err = ex_get_side_set_ids(exoid, sid_blocks);
 
       // go over the sidesets
-      int n_mark = 0;    // number of markers
+      // number of markers
+      int n_mark = 0;
       for (int i = 0; i < n_sidesets; i++)
       {
         int sid = sid_blocks[i];
@@ -231,7 +244,8 @@ namespace Hermes
 
         for (int j = 0; j < num_elem_in_set; j++)
         {
-          int nv = el_nv[side_list[j] - 1];      // # of vertices of the element
+          // # of vertices of the element
+          int nv = el_nv[side_list[j] - 1];
           int vt = side_list[j] - 1;
           marks[im][0] = els[elem_list[j] - 1][vt];
           marks[im][1] = els[elem_list[j] - 1][(vt + 1) % nv];

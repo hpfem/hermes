@@ -20,7 +20,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-
     template<typename Scalar>
     DiscreteProblemSelectiveAssembler<Scalar>::DiscreteProblemSelectiveAssembler()
       : sp_seq(nullptr),

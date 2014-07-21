@@ -20,13 +20,13 @@
 
 namespace Hermes
 {
-  Ord::Ord(): order(0) {}
-  Ord::Ord(int o): order(o) {}
-  Ord::Ord(double o): order(0) {}
+  Ord::Ord() : order(0) {}
+  Ord::Ord(int o) : order(o) {}
+  Ord::Ord(double o) : order(0) {}
 
   int Ord::get_order() const { return order; }
 
-  Ord Ord::get_max_order() {return Ord(30);}
+  Ord Ord::get_max_order() { return Ord(30); }
 
   Ord Ord::operator+ (const Ord &o) { return Ord(std::max(this->order, o.order)); }
   Ord Ord::operator+ (double d) { return *this; }
@@ -70,7 +70,7 @@ namespace Hermes
   Ord operator-(const std::complex<double> &a, const Ord &b) { return b; }
   Ord operator-(const Ord &a) { return a; }
 
-  Ord pow(const Ord &a, const double &b) { return Ord((int) ceil(fabs(b)) * a.get_order()); }
+  Ord pow(const Ord &a, const double &b) { return Ord((int)ceil(fabs(b)) * a.get_order()); }
   Ord sqrt(const Ord &a) { return a; }
   Ord sqr(const Ord &a) { return Ord(2 * a.get_order()); }
   Ord conj(const Ord &a) { return a; }

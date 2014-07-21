@@ -15,9 +15,12 @@ typedef std::complex<double> complex;
 //  elsewhere.
 //
 //  The following parameters can be changed:
-const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
-const double THRESHOLD = 0.95;                    // This is a quantitative parameter of Adaptivity.
+// Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 0;
+// Initial polynomial degree of all mesh elements.
+const int P_INIT = 1;
+// This is a quantitative parameter of Adaptivity.
+const double THRESHOLD = 0.95;
 
 // Error calculation & adaptivity.
 DefaultErrorCalculator< ::complex, HERMES_H1_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
@@ -37,7 +40,6 @@ const double GAMMA_IRON = 6e6;
 const double J_EXT = 1e6;
 const double FREQ = 5e3;
 const double OMEGA = 2 * M_PI * FREQ;
-
 
 int main(int argc, char* argv[])
 {
@@ -84,7 +86,7 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver< ::complex> newton(&dp);
   SimpleGraph graph_dof_est;
-  
+
   // Adaptivity loop:
   int as = 1; bool done = false;
   adaptivity.set_space(space);
@@ -95,7 +97,7 @@ int main(int argc, char* argv[])
     MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
     Space< ::complex>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
     SpaceSharedPtr< ::complex> ref_space = ref_space_creator.create_ref_space();
-    
+
     newton.set_space(ref_space);
 
     int ndof_ref = ref_space->get_num_dofs();
@@ -111,7 +113,7 @@ int main(int argc, char* argv[])
     {
       newton.solve(coeff_vec);
     }
-    catch(Hermes::Exceptions::Exception& e)
+    catch (Hermes::Exceptions::Exception& e)
     {
       e.print_msg();
     }
@@ -138,7 +140,7 @@ int main(int argc, char* argv[])
     sview.show(errorCalculator.get_errorMeshFunction());
 
     // If err_est too large, adapt the mesh->
-    if(errorCalculator.get_total_error_squared()  * 100. < ERR_STOP)
+    if (errorCalculator.get_total_error_squared()  * 100. < ERR_STOP)
       done = true;
     else
     {
@@ -147,14 +149,13 @@ int main(int argc, char* argv[])
     }
 
     // Clean up.
-    delete [] coeff_vec;
+    delete[] coeff_vec;
 
     // Increase counter.
     as++;
-  }
-  while (done == false);
+  } while (done == false);
 
-    graph_dof_est.save("conv_dof_est.dat");
+  graph_dof_est.save("conv_dof_est.dat");
 
   // Show the reference solution - the final result.
   sview.set_title("Fine mesh solution");

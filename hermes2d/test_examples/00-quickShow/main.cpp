@@ -16,7 +16,7 @@ const int INIT_REF_NUM = 2;
 const int P_INIT = 1;
 
 #pragma region Time-dependency setup.
-// Time step. 
+// Time step.
 double time_step_length = 0.05;
 // Time interval length.
 double current_time = 0.;
@@ -214,7 +214,6 @@ int main(int argc, char* argv[])
   View::wait();
   return 0;
 }
-
 
 #pragma region Helper functions
 

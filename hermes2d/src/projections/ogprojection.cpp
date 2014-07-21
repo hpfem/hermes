@@ -106,7 +106,7 @@ namespace Hermes
 
       int spaces_size = spaces.size();
       for (int i = 0; i < spaces_size; i++)
-      project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_slns[i]);
+        project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_slns[i]);
     }
 
     template<typename Scalar>
@@ -202,7 +202,7 @@ namespace Hermes
       if (target_vec == nullptr)
         throw Exceptions::NullException(3);
       if (!proj_norms.empty())
-        Helpers::check_length(proj_norms, spaces); 
+        Helpers::check_length(proj_norms, spaces);
 
       int start_index = 0, spaces_size = spaces.size();
       for (int i = 0; i < spaces_size; i++)

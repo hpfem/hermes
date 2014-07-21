@@ -94,7 +94,7 @@ namespace Hermes
         /// Get mean value of the mixed derivative (mixed_derivative_index) on element e, of the "component" - component
         /// of the solution.
         double get_centroid_value_multiplied(Element* e, int component, int mixed_derivative_index);
-        
+
         double get_edge_midpoint_value_multiplied(Element* e, int component, int mixed_derivative_index, int edge);
 
         void impose_linear_correction_factor(Element* e, int component);
@@ -122,7 +122,7 @@ namespace Hermes
       public:
         /// \param[in] source_functions The functions forming the integral expression.
         /// \param[in] number_of_integrals Number of results (expressions) evaluated. The method integral will get the array result allocated according to this parameter.
-        /// 
+        ///
         IntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);
         IntegralCalculator(std::vector<MeshFunctionSharedPtr<Scalar> > source_functions, int number_of_integrals);
 
@@ -136,7 +136,7 @@ namespace Hermes
 
         /// The integration order calculation.
         virtual void order(Func<Hermes::Ord> **fns, Hermes::Ord* result) = 0;
-      
+
       protected:
         std::vector<MeshFunctionSharedPtr<Scalar> > source_functions;
         int number_of_integrals;
@@ -160,7 +160,7 @@ namespace Hermes
         /// Main method returning the value.
         /// Not designed to be overriden.
         Scalar* calculate(std::vector<std::string> markers);
-				using IntegralCalculator<Scalar>::calculate;
+        using IntegralCalculator<Scalar>::calculate;
       };
 
       /// Surface integral calculator

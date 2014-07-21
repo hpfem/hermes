@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -133,7 +133,7 @@ namespace Hermes
             k = i;
             while (k > 0)
             {
-              sum -= a[i][k-1] * a[j][k-1];
+              sum -= a[i][k - 1] * a[j][k - 1];
               k--;
             }
             if (i == j)
@@ -159,7 +159,7 @@ namespace Hermes
       template HERMES_API void lubksb<double, std::complex<double>, int>(double **a, int n, int *indx, std::complex<double> *d);
       template HERMES_API void lubksb<double, double, int>(double **a, int n, int *indx, double *d);
       template HERMES_API void lubksb<std::complex<double>, std::complex<double>, int>(std::complex<double> **a, int n, int *indx, std::complex<double> *d);
-      
+
       template HERMES_API void lubksb<double, std::complex<double>, unsigned short>(double **a, unsigned short n, unsigned short *indx, std::complex<double> *d);
       template HERMES_API void lubksb<double, double, unsigned short>(double **a, unsigned short n, unsigned short *indx, double *d);
       template HERMES_API void lubksb<std::complex<double>, std::complex<double>, unsigned short>(std::complex<double> **a, unsigned short n, unsigned short *indx, std::complex<double> *d);
@@ -167,7 +167,7 @@ namespace Hermes
       template HERMES_API void lubksb<double, std::complex<double>, unsigned char>(double **a, unsigned char n, unsigned char *indx, std::complex<double> *d);
       template HERMES_API void lubksb<double, double, unsigned char>(double **a, unsigned char n, unsigned char *indx, double *d);
       template HERMES_API void lubksb<std::complex<double>, std::complex<double>, unsigned char>(std::complex<double> **a, unsigned char n, unsigned char *indx, std::complex<double> *d);
-      
+
       template HERMES_API void choldc<double, int>(double **a, int n, double p[]);
       template HERMES_API void choldc<std::complex<double>, int>(std::complex<double> **a, int n, std::complex<double> p[]);
 

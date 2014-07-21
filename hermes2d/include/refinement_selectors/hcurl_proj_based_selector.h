@@ -49,9 +49,11 @@ namespace Hermes
           H2D_HCFE_NUM = 3 ///< A total considered function expansion.
         };
 
-        Scalar* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_HCFE_NUM]; ///< Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
+        /// Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
+        Scalar* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_HCFE_NUM];
 
-        static const int H2DRS_MAX_HCURL_ORDER; ///< A maximum used order in this Hcurl-space selector. \todo Replace the numerical constant after a symbolic constant is added to Hcurl shapeset which would declare the maximum supported order.
+        /// A maximum used order in this Hcurl-space selector. \todo Replace the numerical constant after a symbolic constant is added to Hcurl shapeset which would declare the maximum supported order.
+        static const int H2DRS_MAX_HCURL_ORDER;
 
         /// Sets OptimumSelector::current_max_order and OptimumSelector::current_min_order.
         /** The default order range is[1, ::H2DRS_MAX_HCURL_ORDER]. If curved, the upper boundary of the range becomes lower.
@@ -84,7 +86,7 @@ namespace Hermes
         /// Evaluates an squared error of a projection of an element of a candidate onto subdomains.
         /**  Overriden function. For details, see ProjBasedSelector::evaluate_error_squared_subdomain(). */
         virtual double evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]);
-        
+
         friend class ProjBasedSelector<Scalar>;
       };
     }

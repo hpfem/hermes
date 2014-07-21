@@ -131,7 +131,8 @@ namespace Hermes
         wait_for_draw();
 
         // FIXME: find out why this has to be called after wait_for_draw in order for the view to be reset initially.
-        reset_view(false); // setting true here makes the view always reset after calling 'show'; particularly in the adaptivity process,
+        // setting true here makes the view always reset after calling 'show'; particularly in the adaptivity process,
+        reset_view(false);
         // it would disallow the observation of the process from a manually set viewpoint.
         refresh();
 
@@ -153,7 +154,8 @@ namespace Hermes
         update_layout();
         wait_for_draw();
         // FIXME: find out why this has to be called after wait_for_draw in order for the view to be reset initially.
-        reset_view(false); // setting true here makes the view always reset after calling 'show'; particularly in the adaptivity process,
+        // setting true here makes the view always reset after calling 'show'; particularly in the adaptivity process,
+        reset_view(false);
         // it would disallow the observation of the process from a manually set viewpoint.
         refresh();
       }
@@ -435,7 +437,8 @@ namespace Hermes
         glEnd();
 
         //GL clenaup
-        glMatrixMode(GL_TEXTURE); //switch-off texture transform
+        //switch-off texture transform
+        glMatrixMode(GL_TEXTURE);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
       }
@@ -714,7 +717,8 @@ namespace Hermes
 
           do_zoom_to_fit = true;
         }
-        View::reset_view(force_reset); // Reset 2d view.
+        // Reset 2d view.
+        View::reset_view(force_reset);
       }
 
       double ScalarView::calculate_ztrans_to_fit_view()
@@ -797,7 +801,7 @@ namespace Hermes
 
       void ScalarView::set_min_max_range(double min, double max)
       {
-        /// \todo allow settin min = max, in which case draw the corresponding contour.
+        /// \todo allow setting min = max, in which case draw the corresponding contour.
         if (fabs(max - min) < Hermes::HermesEpsilon)
         {
           this->warn("Range (%f, %f) is too narrow: adjusted to (%f, %f)", min, max, min - 0.5, max);
@@ -921,7 +925,6 @@ namespace Hermes
         }
       }
 
-
       void ScalarView::on_mouse_move(int x, int y)
       {
         if (mode3d && (dragging || scaling || panning))
@@ -976,7 +979,6 @@ namespace Hermes
       {
         panning = false;
       }
-
 
       const char* ScalarView::get_help_text() const
       {

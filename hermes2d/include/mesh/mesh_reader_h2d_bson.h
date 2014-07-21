@@ -39,7 +39,7 @@ namespace Hermes
     ///&nbsp;e.print_msg();
     ///&nbsp;return -1;
     /// }
-    /// 
+    ///
     class HERMES_API MeshReaderH2DBSON : public MeshReader
     {
     public:
@@ -297,7 +297,7 @@ namespace Hermes
         std::vector<refinement_BSON> refinements;
       };
 
-      static bool elementCompare (element_BSON el_i, element_BSON el_j) { return ( el_i.i < el_j.i ); }
+      static bool elementCompare(element_BSON el_i, element_BSON el_j) { return (el_i.i < el_j.i); }
 
       void load_domain(bson& br, MeshSharedPtr mesh, std::map<int, int>& vertex_is, std::map<int, int>& element_is, std::map<int, int>& edge_is,
         std::vector<element_BSON>& elements, std::vector<edge_BSON>& edges, std::vector<vertex_BSON>& vertices, std::vector<arc_BSON>& arcs, std::vector<subdomain_BSON>& subdomains);
@@ -306,4 +306,3 @@ namespace Hermes
 }
 #endif
 #endif
-

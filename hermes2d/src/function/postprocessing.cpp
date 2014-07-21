@@ -219,7 +219,6 @@ namespace Hermes
         // Adjust the solutions according to the quadratic terms handling.
         Solution<double>::vector_to_solutions(this->solution_vector, this->spaces, this->limited_solutions);
 
-
         // 2. Linear
         // Prepare the vertex values for the linear part.
         prepare_min_max_vertex_values(false);
@@ -281,7 +280,6 @@ namespace Hermes
             fraction = 1.;
             if (this->get_verbose_output())
               std::cout << "\tcenter_value";
-
           }
           else
           if (vertex_value > centroid_value_multiplied)
@@ -367,7 +365,6 @@ namespace Hermes
               fraction = std::min(1., (this->vertex_max_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
               if (this->get_verbose_output())
                 std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][i_derivative];
-
             }
             else
             {
@@ -633,14 +630,14 @@ namespace Hermes
       {
 #ifdef _DEBUG
         this->info("User markers");
-        for(unsigned short i = 0; i < markers.size(); i++)
+        for (unsigned short i = 0; i < markers.size(); i++)
           this->info("\t%s", markers[i].c_str());
 #endif
         // This serves for assembling over the whole domain in the case a passed marker is HERMES_ANY.
         bool assemble_everywhere = false;
 
         std::vector<int> internal_markers;
-        for(unsigned short i = 0; i < markers.size(); i++)
+        for (unsigned short i = 0; i < markers.size(); i++)
         {
           if (markers[i] == HERMES_ANY)
           {
@@ -649,7 +646,6 @@ namespace Hermes
           }
           else
           {
-
             Hermes::Hermes2D::Mesh::MarkersConversion::IntValid internalMarker = this->source_functions[0]->get_mesh()->get_element_markers_conversion().get_internal_marker(markers[i]);
             if (internalMarker.valid)
               internal_markers.push_back(internalMarker.marker);
@@ -663,7 +659,7 @@ namespace Hermes
 
 #ifdef _DEBUG
         this->info("Internal markers");
-        for(unsigned short i = 0; i < internal_markers.size(); i++)
+        for (unsigned short i = 0; i < internal_markers.size(); i++)
           this->info("\t%i", internal_markers[i]);
 #endif
 
@@ -712,7 +708,7 @@ namespace Hermes
             if (!assemble_everywhere)
             {
               bool target_marker = false;
-              for(unsigned short i = 0; i < internal_markers.size(); i++)
+              for (unsigned short i = 0; i < internal_markers.size(); i++)
               {
                 if (current_state->rep->marker == internal_markers[i])
                 {
@@ -828,14 +824,14 @@ namespace Hermes
       {
 #ifdef _DEBUG
         this->info("User markers");
-        for(unsigned short i = 0; i < markers.size(); i++)
+        for (unsigned short i = 0; i < markers.size(); i++)
           this->info("\t%s", markers[i].c_str());
 #endif
         // This serves for assembling over the whole domain in the case a passed marker is HERMES_ANY.
         bool assemble_everywhere = false;
 
         std::vector<int> internal_markers;
-        for(unsigned short i = 0; i < markers.size(); i++)
+        for (unsigned short i = 0; i < markers.size(); i++)
         {
           if (markers[i] == HERMES_ANY)
           {
@@ -857,7 +853,7 @@ namespace Hermes
 
 #ifdef _DEBUG
         this->info("Internal markers");
-        for(unsigned short i = 0; i < internal_markers.size(); i++)
+        for (unsigned short i = 0; i < internal_markers.size(); i++)
           this->info("\t%i", internal_markers[i]);
 #endif
 
@@ -927,7 +923,7 @@ namespace Hermes
               if (!assemble_everywhere)
               {
                 bool target_marker = false;
-                for(unsigned short i = 0; i < internal_markers.size(); i++)
+                for (unsigned short i = 0; i < internal_markers.size(); i++)
                 {
                   if (current_state->rep->en[edge]->marker == internal_markers[i])
                   {

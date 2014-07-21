@@ -44,27 +44,37 @@ namespace Hermes
     ///
     struct HERMES_API Node
     {
-      int id;          ///< node id number
-      unsigned ref:29; ///< the number of elements using the node
-      unsigned type:1; ///< 0 = vertex node; 1 = edge node
-      unsigned bnd:1;  ///< 1 = boundary node; 0 = inner node
-      unsigned used:1; ///< array item usage flag
+      /// node id number
+      int id;
+      /// the number of elements using the node
+      unsigned ref : 29;
+      /// 0 = vertex node; 1 = edge node
+      unsigned type : 1;
+      /// 1 = boundary node; 0 = inner node
+      unsigned bnd : 1;
+      /// array item usage flag
+      unsigned used : 1;
 
       union
       {
         struct
         {
-          double x, y; ///< vertex node coordinates
+          /// vertex node coordinates
+          double x, y;
         };
         struct
         {
-          int marker;       ///< edge marker
-          Element* elem[2]; ///< elements sharing the edge node
+          /// edge marker
+          int marker;
+          /// elements sharing the edge node
+          Element* elem[2];
         };
       };
 
-      int p1, p2; ///< parent id numbers
-      Node* next_hash; ///< next node in hash synonym list
+      /// parent id numbers
+      int p1, p2;
+      /// next node in hash synonym list
+      Node* next_hash;
 
       /// Returns true if the (vertex) node is constrained.
       bool is_constrained_vertex() const;
@@ -98,15 +108,20 @@ namespace Hermes
     {
     public:
       Element();
-      int id;              ///< element id number
-      bool active;   ///< 0 = active, no sons; 1 = inactive (refined), has sons
-      bool used;     ///< array item usage flag
-      Element* parent;     ///< pointer to the parent element for the current son
-      bool visited;        ///< true if the element has been visited during assembling
+      /// element id number
+      int id;
+      /// 0 = active, no sons; 1 = inactive (refined), has sons
+      bool active;
+      /// array item usage flag
+      bool used;
+      /// pointer to the parent element for the current son
+      Element* parent;
+      /// true if the element has been visited during assembling
+      bool visited;
 
       /// Calculates the area of the element.
       /// \param[in] precise_for_curvature If curved elements should be evaluated exactly. \
-      /// This takes much longer.
+                  /// This takes much longer.
       void calc_area(bool precise_for_curvature = false);
 
       /// Calculates the diameter.
@@ -115,11 +130,14 @@ namespace Hermes
       /// Returns the center of gravity.
       void get_center(double& x, double& y);
 
-      Node* vn[H2D_MAX_NUMBER_VERTICES];   ///< vertex node pointers
+      /// vertex node pointers
+      Node* vn[H2D_MAX_NUMBER_VERTICES];
       union
       {
-        Node* en[H2D_MAX_NUMBER_EDGES];      ///< edge node pointers
-        Element* sons[H2D_MAX_ELEMENT_SONS]; ///< son elements (up to four)
+        /// edge node pointers
+        Node* en[H2D_MAX_NUMBER_EDGES];
+        /// son elements (up to four)
+        Element* sons[H2D_MAX_ELEMENT_SONS];
       };
 
       /// element marker
@@ -127,9 +145,9 @@ namespace Hermes
 
       // returns the edge orientation. This works for the unconstrained edges.
       bool get_edge_orientation(int ie) const;
-      
-      inline ElementMode2D  get_mode() const { 
-        return (nvert == 3) ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD; 
+
+      inline ElementMode2D  get_mode() const {
+        return (nvert == 3) ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD;
       }
 
       inline bool is_triangle() const {
@@ -149,7 +167,8 @@ namespace Hermes
       bool vsplit() const;
       bool bsplit() const;
 
-      CurvMap* cm; ///< curved mapping, nullptr if not curvilinear
+      /// curved mapping, nullptr if not curvilinear
+      CurvMap* cm;
       /// Serves for saving the once calculated area of this element.
       double area;
 
@@ -182,7 +201,8 @@ namespace Hermes
       /// Internal.
       void unref_all_nodes(HashTable* ht);
 
-      unsigned char nvert; ///< number of vertices (3 or 4)
+      /// number of vertices (3 or 4)
+      unsigned char nvert;
     };
 
     static Node* get_edge_node();

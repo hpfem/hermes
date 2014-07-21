@@ -187,7 +187,8 @@ namespace Hermes
               else
               {
                 throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
-                return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
+                // To avoid MSVC problems; execution should never come to this point.
+                return *(new rank1());
               }
             }
             const rank1& MaterialPropertyMaps::get_nu(std::string material) const
@@ -200,7 +201,8 @@ namespace Hermes
               else
               {
                 throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
-                return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
+                // To avoid MSVC problems; execution should never come to this point.
+                return *(new rank1());
               }
             }
             const rank1& MaterialPropertyMaps::get_chi(std::string material) const
@@ -213,7 +215,8 @@ namespace Hermes
               else
               {
                 throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
-                return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
+                // To avoid MSVC problems; execution should never come to this point.
+                return *(new rank1());
               }
             }
 
@@ -441,7 +444,8 @@ namespace Hermes
               else
               {
                 throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
-                return *(new rank2()); // To avoid MSVC problems; execution should never come to this point.
+                // To avoid MSVC problems; execution should never come to this point.
+                return *(new rank2());
               }
             }
             const rank1& MaterialPropertyMaps::get_Sigma_r(std::string material) const
@@ -454,7 +458,8 @@ namespace Hermes
               else
               {
                 throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
-                return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
+                // To avoid MSVC problems; execution should never come to this point.
+                return *(new rank1());
               }
             }
             const rank1& MaterialPropertyMaps::get_D(std::string material) const
@@ -467,7 +472,8 @@ namespace Hermes
               else
               {
                 throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
-                return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
+                // To avoid MSVC problems; execution should never come to this point.
+                return *(new rank1());
               }
             }
             const rank1& MaterialPropertyMaps::get_src(std::string material) const
@@ -480,7 +486,8 @@ namespace Hermes
               else
               {
                 throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
-                return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
+                // To avoid MSVC problems; execution should never come to this point.
+                return *(new rank1());
               }
             }
 

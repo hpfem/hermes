@@ -78,7 +78,8 @@ namespace Hermes
     void Graph::add_values(int row, double x, double y)
     {
       if (!rows.size()) add_row(nullptr);
-      if (fabs(x) < Hermes::HermesSqrtEpsilon) return;  // this is to avoid problems with plotting in log-log scale
+      // this is to avoid problems with plotting in log-log scale
+      if (fabs(x) < Hermes::HermesSqrtEpsilon) return;
       // (sometimes the CPU time was zero and plotting crashed)
       if (row < 0 || row >= (int)rows.size()) throw Hermes::Exceptions::Exception("Invalid row number.");
       Values xy = { x, y };
@@ -89,7 +90,8 @@ namespace Hermes
     {
       int row = 0;
       if (!rows.size()) add_row(nullptr);
-      if (fabs(x) < Hermes::HermesSqrtEpsilon) return;  // this is to avoid problems with plotting in log-log scale
+      // this is to avoid problems with plotting in log-log scale
+      if (fabs(x) < Hermes::HermesSqrtEpsilon) return;
       // (sometimes the CPU time was zero and plotting crashed)
       Values xy = { x, y };
       rows[row].data.push_back(xy);
@@ -196,42 +198,70 @@ namespace Hermes
     static void get_style_types(std::string line, std::string mark, std::string col, int& lt, int& pt, int& ct)
     {
       if (line == "-")
-        lt = 1; // solid
+        // solid
+        lt = 1;
       else if (line == ":")
-        lt = 4; // dotted
+        // dotted
+        lt = 4;
       else if (line == "-.")
-        lt = 5; // dash dot
+        // dash dot
+        lt = 5;
       else if (line == "--")
-        lt = 2; // dashed
+        // dashed
+        lt = 2;
       else
         lt = 1;
 
-      if (mark == ".") pt = 7;  // full circle
-      else if (mark == "o") pt = 6;  // empty circle
-      else if (mark == "O") pt = 7;  // full circle
-      else if (mark == "x") pt = 2;  // cross
-      else if (mark == "+") pt = 1;  // cross
-      else if (mark == "*") pt = 3;  // star
-      else if (mark == "s") pt = 4;  // empty square
-      else if (mark == "S") pt = 5;  // full square
-      else if (mark == "d") pt = 10; // empty diamond
-      else if (mark == "D") pt = 11; // full diamond
-      else if (mark == "v") pt = 12; // empty triangle down
-      else if (mark == "V") pt = 13; // full triangle down
-      else if (mark == "^") pt = 9;  // full triangle up
-      else if (mark == "<") pt = 12; // empty triangle down
-      else if (mark == ">") pt = 8;  // empty triangle up
-      else if (mark == "p") pt = 14; // empty pentagon
-      else if (mark == "P") pt = 15; // full pentagon
+      // full circle
+      if (mark == ".") pt = 7;
+      // empty circle
+      else if (mark == "o") pt = 6;
+      // full circle
+      else if (mark == "O") pt = 7;
+      // cross
+      else if (mark == "x") pt = 2;
+      // cross
+      else if (mark == "+") pt = 1;
+      // star
+      else if (mark == "*") pt = 3;
+      // empty square
+      else if (mark == "s") pt = 4;
+      // full square
+      else if (mark == "S") pt = 5;
+      // empty diamond
+      else if (mark == "d") pt = 10;
+      // full diamond
+      else if (mark == "D") pt = 11;
+      // empty triangle down
+      else if (mark == "v") pt = 12;
+      // full triangle down
+      else if (mark == "V") pt = 13;
+      // full triangle up
+      else if (mark == "^") pt = 9;
+      // empty triangle down
+      else if (mark == "<") pt = 12;
+      // empty triangle up
+      else if (mark == ">") pt = 8;
+      // empty pentagon
+      else if (mark == "p") pt = 14;
+      // full pentagon
+      else if (mark == "P") pt = 15;
       else pt = 0;
 
-      if (col == "k") ct = -1;  // black
-      else if (col == "b") ct = 3;   // blue
-      else if (col == "g") ct = 2;   // green
-      else if (col == "c") ct = 5;   // cyan
-      else if (col == "m") ct = 4;   // magenta
-      else if (col == "y") ct = 6;   // yellow
-      else if (col == "r") ct = 1;   // red
+      // black
+      if (col == "k") ct = -1;
+      // blue
+      else if (col == "b") ct = 3;
+      // green
+      else if (col == "g") ct = 2;
+      // cyan
+      else if (col == "c") ct = 5;
+      // magenta
+      else if (col == "m") ct = 4;
+      // yellow
+      else if (col == "y") ct = 6;
+      // red
+      else if (col == "r") ct = 1;
       else ct = -1;
     }
 

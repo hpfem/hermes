@@ -50,7 +50,7 @@ namespace Hermes
     ///&nbsp;e.print_msg();
     ///&nbsp;return -1;
     /// }
-    /// 
+    ///
     /// The format specification is in hermes2d/xml_schemas/mesh_h2d_xml.xsd
     class HERMES_API MeshReaderH2DXML : public MeshReader, public Hermes::Hermes2D::Mixins::XMLParsing
     {

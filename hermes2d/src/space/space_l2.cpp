@@ -101,7 +101,8 @@ namespace Hermes
       {
         typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
         ed->bdof = this->next_dof;
-        ed->n = this->shapeset->get_num_bubbles(ed->order, e->get_mode()); //FIXME: this function might return invalid value because retrieved bubble functions for non-uniform orders might be invalid for the given order.
+//FIXME: this function might return invalid value because retrieved bubble functions for non-uniform orders might be invalid for the given order.
+        ed->n = this->shapeset->get_num_bubbles(ed->order, e->get_mode());
         this->next_dof += ed->n;
         this->bubble_functions_count += ed->n;
       }

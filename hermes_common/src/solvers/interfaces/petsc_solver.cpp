@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -248,7 +248,8 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::add_petsc_matrix(PetscMatrix<Scalar>* mat)
     {
-      MatAXPY(matrix, 1, mat->matrix, DIFFERENT_NONZERO_PATTERN);    //matrix = 1*mat + matrix (matrix and mat have different nonzero structure)
+      //matrix = 1*mat + matrix (matrix and mat have different nonzero structure)
+      MatAXPY(matrix, 1, mat->matrix, DIFFERENT_NONZERO_PATTERN);
     }
 
     template<typename Scalar>
@@ -347,7 +348,7 @@ namespace Hermes
     template<>
     std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) const
     {
-        throw(Exceptions::Exception("PETSc with complex numbers support required."));
+      throw(Exceptions::Exception("PETSc with complex numbers support required."));
     }
 #endif
 

@@ -19,7 +19,7 @@
 #include "thread_linearizer.h"
 #include "linearizer_utils.h"
 #ifndef NOGLUT
-  #include <pthread.h>
+#include <pthread.h>
 #endif
 #include "../function/solution.h"
 

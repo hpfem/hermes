@@ -1,7 +1,7 @@
 // This file is part of Hermes2D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -92,7 +92,7 @@ namespace Hermes
     {
     public:
       DefaultNormFormVol(int i, int j, NormType normType);
-      
+
       Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomVol<double> *e) const;
 
     protected:
@@ -104,7 +104,7 @@ namespace Hermes
     {
     public:
       DefaultNormFormSurf(int i, int j, NormType normType);
-      
+
       Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomSurf<double> *e) const;
 
     protected:
@@ -118,14 +118,14 @@ namespace Hermes
       MatrixDefaultNormFormVol(int i, int j, NormType normType);
 
       Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-                           Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const;
+        Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const;
 
       Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                      GeomVol<Ord> *e, Func<Ord> **ext) const;
-    
+        GeomVol<Ord> *e, Func<Ord> **ext) const;
+
       MatrixFormVol<Scalar>* clone() const;
 
-      protected:
+    protected:
       NormType normType;
     };
 
@@ -138,10 +138,10 @@ namespace Hermes
       Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const;
 
       Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, GeomVol<Ord> *e, Func<Ord> **ext) const;
-    
+
       VectorFormVol<Scalar>* clone() const;
 
-      protected:
+    protected:
       NormType normType;
     };
   }

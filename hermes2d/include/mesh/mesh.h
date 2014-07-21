@@ -165,7 +165,7 @@ namespace Hermes
       /// should be refined uniformly, 1 if it is a quad and should be split
       /// horizontally, 2 if it is a quad and should be split vertically,
       /// and 3 if it is a triangle and should be split into three quads.
-      void refine_by_criterion(int (*criterion)(Element* e), int depth = 1, bool mark_as_initial = false);
+      void refine_by_criterion(int(*criterion)(Element* e), int depth = 1, bool mark_as_initial = false);
 
       /// Performs repeated refinements of elements containing the given vertex.
       /// A mesh graded towards the vertex is created.
@@ -496,7 +496,6 @@ namespace Hermes
       /// \param[in] markers The markers
       /// \param[in] n_element_guess(optional) Approximate number of elements that will be in this method. Used as an allocation hint. -1 for not-known.
       static void get_egg_shell_structures(MeshSharedPtr target_mesh, std::vector<std::string> markers, unsigned int levels);
-
 
       /// Internal.
       /// Handle vertices.

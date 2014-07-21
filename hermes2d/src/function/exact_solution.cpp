@@ -128,8 +128,6 @@ namespace Hermes
       dy = 0;
     };
 
-
-
     template<typename Scalar>
     ExactSolutionVector<Scalar>::ExactSolutionVector(MeshSharedPtr mesh) : ExactSolution<Scalar>(mesh)
     {
@@ -341,7 +339,6 @@ namespace Hermes
     Ord ZeroSolution<Scalar>::ord(double x, double y) const {
       return Ord(0);
     }
-
 
     template<>
     void ConstantSolutionVector<double>::save(const char* filename) const

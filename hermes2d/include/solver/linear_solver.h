@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -38,13 +38,16 @@ namespace Hermes
     /// // Solve the linear problem.<br>
     /// try<br>
     /// {<br>
-    ///&nbsp;// Just call solve().<br>
+    // Just call solve().<br>
+    ///&nbsp;
     ///&nbsp;linear_solver.solve();<br>
     /// <br>
-    ///&nbsp;// Get the solution vector from the solver.<br>
+    // Get the solution vector from the solver.<br>
+    ///&nbsp;
     ///&nbsp;double* sln_vector = linear_solver.get_sln_vector();<br>
     /// <br>
-    ///&nbsp;// Translate the solution vector into the previously initialized Solution<double> using the static method vector_to_solution.<br>
+    // Translate the solution vector into the previously initialized Solution<double> using the static method vector_to_solution.<br>
+    ///&nbsp;
     ///&nbsp;Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);<br>
     /// }<br>
     /// // All kinds of Exceptions may happen (Linear algebraic solver, some bad parameters, some data not initialized...)<br>

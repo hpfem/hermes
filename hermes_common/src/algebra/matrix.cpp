@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -152,7 +152,7 @@ namespace Hermes
         for (unsigned int i = 0; i < this->size; i++)
           delete next_pages[i];
         free_with_check(next_pages);
-      } 
+      }
     }
 
     template<typename Scalar>
@@ -464,7 +464,6 @@ namespace Hermes
       }
       return nullptr;
     }
-
 
     template class Matrix<double>;
     template class Matrix<std::complex<double> >;

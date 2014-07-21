@@ -19,11 +19,11 @@
 #include "space.h"
 namespace Hermes
 {
-	namespace Hermes2D
-	{
-		/// @ingroup spaces
-		/// HcurlSpace represents a space of vector functions with continuous tangent<br>
-		/// components over a domain (mesh).<br>
+  namespace Hermes2D
+  {
+    /// @ingroup spaces
+    /// HcurlSpace represents a space of vector functions with continuous tangent<br>
+    /// components over a domain (mesh).<br>
     /// Typical usage:<br>
     /// ...<br>
     /// Hermes::Hermes2D::EssentialBCs<std::complex<double> > bcs(&bc_essential1, &bc_essential2, ...);<br>
@@ -31,42 +31,42 @@ namespace Hermes
     /// // Initialize space.<br>
     /// int globalPolynomialOrder = 4;<br>
     /// Hermes::Hermes2D::HcurlSpace<std::complex<double> > space(&mesh, &bcs, globalPolynomialOrder);<br>
-		template<typename Scalar>
-		class HERMES_API HcurlSpace : public Space<Scalar>
-		{
-		public:
-			HcurlSpace();
-			HcurlSpace(MeshSharedPtr mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
-				Shapeset* shapeset = nullptr);
+    template<typename Scalar>
+    class HERMES_API HcurlSpace : public Space<Scalar>
+    {
+    public:
+      HcurlSpace();
+      HcurlSpace(MeshSharedPtr mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
+        Shapeset* shapeset = nullptr);
 
-			HcurlSpace(MeshSharedPtr mesh, int p_init = 1,
-				Shapeset* shapeset = nullptr);
+      HcurlSpace(MeshSharedPtr mesh, int p_init = 1,
+        Shapeset* shapeset = nullptr);
 
-			virtual ~HcurlSpace();
+      virtual ~HcurlSpace();
 
       virtual void set_shapeset(Shapeset* shapeset, bool clone = false);
 
-			virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc);
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc);
 
-			/// Copy from Space instance 'space'
-			virtual void copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh);
-		protected:
+      /// Copy from Space instance 'space'
+      virtual void copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh);
+    protected:
 
-			virtual SpaceType get_type() const { return HERMES_HCURL_SPACE; }
+      virtual SpaceType get_type() const { return HERMES_HCURL_SPACE; }
 
-			/// Common code for the constructors.
+      /// Common code for the constructors.
       void init(Shapeset* shapeset, int p_init, bool assign_dofs_init = true);
 
-			virtual void assign_vertex_dofs() {}
-			virtual void assign_edge_dofs();
-			virtual void assign_bubble_dofs();
+      virtual void assign_vertex_dofs() {}
+      virtual void assign_edge_dofs();
+      virtual void assign_bubble_dofs();
 
-			virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const {}
-			virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
+      virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const {}
+      virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
 
       void update_constrained_nodes(Element* e, typename Space<Scalar>::EdgeInfo* ei0, typename Space<Scalar>::EdgeInfo* ei1, typename Space<Scalar>::EdgeInfo* ei2, typename Space<Scalar>::EdgeInfo* ei3);
-			virtual void update_constraints();
-		};
-	}
+      virtual void update_constraints();
+    };
+  }
 }
 #endif

@@ -1,7 +1,7 @@
 // This file is part of Hermes2D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -37,8 +37,8 @@ namespace Hermes
     /// Enumeration of potential keys in the Api2D::parameters storage.
     enum Hermes2DApiParam
     {
-			xmlSchemasDirPath,
-			precalculatedFormsDirPath
+      xmlSchemasDirPath,
+      precalculatedFormsDirPath
     };
 
     /// API Class containing settings for the whole Hermes2D.
@@ -50,7 +50,7 @@ namespace Hermes
     protected:
       /// Parameter class, representing one parameter.
       /// Its identifier is a string identifier according to which, the instance is inserted into Api2D::parameters.
-			template<typename T>
+      template<typename T>
       class HERMES_API Parameter
       {
       public:
@@ -67,18 +67,18 @@ namespace Hermes
       /// This storage is not optimized for speed, but for comfort of users.
       /// There should not be any parameters, values of which are sought very often, because of the above reason.
 
-			std::map<Hermes2DApiParam, Parameter<int>*> integral_parameters;
+      std::map<Hermes2DApiParam, Parameter<int>*> integral_parameters;
       std::map<Hermes2DApiParam, Parameter<std::string>*> text_parameters;
     public:
-			int get_integral_param_value(Hermes2DApiParam);
+      int get_integral_param_value(Hermes2DApiParam);
       std::string get_text_param_value(Hermes2DApiParam);
 
-			void set_integral_param_value(Hermes2DApiParam, int value);
-			void set_text_param_value(Hermes2DApiParam, std::string value);
-		private:
+      void set_integral_param_value(Hermes2DApiParam, int value);
+      void set_text_param_value(Hermes2DApiParam, std::string value);
+    private:
 
-			friend class Mesh;
-			friend class MeshReaderH2DXML;
+      friend class Mesh;
+      friend class MeshReaderH2DXML;
       template<typename T1> friend class Space;
       template<typename T1> friend class Solution;
     };

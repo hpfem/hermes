@@ -88,7 +88,8 @@ namespace Hermes
 
         int  create();
         void close();
-        void refresh(); ///< Refreshes views
+        /// Refreshes views
+        void refresh();
 
         /// Returns the title.
         const char* get_title() const;
@@ -116,25 +117,35 @@ namespace Hermes
         void set_num_palette_steps(int num);
         void set_palette_filter(bool linear);
 
-        static void wait_for_keypress(const char* text = nullptr); ///< Waits for keypress. Deprecated.
+        /// Waits for keypress. Deprecated.
+        static void wait_for_keypress(const char* text = nullptr);
         void wait_for_close();
         void wait_for_draw();
 
-        static void wait(const char* text); ///< Closes all views at once.
-        static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = nullptr); ///< Waits for an event.
+        /// Closes all views at once.
+        static void wait(const char* text);
+        /// Waits for an event.
+        static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = nullptr);
         void draw_help();
-        virtual void reset_view(bool force_reset); ///< Resets view based on the axis-aligned bounding box of the mesh. Assumes that the bounding box is set up. Does not reset if view_not_reset is false.
+        /// Resets view based on the axis-aligned bounding box of the mesh. Assumes that the bounding box is set up. Does not reset if view_not_reset is false.
+        virtual void reset_view(bool force_reset);
 
       protected: //FPS measurement
 #define FPS_FRAME_SIZE 5
-        double rendering_frames[FPS_FRAME_SIZE]; ///< time spend in rendering of frames[in ms]
-        int rendering_frames_top; ///< the new_ location of the next FPS
-        void draw_fps(); ///< draws current FPS
-        static double get_tick_count(); ///< returns a current time[in ms]
+        /// time spend in rendering of frames[in ms]
+        double rendering_frames[FPS_FRAME_SIZE];
+        /// the new_ location of the next FPS
+        int rendering_frames_top;
+        /// draws current FPS
+        void draw_fps();
+        /// returns a current time[in ms]
+        static double get_tick_count();
 
       protected: //view
-        bool view_not_reset; ///< True if the view was not reset and therefore it has to be.
-        double vertices_min_x, vertices_max_x, vertices_min_y, vertices_max_y; ///< AABB of shown mesh
+        /// True if the view was not reset and therefore it has to be.
+        bool view_not_reset;
+        /// AABB of shown mesh
+        double vertices_min_x, vertices_max_x, vertices_min_y, vertices_max_y;
         double scale, log_scale, trans_x, trans_y;
         double center_x, center_y;
         int margin, lspace, rspace;
@@ -161,7 +172,8 @@ namespace Hermes
         virtual void on_entry(int state) {}
         virtual void on_close();
 
-        virtual void update_layout(); ///< Updates layout, i.e., centers mesh.
+        /// Updates layout, i.e., centers mesh.
+        virtual void update_layout();
 
       protected:
         std::string title;
@@ -190,16 +202,20 @@ namespace Hermes
         std::string screenshot_filename;
 
       protected: //palette
-        unsigned int gl_pallete_tex_id; ///< OpenGL texture object ID
+        /// OpenGL texture object ID
+        unsigned int gl_pallete_tex_id;
 
-        void create_gl_palette(); ///< Creates pallete texture in OpenGL. Assumes that view_sync is locked.
-        virtual void get_palette_color(double x, float* gl_color); ///< Fills gl_color with palette color. Assumes that gl_color points to a vector of three components (RGB).
+        /// Creates pallete texture in OpenGL. Assumes that view_sync is locked.
+        void create_gl_palette();
+        /// Fills gl_color with palette color. Assumes that gl_color points to a vector of three components (RGB).
+        virtual void get_palette_color(double x, float* gl_color);
 
       protected: //internal functions
         inline double untransform_x(double x) { return (x - center_x - trans_x) / scale; }
         inline double untransform_y(double y) { return (center_y - y - trans_y) / scale; }
 
-        virtual void clear_background(); ///< Clears background.
+        /// Clears background.
+        virtual void clear_background();
         void pre_display();
         void display_antialiased();
 

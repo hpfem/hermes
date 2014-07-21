@@ -19,7 +19,7 @@
 #include "../space/space.h"
 #include "global.h"
 #ifndef NOGLUT
-  #include <pthread.h>
+#include <pthread.h>
 #endif
 #include "../quadrature/quad_all.h"
 #include "../mesh/traverse.h"
@@ -81,8 +81,10 @@ namespace Hermes
 #ifndef NOGLUT
         mutable pthread_mutex_t data_mutex;
 #endif
-        int2* edges;     ///< edges: pairs of vertex indices
-        int* edge_markers;     ///< edge_markers: edge markers, ordering equal to edges
+        /// edges: pairs of vertex indices
+        int2* edges;
+        /// edge_markers: edge markers, ordering equal to edges
+        int* edge_markers;
         void add_edge(int iv1, int iv2, int marker);
 
         /// Reallocation at the beginning of process_*.
@@ -92,22 +94,27 @@ namespace Hermes
         char  buffer[1000];
         char* labels[11][11];
 
-        double3* verts;  ///< vertices: (x, y, value) triplets
+        /// vertices: (x, y, value) triplets
+        double3* verts;
         int  label_size, label_count;
         int* lvert;
         char** ltext;
         double2* lbox;
 
-        int3* tris;      ///< triangles: vertex index triplets
-        int* tri_markers;///< triangle_markers: triangle markers, ordering equal to tris
+        /// triangles: vertex index triplets
+        int3* tris;
+        /// triangle_markers: triangle markers, ordering equal to tris
+        int* tri_markers;
 
-        int vertex_count, triangle_count, edges_count; ///< Real numbers of vertices, triangles and edges
-        int vertex_size, triangle_size, edges_size; ///< Size of arrays of vertices, triangles and edges
+        /// Real numbers of vertices, triangles and edges
+        int vertex_count, triangle_count, edges_count;
+        /// Size of arrays of vertices, triangles and edges
+        int vertex_size, triangle_size, edges_size;
 
         void add_triangle(int iv0, int iv1, int iv2, int marker);
 
         static void calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y);
-        
+
         int add_vertex();
 
         void make_vert(int & index, double x, double y, double val);

@@ -43,7 +43,8 @@ namespace Hermes
   class Array
   {
   protected:
-    TYPE** pages; ///< \todo standard array for maximum access speed
+    /// \todo standard array for maximum access speed
+    TYPE** pages;
     int* unused;
     unsigned int  page_count, size, nitems, unused_size, nunused;
     bool append_only;
@@ -279,7 +280,6 @@ namespace Hermes
 
     TYPE& get(int id) const { return pages[id >> HERMES_PAGE_BITS][id & HERMES_PAGE_MASK]; }
     TYPE& operator[] (int id) const { return get(id); }
-
   };
 
   /// \brief A light version of the array.
@@ -385,7 +385,6 @@ namespace Hermes
     {
       return pages[id >> page_bits][id & page_mask];
     }
-
   };
 }
 #endif

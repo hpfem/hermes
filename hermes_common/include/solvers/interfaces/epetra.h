@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -77,11 +77,11 @@ namespace Hermes
       virtual void add(unsigned int m, unsigned int n, Scalar v);
       virtual void multiply_with_vector(Scalar* vector_in, Scalar*& vector_out, bool vector_out_initialized = false) const;
       virtual void multiply_with_Scalar(Scalar value);
-      
+
       virtual void add_sparse_matrix(SparseMatrix<Scalar>* mat);
 
       EpetraMatrix* duplicate() { return new EpetraMatrix<Scalar>(*this); }
-      
+
       virtual void add(unsigned int m, unsigned int n, Scalar *mat, int *rows, int *cols, const int size);
       using Matrix<Scalar>::export_to_file;
       virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
@@ -95,7 +95,7 @@ namespace Hermes
       Epetra_CrsGraph *grph;
       /// \brief Imaginary part of the matrix, mat holds the real part.
       Epetra_CrsMatrix *mat_im;
-            
+
       bool owner;
 
       friend class Hermes::Solvers::AmesosSolver<Scalar>;

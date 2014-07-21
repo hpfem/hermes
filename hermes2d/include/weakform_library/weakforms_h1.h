@@ -93,7 +93,7 @@ namespace Hermes
         GeomType gt;
       };
 
-       template<typename Scalar>
+      template<typename Scalar>
       class HERMES_API DefaultMatrixFormDiffusion : public MatrixFormVol<Scalar>
       {
       public:

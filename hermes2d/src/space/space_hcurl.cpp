@@ -183,7 +183,8 @@ namespace Hermes
         int ori = part < 0 ? 1 : 0;
         if (part < 0) part ^= ~0;
 
-        nd = &this->ndata[nd->base->id]; // ccc
+        // ccc
+        nd = &this->ndata[nd->base->id];
         for (int j = 0, dof = nd->dof; j < nd->n; j++, dof++)
           al->add_triplet(this->shapeset->get_constrained_edge_index(surf_num, j, ori, part, e->get_mode()), dof, 1.0);
       }

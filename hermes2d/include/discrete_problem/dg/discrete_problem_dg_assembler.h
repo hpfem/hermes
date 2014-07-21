@@ -42,7 +42,7 @@ namespace Hermes
     public:
       /// Constructor copying data from DiscreteProblemThreadAssembler.
       DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshSharedPtr>& meshes);
-      
+
       /// Destructor.
       ~DiscreteProblemDGAssembler();
 
@@ -97,7 +97,7 @@ namespace Hermes
 
       SparseMatrix<Scalar>* current_mat;
       Vector<Scalar>* current_rhs;
-      
+
       Traverse::State* current_state;
       /// Current local matrix.
       Scalar local_stiffness_matrix[H2D_MAX_LOCAL_BASIS_SIZE * H2D_MAX_LOCAL_BASIS_SIZE * 4];

@@ -85,7 +85,6 @@ namespace Hermes
       };
     };
 
-
     /// @ingroup meshFunctions.
     /// Serves for postprocessing of element-wise constant values (such as the error in adaptivity).
     /// The second template parameter ValueType must be a type castable to Scalar.
@@ -120,7 +119,6 @@ namespace Hermes
 
       template<typename T> friend class Solution;
     };
-
 
     /// @ingroup meshFunctions
     template<typename Scalar>

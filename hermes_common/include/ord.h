@@ -71,7 +71,7 @@ namespace Hermes
     bool operator>(std::complex<double> d);
     bool operator<(const Ord &o);
     bool operator>(const Ord &o);
-    
+
     friend std::ostream & operator<< (std::ostream& os, const Ord& ord)
     {
       os << "Integration order: " << ord.get_order() << std::endl;

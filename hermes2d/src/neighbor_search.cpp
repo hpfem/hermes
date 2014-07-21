@@ -249,8 +249,10 @@ namespace Hermes
           {
             neighborhood_type = H2D_DG_GO_DOWN;
 
-            int sons[Transformations::max_level]; // array of virtual sons of the central el. visited on the way down to the neighbor
-            int n_sons = 0; // number of used transformations
+            // array of virtual sons of the central el. visited on the way down to the neighbor
+            int sons[Transformations::max_level];
+            // number of used transformations
+            int n_sons = 0;
 
             // Start the search by going down to the first son.
             find_act_elem_down(vertex, orig_vertex_id, sons, n_sons + 1);
@@ -437,7 +439,7 @@ namespace Hermes
       std::vector<unsigned int> neighbors_not_to_be_deleted;
 
       std::vector<unsigned int> updated_transformations;
-      for(unsigned short i = 0; i < transformations.size(); i++)
+      for (unsigned short i = 0; i < transformations.size(); i++)
       {
         if (!((active_edge == 0 && transformations[i] == 4) || (active_edge == 1 && transformations[i] == 7) || (active_edge == 2 && transformations[i] == 5) || (active_edge == 3 && transformations[i] == 6)))
         {
@@ -558,7 +560,7 @@ namespace Hermes
       std::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
 
       std::vector<unsigned int> updated_transformations;
-      for(unsigned short i = 0; i < transformations.size(); i++)
+      for (unsigned short i = 0; i < transformations.size(); i++)
       {
         if (!((active_edge == 0 && transformations[i] == 4) || (active_edge == 1 && transformations[i] == 7) || (active_edge == 2 && transformations[i] == 5) || (active_edge == 3 && transformations[i] == 6)))
         {
@@ -722,7 +724,8 @@ namespace Hermes
           // Get a pointer to the active neighbor element.
           if ((edge->elem[i] != nullptr) && (edge->elem[i]->active == 1))
           {
-            neighb_el = edge->elem[i];  //debug_log("way up neighbor: %d", neighb_el->id);
+            //debug_log("way up neighbor: %d", neighb_el->id);
+            neighb_el = edge->elem[i];
 
             // Get local number of the edge used by the neighbor.
             neighbor_edge.local_num_of_edge = -1;
@@ -733,7 +736,6 @@ namespace Hermes
               break;
             }
             if (neighbor_edge.local_num_of_edge == -1) throw Hermes::Exceptions::Exception("Neighbor edge wasn't found");
-
 
             // Add to the array of neighbor_transformations one that transforms central el. to its parent completely
             // adjacent to the single big neighbor.
@@ -761,7 +763,6 @@ namespace Hermes
                 if (n->id == par_mid_vertices[j - 1]->id)
                 {
                   neighbor_transforms->transf[n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->get_nvert();
-                  /// \todo This is never used. Why?
                   p2 = par_mid_vertices[j]->id;
                 }
                 else
@@ -799,7 +800,8 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::find_act_elem_down(Node* vertex, int* bounding_verts_id, int* sons, unsigned int n_sons)
     {
-      int mid_vert = vertex->id; // ID of vertex in between vertices from par_vertex_id.
+      // ID of vertex in between vertices from par_vertex_id.
+      int mid_vert = vertex->id;
       int bnd_verts[2];
       bnd_verts[0] = bounding_verts_id[0];
       bnd_verts[1] = bounding_verts_id[1];
@@ -840,7 +842,8 @@ namespace Hermes
           {
             if ((edge->elem[j] != nullptr) && (edge->elem[j]->active == 1))
             {
-              neighb_el = mesh->get_element(edge->elem[j]->id);  //debug_log("way down neighbor: %d", edge->elem[j]->id);
+              //debug_log("way down neighbor: %d", edge->elem[j]->id);
+              neighb_el = mesh->get_element(edge->elem[j]->id);
 
               // Get local number of the edge used by the neighbor.
               neighbor_edge.local_num_of_edge = -1;
@@ -886,13 +889,15 @@ namespace Hermes
       {
         // neighbor edge goes from parent1 to middle vertex
         if (neighb_el->vn[neighbor_edge.local_num_of_edge]->id != bounding_vert1)
-          return true; // orientation reversed
+          // orientation reversed
+          return true;
       }
       else
       {
         // neighbor edge goes from middle vertex to parent2
         if (neighb_el->vn[neighbor_edge.local_num_of_edge]->id == bounding_vert2)
-          return true; // orientation reversed
+          // orientation reversed
+          return true;
       }
       return false;
     }

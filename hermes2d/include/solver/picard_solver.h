@@ -1,7 +1,7 @@
 // This file is part of Hermes2D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -32,7 +32,7 @@ namespace Hermes
     /// @ingroup userSolvingAPI
     /// Class for the Picard's method.<br>
     /// For details about the optionally applied Anderson acceleration, the following website<br>
-    /// http://hpfem.org/hermes/hermes-tutorial/doc/_build/html/src/hermes2d/B-nonlinear/01-picard.html
+    /// http://www.hpfem.org/hermes/hermes-tutorial/doc/_build/html/src/hermes2d/B-nonlinear/01-picard.html
     /// will give an overview.<br>
     /// Typical usage:<br>
     /// // Initialize Picard's solver.<br>
@@ -47,13 +47,16 @@ namespace Hermes
     /// // Solve the linear problem.<br>
     /// try<br>
     /// {<br>
-    ///&nbsp;// Call solve with the initial guess.<br>
+    // Call solve with the initial guess.<br>
+    ///&nbsp;
     ///&nbsp;picard_solver.solve(&prevTimeLevelSolution);<br>
     /// <br>
-    ///&nbsp;// Get the solution vector from the solver.<br>
+    // Get the solution vector from the solver.<br>
+    ///&nbsp;
     ///&nbsp;std::complex<double> * sln_vector = picard_solver.get_sln_vector();<br>
     /// <br>
-    ///&nbsp;// Translate the solution vector into the previously initialized Solution<std::complex<double> > using the static method vector_to_solution.<br>
+    // Translate the solution vector into the previously initialized Solution<std::complex<double> > using the static method vector_to_solution.<br>
+    ///&nbsp;
     ///&nbsp;Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(sln_vector, &space, &sln);<br>
     /// }<br>
     /// // All kinds of Exceptions may happen (Linear algebraic solver, some bad parameters, some data not initialized...)<br>

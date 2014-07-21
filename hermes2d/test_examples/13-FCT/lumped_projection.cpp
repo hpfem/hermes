@@ -17,7 +17,8 @@ void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakFormS
   double* coeff_vec =nullptr; 
   if(mat==nullptr) 		//=> masslumping	
   {
-    CSCMatrix<double>* lumped_matrix = new CSCMatrix<double>;   //M_L 
+//M_L 
+    CSCMatrix<double>* lumped_matrix = new CSCMatrix<double>;
     dp->assemble(matrix, rhs);  		 
     int size = matrix->get_size();
     double* diag = new double[size];

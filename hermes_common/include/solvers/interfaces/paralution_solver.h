@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -19,7 +19,7 @@
 /*! \file paralution_solver.h
 \brief PARALUTION solver interface.
 */
-#ifndef __HERMES_COMMON_PARALUTION_SOLVER_H_ 
+#ifndef __HERMES_COMMON_PARALUTION_SOLVER_H_
 #define __HERMES_COMMON_PARALUTION_SOLVER_H_
 #include "config.h"
 #ifdef WITH_PARALUTION
@@ -212,7 +212,6 @@ namespace Hermes
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver);
       template<typename T> friend class AMGParalutionLinearMatrixSolver;
     };
-
 
     /// \brief Encapsulation of PARALUTION iterative linear solver.
     ///

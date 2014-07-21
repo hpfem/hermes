@@ -1,7 +1,7 @@
 // This file is part of Hermes2D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -26,8 +26,8 @@
 #include "matrix.h"
 #include "solvers/interfaces/paralution_solver.h"
 #if defined __GNUC__ && defined HAVE_BFD
-  #include <signal.h>
-  #include "third_party/backtrace.c"
+#include <signal.h>
+#include "third_party/backtrace.c"
 #endif
 namespace Hermes
 {
@@ -70,7 +70,7 @@ namespace Hermes
 #ifdef _DEBUG
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::showInternalWarnings, new Parameter(1)));
 #else
-    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::showInternalWarnings, new Parameter(0)));
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::showInternalWarnings, new Parameter(0)));
 #endif
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::useAccelerators, new Parameter(1)));
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*>(Hermes::checkMeshesOnLoad, new Parameter(1)));

@@ -38,7 +38,7 @@ namespace Hermes
 #endif
 
     static unsigned short* g_order_table_quad = default_order_table_quad;
-    static unsigned short* g_order_table_tri  = default_order_table_tri;
+    static unsigned short* g_order_table_tri = default_order_table_tri;
     static bool warned_order = false;
 
     HERMES_API unsigned short  g_max_order;
@@ -46,9 +46,9 @@ namespace Hermes
 
     HERMES_API void set_order_limit_table(unsigned short* tri_table, unsigned short* quad_table, unsigned short n)
     {
-      if(n < 24)
+      if (n < 24)
         throw Hermes::Exceptions::Exception("Hermes::Order limit tables must have at least 24 entries.");
-      g_order_table_tri  = tri_table;
+      g_order_table_tri = tri_table;
       g_order_table_quad = quad_table;
     }
 
@@ -65,17 +65,17 @@ namespace Hermes
 
     HERMES_API void warn_order()
     {
-      if(HermesCommonApi.get_integral_param_value(Hermes::showInternalWarnings))
-        if(!warned_order)
+      if (HermesCommonApi.get_integral_param_value(Hermes::showInternalWarnings))
+      if (!warned_order)
+      {
+#pragma omp critical (warn_oder)
+        if (!warned_order)
         {
-  #pragma omp critical (warn_oder)
-          if(!warned_order)
-          {
-            /// \todo Fix this, so that it complies with the rest of the code.
-            Hermes::Mixins::Loggable::Static::warn("Warning: Not enough integration rules for exact integration.");
-            warned_order = true;
-          }
+          /// \todo Fix this, so that it complies with the rest of the code.
+          Hermes::Mixins::Loggable::Static::warn("Warning: Not enough integration rules for exact integration.");
+          warned_order = true;
         }
+      }
     }
 
     HERMES_API void limit_order(int& o, ElementMode2D mode)
@@ -85,7 +85,7 @@ namespace Hermes
         o = g_quad_2d_std.get_safe_max_order(mode);
         warn_order();
       }
-      if(mode == HERMES_MODE_TRIANGLE)
+      if (mode == HERMES_MODE_TRIANGLE)
         o = g_order_table_tri[o];
       else
         o = g_order_table_quad[o];
@@ -93,9 +93,9 @@ namespace Hermes
 
     HERMES_API void limit_order_nowarn(int& o, ElementMode2D mode)
     {
-      if(o > g_quad_2d_std.get_safe_max_order(mode))
+      if (o > g_quad_2d_std.get_safe_max_order(mode))
         o = g_quad_2d_std.get_safe_max_order(mode);
-      if(mode == HERMES_MODE_TRIANGLE)
+      if (mode == HERMES_MODE_TRIANGLE)
         o = g_order_table_tri[o];
       else
         o = g_order_table_quad[o];

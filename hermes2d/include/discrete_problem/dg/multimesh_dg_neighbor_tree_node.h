@@ -11,7 +11,7 @@
 /// GNU General Public License for more details.
 ///
 /// You should have received a copy of the GNU General Public License
-/// along with Hermes2D. If not, see <http:///www.gnu.org/licenses/>.
+/// along with Hermes2D. If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef __H2D_MULTIMESH_DG_NEIGHBOR_TREE_NODE_H
 #define __H2D_MULTIMESH_DG_NEIGHBOR_TREE_NODE_H

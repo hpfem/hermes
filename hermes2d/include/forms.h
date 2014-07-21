@@ -33,8 +33,6 @@ namespace Hermes
       "Neighboring elements are not defined and so are not function traces on their interface. "
       "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
 
-
-
 #pragma region Geometry
 
     /// Geometry (coordinates, normals, tangents) of either an element or an edge.
@@ -76,7 +74,7 @@ namespace Hermes
       T ny[H2D_MAX_INTEGRATION_POINTS_COUNT];
       T tx[H2D_MAX_INTEGRATION_POINTS_COUNT];
       T ty[H2D_MAX_INTEGRATION_POINTS_COUNT];
-      
+
       /// Internal number of an edge of the element.
       unsigned char isurf;
 
@@ -306,7 +304,6 @@ namespace Hermes
       void subtract(Func<Ord>* func);
     };
 
-
     /// @ingroup inner
     /** \class DiscontinuousFunc forms.h "src/form/forms.h"
     *  \brief This class represents a function with jump discontinuity on an interface of two elements.
@@ -325,13 +322,19 @@ namespace Hermes
     class HERMES_API DiscontinuousFunc : public Func<T>
     {
     public:
-      Func<T> *fn_central;        ///< Central element's component.
-      Func<T> *fn_neighbor;       ///< Neighbor element's component.
+      /// Central element's component.
+      Func<T> *fn_central;
+      /// Neighbor element's component.
+      Func<T> *fn_neighbor;
 
-      T *val;              ///< Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
-      T *dx, *dy; ///< First-order partial derivatives.
-      T *val_neighbor;              ///< Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
-      T *dx_neighbor, *dy_neighbor; ///< First-order partial derivatives.
+      /// Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
+      T *val;
+      /// First-order partial derivatives.
+      T *dx, *dy;
+      /// Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
+      T *val_neighbor;
+      /// First-order partial derivatives.
+      T *dx_neighbor, *dy_neighbor;
 
       /// One-component constructor.
       ///
@@ -355,17 +358,21 @@ namespace Hermes
       using Func<T>::subtract;
       void subtract(const DiscontinuousFunc<T>& func);
 
-      bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
+      /// True if values from the neighbor have to be retrieved in reverse order
+      bool reverse_neighbor_side;
       ///< (when retrieving values on an edge that is oriented differently in both elements).
-      static T zero;              ///< Zero value used for the zero-extension.
+      /// Zero value used for the zero-extension.
+      static T zero;
     };
 
     template<>
     class HERMES_API DiscontinuousFunc<Ord> : public Func<Ord>
     {
     public:
-      Func<Ord> *fn_central;        ///< Central element's component.
-      Func<Ord> *fn_neighbor;       ///< Neighbor element's component.
+      /// Central element's component.
+      Func<Ord> *fn_central;
+      /// Neighbor element's component.
+      Func<Ord> *fn_neighbor;
 
       Ord val;
       Ord dx, dy;
@@ -391,9 +398,11 @@ namespace Hermes
       using Func<Ord>::subtract;
       void subtract(const DiscontinuousFunc<Ord>& func);
 
-      bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
+      /// True if values from the neighbor have to be retrieved in reverse order
+      bool reverse_neighbor_side;
       ///< (when retrieving values on an edge that is oriented differently in both elements).
-      static Ord zero;              ///< Zero value used for the zero-extension.
+      /// Zero value used for the zero-extension.
+      static Ord zero;
     };
 
     /// Init the shape function for the evaluation of the volumetric/surface integral (transformation of values).
@@ -401,7 +410,6 @@ namespace Hermes
     /// Init the mesh-function for the evaluation of the volumetric/surface integral.
     template<typename Scalar>
     HERMES_API Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order);
-
 
     /// Preallocate the Func (all we need is np & nc).
     template<typename Scalar>
@@ -415,7 +423,6 @@ namespace Hermes
     /// Init UExt function - preallocated version.
     template<typename Scalar>
     HERMES_API void init_fn_preallocated(Func<Scalar>* u, UExtFunction<Scalar>* fu, Func<Scalar>** ext, Func<Scalar>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
-
 
     /// Utilities follow
     /// Init zero function

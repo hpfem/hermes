@@ -109,7 +109,7 @@ namespace Hermes
     }
 
     template<typename Real, typename Scalar, typename Geom>
-    Scalar int_F_v(int n, double *wt, Real (*F)(Real x, Real y), Func<Real> *v, Geom *e)
+    Scalar int_F_v(int n, double *wt, Real(*F)(Real x, Real y), Func<Real> *v, Geom *e)
     {
       Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
@@ -302,26 +302,26 @@ namespace Hermes
 #define h1_integrate_expression(exp) \
     {double3* pt = quad->get_points(o, ru->get_active_element()->get_mode()); \
     unsigned char np = quad->get_num_points(o, ru->get_active_element()->get_mode()); \
-    if(ru->is_jacobian_const()){ \
+    if (ru->is_jacobian_const()){    \
     for (int i = 0; i < np; i++) \
     result += pt[i][2] * (exp); \
     result *= ru->get_const_jacobian(); \
     } \
-  else { \
-  double* jac = ru->get_jacobian(o); \
-  for (int i = 0; i < np; i++) \
-  result += pt[i][2] * jac[i] * (exp); \
+    else {      \
+      double* jac = ru->get_jacobian(o); \
+    for (int i = 0; i < np; i++) \
+    result += pt[i][2] * jac[i] * (exp); \
     }}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    template<typename Scalar>
+      template<typename Scalar>
     inline double int_h1_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
     {
       Quad2D* quad = fu->get_quad_2d();
       assert(quad == fv->get_quad_2d());
 
-      int o = std::max(2*fu->get_fn_order(), 2*fv->get_fn_order()) + ru->get_inv_ref_order();
+      int o = std::max(2 * fu->get_fn_order(), 2 * fv->get_fn_order()) + ru->get_inv_ref_order();
       limit_order(o, ru->get_active_element()->get_mode());
       fu->set_quad_order(o);
       fv->set_quad_order(o);
@@ -344,7 +344,7 @@ namespace Hermes
       Quad2D* quad = fu->get_quad_2d();
       assert(quad == fv->get_quad_2d());
 
-      int o = std::max(2*fu->get_fn_order(), 2*fv->get_fn_order()) + ru->get_inv_ref_order();
+      int o = std::max(2 * fu->get_fn_order(), 2 * fv->get_fn_order()) + ru->get_inv_ref_order();
       limit_order(o, ru->get_active_element()->get_mode());
       fu->set_quad_order(o);
       fv->set_quad_order(o);
@@ -367,7 +367,7 @@ namespace Hermes
       Quad2D* quad = fu->get_quad_2d();
       assert(quad == fv->get_quad_2d());
 
-      int o = std::max(2*fu->get_fn_order(), 2*fv->get_fn_order()) + ru->get_inv_ref_order();
+      int o = std::max(2 * fu->get_fn_order(), 2 * fv->get_fn_order()) + ru->get_inv_ref_order();
       limit_order(o, ru->get_active_element()->get_mode());
       fu->set_quad_order(o, H2D_FN_VAL);
       fv->set_quad_order(o, H2D_FN_VAL);
@@ -386,7 +386,7 @@ namespace Hermes
       Quad2D* quad = fu->get_quad_2d();
       assert(quad == fv->get_quad_2d());
 
-      int o = std::max(2*fu->get_fn_order(), 2*fv->get_fn_order()) + ru->get_inv_ref_order();
+      int o = std::max(2 * fu->get_fn_order(), 2 * fv->get_fn_order()) + ru->get_inv_ref_order();
       limit_order(o, ru->get_active_element()->get_mode());
       fu->set_quad_order(o);
       fv->set_quad_order(o);
@@ -406,7 +406,7 @@ namespace Hermes
       Quad2D* quad = fu->get_quad_2d();
       assert(quad == fv->get_quad_2d());
 
-      int o = std::max(2*fu->get_fn_order(), 2*fv->get_fn_order()) + ru->get_inv_ref_order();
+      int o = std::max(2 * fu->get_fn_order(), 2 * fv->get_fn_order()) + ru->get_inv_ref_order();
       limit_order(o, ru->get_active_element()->get_mode());
       fu->set_quad_order(o);
       fv->set_quad_order(o);
@@ -425,7 +425,7 @@ namespace Hermes
     {
       Quad2D* quad = fu->get_quad_2d();
 
-      int o = 2*fu->get_fn_order() + ru->get_inv_ref_order();
+      int o = 2 * fu->get_fn_order() + ru->get_inv_ref_order();
       limit_order(o, ru->get_active_element()->get_mode());
       fu->set_quad_order(o);
 
@@ -443,7 +443,7 @@ namespace Hermes
     {
       Quad2D* quad = fu->get_quad_2d();
 
-      int o = 2*fu->get_fn_order() + ru->get_inv_ref_order();
+      int o = 2 * fu->get_fn_order() + ru->get_inv_ref_order();
       limit_order(o, ru->get_active_element()->get_mode());
       fu->set_quad_order(o);
 
@@ -461,7 +461,7 @@ namespace Hermes
     {
       Quad2D* quad = fu->get_quad_2d();
 
-      int o = 2*fu->get_fn_order() + ru->get_inv_ref_order();
+      int o = 2 * fu->get_fn_order() + ru->get_inv_ref_order();
       limit_order(o, ru->get_active_element()->get_mode());
       fu->set_quad_order(o, H2D_FN_VAL);
 

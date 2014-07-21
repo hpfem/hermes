@@ -213,7 +213,7 @@ namespace Hermes
             Scalar result_der = 0;
             for (int i = 0; i < n; i++)
             {
-              result += wt[i] * ( (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]) );
+              result += wt[i] * ((u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
               result_der += wt[i] * (u->val[i] * (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i]));
             }
             result *= coeff->value(u_ext[idx_j]->val[0]);
@@ -453,7 +453,6 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianAdvection<Scalar>::~DefaultJacobianAdvection()
       {
-
         if (this->own_coeff1)
           delete coeff1;
         if (this->own_coeff2)
@@ -530,7 +529,6 @@ namespace Hermes
       template<typename Scalar>
       DefaultVectorFormVol<Scalar>::~DefaultVectorFormVol()
       {
-
         if (this->own_coeff)
           delete coeff;
       };
@@ -627,7 +625,6 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualVol<Scalar>::~DefaultResidualVol()
       {
-
         if (this->own_coeff)
           delete coeff;
       };
@@ -722,7 +719,6 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualDiffusion<Scalar>::~DefaultResidualDiffusion()
       {
-
         if (this->own_coeff)
           delete coeff;
       };
@@ -909,7 +905,6 @@ namespace Hermes
       template<typename Scalar>
       DefaultMatrixFormSurf<Scalar>::~DefaultMatrixFormSurf()
       {
-
         if (this->own_coeff)
           delete coeff;
       };
@@ -1008,7 +1003,6 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianFormSurf<Scalar>::~DefaultJacobianFormSurf()
       {
-
         if (this->own_coeff)
           delete coeff;
       };
@@ -1069,7 +1063,6 @@ namespace Hermes
       {
           this->set_areas(areas);
 
-
           if (coeff == nullptr)
           {
             this->coeff = new Hermes2DFunction<Scalar>(1.0);
@@ -1082,7 +1075,6 @@ namespace Hermes
       template<typename Scalar>
       DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf()
       {
-
         if (this->own_coeff)
           delete coeff;
       };
@@ -1180,7 +1172,6 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualSurf<Scalar>::~DefaultResidualSurf()
       {
-
         if (this->own_coeff)
           delete coeff;
       };

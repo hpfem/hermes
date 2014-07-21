@@ -253,7 +253,7 @@ namespace Hermes
 #pragma region Mesh handling
       /// Recursively removes all son elements of the given element and
       /// makes it active. Also handles element orders.
-      /// \param[in] keep_initial_refinements Refinements in Mesh can be marked as initial (to prevent taking them back), 
+      /// \param[in] keep_initial_refinements Refinements in Mesh can be marked as initial (to prevent taking them back),
       /// this parameter serves to prevent taking them back with this method.
       void unrefine_all_mesh_elements(bool keep_initial_refinements = true);
 
@@ -356,11 +356,14 @@ namespace Hermes
       /// Number of degrees of freedom (dimension of the space).
       int ndof;
 
-      static const int H2D_UNASSIGNED_DOF = -2; ///< DOF which was not assigned yet.
-      static const int H2D_CONSTRAINED_DOF = -1; ///< DOF which is constrained.
+      /// DOF which was not assigned yet.
+      static const int H2D_UNASSIGNED_DOF = -2;
+      /// DOF which is constrained.
+      static const int H2D_CONSTRAINED_DOF = -1;
 
       Shapeset* shapeset;
-      bool own_shapeset;  ///< true if default shapeset is created in the constructor, false if shapeset is supplied by user.
+      /// true if default shapeset is created in the constructor, false if shapeset is supplied by user.
+      bool own_shapeset;
 
       /// Boundary conditions.
       EssentialBCs<Scalar>* essential_bcs;
@@ -437,7 +440,7 @@ namespace Hermes
 
       /// Recursively removes all son elements of the given element and
       /// makes it active. Also handles element orders.
-      /// \param[in] keep_initial_refinements Refinements in Mesh can be marked as initial (to prevent taking them back), 
+      /// \param[in] keep_initial_refinements Refinements in Mesh can be marked as initial (to prevent taking them back),
       /// this parameter serves to prevent taking them back with this method.
       /// \param[in] only_unrefine_space_data Useful when more spaces share the mesh if one wants to unrefine the underlying
       /// Mesh only once, but wants other spaces know about the change.
@@ -454,7 +457,8 @@ namespace Hermes
 
       void update_orders_recurrent(Element* e, int order);
 
-      virtual void reset_dof_assignment(); ///< Resets assignment of DOF to an unassigned state.
+      /// Resets assignment of DOF to an unassigned state.
+      virtual void reset_dof_assignment();
       virtual void assign_vertex_dofs() = 0;
       virtual void assign_edge_dofs() = 0;
       virtual void assign_bubble_dofs() = 0;

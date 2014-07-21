@@ -60,7 +60,7 @@ namespace Hermes
 
       void operator=(const WeakFormSharedPtr<Scalar>& other);
     };
-    
+
     /// \brief Represents the weak formulation of a PDE problem.
     ///
     /// The WeakForm class represents the weak formulation of a system of linear PDEs.<br>
@@ -159,7 +159,7 @@ namespace Hermes
       /// Set one function acting on the u_ext functions in assembling (for fast assembling of nonlinear problems).
       /// IMPORTANT: This function will appear at the beginning of the Func<Scalar>** ext array in the value(), and ord() methods of individual forms.
       void set_u_ext_fn(UExtFunctionSharedPtr<Scalar> ext);
-      
+
       /// External functions.
       /// Set one external function.
       /// IMPORTANT: This function will appear at the END (after those functions coming via set_u_ext_fn) of the Func<Scalar>** ext array in the value(), and ord() methods of individual forms.
@@ -302,7 +302,7 @@ namespace Hermes
 
       /// Internal - this structure is being filled anew with every assembling.
       std::vector<int> areas_internal;
-      
+
       /// Internal - this structure is being filled anew with every assembling.
       /// True iff areas contain HERMES_ANY - meaning that this form represents an integral over the whole domain (whole boundary in case of surface forms).
       bool assembleEverywhere;
@@ -424,7 +424,6 @@ namespace Hermes
     protected:
       friend class DiscreteProblem<Scalar>;
     };
-
 
     /// \brief Abstract, base class for vector form - i.e. a single integral in the linear form on the right hand side of the variational formulation of a (system of) PDE.
     template<typename Scalar>

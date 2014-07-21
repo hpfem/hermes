@@ -47,8 +47,8 @@ const CandList CAND_LIST = H2D_HP_ANISO;
 const double ERR_STOP = 1e-3;
 
 // Problem parameters.
-const double MU_R   = 1.0;
-const double KAPPA  = 1.0;
+const double MU_R = 1.0;
+const double KAPPA = 1.0;
 const double LAMBDA = 1.0;
 
 // Bessel functions, exact solution, and weak forms.
@@ -59,8 +59,10 @@ int main(int argc, char* argv[])
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
-  mloader.load("lshape3q.mesh", mesh);    // quadrilaterals
-  //mloader.load("lshape3t.mesh", mesh);  // triangles
+  // quadrilaterals
+  mloader.load("lshape3q.mesh", mesh);
+  // triangles
+  //mloader.load("lshape3t.mesh", mesh);
 
   // Perform initial mesh refinemets.
   for (int i = 0; i < INIT_REF_NUM; i++)  mesh->refine_all_elements();
@@ -120,12 +122,12 @@ int main(int argc, char* argv[])
     // Initial coefficient vector for the Newton's method.
     ::complex* coeff_vec = new ::complex[ndof_ref];
     memset(coeff_vec, 0, ndof_ref * sizeof(::complex));
-    
+
     try
     {
       newton.solve(coeff_vec);
     }
-    catch(Hermes::Exceptions::Exception& e)
+    catch (Hermes::Exceptions::Exception& e)
     {
       e.print_msg();
     }
@@ -136,7 +138,7 @@ int main(int argc, char* argv[])
     ogProjection.project_global(space, ref_sln, sln);
 
     // View the coarse mesh solution and polynomial orders.
-    if(HERMES_VISUALIZATION)
+    if (HERMES_VISUALIZATION)
     {
       MeshFunctionSharedPtr<double> real_filter(new RealFilter(sln));
       v_view.show(real_filter);
@@ -163,22 +165,21 @@ int main(int argc, char* argv[])
     graph_dof_exact.save("conv_dof_exact.dat");
 
     // If err_est_rel too large, adapt the mesh->
-    if(err_est_rel < ERR_STOP)
+    if (err_est_rel < ERR_STOP)
       done = true;
     else
     {
       done = adaptivity.adapt(&selector);
       // Increase the counter of performed adaptivity steps.
-      if(done == false)  as++;
+      if (done == false)  as++;
     }
 
     // Clean up.
-    delete [] coeff_vec;
-  }
-  while (done == false);
+    delete[] coeff_vec;
+  } while (done == false);
 
   // Show the reference solution - the final result.
-  if(HERMES_VISUALIZATION)
+  if (HERMES_VISUALIZATION)
   {
     v_view.set_title("Fine mesh solution (magnitude)");
     MeshFunctionSharedPtr<double> real_filter(new RealFilter(ref_sln));

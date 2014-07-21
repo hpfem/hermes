@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -42,24 +42,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(DiscreteProblem<Scalar>* dp) :  dp(dp), own_dp(false)
+    Solver<Scalar>::Solver(DiscreteProblem<Scalar>* dp) : dp(dp), own_dp(false)
     {
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space) :  dp(new DiscreteProblem<Scalar>(wf, space)), own_dp(true)
+    Solver<Scalar>::Solver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space) : dp(new DiscreteProblem<Scalar>(wf, space)), own_dp(true)
     {
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces) :  dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
+    Solver<Scalar>::Solver(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces) : dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
     {
     }
-    
+
     template<typename Scalar>
     Solver<Scalar>::~Solver()
     {
-      if(own_dp)
+      if (own_dp)
         delete this->dp;
       else
       {
@@ -77,12 +77,12 @@ namespace Hermes
     template<typename Scalar>
     void Solver<Scalar>::solve(MeshFunctionSharedPtr<Scalar> initial_guess)
     {
-      if(this->dp->get_spaces().size() != 1)
+      if (this->dp->get_spaces().size() != 1)
         throw Hermes::Exceptions::ValueException("dp->get_spaces().size()", this->dp->get_spaces().size(), 1);
       Scalar* coeff_vec = new Scalar[Space<Scalar>::get_num_dofs(this->dp->get_spaces())];
       OGProjection<Scalar>::project_global(this->dp->get_spaces()[0], initial_guess, coeff_vec);
       this->solve(coeff_vec);
-      delete [] coeff_vec;
+      delete[] coeff_vec;
     }
 
     template<typename Scalar>
@@ -91,7 +91,7 @@ namespace Hermes
       Scalar* coeff_vec = new Scalar[Space<Scalar>::get_num_dofs(this->dp->get_spaces())];
       OGProjection<Scalar>::project_global(this->dp->get_spaces(), initial_guess, coeff_vec);
       this->solve(coeff_vec);
-      delete [] coeff_vec;
+      delete[] coeff_vec;
     }
 
     template<typename Scalar>
@@ -99,7 +99,7 @@ namespace Hermes
     {
       return this->dp->isOkay();
     }
-    
+
     template<typename Scalar>
     void Solver<Scalar>::set_time(double time)
     {
@@ -124,7 +124,7 @@ namespace Hermes
     {
       this->dp->set_spaces(spaces);
     }
-    
+
     template<typename Scalar>
     std::vector<SpaceSharedPtr<Scalar> > Solver<Scalar>::get_spaces()
     {

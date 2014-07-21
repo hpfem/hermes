@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -110,9 +110,12 @@ namespace Hermes
       CSMatrix<Scalar>* duplicate() const;
 
     protected:
-      int *irn;         ///< Row indices.
-      int *jcn;         ///< Column indices.
-      typename mumps_type<Scalar>::mumps_Scalar *Ax; ///< Matrix entries (column-wise).
+      /// Row indices.
+      int *irn;
+      /// Column indices.
+      int *jcn;
+      /// Matrix entries (column-wise).
+      typename mumps_type<Scalar>::mumps_Scalar *Ax;
 
       friend class Solvers::MumpsSolver<Scalar>;
       template<typename T> friend SparseMatrix<T>*  create_matrix();
@@ -157,7 +160,8 @@ namespace Hermes
       /// \sa #check_status()
       bool reinit();
     private:
-      void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
+      //wrapper around dmums_c or zmumps_c
+      void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);
 
       /// True if solver is inited.
       bool inited;

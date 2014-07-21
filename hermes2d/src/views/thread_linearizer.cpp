@@ -526,7 +526,7 @@ namespace Hermes
         // Initialization.
         split = 0;
         bool done = false;
-        
+
         // Core of the decision - calculate the approximate error of linearizing the normalized solution
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
         {
@@ -542,8 +542,8 @@ namespace Hermes
           // Divide by the edge count.
           error /= (3 + mode);
 
-          /// Relative error.
-          /// max_value_approx here is only an approximation - only taking into account the elements being processed by this thread.
+          // Relative error.
+          // max_value_approx here is only an approximation - only taking into account the elements being processed by this thread.
           double relative_error = error / this->max_value_approx;
 
           // Split ?
@@ -560,9 +560,11 @@ namespace Hermes
             // Decide whether to split horizontally or vertically only
             // If one error is LINEARIZER_DIRECTIONAL_QUAD_REFINEMENT_REQUIREMENT larger than the other.
             if (horizontal_error > LINEARIZER_DIRECTIONAL_QUAD_REFINEMENT_REQUIREMENT * vertical_error)
-              split = 1; // h-split
+              // h-split
+              split = 1;
             else if (vertical_error > LINEARIZER_DIRECTIONAL_QUAD_REFINEMENT_REQUIREMENT * horizontal_error)
-              split = 2; // v-split
+              // v-split
+              split = 2;
             else
               split = 3;
           }
@@ -575,7 +577,7 @@ namespace Hermes
           {
             double error = sqr(physical_x[vertex_indices[i]] - midval[0][i])
               + sqr(physical_y[vertex_indices[i]] - midval[1][i]);
-        
+
             double diameter = sqr(fns[0]->get_active_element()->diameter);
 
             split = (error / diameter) > this->curvature_epsilon ? 3 : split;
@@ -748,7 +750,6 @@ namespace Hermes
           this->info = realloc_with_check<ThreadLinearizerMultidimensional, internal_vertex_info_t>(this->info, new_vertex_size, this);
           this->hash_table = realloc_with_check<ThreadLinearizerMultidimensional, int>(this->hash_table, new_vertex_size, this);
           memset(this->hash_table + this->vertex_size, 0xff, sizeof(int)* (new_vertex_size - this->vertex_size));
-
 
           this->vertex_size = new_vertex_size;
         }

@@ -6,7 +6,7 @@
 using namespace RefinementSelectors;
 
 //  This example uses the Picard's method to solve a nonlinear problem.
-//  Try to run this example with PICARD_NUM_LAST_ITER_USED = 1 for 
+//  Try to run this example with PICARD_NUM_LAST_ITER_USED = 1 for
 //  comparison (Anderson acceleration turned off).)
 //
 //  PDE: Stationary heat transfer equation with nonlinear thermal
@@ -35,11 +35,11 @@ const double INIT_COND_CONST = 3.0;
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;
 
 // Picard's method.
-// Number of last iterations used. 
+// Number of last iterations used.
 // 1... standard fixed point.
 // >1... Anderson acceleration.
 const int PICARD_NUM_LAST_ITER_USED = 4;
-// 0 <= beta <= 1... parameter for the Anderson acceleration. 
+// 0 <= beta <= 1... parameter for the Anderson acceleration.
 const double PICARD_ANDERSON_BETA = 0.2;
 // Stopping criterion for the Picard's method.
 const double PICARD_TOL = 1e-3;
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
     std::cout << e.what();
   }
 
-  // Translate the coefficient vector into a Solution. 
+  // Translate the coefficient vector into a Solution.
   MeshFunctionSharedPtr<double> sln(new Solution<double>);
   Solution<double>::vector_to_solution(picard.get_sln_vector(), space, sln);
 
@@ -115,4 +115,3 @@ int main(int argc, char* argv[])
   View::wait();
   return 0;
 }
-

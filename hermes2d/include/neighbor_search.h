@@ -145,7 +145,8 @@ namespace Hermes
       DiscontinuousFunc<Scalar>* init_ext_fn(MeshFunction<Scalar>* fu);
 
       class ExtendedShapeset;
-      ExtendedShapeset *supported_shapes; ///< Object allowing to set/get a particular shape function from the extended
+      /// Object allowing to set/get a particular shape function from the extended
+      ExtendedShapeset *supported_shapes;
       ///< shapeset and retrieve global assembly information for it.
 
       /// Form the extended shapeset.
@@ -227,15 +228,20 @@ namespace Hermes
         void update(NeighborSearch* neighborhood, SpaceSharedPtr<Scalar> space);
 
       public:
-        int cnt;  ///< Number of shape functions in the extended shapeset.
-        int *dof; ///< Array of global DOF numbers of shape functions in the extended shapeset.
+        /// Number of shape functions in the extended shapeset.
+        int cnt;
+        /// Array of global DOF numbers of shape functions in the extended shapeset.
+        int *dof;
 
         bool has_support_on_neighbor(unsigned int index) const;
 
-        AsmList<Scalar>* central_al;                    ///< Assembly list for the currently assembled edge on the central elem.
-        AsmList<Scalar>* neighbor_al;                   ///< Assembly list for the currently assembled edge on the neighbor elem.
+        /// Assembly list for the currently assembled edge on the central elem.
+        AsmList<Scalar>* central_al;
+        /// Assembly list for the currently assembled edge on the neighbor elem.
+        AsmList<Scalar>* neighbor_al;
 
-        friend class NeighborSearch; // Only a NeighborSearch is allowed to create an ExtendedShapeset.
+        // Only a NeighborSearch is allowed to create an ExtendedShapeset.
+        friend class NeighborSearch;
       };
 
       /*** Neighborhood information. ***/
@@ -245,8 +251,10 @@ namespace Hermes
       public:
         NeighborEdgeInfo() : local_num_of_edge(-1), orientation(false) {};
 
-        int local_num_of_edge;  ///< Local number of the edge on neighbor element.
-        bool orientation;        ///< Relative orientation of the neighbor edge with respect to the active edge
+        /// Local number of the edge on neighbor element.
+        int local_num_of_edge;
+        /// Relative orientation of the neighbor edge with respect to the active edge
+        bool orientation;
         ///< (0 - same orientation, 1 - reverse orientation).
       };
 
@@ -282,11 +290,14 @@ namespace Hermes
       class HERMES_API Transformations
       {
       public:
-        static const int max_level = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
+        /// Number of allowed transformations (or equiv. number of neighbors
+        static const int max_level = Transformable::H2D_MAX_TRN_LEVEL;
         ///< in a go-down neighborhood) - see Transformable::push_transform.
 
-        unsigned int transf[max_level];   ///< Array holding the transformations at subsequent levels.
-        unsigned int num_levels;          ///< Number of transformation levels actually used in \c transf.
+        /// Array holding the transformations at subsequent levels.
+        unsigned int transf[max_level];
+        /// Number of transformation levels actually used in \c transf.
+        unsigned int num_levels;
 
         Transformations();
         Transformations(const Transformations* t);
@@ -315,39 +326,49 @@ namespace Hermes
         template<typename T> friend class MultimeshDGNeighborTree;
       };
 
-
       MeshSharedPtr mesh;
 
       /*** Transformations. ***/
       static const unsigned int H2D_INITIAL_NEIGHBOR_NUMBER_GUESS = 32;
 
-      Transformations** central_transformations;  ///< Array of transformations of the central element to each neighbor
+      /// Array of transformations of the central element to each neighbor
+      Transformations** central_transformations;
       ///< (in a go-down neighborhood; stored as on \c Transformation structure
       ///< for each neighbor).
 
       void add_central_transformations(Transformations* to_add, int position, bool replace = false);
       unsigned int central_transformations_size;
       unsigned int central_transformations_alloc_size;
-      Transformations** neighbor_transformations; ///< Array of transformations of the neighbor to the central element (go-up).
+      /// Array of transformations of the neighbor to the central element (go-up).
+      Transformations** neighbor_transformations;
 
       void add_neighbor_transformations(Transformations* to_add, int position, bool replace = false);
       unsigned int neighbor_transformations_size;
       unsigned int neighbor_transformations_alloc_size;
-      uint64_t original_central_el_transform;                  ///< Sub-element transformation of any function that comes from the
+      /// Sub-element transformation of any function that comes from the
+      uint64_t original_central_el_transform;
       ///< assembly, before transforms from \c transformations are pushed to it.
 
       /*** Significant objects of the neighborhood. ***/
-      Element* central_el;          ///< Central (currently assembled) element.
-      Element* neighb_el;           ///< Currently selected neighbor element (on the other side of active segment).
+      /// Central (currently assembled) element.
+      Element* central_el;
+      /// Currently selected neighbor element (on the other side of active segment).
+      Element* neighb_el;
 
     private:
-      int active_edge;               ///< Local number of the currently assembled edge, w.r.t. the central element.
-      NeighborEdgeInfo neighbor_edge;///< Assembled edge, w.r.t. the element on the other side.
-      int active_segment;            ///< Part of the active edge shared by central and neighbor elements.
+      /// Local number of the currently assembled edge, w.r.t. the central element.
+      int active_edge;
+      /// Assembled edge, w.r.t. the element on the other side.
+      NeighborEdgeInfo neighbor_edge;
+      /// Part of the active edge shared by central and neighbor elements.
+      int active_segment;
 
-      std::vector<NeighborEdgeInfo> neighbor_edges;   ///< Active edge information from each neighbor.
-      std::vector<Element*> neighbors;                ///< Vector with pointers to the neighbor elements.
-      unsigned int n_neighbors;                          ///< Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
+      /// Active edge information from each neighbor.
+      std::vector<NeighborEdgeInfo> neighbor_edges;
+      /// Vector with pointers to the neighbor elements.
+      std::vector<Element*> neighbors;
+      /// Number of neighbors (>1 for a go-down neighborhood, 1 otherwise).
+      unsigned int n_neighbors;
 
       /// Possible neighborhood types, according to which way we went on the neighbor element in order to get to the
       /// other side of the neighbor. The way is characterized by transformations needed to be pushed either on the
@@ -425,8 +446,10 @@ namespace Hermes
       /*** Quadrature on the active edge. ***/
       Quad2D* quad;
 
-      int central_quad_order;  ///< Quadrature data of the active edge with respect to the central element.
-      int neighb_quad_order;   ///< Quadrature data of the active edge with respect to the element on the other side.
+      /// Quadrature data of the active edge with respect to the central element.
+      int central_quad_order;
+      /// Quadrature data of the active edge with respect to the element on the other side.
+      int neighb_quad_order;
 
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class Adapt;

@@ -52,7 +52,7 @@ namespace Hermes
     };
 
     /// h-, p-, hp-adaptivity
-    /// Also influences the selectors - i.e. for h-, or p- adaptivity 
+    /// Also influences the selectors - i.e. for h-, or p- adaptivity
     enum AdaptivityType
     {
       pAdaptivity,
@@ -145,7 +145,7 @@ namespace Hermes
       AdaptSolverCriterion* stopping_criterion_global;
 
       /// Information if the solve method is running.
-      /// Used for banning descendants of this class to perform some actions 
+      /// Used for banning descendants of this class to perform some actions
       bool solve_method_running;
 
       /// Internal structures - Spaces.

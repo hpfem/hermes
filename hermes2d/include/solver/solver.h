@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -31,17 +31,17 @@ namespace Hermes
   {
     /** \defgroup userSolvingAPI User solving API
      * \brief Collection of classes that provide the top-level solving capabilities.
-    */
+     */
 
     template <typename Scalar>
-    class Solver: 
+    class Solver :
       public virtual Hermes::Mixins::TimeMeasurable,
-      public Hermes::Mixins::SettableComputationTime, 
-      public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
+      public Hermes::Mixins::SettableComputationTime,
+      public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>,
       public virtual Hermes::Mixins::OutputAttachable,
-      public Hermes::Algebra::Mixins::MatrixRhsOutput<Scalar>, 
-      public Hermes::Mixins::IntegrableWithGlobalOrder, 
-      public virtual Hermes::Mixins::StateQueryable, 
+      public Hermes::Algebra::Mixins::MatrixRhsOutput<Scalar>,
+      public Hermes::Mixins::IntegrableWithGlobalOrder,
+      public virtual Hermes::Mixins::StateQueryable,
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>
     {
     public:
@@ -82,8 +82,8 @@ namespace Hermes
 
     protected:
       virtual bool isOkay() const;
-      
-      ///< FE problem being solved.
+
+      /// FE problem being solved.
       DiscreteProblem<Scalar>* dp;
 
       /// This instance owns its DP.

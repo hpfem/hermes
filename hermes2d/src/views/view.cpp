@@ -214,7 +214,8 @@ namespace Hermes
 
       void View::on_create(int output_id)
       {
-        this->output_id = output_id; //does not need thread protection because it is during execution of add_view
+        //does not need thread protection because it is during execution of add_view
+        this->output_id = output_id;
         create_gl_palette();
         set_palette_filter(pal_filter == GL_LINEAR);
       }
@@ -640,7 +641,8 @@ namespace Hermes
 
       void View::set_palette_filter(bool linear)
       {
-        view_sync.enter(); //lock to prevent simultaneuous rendering
+        //lock to prevent simultaneuous rendering
+        view_sync.enter();
 
         pal_filter = linear ? GL_LINEAR : GL_NEAREST;
 
@@ -651,7 +653,8 @@ namespace Hermes
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, pal_filter);
         update_tex_adjust();
 
-        view_sync.leave(); //unlock
+        //unlock
+        view_sync.leave();
 
         refresh();
       }
@@ -724,10 +727,13 @@ namespace Hermes
         if (align > -1)
         {
           int width = glutBitmapLength(font, (const unsigned char*)text);
-          if (align == 1) x -= width; // align right
-          else x -= (double)width / 2; // center
+          // align right
+          if (align == 1) x -= width;
+          // center
+          else x -= (double)width / 2;
         }
-        y += 5; //(double) glutBitmapHeight(font) / 2 - 1;
+        //(double) glutBitmapHeight(font) / 2 - 1;
+        y += 5;
 
         glDisable(GL_TEXTURE_1D);
         glDisable(GL_LIGHTING);
@@ -838,7 +844,8 @@ namespace Hermes
 #ifdef GL_BGRA_EXT
         glReadPixels(0, 0, output_width, output_height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
 #else
-        glReadPixels(0, 0, output_width, output_height, GL_RGBA, GL_UNSIGNED_BYTE, pixels); // FIXME!!!
+        // FIXME!!!
+        glReadPixels(0, 0, output_width, output_height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
         this->warn("BGRA format not supported. Saved image will have inverted colors");
 #endif
         // opening file for binary writing
@@ -851,7 +858,8 @@ namespace Hermes
         file_header.size = sizeof(BitmapFileHeader)+sizeof(BitmapInfoHeader)+
           4 * output_width * output_height;
         file_header.reserved1 = file_header.reserved2 = 0;
-        file_header.off_bits = 14 + 40; // length of both headers
+        // length of both headers
+        file_header.off_bits = 14 + 40;
 
         if (fwrite(&file_header, sizeof(file_header), 1, file) != 1)
         {
@@ -864,11 +872,14 @@ namespace Hermes
         info_header.width = output_width;
         info_header.height = output_height;
         info_header.planes = 1;
-        info_header.bit_count = 32; // 4 bytes per pixel = 32 bits
+        // 4 bytes per pixel = 32 bits
+        info_header.bit_count = 32;
         info_header.compression = 0;
         info_header.size_image = output_width * output_height * 4;
-        info_header.xdpi = 2835; // 72 dpi
-        info_header.ydpi = 2835; // 72 dpi
+        // 72 dpi
+        info_header.xdpi = 2835;
+        // 72 dpi
+        info_header.ydpi = 2835;
         info_header.clr_used = 0;
         info_header.clr_important = 0;
 

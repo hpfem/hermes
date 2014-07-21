@@ -39,7 +39,8 @@ namespace Hermes
     ///.
     class MeshData
     {
-      std::string mesh_file_; ///< Mesh Filename (private)
+      /// Mesh Filename (private)
+      std::string mesh_file_;
 
       /// Removes brackets, commas and other unessential details from the input file.
       /// Meaningful blank spaces are temporarily replaced with a ';'
@@ -49,39 +50,63 @@ namespace Hermes
       std::string restore(std::string &str);
 
     public:
-      std::map< std::string, std::vector< std::string > > vars_; ///< Map for storing variables in input mesh file
+      /// Map for storing variables in input mesh file
+      std::map< std::string, std::vector< std::string > > vars_;
 
-      int n_vert; ///< Number of vertices
-      int n_el; ///< Number of elements
-      int n_bdy; ///< Number of boundary edges
-      int n_curv; ///< Number of curved edges (including NURBS curves)
-      int n_ref; ///< Number of elements with specified refinements
+      /// Number of vertices
+      int n_vert;
+      /// Number of elements
+      int n_el;
+      /// Number of boundary edges
+      int n_bdy;
+      /// Number of curved edges (including NURBS curves)
+      int n_curv;
+      /// Number of elements with specified refinements
+      int n_ref;
 
-      std::vector<double> x_vertex; ///< x-coordinate of the vertices
-      std::vector<double> y_vertex; ///< y-coordinate of the vertices
+      /// x-coordinate of the vertices
+      std::vector<double> x_vertex;
+      /// y-coordinate of the vertices
+      std::vector<double> y_vertex;
 
-      std::vector<int> en1; ///< Nodes with local node number 1
-      std::vector<int> en2; ///< Nodes with local node number 2
-      std::vector<int> en3; ///< Nodes with local node number 3
-      std::vector<int> en4; ///< Nodes with local node number 4. Only for quadrilateral elements. For triangular elements it is set to -1.
+      /// Nodes with local node number 1
+      std::vector<int> en1;
+      /// Nodes with local node number 2
+      std::vector<int> en2;
+      /// Nodes with local node number 3
+      std::vector<int> en3;
+      /// Nodes with local node number 4. Only for quadrilateral elements. For triangular elements it is set to -1.
+      std::vector<int> en4;
 
-      std::vector<std::string> e_mtl; ///< Element markers -- single word strings
+      /// Element markers -- single word strings
+      std::vector<std::string> e_mtl;
 
-      std::vector<int> bdy_first;  ///< First node of a boundary edge
-      std::vector<int> bdy_second; ///< Second node of a boundary edge
-      std::vector<std::string> bdy_type; ///< Boundary name
+      /// First node of a boundary edge
+      std::vector<int> bdy_first;
+      /// Second node of a boundary edge
+      std::vector<int> bdy_second;
+      /// Boundary name
+      std::vector<std::string> bdy_type;
 
-      std::vector<int> curv_first;  ///< First node of a curved edge
-      std::vector<int> curv_second; ///< Second node of a curved edge
+      /// First node of a curved edge
+      std::vector<int> curv_first;
+      /// Second node of a curved edge
+      std::vector<int> curv_second;
 
-      std::vector<double> curv_third; ///< Third entry of a curve specification. Angle for a circular arc and degree for a NURBS curve.
+      /// Third entry of a curve specification. Angle for a circular arc and degree for a NURBS curve.
+      std::vector<double> curv_third;
 
-      std::vector<std::string> curv_inner_pts; ///< Name of the list of the control points and weights of a NURBS curve. Set to "none" for a circular arc
-      std::vector<std::string> curv_knots; ///< Name of the list of knot vectors of a NURBS curve. Set to "none" for a circular arc
-      std::vector<bool> curv_nurbs; ///< Nurbs Indicator. True if curve is modeled with NURBS. False if it is a circular arc.
+      /// Name of the list of the control points and weights of a NURBS curve. Set to "none" for a circular arc
+      std::vector<std::string> curv_inner_pts;
+      /// Name of the list of knot vectors of a NURBS curve. Set to "none" for a circular arc
+      std::vector<std::string> curv_knots;
+      /// Nurbs Indicator. True if curve is modeled with NURBS. False if it is a circular arc.
+      std::vector<bool> curv_nurbs;
 
-      std::vector<int> ref_elt; ///< List of elements to be refined
-      std::vector<int> ref_type; ///< List of element refinement type
+      /// List of elements to be refined
+      std::vector<int> ref_elt;
+      /// List of element refinement type
+      std::vector<int> ref_type;
 
       /// This function parses a given input mesh file line by line and extracts the necessary information into the MeshData class variables
       void parse_mesh(void);

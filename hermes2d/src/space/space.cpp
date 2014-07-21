@@ -1,4 +1,3 @@
-
 // This file is part of Hermes2D.
 //
 // Hermes2D is free software: you can redistribute it and/or modify
@@ -623,9 +622,9 @@ namespace Hermes
         {
           // The triangular order is just the current order.
           int current_order_triangular = current_order;
-          /// This is the default setup, we ALWAYS increase by attribute of this functor class: 'order_increase'.
-          /// This is OVERRIDABLE. Plus when overriding, one does not have to care about min / max possible values (due to shapeset, Space requirements).
-          /// These are guarded internally.
+          // This is the default setup, we ALWAYS increase by attribute of this functor class: 'order_increase'.
+          // This is OVERRIDABLE. Plus when overriding, one does not have to care about min / max possible values (due to shapeset, Space requirements).
+          // These are guarded internally.
           new_order = current_order_triangular + this->order_increase;
         }
         else
@@ -676,16 +675,17 @@ namespace Hermes
       if (ref_space == nullptr)
         throw Exceptions::Exception("Something went wrong in ReferenceSpaceCreator::create_ref_space().");
 
-      /// Call to the OVERRIDABLE handling method.
+      // Call to the OVERRIDABLE handling method.
       this->handle_orders(ref_space);
 
-      /// Finish - MUST BE CALLED BEFORE RETURN.
+      // Finish - MUST BE CALLED BEFORE RETURN.
       this->finish_construction(ref_space);
 
       // Assign dofs?
       if (assign_dofs)
         ref_space->assign_dofs();
-      /// Return.
+
+      // Return.
       return ref_space;
     }
 
@@ -751,7 +751,8 @@ namespace Hermes
     {
       // Adjust wrt. max and min possible orders.
       int mo = shapeset->get_max_order();
-      int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_L2_MARKERWISE_CONST_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
+      // L2 and Hcurl may use zero orders.
+      int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_L2_MARKERWISE_CONST_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1;
       int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(order), mo));
       int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(order), mo));
       order = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
@@ -772,7 +773,8 @@ namespace Hermes
         return 0;
 
       if (ndata[en->id].n == -1)
-        return get_edge_order_internal(ndata[en->id].base); // constrained node
+        // constrained node
+        return get_edge_order_internal(ndata[en->id].base);
       else
         return get_edge_order_internal(en);
     }
@@ -910,7 +912,8 @@ namespace Hermes
       int i, j;
       for (i = 0; i < mesh->get_max_node_id(); i++)
       {
-        ndata[i].n = 1; // Natural boundary condition. The point is that it is not (0 == Dirichlet).
+        // Natural boundary condition. The point is that it is not (0 == Dirichlet).
+        ndata[i].n = 1;
         ndata[i].dof = H2D_UNASSIGNED_DOF;
       }
 

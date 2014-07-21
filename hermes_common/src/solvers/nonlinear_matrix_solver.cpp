@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -288,7 +288,7 @@ namespace Hermes
       // If we have not converged and everything else is ok, we finish.
       if (state == NotConverged)
         return false;
-      
+
       // Act upon the state.
       switch (state)
       {
@@ -514,7 +514,7 @@ namespace Hermes
       if (this->do_initial_step_return_finished())
         return;
 
-      // Main Nonlinear loop 
+      // Main Nonlinear loop
       while (true)
       {
         // Handle the event of step beginning.
@@ -635,7 +635,7 @@ namespace Hermes
 
         // Reassemble the jacobian once not reusable anymore.
         this->info("\tNonlinearSolver: Re-calculating Jacobian.");
-        
+
         // Set factorization scheme.
         this->assemble_jacobian(true);
         this->linear_matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);

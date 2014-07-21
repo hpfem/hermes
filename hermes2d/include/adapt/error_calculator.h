@@ -58,7 +58,8 @@ namespace Hermes
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
       void calculate_errors(MeshFunctionSharedPtr<Scalar> coarse_solution, MeshFunctionSharedPtr<Scalar> fine_solution, bool sort_and_store = true);
 
-      virtual ~ErrorCalculator();  ///< Destructor. Deallocates allocated private data.
+      /// Destructor. Deallocates allocated private data.
+      virtual ~ErrorCalculator();
 
       /// Adds user defined norm form which is used to calculate error.
       /// If the errorType is CalculatedErrorType::RelativeError, this form is also used as a "norm" form to divide the absolute error by the norm of the "fine" solution(s).
@@ -85,10 +86,14 @@ namespace Hermes
         ElementReference() : element_id(-1), comp(-1), error(nullptr), norm(nullptr) {};
         ElementReference(int comp, int element_id, double* error, double* norm) : element_id(element_id), comp(comp), error(error), norm(norm) {};
 
-        int element_id; ///< An element ID. Invalid if below 0.
-        int comp; ///< A component which this element belongs to. Invalid if below 0.
-        double* error;///< Pointer to the final error, respecting the errorType.
-        double* norm;///< Pointer to the norm.
+        /// An element ID. Invalid if below 0.
+        int element_id;
+        /// A component which this element belongs to. Invalid if below 0.
+        int comp;
+        /// Pointer to the final error, respecting the errorType.
+        double* error;
+        /// Pointer to the norm.
+        double* norm;
       };
 
       /// A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().

@@ -29,7 +29,7 @@ namespace Hermes
     {
       template<typename LinearizerDataDimensions>
       class HERMES_API LinearizerMultidimensional;
-      
+
       /// ThreadLinearizerMultidimensional is a utility class for linearizing a mesh function on a single thread
       /// The main refinement (splitting) decision is contained in split_decision().
       /// Important - the instance of LinearizerCriterion (from LinearizerMultidimensional instance) - see the method split_decision() for the adaptive criterion, process_[triangle|quad] for the fixed one.
@@ -39,7 +39,7 @@ namespace Hermes
       public:
         /// Free the instance.
         void free();
-        
+
       private:
         /// Constructor
         /// \param[in] The linearizer this instance is being created for.
@@ -53,7 +53,7 @@ namespace Hermes
         void init_processing(MeshFunctionSharedPtr<double>* sln, LinearizerMultidimensional<LinearizerDataDimensions>* linearizer);
         /// Deinitialize the temporary data for this run of processing.
         void deinit_processing();
-        
+
         /// Completely process the state current_state
         void process_state(Traverse::State* current_state);
 
@@ -98,7 +98,7 @@ namespace Hermes
         /// Internal.
         double get_max_value(Traverse::State* current_state);
         double max_value_approx;
-        
+
         /// Push transforms to all necessary functions (including displacement).
         void push_transforms(int transform);
 
@@ -141,7 +141,7 @@ namespace Hermes
         int vertex_count, triangle_count, edges_count;
         /// Size of arrays of vertices, triangles and edges
         int vertex_size, triangle_size, edges_size;
-        
+
         /// Temporary storage - per state processing.
         double midval[LinearizerDataDimensions::dimension + 2][5];
         /// Temporary storage - per state processing.
@@ -150,7 +150,7 @@ namespace Hermes
         Element* rep_element;
         /// The current state is curved.
         bool curved;
-        
+
         /// From LinearizerMultidimensional - for convenience & speed.
         LinearizerOutputType linearizerOutputType;
 

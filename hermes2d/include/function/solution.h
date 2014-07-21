@@ -180,7 +180,8 @@ namespace Hermes
 
       bool transform;
 
-      int* elem_coeffs[H2D_MAX_SOLUTION_COMPONENTS];  ///< array of pointers into mono_coeffs
+      /// array of pointers into mono_coeffs
+      int* elem_coeffs[H2D_MAX_SOLUTION_COMPONENTS];
       int num_coeffs, num_elems;
       int num_dofs;
 
@@ -225,43 +226,43 @@ namespace Hermes
 #pragma endregion
 
 #pragma region static
-      public:
-        static bool static_verbose_output;
+    public:
+      static bool static_verbose_output;
 
-        // Calculate derivative wrt. x of mono into result.
-        static void make_dx_coeffs(int mode, int o, Scalar* mono, Scalar* result);
-        // Calculate derivative wrt. y of mono into result.
-        static void make_dy_coeffs(int mode, int o, Scalar* mono, Scalar* result);
+      // Calculate derivative wrt. x of mono into result.
+      static void make_dx_coeffs(int mode, int o, Scalar* mono, Scalar* result);
+      // Calculate derivative wrt. y of mono into result.
+      static void make_dy_coeffs(int mode, int o, Scalar* mono, Scalar* result);
 
-        static void set_static_verbose_output(bool verbose);
+      static void set_static_verbose_output(bool verbose);
 
-        /// Passes solution components calculated from solution vector as Solutions.
-        static void vector_to_solutions(const Scalar* solution_vector, std::vector<SpaceSharedPtr<Scalar> > spaces,
-          std::vector<MeshFunctionSharedPtr<Scalar> > solutions,
-          std::vector<bool> add_dir_lift = std::vector<bool>(),
-          std::vector<int> start_indices = std::vector<int>());
+      /// Passes solution components calculated from solution vector as Solutions.
+      static void vector_to_solutions(const Scalar* solution_vector, std::vector<SpaceSharedPtr<Scalar> > spaces,
+        std::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        std::vector<bool> add_dir_lift = std::vector<bool>(),
+        std::vector<int> start_indices = std::vector<int>());
 
-        static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
-          bool add_dir_lift = true, int start_index = 0);
+      static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
+        bool add_dir_lift = true, int start_index = 0);
 
-        static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, Solution<Scalar>* solution,
-          bool add_dir_lift = true, int start_index = 0);
+      static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, Solution<Scalar>* solution,
+        bool add_dir_lift = true, int start_index = 0);
 
-        static void vector_to_solutions(const Vector<Scalar>* vec, std::vector<SpaceSharedPtr<Scalar> > spaces,
-          std::vector<MeshFunctionSharedPtr<Scalar> > solutions,
-          std::vector<bool> add_dir_lift = std::vector<bool>(),
-          std::vector<int> start_indices = std::vector<int>());
+      static void vector_to_solutions(const Vector<Scalar>* vec, std::vector<SpaceSharedPtr<Scalar> > spaces,
+        std::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        std::vector<bool> add_dir_lift = std::vector<bool>(),
+        std::vector<int> start_indices = std::vector<int>());
 
-        static void vector_to_solutions_common_dir_lift(const Vector<Scalar>* vec, std::vector<SpaceSharedPtr<Scalar> > spaces,
-          std::vector<MeshFunctionSharedPtr<Scalar> > solutions,
-          bool add_dir_lift = false);
+      static void vector_to_solutions_common_dir_lift(const Vector<Scalar>* vec, std::vector<SpaceSharedPtr<Scalar> > spaces,
+        std::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        bool add_dir_lift = false);
 
-        static void vector_to_solutions_common_dir_lift(const Scalar* solution_vector, std::vector<SpaceSharedPtr<Scalar> > spaces,
-          std::vector<MeshFunctionSharedPtr<Scalar> > solutions,
-          bool add_dir_lift = false);
+      static void vector_to_solutions_common_dir_lift(const Scalar* solution_vector, std::vector<SpaceSharedPtr<Scalar> > spaces,
+        std::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        bool add_dir_lift = false);
 
-        static void vector_to_solution(const Vector<Scalar>* vec, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
-          bool add_dir_lift = true, int start_index = 0);
+      static void vector_to_solution(const Vector<Scalar>* vec, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
+        bool add_dir_lift = true, int start_index = 0);
 
 #pragma endregion
     };

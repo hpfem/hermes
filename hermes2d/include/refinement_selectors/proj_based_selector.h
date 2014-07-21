@@ -69,9 +69,12 @@ namespace Hermes
         /// Evaluated shapes for all possible transformations for all points. The first index is a transformation, the second index is an index of a shape function.
         typedef std::vector<TrfShapeExp> TrfShape[H2D_TRF_NUM];
 
-        bool* cached_shape_vals_valid; ///< True if shape values were already initialized.
-        TrfShape* cached_shape_ortho_vals; ///< Precalculated valus of orthogonalized shape functions.
-        TrfShape* cached_shape_vals; ///< Precalculate values of shape functions.
+        /// True if shape values were already initialized.
+        bool* cached_shape_vals_valid;
+        /// Precalculated valus of orthogonalized shape functions.
+        TrfShape* cached_shape_ortho_vals;
+        /// Precalculate values of shape functions.
+        TrfShape* cached_shape_vals;
 
       protected: //evaluated shape basis
         /// A transform shaped function expansions.
@@ -103,9 +106,12 @@ namespace Hermes
             return *this;
           }
         private:
-          int num_gip; ///< A number of integration points.
-          int num_expansion; ///< A number of expansions.
-          double** values; ///< Values. The first index is index of a functions expansion, the second index is an index of a an integration point.
+          /// A number of integration points.
+          int num_gip;
+          /// A number of expansions.
+          int num_expansion;
+          /// Values. The first index is index of a functions expansion, the second index is an index of a an integration point.
+          double** values;
 
           /// Allocates a space for function expansions.
           /** \param[in] num_expansion A number of expansions.
@@ -184,9 +190,12 @@ namespace Hermes
         bool warn_uniform_orders;
 
       protected: //error evaluation
-        static const int H2DRS_VALCACHE_INVALID = 0; ///< State of value cache: item contains undefined or invalid value. \ingroup g_selectors
-        static const int H2DRS_VALCACHE_VALID = 1; ///< State of value cache: item contains a valid value. \ingroup g_selectors
-        static const int H2DRS_VALCACHE_USER = 2; ///< State of value cache: the first state ID which can be used by the user. \ingroup g_selectors
+        /// State of value cache: item contains undefined or invalid value. \ingroup g_selectors
+        static const int H2DRS_VALCACHE_INVALID = 0;
+        /// State of value cache: item contains a valid value. \ingroup g_selectors
+        static const int H2DRS_VALCACHE_VALID = 1;
+        /// State of value cache: the first state ID which can be used by the user. \ingroup g_selectors
+        static const int H2DRS_VALCACHE_USER = 2;
 
         /// An item of a value cache.
         template<typename T>
@@ -211,10 +220,13 @@ namespace Hermes
           /** By default, the item is set as invalid.
           *  \param value A starting value.
           *  \param state A state of the value. */
-          ValueCacheItem(const T& value = 0, const int state = H2DRS_VALCACHE_INVALID) : value(value), state(state) {}; ///< Default constructor. By default, it creates an item that contains invalid value.
+          /// Default constructor. By default, it creates an item that contains invalid value.
+          ValueCacheItem(const T& value = 0, const int state = H2DRS_VALCACHE_INVALID) : value(value), state(state) {};
         private:
-          T value; ///< A value stored in the item.
-          int state; ///< A state of the image: ::H2DRS_VALCACHE_INVALID or ::H2DRS_VALCACHE_VALID or any other user-defined value. The first user defined state has to have number ::H2DRS_VALCACHE_USER.
+          /// A value stored in the item.
+          T value;
+          /// A state of the image: ::H2DRS_VALCACHE_INVALID or ::H2DRS_VALCACHE_VALID or any other user-defined value. The first user defined state has to have number ::H2DRS_VALCACHE_USER.
+          int state;
         };
         /// A projection matrix cache type.
         /** Defines a cache of projection matrices for all possible permutations of orders. */
@@ -228,9 +240,12 @@ namespace Hermes
         *  If record is nullptr, the corresponding matrix has to be calculated. */
         ProjMatrixCache proj_matrix_cache[H2D_NUM_MODES];
 
-        double error_weight_h; ///< A coefficient that multiplies error of H-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_H.
-        double error_weight_p; ///< A coefficient that multiplies error of P-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_P.
-        double error_weight_aniso; ///< A coefficient that multiplies error of ANISO-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_ANISO.
+        /// A coefficient that multiplies error of H-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_H.
+        double error_weight_h;
+        /// A coefficient that multiplies error of P-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_P.
+        double error_weight_p;
+        /// A coefficient that multiplies error of ANISO-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_ANISO.
+        double error_weight_aniso;
 
         /// Calculates error of candidates.
         /** Overriden function. For details, see OptimumSelector::evaluate_cands_error(). */
@@ -272,31 +287,43 @@ namespace Hermes
       protected: //projection
         /// Projection of an element of a candidate.
         struct ElemProj {
-          int* shape_inxs; ///< Used shape indices
-          int num_shapes; ///< A number of used shape indices.
-          std::vector<TrfShapeExp>& svals; ///< A precalculated shape-function values. Empty is not defined.
-          Scalar* shape_coeffs; ///< Coefficients of shape indices of a projection.
-          int max_quad_order; ///< An encoded maximum order of the projection. If triangle, the vertical order is equal to the horizontal order.
+          /// Used shape indices
+          int* shape_inxs;
+          /// A number of used shape indices.
+          int num_shapes;
+          /// A precalculated shape-function values. Empty is not defined.
+          std::vector<TrfShapeExp>& svals;
+          /// Coefficients of shape indices of a projection.
+          Scalar* shape_coeffs;
+          /// An encoded maximum order of the projection. If triangle, the vertical order is equal to the horizontal order.
+          int max_quad_order;
         };
 
         /// Integration points in the reference domain of an element of a candidate.
         /** The structure assumes Gauss Integration Points (GIP). */
         struct ElemGIP {
-          double3* gip_points; ///< Integration points and weights. The first index is an index of an integration point, the second index is defined through the enum GIP2DIndices.
-          int num_gip_points; ///< A number of integration points.
+          /// Integration points and weights. The first index is an index of an integration point, the second index is defined through the enum GIP2DIndices.
+          double3* gip_points;
+          /// A number of integration points.
+          int num_gip_points;
         };
 
         /// A transformation from a reference domain of a subdomain to a reference domain of an element of a candidate.
         struct ElemSubTrf {
-          Trf* trf; ///< A transformation.
-          double coef_mx; ///< A coefficient that scales df/dx for each subdomain. A coefficient represents effects of a transformation \a trf on df/dx.
-          double coef_my; ///< A coefficient that scales df/dy for each subdomain. A coefficient represents effects of a transformation \a trf on df/dy.
+          /// A transformation.
+          Trf* trf;
+          /// A coefficient that scales df/dx for each subdomain. A coefficient represents effects of a transformation \a trf on df/dx.
+          double coef_mx;
+          /// A coefficient that scales df/dy for each subdomain. A coefficient represents effects of a transformation \a trf on df/dy.
+          double coef_my;
         };
 
         /// A shape function on subdomain of an element.
         struct ElemSubShapeFunc {
-          int inx; ///< An index of a shape function.
-          TrfShapeExp& svals; ///< Evaluate values of a shape function. If TrfShapeExp::empty(), no precalculated values are available.
+          /// An index of a shape function.
+          int inx;
+          /// Evaluate values of a shape function. If TrfShapeExp::empty(), no precalculated values are available.
+          TrfShapeExp& svals;
         };
 
         /// Returns an array of values of the reference solution at integration points.
@@ -313,7 +340,7 @@ namespace Hermes
         *  \param[in] intr_gip_order An order of quadrature integration. The number of quadrature points should be retrieved through a quadrature stored in the paremeter \a rsln.
         *  \return A pointer to 2D array. The first index is an index of the function expansion (f, df/dx, ...), the second index is an index of the integration point. */
         virtual void precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]) = 0;
-        
+
         /// Frees the data allocated in precalc_ref_solution.
         virtual void free_ref_solution_data(int inx_son, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]) = 0;
 

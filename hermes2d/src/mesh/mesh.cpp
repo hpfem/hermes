@@ -168,7 +168,6 @@ namespace Hermes
         return elements.get_num_items();
     }
 
-    /// Returns the number of coarse mesh elements.
     int Mesh::get_num_base_elements() const
     {
       if (this == nullptr) throw Hermes::Exceptions::Exception("this == nullptr in Mesh::get_num_base_elements().");
@@ -179,7 +178,6 @@ namespace Hermes
         return nbase;
     }
 
-    /// Returns the number of coarse mesh elements.
     int Mesh::get_num_used_base_elements() const
     {
       int toReturn = 0;
@@ -197,7 +195,6 @@ namespace Hermes
       return toReturn;
     }
 
-    /// Returns the current number of active elements in the mesh.
     int Mesh::get_num_active_elements() const
     {
       if (this == nullptr)
@@ -208,7 +205,6 @@ namespace Hermes
         return nactive;
     }
 
-    /// Returns the maximum node id number plus one.
     int Mesh::get_max_element_id() const
     {
       if (this == nullptr)
@@ -398,7 +394,6 @@ namespace Hermes
 
       // register in the nodes
       e->ref_all_nodes();
-
 
       return e;
     }
@@ -1235,7 +1230,8 @@ namespace Hermes
         for (unsigned int j = 0; j < e->get_nvert(); j++)
         {
           Node* en = MeshUtil::get_base_edge_node(e, j);
-          enew->en[j]->bnd = en->bnd; // copy bnd data from the active el.
+          // copy bnd data from the active el.
+          enew->en[j]->bnd = en->bnd;
           enew->en[j]->marker = en->marker;
         }
 
@@ -1717,8 +1713,9 @@ namespace Hermes
       nactive--;
       e->unref_all_nodes(this);
 
-      bool bcheck = true;  ///< if bcheck is true, it is default add a new_ edge between
-      ///<  vn[0] and vn[2]
+      // if bcheck is true, it is default add a new_ edge between
+      bool bcheck = true;
+      //  vn[0] and vn[2]
       double length_x_0_2 = (e->vn[0]->x - e->vn[2]->x)*(e->vn[0]->x - e->vn[2]->x);
       double length_x_1_3 = (e->vn[1]->x - e->vn[3]->x)*(e->vn[1]->x - e->vn[3]->x);
 
@@ -1764,7 +1761,8 @@ namespace Hermes
             cm[1] = new CurvMap;
             memset(cm[1], 0, sizeof(CurvMap));
           }
-          i_case2 = 1; //switch to the shorter diagonal
+          //switch to the shorter diagonal
+          i_case2 = 1;
         }
 
         for (unsigned int k = 0; k < 2; k++)
@@ -1778,7 +1776,8 @@ namespace Hermes
               int p1, p2;
 
               p1 = e->vn[(idx + i_case2) % 4]->id;
-              p2 = e->vn[(idx + i_case2 + 1) % 4]->id;  //node_temp->id;
+              //node_temp->id;
+              p2 = e->vn[(idx + i_case2 + 1) % 4]->id;
 
               Arc* curve = new Arc(angle2);
 
@@ -1887,7 +1886,8 @@ namespace Hermes
       if (e->is_triangle())
         convert_triangles_to_base(e);
       else
-        convert_quads_to_base(e);// FIXME:
+        // FIXME:
+        convert_quads_to_base(e);
 
       seq = g_mesh_seq++;
     }
@@ -2817,39 +2817,39 @@ namespace Hermes
       // Fill holes.
       while (true)
       {
-        elements_added = false;
-        for_all_active_elements(e, target_mesh)
-        {
-          NeighborSearch<double> ns(e, target_mesh);
-          ns.set_ignore_errors(true);
-          int edges_eggShell = 0;
-          for (int edge = 0; edge < e->get_nvert(); edge++)
-          {
-            // This has been taken care of above.
-            if (e->en[edge]->marker == eggShell_marker_1 || e->en[edge]->bnd)
-              continue;
+      elements_added = false;
+      for_all_active_elements(e, target_mesh)
+      {
+      NeighborSearch<double> ns(e, target_mesh);
+      ns.set_ignore_errors(true);
+      int edges_eggShell = 0;
+      for (int edge = 0; edge < e->get_nvert(); edge++)
+      {
+      // This has been taken care of above.
+      if (e->en[edge]->marker == eggShell_marker_1 || e->en[edge]->bnd)
+      continue;
 
-            ns.set_active_edge(edge);
-            for (int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
-            {
-              Element* neighbor_el = ns.get_neighb_el();
-              if (neighbor_el && neighbor_el->marker == eggShell_marker_volume)
-              {
-                edges_eggShell++;
-                break;
-              }
-            }
-          }
-          if (edges_eggShell > 2)
-          {
-            e->marker = eggShell_marker_volume;
-            elements_added = true;
-          }
-        }
-        if (elements_added)
-          EggShell::fix_hanging_nodes(target_mesh);
-        else
-          break;
+      ns.set_active_edge(edge);
+      for (int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
+      {
+      Element* neighbor_el = ns.get_neighb_el();
+      if (neighbor_el && neighbor_el->marker == eggShell_marker_volume)
+      {
+      edges_eggShell++;
+      break;
+      }
+      }
+      }
+      if (edges_eggShell > 2)
+      {
+      e->marker = eggShell_marker_volume;
+      elements_added = true;
+      }
+      }
+      if (elements_added)
+      EggShell::fix_hanging_nodes(target_mesh);
+      else
+      break;
       }
       */
 

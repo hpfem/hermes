@@ -178,7 +178,6 @@ namespace Hermes
       this->storage->ref_count++;
     }
 
-
     PrecalcShapesetAssembling::~PrecalcShapesetAssembling()
     {
       if (this->storage && this->storage->ref_count > 0)

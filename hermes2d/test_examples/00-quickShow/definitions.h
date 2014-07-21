@@ -21,8 +21,8 @@ public:
 
   virtual Ord derivative(Ord u) const;
 
-  protected:
-    double alpha;
+protected:
+  double alpha;
 };
 
 class CustomEssentialBCNonConst : public EssentialBoundaryCondition<double>
@@ -41,9 +41,9 @@ public:
   CustomInitialCondition(MeshSharedPtr mesh) : ExactSolutionScalar<double>(mesh) {};
   ~CustomInitialCondition();
 
-  virtual void derivatives (double x, double y, double& dx, double& dy) const;
+  virtual void derivatives(double x, double y, double& dx, double& dy) const;
 
-  virtual double value (double x, double y) const;
+  virtual double value(double x, double y) const;
 
   virtual Ord ord(double x, double y) const;
 
@@ -55,12 +55,12 @@ class CustomWeakFormSteadyState : public WeakForm<double>
 public:
   CustomWeakFormSteadyState(Hermes1DFunction<double>* thermal_conductivity, Hermes2DFunction<double>* heat_source);
 };
-  
+
 class CustomWeakFormTimeDependent : public CustomWeakFormSteadyState
 {
 public:
   CustomWeakFormTimeDependent(Hermes1DFunction<double>* thermal_conductivity, Hermes2DFunction<double>* heat_source, MeshFunctionSharedPtr<double> prev_sln);
-  
+
   class CustomMatrixFormVol : public DefaultMatrixFormVol<double>
   {
     CustomMatrixFormVol(int i, int j);
@@ -71,7 +71,7 @@ public:
 
     friend class CustomWeakFormTimeDependent;
   };
-  
+
   class CustomVectorFormVol : public DefaultResidualVol<double>
   {
     CustomVectorFormVol(int i);
@@ -82,7 +82,7 @@ public:
 
     friend class CustomWeakFormTimeDependent;
   };
-  
+
   class CustomResidualFormVol : public DefaultResidualVol<double>
   {
     CustomResidualFormVol(int i);

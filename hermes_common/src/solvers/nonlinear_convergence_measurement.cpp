@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -50,7 +50,7 @@ namespace Hermes
       double current_solution_change_norm = solution_change_norms.back();
 
       bool converged;
-      if(nonlinear_solver->handleMultipleTolerancesAnd)
+      if (nonlinear_solver->handleMultipleTolerancesAnd)
         converged = true;
       else
         converged = false;
@@ -63,25 +63,25 @@ namespace Hermes
       convergence_decision_value[4] = current_solution_change_norm;
       convergence_decision_value[5] = (current_solution_change_norm / previous_solution_norm);
 
-      for(int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
+      for (int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
       {
-        if(!nonlinear_solver->tolerance_set[i])
+        if (!nonlinear_solver->tolerance_set[i])
           continue;
 
-        if(i == 1 && iteration == 1)
+        if (i == 1 && iteration == 1)
         {
-          if(nonlinear_solver->handleMultipleTolerancesAnd)
+          if (nonlinear_solver->handleMultipleTolerancesAnd)
             return false;
           else
             continue;
         }
 
         bool converged_this_tolerance = (convergence_decision_value[i] < nonlinear_solver->tolerance[i]);
-        if(nonlinear_solver->handleMultipleTolerancesAnd)
+        if (nonlinear_solver->handleMultipleTolerancesAnd)
           converged = converged && converged_this_tolerance;
         else
-          if(converged_this_tolerance)
-            return true;
+        if (converged_this_tolerance)
+          return true;
       }
 
       return converged;

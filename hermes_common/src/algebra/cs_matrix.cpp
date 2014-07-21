@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -100,7 +100,6 @@ namespace Hermes
     template<typename Scalar>
     void CSMatrix<Scalar>::alloc()
     {
-
       // initialize the arrays Ap and Ai
       Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
       int aisize = this->get_num_indices();
@@ -243,7 +242,7 @@ namespace Hermes
       }
       else
       {
-        for(unsigned short i = 0; i < csMatrix->get_size(); i++)
+        for (unsigned short i = 0; i < csMatrix->get_size(); i++)
         {
           int index = csMatrix->Ap[i];
           for (int j = 0; j < csMatrix->Ap[i + 1] - index; j++)
@@ -513,56 +512,56 @@ namespace Hermes
 #ifdef WITH_BSON
       case EXPORT_FORMAT_BSON:
       {
-        // Init bson
-        bson bw;
-        bson_init(&bw);
+                               // Init bson
+                               bson bw;
+                               bson_init(&bw);
 
-        // Matrix size.
-        bson_append_int(&bw, "size", this->size);
-        // Nonzeros.
-        bson_append_int(&bw, "nnz", this->nnz);
+                               // Matrix size.
+                               bson_append_int(&bw, "size", this->size);
+                               // Nonzeros.
+                               bson_append_int(&bw, "nnz", this->nnz);
 
-        if (invert_storage)
-          this->switch_orientation();
+                               if (invert_storage)
+                                 this->switch_orientation();
 
-        bson_append_start_array(&bw, "Ap");
-        for (unsigned int i = 0; i < this->size; i++)
-          bson_append_int(&bw, "p", this->Ap[i]);
-        bson_append_finish_array(&bw);
+                               bson_append_start_array(&bw, "Ap");
+                               for (unsigned int i = 0; i < this->size; i++)
+                                 bson_append_int(&bw, "p", this->Ap[i]);
+                               bson_append_finish_array(&bw);
 
-        bson_append_start_array(&bw, "Ai");
-        for (unsigned int i = 0; i < this->nnz; i++)
-          bson_append_int(&bw, "i", this->Ai[i]);
-        bson_append_finish_array(&bw);
+                               bson_append_start_array(&bw, "Ai");
+                               for (unsigned int i = 0; i < this->nnz; i++)
+                                 bson_append_int(&bw, "i", this->Ai[i]);
+                               bson_append_finish_array(&bw);
 
-        bson_append_start_array(&bw, "Ax");
-        for (unsigned int i = 0; i < this->nnz; i++)
-          bson_append_double(&bw, "x", real(this->Ax[i]));
-        bson_append_finish_array(&bw);
+                               bson_append_start_array(&bw, "Ax");
+                               for (unsigned int i = 0; i < this->nnz; i++)
+                                 bson_append_double(&bw, "x", real(this->Ax[i]));
+                               bson_append_finish_array(&bw);
 
-        if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
-        {
-          bson_append_start_array(&bw, "Ax-imag");
-          for (unsigned int i = 0; i < this->nnz; i++)
-            bson_append_double(&bw, "x-i", imag(this->Ax[i]));
-          bson_append_finish_array(&bw);
-        }
-        bson_append_finish_array(&bw);
+                               if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+                               {
+                                 bson_append_start_array(&bw, "Ax-imag");
+                                 for (unsigned int i = 0; i < this->nnz; i++)
+                                   bson_append_double(&bw, "x-i", imag(this->Ax[i]));
+                                 bson_append_finish_array(&bw);
+                               }
+                               bson_append_finish_array(&bw);
 
-        if (invert_storage)
-          this->switch_orientation();
+                               if (invert_storage)
+                                 this->switch_orientation();
 
-        // Done.
-        bson_finish(&bw);
+                               // Done.
+                               bson_finish(&bw);
 
-        // Write to disk.
-        FILE *fpw;
-        fpw = fopen(filename, "wb");
-        const char *dataw = (const char *)bson_data(&bw);
-        fwrite(dataw, bson_size(&bw), 1, fpw);
-        fclose(fpw);
+                               // Write to disk.
+                               FILE *fpw;
+                               fpw = fopen(filename, "wb");
+                               const char *dataw = (const char *)bson_data(&bw);
+                               fwrite(dataw, bson_size(&bw), 1, fpw);
+                               fclose(fpw);
 
-        bson_destroy(&bw);
+                               bson_destroy(&bw);
       }
         break;
 #endif
@@ -697,14 +696,14 @@ namespace Hermes
                                while (bson_iterator_next(&it))
                                  this->Ai[index_coeff++] = bson_iterator_int(&it);
 
-                                bson_find(&it_coeffs, &br, "Ax");
-                                bson_iterator_subobject_init(&it_coeffs, &sub, 0);
-                                bson_iterator_init(&it, &sub);
-                                index_coeff = 0;
-                                while (bson_iterator_next(&it))
-                                  this->Ax[index_coeff++] = bson_iterator_double(&it);
-                               
-                                if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+                               bson_find(&it_coeffs, &br, "Ax");
+                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+                               bson_iterator_init(&it, &sub);
+                               index_coeff = 0;
+                               while (bson_iterator_next(&it))
+                                 this->Ax[index_coeff++] = bson_iterator_double(&it);
+
+                               if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
                                {
                                  bson_find(&it_coeffs, &br, "Ax-imag");
                                  bson_iterator_subobject_init(&it_coeffs, &sub, 0);
@@ -714,8 +713,8 @@ namespace Hermes
                                    ((std::complex<double>)this->Ax[index_coeff++]).imag(bson_iterator_double(&it));
                                }
 
-                                if (invert_storage)
-                                  this->switch_orientation();
+                               if (invert_storage)
+                                 this->switch_orientation();
 
                                bson_destroy(&br);
                                free_with_check(datar);

@@ -88,7 +88,7 @@ namespace Hermes
       ~Shapeset();
 
       /// Shape-function function type. Internal.
-      typedef double (*shape_fn_t)(double, double);
+      typedef double(*shape_fn_t)(double, double);
 
       /// Returns the polynomial degree of the specified shape function.
       /// If on quads, it returns encoded orders. The orders has to be decoded through macros
@@ -113,7 +113,7 @@ namespace Hermes
       /// Returns the index of an edge function associated with the specified edge and of the
       /// requested order. 'ori' can be 0 or 1 and determines edge orientation (this is for
       /// shapesets with non-symmetric edge functions).
-       short get_edge_index(unsigned char edge, unsigned short ori, unsigned short order, ElementMode2D mode) const;
+      short get_edge_index(unsigned char edge, unsigned short ori, unsigned short order, ElementMode2D mode) const;
 
       /// Returns space type.
       /// Internal.
@@ -127,9 +127,9 @@ namespace Hermes
       /// domain, component is 0 for Scalar shapesets and 0 or 1 for vector shapesets.
       double get_value(int n, int index, double x, double y, unsigned short component, ElementMode2D mode);
 
-      double get_fn_value (int index, double x, double y, unsigned short component, ElementMode2D mode);
-      double get_dx_value (int index, double x, double y, unsigned short component, ElementMode2D mode);
-      double get_dy_value (int index, double x, double y, unsigned short component, ElementMode2D mode);
+      double get_fn_value(int index, double x, double y, unsigned short component, ElementMode2D mode);
+      double get_dx_value(int index, double x, double y, unsigned short component, ElementMode2D mode);
+      double get_dy_value(int index, double x, double y, unsigned short component, ElementMode2D mode);
 
       /// The most used calls are distinguished for optimization.
       double get_fn_value_0_tri(int index, double x, double y);
@@ -175,7 +175,8 @@ namespace Hermes
       unsigned char max_order, min_order;
       unsigned char num_components;
 
-      unsigned short ebias; ///< 2 for H1 shapesets, 0 for H(curl) shapesets. It is the order of the
+      /// 2 for H1 shapesets, 0 for H(curl) shapesets. It is the order of the
+      unsigned short ebias;
       ///< first edge function.
 
       double** comb_table;

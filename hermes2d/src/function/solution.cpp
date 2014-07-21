@@ -339,7 +339,7 @@ namespace Hermes
         throw Exceptions::Exception("Mesh == nullptr in Solution<Scalar>::set_coeff_vector().");
       Helpers::check_for_null(space->get_mesh());
       Helpers::check_for_null(coeff_vec);
-      
+
       if (!space->is_up_to_date())
         throw Exceptions::Exception("Provided 'space' is not up to date.");
 
@@ -773,9 +773,12 @@ namespace Hermes
             Scalar vyy = this->values[0][4][i];
             Scalar vxy = this->values[0][5][i];
 
-            this->values[0][3][i] = sqr((*m)[0][0])*vxx + 2 * (*m)[0][1] * (*m)[0][0] * vxy + sqr((*m)[0][1])*vyy + (*mm)[0][0] * vx + (*mm)[0][1] * vy;   // dxx
-            this->values[0][4][i] = sqr((*m)[1][0])*vxx + 2 * (*m)[1][1] * (*m)[1][0] * vxy + sqr((*m)[1][1])*vyy + (*mm)[2][0] * vx + (*mm)[2][1] * vy;   // dyy
-            this->values[0][5][i] = (*m)[0][0] * (*m)[1][0] * vxx + ((*m)[0][0] * (*m)[1][1] + (*m)[1][0] * (*m)[0][1])*vxy + (*m)[0][1] * (*m)[1][1] * vyy + (*mm)[1][0] * vx + (*mm)[1][1] * vy;   //dxy
+            // dxx
+            this->values[0][3][i] = sqr((*m)[0][0])*vxx + 2 * (*m)[0][1] * (*m)[0][0] * vxy + sqr((*m)[0][1])*vyy + (*mm)[0][0] * vx + (*mm)[0][1] * vy;
+            // dyy
+            this->values[0][4][i] = sqr((*m)[1][0])*vxx + 2 * (*m)[1][1] * (*m)[1][0] * vxy + sqr((*m)[1][1])*vyy + (*mm)[2][0] * vx + (*mm)[2][1] * vy;
+            //dxy
+            this->values[0][5][i] = (*m)[0][0] * (*m)[1][0] * vxx + ((*m)[0][0] * (*m)[1][1] + (*m)[1][0] * (*m)[0][1])*vxy + (*m)[0][1] * (*m)[1][1] * vyy + (*mm)[1][0] * vx + (*mm)[1][1] * vy;
           }
         }
 #endif
@@ -1312,7 +1315,6 @@ namespace Hermes
           for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
           for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
             this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).c();
-
         }
         init_dxdy_buffer();
       }
@@ -1594,7 +1596,7 @@ namespace Hermes
         while (bson_iterator_next(&it))
           imag_coeffs.push_back(bson_iterator_double(&it));
 
-        for(unsigned short i = 0; i < imag_coeffs.size(); i++)
+        for (unsigned short i = 0; i < imag_coeffs.size(); i++)
           this->mono_coeffs[i] = std::complex<double>(real_coeffs[i], imag_coeffs[i]);
 
         // elem order
@@ -1715,8 +1717,10 @@ namespace Hermes
           this->refmap.inv_ref_map_at_point(xi1, xi2, xx, yy, m);
           Scalar dx = get_ref_value(e, xi1, xi2, a, 1);
           Scalar dy = get_ref_value(e, xi1, xi2, a, 2);
-          if (b == 1) return m[0][0] * dx + m[0][1] * dy; // H2D_FN_DX
-          if (b == 2) return m[1][0] * dx + m[1][1] * dy; // H2D_FN_DY
+          // H2D_FN_DX
+          if (b == 1) return m[0][0] * dx + m[0][1] * dy;
+          // H2D_FN_DY
+          if (b == 2) return m[1][0] * dx + m[1][1] * dy;
         }
 #ifdef H2D_USE_SECOND_DERIVATIVES
         else
@@ -1734,11 +1738,14 @@ namespace Hermes
           Scalar vxy = get_ref_value(e, xi1, xi2, a, 5);
           this->refmap.second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
           if (b == 3)
-            return sqr(mat[0][0])*vxx + 2 * mat[0][1] * mat[0][0] * vxy + sqr(mat[0][1])*vyy + mat2[0][0] * vx + mat2[0][1] * vy;   // dxx
+            // dxx
+            return sqr(mat[0][0])*vxx + 2 * mat[0][1] * mat[0][0] * vxy + sqr(mat[0][1])*vyy + mat2[0][0] * vx + mat2[0][1] * vy;
           if (b == 4)
-            return sqr(mat[1][0])*vxx + 2 * mat[1][1] * mat[1][0] * vxy + sqr(mat[1][1])*vyy + mat2[2][0] * vx + mat2[2][1] * vy;   // dyy
+            // dyy
+            return sqr(mat[1][0])*vxx + 2 * mat[1][1] * mat[1][0] * vxy + sqr(mat[1][1])*vyy + mat2[2][0] * vx + mat2[2][1] * vy;
           if (b == 5)
-            return mat[0][0] * mat[1][0] * vxx + (mat[0][0] * mat[1][1] + mat[1][0] * mat[0][1])*vxy + mat[0][1] * mat[1][1] * vyy + mat2[1][0] * vx + mat2[1][1] * vy;   //dxy
+            //dxy
+            return mat[0][0] * mat[1][0] * vxx + (mat[0][0] * mat[1][1] + mat[1][0] * mat[0][1])*vxy + mat[0][1] * mat[1][1] * vyy + mat2[1][0] * vx + mat2[1][1] * vy;
         }
 #else
         throw Exceptions::Exception("Hermes not built with second derivatives support. Consult the macro H2D_USE_SECOND_DERIVATIVES.");
@@ -1753,8 +1760,10 @@ namespace Hermes
           this->refmap.inv_ref_map_at_point(xi1, xi2, xx, yy, m);
           Scalar vx = get_ref_value(e, xi1, xi2, 0, 0);
           Scalar vy = get_ref_value(e, xi1, xi2, 1, 0);
-          if (a == 0) return m[0][0] * vx + m[0][1] * vy; // H2D_FN_VAL_0
-          if (a == 1) return m[1][0] * vx + m[1][1] * vy; // H2D_FN_VAL_1
+          // H2D_FN_VAL_0
+          if (a == 0) return m[0][0] * vx + m[0][1] * vy;
+          // H2D_FN_VAL_1
+          if (a == 1) return m[1][0] * vx + m[1][1] * vy;
         }
         else
           throw Hermes::Exceptions::Exception("Getting derivatives of the vector solution: Not implemented yet.");
@@ -1892,8 +1901,10 @@ namespace Hermes
             Scalar vxx = get_ref_value(e, xi1, xi2, 0, 3);
             Scalar vyy = get_ref_value(e, xi1, xi2, 0, 4);
             Scalar vxy = get_ref_value(e, xi1, xi2, 0, 5);
-            Scalar dxx = sqr(mat[0][0])*vxx + 2 * mat[0][1] * mat[0][0] * vxy + sqr(mat[0][1])*vyy + mat2[0][0] * dx + mat2[0][1] * dy;   // dxx
-            Scalar dyy = sqr(mat[1][0])*vxx + 2 * mat[1][1] * mat[1][0] * vxy + sqr(mat[1][1])*vyy + mat2[2][0] * dx + mat2[2][1] * dy;   // dyy
+            // dxx
+            Scalar dxx = sqr(mat[0][0])*vxx + 2 * mat[0][1] * mat[0][0] * vxy + sqr(mat[0][1])*vyy + mat2[0][0] * dx + mat2[0][1] * dy;
+            // dyy
+            Scalar dyy = sqr(mat[1][0])*vxx + 2 * mat[1][1] * mat[1][0] * vxy + sqr(mat[1][1])*vyy + mat2[2][0] * dx + mat2[2][1] * dy;
             toReturn->laplace[0] = dxx + dyy;
 #endif
           }

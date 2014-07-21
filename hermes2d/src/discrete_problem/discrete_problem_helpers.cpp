@@ -25,7 +25,6 @@ namespace Hermes
       template<typename Scalar>
       DiscreteProblemRungeKutta<Scalar>::DiscreteProblemRungeKutta() : rungeKutta(false), RK_original_spaces_count(0), force_diagonal_blocks(false), block_weights(nullptr)
       {
-
       }
 
       template<typename Scalar>

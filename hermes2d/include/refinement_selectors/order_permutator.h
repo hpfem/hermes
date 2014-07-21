@@ -37,14 +37,22 @@ namespace Hermes
       class HERMES_API OrderPermutator
       {
       protected:
-        unsigned short order_h; ///< The current horizontal order.
-        unsigned short order_v; ///< The current verical order.
-        unsigned short start_order_h; ///< The starting horizontal order.
-        unsigned short start_order_v; ///< The starting vertical order.
-        unsigned short end_order_h; ///< The ending horizontal order.
-        unsigned short end_order_v; ///< The ending vertical order.
-        bool iso_p; ///< True if orders is incresed in both the horizontal order and the vertical order are increased simultaneously.
-        unsigned short* tgt_quad_order; ///< A pointer to which a current order is stored in encoded form. Ignored if nullptr.
+        /// The current horizontal order.
+        unsigned short order_h;
+        /// The current verical order.
+        unsigned short order_v;
+        /// The starting horizontal order.
+        unsigned short start_order_h;
+        /// The starting vertical order.
+        unsigned short start_order_v;
+        /// The ending horizontal order.
+        unsigned short end_order_h;
+        /// The ending vertical order.
+        unsigned short end_order_v;
+        /// True if orders is incresed in both the horizontal order and the vertical order are increased simultaneously.
+        bool iso_p;
+        /// A pointer to which a current order is stored in encoded form. Ignored if nullptr.
+        unsigned short* tgt_quad_order;
 
       public:
         /// Constructor.

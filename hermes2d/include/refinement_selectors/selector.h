@@ -61,18 +61,20 @@ namespace Hermes
       {
       public:
         virtual ~Selector() {};
-          /// Selects a refinement.
-          /** This methods has to be implemented.
-          *  \param[in] element An element which is being refined.
-          *  \param[in] quad_order An encoded order of the element.
-          *  \param[in] rsln A reference solution which is used to select a refinement.
-          *  \param[out] refinement A selected refinement. It contains a valid contents if and only if the method returns true.
-          *  \return True if a refinement was proposed. False if the selector is unable to select a refinement or it suggest that the element should not be refined. */
-          virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement) = 0;
-          
+        /// Selects a refinement.
+        /** This methods has to be implemented.
+        *  \param[in] element An element which is being refined.
+        *  \param[in] quad_order An encoded order of the element.
+        *  \param[in] rsln A reference solution which is used to select a refinement.
+        *  \param[out] refinement A selected refinement. It contains a valid contents if and only if the method returns true.
+        *  \return True if a refinement was proposed. False if the selector is unable to select a refinement or it suggest that the element should not be refined. */
+        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement) = 0;
+
       protected:
-        const int min_order; ///< A minimum allowed order.
-        const int max_order; ///< A maximum allowed order.
+        /// A minimum allowed order.
+        const int min_order;
+        /// A maximum allowed order.
+        const int max_order;
 
         /// Constructor
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used. */
@@ -92,7 +94,7 @@ namespace Hermes
         /// Selects a refinement.
         /** Selects a H-refienements. For details, see Selector::select_refinement. */
         virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement);
-        
+
         template<typename T> friend class Adapt;
         template<typename T> friend class KellyTypeAdapt;
       };
@@ -100,8 +102,10 @@ namespace Hermes
       /// A selector that increases order (i.e., it selects P-refinements only). \ingroup g_selectors
       template<typename Scalar>
       class HERMES_API POnlySelector : public Selector<Scalar> {
-        const int order_h_inc; ///< Increase along the horizontal direction in a quadrilateral or increase of an order in a triangle.
-        const int order_v_inc; ///< Increase along the vertical direction in a quadrilateral.
+        /// Increase along the horizontal direction in a quadrilateral or increase of an order in a triangle.
+        const int order_h_inc;
+        /// Increase along the vertical direction in a quadrilateral.
+        const int order_v_inc;
       public:
         /// Constructor.
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used.

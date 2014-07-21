@@ -417,7 +417,8 @@ namespace Hermes
         fprintf(f, "CELL_TYPES %d\n", this->get_triangle_count());
         for (int i = 0; i < this->get_triangle_count(); i++)
         {
-          fprintf(f, "5\n");    // The "5" means triangle in VTK.
+          // The "5" means triangle in VTK.
+          fprintf(f, "5\n");
         }
 
         // This outputs double solution values.
@@ -664,7 +665,6 @@ namespace Hermes
       {
         return this->linearizer->threadLinearizerMultidimensional[this->current_thread]->triangle_markers[this->current_thread_index];
       }
-
 
       template<typename LinearizerDataDimensions>
 #ifdef _MSC_VER

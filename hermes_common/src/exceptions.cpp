@@ -66,7 +66,6 @@ namespace Hermes
       return this->message.str();
     }
 
-
     IOException::IOException(ReadWrite readWrite, const char* filename_) : Exception(), readWrite(readWrite)
     {
       std::stringstream ss;

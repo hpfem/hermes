@@ -156,7 +156,8 @@ namespace Hermes
         if (mode == 1)
         {
           float color[3];
-          get_palette_color((mag - min) / (max - min), color); //  0.0 -- 1.0
+          //  0.0 -- 1.0
+          get_palette_color((mag - min) / (max - min), color);
           glColor3f(color[0], color[1], color[2]);
 
           if (mag / (max - min) < 1e-5)
@@ -323,7 +324,6 @@ namespace Hermes
                 }
               };
 
-
               if ((tvert[0][0] < -gs) && (tvert[1][0] < -gs) && (tvert[2][0] < -gs)) continue;
               if ((tvert[0][0] >  ww) && (tvert[1][0] >  ww) && (tvert[2][0] >  ww)) continue;
               if ((tvert[0][1] < -gt) && (tvert[1][1] < -gt) && (tvert[2][1] < -gt)) continue;
@@ -350,7 +350,8 @@ namespace Hermes
                 a[n] /= c[n]; b[n] /= c[n]; d[n] /= c[n];
               }
 
-              s = (int)ceil((tvert[l1][1] - gy) / gt);  // first step
+              // first step
+              s = (int)ceil((tvert[l1][1] - gy) / gt);
               lry = gy + s*gt;
               bool shift = hexa && (s & 1);
 

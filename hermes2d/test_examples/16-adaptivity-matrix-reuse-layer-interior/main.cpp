@@ -5,15 +5,14 @@ using namespace Hermes::Hermes2D;
 using namespace Hermes::Hermes2D::Views;
 using namespace Hermes::Hermes2D::RefinementSelectors;
 
-
 // Initial polynomial degree of mesh elements.
-const int P_INIT = 2;                             
+const int P_INIT = 2;
 // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM = 3;
 
 // Problem parameters.
 // Slope of the layer.
-double slope = 60;                                
+double slope = 60;
 
 int main(int argc, char* argv[])
 {
@@ -26,7 +25,7 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++)
     mesh->refine_all_elements();
-  
+
   // Define exact solution.
   MeshFunctionSharedPtr<double> exact_sln(new CustomExactSolution(mesh, slope));
 
@@ -36,14 +35,14 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   Hermes::Hermes1DFunction<double> lambda(1.0);
   WeakFormSharedPtr<double> wf(new DefaultWeakFormPoissonLinear<double>(HERMES_ANY, &f));
-  
+
   // Initialize boundary conditions
   DefaultEssentialBCNonConst<double> bc_essential("Bdy", exact_sln);
   EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   SpaceSharedPtr<double> space(new H1Space<double>(mesh, &bcs, P_INIT));
-  
+
   // Initialize approximate solution.
   MeshFunctionSharedPtr<double> sln(new Solution<double>());
 
@@ -52,7 +51,7 @@ int main(int argc, char* argv[])
 
   DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(CalculatedErrorType::RelativeErrorToGlobalNorm, 1);
   AdaptStoppingCriterionCumulative<double> criterion(0.3);
-  
+
   AdaptSolverCriterionFixed global_criterion(20);
 
   AdaptSolver<double, LinearSolver<double> > adaptSolver(space, wf, &errorCalculator, &criterion, &selector, &global_criterion);

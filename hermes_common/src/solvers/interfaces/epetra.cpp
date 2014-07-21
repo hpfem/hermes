@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -411,7 +411,8 @@ namespace Hermes
     template<typename Scalar>
     void EpetraVector<Scalar>::extract(Scalar *v) const
     {
-      vec->ExtractCopy((double *)v); ///< \todo this can't be used with complex numbers
+      /// \todo this can't be used with complex numbers
+      vec->ExtractCopy((double *)v);
     }
 
     template<typename Scalar>

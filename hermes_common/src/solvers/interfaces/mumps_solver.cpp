@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -175,7 +175,8 @@ namespace Hermes
       pos += this->Ap[n];
 #pragma omp atomic
       Ax[pos] += v;
-      irn[pos] = m + 1;  // MUMPS is indexing from 1
+      // MUMPS is indexing from 1
+      irn[pos] = m + 1;
       jcn[pos] = n + 1;
     }
 
@@ -191,7 +192,8 @@ namespace Hermes
       pos += this->Ap[n];
 #pragma omp critical (MumpsMatrix_add)
       Ax[pos] += v;
-      irn[pos] = m + 1;  // MUMPS is indexing from 1
+      // MUMPS is indexing from 1
+      irn[pos] = m + 1;
       jcn[pos] = n + 1;
     }
 
@@ -285,8 +287,8 @@ namespace Hermes
                                        }
                                        if (invert_storage)
                                          this->switch_orientation();
-                                        free_with_check(Ax_re);
-                                        free_with_check(Ax_im);
+                                       free_with_check(Ax_re);
+                                       free_with_check(Ax_im);
                                        Mat_Close(mat);
 
                                        if (!matvar)
@@ -644,7 +646,8 @@ namespace Hermes
         // Initial values for some fields of the MUMPS_STRUC structure that may be accessed
         // before MUMPS has been initialized.
         param.rhs = nullptr;
-        param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
+        // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
+        param.INFOG(33) = -999;
         // in setup_factorization()
       }
 
@@ -685,7 +688,8 @@ namespace Hermes
     {
       switch (param.INFOG(1))
       {
-      case 0: return true; // no error
+        // no error
+      case 0: return true;
       case -1: throw Hermes::Exceptions::LinearMatrixSolverException("Error occured on processor %d", MUMPS_INFO(param, 2)); break;
       case -2: throw Hermes::Exceptions::LinearMatrixSolverException("Number of nonzeros (NNZ) is out of range."); break;
       case -3: throw Hermes::Exceptions::LinearMatrixSolverException("MUMPS called with an invalid option for JOB."); break;
@@ -712,8 +716,10 @@ namespace Hermes
       }
 
       param.job = JOB_INIT;
-      param.par = 1; // host also performs calculations
-      param.sym = 0; // 0 = unsymmetric
+      // host also performs calculations
+      param.par = 1;
+      // 0 = unsymmetric
+      param.sym = 0;
       param.comm_fortran = USE_COMM_WORLD;
 
       mumps_c(&param);
@@ -727,10 +733,14 @@ namespace Hermes
         param.ICNTL(3) = -1;
         param.ICNTL(4) = 0;
 
-        param.ICNTL(5) = 0;  // =/ both centralized assembled matrix
-        param.ICNTL(18) = 0; // =\ both centralized assembled matrix
-        param.ICNTL(20) = 0; // centralized dense RHS
-        param.ICNTL(21) = 0; // centralized dense solution
+        // =/ both centralized assembled matrix
+        param.ICNTL(5) = 0;
+        // =\ both centralized assembled matrix
+        param.ICNTL(18) = 0;
+        // centralized dense RHS
+        param.ICNTL(20) = 0;
+        // centralized dense solution
+        param.ICNTL(21) = 0;
 
         // Fixing the memory problems - this parameter specifies the maximum
         // extra fill-in.

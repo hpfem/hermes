@@ -35,10 +35,10 @@ namespace Hermes
     /// This class does assembling into external matrix / vector structures.
     ///
     template<typename Scalar>
-    class HERMES_API DiscreteProblem : 
+    class HERMES_API DiscreteProblem :
       public Hermes::Mixins::Loggable,
       public Hermes::Mixins::TimeMeasurable,
-      public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
+      public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>,
       public Hermes::Mixins::StateQueryable,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
@@ -140,12 +140,12 @@ namespace Hermes
 
       /// Internal.
       bool nonlinear, add_dirichlet_lift;
-      
+
       /// DiscreteProblemMatrixVector methods.
       bool set_matrix(SparseMatrix<Scalar>* mat);
       bool set_rhs(Vector<Scalar>* rhs);
       void invalidate_matrix();
-      
+
       /// Assembly data.
       DiscreteProblemThreadAssembler<Scalar>** threadAssembler;
 

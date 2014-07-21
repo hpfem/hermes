@@ -32,7 +32,7 @@ namespace Hermes
     /// \brief This class is a one-thread (non-DG) assembly worker.
     ///
     template<typename Scalar>
-    class HERMES_API DiscreteProblemThreadAssembler : 
+    class HERMES_API DiscreteProblemThreadAssembler :
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
@@ -89,10 +89,10 @@ namespace Hermes
         int n_quadrature_points, Geom* geometry, double* jacobian_x_weights);
       /// De-initialization of 1 state assembly
       void deinit_assembling_one_state();
-      
+
       /// De-initialization.
       void deinit_assembling();
-      
+
       /// Free space-related data.
       void free_spaces();
       /// Free weak formulation data.
@@ -108,10 +108,10 @@ namespace Hermes
       RefMap* rep_refmap;
       Solution<Scalar>** u_ext;
       std::vector<Transformable *> fns;
-      
+
       /// For selective reassembling.
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;
-      
+
       /// Currently assembled state.
       Traverse::State* current_state;
       /// Current local matrix.

@@ -45,7 +45,8 @@ namespace Hermes
       /// Returns the maximum node id number plus one.
       int get_max_node_id() const;
 
-      static const int H2D_DEFAULT_HASH_SIZE = 0x8000; // 32K entries
+      /// 32K entries
+      static const int H2D_DEFAULT_HASH_SIZE = 0x8000;
 
       /// Returns a vertex node with parent id's p1 and p2 if it exists, nullptr otherwise.
       Node* peek_vertex_node(int p1, int p2) const;
@@ -70,7 +71,8 @@ namespace Hermes
       /// created first.
       Node* get_edge_node(int p1, int p2);
 
-      Array<Node> nodes; ///< Array storing all nodes
+      /// Array storing all nodes
+      Array<Node> nodes;
 
       /// Initializes the hash table.
       /// \param size[in] Hash table size; must be a power of two.
@@ -94,12 +96,14 @@ namespace Hermes
       // Internal members
     private:
 
-      Node** v_table; ///< Vertex node hash table
-      Node** e_table; ///< Edge node hash table
+      /// Vertex node hash table
+      Node** v_table;
+      /// Edge node hash table
+      Node** e_table;
 
       int mask;
 
-      inline int hash(int p1, int p2) const { return (984120265*p1 + 125965121*p2) & mask; }
+      inline int hash(int p1, int p2) const { return (984120265 * p1 + 125965121 * p2) & mask; }
 
       /// Searches a list of hash synonyms given the first list item.
       /// Returns the node matching the parent ids p1 and p2.

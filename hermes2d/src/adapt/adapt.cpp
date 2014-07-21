@@ -201,12 +201,12 @@ namespace Hermes
       if (refinement_selectors.empty())
         throw Exceptions::NullException(1);
       Helpers::check_length(refinement_selectors, this->spaces);
-      
+
       // Get meshes
       for (int j = 0; j < this->num; j++)
       {
         meshes[j] = this->meshes[j];
-        element_refinement_location[j] = calloc_with_check<Adapt<Scalar>, ElementToRefine*> (meshes[j]->get_max_element_id() + 1, this);
+        element_refinement_location[j] = calloc_with_check<Adapt<Scalar>, ElementToRefine*>(meshes[j]->get_max_element_id() + 1, this);
       }
 
       // Clearing.
@@ -527,7 +527,8 @@ namespace Hermes
         for (int j = 0; j < this->num; j++)
         {
           if (selected_refinement == H2D_REFINEMENT_H)
-            break; // iso refinement is max what can be recieved
+            // iso refinement is max what can be recieved
+            break;
 
           // if a mesh is shared
           if (j != elem_ref.comp && meshes[j]->get_seq() == meshes[elem_ref.comp]->get_seq())
@@ -578,7 +579,7 @@ namespace Hermes
                     // This should occur only if the original refinement was a p-refinement.
 #ifdef _DEBUG
                     this->warn("The best refinement poly degree is missing in fix_shared_mesh_refinements.");
-#endif 
+#endif
                     elem_ref_ii->refinement_polynomial_order[3] = elem_ref_ii->refinement_polynomial_order[2] = elem_ref_ii->refinement_polynomial_order[1] = elem_ref_ii->refinement_polynomial_order[0];
                   }
                 }
@@ -604,7 +605,7 @@ namespace Hermes
         free_with_check(elems_to_refine);
         elems_to_refine = new_elems_to_refine_array;
 
-        for(unsigned short inx = 0; inx < new_elems_to_refine.size(); inx++)
+        for (unsigned short inx = 0; inx < new_elems_to_refine.size(); inx++)
           elems_to_refine[num_elem_to_proc + inx] = new_elems_to_refine[inx];
         num_elem_to_proc += new_elems_to_refine.size();
       }

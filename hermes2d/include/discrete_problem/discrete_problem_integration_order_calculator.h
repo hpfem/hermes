@@ -56,7 +56,7 @@ namespace Hermes
 
       /// Order calculation.
       int calculate_order(const std::vector<SpaceSharedPtr<Scalar> >& spaces, RefMap** current_refmaps, WeakFormSharedPtr<Scalar> current_wf);
-    
+
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for previous nonlinear iterations.
       Func<Hermes::Ord>** init_u_ext_orders();
@@ -83,7 +83,7 @@ namespace Hermes
       /// Initialize orders of external functions for DG forms.
       DiscontinuousFunc<Hermes::Ord>** init_ext_fns_ord(std::vector<MeshFunctionSharedPtr<Scalar> > &ext,
         NeighborSearch<Scalar>** neighbor_searches);
-      
+
       /// Deinitialize orders of external functions for DG forms.
       template<typename FormType>
       void deinit_ext_fns_ord(Form<Scalar> *form, FormType** oi, FormType** oext);

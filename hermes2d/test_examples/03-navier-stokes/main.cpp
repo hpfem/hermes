@@ -67,10 +67,14 @@ double current_time = 0;
 // from 0 to VEL_INLET, then it stays constant.
 const double STARTUP_TIME = 1.0;
 
-const double TAU = 0.1;                           // Time step.
-const double T_FINAL = 10.0;                      // Time interval length.
-const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
-const double H = 5;                               // Domain height (necessary to define the parabolic velocity profile at inlet).
+// Time step.
+const double TAU = 0.1;
+// Time interval length.
+const double T_FINAL = 10.0;
+// Stopping criterion for the Newton's method.
+const double NEWTON_TOL = 1e-3;
+// Domain height (necessary to define the parabolic velocity profile at inlet).
+const double H = 5;
 
 // Boundary markers.
 const std::string BDY_BOTTOM = "1";
@@ -110,7 +114,7 @@ int main(int argc, char* argv[])
   // Use Saddle-point preconditioner.
   newton.get_linear_matrix_solver()->as_IterSolver()->set_precond(new Preconditioners::ParalutionPrecond<double>(Preconditioners::PreconditionerType::SaddlePoint));
 #endif
- 
+
   // Newton method setup:
   // - max allowed iterations
   newton.set_max_allowed_iterations(10);
@@ -138,7 +142,7 @@ int main(int argc, char* argv[])
     vview.set_title("Velocity, time %g", current_time);
     //vview.get_vectorizer()->set_criterion(Views::LinearizerCriterionFixed(2));
     vview.show(xvel_prev_time, yvel_prev_time);
-    
+
     pview.set_title("Pressure, time %g", current_time);
     //pview.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(2));
     pview.show(p_prev_time);

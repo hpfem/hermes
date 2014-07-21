@@ -178,7 +178,6 @@ namespace Hermes
 
       for (i = 0; i < nc; i++)
       {
-
         double coeff_0 = coeffs[i][0];
         double coeff_1 = coeffs[i][1];
         ref_map_pss.set_active_shape(indices[i]);
@@ -457,20 +456,26 @@ namespace Hermes
         // coefficients in second derivative with respect to xx
         a = sqr(m[j][0][0])*k[j][0][0] + 2 * m[j][0][0] * m[j][0][1] * k[j][1][0] + sqr(m[j][0][1])*k[j][2][0];
         b = sqr(m[j][0][0])*k[j][0][1] + 2 * m[j][0][0] * m[j][0][1] * k[j][1][1] + sqr(m[j][0][1])*k[j][2][1];
-        mm[j][0][0] = -(a * m[j][0][0] + b * m[j][1][0]); // du/dx
-        mm[j][0][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
+        // du/dx
+        mm[j][0][0] = -(a * m[j][0][0] + b * m[j][1][0]);
+        // du/dy
+        mm[j][0][1] = -(a * m[j][0][1] + b * m[j][1][1]);
 
         // coefficients in second derivative with respect to xy
         a = m[j][0][0] * m[j][1][0] * k[j][0][0] + (m[j][0][1] * m[j][1][0] + m[j][0][0] * m[j][1][1])*k[j][1][0] + m[j][0][1] * m[j][1][1] * k[j][2][0];
         b = m[j][0][0] * m[j][1][0] * k[j][0][1] + (m[j][0][1] * m[j][1][0] + m[j][0][0] * m[j][1][1])*k[j][1][1] + m[j][0][1] * m[j][1][1] * k[j][2][1];
-        mm[j][1][0] = -(a * m[j][0][0] + b * m[j][1][0]); // du/dx
-        mm[j][1][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
+        // du/dx
+        mm[j][1][0] = -(a * m[j][0][0] + b * m[j][1][0]);
+        // du/dy
+        mm[j][1][1] = -(a * m[j][0][1] + b * m[j][1][1]);
 
         // coefficients in second derivative with respect to yy
         a = sqr(m[j][1][0])*k[j][0][0] + 2 * m[j][1][0] * m[j][1][1] * k[j][1][0] + sqr(m[j][1][1])*k[j][2][0];
         b = sqr(m[j][1][0])*k[j][0][1] + 2 * m[j][1][0] * m[j][1][1] * k[j][1][1] + sqr(m[j][1][1])*k[j][2][1];
-        mm[j][2][0] = -(a * m[j][0][0] + b * m[j][1][0]); // du/dx
-        mm[j][2][1] = -(a * m[j][0][1] + b * m[j][1][1]); // du/dy
+        // du/dx
+        mm[j][2][0] = -(a * m[j][0][0] + b * m[j][1][0]);
+        // du/dy
+        mm[j][2][1] = -(a * m[j][0][1] + b * m[j][1][1]);
       }
 
       free_with_check(k);
@@ -510,20 +515,26 @@ namespace Hermes
       // coefficients in second derivative with respect to xx
       a = sqr(m[0][0])*k[0][0] + 2 * m[0][0] * m[0][1] * k[1][0] + sqr(m[0][1])*k[2][0];
       b = sqr(m[0][0])*k[0][1] + 2 * m[0][0] * m[0][1] * k[1][1] + sqr(m[0][1])*k[2][1];
-      mm[0][0] = -(a * m[0][0] + b * m[1][0]); // du/dx
-      mm[0][1] = -(a * m[0][1] + b * m[1][1]); // du/dy
+      // du/dx
+      mm[0][0] = -(a * m[0][0] + b * m[1][0]);
+      // du/dy
+      mm[0][1] = -(a * m[0][1] + b * m[1][1]);
 
       // coefficients in second derivative with respect to xy
       a = m[0][0] * m[1][0] * k[0][0] + (m[0][1] * m[1][0] + m[0][0] * m[1][1])*k[1][0] + m[0][1] * m[1][1] * k[2][0];
       b = m[0][0] * m[1][0] * k[0][1] + (m[0][1] * m[1][0] + m[0][0] * m[1][1])*k[1][1] + m[0][1] * m[1][1] * k[2][1];
-      mm[1][0] = -(a * m[0][0] + b * m[1][0]); // du/dx
-      mm[1][1] = -(a * m[0][1] + b * m[1][1]); // du/dy
+      // du/dx
+      mm[1][0] = -(a * m[0][0] + b * m[1][0]);
+      // du/dy
+      mm[1][1] = -(a * m[0][1] + b * m[1][1]);
 
       // coefficients in second derivative with respect to yy
       a = sqr(m[1][0])*k[0][0] + 2 * m[1][0] * m[1][1] * k[1][0] + sqr(m[1][1])*k[2][0];
       b = sqr(m[1][0])*k[0][1] + 2 * m[1][0] * m[1][1] * k[1][1] + sqr(m[1][1])*k[2][1];
-      mm[2][0] = -(a * m[0][0] + b * m[1][0]); // du/dx
-      mm[2][1] = -(a * m[0][1] + b * m[1][1]); // du/dy
+      // du/dx
+      mm[2][0] = -(a * m[0][0] + b * m[1][0]);
+      // du/dy
+      mm[2][1] = -(a * m[0][1] + b * m[1][1]);
     }
 
     double3x2* RefMap::get_second_ref_map(int order)
@@ -611,7 +622,8 @@ namespace Hermes
         double xi1_old = 0.0, xi2_old = 0.0;
         double vx, vy;
         double2x2 m;
-        int it = 0; // number of Newton iterations
+        // number of Newton iterations
+        int it = 0;
         while (1)
         {
           double2x2 tmp;
@@ -905,7 +917,7 @@ namespace Hermes
       }
 
       // loop through the improbable curved elements.
-      for(unsigned short i = 0; i < improbable_curved_elements.size(); i++)
+      for (unsigned short i = 0; i < improbable_curved_elements.size(); i++)
       {
         untransform(improbable_curved_elements[i], x, y, xi1, xi2);
         if (is_in_ref_domain(improbable_curved_elements[i], xi1, xi2))

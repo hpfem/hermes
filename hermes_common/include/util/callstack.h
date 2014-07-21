@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -18,33 +18,35 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file callstack.h
     \brief File containing functionality for investigating call stack.
-*/
+    */
 #ifndef __HERMES_COMMON_CALLSTACK_H_
 #define __HERMES_COMMON_CALLSTACK_H_
 
 #include "util/compat.h"
 #include "common.h"
 #ifdef WITH_WINDOWS_STACKWALKER
-  #ifdef _WINDOWS
-    #include <windows.h>
-    #include "StackWalker.h"
-    
-    /// A windows stack walker implementation
-    /// Usage:
-    ///  MyStackWalker sw;
-    ///  sw.ShowCallstack();
-    class MyStackWalker : public StackWalker
-    {
-    public:
-      MyStackWalker() : StackWalker(StackWalker::RetrieveSymbol & StackWalker::RetrieveLine, nullptr, GetCurrentProcessId(), GetCurrentProcess())
-      {
-        int a = 1;
-      }
-    protected:
-      virtual void OnOutput(LPCSTR szText)
-        { printf(szText);}
-    };
+#ifdef _WINDOWS
+#include <windows.h>
+#include "StackWalker.h"
 
-  #endif
+/// A windows stack walker implementation
+/// Usage:
+///  MyStackWalker sw;
+///  sw.ShowCallstack();
+class MyStackWalker : public StackWalker
+{
+public:
+  MyStackWalker() : StackWalker(StackWalker::RetrieveSymbol & StackWalker::RetrieveLine, nullptr, GetCurrentProcessId(), GetCurrentProcess())
+  {
+    int a = 1;
+  }
+protected:
+  virtual void OnOutput(LPCSTR szText)
+  {
+    printf(szText);
+  }
+};
+
+#endif
 #endif
 #endif

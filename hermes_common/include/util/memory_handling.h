@@ -201,7 +201,7 @@ namespace Hermes
       return nullptr;
     ArrayItem* new_array;
 #ifdef WITH_PJLIB
-      new_array = (ArrayItem*)hermesCommonGlobalPoolCache.pool_alloc(size * sizeof(ArrayItem));
+    new_array = (ArrayItem*)hermesCommonGlobalPoolCache.pool_alloc(size * sizeof(ArrayItem));
 #else
     new_array = (ArrayItem*)malloc(size);
 #endif

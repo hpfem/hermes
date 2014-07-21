@@ -47,7 +47,8 @@ namespace Hermes
       void set_row_style(int row, const char* color = "k", const char* line = "-", const char* marker = "");
 
       void add_values(int row, double x, double y);
-      void add_values(double x, double y); // same as previous but uses row = 0
+      // same as previous but uses row = 0
+      void add_values(double x, double y);
       void add_values(int row, int n, double* x, double* y);
       void add_values(int row, int n, double2* xy);
 
@@ -109,7 +110,7 @@ namespace Hermes
       GnuplotGraph(const char* title = nullptr, const char* x_axis_name = nullptr, const
         char* y_axis_name = nullptr, double lines_width = 1.0, const
         std::string& terminal_str = default_terminal) :
-      Graph(title, x_axis_name, y_axis_name),
+        Graph(title, x_axis_name, y_axis_name),
         legend_pos(),
         terminal_str(terminal_str),
         lw(lines_width) {

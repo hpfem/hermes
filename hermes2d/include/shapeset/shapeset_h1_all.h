@@ -32,9 +32,9 @@ namespace Hermes
       virtual Shapeset* clone() { return new H1ShapesetJacobi(*this); };
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
       virtual unsigned short get_max_index(ElementMode2D mode) const;
-      
+
       virtual unsigned char get_id() const { return 1; }
-      
+
       static const unsigned short max_index[H2D_NUM_MODES];
     };
 
@@ -44,16 +44,16 @@ namespace Hermes
     class HERMES_API H1ShapesetEigen : public Shapeset
     {
     public:
-      H1ShapesetEigen();
-      virtual Shapeset* clone() { return new H1ShapesetEigen(*this); };
-      virtual unsigned short get_max_index(ElementMode2D mode) {};
+    H1ShapesetEigen();
+    virtual Shapeset* clone() { return new H1ShapesetEigen(*this); };
+    virtual unsigned short get_max_index(ElementMode2D mode) {};
     private:
-      virtual unsigned char get_id() const { return 2; }
-      template<typename Scalar> friend class VectorForm;
-      template<typename Scalar> friend class MatrixForm;
-      virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
-      template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
-      static const unsigned short max_index[H2D_NUM_MODES];
+    virtual unsigned char get_id() const { return 2; }
+    template<typename Scalar> friend class VectorForm;
+    template<typename Scalar> friend class MatrixForm;
+    virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+    template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+    static const unsigned short max_index[H2D_NUM_MODES];
     };
     */
 

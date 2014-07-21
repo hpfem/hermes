@@ -207,7 +207,7 @@ namespace Hermes
 
         for (unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
         {
-          for(unsigned short element_i = 0; element_i < parsed_xml_domain->elements().el().size(); element_i++)
+          for (unsigned short element_i = 0; element_i < parsed_xml_domain->elements().el().size(); element_i++)
           {
             XMLSubdomains::domain::elements_type::el_type* element = &parsed_xml_domain->elements().el().at(element_i);
 
@@ -613,7 +613,7 @@ namespace Hermes
             int new_i = points_to_vertices.size();
             vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, new_i));
             points_to_vertices.insert(std::pair<std::pair<double, double>, unsigned int>(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y), new_i));
-            
+
             vertices.v().push_back(std::auto_ptr<XMLMesh::v>(new XMLMesh::v(std::to_string((long double)meshes[meshes_i]->nodes[i].x), std::to_string((long double)meshes[meshes_i]->nodes[i].y), new_i)));
           }
           if (!hasAllElements)
@@ -716,10 +716,10 @@ namespace Hermes
       std::sort(elements.begin(), elements.end(), elementCompare);
 
       XMLSubdomains::elements_type elementsToPass;
-      for(unsigned short i = 0; i < elements.size(); i++)
+      for (unsigned short i = 0; i < elements.size(); i++)
         elementsToPass.el().push_back(*elements[i]);
 
-      for(unsigned short i = 0; i < elements.size(); i++)
+      for (unsigned short i = 0; i < elements.size(); i++)
         delete elements[i];
       XMLSubdomains::domain xmldomain(vertices, elementsToPass, edges, subdomains);
       xmldomain.curves().set(curves);
@@ -951,7 +951,6 @@ namespace Hermes
           variables.insert(std::pair<std::string, double>((std::string)parsed_xml_domain->variables()->var().at(variables_i).name(), parsed_xml_domain->variables()->var().at(variables_i).value()));
 #endif
 
-
         // Vertices //
         int vertices_count = parsed_xml_domain->vertices().v().size();
 
@@ -965,34 +964,34 @@ namespace Hermes
         /*
         for (int vertex_i = 0; vertex_i < vertices_count; vertex_i++)
         {
-            std::string x_i_s = parsed_xml_domain->vertices().v().at(vertex_i).x();
-            std::string y_i_s = parsed_xml_domain->vertices().v().at(vertex_i).y();
+        std::string x_i_s = parsed_xml_domain->vertices().v().at(vertex_i).x();
+        std::string y_i_s = parsed_xml_domain->vertices().v().at(vertex_i).y();
 
-            double x_i = ::atof(x_i_s.c_str());
-            double y_i = ::atof(y_i_s.c_str());
-            for (int vertex_j = vertex_i + 1; vertex_j < vertices_count; vertex_j++)
-            {
-                std::string x_j_s = parsed_xml_domain->vertices().v().at(vertex_j).x();
-                std::string y_j_s = parsed_xml_domain->vertices().v().at(vertex_j).y();
+        double x_i = ::atof(x_i_s.c_str());
+        double y_i = ::atof(y_i_s.c_str());
+        for (int vertex_j = vertex_i + 1; vertex_j < vertices_count; vertex_j++)
+        {
+        std::string x_j_s = parsed_xml_domain->vertices().v().at(vertex_j).x();
+        std::string y_j_s = parsed_xml_domain->vertices().v().at(vertex_j).y();
 
-                double x_j = ::atof(x_j_s.c_str());
-                double y_j = ::atof(y_j_s.c_str());
-                if(x_i == x_j && y_i == y_j)
-                {
-                  std::cout << std::endl;
-                  std::cout << "|" << x_i_s << "|";
-                  std::cout << std::endl;
-                  std::cout << "|" << y_i_s << "|";
-                  std::cout << std::endl;
-                  std::cout << "|" << x_j_s << "|";
-                  std::cout << std::endl;
-                  std::cout  << "|"<< y_j_s << "|";
-                  std::cout << std::endl;
-                  throw Exceptions::MeshLoadFailureException("Vertices %i and %i share coordinates [%f, %f].", vertex_i, vertex_j, x_i, y_i);
-}
-            }
+        double x_j = ::atof(x_j_s.c_str());
+        double y_j = ::atof(y_j_s.c_str());
+        if(x_i == x_j && y_i == y_j)
+        {
+        std::cout << std::endl;
+        std::cout << "|" << x_i_s << "|";
+        std::cout << std::endl;
+        std::cout << "|" << y_i_s << "|";
+        std::cout << std::endl;
+        std::cout << "|" << x_j_s << "|";
+        std::cout << std::endl;
+        std::cout  << "|"<< y_j_s << "|";
+        std::cout << std::endl;
+        throw Exceptions::MeshLoadFailureException("Vertices %i and %i share coordinates [%f, %f].", vertex_i, vertex_j, x_i, y_i);
         }
-*/
+        }
+        }
+        */
         // Create top-level vertex nodes.
         for (int vertex_i = 0; vertex_i < vertices_count; vertex_i++)
         {
@@ -1033,10 +1032,10 @@ namespace Hermes
 
           // test of value if no variable found.
           if (!x_found)
-              x_value = std::strtod(x.c_str(), nullptr);
+            x_value = std::strtod(x.c_str(), nullptr);
 
           if (!y_found)
-                y_value = std::strtod(y.c_str(), NULL   );
+            y_value = std::strtod(y.c_str(), NULL);
 
           // assignment.
           node->x = x_value;

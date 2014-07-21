@@ -23,10 +23,10 @@ namespace Hermes
 
     Trf tri_trf[H2D_TRF_NUM] =
     {
-      { { 0.5,  0.5 }, { -0.5, -0.5 } }, // son 0
-      { { 0.5,  0.5 }, {  0.5, -0.5 } }, // son 1
-      { { 0.5,  0.5 }, { -0.5,  0.5 } }, // son 2
-      { {-0.5, -0.5 }, { -0.5, -0.5 } }, // son 3
+      { { 0.5, 0.5 }, { -0.5, -0.5 } }, // son 0
+      { { 0.5, 0.5 }, { 0.5, -0.5 } }, // son 1
+      { { 0.5, 0.5 }, { -0.5, 0.5 } }, // son 2
+      { { -0.5, -0.5 }, { -0.5, -0.5 } }, // son 3
       { H2D_IDENTIFY_TRF },              // identity
       { H2D_IDENTIFY_TRF },              // identity
       { H2D_IDENTIFY_TRF },              // identity
@@ -37,13 +37,13 @@ namespace Hermes
     Trf quad_trf[H2D_TRF_NUM] =
     {
       { { 0.5, 0.5 }, { -0.5, -0.5 } }, // son 0
-      { { 0.5, 0.5 }, {  0.5, -0.5 } }, // son 1
-      { { 0.5, 0.5 }, {  0.5,  0.5 } }, // son 2
-      { { 0.5, 0.5 }, { -0.5,  0.5 } }, // son 3
-      { { 1.0, 0.5 }, {  0.0, -0.5 } }, // horz son 0
-      { { 1.0, 0.5 }, {  0.0,  0.5 } }, // horz son 1
-      { { 0.5, 1.0 }, { -0.5,  0.0 } }, // vert son 0
-      { { 0.5, 1.0 }, {  0.5,  0.0 } }, // vert son 1
+      { { 0.5, 0.5 }, { 0.5, -0.5 } }, // son 1
+      { { 0.5, 0.5 }, { 0.5, 0.5 } }, // son 2
+      { { 0.5, 0.5 }, { -0.5, 0.5 } }, // son 3
+      { { 1.0, 0.5 }, { 0.0, -0.5 } }, // horz son 0
+      { { 1.0, 0.5 }, { 0.0, 0.5 } }, // horz son 1
+      { { 0.5, 1.0 }, { -0.5, 0.0 } }, // vert son 0
+      { { 0.5, 1.0 }, { 0.5, 0.0 } }, // vert son 1
       { H2D_IDENTIFY_TRF }              // identity
     };
 
@@ -80,7 +80,7 @@ namespace Hermes
 
       if (e == nullptr)
         throw Exceptions::NullException(1);
-      
+
       this->element = e;
 
       this->reset_transform();
@@ -96,7 +96,7 @@ namespace Hermes
         idx = (idx - 1) >> 3;
       }
       reset_transform();
-      for (int k = i-1; k >= 0; k--)
+      for (int k = i - 1; k >= 0; k--)
         push_transform(son[k]);
     }
 
@@ -109,7 +109,7 @@ namespace Hermes
     void Transformable::push_transform(int son)
     {
       assert(element != nullptr);
-      if(top >= H2D_MAX_TRN_LEVEL)
+      if (top >= H2D_MAX_TRN_LEVEL)
         throw Hermes::Exceptions::Exception("Too deep transform.");
 
       Trf* mat = stack + (++top);
@@ -121,20 +121,21 @@ namespace Hermes
       mat->t[1] = ctm->m[1] * tr->t[1] + ctm->t[1];
 
       ctm = mat;
-      sub_idx = (sub_idx << 3) + son + 1; // see traverse.cpp if this changes
+      // see traverse.cpp if this changes
+      sub_idx = (sub_idx << 3) + son + 1;
     }
 
     void Transformable::push_transforms(std::set<Transformable *>& transformables, int son)
     {
-      for(std::set<Transformable *>::iterator it = transformables.begin(); it != transformables.end(); ++it)
-        if(*it != nullptr)
-          (*it)->push_transform(son);
+      for (std::set<Transformable *>::iterator it = transformables.begin(); it != transformables.end(); ++it)
+      if (*it != nullptr)
+        (*it)->push_transform(son);
     }
     void Transformable::pop_transforms(std::set<Transformable *>& transformables)
     {
-      for(std::set<Transformable *>::iterator it = transformables.begin(); it != transformables.end(); ++it)
-        if(*it != nullptr)
-          (*it)->pop_transform();
+      for (std::set<Transformable *>::iterator it = transformables.begin(); it != transformables.end(); ++it)
+      if (*it != nullptr)
+        (*it)->pop_transform();
     }
   }
 }

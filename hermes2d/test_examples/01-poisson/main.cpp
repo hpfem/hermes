@@ -27,16 +27,24 @@ using namespace Hermes::Hermes2D;
 //
 // The following parameters can be changed:
 
-const bool HERMES_VISUALIZATION = true;   // Set to "false" to suppress Hermes OpenGL visualization.
-const bool VTK_VISUALIZATION = false;     // Set to "true" to enable VTK output.
-const int P_INIT = 3;                     // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refinements.
+// Set to "false" to suppress Hermes OpenGL visualization.
+const bool HERMES_VISUALIZATION = true;
+// Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = false;
+// Uniform polynomial degree of mesh elements.
+const int P_INIT = 3;
+// Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 3;
 
 // Problem parameters.
-const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
-const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
-const double VOLUME_HEAT_SRC = 5;        // Volume heat sources generated (for example) by electric current.
-const double FIXED_BDY_TEMP = 20;        // Fixed temperature on the boundary.
+// Thermal cond. of Al for temperatures around 20 deg Celsius.
+const double LAMBDA_AL = 236.0;
+// Thermal cond. of Cu for temperatures around 20 deg Celsius.
+const double LAMBDA_CU = 386.0;
+// Volume heat sources generated (for example) by electric current.
+const double VOLUME_HEAT_SRC = 5;
+// Fixed temperature on the boundary.
+const double FIXED_BDY_TEMP = 20;
 
 int main(int argc, char* argv[])
 {

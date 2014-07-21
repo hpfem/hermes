@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -30,27 +30,27 @@ namespace Hermes
   namespace Solvers
   {
     template <>
-    void SuperLUSolver<std::complex<double> >::create_csc_matrix (SuperMatrix *A, int m, int n, int nnz,
+    void SuperLUSolver<std::complex<double> >::create_csc_matrix(SuperMatrix *A, int m, int n, int nnz,
       SuperLuType<std::complex<double> >::Scalar *nzval,
       int *rowind, int *colptr, Stype_t stype, Dtype_t dtype, Mtype_t mtype)
     {
-      zCreate_CompCol_Matrix (A, m, n, nnz, (doublecomplex*) nzval, rowind, colptr, stype, dtype, mtype);
+      zCreate_CompCol_Matrix(A, m, n, nnz, (doublecomplex*)nzval, rowind, colptr, stype, dtype, mtype);
     }
 
     template<>
-    void SuperLUSolver<std::complex<double> >::create_dense_matrix (SuperMatrix *X, int m, int n, SuperLuType<std::complex<double> >::Scalar *x,
+    void SuperLUSolver<std::complex<double> >::create_dense_matrix(SuperMatrix *X, int m, int n, SuperLuType<std::complex<double> >::Scalar *x,
       int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype)
     {
-      zCreate_Dense_Matrix (X, m, n, (doublecomplex *) x, ldx, stype, dtype, mtype);
+      zCreate_Dense_Matrix(X, m, n, (doublecomplex *)x, ldx, stype, dtype, mtype);
     }
 
     template <>
-    void  SuperLUSolver<std::complex<double> >::solver_driver (superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R,
+    void  SuperLUSolver<std::complex<double> >::solver_driver(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R,
       double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X,
       double *recip_pivot_growth, double *rcond, double *ferr, double *berr, slu_memusage_t *mem_usage, SuperLUStat_t *stat,
       int *info)
     {
-      zgssvx(options, A, perm_c, perm_r, etree, equed, R, C, L, U, work, lwork, B, X, recip_pivot_growth, rcond, ferr, berr, (mem_usage_t*) mem_usage, stat, info);
+      zgssvx(options, A, perm_c, perm_r, etree, equed, R, C, L, U, work, lwork, B, X, recip_pivot_growth, rcond, ferr, berr, (mem_usage_t*)mem_usage, stat, info);
     }
   }
 }

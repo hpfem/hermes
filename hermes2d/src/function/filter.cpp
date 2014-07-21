@@ -122,7 +122,8 @@ namespace Hermes
     {
       MeshFunction<Scalar>::set_quad_2d(quad_2d);
       for (int i = 0; i < num; i++)
-        this->sln[i]->set_quad_2d(quad_2d); // nodup
+        // nodup
+        this->sln[i]->set_quad_2d(quad_2d);
     }
 
     template<typename Scalar>
@@ -132,7 +133,8 @@ namespace Hermes
       if (!unimesh)
       {
         for (int i = 0; i < num; i++)
-          this->sln[i]->set_active_element(e); // nodup
+          // nodup
+          this->sln[i]->set_active_element(e);
         memset(sln_sub, 0, sizeof(sln_sub));
       }
       else
@@ -145,7 +147,8 @@ namespace Hermes
         }
       }
 
-      this->order = 20; // fixme
+      // fixme
+      this->order = 20;
     }
 
     template<typename Scalar>
@@ -211,8 +214,8 @@ namespace Hermes
       if (this->num > H2D_MAX_COMPONENTS)
         throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       if (items.size() != (unsigned) this->num)
-        if (items.size() > 0)
-          throw Hermes::Exceptions::Exception("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
+      if (items.size() > 0)
+        throw Hermes::Exceptions::Exception("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
 
       for (int i = 0; i < this->num; i++)
 
@@ -345,7 +348,8 @@ namespace Hermes
 
       memset(sln_sub, 0, sizeof(sln_sub));
 
-      this->order = 20; // fixme
+      // fixme
+      this->order = 20;
     }
 
     void ComplexFilter::push_transform(int son)
@@ -425,8 +429,8 @@ namespace Hermes
     {
       this->num_components = this->sln[0]->get_num_components();
       for (int i = 1; i < this->num; i++)
-        if (this->sln[i]->get_num_components() != this->num_components)
-          throw Hermes::Exceptions::Exception("Filter: Solutions do not have the same number of components!");
+      if (this->sln[i]->get_num_components() != this->num_components)
+        throw Hermes::Exceptions::Exception("Filter: Solutions do not have the same number of components!");
     }
 
     template<typename Scalar>
@@ -506,13 +510,13 @@ namespace Hermes
     MagFilter<Scalar>::MagFilter(MeshFunctionSharedPtr<Scalar> sln1, int item1)
       : SimpleFilter<Scalar>(std::vector<MeshFunctionSharedPtr<Scalar> >(), std::vector<int>())
     {
-      this->sln[0] = sln1;
-      this->sln[1] = sln1;
-      this->item[0] = item1 & H2D_FN_COMPONENT_0;
-      this->item[1] = item1 & H2D_FN_COMPONENT_1;
-      if (sln1->get_num_components() < 2)
-        throw Hermes::Exceptions::Exception("The single-argument constructor is intended for vector-valued solutions.");
-    };
+        this->sln[0] = sln1;
+        this->sln[1] = sln1;
+        this->item[0] = item1 & H2D_FN_COMPONENT_0;
+        this->item[1] = item1 & H2D_FN_COMPONENT_1;
+        if (sln1->get_num_components() < 2)
+          throw Hermes::Exceptions::Exception("The single-argument constructor is intended for vector-valued solutions.");
+      };
 
     template<typename Scalar>
     MagFilter<Scalar>::~MagFilter()
@@ -539,10 +543,10 @@ namespace Hermes
       {
         result[i] = 0;
         for (unsigned int j = 0; j < values.size(); j++)
-          if (values.at(j)[i] > limits[j])
-            result[i] = limits[j];
-          else
-            result[i] = values.at(j)[i];
+        if (values.at(j)[i] > limits[j])
+          result[i] = limits[j];
+        else
+          result[i] = values.at(j)[i];
       }
     };
 
@@ -553,12 +557,12 @@ namespace Hermes
     TopValFilter::TopValFilter(MeshFunctionSharedPtr<double> sln, double limit, int item)
       : SimpleFilter<double>()
     {
-      this->limits.push_back(limit);
-      this->sln[0] = sln;
-      this->item[0] = item;
-      this->num = 1;
-      Filter<double>::init();
-    };
+        this->limits.push_back(limit);
+        this->sln[0] = sln;
+        this->item[0] = item;
+        this->num = 1;
+        Filter<double>::init();
+      };
 
     TopValFilter::~TopValFilter()
     {
@@ -583,10 +587,10 @@ namespace Hermes
       {
         result[i] = 0;
         for (unsigned int j = 0; j < values.size(); j++)
-          if (values.at(j)[i] < limits[j])
-            result[i] = limits[j];
-          else
-            result[i] = values.at(j)[i];
+        if (values.at(j)[i] < limits[j])
+          result[i] = limits[j];
+        else
+          result[i] = values.at(j)[i];
       }
     };
 
@@ -597,12 +601,12 @@ namespace Hermes
     BottomValFilter::BottomValFilter(MeshFunctionSharedPtr<double> sln, double limit, int item)
       : SimpleFilter<double>()
     {
-      this->limits.push_back(limit);
-      this->sln[0] = sln;
-      this->item[0] = item;
-      this->num = 1;
-      Filter<double>::init();
-    };
+        this->limits.push_back(limit);
+        this->sln[0] = sln;
+        this->item[0] = item;
+        this->num = 1;
+        Filter<double>::init();
+      };
 
     BottomValFilter::~BottomValFilter()
     {
@@ -627,13 +631,13 @@ namespace Hermes
       {
         result[i] = 0;
         for (unsigned int j = 0; j < values.size(); j++)
-          if (values.at(j)[i] < low_limits[j])
-            result[i] = low_limits[j];
-          else
-            if (values.at(j)[i] > high_limits[j])
-              result[i] = high_limits[j];
-            else
-              result[i] = values.at(j)[i];
+        if (values.at(j)[i] < low_limits[j])
+          result[i] = low_limits[j];
+        else
+        if (values.at(j)[i] > high_limits[j])
+          result[i] = high_limits[j];
+        else
+          result[i] = values.at(j)[i];
       }
     };
 
@@ -644,13 +648,13 @@ namespace Hermes
     ValFilter::ValFilter(MeshFunctionSharedPtr<double> sln, double low_limit, double high_limit, int item)
       : SimpleFilter<double>()
     {
-      this->low_limits.push_back(low_limit);
-      this->high_limits.push_back(high_limit);
-      this->sln[0] = sln;
-      this->item[0] = item;
-      this->num = 1;
-      Filter<double>::init();
-    };
+        this->low_limits.push_back(low_limit);
+        this->high_limits.push_back(high_limit);
+        this->sln[0] = sln;
+        this->item[0] = item;
+        this->num = 1;
+        Filter<double>::init();
+      };
 
     ValFilter::~ValFilter()
     {
@@ -748,9 +752,9 @@ namespace Hermes
     SquareFilter<Scalar>::SquareFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, std::vector<int> items)
       : SimpleFilter<Scalar>(solutions, items)
     {
-      if (solutions.size() > 1)
-        throw Hermes::Exceptions::Exception("SquareFilter only supports one MeshFunction.");
-    };
+        if (solutions.size() > 1)
+          throw Hermes::Exceptions::Exception("SquareFilter only supports one MeshFunction.");
+      };
 
     template<typename Scalar>
     SquareFilter<Scalar>::~SquareFilter()
@@ -780,21 +784,21 @@ namespace Hermes
     AbsFilter::AbsFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<int> items)
       : SimpleFilter<double>(solutions, items)
     {
-      if (solutions.size() > 1)
-        throw Hermes::Exceptions::Exception("AbsFilter only supports one MeshFunction.");
-    };
+        if (solutions.size() > 1)
+          throw Hermes::Exceptions::Exception("AbsFilter only supports one MeshFunction.");
+      };
 
     AbsFilter::AbsFilter(MeshFunctionSharedPtr<double> solution)
       : SimpleFilter<double>()
     {
-      this->num = 1;
-      this->sln[0] = solution;
+        this->num = 1;
+        this->sln[0] = solution;
 
-      this->item[0] = H2D_FN_VAL;
+        this->item[0] = H2D_FN_VAL;
 
-      this->init();
-      init_components();
-    };
+        this->init();
+        init_components();
+      };
 
     AbsFilter::~AbsFilter()
     {
@@ -890,9 +894,9 @@ namespace Hermes
     AngleFilter::AngleFilter(std::vector<MeshFunctionSharedPtr<std::complex<double> > > solutions, std::vector<int> items)
       : SimpleFilter<std::complex<double> >(solutions, items)
     {
-      if (solutions.size() > 1)
-        throw Hermes::Exceptions::Exception("RealFilter only supports one MeshFunction.");
-    };
+        if (solutions.size() > 1)
+          throw Hermes::Exceptions::Exception("RealFilter only supports one MeshFunction.");
+      };
 
     AngleFilter::~AngleFilter()
     {
@@ -945,22 +949,22 @@ namespace Hermes
       int cyl, int item1, int item2)
       : Filter<double>(solutions)
     {
-      this->mu = mu;
-      this->lambda = lambda;
-      this->cyl = cyl;
-      this->item1 = item1;
-      this->item2 = item2;
-    }
+        this->mu = mu;
+        this->lambda = lambda;
+        this->cyl = cyl;
+        this->item1 = item1;
+        this->item2 = item2;
+      }
 
     VonMisesFilter::VonMisesFilter(MeshFunctionSharedPtr<double>* solutions, int num, double lambda, double mu,
       int cyl, int item1, int item2) : Filter<double>(solutions, num)
     {
-      this->mu = mu;
-      this->lambda = lambda;
-      this->cyl = cyl;
-      this->item1 = item1;
-      this->item2 = item2;
-    }
+        this->mu = mu;
+        this->lambda = lambda;
+        this->cyl = cyl;
+        this->item1 = item1;
+        this->item2 = item2;
+      }
 
     VonMisesFilter::~VonMisesFilter()
     {
@@ -997,19 +1001,19 @@ namespace Hermes
           dy[i] = this->sln[i]->get_dy_values(j);
         }
         if (this->num == 2)
-          for (int i = 0; i < np; i++)
-          {
-            node->values[j][0][i] = tau_frac * (val[1][i] - val[0][i]) + val[1][i];
-            node->values[j][1][i] = tau_frac * (dx[1][i] - dx[0][i]) + dx[1][i];
-            node->values[j][2][i] = tau_frac * (dy[1][i] - dy[0][i]) + dy[1][i];
-          }
+        for (int i = 0; i < np; i++)
+        {
+          node->values[j][0][i] = tau_frac * (val[1][i] - val[0][i]) + val[1][i];
+          node->values[j][1][i] = tau_frac * (dx[1][i] - dx[0][i]) + dx[1][i];
+          node->values[j][2][i] = tau_frac * (dy[1][i] - dy[0][i]) + dy[1][i];
+        }
         else
-          for (int i = 0; i < np; i++)
-          {
-            node->values[j][0][i] = val[0][i];
-            node->values[j][1][i] = dx[0][i];
-            node->values[j][2][i] = dy[0][i];
-          }
+        for (int i = 0; i < np; i++)
+        {
+          node->values[j][0][i] = val[0][i];
+          node->values[j][1][i] = dx[0][i];
+          node->values[j][2][i] = dy[0][i];
+        }
       }
 
       if (this->nodes->present(order))
@@ -1038,9 +1042,9 @@ namespace Hermes
     LinearFilter<Scalar>::LinearFilter(MeshFunctionSharedPtr<Scalar> older, MeshFunctionSharedPtr<Scalar> old, double tau_frac)
       : Filter<Scalar>({ older, old })
     {
-      this->tau_frac = tau_frac;
-      init_components();
-    }
+        this->tau_frac = tau_frac;
+        init_components();
+      }
 
     template<typename Scalar>
     LinearFilter<Scalar>::~LinearFilter()
@@ -1052,8 +1056,8 @@ namespace Hermes
     {
       this->num_components = this->sln[0]->get_num_components();
       for (int i = 1; i < this->num; i++)
-        if (this->sln[i]->get_num_components() != this->num_components)
-          throw Hermes::Exceptions::Exception("Filter: Solutions do not have the same number of components!");
+      if (this->sln[i]->get_num_components() != this->num_components)
+        throw Hermes::Exceptions::Exception("Filter: Solutions do not have the same number of components!");
     }
 
     template<typename Scalar>

@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -61,23 +61,23 @@ namespace Hermes
 
   void Range::enlarge_to_include(const int& value)
   {
-    if(empty_range) {
+    if (empty_range) {
       lower_bound = upper_bound = value;
       empty_range = false;
     }
     else {
-      if(lower_bound > value)
+      if (lower_bound > value)
         lower_bound = value;
-      if(upper_bound < value)
+      if (upper_bound < value)
         upper_bound = value;
     }
   }
 
   Range Range::make_envelope(const Range& a, const Range& b)
   {
-    if(a.empty())
+    if (a.empty())
       return b;
-    else if(b.empty())
+    else if (b.empty())
       return a;
     else
       return Range(std::min(a.lower(), b.lower()), std::max(a.upper(), b.upper()));

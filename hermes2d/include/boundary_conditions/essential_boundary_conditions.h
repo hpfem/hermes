@@ -1,7 +1,7 @@
 // This file is part of Hermes3D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes3D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -107,8 +107,9 @@ namespace Hermes
     /// class MyEssentialBCNonConst : public DefaultEssentialBCNonConst<double>
     /// {
     /// public:
-    ///&nbsp;// Constructor with multiple markers, setting velocity at inlet(vel_inlet), domain height(H) and startup time(startup_time) - all parameters are of this example - DERIVED - class.
-    ///&nbsp;MyEssentialBCNonConst(std::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
+    // Constructor with multiple markers, setting velocity at inlet(vel_inlet), domain height(H) and startup time(startup_time) - all parameters are of this example - DERIVED - class.
+    ///&nbsp;
+    ///&nbsp;MyEssentialBCNonConst(std::vector<std::string> markers, double vel_inlet, double H, double startup_time) :
     ///&nbsp;  EssentialBoundaryCondition<double>(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
     ///
     ///  // VERY IMPORTANT - overriding the method of the base class (DefaultEssentialBCNonConst::value) with a custom implementation.
@@ -116,18 +117,19 @@ namespace Hermes
     ///  // NOTE - the 'virtual' keyword is not here anymore - because we will not need to further derive from this class and override this method.
     ///  double value(double x, double y) const {
     ///&nbsp; double val_y = vel_inlet * y*(H-y) / (H/2.)/(H/2.);
-    ///&nbsp; if (get_current_time() <= startup_time) 
+    ///&nbsp; if (get_current_time() <= startup_time)
     ///&nbsp;   return val_y * get_current_time()/startup_time;
-    ///&nbsp; else 
+    ///&nbsp; else
     ///&nbsp;   return val_y;
     ///  };
     ///
     /// protected:
-    ///&nbsp;// Members of MyEssentialBCNonConst.
+    // Members of MyEssentialBCNonConst.
+    ///&nbsp;
     ///&nbsp;double vel_inlet;
     ///&nbsp;double H;
     ///&nbsp;double startup_time;
-    ///}; 
+    ///};
 
     template<typename Scalar>
     class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition<Scalar>

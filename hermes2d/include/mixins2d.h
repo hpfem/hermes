@@ -15,7 +15,6 @@ namespace Hermes
 
     namespace Mixins
     {
-
       /// \ingroup g_mixins2d
       /// Any XML parsing class should inherit from this mixin.
       /// It serves various purposes, first of which is disabling / re-enabling of validation

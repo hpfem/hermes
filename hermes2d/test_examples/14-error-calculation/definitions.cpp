@@ -45,32 +45,31 @@ double CustomNormFormDG::value(int n, double *wt, DiscontinuousFunc<double> *u, 
   return custom_fn(n, wt, u, v);
 }
 
-
 CustomExactSolutionScalar::CustomExactSolutionScalar(MeshSharedPtr mesh)
-      : ExactSolutionScalar<double>(mesh)
+: ExactSolutionScalar<double>(mesh)
 {
 }
 
-double CustomExactSolutionScalar::value(double x, double y) const 
+double CustomExactSolutionScalar::value(double x, double y) const
 {
-  if(this->element_id == 1 || this->element_id == 3)
+  if (this->element_id == 1 || this->element_id == 3)
     return 0.0;
   else
     return 2.0;
 }
 
-void CustomExactSolutionScalar::derivatives(double x, double y, double& dx, double& dy) const 
+void CustomExactSolutionScalar::derivatives(double x, double y, double& dx, double& dy) const
 {
   dx = 0.0;
   dy = 0.0;
 }
 
-Ord CustomExactSolutionScalar::ord(double x, double y) const 
+Ord CustomExactSolutionScalar::ord(double x, double y) const
 {
   return Ord(1);
 }
 
-CustomExactSolutionScalar::~CustomExactSolutionScalar() 
+CustomExactSolutionScalar::~CustomExactSolutionScalar()
 {
 }
 

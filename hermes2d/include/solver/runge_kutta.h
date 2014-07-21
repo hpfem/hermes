@@ -71,7 +71,7 @@ namespace Hermes
     /// @ingroup userSolvingAPI
     /// Runge-Kutta methods implementation for time-dependent problems.
     template<typename Scalar>
-    class HERMES_API RungeKutta : 
+    class HERMES_API RungeKutta :
       public Hermes::Mixins::Loggable,
       public Hermes::Mixins::TimeMeasurable,
       public Hermes::Mixins::IntegrableWithGlobalOrder,
@@ -116,7 +116,7 @@ namespace Hermes
 
       void set_freeze_jacobian();
       void set_tolerance(double newton_tol);
-      void set_max_allowed_iterations  (int newton_max_iter);
+      void set_max_allowed_iterations(int newton_max_iter);
       void set_newton_damping_coeff(double newton_damping_coeff);
       void set_newton_max_allowed_residual_norm(double newton_max_allowed_residual_norm);
 
@@ -156,7 +156,7 @@ namespace Hermes
       /// Below, "stage_wf_left" and "stage_wf_right" refer to the left-hand side M\dot{Y}
       /// and right-hand side F(t, Y) of the above equation, respectively.
       void create_stage_wf(unsigned int size, bool block_diagonal_jacobian);
-      
+
       /// Updates the augmented weak formulation.
       void update_stage_wf(std::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev);
 
@@ -208,7 +208,7 @@ namespace Hermes
       int newton_max_iter;
       double newton_damping_coeff;
       double newton_max_allowed_residual_norm;
-      
+
       std::vector<MeshFunctionSharedPtr<Scalar> > residuals_vector;
 
       /// Vector K_vector of length num_stages * ndof. will represent
@@ -220,7 +220,7 @@ namespace Hermes
 
       /// Vector for the left part of the residual.
       Scalar* vector_left;
-      
+
       ///< The filters to reinitialize in every Newton's loop
       std::vector<Filter<Scalar>*> filters_to_reinit;
     };

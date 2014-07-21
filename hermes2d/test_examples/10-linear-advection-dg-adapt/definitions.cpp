@@ -2,11 +2,11 @@
 
 CustomWeakForm::CustomWeakForm(std::string left_bottom_bnd_part, MeshSharedPtr mesh) : WeakForm<double>(1), mesh(mesh)
 {
-    add_matrix_form(new CustomMatrixFormVol(0, 0));
-    add_vector_form(new CustomVectorFormVol(0));
-    add_matrix_form_surf(new CustomMatrixFormSurface(0, 0));
-    add_matrix_form_DG(new CustomMatrixFormInterface(0, 0));
-    add_vector_form_surf(new CustomVectorFormSurface(0, left_bottom_bnd_part));
+  add_matrix_form(new CustomMatrixFormVol(0, 0));
+  add_vector_form(new CustomVectorFormVol(0));
+  add_matrix_form_surf(new CustomMatrixFormSurface(0, 0));
+  add_matrix_form_DG(new CustomMatrixFormInterface(0, 0));
+  add_vector_form_surf(new CustomVectorFormSurface(0, left_bottom_bnd_part));
 }
 
 WeakForm<double>* CustomWeakForm::clone() const
@@ -114,7 +114,7 @@ Scalar CustomWeakForm::CustomMatrixFormInterface::matrix_form(int n, double *wt,
   for (int i = 0; i < n; i++) {
     Real a_dot_n = static_cast<CustomWeakForm*>(wf)->calculate_a_dot_v(e->x[i], e->y[i], e->nx[i], e->ny[i]);
     Real jump_v = (v->fn_central == nullptr ? -v->val_neighbor[i] : v->val[i]);
-    if(u->fn_central == nullptr)
+    if (u->fn_central == nullptr)
       result += wt[i] * static_cast<CustomWeakForm*>(wf)->upwind_flux(Scalar(0), u->val_neighbor[i], a_dot_n) * jump_v;
     else
       result += wt[i] * static_cast<CustomWeakForm*>(wf)->upwind_flux(u->val[i], Scalar(0), a_dot_n) * jump_v;
@@ -140,7 +140,7 @@ MatrixFormDG<double>* CustomWeakForm::CustomMatrixFormInterface::clone() const
 }
 
 double CustomWeakForm::CustomVectorFormSurface::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
-                                                GeomSurf<double> *e, Func<double> **ext) const
+  GeomSurf<double> *e, Func<double> **ext) const
 {
   double result = 0;
   for (int i = 0; i < n; i++) {
@@ -174,7 +174,7 @@ Real CustomWeakForm::CustomVectorFormSurface::F(Real x, Real y) const
 double CustomWeakForm::calculate_a_dot_v(double x, double y, double vx, double vy) const
 {
   double norm = std::max<double>(1e-12, std::sqrt(sqr(x) + sqr(y)));
-  return -y/norm*vx + x/norm*vy;
+  return -y / norm*vx + x / norm*vy;
 }
 
 Ord CustomWeakForm::calculate_a_dot_v(Ord x, Ord y, Ord vx, Ord vy) const

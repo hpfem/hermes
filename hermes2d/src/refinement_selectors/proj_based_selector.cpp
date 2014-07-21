@@ -156,7 +156,8 @@ namespace Hermes
                 c.errors[j] = herr[j][order][order];
                 error_squared += c.errors[j];
               }
-              error_squared *= 0.25; //element of a candidate occupies 1/4 of the reference domain defined over a candidate
+              //element of a candidate occupies 1/4 of the reference domain defined over a candidate
+              error_squared *= 0.25;
               break;
 
             case H2D_REFINEMENT_P:
@@ -184,19 +185,21 @@ namespace Hermes
                 c.errors[j] = herr[j][order_h][order_v];
                 error_squared += c.errors[j];
               }
-              error_squared *= 0.25; //element of a candidate occupies 1/4 of the reference domain defined over a candidate
+              //element of a candidate occupies 1/4 of the reference domain defined over a candidate
+              error_squared *= 0.25;
               break;
 
             case H2D_REFINEMENT_H_ANISO_H:
             case H2D_REFINEMENT_H_ANISO_V:
             {
-                                         error_squared = 0.0;
-                                         for (int j = 0; j < 2; j++)
-                                         {
-                                           c.errors[j] = anisoerr[(c.split == H2D_REFINEMENT_H_ANISO_H) ? j : j + 2][H2D_GET_H_ORDER(c.p[j])][H2D_GET_V_ORDER(c.p[j])];
-                                           error_squared += c.errors[j];
-                                         }
-                                         error_squared *= 0.5;  //element of a candidate occupies 1/2 of the reference domain defined over a candidate
+                                           error_squared = 0.0;
+                                           for (int j = 0; j < 2; j++)
+                                           {
+                                             c.errors[j] = anisoerr[(c.split == H2D_REFINEMENT_H_ANISO_H) ? j : j + 2][H2D_GET_H_ORDER(c.p[j])][H2D_GET_V_ORDER(c.p[j])];
+                                             error_squared += c.errors[j];
+                                           }
+                                           //element of a candidate occupies 1/2 of the reference domain defined over a candidate
+                                           error_squared *= 0.5;
             }
               break;
 
@@ -370,8 +373,10 @@ namespace Hermes
           }
           else
           {
-            const int sons[4][2] = { { 0, 1 }, { 3, 2 }, { 0, 3 }, { 1, 2 } }; //indices of sons for sub-areas
-            const int tr[4][2] = { { 6, 7 }, { 6, 7 }, { 4, 5 }, { 4, 5 } }; //indices of ref. domain transformations for sub-areas
+            //indices of sons for sub-areas
+            const int sons[4][2] = { { 0, 1 }, { 3, 2 }, { 0, 3 }, { 1, 2 } };
+            //indices of ref. domain transformations for sub-areas
+            const int tr[4][2] = { { 6, 7 }, { 6, 7 }, { 4, 5 }, { 4, 5 } };
             for (int version = 0; version < 4; version++)
             { // 2 elements for vertical split, 2 elements for horizontal split
               Trf* sub_trfs[2] = { &trfs[tr[version][0]], &trfs[tr[version][1]] };
@@ -435,8 +440,10 @@ namespace Hermes
         int max_num_shapes = this->next_order_shape[mode][this->max_order == H2DRS_DEFAULT_ORDER ? H2DRS_MAX_ORDER : this->max_order];
         Scalar* right_side = new Scalar[max_num_shapes];
         int* shape_inxs = new int[max_num_shapes];
-        int* indx = new int[max_num_shapes]; //solver data
-        double* d = new double[max_num_shapes]; //solver data
+        //solver data
+        int* indx = new int[max_num_shapes];
+        //solver data
+        double* d = new double[max_num_shapes];
         double** proj_matrix = new_matrix<double>(max_num_shapes, max_num_shapes);
         ProjMatrixCache& proj_matrices = proj_matrix_cache[mode];
         std::vector<typename OptimumSelector<Scalar>::ShapeInx>& full_shape_indices = this->shape_indices[mode];
@@ -446,7 +453,7 @@ namespace Hermes
         for (int i = 0; i < num_sub && ortho_svals_available; i++)
           ortho_svals_available &= !sub_ortho_svals[i]->empty();
 
-        /// An array of cached right-hand side values.
+        // An array of cached right-hand side values.
         std::vector< ValueCacheItem<Scalar> > nonortho_rhs_cache;
         std::vector< ValueCacheItem<Scalar> > ortho_rhs_cache;
         for (int i = 0; i <= this->max_shape_inx[mode]; i++)
@@ -503,7 +510,8 @@ namespace Hermes
               }
             }
 
-            copy_matrix(proj_matrix, proj_matrices[order_h][order_v], num_shapes, num_shapes); //copy projection matrix because original matrix will be modified
+            //copy projection matrix because original matrix will be modified
+            copy_matrix(proj_matrix, proj_matrices[order_h][order_v], num_shapes, num_shapes);
           }
 
           //build right side (fill cache values that are missing)
@@ -553,7 +561,8 @@ namespace Hermes
 
             error_squared += evaluate_error_squared_subdomain(this_sub_domain, this_sub_gip, sons[inx_sub], this_sub_trf, elem_proj, rval);
           }
-          errors_squared[order_h][order_v] = error_squared * sub_area_corr_coef; //apply area correction coefficient
+          //apply area correction coefficient
+          errors_squared[order_h][order_v] = error_squared * sub_area_corr_coef;
         } while (order_perm.next());
 
         free_with_check(proj_matrix, true);

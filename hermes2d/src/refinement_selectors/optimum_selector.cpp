@@ -339,7 +339,8 @@ namespace Hermes
           int inx_son = 1;
           while (inx_son < num_sons && !quad_perms[inx_son].next())
           {
-            quad_perms[inx_son].reset(); //reset order of the son
+            //reset order of the son
+            quad_perms[inx_son].reset();
             inx_son++;
           }
           if (inx_son >= num_sons)
@@ -413,7 +414,8 @@ namespace Hermes
           case H2D_H_ANISO:
             last_order_hz = start_order_hz = quad_order;
             last_order_vt = start_order_vt = quad_order;
-            break; //only one candidate will be created
+            //only one candidate will be created
+            break;
           case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
           }
           if (iso_p) { //make orders uniform: take mininmum order since nonuniformity is caused by different handling of orders along directions
@@ -477,18 +479,21 @@ namespace Hermes
             {
             case H2D_REFINEMENT_H:
             {
-                                   const int central = 3; //central triangle
+                                   //central triangle
+                                   const int central = 3;
                                    c.dofs = 0;
                                    for (int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
                                    {
                                      c.dofs += num_shapes[HERMES_MODE_TRIANGLE][H2D_GET_H_ORDER(c.p[j]) + 1][H2DRS_ORDER_ANY + 1][H2DSI_ANY];
                                      if (j != central)
                                      {
-                                       c.dofs -= num_shapes[HERMES_MODE_TRIANGLE][std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[central])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_TRI_EDGE] / 3; //shared edge: since triangle has three edges which are identified by a single order this will find 3 x different edge of a given order
+                                       //shared edge: since triangle has three edges which are identified by a single order this will find 3 x different edge of a given order
+                                       c.dofs -= num_shapes[HERMES_MODE_TRIANGLE][std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[central])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_TRI_EDGE] / 3;
                                      }
                                    }
                                    if (has_vertex_shape[HERMES_MODE_TRIANGLE])
-                                     c.dofs -= 2 * 3; // Every vertex function belonging to vertices of the middle triangle is added 3-times, so it has to be deducted 2 times.
+                                     // Every vertex function belonging to vertices of the middle triangle is added 3-times, so it has to be deducted 2 times.
+                                     c.dofs -= 2 * 3;
             }
               break;
 
@@ -508,27 +513,34 @@ namespace Hermes
               for (int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
                 c.dofs += num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[j]) + 1][H2D_GET_V_ORDER(c.p[j]) + 1][H2DSI_ANY];
               for (int j = 0; j < 2; j++) { //shared edge functions
-                c.dofs -= num_shapes[HERMES_MODE_QUAD][H2DRS_ORDER_ANY + 1][std::min(H2D_GET_V_ORDER(c.p[2 * j]), H2D_GET_V_ORDER(c.p[2 * j + 1])) + 1][H2DSI_VERT_EDGE] / 2; //shared vertical edge functions: every edge is twice there
-                c.dofs -= num_shapes[HERMES_MODE_QUAD][std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[j ^ 3])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_HORIZ_EDGE] / 2; //shared horizontal edge functions: every edge is twice there
+                //shared vertical edge functions: every edge is twice there
+                c.dofs -= num_shapes[HERMES_MODE_QUAD][H2DRS_ORDER_ANY + 1][std::min(H2D_GET_V_ORDER(c.p[2 * j]), H2D_GET_V_ORDER(c.p[2 * j + 1])) + 1][H2DSI_VERT_EDGE] / 2;
+                //shared horizontal edge functions: every edge is twice there
+                c.dofs -= num_shapes[HERMES_MODE_QUAD][std::min(H2D_GET_H_ORDER(c.p[j]), H2D_GET_H_ORDER(c.p[j ^ 3])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_HORIZ_EDGE] / 2;
               }
               if (has_vertex_shape[HERMES_MODE_QUAD])
-                c.dofs -= 4 + 3; //edge vertex + central vertex
+                //edge vertex + central vertex
+                c.dofs -= 4 + 3;
               break;
 
             case H2D_REFINEMENT_H_ANISO_H:
               c.dofs = num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[0]) + 1][H2D_GET_V_ORDER(c.p[0]) + 1][H2DSI_ANY];
               c.dofs += num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[1]) + 1][H2D_GET_V_ORDER(c.p[1]) + 1][H2DSI_ANY];
-              c.dofs -= num_shapes[HERMES_MODE_QUAD][std::min(H2D_GET_H_ORDER(c.p[0]), H2D_GET_H_ORDER(c.p[1])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_HORIZ_EDGE] / 2; //shared edge functions
+              //shared edge functions
+              c.dofs -= num_shapes[HERMES_MODE_QUAD][std::min(H2D_GET_H_ORDER(c.p[0]), H2D_GET_H_ORDER(c.p[1])) + 1][H2DRS_ORDER_ANY + 1][H2DSI_HORIZ_EDGE] / 2;
               if (has_vertex_shape[HERMES_MODE_QUAD])
-                c.dofs -= 2; //shared vertex functions
+                //shared vertex functions
+                c.dofs -= 2;
               break;
 
             case H2D_REFINEMENT_H_ANISO_V:
               c.dofs = num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[0]) + 1][H2D_GET_V_ORDER(c.p[0]) + 1][H2DSI_ANY];
               c.dofs += num_shapes[HERMES_MODE_QUAD][H2D_GET_H_ORDER(c.p[1]) + 1][H2D_GET_V_ORDER(c.p[1]) + 1][H2DSI_ANY];
-              c.dofs -= num_shapes[HERMES_MODE_QUAD][H2DRS_ORDER_ANY + 1][std::min(H2D_GET_V_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[1])) + 1][H2DSI_VERT_EDGE] / 2; //shared edge functions
+              //shared edge functions
+              c.dofs -= num_shapes[HERMES_MODE_QUAD][H2DRS_ORDER_ANY + 1][std::min(H2D_GET_V_ORDER(c.p[0]), H2D_GET_V_ORDER(c.p[1])) + 1][H2DSI_VERT_EDGE] / 2;
               if (has_vertex_shape[HERMES_MODE_QUAD])
-                c.dofs -= 2; //shared vertex functions
+                //shared vertex functions
+                c.dofs -= 2;
               break;
 
             case H2D_REFINEMENT_P:
@@ -646,7 +658,8 @@ namespace Hermes
         if (element->is_triangle())
         {
           order_v = order_h;
-          quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v); //in a case of a triangle, order_v is zero. Set it to order_h in order to simplify the routines.
+          //in a case of a triangle, order_v is zero. Set it to order_h in order to simplify the routines.
+          quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
         }
 
         //build candidates.

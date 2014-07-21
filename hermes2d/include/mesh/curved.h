@@ -51,7 +51,8 @@ namespace Hermes
       Arc(double angle);
       Arc(const Arc* other);
 
-      double angle; ///< arc angle
+      /// arc angle
+      double angle;
 
       /// Arc degree is 2.
       static const unsigned char degree = 2;
@@ -80,11 +81,16 @@ namespace Hermes
       Nurbs(const Nurbs* other);
       ~Nurbs();
 
-      unsigned char degree;  ///< curve degree (2=quadratic, etc.)
-      unsigned char np;      ///< number of control points
-      double3* pt; ///< control points and their weights
-      unsigned char nk;      ///< knot vector length
-      double* kv;  ///< knot vector
+      /// curve degree (2=quadratic, etc.)
+      unsigned char degree;
+      /// number of control points
+      unsigned char np;
+      /// control points and their weights
+      double3* pt;
+      /// knot vector length
+      unsigned char nk;
+      /// knot vector
+      double* kv;
     };
 
     /// CurvMap is a structure storing complete information on the curved edges of
@@ -134,8 +140,10 @@ namespace Hermes
 
       /// finally here are the coefficients of the higher-order basis functions
       /// that constitute the projected reference mapping:
-      unsigned short nc; ///< number of coefficients
-      double2* coeffs; ///< array of the coefficients
+      /// number of coefficients
+      unsigned short nc;
+      /// array of the coefficients
+      double2* coeffs;
 
       void get_mid_edge_points(Element* e, double2* pt, unsigned short n);
 
@@ -201,15 +209,21 @@ namespace Hermes
       double** calculate_bubble_projection_matrix(short* indices, ElementMode2D mode);
       void precalculate_cholesky_projection_matrices_bubble();
 
-      double** edge_proj_matrix;  ///< projection matrix for each edge is the same
+      /// projection matrix for each edge is the same
+      double** edge_proj_matrix;
       unsigned short edge_proj_matrix_size;
-      double** bubble_proj_matrix_tri; ///< projection matrix for triangle bubbles
-      double** bubble_proj_matrix_quad; ///< projection matrix for quad bubbles
+      /// projection matrix for triangle bubbles
+      double** bubble_proj_matrix_tri;
+      /// projection matrix for quad bubbles
+      double** bubble_proj_matrix_quad;
 
-      double* edge_p;  ///<  diagonal vector in cholesky factorization
-      double* bubble_tri_p; ///<  diagonal vector in cholesky factorization
+      ///  diagonal vector in cholesky factorization
+      double* edge_p;
+      ///  diagonal vector in cholesky factorization
+      double* bubble_tri_p;
       unsigned short tri_bubble_np;
-      double* bubble_quad_p; ///<  diagonal vector in cholesky factorization
+      ///  diagonal vector in cholesky factorization
+      double* bubble_quad_p;
       unsigned short quad_bubble_np;
     };
 

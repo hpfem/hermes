@@ -32,12 +32,12 @@ namespace Hermes
         spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
-        this->set_area(area);
-        this->setSymFlag(sym);
+          this->set_area(area);
+          this->setSymFlag(sym);
 
-        // If spline is nullptr, initialize it to be constant 1.0.
-        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
-      }
+          // If spline is nullptr, initialize it to be constant 1.0.
+          if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+        }
       template<typename Scalar>
       DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, std::vector<std::string> areas,
         Scalar const_coeff,
@@ -49,12 +49,12 @@ namespace Hermes
         spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
-        this->set_areas(areas);
-        this->setSymFlag(sym);
+          this->set_areas(areas);
+          this->setSymFlag(sym);
 
-        // If spline is nullptr, initialize it to be constant 1.0.
-        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
-      }
+          // If spline is nullptr, initialize it to be constant 1.0.
+          if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+        }
 
       template<typename Scalar>
       Scalar DefaultJacobianMagnetostatics<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
@@ -65,35 +65,35 @@ namespace Hermes
         for (int i = 0; i < n; i++)
         {
           Scalar B_i = sqrt(sqr(u_ext[idx_j]->dx[i]) + sqr(u_ext[idx_j]->dy[i]));
-          if(std::abs(B_i) > Hermes::HermesSqrtEpsilon)
+          if (std::abs(B_i) > Hermes::HermesSqrtEpsilon)
           {
             planar_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i
               * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
               * (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i]);
-            if(gt == HERMES_AXISYM_X)
+            if (gt == HERMES_AXISYM_X)
             {
               axisym_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i / e->y[i]
-              * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
+                * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
                 * u_ext[idx_j]->val[i] * v->dy[i];
             }
-            else if(gt == HERMES_AXISYM_Y)
+            else if (gt == HERMES_AXISYM_Y)
             {
               axisym_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i / e->x[i]
-              * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
+                * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
                 * u_ext[idx_j]->val[i] * v->dx[i];
             }
           }
           planar_part += wt[i] * const_coeff*spline_coeff->value(B_i)
             * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-          if(gt == HERMES_AXISYM_X)
+          if (gt == HERMES_AXISYM_X)
           {
             axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->y[i]
-            * u->val[i] * v->dy[i];
+              * u->val[i] * v->dy[i];
           }
-          else if(gt == HERMES_AXISYM_Y)
+          else if (gt == HERMES_AXISYM_Y)
           {
             axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->x[i]
-            * u->val[i] * v->dx[i];
+              * u->val[i] * v->dx[i];
           }
         }
 
@@ -135,10 +135,10 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline),
         gt(gt), order_increase(order_increase)
       {
-        this->set_area(area);
-        // If spline is nullptr, initialize it to be constant 1.0.
-        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
-      }
+          this->set_area(area);
+          // If spline is nullptr, initialize it to be constant 1.0.
+          if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+        }
 
       template<typename Scalar>
       DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, std::vector<std::string> areas, Scalar const_coeff,
@@ -147,11 +147,11 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
-        this->set_areas(areas);
+          this->set_areas(areas);
 
-        // If spline is nullptr, initialize it to be constant 1.0.
-        if(c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
-      }
+          // If spline is nullptr, initialize it to be constant 1.0.
+          if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+        }
 
       template<typename Scalar>
       Scalar DefaultResidualMagnetostatics<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
@@ -164,10 +164,10 @@ namespace Hermes
           Scalar B_i = sqrt(sqr(u_ext[idx_i]->dx[i]) + sqr(u_ext[idx_i]->dy[i]));
           planar_part += wt[i] * const_coeff*spline_coeff->value(B_i) *
             (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
-          if(gt == HERMES_AXISYM_X) axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->y[i]
-          * u_ext[idx_i]->val[i] * v->dy[i];
-          else if(gt == HERMES_AXISYM_Y) axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->x[i]
-          * u_ext[idx_i]->val[i] * v->dx[i];
+          if (gt == HERMES_AXISYM_X) axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->y[i]
+            * u_ext[idx_i]->val[i] * v->dy[i];
+          else if (gt == HERMES_AXISYM_Y) axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->x[i]
+            * u_ext[idx_i]->val[i] * v->dx[i];
         }
         return planar_part + axisym_part;
       }

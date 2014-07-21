@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -74,7 +74,7 @@ namespace Hermes
       ML_Epetra::MultiLevelPreconditioner *prec;
       Teuchos::ParameterList mlist;
       EpetraMatrix<Scalar> *mat;
-      unsigned owner:1;
+      unsigned owner : 1;
 
       friend class AztecOOSolver<Scalar>;
     };

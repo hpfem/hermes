@@ -26,12 +26,12 @@ namespace Hermes
     }
     MultimeshDGNeighborTreeNode::~MultimeshDGNeighborTreeNode()
     {
-      if(left_son)
+      if (left_son)
       {
         delete left_son;
         left_son = nullptr;
       }
-      if(right_son)
+      if (right_son)
       {
         delete right_son;
         right_son = nullptr;

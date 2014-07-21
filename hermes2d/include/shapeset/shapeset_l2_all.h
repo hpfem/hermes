@@ -34,7 +34,7 @@ namespace Hermes
       virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
       virtual unsigned short get_max_index(ElementMode2D mode) const;
       virtual unsigned char get_id() const { return 30; }
-      
+
       static const unsigned short max_index[H2D_NUM_MODES];
     };
 
@@ -56,7 +56,7 @@ namespace Hermes
       /// Returns the number of bubble functions for an element of the given order.
       /// Reimplemented because this shapeset uses linear (not bi-linear), quadratic (not bi-quadratic) etc. polynomials.
       virtual unsigned short get_num_bubbles(unsigned short order, ElementMode2D mode) const;
-      
+
       static const unsigned short max_index[H2D_NUM_MODES];
     };
 

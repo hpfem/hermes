@@ -29,7 +29,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_,std::vector<SpaceSharedPtr<Scalar> > spaces, bool to_set, bool dirichlet_lift_accordingly)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_, std::vector<SpaceSharedPtr<Scalar> > spaces, bool to_set, bool dirichlet_lift_accordingly)
     {
       this->init(to_set, dirichlet_lift_accordingly);
       this->set_spaces(spaces);
@@ -37,7 +37,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_,SpaceSharedPtr<Scalar> space, bool to_set, bool dirichlet_lift_accordingly)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_, SpaceSharedPtr<Scalar> space, bool to_set, bool dirichlet_lift_accordingly)
     {
       this->init(to_set, dirichlet_lift_accordingly);
       this->set_space(space);
@@ -100,8 +100,8 @@ namespace Hermes
         this->spaces[space_i]->check();
 
       for (unsigned short space_i = 0; space_i < this->spaces_size; space_i++)
-        if (!this->spaces[space_i]->is_up_to_date())
-          throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
+      if (!this->spaces[space_i]->is_up_to_date())
+        throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
 
       return true;
     }
@@ -198,7 +198,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_spaces(std::vector<SpaceSharedPtr<Scalar> > spacesToSet)
     {
-      if(this->spaces_size > 0)
+      if (this->spaces_size > 0)
         Helpers::check_length(spacesToSet, this->spaces_size);
 
       for (unsigned int i = 0; i < spacesToSet.size(); i++)
@@ -244,7 +244,7 @@ namespace Hermes
       Scalar* coeff_vec = nullptr;
       return assemble(coeff_vec, nullptr, rhs);
     }
-    
+
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, unsigned int& num_states, std::vector<MeshSharedPtr>& meshes)
     {
@@ -254,9 +254,9 @@ namespace Hermes
       for (unsigned int ext_i = 0; ext_i < this->wf->ext.size(); ext_i++)
         meshes.push_back(this->wf->ext[ext_i]->get_mesh());
       for (unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
-        for (unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
-          if (this->wf->get_forms()[form_i]->ext[ext_i])
-            meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
+      for (unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
+      if (this->wf->get_forms()[form_i]->ext[ext_i])
+        meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
 
       if (this->nonlinear)
       {
@@ -276,7 +276,7 @@ namespace Hermes
 
       // Init the caught parallel exception message.
       this->exceptionMessageCaughtInParallelBlock.clear();
-      
+
       // Dirichlet lift rhs part.
       if (this->add_dirichlet_lift)
       {
@@ -397,11 +397,11 @@ namespace Hermes
       }
 
       this->tick();
-      
+
       // Deinitialize states && previous iterations.
       this->deinit_assembling(states, num_states);
 
-      /// Finish the algebraic structures for solving.
+      // Finish the algebraic structures for solving.
       if (this->current_mat)
         this->current_mat->finish();
       if (this->current_rhs)
@@ -434,7 +434,7 @@ namespace Hermes
       free_with_check(states);
 
       // Very important.
-      if(this->add_dirichlet_lift && this->current_rhs)
+      if (this->add_dirichlet_lift && this->current_rhs)
         this->current_rhs->add_vector(this->dirichlet_lift_rhs);
     }
 

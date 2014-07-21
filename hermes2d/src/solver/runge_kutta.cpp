@@ -31,13 +31,13 @@ namespace Hermes
       stage_wf_left(new WeakForm<Scalar>(spaces.size())), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
     {
-      for(unsigned char i = 0; i < spaces.size(); i++)
+      for (unsigned char i = 0; i < spaces.size(); i++)
       {
         this->spaces.push_back(spaces.at(i));
         this->spaces_seqs.push_back(spaces.at(i)->get_seq());
       }
 
-      if(bt==nullptr)
+      if (bt == nullptr)
         throw Exceptions::NullException(2);
 
       matrix_right = create_matrix<Scalar>();
@@ -69,7 +69,7 @@ namespace Hermes
       this->spaces.push_back(space);
       this->spaces_seqs.push_back(space->get_seq());
 
-      if(bt==nullptr) throw Exceptions::NullException(2);
+      if (bt == nullptr) throw Exceptions::NullException(2);
 
       matrix_right = create_matrix<Scalar>();
       matrix_left = create_matrix<Scalar>();
@@ -95,30 +95,30 @@ namespace Hermes
     void RungeKutta<Scalar>::set_spaces(std::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       bool delete_K_vector = false;
-      for(unsigned char i = 0; i < spaces.size(); i++)
+      for (unsigned char i = 0; i < spaces.size(); i++)
       {
-        if(spaces[i]->get_seq() != this->spaces_seqs[i])
+        if (spaces[i]->get_seq() != this->spaces_seqs[i])
           delete_K_vector = true;
       }
 
       this->spaces = spaces;
       this->spaces_seqs.clear();
-      for(unsigned char i = 0; i < spaces.size(); i++)
+      for (unsigned char i = 0; i < spaces.size(); i++)
         this->spaces_seqs.push_back(spaces.at(i)->get_seq());
 
-      if(delete_K_vector)
+      if (delete_K_vector)
       {
-        delete [] K_vector;
+        delete[] K_vector;
         K_vector = new Scalar[num_stages * Space<Scalar>::get_num_dofs(this->spaces)];
         this->info("\tRunge-Kutta: K vectors are being set to zero, as the spaces changed during computation.");
         memset(K_vector, 0, num_stages * Space<Scalar>::get_num_dofs(this->spaces) * sizeof(Scalar));
       }
-      delete [] u_ext_vec;
+      delete[] u_ext_vec;
       u_ext_vec = new Scalar[num_stages * Space<Scalar>::get_num_dofs(this->spaces)];
-      delete [] vector_left;
+      delete[] vector_left;
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
 
-      if(this->stage_dp_left != nullptr)
+      if (this->stage_dp_left != nullptr)
         this->stage_dp_left->set_spaces(this->spaces);
     }
 
@@ -126,7 +126,7 @@ namespace Hermes
     void RungeKutta<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
     {
       bool delete_K_vector = false;
-      if(space->get_seq() != this->spaces_seqs[0])
+      if (space->get_seq() != this->spaces_seqs[0])
         delete_K_vector = true;
 
       this->spaces.clear();
@@ -134,19 +134,19 @@ namespace Hermes
       this->spaces_seqs.clear();
       this->spaces_seqs.push_back(space->get_seq());
 
-      if(delete_K_vector)
+      if (delete_K_vector)
       {
-        delete [] K_vector;
+        delete[] K_vector;
         K_vector = new Scalar[num_stages * Space<Scalar>::get_num_dofs(this->spaces)];
         this->info("\tRunge-Kutta: K vector is being set to zero, as the spaces changed during computation.");
         memset(K_vector, 0, num_stages * Space<Scalar>::get_num_dofs(this->spaces) * sizeof(Scalar));
       }
-      delete [] u_ext_vec;
+      delete[] u_ext_vec;
       u_ext_vec = new Scalar[num_stages * Space<Scalar>::get_num_dofs(this->spaces)];
-      delete [] vector_left;
+      delete[] vector_left;
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
 
-      if(this->stage_dp_left != nullptr)
+      if (this->stage_dp_left != nullptr)
         this->stage_dp_left->set_space(space);
     }
 
@@ -161,7 +161,7 @@ namespace Hermes
     {
       this->create_stage_wf(spaces.size(), block_diagonal_jacobian);
 
-      if(this->get_verbose_output())
+      if (this->get_verbose_output())
       {
         this->stage_wf_left->set_verbose_output(true);
         this->stage_wf_right->set_verbose_output(true);
@@ -187,16 +187,16 @@ namespace Hermes
       // Create spaces for stage solutions K_i. This is necessary
       // to define a num_stages x num_stages block weak formulation.
       for (unsigned int i = 0; i < num_stages; i++)
-        for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
-          stage_spaces_vector.push_back(spaces[space_i]);
+      for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+        stage_spaces_vector.push_back(spaces[space_i]);
 
       this->stage_dp_right = new DiscreteProblem<Scalar>(stage_wf_right, stage_spaces_vector);
 
       // Prepare residuals of stage solutions.
-      if(!residual_as_vector)
-        for (unsigned int i = 0; i < num_stages; i++)
-          for(unsigned int sln_i = 0; sln_i < spaces.size(); sln_i++)
-            residuals_vector.push_back(new Solution<Scalar>(spaces[sln_i]->get_mesh()));
+      if (!residual_as_vector)
+      for (unsigned int i = 0; i < num_stages; i++)
+      for (unsigned int sln_i = 0; sln_i < spaces.size(); sln_i++)
+        residuals_vector.push_back(new Solution<Scalar>(spaces[sln_i]->get_mesh()));
     }
 
     template<typename Scalar>
@@ -246,17 +246,17 @@ namespace Hermes
     template<typename Scalar>
     RungeKutta<Scalar>::~RungeKutta()
     {
-      if(stage_dp_left != nullptr)
+      if (stage_dp_left != nullptr)
         delete stage_dp_left;
-      if(stage_dp_right != nullptr)
+      if (stage_dp_right != nullptr)
         delete stage_dp_right;
       delete solver;
       delete matrix_right;
       delete matrix_left;
       delete vector_right;
-      delete [] K_vector;
-      delete [] u_ext_vec;
-      delete [] vector_left;
+      delete[] K_vector;
+      delete[] u_ext_vec;
+      delete[] vector_left;
     }
 
     template<typename Scalar>
@@ -278,9 +278,9 @@ namespace Hermes
     {
       std::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev = std::vector<MeshFunctionSharedPtr<Scalar> >();
       slns_time_prev.push_back(sln_time_prev);
-      std::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new  = std::vector<MeshFunctionSharedPtr<Scalar> >();
+      std::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new = std::vector<MeshFunctionSharedPtr<Scalar> >();
       slns_time_new.push_back(sln_time_new);
-      std::vector<MeshFunctionSharedPtr<Scalar> > error_fns      = std::vector<MeshFunctionSharedPtr<Scalar> >();
+      std::vector<MeshFunctionSharedPtr<Scalar> > error_fns = std::vector<MeshFunctionSharedPtr<Scalar> >();
       error_fns.push_back(error_fn);
       return rk_time_step_newton(slns_time_prev, slns_time_new,
         error_fns);
@@ -295,14 +295,14 @@ namespace Hermes
 
       int ndof = Space<Scalar>::get_num_dofs(spaces);
 
-      if(this->stage_dp_left == nullptr)
+      if (this->stage_dp_left == nullptr)
         this->init();
 
       // Creates the stage weak formulation.
       update_stage_wf(slns_time_prev);
 
       // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
-      if(error_fns != std::vector<MeshFunctionSharedPtr<Scalar> >() && bt->is_embedded() == false)
+      if (error_fns != std::vector<MeshFunctionSharedPtr<Scalar> >() && bt->is_embedded() == false)
         throw Hermes::Exceptions::Exception("rk_time_step_newton(): R-K method must be embedded if temporal error estimate is requested.");
 
       info("\tRunge-Kutta: time step, time: %f, time step: %f", this->time, this->time_step);
@@ -317,7 +317,7 @@ namespace Hermes
       // to define a num_stages x num_stages block weak formulation.
       for (unsigned int i = 0; i < num_stages; i++)
       {
-        for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+        for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
         {
           typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(spaces[space_i], spaces[space_i]->get_mesh(), 0);
           stage_spaces_vector.push_back(ref_space_creator.create_ref_space());
@@ -326,7 +326,7 @@ namespace Hermes
       this->stage_dp_right->set_spaces(stage_spaces_vector);
 
       // Zero utility vectors.
-      if(start_from_zero_K_vector || !iteration)
+      if (start_from_zero_K_vector || !iteration)
         memset(K_vector, 0, num_stages * ndof * sizeof(Scalar));
       memset(u_ext_vec, 0, num_stages * ndof * sizeof(Scalar));
       memset(vector_left, 0, num_stages * ndof * sizeof(Scalar));
@@ -348,11 +348,11 @@ namespace Hermes
         prepare_u_ext_vec();
 
         // Reinitialize filters.
-        if(this->filters_to_reinit.size() > 0)
+        if (this->filters_to_reinit.size() > 0)
         {
           Solution<Scalar>::vector_to_solutions(u_ext_vec, spaces, slns_time_new);
 
-          for(unsigned int filters_i = 0; filters_i < this->filters_to_reinit.size(); filters_i++)
+          for (unsigned int filters_i = 0; filters_i < this->filters_to_reinit.size(); filters_i++)
             filters_to_reinit.at(filters_i)->reinit();
         }
 
@@ -370,7 +370,7 @@ namespace Hermes
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).
         vector_right->change_sign();
-        if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= it))
+        if (this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= it))
         {
           char* fileName = new char[this->RhsFilename.length() + 5];
           sprintf(fileName, "%s%i", this->RhsFilename.c_str(), it);
@@ -378,9 +378,9 @@ namespace Hermes
         }
 
         // Measure the residual norm.
-        if(residual_as_vector)
+        if (residual_as_vector)
           // Calculate the l2-norm of residual vector.
-            residual_norm = get_l2_norm(vector_right);
+          residual_norm = get_l2_norm(vector_right);
         else
         {
           // Translate residual vector into residual functions.
@@ -390,7 +390,7 @@ namespace Hermes
           Solution<Scalar>::vector_to_solutions_common_dir_lift(vector_right, stage_dp_right->get_spaces(), residuals_vector, false);
 
           std::vector<MeshFunctionSharedPtr<Scalar> > meshFns;
-          for(unsigned short i = 0; i < residuals_vector.size(); i++)
+          for (unsigned short i = 0; i < residuals_vector.size(); i++)
             meshFns.push_back(residuals_vector[i]);
 
           DefaultNormCalculator<Scalar, HERMES_L2_NORM> errorCalculator(meshFns.size());
@@ -398,24 +398,24 @@ namespace Hermes
         }
 
         // Info for the user.
-        if(it == 1)
+        if (it == 1)
           this->info("\tRunge-Kutta: Newton initial residual norm: %g", residual_norm);
         else
-          this->info("\tRunge-Kutta: Newton iteration %d, residual norm: %g", it-1, residual_norm);
+          this->info("\tRunge-Kutta: Newton iteration %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
-        if(residual_norm > newton_max_allowed_residual_norm)
+        if (residual_norm > newton_max_allowed_residual_norm)
         {
           throw Exceptions::ValueException("residual norm", residual_norm, newton_max_allowed_residual_norm);
         }
 
         // If residual norm is within tolerance, or the maximum number
         // of iteration has been reached, or the problem is linear, then quit.
-        if((residual_norm < newton_tol || it > newton_max_iter) && it > 1)
+        if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1)
           break;
 
         bool rhs_only = (freeze_jacobian && it > 1);
-        if(!rhs_only)
+        if (!rhs_only)
         {
           // Assemble the block Jacobian matrix of the stationary residual F
           // Diagonal blocks are created even if empty, so that matrix_left
@@ -427,7 +427,7 @@ namespace Hermes
           // resulting tensor Jacobian.
           matrix_right->add_sparse_to_diagonal_blocks(num_stages, matrix_left);
 
-          if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= it))
+          if (this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= it))
           {
             char* fileName = new char[this->matrixFilename.length() + 5];
             sprintf(fileName, "%s%i", this->matrixFilename.c_str(), it);
@@ -451,7 +451,7 @@ namespace Hermes
       }
 
       // If max number of iterations was exceeded, fail.
-      if(it >= newton_max_iter)
+      if (it >= newton_max_iter)
       {
         this->tick();
         this->info("\tRunge-Kutta: time step duration: %f s.\n", this->last());
@@ -468,14 +468,14 @@ namespace Hermes
 
       // Calculate new_ time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)
-        for (unsigned int j = 0; j < num_stages; j++)
-          coeff_vec[i] += this->time_step * bt->get_B(j) * K_vector[j * ndof + i];
+      for (unsigned int j = 0; j < num_stages; j++)
+        coeff_vec[i] += this->time_step * bt->get_B(j) * K_vector[j * ndof + i];
 
       Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, slns_time_new);
 
       // If error_fn is not nullptr, use the B2-row in the Butcher's
       // table to calculate the temporal error estimate.
-      if(error_fns != std::vector<MeshFunctionSharedPtr<Scalar> >())
+      if (error_fns != std::vector<MeshFunctionSharedPtr<Scalar> >())
       {
         for (int i = 0; i < ndof; i++)
         {
@@ -488,7 +488,7 @@ namespace Hermes
       }
 
       // Clean up.
-      delete [] coeff_vec;
+      delete[] coeff_vec;
 
       iteration++;
       this->tick();
@@ -517,7 +517,7 @@ namespace Hermes
     template<typename Scalar>
     void RungeKutta<Scalar>::set_filters_to_reinit(std::vector<Filter<Scalar>*> filters_to_reinit)
     {
-      for(unsigned short i = 0; i < filters_to_reinit.size(); i++)
+      for (unsigned short i = 0; i < filters_to_reinit.size(); i++)
         this->filters_to_reinit.push_back(filters_to_reinit.at(i));
     }
 
@@ -529,9 +529,9 @@ namespace Hermes
       stage_wf_right->delete_all();
 
       // First let's do the mass matrix (only one block ndof times ndof).
-      for(unsigned int component_i = 0; component_i < size; component_i++)
+      for (unsigned int component_i = 0; component_i < size; component_i++)
       {
-        if(spaces[component_i]->get_type() == HERMES_H1_SPACE
+        if (spaces[component_i]->get_type() == HERMES_H1_SPACE
           || spaces[component_i]->get_type() == HERMES_L2_SPACE)
         {
           MatrixDefaultNormFormVol<Scalar>* proj_form = new MatrixDefaultNormFormVol<Scalar>(component_i, component_i, HERMES_L2_NORM);
@@ -540,7 +540,7 @@ namespace Hermes
           proj_form->u_ext_offset = 0;
           stage_wf_left->add_matrix_form(proj_form);
         }
-        if(spaces[component_i]->get_type() == HERMES_HDIV_SPACE
+        if (spaces[component_i]->get_type() == HERMES_HDIV_SPACE
           || spaces[component_i]->get_type() == HERMES_HCURL_SPACE)
         {
           MatrixDefaultNormFormVol<Scalar>* proj_form = new MatrixDefaultNormFormVol<Scalar>(component_i, component_i, HERMES_HCURL_NORM);
@@ -574,7 +574,7 @@ namespace Hermes
         {
           for (unsigned int j = 0; j < num_stages; j++)
           {
-            if(block_diagonal_jacobian && i != j) continue;
+            if (block_diagonal_jacobian && i != j) continue;
 
             MatrixFormVol<Scalar>* mfv_ij = mfvol_base[m]->clone();
 
@@ -599,7 +599,7 @@ namespace Hermes
         {
           for (unsigned int j = 0; j < num_stages; j++)
           {
-            if(block_diagonal_jacobian && i != j) continue;
+            if (block_diagonal_jacobian && i != j) continue;
 
             MatrixFormSurf<Scalar>* mfs_ij = mfsurf_base[m]->clone();
 
@@ -659,7 +659,7 @@ namespace Hermes
     template<typename Scalar>
     void RungeKutta<Scalar>::update_stage_wf(std::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev)
     {
-      if(this->wf->global_integration_order_set)
+      if (this->wf->global_integration_order_set)
       {
         this->stage_wf_left->set_global_integration_order(this->wf->global_integration_order);
         this->stage_wf_right->set_global_integration_order(this->wf->global_integration_order);
@@ -674,7 +674,7 @@ namespace Hermes
 
       stage_wf_right->ext.clear();
 
-      for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
+      for (unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
         stage_wf_right->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
       // Duplicate matrix volume forms, scale them according
@@ -725,7 +725,7 @@ namespace Hermes
       for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++)
       {
         unsigned int running_space_ndofs = 0;
-        for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+        for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
         {
           for (int idx = 0; idx < spaces[space_i]->get_num_dofs(); idx++)
           {

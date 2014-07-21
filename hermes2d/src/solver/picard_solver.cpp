@@ -1,7 +1,7 @@
 // This file is part of Hermes2D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -44,7 +44,6 @@ namespace Hermes
     {
       this->dp = new DiscreteProblem<Scalar>(wf, space, false, false);
       this->own_dp = true;
-
     }
 
     template<typename Scalar>

@@ -37,7 +37,7 @@ namespace Hermes
 
     void MeshReaderH2DBSON::load(const char *filename, MeshSharedPtr mesh)
     {
-      if(!mesh)
+      if (!mesh)
         throw Exceptions::NullException(1);
 
       mesh->free();
@@ -46,7 +46,7 @@ namespace Hermes
       fpr = fopen(filename, "rb");
 
       // file size:
-      fseek (fpr, 0, SEEK_END);
+      fseek(fpr, 0, SEEK_END);
       int size = ftell(fpr);
       rewind(fpr);
 
@@ -107,9 +107,8 @@ namespace Hermes
       }
       mesh->ntopvert = vertices_count;
 
-      delete [] vertex_xes;
-      delete [] vertex_yes;
-
+      delete[] vertex_xes;
+      delete[] vertex_yes;
 
       // Elements //
       bson_find(&it, &br, "element-count");
@@ -162,7 +161,7 @@ namespace Hermes
       for (int element_i = 0; element_i < element_count; element_i++)
       {
         mesh->element_markers_conversion.insert_marker(markers[element_i]);
-        if(vertex_3[element_i] != -1)
+        if (vertex_3[element_i] != -1)
           e = mesh->create_quad(mesh->element_markers_conversion.get_internal_marker(markers[element_i]).marker,
           &mesh->nodes[vertex_0[element_i]],
           &mesh->nodes[vertex_1[element_i]],
@@ -177,11 +176,11 @@ namespace Hermes
           nullptr);
       }
 
-      delete [] vertex_0;
-      delete [] vertex_1;
-      delete [] vertex_2;
-      delete [] vertex_3;
-      delete [] markers;
+      delete[] vertex_0;
+      delete[] vertex_1;
+      delete[] vertex_2;
+      delete[] vertex_3;
+      delete[] markers;
 
       // Boundaries //
       bson_find(&it, &br, "edge-count");
@@ -217,7 +216,7 @@ namespace Hermes
       for (unsigned int edge_i = 0; edge_i < edges_count; edge_i++)
       {
         en = mesh->peek_edge_node(vertex_0_edge[edge_i], vertex_1_edge[edge_i]);
-        if(en == nullptr)
+        if (en == nullptr)
           throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist.", edge_i, vertex_0_edge[edge_i], vertex_1_edge[edge_i]);
 
         std::string edge_marker = edge_markers[edge_i];
@@ -242,12 +241,12 @@ namespace Hermes
 
       // check that all boundary edges have a marker assigned
       for_all_edge_nodes(en, mesh)
-        if(en->ref < 2 && en->marker == 0)
-          this->warn("Boundary edge node does not have a boundary marker.");
+      if (en->ref < 2 && en->marker == 0)
+        this->warn("Boundary edge node does not have a boundary marker.");
 
-      delete [] vertex_0_edge;
-      delete [] vertex_1_edge;
-      delete [] edge_markers;
+      delete[] vertex_0_edge;
+      delete[] vertex_1_edge;
+      delete[] edge_markers;
 
       // Curves //
 
@@ -311,9 +310,9 @@ namespace Hermes
         RefMap::set_element_iro_cache(e);
       }
 
-      delete [] p1s;
-      delete [] p2s;
-      delete [] angles;
+      delete[] p1s;
+      delete[] p2s;
+      delete[] angles;
 
       // Refinements.
       bson_find(&it, &br, "refinement-count");
@@ -344,16 +343,16 @@ namespace Hermes
       {
         int element_id = refined_elements[refinement_i];
         int refinement_type = refinement_types[refinement_i];
-        if(refinement_type == -1)
+        if (refinement_type == -1)
           mesh->unrefine_element_id(element_id);
         else
           mesh->refine_element_id(element_id, refinement_type);
       }
 
-      delete [] refined_elements;
-      delete [] refinement_types;
+      delete[] refined_elements;
+      delete[] refinement_types;
 
-      if(HermesCommonApi.get_integral_param_value(checkMeshesOnLoad))
+      if (HermesCommonApi.get_integral_param_value(checkMeshesOnLoad))
         mesh->initial_single_check();
     }
 
@@ -383,7 +382,7 @@ namespace Hermes
       // Save elements
       // - count.
       bson_append_int(&bw, "element-count", mesh->get_num_base_elements());
-      // - first vertex ids  
+      // - first vertex ids
       bson_append_start_array(&bw, "element-1");
       for (int i = 0; i < mesh->get_num_base_elements(); i++)
       {
@@ -391,7 +390,7 @@ namespace Hermes
         bson_append_int(&bw, "c", e->vn[0]->id);
       }
       bson_append_finish_array(&bw);
-      // - second vertex ids  
+      // - second vertex ids
       bson_append_start_array(&bw, "element-2");
       for (int i = 0; i < mesh->get_num_base_elements(); i++)
       {
@@ -399,7 +398,7 @@ namespace Hermes
         bson_append_int(&bw, "c", e->vn[1]->id);
       }
       bson_append_finish_array(&bw);
-      // - third vertex ids  
+      // - third vertex ids
       bson_append_start_array(&bw, "element-3");
       for (int i = 0; i < mesh->get_num_base_elements(); i++)
       {
@@ -407,12 +406,12 @@ namespace Hermes
         bson_append_int(&bw, "c", e->vn[2]->id);
       }
       bson_append_finish_array(&bw);
-      // - first vertex ids  
+      // - first vertex ids
       bson_append_start_array(&bw, "element-4");
       for (int i = 0; i < mesh->get_num_base_elements(); i++)
       {
         e = mesh->get_element_fast(i);
-        if(e->is_triangle())
+        if (e->is_triangle())
           bson_append_int(&bw, "c", -1);
         else
           bson_append_int(&bw, "c", e->vn[3]->id);
@@ -431,30 +430,30 @@ namespace Hermes
       // - count.
       int edge_count = 0;
       for_all_base_elements(e, mesh)
-        for (unsigned i = 0; i < e->get_nvert(); i++)
-          if(MeshUtil::get_base_edge_node(e, i)->marker)
-            edge_count++;
+      for (unsigned i = 0; i < e->get_nvert(); i++)
+      if (MeshUtil::get_base_edge_node(e, i)->marker)
+        edge_count++;
       bson_append_int(&bw, "edge-count", edge_count);
       // - ids 1
       bson_append_start_array(&bw, "edge-1");
       for_all_base_elements(e, mesh)
-        for (unsigned i = 0; i < e->get_nvert(); i++)
-          if(MeshUtil::get_base_edge_node(e, i)->marker)
-            bson_append_int(&bw, "c", e->vn[i]->id);
+      for (unsigned i = 0; i < e->get_nvert(); i++)
+      if (MeshUtil::get_base_edge_node(e, i)->marker)
+        bson_append_int(&bw, "c", e->vn[i]->id);
       bson_append_finish_array(&bw);
       // - ids 2
       bson_append_start_array(&bw, "edge-2");
       for_all_base_elements(e, mesh)
-        for (unsigned i = 0; i < e->get_nvert(); i++)
-          if(MeshUtil::get_base_edge_node(e, i)->marker)
-            bson_append_int(&bw, "c", e->vn[e->next_vert(i)]->id);
+      for (unsigned i = 0; i < e->get_nvert(); i++)
+      if (MeshUtil::get_base_edge_node(e, i)->marker)
+        bson_append_int(&bw, "c", e->vn[e->next_vert(i)]->id);
       bson_append_finish_array(&bw);
       // - markers
       bson_append_start_array(&bw, "edge-marker");
       for_all_base_elements(e, mesh)
-        for (unsigned i = 0; i < e->get_nvert(); i++)
-          if(MeshUtil::get_base_edge_node(e, i)->marker)
-            bson_append_string(&bw, "c", mesh->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker.c_str());
+      for (unsigned i = 0; i < e->get_nvert(); i++)
+      if (MeshUtil::get_base_edge_node(e, i)->marker)
+        bson_append_string(&bw, "c", mesh->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker.c_str());
       bson_append_finish_array(&bw);
 
       // Save arcs.
@@ -462,77 +461,77 @@ namespace Hermes
       int arc_count = 0;
       for_all_base_elements(e, mesh)
       {
-        if(e->is_curved())
-          for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->curves[i] != nullptr)
-              if(e->cm->curves[i]->type == ArcType)
-                arc_count++;
+        if (e->is_curved())
+        for (unsigned i = 0; i < e->get_nvert(); i++)
+        if (e->cm->curves[i] != nullptr)
+        if (e->cm->curves[i]->type == ArcType)
+          arc_count++;
       }
       bson_append_int(&bw, "arc-count", arc_count);
       // - p1.
       bson_append_start_array(&bw, "arcs-p1");
       for_all_base_elements(e, mesh)
       {
-        if(e->is_curved())
-          for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->curves[i] != nullptr)
-            {
-              if(e->cm->curves[i]->type != ArcType)
-                continue;
-              bson_append_int(&bw, "c", e->vn[i]->id);
-            }
+        if (e->is_curved())
+        for (unsigned i = 0; i < e->get_nvert(); i++)
+        if (e->cm->curves[i] != nullptr)
+        {
+          if (e->cm->curves[i]->type != ArcType)
+            continue;
+          bson_append_int(&bw, "c", e->vn[i]->id);
+        }
       }
       bson_append_finish_array(&bw);
       // - p2.
       bson_append_start_array(&bw, "arcs-p2");
       for_all_base_elements(e, mesh)
       {
-        if(e->is_curved())
-          for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->curves[i] != nullptr)
-            {
-              if(e->cm->curves[i]->type != ArcType)
-                continue;
-              bson_append_int(&bw, "c", e->vn[e->next_vert(i)]->id);
-            }
+        if (e->is_curved())
+        for (unsigned i = 0; i < e->get_nvert(); i++)
+        if (e->cm->curves[i] != nullptr)
+        {
+          if (e->cm->curves[i]->type != ArcType)
+            continue;
+          bson_append_int(&bw, "c", e->vn[e->next_vert(i)]->id);
+        }
       }
       bson_append_finish_array(&bw);
       // - angles.
       bson_append_start_array(&bw, "arcs-angle");
       for_all_base_elements(e, mesh)
       {
-        if(e->is_curved())
-          for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->curves[i] != nullptr)
-            {
-              if(e->cm->curves[i]->type != ArcType)
-                continue;
-              bson_append_int(&bw, "c", ((Arc*)e->cm->curves[i])->angle);
-            }
+        if (e->is_curved())
+        for (unsigned i = 0; i < e->get_nvert(); i++)
+        if (e->cm->curves[i] != nullptr)
+        {
+          if (e->cm->curves[i]->type != ArcType)
+            continue;
+          bson_append_int(&bw, "c", ((Arc*)e->cm->curves[i])->angle);
+        }
       }
       bson_append_finish_array(&bw);
 
       // Save general NURBS.
       // - count.
       for_all_base_elements(e, mesh)
-        if(e->is_curved())
-          for (unsigned i = 0; i < e->get_nvert(); i++)
-            if(e->cm->curves[i] != nullptr)
-              if(e->cm->curves[i]->type != ArcType)
-                throw Exceptions::Exception("BSON mesh loader can not operate with general NURBS so far.");
+      if (e->is_curved())
+      for (unsigned i = 0; i < e->get_nvert(); i++)
+      if (e->cm->curves[i] != nullptr)
+      if (e->cm->curves[i]->type != ArcType)
+        throw Exceptions::Exception("BSON mesh loader can not operate with general NURBS so far.");
 
       // Save refinements
       // - count.
-      for(unsigned int refinement_i = 0; refinement_i < mesh->refinements.size(); refinement_i++)
+      for (unsigned int refinement_i = 0; refinement_i < mesh->refinements.size(); refinement_i++)
         bson_append_int(&bw, "refinement-count", mesh->refinements.size());
       // - ids
       bson_append_start_array(&bw, "refinement-id");
-      for(unsigned int refinement_i = 0; refinement_i < mesh->refinements.size(); refinement_i++)
+      for (unsigned int refinement_i = 0; refinement_i < mesh->refinements.size(); refinement_i++)
         bson_append_int(&bw, "c", mesh->refinements[refinement_i].first);
       bson_append_finish_array(&bw);
       // - type
       bson_append_start_array(&bw, "refinement-type");
-      for(unsigned int refinement_i = 0; refinement_i < mesh->refinements.size(); refinement_i++)
+      for (unsigned int refinement_i = 0; refinement_i < mesh->refinements.size(); refinement_i++)
         bson_append_int(&bw, "c", mesh->refinements[refinement_i].second);
       bson_append_finish_array(&bw);
 
@@ -542,7 +541,7 @@ namespace Hermes
       // Write to disk.
       FILE *fpw;
       fpw = fopen(filename, "wb");
-      const char *dataw = (const char *) bson_data(&bw);
+      const char *dataw = (const char *)bson_data(&bw);
       fwrite(dataw, bson_size(&bw), 1, fpw);
       fclose(fpw);
 
@@ -565,11 +564,11 @@ namespace Hermes
       std::vector<subdomain_BSON> subdomains;
 
       bool* baseElementsSaved = new bool[meshes[0]->get_num_base_elements()];
-      memset(baseElementsSaved, 0, sizeof(bool) * meshes[0]->get_num_base_elements());
+      memset(baseElementsSaved, 0, sizeof(bool)* meshes[0]->get_num_base_elements());
 
 #pragma region Save to structures
 
-      for(unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
+      for (unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
       {
         bool hasAllElements = (meshes[meshes_i]->get_num_used_base_elements() == meshes[meshes_i]->get_num_base_elements());
 
@@ -588,7 +587,7 @@ namespace Hermes
           // If found, then insert the pair <this vertex number, the found vertex number> into vertices_to_vertices dictionary.
           // If not, insert.
           std::map<std::pair<double, double>, unsigned int>::iterator it = points_to_vertices.find(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y));
-          if(it != points_to_vertices.end())
+          if (it != points_to_vertices.end())
             vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, it->second));
           else
           {
@@ -598,7 +597,7 @@ namespace Hermes
 
             vertices.push_back(vertex_BSON(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y, new_i));
           }
-          if(!hasAllElements)
+          if (!hasAllElements)
             subdomain.vertices.push_back(vertices_to_vertices.find(i)->second);
         }
 
@@ -606,18 +605,18 @@ namespace Hermes
         for (int i = 0; i < meshes[meshes_i]->get_num_base_elements(); i++)
         {
           e = &(meshes[meshes_i]->elements[i]);
-          if(!e->used)
+          if (!e->used)
             continue;
-          if(!baseElementsSaved[e->id])
+          if (!baseElementsSaved[e->id])
           {
-            if(e->nvert == 3)
+            if (e->nvert == 3)
               elements.push_back(element_BSON(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, -1, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker, e->id));
             else
               elements.push_back(element_BSON(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, vertices_to_vertices.find(e->vn[3]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker, e->id));
             baseElementsSaved[e->id] = true;
           }
 
-          if(!hasAllElements)
+          if (!hasAllElements)
             subdomain.elements.push_back(e->id);
         }
 
@@ -627,15 +626,15 @@ namespace Hermes
         {
           for (unsigned i = 0; i < e->get_nvert(); i++)
           {
-            if(MeshUtil::get_base_edge_node(e, i)->bnd)
+            if (MeshUtil::get_base_edge_node(e, i)->bnd)
             {
-              if(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_boundaries.end())
+              if (vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_boundaries.end())
               {
                 unsigned int edge_i = edges.size();
                 vertices_to_boundaries.insert(std::pair<std::pair<unsigned int, unsigned int>, unsigned int>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), edge_i));
                 edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker, edge_i));
               }
-              if(!hasAllElements)
+              if (!hasAllElements)
                 subdomain.boundary_edges.push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
             }
             else
@@ -643,52 +642,52 @@ namespace Hermes
           }
         }
 
-        if(has_inner_edges)
+        if (has_inner_edges)
         {
           for_all_base_elements(e, meshes[meshes_i])
-            for (unsigned i = 0; i < e->get_nvert(); i++)
+          for (unsigned i = 0; i < e->get_nvert(); i++)
+          {
+            if (!MeshUtil::get_base_edge_node(e, i)->bnd)
             {
-              if(!MeshUtil::get_base_edge_node(e, i)->bnd)
+              if (vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_boundaries.end())
               {
-                if(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_boundaries.end())
-                {
-                  unsigned int edge_i = edges.size();
-                  vertices_to_boundaries.insert(std::pair<std::pair<unsigned int, unsigned int>, unsigned int>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), edge_i));
-                  edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker, edge_i));
-                }
-                if(!hasAllElements)
-                  subdomain.inner_edges.push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
+                unsigned int edge_i = edges.size();
+                vertices_to_boundaries.insert(std::pair<std::pair<unsigned int, unsigned int>, unsigned int>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), edge_i));
+                edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker, edge_i));
               }
+              if (!hasAllElements)
+                subdomain.inner_edges.push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
             }
+          }
         }
 
         // save curved edges
         for_all_base_elements(e, meshes[meshes_i])
         {
-          if(e->is_curved())
-            for (unsigned i = 0; i < e->get_nvert(); i++)
-              if(e->cm->curves[i] != nullptr)
-                if(vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
-                {
-                  if(e->cm->curves[i]->type == ArcType)
-                    arcs.push_back(arc_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, ((Arc*)e->cm->curves[i])->angle));
-                  else
-                    throw Exceptions::Exception("BSON mesh loader can not operate with general NURBS so far.");
+          if (e->is_curved())
+          for (unsigned i = 0; i < e->get_nvert(); i++)
+          if (e->cm->curves[i] != nullptr)
+          if (vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
+          {
+            if (e->cm->curves[i]->type == ArcType)
+              arcs.push_back(arc_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, ((Arc*)e->cm->curves[i])->angle));
+            else
+              throw Exceptions::Exception("BSON mesh loader can not operate with general NURBS so far.");
 
-                  vertices_to_curves.insert(std::pair<std::pair<unsigned int, unsigned int>, bool>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), true));
-                }
+            vertices_to_curves.insert(std::pair<std::pair<unsigned int, unsigned int>, bool>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), true));
+          }
         }
 
         // save refinements
-        for(unsigned int refinement_i = 0; refinement_i < meshes[meshes_i]->refinements.size(); refinement_i++)
+        for (unsigned int refinement_i = 0; refinement_i < meshes[meshes_i]->refinements.size(); refinement_i++)
           subdomain.refinements.push_back(refinement_BSON(meshes[meshes_i]->refinements[refinement_i].first, meshes[meshes_i]->refinements[refinement_i].second));
 
         subdomains.push_back(subdomain);
       }
 
-      delete [] baseElementsSaved;
+      delete[] baseElementsSaved;
 
-      std::sort (elements.begin(), elements.end(), elementCompare);
+      std::sort(elements.begin(), elements.end(), elementCompare);
 #pragma endregion
 
       // Init bson
@@ -729,7 +728,7 @@ namespace Hermes
       // Write to disk.
       FILE *fpw;
       fpw = fopen(filename, "wb");
-      const char *dataw = (const char *) bson_data(&bw);
+      const char *dataw = (const char *)bson_data(&bw);
       fwrite(dataw, bson_size(&bw), 1, fpw);
       fclose(fpw);
 
@@ -742,7 +741,7 @@ namespace Hermes
       fpr = fopen(filename, "rb");
 
       // file size:
-      fseek (fpr, 0, SEEK_END);
+      fseek(fpr, 0, SEEK_END);
       int size = ftell(fpr);
       rewind(fpr);
 
@@ -754,7 +753,7 @@ namespace Hermes
       bson br;
       bson_init_finished_data(&br, datar, 0);
 
-      for(unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
+      for (unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
         meshes.at(meshes_i)->free();
 
       MeshSharedPtr global_mesh(new Mesh);
@@ -773,24 +772,24 @@ namespace Hermes
       this->load_domain(br, global_mesh, vertex_is, element_is, edge_is, elements, edges, vertices, arcs, subdomains);
 
       int max_vertex_i = -1;
-      for(std::map<int, int>::iterator it = vertex_is.begin(); it != vertex_is.end(); ++it)
-        if(it->first > max_vertex_i)
-          max_vertex_i = it->first;
+      for (std::map<int, int>::iterator it = vertex_is.begin(); it != vertex_is.end(); ++it)
+      if (it->first > max_vertex_i)
+        max_vertex_i = it->first;
       int max_element_i = -1;
-      for(std::map<int, int>::iterator it = element_is.begin(); it != element_is.end(); ++it)
-        if(it->first > max_element_i)
-          max_element_i = it->first;
+      for (std::map<int, int>::iterator it = element_is.begin(); it != element_is.end(); ++it)
+      if (it->first > max_element_i)
+        max_element_i = it->first;
       int max_edge_i = -1;
-      for(std::map<int, int>::iterator it = edge_is.begin(); it != edge_is.end(); ++it)
-        if(it->first > max_edge_i)
-          max_edge_i = it->first;
+      for (std::map<int, int>::iterator it = edge_is.begin(); it != edge_is.end(); ++it)
+      if (it->first > max_edge_i)
+        max_edge_i = it->first;
 
       // Subdomains //
       unsigned int subdomains_count = subdomains.size();
-      if(subdomains_count != meshes.size())
+      if (subdomains_count != meshes.size())
         throw Hermes::Exceptions::MeshLoadFailureException("Number of subdomains( = %u) does not equal the number of provided meshes in the vector( = %u).", subdomains_count, meshes.size());
 
-      for(unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
+      for (unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
       {
         for (int element_i = 0; element_i < elements.size(); element_i++)
         {
@@ -798,7 +797,7 @@ namespace Hermes
 
           meshes[subdomains_i]->element_markers_conversion.insert_marker(element.marker);
         }
-        for(unsigned int edge_i = 0; edge_i < edges.size(); edge_i++)
+        for (unsigned int edge_i = 0; edge_i < edges.size(); edge_i++)
         {
           edge_BSON edge = edges.at(edge_i);
 
@@ -806,7 +805,7 @@ namespace Hermes
         }
       }
 
-      for(unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
+      for (unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
       {
         unsigned int vertex_number_count = subdomains.at(subdomains_i).vertices.empty() ? 0 : subdomains.at(subdomains_i).vertices.size();
         unsigned int element_number_count = subdomains.at(subdomains_i).elements.empty() ? 0 : subdomains.at(subdomains_i).elements.size();
@@ -814,18 +813,18 @@ namespace Hermes
         unsigned int inner_edge_number_count = subdomains.at(subdomains_i).inner_edges.empty() ? 0 : subdomains.at(subdomains_i).inner_edges.size();
 
         // copy the whole mesh if the subdomain is the whole mesh.
-        if(element_number_count == 0 || element_number_count == elements.size())
+        if (element_number_count == 0 || element_number_count == elements.size())
         {
           meshes[subdomains_i]->copy(global_mesh);
           // refinements.
-          if(!subdomains.at(subdomains_i).refinements.empty() && subdomains.at(subdomains_i).refinements.size() > 0)
+          if (!subdomains.at(subdomains_i).refinements.empty() && subdomains.at(subdomains_i).refinements.size() > 0)
           {
             // perform initial refinements
             for (unsigned int i = 0; i < subdomains.at(subdomains_i).refinements.size(); i++)
             {
               int element_id = subdomains.at(subdomains_i).refinements.at(i).id;
               int refinement_type = subdomains.at(subdomains_i).refinements.at(i).type;
-              if(refinement_type == -1)
+              if (refinement_type == -1)
                 meshes[subdomains_i]->unrefine_element_id(element_id);
               else
                 meshes[subdomains_i]->refine_element_id(element_id, refinement_type);
@@ -845,17 +844,17 @@ namespace Hermes
           meshes[subdomains_i]->init(size);
 
           // Create top-level vertex nodes.
-          if(vertex_number_count == 0)
+          if (vertex_number_count == 0)
             vertex_number_count = vertices.size();
           for (unsigned int vertex_numbers_i = 0; vertex_numbers_i < vertex_number_count; vertex_numbers_i++)
           {
             unsigned int vertex_number;
-            if(vertex_number_count == vertices.size())
+            if (vertex_number_count == vertices.size())
               vertex_number = vertex_is[vertex_numbers_i];
             else
             {
-              vertex_number =  subdomains.at(subdomains_i).vertices.at(vertex_numbers_i);
-              if(vertex_number > max_vertex_i)
+              vertex_number = subdomains.at(subdomains_i).vertices.at(vertex_numbers_i);
+              if (vertex_number > max_vertex_i)
                 throw Exceptions::MeshLoadFailureException("Wrong vertex number:%u in subdomain %u.", vertex_number, subdomains_i);
             }
 
@@ -881,12 +880,12 @@ namespace Hermes
 
           Element* e;
           int* elements_existing = new int[element_count];
-          for(int i = 0; i < element_count; i++)
+          for (int i = 0; i < element_count; i++)
             elements_existing[i] = -1;
           for (int element_number_i = 0; element_number_i < element_number_count; element_number_i++)
           {
             int elementI = subdomains.at(subdomains_i).elements.at(element_number_i);
-            if(elementI > max_element_i)
+            if (elementI > max_element_i)
               throw Exceptions::MeshLoadFailureException("Wrong element number:%i in subdomain %u.", elementI, subdomains_i);
 
             elements_existing[element_is[subdomains.at(subdomains_i).elements.at(element_number_i)]] = elementI;
@@ -894,28 +893,28 @@ namespace Hermes
           for (int element_i = 0; element_i < element_count; element_i++)
           {
             bool found = false;
-            if(element_number_count == 0)
+            if (element_number_count == 0)
               found = true;
             else
               found = elements_existing[element_i] != -1;
 
-            if(!found)
+            if (!found)
             {
               meshes[subdomains_i]->elements.skip_slot()->cm = nullptr;
               continue;
             }
 
-            element_BSON element(-1,-1,-1,-1, "", -1);
-            for(int searched_element_i = 0; searched_element_i < element_count; searched_element_i++)
+            element_BSON element(-1, -1, -1, -1, "", -1);
+            for (int searched_element_i = 0; searched_element_i < element_count; searched_element_i++)
             {
               element = elements.at(searched_element_i);
-              if(element.i == elements_existing[element_i])
+              if (element.i == elements_existing[element_i])
                 break;
             }
-            if(element.i == -1)
+            if (element.i == -1)
               throw Exceptions::MeshLoadFailureException("Element number wrong in the mesh file.");
 
-            if(element.v4 != -1)
+            if (element.v4 != -1)
               e = meshes[subdomains_i]->create_quad(meshes[subdomains_i]->element_markers_conversion.get_internal_marker(element.marker).marker,
               &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(element.v1)->second],
               &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(element.v2)->second],
@@ -931,18 +930,18 @@ namespace Hermes
           }
 
           // Boundary Edge numbers //
-          if(boundary_edge_number_count == 0)
+          if (boundary_edge_number_count == 0)
             boundary_edge_number_count = edges.size();
 
           for (int boundary_edge_number_i = 0; boundary_edge_number_i < boundary_edge_number_count; boundary_edge_number_i++)
           {
-            edge_BSON edge(-1,-1, "", -1);
+            edge_BSON edge(-1, -1, "", -1);
             int domain_edge_count = edges.size();
-            for(unsigned int to_find_i = 0; to_find_i < domain_edge_count; to_find_i++)
+            for (unsigned int to_find_i = 0; to_find_i < domain_edge_count; to_find_i++)
             {
-              if(boundary_edge_number_count != domain_edge_count)
+              if (boundary_edge_number_count != domain_edge_count)
               {
-                if(edges.at(to_find_i).i == subdomains.at(subdomains_i).boundary_edges.at(boundary_edge_number_i))
+                if (edges.at(to_find_i).i == subdomains.at(subdomains_i).boundary_edges.at(boundary_edge_number_i))
                 {
                   edge = edges.at(to_find_i);
                   break;
@@ -950,7 +949,7 @@ namespace Hermes
               }
               else
               {
-                if(edges.at(to_find_i).i == edge_is[boundary_edge_number_i])
+                if (edges.at(to_find_i).i == edge_is[boundary_edge_number_i])
                 {
                   edge = edges.at(to_find_i);
                   break;
@@ -958,11 +957,11 @@ namespace Hermes
               }
             }
 
-            if(edge.i == -1)
+            if (edge.i == -1)
               throw Exceptions::MeshLoadFailureException("Wrong boundary-edge number:%i in subdomain %u.", subdomains.at(subdomains_i).boundary_edges.at(boundary_edge_number_i), subdomains_i);
 
             Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge.v1)->second, vertex_vertex_numbers.find(edge.v2)->second);
-            if(en == nullptr)
+            if (en == nullptr)
               throw Hermes::Exceptions::MeshLoadFailureException("Boundary data error (edge %i does not exist).", boundary_edge_number_i);
 
             en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge.marker).marker;
@@ -977,20 +976,20 @@ namespace Hermes
           {
             edge_BSON edge(-1, -1, "", -1);
 
-            for(unsigned int to_find_i = 0; to_find_i < edges.size(); to_find_i++)
+            for (unsigned int to_find_i = 0; to_find_i < edges.size(); to_find_i++)
             {
-              if(edges.at(to_find_i).i == subdomains.at(subdomains_i).inner_edges.at(inner_edge_number_i))
+              if (edges.at(to_find_i).i == subdomains.at(subdomains_i).inner_edges.at(inner_edge_number_i))
               {
                 edge = edges.at(to_find_i);
                 break;
               }
             }
 
-            if(edge.i == -1)
+            if (edge.i == -1)
               throw Exceptions::MeshLoadFailureException("Wrong inner-edge number:%i in subdomain %u.", subdomains.at(subdomains_i).boundary_edges.at(inner_edge_number_i), subdomains_i);
 
             Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge.v1)->second, vertex_vertex_numbers.find(edge.v2)->second);
-            if(en == nullptr)
+            if (en == nullptr)
               throw Hermes::Exceptions::MeshLoadFailureException("Inner data error (edge %i does not exist).", inner_edge_number_i);
 
             en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge.marker).marker;
@@ -1009,7 +1008,7 @@ namespace Hermes
 
             // first do arcs, then NURBSs.
             Curve* curve;
-            if(vertex_vertex_numbers.find(arcs.at(curves_i).p1) == vertex_vertex_numbers.end() ||
+            if (vertex_vertex_numbers.find(arcs.at(curves_i).p1) == vertex_vertex_numbers.end() ||
               vertex_vertex_numbers.find(arcs.at(curves_i).p2) == vertex_vertex_numbers.end())
               continue;
             else
@@ -1019,7 +1018,7 @@ namespace Hermes
               p2 = vertex_vertex_numbers.find(arcs.at(curves_i).p2)->second;
 
               curve = MeshUtil::load_arc(meshes[subdomains_i], curves_i, &en, p1, p2, arcs.at(curves_i).angle, true);
-              if(curve == nullptr)
+              if (curve == nullptr)
                 continue;
             }
 
@@ -1036,24 +1035,24 @@ namespace Hermes
           }
 
           // refinements.
-          if(!subdomains.at(subdomains_i).refinements.empty() && subdomains.at(subdomains_i).refinements.size() > 0)
+          if (!subdomains.at(subdomains_i).refinements.empty() && subdomains.at(subdomains_i).refinements.size() > 0)
           {
             // perform initial refinements
             for (unsigned int i = 0; i < subdomains.at(subdomains_i).refinements.size(); i++)
             {
               int element_id = subdomains.at(subdomains_i).refinements.at(i).id;
               int refinement_type = subdomains.at(subdomains_i).refinements.at(i).type;
-              if(refinement_type == -1)
+              if (refinement_type == -1)
                 meshes[subdomains_i]->unrefine_element_id(element_id);
               else
                 meshes[subdomains_i]->refine_element_id(element_id, refinement_type);
             }
           }
 
-          delete [] elements_existing;
+          delete[] elements_existing;
         }
         meshes[subdomains_i]->seq = g_mesh_seq++;
-        if(HermesCommonApi.get_integral_param_value(checkMeshesOnLoad))
+        if (HermesCommonApi.get_integral_param_value(checkMeshesOnLoad))
           meshes[subdomains_i]->initial_single_check();
       }
       bson_destroy(&br);
@@ -1140,11 +1139,11 @@ namespace Hermes
         node->p1 = node->p2 = -1;
         node->next_hash = nullptr;
 
-        if(vertices[vertex_i].i > H2D_MAX_NODE_ID - 1)
+        if (vertices[vertex_i].i > H2D_MAX_NODE_ID - 1)
           throw Exceptions::MeshLoadFailureException("The index 'i' of vertex in the mesh file must be lower than %i.", H2D_MAX_NODE_ID);
 
         // insert
-        vertex_is.insert(std::pair<int,int>(vertices[vertex_i].i, vertex_i));
+        vertex_is.insert(std::pair<int, int>(vertices[vertex_i].i, vertex_i));
 
         // assignment.
         node->x = vertices[vertex_i].x;
@@ -1162,14 +1161,14 @@ namespace Hermes
         element_BSON element = elements[element_i];
 
         // insert.
-        if(element.i > H2D_MAX_NODE_ID - 1)
+        if (element.i > H2D_MAX_NODE_ID - 1)
           throw Exceptions::MeshLoadFailureException("The index 'i' of element in the mesh file must be lower than %i.", H2D_MAX_NODE_ID);
 
-        element_is.insert(std::pair<int,int>(element.i, element_i));
+        element_is.insert(std::pair<int, int>(element.i, element_i));
 
         mesh->element_markers_conversion.insert_marker(element.marker);
 
-        if(element.v4 != -1)
+        if (element.v4 != -1)
           e = mesh->create_quad(mesh->element_markers_conversion.get_internal_marker(element.marker).marker,
           &mesh->nodes[element.v1],
           &mesh->nodes[element.v2],
@@ -1194,13 +1193,13 @@ namespace Hermes
         int v2 = edges[edge_i].v2;
 
         // insert
-        if(edges[edge_i].i > H2D_MAX_NODE_ID - 1)
+        if (edges[edge_i].i > H2D_MAX_NODE_ID - 1)
           throw Exceptions::MeshLoadFailureException("The index 'i' of edge in the mesh file must be lower than %i.", H2D_MAX_NODE_ID);
 
         edge_is.insert(std::pair<int, int>(edge_i, edges[edge_i].i));
 
         en = mesh->peek_edge_node(v1, v2);
-        if(en == nullptr)
+        if (en == nullptr)
           throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist.", edge_i, v1, v2);
 
         std::string edge_marker = edges[edge_i].marker;
@@ -1232,8 +1231,8 @@ namespace Hermes
 
       // check that all boundary edges have a marker assigned
       for_all_edge_nodes(en, mesh)
-        if(en->ref < 2 && en->marker == 0)
-          this->warn("Boundary edge node does not have a boundary marker.");
+      if (en->ref < 2 && en->marker == 0)
+        this->warn("Boundary edge node does not have a boundary marker.");
 
       // Curves //
       // Arcs & NURBSs //

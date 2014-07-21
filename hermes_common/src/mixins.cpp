@@ -134,7 +134,7 @@ namespace Hermes
       printf("\033[%dm", console_attrs + 30);
 
       //emphasize and console bold
-      if(console_bold)
+      if (console_bold)
         printf("\033[1m");
 
       //print text and reset settings
@@ -188,7 +188,7 @@ namespace Hermes
       printf("\033[%dm", console_attrs + 30);
 
       //emphasize and console bold
-      if(console_bold)
+      if (console_bold)
         printf("\033[1m");
 
       //print text and reset settings
@@ -242,7 +242,7 @@ namespace Hermes
       printf("\033[%dm", console_attrs + 30);
 
       //emphasize and console bold
-      if(console_bold)
+      if (console_bold)
         printf("\033[1m");
 
       //print text and reset settings
@@ -425,7 +425,7 @@ namespace Hermes
       //console color code
       int console_attrs = 0;
       bool console_bold = false;
-      switch(code)
+      switch (code)
       {
       case HERMES_EC_WARNING: console_attrs |= FOREGROUND_RED | FOREGROUND_GREEN; break;
       case HERMES_EC_INFO: console_bold = true; break;
@@ -435,7 +435,7 @@ namespace Hermes
       printf("\033[%dm", console_attrs + 30);
 
       //emphasize and console bold
-      if(console_bold)
+      if (console_bold)
         printf("\033[1m");
 
       //print text and reset settings
@@ -487,9 +487,11 @@ namespace Hermes
         if (!this->file_output_only)
         {
           if (!write_console(code, msg))
-            printf("%s", msg);  //safe fallback
+            //safe fallback
+            printf("%s", msg);
 
-          printf("\n");  //write a new line
+          //write a new line
+          printf("\n");
         }
 
         HermesLogEventInfo* info = this->hermes_build_log_info(code);
@@ -605,7 +607,7 @@ namespace Hermes
 #else  //Linux
       int sec_corr = 0;
       long period_nsec = end.tv_nsec - begin.tv_nsec;
-      if(period_nsec < 0)
+      if (period_nsec < 0)
       {
         sec_corr += -1;
         period_nsec += 1000000000UL;

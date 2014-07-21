@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -129,10 +129,14 @@ namespace Hermes
       {
       public:
         HermesLogEventInfo(const char code, const char* src_function, const char* src_file, const int src_line);
-        const char code;          ///< An event code character. For defails see event characters, e.g., ::HERMES_EC_ERROR
-        const char* src_function; ///< A name of a function/method at which the event was generated.
-        const char* src_file;     ///< A source file at which the event was generated.
-        const int src_line;       ///< A line in the source file at which the event was generated.
+        /// An event code character. For defails see event characters, e.g., ::HERMES_EC_ERROR
+        const char code;
+        /// A name of a function/method at which the event was generated.
+        const char* src_function;
+        /// A source file at which the event was generated.
+        const char* src_file;
+        /// A line in the source file at which the event was generated.
+        const int src_line;
       };
 
       HermesLogEventInfo* hermes_build_log_info(char event) const;
@@ -153,7 +157,7 @@ namespace Hermes
       bool verbose_output;
 
       /// Only output to file - not to console.
-      bool file_output_only; 
+      bool file_output_only;
 
       /// Verbose callback.
       callbackFn verbose_callback;
@@ -179,7 +183,8 @@ namespace Hermes
     class HERMES_API TimeMeasurable
     {
     public:
-      TimeMeasurable(const char *name = nullptr); ///< Constructs internal structures and starts measuring.
+      /// Constructs internal structures and starts measuring.
+      TimeMeasurable(const char *name = nullptr);
 
       /// Tick type. Used by the class Hermes::TimePeriod.
       enum TimerPeriodTickType
@@ -188,9 +193,12 @@ namespace Hermes
         HERMES_SKIP ///< Skip period between ticks, i.e., do not accumulate it.
       };
 
-      const TimeMeasurable& reset(); ///< Resets accumulated time.
-      const TimeMeasurable& tick_reset(); ///< Starts a new_ period and resets accumulated time.
-      const TimeMeasurable& tick(TimeMeasurable::TimerPeriodTickType type = HERMES_ACCUMULATE); ///< Starts/ends a new_ period.
+      /// Resets accumulated time.
+      const TimeMeasurable& reset();
+      /// Starts a new_ period and resets accumulated time.
+      const TimeMeasurable& tick_reset();
+      /// Starts/ends a new_ period.
+      const TimeMeasurable& tick(TimeMeasurable::TimerPeriodTickType type = HERMES_ACCUMULATE);
 
       /// Returns a name of the time period if any.
       const std::string& name() const;
@@ -211,18 +219,26 @@ namespace Hermes
     private:
 #ifdef _WINDOWS //Windows
       typedef uint64_t SysTime;
-      double frequency; ///< Frequency of the performance timer. If zero, no hi-res timer is supported. (Win32 only)
+      /// Frequency of the performance timer. If zero, no hi-res timer is supported. (Win32 only)
+      double frequency;
 #else //Linux
       typedef timespec SysTime;
 #endif
-      const std::string period_name; ///< Name of the timer (can be empty)
-      double last_period; ///< Time of the last measured period.
-      SysTime last_time; ///< Time when the timer was started/resumed (in platform-dependent units).
-      double accum; ///< Time accumulator (in seconds).
+      /// Name of the timer (can be empty)
+      const std::string period_name;
+      /// Time of the last measured period.
+      double last_period;
+      /// Time when the timer was started/resumed (in platform-dependent units).
+      SysTime last_time;
+      /// Time accumulator (in seconds).
+      double accum;
 
-      SysTime get_time() const; ///< Returns current time (in platform-dependent units).
-      double period_in_seconds(const SysTime& begin, const SysTime& end) const; ///< Calculates distance between times (in platform specific units) and returns it in seconds.
-      std::string to_string(const double time) const; ///< Converts time from seconds to human readable form.
+      /// Returns current time (in platform-dependent units).
+      SysTime get_time() const;
+      /// Calculates distance between times (in platform specific units) and returns it in seconds.
+      double period_in_seconds(const SysTime& begin, const SysTime& end) const;
+      /// Converts time from seconds to human readable form.
+      std::string to_string(const double time) const;
     };
 
     /// \brief Class that allows overriding integration order in its discrete problems

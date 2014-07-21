@@ -34,14 +34,20 @@ namespace Hermes
     ///
     struct SurfPos
     {
-      int marker;    ///< surface marker (surface = edge in 2D and face in 3D)
-      int surf_num;   ///< local element surface number
+      /// surface marker (surface = edge in 2D and face in 3D)
+      int marker;
+      /// local element surface number
+      int surf_num;
 
-      Element *base; ///< for internal use
+      /// for internal use
+      Element *base;
 
-      int v1, v2;    ///< H2D only: edge endpoint vertex id numbers
-      double t;      ///< H2D only: position between v1 and v2 in the range[0..1]
-      double lo, hi; ///< H2D only: for internal use
+      /// H2D only: edge endpoint vertex id numbers
+      int v1, v2;
+      /// H2D only: position between v1 and v2 in the range[0..1]
+      double t;
+      /// H2D only: for internal use
+      double lo, hi;
     };
 
     class Mesh;
@@ -56,7 +62,7 @@ namespace Hermes
     };
 
     /// @ingroup inner
-    static const uint64_t ONE = (uint64_t) 1 << 63;
+    static const uint64_t ONE = (uint64_t)1 << 63;
 
     /// @ingroup inner
     struct Rect
@@ -95,10 +101,10 @@ namespace Hermes
         bool visited;
         Rect  cr;
         Rect* er;
-      friend class Traverse;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename T> friend class DiscreteProblemDGAssembler;
-      template<typename T> friend class DiscreteProblemThreadAssembler;
+        friend class Traverse;
+        template<typename Scalar> friend class DiscreteProblem;
+        template<typename T> friend class DiscreteProblemDGAssembler;
+        template<typename T> friend class DiscreteProblemThreadAssembler;
       };
 
       /// Returns all states on the passed meshes.
@@ -112,7 +118,7 @@ namespace Hermes
       /// Overload for mesh functions.
       template<typename Scalar>
       State** get_states(std::vector<MeshFunctionSharedPtr<Scalar> > mesh_functions, unsigned int& states_count);
-      
+
     private:
       /// Used by get_states.
       void begin(int n);

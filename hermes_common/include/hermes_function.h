@@ -25,7 +25,8 @@ namespace Hermes
 {
   struct HERMES_API SplineCoeff
   {
-    double a, b, c, d;    // four coefficients of a cubic spline.
+    // four coefficients of a cubic spline.
+    double a, b, c, d;
   };
 
   /// Generic class for functions of one variable.

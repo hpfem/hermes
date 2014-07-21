@@ -40,7 +40,7 @@ namespace Hermes
         VectorFormVol<Scalar>* custom_projection_residual,
         Scalar* target_vec);
 
-      /// Wrapper that delivers a Solution instead of a coefficient vector.   
+      /// Wrapper that delivers a Solution instead of a coefficient vector.
       static void project_global(SpaceSharedPtr<Scalar> space,
         MatrixFormVol<Scalar>* custom_projection_jacobian,
         VectorFormVol<Scalar>* custom_projection_residual,
@@ -52,7 +52,7 @@ namespace Hermes
         const std::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
         Scalar* target_vec);
 
-      /// Wrapper that delivers a vector of Solutions instead of a coefficient vector.   
+      /// Wrapper that delivers a vector of Solutions instead of a coefficient vector.
       static void project_global(const std::vector<SpaceSharedPtr<Scalar> > spaces,
         const std::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
         const std::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
@@ -91,7 +91,7 @@ namespace Hermes
 
       static void project_global(std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshFunctionSharedPtr<Scalar> > source_meshfns,
         Hermes::Algebra::Vector<Scalar>* target_vec, std::vector<NormType> proj_norms = std::vector<NormType>());
-      
+
       static void project_global(std::vector<SpaceSharedPtr<Scalar> > spaces,
         std::vector<MeshFunctionSharedPtr<Scalar> > source_slns, std::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
         std::vector<NormType> proj_norms = std::vector<NormType>(), bool delete_old_mesh = false);

@@ -739,7 +739,6 @@ namespace Hermes
       fu->value(np, ext, u_ext, u, geometry);
     }
 
-
     template<typename Scalar>
     Func<Scalar>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad, int nc)
     {
@@ -794,7 +793,6 @@ namespace Hermes
 
     template HERMES_API void init_fn_preallocated(Func<double>* u, UExtFunction<double>* fu, Func<double>** ext, Func<double>** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
     template HERMES_API void init_fn_preallocated(Func<std::complex<double> >* u, UExtFunction<std::complex<double> >* fu, Func<std::complex<double> >** ext, Func<std::complex<double> >** u_ext, const int order, Geom<double>* geometry, ElementMode2D mode);
-
 
     template HERMES_API Func<double>* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);
     template HERMES_API Func<std::complex<double> >* init_zero_fn(ElementMode2D mode, int order, Quad2D* quad_2d, int nc);

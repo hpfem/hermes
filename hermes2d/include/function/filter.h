@@ -43,7 +43,7 @@ namespace Hermes
       virtual ~Filter();
 
       virtual void reinit();
-      
+
       inline SpaceType get_space_type() const { return space_type; };
 
       /// State querying helpers.
@@ -73,7 +73,7 @@ namespace Hermes
       bool unimesh;
 
       SpaceType space_type;
-      
+
       UniData** unidata;
 
       void copy_base(Filter* flt);
@@ -113,7 +113,6 @@ namespace Hermes
 
       void init_components();
       virtual void precalculate(unsigned short order, unsigned short mask);
-
     };
 
     /// @ingroup meshFunctions
@@ -186,7 +185,8 @@ namespace Hermes
     public:
       MagFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, std::vector<int> items = *(new std::vector<int>));
 
-      MagFilter(MeshFunctionSharedPtr<Scalar> sln1, int item1 = H2D_FN_VAL); ///< for vector-valued sln1
+      /// for vector-valued sln1
+      MagFilter(MeshFunctionSharedPtr<Scalar> sln1, int item1 = H2D_FN_VAL);
       virtual MeshFunction<Scalar>* clone() const;
 
       virtual ~MagFilter();
@@ -201,7 +201,8 @@ namespace Hermes
     public:
       TopValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> limits, std::vector<int> items = *(new std::vector<int>));
 
-      TopValFilter(MeshFunctionSharedPtr<double> sln, double limit, int item = H2D_FN_VAL_0); ///< for vector-valued sln1
+      /// for vector-valued sln1
+      TopValFilter(MeshFunctionSharedPtr<double> sln, double limit, int item = H2D_FN_VAL_0);
       virtual MeshFunction<double>* clone() const;
 
       virtual ~TopValFilter();
@@ -217,7 +218,8 @@ namespace Hermes
     public:
       BottomValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> limits, std::vector<int> items = *(new std::vector<int>));
 
-      BottomValFilter(MeshFunctionSharedPtr<double> sln, double limit, int item = H2D_FN_VAL_0); ///< for vector-valued sln1
+      /// for vector-valued sln1
+      BottomValFilter(MeshFunctionSharedPtr<double> sln, double limit, int item = H2D_FN_VAL_0);
       virtual MeshFunction<double>* clone() const;
 
       virtual ~BottomValFilter();
@@ -233,7 +235,8 @@ namespace Hermes
     public:
       ValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> low_limits, std::vector<double> high_limits, std::vector<int> items = *(new std::vector<int>));
 
-      ValFilter(MeshFunctionSharedPtr<double> sln, double low_limit, double high_limit, int item = H2D_FN_VAL_0); ///< for vector-valued sln1
+      /// for vector-valued sln1
+      ValFilter(MeshFunctionSharedPtr<double> sln, double low_limit, double high_limit, int item = H2D_FN_VAL_0);
       virtual MeshFunction<double>* clone() const;
 
       virtual ~ValFilter();

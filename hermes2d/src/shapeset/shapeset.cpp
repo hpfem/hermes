@@ -269,22 +269,22 @@ namespace Hermes
         return get_constrained_value(n, index, x, y, component, mode);
     }
 
-    double Shapeset::get_fn_value(int index, double x, double y, unsigned short component, ElementMode2D mode)  
+    double Shapeset::get_fn_value(int index, double x, double y, unsigned short component, ElementMode2D mode)
     {
       if (index < 0)
         return get_value(0, index, x, y, component, mode);
       else
-      return shape_table[0][mode][component][index](x, y);
+        return shape_table[0][mode][component][index](x, y);
     }
-    double Shapeset::get_dx_value(int index, double x, double y, unsigned short component, ElementMode2D mode) 
-    { 
+    double Shapeset::get_dx_value(int index, double x, double y, unsigned short component, ElementMode2D mode)
+    {
       if (index < 0)
         return get_value(1, index, x, y, component, mode);
       else
         return shape_table[1][mode][component][index](x, y);
     }
-    double Shapeset::get_dy_value(int index, double x, double y, unsigned short component, ElementMode2D mode) 
-    { 
+    double Shapeset::get_dy_value(int index, double x, double y, unsigned short component, ElementMode2D mode)
+    {
       if (index < 0)
         return get_value(2, index, x, y, component, mode);
       else
@@ -335,7 +335,7 @@ namespace Hermes
         return shape_table[2][HERMES_MODE_QUAD][0][index](x, y);
     }
 
-    double Shapeset::get_dxx_value(int index, double x, double y, unsigned short component, ElementMode2D mode) 
+    double Shapeset::get_dxx_value(int index, double x, double y, unsigned short component, ElementMode2D mode)
     {
       if (index < 0)
         return get_value(3, index, x, y, component, mode);
@@ -349,7 +349,7 @@ namespace Hermes
       else
         return shape_table[4][mode][component][index](x, y);
     }
-    double Shapeset::get_dxy_value(int index, double x, double y, unsigned short component, ElementMode2D mode) 
+    double Shapeset::get_dxy_value(int index, double x, double y, unsigned short component, ElementMode2D mode)
     {
       if (index < 0)
         return get_value(5, index, x, y, component, mode);
@@ -357,7 +357,6 @@ namespace Hermes
         return shape_table[5][mode][component][index](x, y);
     }
 
-    /// Returns the coordinates of the reference domain vertices.
     double2* Shapeset::get_ref_vertex(int vertex, ElementMode2D mode)
     {
       return &ref_vert[mode][vertex];

@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     Hermes::Mixins::Loggable::Static::info("Projecting reference solution on coarse mesh.");
-    OGProjection<double> ogProjection; ogProjection.project_global({u_space, v_space }, ref_slns, slns);
+    OGProjection<double> ogProjection; ogProjection.project_global({ u_space, v_space }, ref_slns, slns);
 
     cpu_time.tick();
 

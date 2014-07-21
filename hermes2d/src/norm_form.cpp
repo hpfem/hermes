@@ -141,7 +141,6 @@ namespace Hermes
       }
     }
 
-
     template<typename Scalar>
     MatrixDefaultNormFormVol<Scalar>::MatrixDefaultNormFormVol(int i, int j, NormType normType) : MatrixFormVol<Scalar>(i, j), normType(normType)
     {

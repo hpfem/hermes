@@ -23,9 +23,12 @@ namespace Hermes
   {
     /// Indices of values in the value returned by Quad2D::get_points().
     enum GIP2DIndices {
-      H2D_GIP2D_X = 0, ///< X-axis coordinate.
-      H2D_GIP2D_Y = 1, ///< Y-axis coordinate.
-      H2D_GIP2D_W = 2  ///< A weight.
+      /// X-axis coordinate.
+      H2D_GIP2D_X = 0,
+      /// Y-axis coordinate.
+      H2D_GIP2D_Y = 1,
+      /// A weight.
+      H2D_GIP2D_W = 2
     };
 
     static unsigned short H2D_GIP1D_X = 0;
@@ -35,7 +38,7 @@ namespace Hermes
 #define g_max_quad 24
     // Maximum integration order for global quadrature, for triangles.
 #define g_max_tri 20
-    
+
     // Maximum number of integration points.
 #define H2D_MAX_INTEGRATION_POINTS_COUNT_TRI 79
 #define H2D_MAX_INTEGRATION_POINTS_COUNT_QUAD 169
@@ -61,7 +64,8 @@ namespace Hermes
       double ref_vert[H2D_NUM_MODES];
       unsigned short max_order;
 
-      virtual void dummy_fn() = 0; // to prevent this class from being instantiated
+      /// to prevent this class from being instantiated
+      virtual void dummy_fn() = 0;
     };
 
     /// Quad2D is a base class for all 2D quadrature points on triangles and quads.

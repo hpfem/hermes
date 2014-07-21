@@ -266,8 +266,6 @@ namespace Hermes
       }
     }
 
-
-
     template<typename Scalar>
     Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc)
     {
@@ -481,10 +479,14 @@ namespace Hermes
           Node* mid_vn = this->get_mid_edge_vertex_node(e, i, j);
           if (mid_vn == nullptr) continue;
 
-          Node* vn[2] = { e->vn[i], e->vn[j] }; // endpoint vertex nodes
-          Node* en = ei[i]->node; // constraining edge node
-          typename Space<Scalar>::BaseComponent *bl[2], dummy_bl[2]; // base lists of v[0] and v[1]
-          int nc[2] = { 0, 0 }; // number of components of bl[0] and bl[1]
+          // endpoint vertex nodes
+          Node* vn[2] = { e->vn[i], e->vn[j] };
+          // constraining edge node
+          Node* en = ei[i]->node;
+          // base lists of v[0] and v[1]
+          typename Space<Scalar>::BaseComponent *bl[2], dummy_bl[2];
+          // number of components of bl[0] and bl[1]
+          int nc[2] = { 0, 0 };
 
           // get baselists of vn[0] and vn[1] - pretend we have them even if they are unconstrained
           for (k = 0; k < 2; k++)

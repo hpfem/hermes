@@ -11,25 +11,25 @@ namespace Hermes
       H1ProjBasedSelector<Scalar>::H1ProjBasedSelector(CandList cand_list, int max_order, H1Shapeset* user_shapeset)
         : ProjBasedSelector<Scalar>(cand_list, max_order, user_shapeset == nullptr ? new H1Shapeset() : user_shapeset, Range(1, 1), Range(2, H2DRS_MAX_ORDER)), user_shapeset(user_shapeset == nullptr ? false : true)
       {
-        if(user_shapeset != nullptr)
-        {
-          this->warn("Warn: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
-          this->warn("Warning: The functionality for cloning user shapeset is to be implemented yet.");
+          if (user_shapeset != nullptr)
+          {
+            this->warn("Warn: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
+            this->warn("Warning: The functionality for cloning user shapeset is to be implemented yet.");
+          }
         }
-      }
 
       template<typename Scalar>
       H1ProjBasedSelector<Scalar>::~H1ProjBasedSelector()
       {
-        if(!this->user_shapeset)
+        if (!this->user_shapeset)
           delete this->shapeset;
       }
 
       template<typename Scalar>
       void H1ProjBasedSelector<Scalar>::get_current_order_range(Element* element, int& min_order_, int& max_order_)
       {
-        int max_element_order = (20 - element->iro_cache)/2 - 1;
-        if(this->max_order == H2DRS_DEFAULT_ORDER)
+        int max_element_order = (20 - element->iro_cache) / 2 - 1;
+        if (this->max_order == H2DRS_DEFAULT_ORDER)
           max_order_ = max_element_order;
         else
           max_order_ = std::min(this->max_order, max_element_order);
@@ -53,7 +53,7 @@ namespace Hermes
 
           //for all shapes
           const int num_shapes = (int)shapes.size();
-          for(int i = 0; i < num_shapes; i++)
+          for (int i = 0; i < num_shapes; i++)
           {
             int inx_shape = shapes[i].inx;
             typename ProjBasedSelector<Scalar>::TrfShapeExp& shape_exp = trf_svals[inx_shape];
@@ -62,7 +62,7 @@ namespace Hermes
             shape_exp.allocate(H2D_H1FE_NUM, num_gip_points);
 
             //for all GIP points
-            for(int k = 0; k < num_gip_points; k++)
+            for (int k = 0; k < num_gip_points; k++)
             {
               //transform coordinates
               double ref_x = gip_points[k][H2D_GIP2D_X] * trf.m[0] + trf.t[0];
@@ -76,17 +76,18 @@ namespace Hermes
           }
 
           //move to the next transformation
-          if(inx_trf == H2D_TRF_IDENTITY)
+          if (inx_trf == H2D_TRF_IDENTITY)
             done = true;
           else
           {
             inx_trf++;
-            if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+            if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
               inx_trf = H2D_TRF_IDENTITY;
           }
         }
-        if(!done)
-          throw Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
+        if (!done)
+          //identity transformation has to be the last transformation
+          throw Exceptions::Exception("All transformation processed but identity transformation not found.");
       }
 
       template<typename Scalar>
@@ -97,18 +98,18 @@ namespace Hermes
 
         //calculate orthonormal basis
         const int num_shapes = (int)shapes.size();
-        for(int i = 0; i < num_shapes; i++)
+        for (int i = 0; i < num_shapes; i++)
         {
           const int inx_shape_i = shapes[i].inx;
 
           //orthogonalize
-          for(int j = 0; j < i; j++)
+          for (int j = 0; j < i; j++)
           {
             const int inx_shape_j = shapes[j].inx;
 
             //calculate product of non-transformed functions
             double product = 0.0;
-            for(int k = 0; k < num_gip_points; k++)
+            for (int k = 0; k < num_gip_points; k++)
             {
               double sum = 0.0;
               sum += svals[H2D_TRF_IDENTITY][inx_shape_i][H2D_H1FE_VALUE][k] * svals[H2D_TRF_IDENTITY][inx_shape_j][H2D_H1FE_VALUE][k];
@@ -123,7 +124,7 @@ namespace Hermes
             while (!done && inx_trf < H2D_TRF_NUM)
             {
               //for all integration points
-              for(int k = 0; k < num_gip_points; k++)
+              for (int k = 0; k < num_gip_points; k++)
               {
                 svals[inx_trf][inx_shape_i][H2D_H1FE_VALUE][k] -= product * svals[inx_trf][inx_shape_j][H2D_H1FE_VALUE][k];
                 svals[inx_trf][inx_shape_i][H2D_H1FE_DX][k] -= product * svals[inx_trf][inx_shape_j][H2D_H1FE_DX][k];
@@ -131,23 +132,24 @@ namespace Hermes
               }
 
               //move to the next transformation
-              if(inx_trf == H2D_TRF_IDENTITY)
+              if (inx_trf == H2D_TRF_IDENTITY)
                 done = true;
               else
               {
                 inx_trf++;
-                if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+                if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
                   inx_trf = H2D_TRF_IDENTITY;
               }
             }
-            if(!done)
-              throw Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
+            if (!done)
+              //identity transformation has to be the last transformation
+              throw Exceptions::Exception("All transformation processed but identity transformation not found.");
           }
 
           //normalize
           //calculate norm
           double norm_squared = 0.0;
-          for(int k = 0; k < num_gip_points; k++)
+          for (int k = 0; k < num_gip_points; k++)
           {
             double sum = 0.0;
             sum += sqr(svals[H2D_TRF_IDENTITY][inx_shape_i][H2D_H1FE_VALUE][k]);
@@ -156,7 +158,7 @@ namespace Hermes
             norm_squared += gip_points[k][H2D_GIP2D_W] * sum;
           }
           double norm = sqrt(norm_squared);
-          if(!finite(1/norm))
+          if (!finite(1 / norm))
             throw Exceptions::Exception("Norm (%g) is almost zero.", norm);
 
           //for all transformations: normalize
@@ -165,7 +167,7 @@ namespace Hermes
           while (!done && inx_trf < H2D_TRF_NUM)
           {
             //for all integration points
-            for(int k = 0; k < num_gip_points; k++)
+            for (int k = 0; k < num_gip_points; k++)
             {
               svals[inx_trf][inx_shape_i][H2D_H1FE_VALUE][k] /= norm;
               svals[inx_trf][inx_shape_i][H2D_H1FE_DX][k] /= norm;
@@ -173,17 +175,18 @@ namespace Hermes
             }
 
             //move to the next transformation
-            if(inx_trf == H2D_TRF_IDENTITY)
+            if (inx_trf == H2D_TRF_IDENTITY)
               done = true;
             else
             {
               inx_trf++;
-              if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+              if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
                 inx_trf = H2D_TRF_IDENTITY;
             }
           }
-          if(!done)
-            throw Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
+          if (!done)
+            //identity transformation has to be the last transformation
+            throw Exceptions::Exception("All transformation processed but identity transformation not found.");
         }
       }
 
@@ -218,16 +221,16 @@ namespace Hermes
 
         //calculate products
         int inx_row = 0;
-        for(int i = 0; i < num_shapes; i++, inx_row += num_shapes)
+        for (int i = 0; i < num_shapes; i++, inx_row += num_shapes)
         {
           double* matrix_row = matrix[i];
           int shape0_inx = shape_inx[i];
-          for(int k = 0; k < num_shapes; k++)
+          for (int k = 0; k < num_shapes; k++)
           {
             int shape1_inx = shape_inx[k];
 
             double value = 0.0;
-            for(int j = 0; j < num_gip_points; j++)
+            for (int j = 0; j < num_gip_points; j++)
             {
               double gip_x = gip_points[j][H2D_GIP2D_X], gip_y = gip_points[j][H2D_GIP2D_Y];
               double value0 = this->shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 0, mode);
@@ -250,16 +253,16 @@ namespace Hermes
       Scalar H1ProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemSubShapeFunc& sub_shape, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS])
       {
         Scalar total_value = 0;
-        for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
+        for (int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
         {
           double3 &gip_pt = sub_gip.gip_points[gip_inx];
 
           //get value of a shape function
-          double shape_value[H2D_H1FE_NUM] = {0, 0, 0};
+          double shape_value[H2D_H1FE_NUM] = { 0, 0, 0 };
           shape_value[H2D_H1FE_VALUE] = sub_shape.svals[H2D_H1FE_VALUE][gip_inx];
           shape_value[H2D_H1FE_DX] = sub_shape.svals[H2D_H1FE_DX][gip_inx];
           shape_value[H2D_H1FE_DY] = sub_shape.svals[H2D_H1FE_DY][gip_inx];
-          
+
           //get value of ref. solution
           Scalar ref_value[H2D_H1FE_NUM];
           ref_value[H2D_H1FE_VALUE] = rval[son][H2D_H1FE_VALUE][gip_inx];
@@ -280,20 +283,20 @@ namespace Hermes
       double H1ProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS])
       {
         double total_error_squared = 0;
-        for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
+        for (int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
         {
           double3 &gip_pt = sub_gip.gip_points[gip_inx];
 
           //calculate value of projected solution
-          Scalar proj_value[H2D_H1FE_NUM] = {0, 0, 0};
-          for(int i = 0; i < elem_proj.num_shapes; i++)
+          Scalar proj_value[H2D_H1FE_NUM] = { 0, 0, 0 };
+          for (int i = 0; i < elem_proj.num_shapes; i++)
           {
             int shape_inx = elem_proj.shape_inxs[i];
             proj_value[H2D_H1FE_VALUE] += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_H1FE_VALUE][gip_inx];
             proj_value[H2D_H1FE_DX] += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_H1FE_DX][gip_inx];
             proj_value[H2D_H1FE_DY] += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_H1FE_DY][gip_inx];
           }
-          
+
           {
             //get value of ref. solution
             Scalar ref_value[3];

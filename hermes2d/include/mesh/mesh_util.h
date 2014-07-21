@@ -35,7 +35,7 @@ namespace Hermes
       MeshHashGridElement(double lower_left_x, double lower_left_y, double upper_right_x, double upper_right_y, int depth = 0);
       ~MeshHashGridElement();
 
-      /// Return the Element 
+      /// Return the Element
       Hermes::Hermes2D::Element* getElement(double x, double y);
 
     private:
@@ -216,50 +216,50 @@ namespace Hermes
 
     /// Helper macros for easy iteration through all elements, nodes etc. in a Mesh.
 #define for_all_elements(e, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-  if(((e) = (mesh)->get_element_fast(_id)) != nullptr)
+    for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
+    if (((e) = (mesh)->get_element_fast(_id)) != nullptr)
 
 #define for_all_used_elements(e, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-  if(((e) = (mesh)->get_element_fast(_id))->used)
+    for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
+    if (((e) = (mesh)->get_element_fast(_id))->used)
 
 #define for_all_base_elements(e, mesh) \
-  for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
-  if(((e) = (mesh)->get_element_fast(_id))->used)
+    for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
+    if (((e) = (mesh)->get_element_fast(_id))->used)
 
 #define for_all_base_elements_incl_inactive(e, mesh) \
-  for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
-  if(((e) = (mesh)->get_element_fast(_id))->used || !((e) = (mesh)->get_element_fast(_id))->used)
+    for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
+    if (((e) = (mesh)->get_element_fast(_id))->used || !((e) = (mesh)->get_element_fast(_id))->used)
 
 #define for_all_active_elements_fast(mesh) \
   Element* e; \
-  for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-if (((e) = (mesh)->get_element_fast(_id))->used) \
-if ((e)->active)
+    for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
+    if (((e) = (mesh)->get_element_fast(_id))->used) \
+    if ((e)->active)
 
 #define for_all_active_elements(e, mesh) \
-for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-if (((e) = (mesh)->get_element_fast(_id))->used) \
-if ((e)->active)
+    for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
+    if (((e) = (mesh)->get_element_fast(_id))->used) \
+    if ((e)->active)
 
 #define for_all_inactive_elements(e, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-  if(((e) = (mesh)->get_element_fast(_id))->used) \
-  if(!(e)->active)
+    for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
+    if (((e) = (mesh)->get_element_fast(_id))->used) \
+    if (!(e)->active)
 
 #define for_all_nodes(n, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-  if(((n) = (mesh)->get_node(_id))->used)
+    for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
+    if (((n) = (mesh)->get_node(_id))->used)
 
 #define for_all_vertex_nodes(n, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-  if(((n) = (mesh)->get_node(_id))->used) \
-  if(!(n)->type)
+    for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
+    if (((n) = (mesh)->get_node(_id))->used) \
+    if (!(n)->type)
 
 #define for_all_edge_nodes(n, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-  if(((n) = (mesh)->get_node(_id))->used) \
-  if((n)->type)
+    for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
+    if (((n) = (mesh)->get_node(_id))->used) \
+    if ((n)->type)
   }
 }
 #endif

@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -83,7 +83,8 @@ namespace Hermes
       void set_param(int param, double value);
 
     protected:
-      AztecOO aztec;    ///< Instance of the Aztec solver.
+/// Instance of the Aztec solver.
+      AztecOO aztec;
       EpetraMatrix<Scalar> *m;
       EpetraVector<Scalar> *rhs;
 

@@ -77,15 +77,21 @@ namespace Hermes
       extern HERMES_API bool is_p_aniso(const CandList cand_list);
 
       /// A candidate.
-      class HERMES_API Cand 
+      class HERMES_API Cand
       {
       public:
-        double error; ///< Error of this candidate's sons.
-        double errors[H2D_MAX_ELEMENT_SONS]; ///< Error of this candidate's sons.
-        unsigned short dofs;  ///< An estimated number of DOFs.
-        RefinementType split; ///< A refinement, see the enum RefinementType.
-        unsigned short p[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons, see ::H2D_MAKE_QUAD_ORDER. In a case of a triangle, the vertical order is equal to the horizontal one.
-        double score; ///< A score of a candidate: the higher the better. If zero, the score is not valid and a candidate should be ignored. Evaluated in OptimumSelector::select_best_candidate.
+        /// Error of this candidate's sons.
+        double error;
+        /// Error of this candidate's sons.
+        double errors[H2D_MAX_ELEMENT_SONS];
+        /// An estimated number of DOFs.
+        unsigned short dofs;
+        /// A refinement, see the enum RefinementType.
+        RefinementType split;
+        /// Encoded orders of sons, see ::H2D_MAKE_QUAD_ORDER. In a case of a triangle, the vertical order is equal to the horizontal one.
+        unsigned short p[H2D_MAX_ELEMENT_SONS];
+        /// A score of a candidate: the higher the better. If zero, the score is not valid and a candidate should be ignored. Evaluated in OptimumSelector::select_best_candidate.
+        double score;
 
         /// Constructor.
         /** \param[in] split A refinement, see the enum RefinementTypes.

@@ -54,9 +54,12 @@ namespace Hermes
         /// Information about candidates.
         struct CandsInfo
         {
-          bool uniform_orders; ///< True if all elements of all examined candidates have uniform orders.
-          int min_quad_order; ///< Minimum quad order of all elements of all examined candidates.
-          int max_quad_order; ///< Maximum quad order of all elements of all examined candidates. If less than zero, no candidate is generated.
+          /// True if all elements of all examined candidates have uniform orders.
+          bool uniform_orders;
+          /// Minimum quad order of all elements of all examined candidates.
+          int min_quad_order;
+          /// Maximum quad order of all elements of all examined candidates. If less than zero, no candidate is generated.
+          int max_quad_order;
 
           /// Default constructor. Creates info that declares no candidates and uniform orders.
           CandsInfo() : uniform_orders(true), min_quad_order(-1), max_quad_order(-1) {};
@@ -66,7 +69,8 @@ namespace Hermes
           bool is_empty() const { return (min_quad_order < 0 || max_quad_order < 0); };
         };
 
-        CandList cand_list; ///< Allowed candidate types.
+        /// Allowed candidate types.
+        CandList cand_list;
 
         /// Updates information about candidates. Initial information is provided.
         /** \param[in,out] info_h Information about all H-candidates.
@@ -92,7 +96,7 @@ namespace Hermes
         *  \param[in] max_ha_quad_order A maximum encoded order of an element of a H-candidate or an ANISO-candidate. In the case of ANIO-candidates, the maximum is applied only to modified orders.
         *  \param[in] max_p_quad_order A maximum encoded order of an element of a P-candidate.
         *  \return A vector of candidates. The first candidate has to be equal to the original element with a refinement ::H2D_REFINEMENT_P.
-         */
+        */
         virtual std::vector<Cand> create_candidates(Element* e, int quad_order);
 
         /// Calculates error, dofs, and score of candidates.
@@ -150,7 +154,7 @@ namespace Hermes
         /// - vertical order + 1 (any)
         /// - shape function type
         int ****num_shapes;
-      
+
         /// Compares scores. Used to sort scores ascending.
         /** \param[in] a The first candidate.
         *  \param[in] b The second candidate.
@@ -186,10 +190,14 @@ namespace Hermes
         /// A shape index.
         /** Any element order higher than both the vertical and the horizontal direction will use a given shape function. */
         struct ShapeInx {
-          int order_h; ///< A minimal horizonal order of an element that can use this shape function.
-          int order_v; ///< A minimal vertical order of an element that can use this shape function.
-          int inx; ///< An index of the shape function.
-          ShapeType type; ///< A type of the shape function. It is used to calculate DOF in Optimum::evaluate_cands_dof().
+          /// A minimal horizonal order of an element that can use this shape function.
+          int order_h;
+          /// A minimal vertical order of an element that can use this shape function.
+          int order_v;
+          /// An index of the shape function.
+          int inx;
+          /// A type of the shape function. It is used to calculate DOF in Optimum::evaluate_cands_dof().
+          ShapeType type;
 
           /// Constructor.
           /** \param[in] order_h A minimal horizonal order of an element that can use this shape function.
@@ -199,14 +207,21 @@ namespace Hermes
           ShapeInx(int order_h, int order_v, int inx, ShapeType type) : order_h(order_h), order_v(order_v), inx(inx), type(type) {};
         };
 
-        Shapeset *shapeset; ///< A shapeset used to calculate error.
+        /// A shapeset used to calculate error.
+        Shapeset *shapeset;
 
-        std::vector<ShapeInx> shape_indices[H2D_NUM_MODES]; ///< Shape indices. The first index is a mode (ElementMode2D).
-        int max_shape_inx[H2D_NUM_MODES]; ///< A maximum index of a shape function. The first index is a mode (ElementMode2D).
-        int next_order_shape[H2D_NUM_MODES][H2DRS_MAX_ORDER+1]; ///< An index to the array OptimumSelector::shape_indices of a shape function of the next uniform order. The first index is a mode (ElementMode2D), the second index is an order.
-        bool has_vertex_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains vertex functions. The index is a mode (ElementMode2D).
-        bool has_edge_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains edge functions. The index is a mode (ElementMode2D).
-        bool has_bubble_shape[H2D_NUM_MODES]; ///< True if the shapeset OptimumSelector::shapeset contains bubble functions. The index is a mode (ElementMode2D).
+        /// Shape indices. The first index is a mode (ElementMode2D).
+        std::vector<ShapeInx> shape_indices[H2D_NUM_MODES];
+        /// A maximum index of a shape function. The first index is a mode (ElementMode2D).
+        int max_shape_inx[H2D_NUM_MODES];
+        /// An index to the array OptimumSelector::shape_indices of a shape function of the next uniform order. The first index is a mode (ElementMode2D), the second index is an order.
+        int next_order_shape[H2D_NUM_MODES][H2DRS_MAX_ORDER + 1];
+        /// True if the shapeset OptimumSelector::shapeset contains vertex functions. The index is a mode (ElementMode2D).
+        bool has_vertex_shape[H2D_NUM_MODES];
+        /// True if the shapeset OptimumSelector::shapeset contains edge functions. The index is a mode (ElementMode2D).
+        bool has_edge_shape[H2D_NUM_MODES];
+        /// True if the shapeset OptimumSelector::shapeset contains bubble functions. The index is a mode (ElementMode2D).
+        bool has_bubble_shape[H2D_NUM_MODES];
 
         /// Adds an index (or indices) of a bubble function of a given order if the shape index was not used yet.
         /** This function adds indices of bubble functions that were not added yet on a quadrilateral.
@@ -238,7 +253,8 @@ namespace Hermes
 
         /// Selects a refinement.
         /** Overriden function. For details, see Selector::select_refinement(). */
-        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement); ///< Selects refinement.
+        /// Selects refinement.
+        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement);
 
         /// Score DOF exponent. Used in evaluate_cands_score.
         double dof_score_exponent;

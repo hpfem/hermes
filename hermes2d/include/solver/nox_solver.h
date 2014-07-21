@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http://www.hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -220,10 +220,10 @@ namespace Hermes
 
       struct conv_flag_t
       {
-        unsigned absresid:1;
-        unsigned relresid:1;
-        unsigned wrms:1;
-        unsigned update:1;
+        unsigned absresid : 1;
+        unsigned relresid : 1;
+        unsigned wrms : 1;
+        unsigned update : 1;
       } conv_flag;
     };
   }
