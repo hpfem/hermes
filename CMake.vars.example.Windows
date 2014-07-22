@@ -1,0 +1,94 @@
+# WINDOWS
+# On windows, as there is no package manager or "standard" directory structure, we need to get the locations of dependencies.
+# We only support Visual Studio on Windows (with C++11 support), and as such, Release / Debug versions are handled by Visual Studio and there is no need or reason to set them up here.
+
+# BASIC CONFIGURATION
+
+  # Global
+  # Generate static libs (instead of dynamic)
+  set(HERMES_STATIC_LIBS NO)
+  # Target path
+  set(CMAKE_INSTALL_PREFIX "d:/hpfem/hermes/dependencies")
+  
+  # Paths for compulsory dependencies
+  set(XERCES_ROOT "d:/hpfem/hermes/dependencies")
+  set(XSD_ROOT "d:/hpfem/hermes/dependencies")
+  
+  # HermesCommon
+    # TC_MALLOC
+    set(WITH_TC_MALLOC NO)
+      set(TCMALLOC_ROOT "d:/hpfem/hermes/dependencies")
+
+    # BSON 
+    set(WITH_BSON NO)
+      set(BSON_ROOT "d:/hpfem/hermes/dependencies")
+
+    # MATIO
+    set(WITH_MATIO NO)
+      set(MATIO_ROOT "d:/hpfem/hermes/dependencies")
+    set(MATIO_WITH_HDF5 NO)
+    
+    # Solvers
+      
+      # UMFPACK
+      set(WITH_UMFPACK YES)
+        set(UMFPACK_ROOT "d:/hpfem/hermes/dependencies")
+      
+      # PARALUTION
+      set(WITH_PARALUTION NO)
+        set(PARALUTION_ROOT "d:/hpfem/hermes/dependencies")
+      
+      # MUMPS
+      # Sequential version of MUMPS may be enabled by setting YES on the following line
+      # and pointing to the package installation directory with MUMPS_ROOT.
+      set(WITH_MUMPS NO)
+        set(MUMPS_ROOT "d:/hpfem/hermes/dependencies")
+        set(WINBLAS_ROOT "d:/hpfem/hermes/dependencies")
+
+      # Trilinos
+      set(WITH_TRILINOS NO)
+        set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies")
+      
+    # Mesh format Exodus II
+    set(WITH_EXODUSII NO)
+      set(EXODUSII_ROOT "d:/hpfem/hermes/dependencies")
+    
+    # Parallel execution - Enable OpenMP for shared memory processing.
+    set(WITH_OPENMP YES)
+
+    # If MPI is enabled, the MPI library installed on the system should be found by
+    # CMake automatically. If the found library doesn't match the one used to compile the
+    # particular MPI-dependent package, the other two options should be used to specify it:
+    ## set(MPI_LIBRARIES         -lmpi)
+    ## set(MPI_INCLUDE_PATH      "d:/hpfem/hermes/dependencies/include")
+    set(WITH_MPI NO)
+    
+    # Experimental
+      # PJLIB - memory pool implementation
+      set(WITH_PJLIB NO)
+        set(PJLIB_ROOT "d:/hpfem/hermes/dependencies")
+  
+  # Hermes2D
+  set(WITH_H2D YES)
+    # In-house OpenGL visualization
+    set(H2D_WITH_GLUT YES)
+      set(GLUT_ROOT "d:/hpfem/hermes/dependencies")
+      set(GLEW_ROOT "d:/hpfem/hermes/dependencies")
+      set(PTHREAD_ROOT "d:/hpfem/hermes/dependencies")
+      
+    # Test examples shipped with the library
+    set(H2D_WITH_TEST_EXAMPLES YES)
+  
+
+# ADVANCED CONFIGURATION
+
+  # Number of solution / filter components.
+  # Minimum is 1, maximum 999.
+  set(H2D_MAX_COMPONENTS 10)
+  # Number of quadratures, recommended is 4.
+  # Minimum is 2, maximum 999.
+  set(H2D_MAX_QUADRATURES 4)
+  #  This number has to be smaller than 21.
+  set(H2D_MAX_HANGING_NODES_LEVEL 15)
+  #  Use second derivatives (that are turned off by default).
+  set(H2D_USE_SECOND_DERIVATIVES NO)

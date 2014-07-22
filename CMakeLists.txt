@@ -1,8 +1,29 @@
 project(hermes)
   cmake_minimum_required(VERSION 2.8)
 
-  ### BEGIN DEFAULT CONFIGURATION ##############################################################
-  ### BEGIN BASIC DEFAULT CONFIGURATION ##############################################################
+###########################################################################
+#############//////---------------------------------\\\\\\#################
+#############!!!!!! NEVER CHANGE THIS FILE DIRECTLY !!!!!!#################
+################!!!!!! USE the "CMake.vars" file !!!!!!####################
+#############\\\\\\---------------------------------//////#################
+###########################################################################
+#   __      __      __      __      __      __      __      __      __    #
+# /    \  /    \  /    \  /    \  /    \  /    \  /    \  /    \  /    \  #
+#| STOP || STOP || STOP || STOP || STOP || STOP || STOP || STOP || STOP | #
+# \ __ /  \ __ /  \ __ /  \ __ /  \ __ /  \ __ /  \ __ /  \ __ /  \ __ /  #
+#   ||      ||      ||      ||      ||      ||      ||      ||      ||    #
+#   ||      ||      ||      ||      ||      ||      ||      ||      ||    #
+#   ||      ||      ||      ||      ||      ||      ||      ||      ||    #
+#   ||      ||      ||      ||      ||      ||      ||      ||      ||    #
+#  /  \    /  \    /  \    /  \    /  \    /  \    /  \    /  \    /  \   #
+# ~~~~~~~ ~~~~~~~ ~~~~~~~ ~~~~~~~ ~~~~~~~ ~~~~~~~ ~~~~~~~ ~~~~~~~ ~~~~~~~ #
+###########################################################################
+#############//////---------------------------------\\\\\\#################
+#############!!!!!! NEVER CHANGE THIS FILE DIRECTLY !!!!!!#################
+################!!!!!! USE the "CMake.vars" file !!!!!!####################
+#############\\\\\\---------------------------------//////#################
+###########################################################################
+
 
     # The values below are sane defaults to produce a build on all platforms,
     # if you want to override them, set them in CMake.vars rather than here.
@@ -55,7 +76,6 @@ project(hermes)
     # during the CMake configuration phase) do not match those used when compiling MUMPS.
     # In this case, set SCALAPACK_LIBRARIES manually in CMake.vars and reconfigure Hermes.
     set(WITH_MUMPS              NO)
-    # set(MUMPS_ROOT            root/dir/of/mumps/)
     # set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
 
     # Trilinos
@@ -144,7 +164,7 @@ project(hermes)
   
   # Allow to override the default values in CMake.vars:
 	include(CMake.vars OPTIONAL)
-    include(../CMakeHermes.cmake OPTIONAL)
+  include(../CMakeHermes.cmake OPTIONAL)
     
   set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
   if(WIN64)
@@ -458,13 +478,6 @@ project(hermes)
     include_directories(${MPI_INCLUDE_PATH})
   endif(WITH_MPI)
   
-  IF(WITH_WINDOWS_STACKWALKER)
-    IF(MSVC)
-      find_package(STACK_WALKER REQUIRED)
-      include_directories(${STACK_WALKER_INCLUDE_DIR})
-    ENDIF(MSVC)
-  ENDIF(WITH_WINDOWS_STACKWALKER)
-
   # Match debug or release version of all other libraries.
   DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)
   
@@ -488,13 +501,13 @@ project(hermes)
   # Report.
   #~~~~~~~~
   message("\nHermes Configuration results")
-  message("---------------------")
+  message("----------------------------")
   message("Build static libs: ${HERMES_STATIC_LIBS}")
   if(WIN32)
     message("Build for Win64: ${WIN64}")
   endif(WIN32)
   
-  message("\n-------Features-------")
+  message("\n----------Features----------")
   message("Build with OpenMP: ${WITH_OPENMP}")
   message("Build with TCMalloc: ${WITH_TC_MALLOC}")
   message("Build with BSON: ${WITH_BSON}")
@@ -506,20 +519,23 @@ project(hermes)
     message("Build with MPI: ${WITH_MPI}")
   endif()
   message("Build with EXODUSII: ${WITH_EXODUSII}")
+  message("----------------------------")
   
-  message("\n-------Solvers-------")
+  message("\n-----------Solvers----------")
   message("Build with UMFPACK: ${WITH_UMFPACK}")
   message("Build with PARALUTION: ${WITH_PARALUTION}")
   message("Build with PETSC: ${WITH_PETSC}")
   message("Build with MUMPS: ${WITH_MUMPS}")
   message("Build with SUPERLU${MT}: ${WITH_SUPERLU}")
   message("Build with TRILINOS: ${WITH_TRILINOS}")
+  message("----------------------------")
   
-  message("\n-----Hermes common-----")
+  message("\n-------Hermes common--------")
   message(" Debug version: ${HERMES_COMMON_DEBUG}")
   message(" Release version: ${HERMES_COMMON_RELEASE}")
+message("----------------------------")
 
-  message("\n-----Hermes2D-----")
+  message("\n----------Hermes2D----------")
   message(" Build Hermes2D: ${WITH_H2D}")
   if(WITH_H2D)
     message(" Debug version: ${H2D_DEBUG}")
@@ -527,5 +543,5 @@ project(hermes)
     message(" Test examples: ${H2D_WITH_TEST_EXAMPLES}")
     message(" Hermes2D with OpenGL: ${H2D_WITH_GLUT}")
   endif(WITH_H2D)
-  message("---------------------")
+  message("----------------------------")
   message("\n")

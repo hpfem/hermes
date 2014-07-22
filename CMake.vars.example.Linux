@@ -1,0 +1,113 @@
+# LINUX
+# On linux, there should be no need to set up *_ROOT directories, in the default settings, they all point to /usr/local, as should be true on Debian systems.
+# We mainly support gcc and CLang compilers with C++11 support.
+
+# BASIC CONFIGURATION
+
+  # Global
+  # Generate static libs (instead of dynamic)
+  set(HERMES_STATIC_LIBS NO)
+  # Target path
+  set(CMAKE_INSTALL_PREFIX "/usr/local")
+  
+  # Paths for compulsory dependencies
+  set(XERCES_ROOT "/usr/local")
+  set(XSD_ROOT "/usr/local")
+  
+  
+  # HermesCommon
+    
+    # Release and debug versions
+    set(HERMES_COMMON_DEBUG     YES)
+    set(HERMES_COMMON_RELEASE   YES)
+    
+    # BFD
+    set(WITH_BFD NO)
+      set(BFD_ROOT "/usr/local")
+      
+    # TC_MALLOC
+    set(WITH_TC_MALLOC NO)
+      set(TCMALLOC_ROOT "/usr/local")
+
+    # BSON 
+    set(WITH_BSON NO)
+      set(BSON_ROOT "/usr/local")
+
+    # MATIO
+    set(WITH_MATIO NO)
+      set(MATIO_ROOT "/usr/local")
+    set(MATIO_WITH_HDF5 NO)
+    
+    # Solvers
+      
+      # UMFPACK
+      set(WITH_UMFPACK YES)
+        set(UMFPACK_ROOT "/usr/local")
+      
+      # PARALUTION
+      set(WITH_PARALUTION NO)
+        set(PARALUTION_ROOT "/usr/local")
+      
+      # MUMPS
+      # Sequential version of MUMPS may be enabled by setting YES on the following line
+      # and pointing to the package installation directory with MUMPS_ROOT. To enable the
+      # parallel version, setting WITH_MPI to YES in addition to that should suffice. If link
+      # problems arise, it may be that the automatically found SCALAPACK libraries (reported
+      # during the CMake configuration phase) do not match those used when compiling MUMPS.
+      # In this case, set SCALAPACK_LIBRARIES manually and reconfigure Hermes.
+      # set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
+      set(WITH_MUMPS NO)
+        set(MUMPS_ROOT "/usr/local")
+
+      # Trilinos
+      set(WITH_TRILINOS NO)
+        set(TRILINOS_ROOT "/usr/local")
+      
+    # Mesh format Exodus II
+    set(WITH_EXODUSII NO)
+      set(EXODUSII_ROOT "/usr/local")
+    
+    # Parallel execution - Enable OpenMP for shared memory processing.
+    set(WITH_OPENMP YES)
+
+    # If MPI is enabled, the MPI library installed on the system should be found by
+    # CMake automatically. If the found library doesn't match the one used to compile the
+    # particular MPI-dependent package, the other two options should be used to specify it:
+    ## set(MPI_LIBRARIES         -lmpi)
+    ## set(MPI_INCLUDE_PATH      /usr/include/openmpi)
+    set(WITH_MPI NO)
+    
+    # Experimental
+      # PJLIB - memory pool implementation
+      set(WITH_PJLIB NO)
+        set(PJLIB_ROOT "/usr/local")
+  
+  # Hermes2D
+  set(WITH_H2D YES)
+    
+    # Release and debug versions
+    set(H2D_DEBUG               YES)
+    set(H2D_RELEASE             YES)
+    
+    # In-house OpenGL visualization
+    set(H2D_WITH_GLUT YES)
+      set(GLUT_ROOT "/usr/local")
+      set(GLEW_ROOT "/usr/local")
+      set(PTHREAD_ROOT "/usr/local")
+      
+    # Test examples shipped with the library
+    set(H2D_WITH_TEST_EXAMPLES YES)
+  
+
+# ADVANCED CONFIGURATION
+
+  # Number of solution / filter components.
+  # Minimum is 1, maximum 999.
+  set(H2D_MAX_COMPONENTS 10)
+  # Number of quadratures, recommended is 4.
+  # Minimum is 2, maximum 999.
+  set(H2D_MAX_QUADRATURES 4)
+  #  This number has to be smaller than 21.
+  set(H2D_MAX_HANGING_NODES_LEVEL 15)
+  #  Use second derivatives (that are turned off by default).
+  set(H2D_USE_SECOND_DERIVATIVES NO)
