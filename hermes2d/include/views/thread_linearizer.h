@@ -12,6 +12,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
+/*! \file thread_linearizer.h
+\brief File containing ThreadLinearizerMultidimensional class.
+*/
 
 #ifndef __H2D_THREAD_LINEARIZER_H
 #define __H2D_THREAD_LINEARIZER_H

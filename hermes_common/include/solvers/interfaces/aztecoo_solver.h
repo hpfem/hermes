@@ -36,8 +36,7 @@ namespace Hermes
   {
     /// \brief Encapsulation of AztecOO linear solver.
     ///
-    /// @ingroup solvers
-    template <typename Scalar>
+        template <typename Scalar>
     class HERMES_API AztecOOSolver : public IterSolver<Scalar>
     {
     public:

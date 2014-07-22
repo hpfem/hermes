@@ -37,8 +37,7 @@ namespace Hermes
       HERMES_EXACT = 1
     };
 
-    /// @ingroup meshFunctions
-    /// \brief Represents the solution of a PDE.<br>
+        /// \brief Represents the solution of a PDE.<br>
     ///
     /// The Solution class represents the solution of a PDE. Given a space and a solution vector,
     /// it calculates the appropriate linear combination of basis functions at the specified

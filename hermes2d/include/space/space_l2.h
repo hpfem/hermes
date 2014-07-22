@@ -21,8 +21,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// @ingroup spaces
-    /// L2Space represents a space of Scalar functions with discontinuities along
+        /// L2Space represents a space of Scalar functions with discontinuities along
     /// mesh edges.<br>
     /// Typical usage:<br>
     /// ...<br>
@@ -68,8 +67,7 @@ namespace Hermes
       template<typename T> friend class Space<T>::ReferenceSpaceCreator;
     };
 
-    /// @ingroup spaces
-    /// L2MarkerWiseConstSpace represents a space of material-wise constant functions.
+        /// L2MarkerWiseConstSpace represents a space of material-wise constant functions.
     /// It is, of course, discontinuous, therefore it uses L2Space as a basis.
     template<typename Scalar>
     class HERMES_API L2MarkerWiseConstSpace : public L2Space<Scalar>

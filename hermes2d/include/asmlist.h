@@ -29,8 +29,7 @@ namespace Hermes
     /// automatically by the class. The class provides a list of triples (idx, dof, coef).
     /// The triples are flattened to separate arrays of length 'cnt'.
     ///
-    /// @ingroup inner
-    template<typename Scalar>
+        template<typename Scalar>
     class HERMES_API AsmList
     {
     public:

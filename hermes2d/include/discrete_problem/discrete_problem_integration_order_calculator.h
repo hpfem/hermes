@@ -33,8 +33,7 @@ namespace Hermes
   namespace Hermes2D
   {
     class PrecalcShapeset;
-    /// @ingroup inner
-    /// DiscreteProblemIntegrationOrderCalculator class.
+        /// DiscreteProblemIntegrationOrderCalculator class.
     /// \brief Provides methods of integration order calculation.
     template<typename Scalar>
     class HERMES_API DiscreteProblemIntegrationOrderCalculator :

@@ -106,6 +106,11 @@ namespace Hermes
         return this->vec;
       }
 
+      void VectorView::set_vectorizer_criterion(LinearizerCriterion criterion)
+      {
+        this->vec->set_criterion(criterion);
+      }
+
       void VectorView::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
       {
         if (mode == 1)

@@ -12,6 +12,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
+/*! \file linearizer.h
+\brief File containing LinearizerMultidimensional class.
+*/
 
 #ifndef __H2D_LINEARIZER_H
 #define __H2D_LINEARIZER_H

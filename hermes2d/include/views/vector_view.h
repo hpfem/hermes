@@ -48,6 +48,10 @@ namespace Hermes
 
         /// Returns the internal Linearizer for the purpose of parameter settings.
         Vectorizer* get_vectorizer();
+        /// Sets the criterion to use for the linearization process.
+        /// This criterion is used in ThreadLinearizerMultidimensional class instances (see threadLinearizerMultidimensional array).
+        /// \param[in] criterion The instance of the criterion - see the class LinearizerCriterion for details (method split_decision() for the adaptive criterion, process_[triangle|quad] for the fixed one).
+        void set_vectorizer_criterion(LinearizerCriterion criterion);
 
       protected:
         /// Linearizer class responsible for obtaining linearized data.
@@ -85,7 +89,11 @@ namespace Hermes
         void set_mode(int mode) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         /// Returns the internal Linearizer for the purpose of parameter settings.
-        Linearizer* get_Linearizer() { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
+        Vectorizer* get_vectorizer() { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
+        /// Sets the criterion to use for the linearization process.
+        /// This criterion is used in ThreadLinearizerMultidimensional class instances (see threadLinearizerMultidimensional array).
+        /// \param[in] criterion The instance of the criterion - see the class LinearizerCriterion for details (method split_decision() for the adaptive criterion, process_[triangle|quad] for the fixed one).
+        void set_vectorizer_criterion(LinearizerCriterion criterion) { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
       };
 #endif
     }

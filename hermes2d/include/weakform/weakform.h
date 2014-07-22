@@ -307,12 +307,6 @@ namespace Hermes
       /// True iff areas contain HERMES_ANY - meaning that this form represents an integral over the whole domain (whole boundary in case of surface forms).
       bool assembleEverywhere;
 
-      /// External solutions for this form will start
-      /// with u_ext[u_ext_offset] where u_ext[] are external
-      /// solutions coming to the assembling procedure via the
-      /// external coefficient vector.
-      int u_ext_offset;
-
       /// External solutions.
       std::vector<MeshFunctionSharedPtr<Scalar> > ext;
       std::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
@@ -322,7 +316,6 @@ namespace Hermes
       WeakForm<Scalar>* wf;
     private:
       double stage_time;
-      void set_uExtOffset(int u_ext_offset);
       /// Form will be always multiplied (scaled) with this number.
       double scaling_factor;
       /// For time-dependent right-hand side functions.

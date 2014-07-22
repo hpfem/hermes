@@ -298,7 +298,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Form<Scalar>::Form(int i) : scaling_factor(1.0), u_ext_offset(0), wf(nullptr), assembleEverywhere(false), i(i)
+    Form<Scalar>::Form(int i) : scaling_factor(1.0), wf(nullptr), assembleEverywhere(false), i(i)
     {
       areas.push_back(HERMES_ANY);
       stage_time = 0.0;
@@ -346,12 +346,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Form<Scalar>::set_uExtOffset(int u_ext_offset)
-    {
-      this->u_ext_offset = u_ext_offset;
-    }
-
-    template<typename Scalar>
     void Form<Scalar>::set_ext(MeshFunctionSharedPtr<Scalar> ext)
     {
       this->ext.clear();
@@ -386,7 +380,6 @@ namespace Hermes
     template<typename Scalar>
     void Form<Scalar>::copy_base(Form<Scalar>* other_form)
     {
-      this->u_ext_offset = other_form->u_ext_offset;
       this->stage_time = other_form->stage_time;
       this->scaling_factor = other_form->scaling_factor;
     }

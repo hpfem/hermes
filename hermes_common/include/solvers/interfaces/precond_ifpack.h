@@ -35,8 +35,7 @@ namespace Hermes
     using namespace Hermes::Solvers;
     /// \brief Preconditioners built on IFPACK.
     ///
-    /// @ingroup preconds
-    template <typename Scalar>
+        template <typename Scalar>
     class HERMES_API IfpackPrecond: public EpetraPrecond<Scalar>
     {
     public:

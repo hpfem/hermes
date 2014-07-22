@@ -22,8 +22,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// @ingroup spaces
-    /// HdivSpace represents a space of vector functions with continuous normal<br>
+        /// HdivSpace represents a space of vector functions with continuous normal<br>
     /// components over a domain (mesh).<br>
     /// Typical usage:<br>
     /// ...<br>

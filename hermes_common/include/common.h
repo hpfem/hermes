@@ -28,6 +28,7 @@
 #include <stddef.h>
 #include <assert.h>
 #include <math.h>
+#include <initializer_list>
 #include <time.h>
 #include <float.h>
 #include <climits>

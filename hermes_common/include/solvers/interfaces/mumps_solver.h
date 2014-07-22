@@ -126,8 +126,7 @@ namespace Hermes
   {
     /// Encapsulation of MUMPS linear solver.
     ///
-    /// @ingroup solvers
-    template <typename Scalar>
+        template <typename Scalar>
     class HERMES_API MumpsSolver : public DirectSolver<Scalar>
     {
     public:

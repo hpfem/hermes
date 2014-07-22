@@ -29,8 +29,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// @ingroup spaces
-    /// \brief Used to pass the instances of Space around.
+        /// \brief Used to pass the instances of Space around.
     template<typename Scalar>
     class HERMES_API SpaceSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
     {
@@ -82,8 +81,7 @@ namespace Hermes
     * \brief Collection of classes that represent and specify FE spaces.
     */
 
-    /// @ingroup spaces
-    /// \brief Represents a finite element space over a domain.
+        /// \brief Represents a finite element space over a domain.
     ///
     /// The Space class represents a finite element space over a domain defined by 'mesh', spanned
     /// by basis functions constructed using 'shapeset'. It serves as a base class for H1Space,

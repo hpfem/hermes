@@ -24,8 +24,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// @ingroup inner
-    /// Multimesh neighbors traversal class.
+        /// Multimesh neighbors traversal class.
     /// Internal.
     template<typename Scalar>
     class MultimeshDGNeighborTree

@@ -97,8 +97,7 @@ namespace Hermes
   {
     /// Encapsulation of SUPERLU linear solver.
     ///
-    /// @ingroup solvers
-    template <typename Scalar>
+        template <typename Scalar>
     class HERMES_API SuperLUSolver : public DirectSolver<Scalar>
     {
     public:

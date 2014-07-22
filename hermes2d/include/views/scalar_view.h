@@ -12,9 +12,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
-
-// $Id: scalar_view.h 1086 2008-10-21 09:05:44Z jakub $
-
+/*! \file scalar_view.h
+\brief File containing ScalarView class.
+*/
 #ifndef __H2D_SCALAR_VIEW_H
 #define __H2D_SCALAR_VIEW_H
 
@@ -73,6 +73,11 @@ namespace Hermes
 
         /// Returns the internal linearizer for the purpose of parameter settings.
         Linearizer* get_linearizer();
+
+        /// Sets the criterion to use for the linearization process.
+        /// This criterion is used in ThreadLinearizerMultidimensional class instances (see threadLinearizerMultidimensional array).
+        /// \param[in] criterion The instance of the criterion - see the class LinearizerCriterion for details (method split_decision() for the adaptive criterion, process_[triangle|quad] for the fixed one).
+        void set_linearizer_criterion(LinearizerCriterion criterion);
 
       protected:
         /// LinearizerMultidimensional class responsible for obtaining linearized data.
@@ -249,6 +254,7 @@ namespace Hermes
         void set_vertical_scaling(double sc) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_min_max_range(double min, double max) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         Linearizer* get_linearizer()  { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
+        void set_linearizer_criterion(LinearizerCriterion criterion) { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
       };
 #endif
     }

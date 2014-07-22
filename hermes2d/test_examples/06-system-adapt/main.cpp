@@ -149,11 +149,9 @@ int main(int argc, char* argv[])
     Space<double>::ReferenceSpaceCreator v_ref_space_creator(v_space, MULTI ? v_ref_mesh : u_ref_mesh);
     SpaceSharedPtr<double> v_ref_space = v_ref_space_creator.create_ref_space();
 
-    std::vector<SpaceSharedPtr<double> > ref_spaces_const({ u_ref_space, v_ref_space });
+    newton.set_spaces({ u_ref_space, v_ref_space });
 
-    newton.set_spaces(ref_spaces_const);
-
-    int ndof_ref = Space<double>::get_num_dofs(ref_spaces_const);
+    int ndof_ref = Space<double>::get_num_dofs({ u_ref_space, v_ref_space });
 
     // Initialize reference problem.
     Hermes::Mixins::Loggable::Static::info("Solving on reference mesh.");
@@ -176,7 +174,7 @@ int main(int argc, char* argv[])
     }
 
     // Translate the resulting coefficient vector into the instance of Solution.
-    Solution<double>::vector_to_solutions(newton.get_sln_vector(), ref_spaces_const, { u_ref_sln, v_ref_sln });
+    Solution<double>::vector_to_solutions(newton.get_sln_vector(), { u_ref_space, v_ref_space }, { u_ref_sln, v_ref_sln });
 
     // Project the fine mesh solution onto the coarse mesh.
     Hermes::Mixins::Loggable::Static::info("Projecting reference solution on coarse mesh.");
@@ -218,7 +216,7 @@ int main(int argc, char* argv[])
     Hermes::Mixins::Loggable::Static::info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1], err_exact_rel[1]);
     Hermes::Mixins::Loggable::Static::info("ndof_coarse_total: %d, ndof_fine_total: %d",
       Space<double>::get_num_dofs({ u_space, v_space }),
-      Space<double>::get_num_dofs(ref_spaces_const));
+      Space<double>::get_num_dofs({ u_ref_space, v_ref_space }));
     Hermes::Mixins::Loggable::Static::info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
 
     // Add entry to DOF and CPU convergence graphs.

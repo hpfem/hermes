@@ -246,6 +246,11 @@ namespace Hermes
         return this->lin;
       }
 
+      void ScalarView::set_linearizer_criterion(LinearizerCriterion criterion)
+      {
+        this->lin->set_criterion(criterion);
+      }
+
       void ScalarView::draw_element_infos_2d()
       {
         //create widgets

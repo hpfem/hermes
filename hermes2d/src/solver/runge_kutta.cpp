@@ -411,7 +411,7 @@ namespace Hermes
 
         // If residual norm is within tolerance, or the maximum number
         // of iteration has been reached, or the problem is linear, then quit.
-        if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1)
+        if (((residual_norm < newton_tol) || (it > newton_max_iter)) && it > 1)
           break;
 
         bool rhs_only = (freeze_jacobian && it > 1);
@@ -537,7 +537,6 @@ namespace Hermes
           MatrixDefaultNormFormVol<Scalar>* proj_form = new MatrixDefaultNormFormVol<Scalar>(component_i, component_i, HERMES_L2_NORM);
           proj_form->areas.push_back(HERMES_ANY);
           proj_form->scaling_factor = 1.0;
-          proj_form->u_ext_offset = 0;
           stage_wf_left->add_matrix_form(proj_form);
         }
         if (spaces[component_i]->get_type() == HERMES_HDIV_SPACE
@@ -546,7 +545,6 @@ namespace Hermes
           MatrixDefaultNormFormVol<Scalar>* proj_form = new MatrixDefaultNormFormVol<Scalar>(component_i, component_i, HERMES_HCURL_NORM);
           proj_form->areas.push_back(HERMES_ANY);
           proj_form->scaling_factor = 1.0;
-          proj_form->u_ext_offset = 0;
           stage_wf_left->add_matrix_form(proj_form);
         }
       }
@@ -581,8 +579,6 @@ namespace Hermes
             mfv_ij->i = mfv_ij->i + i * spaces.size();
             mfv_ij->j = mfv_ij->j + j * spaces.size();
 
-            mfv_ij->u_ext_offset = i * spaces.size();
-
             // Add the matrix form to the corresponding block of the
             // stage Jacobian matrix.
             stage_wf_right->add_matrix_form(mfv_ij);
@@ -606,8 +602,6 @@ namespace Hermes
             mfs_ij->i = mfs_ij->i + i * spaces.size();
             mfs_ij->j = mfs_ij->j + j * spaces.size();
 
-            mfs_ij->u_ext_offset = i * spaces.size();
-
             // Add the matrix form to the corresponding block of the
             // stage Jacobian matrix.
             stage_wf_right->add_matrix_form_surf(mfs_ij);
@@ -627,7 +621,6 @@ namespace Hermes
           vfv_i->i = vfv_i->i + i * spaces.size();
 
           vfv_i->scaling_factor = -1.0;
-          vfv_i->u_ext_offset = i * spaces.size();
 
           // Add the matrix form to the corresponding block of the
           // stage Jacobian matrix.
@@ -647,7 +640,6 @@ namespace Hermes
           vfs_i->i = vfs_i->i + i * spaces.size();
 
           vfs_i->scaling_factor = -1.0;
-          vfs_i->u_ext_offset = i * spaces.size();
 
           // Add the matrix form to the corresponding block of the
           // stage Jacobian matrix.

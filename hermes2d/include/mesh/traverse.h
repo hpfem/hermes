@@ -27,8 +27,7 @@ namespace Hermes
     * Inner functionality classes that are not for the user to modify.
     */
 
-    /// @ingroup inner
-    /// \brief Determines the position on an element surface (edge in 2D and Face in 3D).
+        /// \brief Determines the position on an element surface (edge in 2D and Face in 3D).
     /// \details Used for the retrieval of boundary condition values.
     /// \details Same in H2D and H3D.
     ///
@@ -54,24 +53,20 @@ namespace Hermes
     class Transformable;
     struct Rect;
 
-    /// @ingroup inner
-    struct UniData
+        struct UniData
     {
       Element* e;
       uint64_t idx;
     };
 
-    /// @ingroup inner
-    static const uint64_t ONE = (uint64_t)1 << 63;
+        static const uint64_t ONE = (uint64_t)1 << 63;
 
-    /// @ingroup inner
-    struct Rect
+        struct Rect
     {
       uint64_t l, b, r, t;
     };
 
-    /// @ingroup inner
-    /// Traverse is a multi-mesh traversal utility class. Given N meshes sharing the
+        /// Traverse is a multi-mesh traversal utility class. Given N meshes sharing the
     /// same base mesh it walks through all (pseudo-)elements of the union of all
     /// the N meshes.
     ///

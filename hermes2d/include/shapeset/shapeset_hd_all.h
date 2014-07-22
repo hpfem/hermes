@@ -23,8 +23,7 @@ namespace Hermes
   namespace Hermes2D
   {
     /// H(div) shapeset based on Legendre polynomials.
-    /// @ingroup spaces
-    class HERMES_API HdivShapesetLegendre : public Shapeset
+        class HERMES_API HdivShapesetLegendre : public Shapeset
     {
     public:
       HdivShapesetLegendre();

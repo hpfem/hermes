@@ -381,7 +381,7 @@ namespace Hermes
     template<typename FormType>
     void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_fns_ord(Form<Scalar> *form, FormType** oi, FormType** oext)
     {
-      unsigned int prev_size = oi ? (this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset) : 0;
+      unsigned int prev_size = oi ? (this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq()) : 0;
 
       if (oi)
       {
@@ -405,19 +405,23 @@ namespace Hermes
     {
       NeighborSearch<Scalar>* nbs_u = neighbor_searches[mfDG->j];
 
-      unsigned short prev_size = this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset;
+      unsigned short prev_size = this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq();
 
       // Order to return.
       int order = 0;
 
-      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset];
+      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq()];
 
       if (current_u_ext)
-      for (unsigned short i = 0; i < prev_size; i++)
-      if (current_u_ext[i + mfDG->u_ext_offset])
-        u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + mfDG->u_ext_offset]);
-      else
-        u_ext_ord[i] = new DiscontinuousFunc<Ord>(&func_order[0], false, false);
+      {
+        for (unsigned short i = 0; i < prev_size; i++)
+        {
+          if (current_u_ext[i])
+            u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i]);
+          else
+            u_ext_ord[i] = new DiscontinuousFunc<Ord>(&func_order[0], false, false);
+        }
+      }
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;
@@ -462,19 +466,23 @@ namespace Hermes
     {
       NeighborSearch<Scalar>* nbs_u = neighbor_searches[vfDG->i];
 
-      unsigned short prev_size = this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset;
+      unsigned short prev_size = this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq();
 
       // Order to return.
       int order = 0;
 
-      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset];
+      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == nullptr ? nullptr : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq()];
 
       if (current_u_ext)
-      for (unsigned short i = 0; i < prev_size; i++)
-      if (current_u_ext[i + vfDG->u_ext_offset])
-        u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + vfDG->u_ext_offset]);
-      else
-        u_ext_ord[i] = new DiscontinuousFunc<Ord>(&func_order[0], false, false);
+      {
+        for (unsigned short i = 0; i < prev_size; i++)
+        {
+          if (current_u_ext[i])
+            u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i]);
+          else
+            u_ext_ord[i] = new DiscontinuousFunc<Ord>(&func_order[0], false, false);
+        }
+      }
 
       // Order of additional external functions.
       DiscontinuousFunc<Ord>** ext_ord = nullptr;

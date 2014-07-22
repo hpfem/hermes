@@ -29,8 +29,7 @@ namespace Hermes
   namespace Hermes2D
   {
     class PrecalcShapeset;
-    /// @ingroup inner
-    /// Discrete problem class.
+        /// Discrete problem class.
     ///
     /// This class does assembling into external matrix / vector structures.
     ///

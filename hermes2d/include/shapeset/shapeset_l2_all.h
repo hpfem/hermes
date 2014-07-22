@@ -25,8 +25,7 @@ namespace Hermes
   namespace Hermes2D
   {
     /// L2 shapeset - products of legendre polynomials
-    /// @ingroup spaces
-    class HERMES_API L2ShapesetLegendre : public Shapeset
+        class HERMES_API L2ShapesetLegendre : public Shapeset
     {
     public:
       L2ShapesetLegendre();
@@ -39,8 +38,7 @@ namespace Hermes
     };
 
     /// L2 Taylor shapeset - Taylor basis functions as proposed by Kuzmin, Luo
-    /// @ingroup spaces
-    class HERMES_API L2ShapesetTaylor : public Shapeset
+        class HERMES_API L2ShapesetTaylor : public Shapeset
     {
     public:
       L2ShapesetTaylor(bool contains_means = true);

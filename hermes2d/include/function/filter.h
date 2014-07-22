@@ -25,7 +25,6 @@ namespace Hermes
   {
     struct UniData;
 
-    /// @ingroup meshFunctions
     /// Filter is a general postprocessing class, intended for visualization.
     /// The output of Filter is an arbitrary combination of up to three input functions,
     /// which usually are Solutions to PDEs, but can also be other Filters.
@@ -79,8 +78,7 @@ namespace Hermes
       void copy_base(Filter* flt);
     };
 
-    /// @ingroup meshFunctions
-    /// SimpleFilter is a base class for predefined simple filters (MagFilter, DiffFilter...).
+        /// SimpleFilter is a base class for predefined simple filters (MagFilter, DiffFilter...).
     /// The 'simplicity' lies in the fact that only one value per input function can be
     /// combined (e.g., not a value and a derivative). If this is not sufficient, a full-fledged
     /// filter must be derived from the Filter class (see VonMisesFilter). SimpleFilter is also
@@ -115,8 +113,7 @@ namespace Hermes
       virtual void precalculate(unsigned short order, unsigned short mask);
     };
 
-    /// @ingroup meshFunctions
-    /// ComplexFilter is used to transform complex solutions into its real parts.
+        /// ComplexFilter is used to transform complex solutions into its real parts.
     ///
     class HERMES_API ComplexFilter : public Filter<double>
     {
@@ -147,8 +144,7 @@ namespace Hermes
       virtual void precalculate(unsigned short order, unsigned short mask);
     };
 
-    /// @ingroup meshFunctions
-    /// DXDYFilter is a more advanced version of SimpleFilter. It allows combining derivatives
+        /// DXDYFilter is a more advanced version of SimpleFilter. It allows combining derivatives
     /// of the inputs and also, unlike SimpleFilter, it defines derivatives of the filtered
     /// result. The user-supplied combining function has a different format: it takes and must
     /// return also the DX and DY values.
@@ -175,8 +171,7 @@ namespace Hermes
       virtual void precalculate(unsigned short order, unsigned short mask);
     };
 
-    /// @ingroup meshFunctions
-    /// MagFilter takes two functions representing the components of a vector function and
+        /// MagFilter takes two functions representing the components of a vector function and
     /// calculates the vector magnitude, sqrt(x^2 + y^2).
     /// \brief Calculates the magnitude of a vector function.
     template<typename Scalar>
@@ -194,8 +189,7 @@ namespace Hermes
       virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result);
     };
 
-    /// @ingroup meshFunctions
-    /// TopValFilter takes functions and puts a threshold on their highest values.
+        /// TopValFilter takes functions and puts a threshold on their highest values.
     class HERMES_API TopValFilter : public SimpleFilter<double>
     {
     public:
@@ -211,8 +205,7 @@ namespace Hermes
       std::vector<double> limits;
     };
 
-    /// @ingroup meshFunctions
-    /// BottomValFilter takes functions and puts a threshold on their lowest values.
+        /// BottomValFilter takes functions and puts a threshold on their lowest values.
     class HERMES_API BottomValFilter : public SimpleFilter<double>
     {
     public:
@@ -228,8 +221,7 @@ namespace Hermes
       std::vector<double> limits;
     };
 
-    /// @ingroup meshFunctions
-    /// ValFilter takes functions and puts a threshold on their lowest AND highest values.
+        /// ValFilter takes functions and puts a threshold on their lowest AND highest values.
     class HERMES_API ValFilter : public SimpleFilter<double>
     {
     public:
@@ -246,8 +238,7 @@ namespace Hermes
       std::vector<double> high_limits;
     };
 
-    /// @ingroup meshFunctions
-    /// Calculates the difference of two functions.
+        /// Calculates the difference of two functions.
     template<typename Scalar>
     class HERMES_API DiffFilter : public SimpleFilter<Scalar>
     {
@@ -260,8 +251,7 @@ namespace Hermes
       virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result);
     };
 
-    /// @ingroup meshFunctions
-    /// Calculates the sum of two functions.
+        /// Calculates the sum of two functions.
     template<typename Scalar>
     class HERMES_API SumFilter : public SimpleFilter<Scalar>
     {
@@ -274,8 +264,7 @@ namespace Hermes
       virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result);
     };
 
-    /// @ingroup meshFunctions
-    /// Calculates the square of a function.
+        /// Calculates the square of a function.
     template<typename Scalar>
     class HERMES_API SquareFilter : public SimpleFilter<Scalar>
     {
@@ -288,8 +277,7 @@ namespace Hermes
       virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result);
     };
 
-    /// @ingroup meshFunctions
-    /// Calculates absolute value of a real solution.
+        /// Calculates absolute value of a real solution.
     class HERMES_API AbsFilter : public SimpleFilter<double>
     {
     public:
@@ -302,8 +290,7 @@ namespace Hermes
       virtual void filter_fn(int n, std::vector<double*> values, double* result);
     };
 
-    /// @ingroup meshFunctions
-    /// Removes the imaginary part from a function.
+        /// Removes the imaginary part from a function.
     class HERMES_API RealFilter : public ComplexFilter
     {
     public:
@@ -317,8 +304,7 @@ namespace Hermes
       virtual void filter_fn(int n, std::complex<double>* values, double* result);
     };
 
-    /// @ingroup meshFunctions
-    /// ImagFilter puts the imaginary part of the input function to the Real part of the
+        /// ImagFilter puts the imaginary part of the input function to the Real part of the
     /// output, allowing it to be visualized.
     class HERMES_API ImagFilter : public ComplexFilter
     {
@@ -331,8 +317,7 @@ namespace Hermes
       virtual void filter_fn(int n, std::complex<double>* values, double* result);
     };
 
-    /// @ingroup meshFunctions
-    /// Computes the absolute value of a complex solution.
+        /// Computes the absolute value of a complex solution.
     class HERMES_API ComplexAbsFilter : public ComplexFilter
     {
     public:
@@ -345,8 +330,7 @@ namespace Hermes
       virtual void filter_fn(int n, std::complex<double>* values, double* result);
     };
 
-    /// @ingroup meshFunctions
-    /// Computes the angle of a complex solution.
+        /// Computes the angle of a complex solution.
     class HERMES_API AngleFilter : public SimpleFilter<std::complex<double> >
     {
     public:
@@ -357,8 +341,7 @@ namespace Hermes
       virtual void filter_fn(int n, std::vector<std::complex<double>*> values, double* result);
     };
 
-    /// @ingroup meshFunctions
-    /// VonMisesFilter is a postprocessing filter for visualizing elastic stresses in a body.
+        /// VonMisesFilter is a postprocessing filter for visualizing elastic stresses in a body.
     /// It calculates the stress tensor and applies the Von Mises equivalent stress formula
     /// to obtain the resulting stress measure.
     /// \brief Calculates the Von Mises stress.
@@ -384,8 +367,7 @@ namespace Hermes
       virtual void precalculate(unsigned short order, unsigned short mask);
     };
 
-    /// @ingroup meshFunctions
-    /// Linearization filter for use in nonlinear problems. From one or two previous
+        /// Linearization filter for use in nonlinear problems. From one or two previous
     /// solution values it extrapolates an estimate of the new_ one.
     /// With adaptive time step: tau_frac = tau_new_ / tau_old
     template<typename Scalar>

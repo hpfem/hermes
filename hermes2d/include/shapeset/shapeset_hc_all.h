@@ -23,8 +23,7 @@ namespace Hermes
   namespace Hermes2D
   {
     /// H(curl) shapeset with Legendre bubbles and gradients of H1 functions as edges
-    /// @ingroup spaces
-    class HERMES_API HcurlShapesetGradLeg : public Shapeset
+        class HERMES_API HcurlShapesetGradLeg : public Shapeset
     {
     public:
       HcurlShapesetGradLeg();

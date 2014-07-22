@@ -579,8 +579,8 @@ namespace Hermes
 
       // Account for the previous time level solution previously inserted at the back of ext.
       Func<Scalar>** u_ext_local = this->u_ext_funcs;
-      if (this->rungeKutta)
-        u_ext_local += form->u_ext_offset;
+      //if (this->rungeKutta)
+      //u_ext_local += form->u_ext_offset;
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
@@ -702,8 +702,8 @@ namespace Hermes
 
       // Account for the previous time level solution previously inserted at the back of ext.
       Func<Scalar>** u_ext_local = this->u_ext_funcs;
-      if (this->rungeKutta)
-        u_ext_local += form->u_ext_offset;
+      //if (this->rungeKutta)
+      //u_ext_local += form->u_ext_offset;
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)

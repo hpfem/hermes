@@ -31,8 +31,7 @@ namespace Hermes
 
     /// Base, abstract class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential.
     /// Internal.
-    /// @ingroup inner
-    template<typename Scalar>
+        template<typename Scalar>
     class HERMES_API EssentialBoundaryCondition : public Hermes::Mixins::Loggable
     {
     public:

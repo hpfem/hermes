@@ -29,8 +29,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// @ingroup userSolvingAPI
-    /// Class for Newton's method.<br>
+        /// Class for Newton's method.<br>
     /// Typical usage:<br>
     /// // Initialize Newton's solver.<br>
     /// // Here wf is Hermes2D::WeakForm<double>, space is Hermes2D::Space<double><br>

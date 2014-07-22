@@ -27,8 +27,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// @ingroup inner
-    /// Discrete problem thread assembler class
+        /// Discrete problem thread assembler class
     /// \brief This class is a one-thread (non-DG) assembly worker.
     ///
     template<typename Scalar>

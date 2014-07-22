@@ -43,8 +43,7 @@ namespace Hermes
     * These comprise solutions, exact &amp; initial solutions, filters (functions of the solutions) etc.
     */
 
-    /// @ingroup meshFunctions
-    /// \brief Represents a function defined on a mesh.
+        /// \brief Represents a function defined on a mesh.
     ///
     /// MeshFunction is a base class for all classes representing an arbitrary function
     /// superimposed on a mesh (ie., domain). These include the Solution, ExactSolution

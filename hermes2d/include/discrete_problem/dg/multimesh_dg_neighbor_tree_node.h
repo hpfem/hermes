@@ -20,8 +20,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// @ingroup inner
-    /// Multimesh neighbors traversal inner class.
+        /// Multimesh neighbors traversal inner class.
     /// Completely internal.
     class MultimeshDGNeighborTreeNode
     {

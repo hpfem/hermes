@@ -36,8 +36,7 @@ namespace Hermes
 #pragma region Geometry
 
     /// Geometry (coordinates, normals, tangents) of either an element or an edge.
-    /// @ingroup inner
-    template<typename T>
+        template<typename T>
     class HERMES_API Geom
     {
     public:
@@ -51,8 +50,7 @@ namespace Hermes
     };
 
     /// Geometry - volumetric.
-    /// @ingroup inner
-    template<typename T>
+        template<typename T>
     class HERMES_API GeomVol : public Geom<T>
     {
     public:
@@ -91,8 +89,7 @@ namespace Hermes
     };
 
     /// Geometry - volumetric - for order calculation.
-    /// @ingroup inner
-    template<>
+        template<>
     class HERMES_API GeomVol<Hermes::Ord>
     {
     public:
@@ -115,8 +112,7 @@ namespace Hermes
     };
 
     /// Geometry - surface - for order calculation.
-    /// @ingroup inner
-    template<>
+        template<>
     class HERMES_API GeomSurf<Hermes::Ord>
     {
     public:
@@ -151,8 +147,7 @@ namespace Hermes
     /// instance is not touched - it must be destroyed separately. You may call the overriden methods
     /// \c free or \c free_ord in order to do this via the instance of InterfaceGeom.
     ///
-    /// @ingroup inner
-    template<typename T>
+        template<typename T>
     class HERMES_API InterfaceGeom : public GeomSurf<T>
     {
     public:
@@ -187,15 +182,13 @@ namespace Hermes
 #pragma region Func
     /// Calculated function values (from the class Function) on an element for assembling.
     /// Internal.
-    /// @ingroup inner
-    template<typename Scalar>
+        template<typename Scalar>
     class HERMES_API Func
     {
     };
 
     /// Calculated function values (from the class Function) on an element for assembling.
-    /// @ingroup inner
-    template<>
+        template<>
     class HERMES_API Func<double>
     {
     public:
@@ -246,8 +239,7 @@ namespace Hermes
     };
 
     /// Calculated function values (from the class Function) on an element for assembling.
-    /// @ingroup inner
-    template<>
+        template<>
     class HERMES_API Func<std::complex<double> >
     {
     public:
@@ -304,8 +296,7 @@ namespace Hermes
       void subtract(Func<Ord>* func);
     };
 
-    /// @ingroup inner
-    /** \class DiscontinuousFunc forms.h "src/form/forms.h"
+        /** \class DiscontinuousFunc forms.h "src/form/forms.h"
     *  \brief This class represents a function with jump discontinuity on an interface of two elements.
     *
     *  We will refer to one of the elements sharing the interface of discontinuity as to the \em central element,

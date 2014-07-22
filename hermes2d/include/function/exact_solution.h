@@ -24,8 +24,7 @@ namespace Hermes
   {
     template<typename T> class Geom;
 
-    /// @ingroup meshFunctions
-    /// \brief Represents an exact solution of a PDE.
+        /// \brief Represents an exact solution of a PDE.
     ///
     /// ExactSolution represents an arbitrary user-specified function defined on a domain (mesh),
     /// typically an exact solution to a PDE. This can be used to compare an approximate solution
@@ -59,8 +58,7 @@ namespace Hermes
       template<typename T> friend class Solution;
     };
 
-    /// @ingroup meshFunctions
-    /// These classes are abstract (pure virtual destructor).
+        /// These classes are abstract (pure virtual destructor).
     /// The user is supposed to subclass them (see e.g. NIST benchmarks).
     template<typename Scalar>
     class HERMES_API ExactSolutionScalar : public ExactSolution<Scalar>
@@ -85,8 +83,7 @@ namespace Hermes
       };
     };
 
-    /// @ingroup meshFunctions.
-    /// Serves for postprocessing of element-wise constant values (such as the error in adaptivity).
+        /// Serves for postprocessing of element-wise constant values (such as the error in adaptivity).
     /// The second template parameter ValueType must be a type castable to Scalar.
     template<typename Scalar, typename ValueType>
     class HERMES_API ExactSolutionConstantArray : public ExactSolutionScalar<Scalar>
@@ -120,8 +117,7 @@ namespace Hermes
       template<typename T> friend class Solution;
     };
 
-    /// @ingroup meshFunctions
-    template<typename Scalar>
+        template<typename Scalar>
     class HERMES_API ExactSolutionVector : public ExactSolution<Scalar>
     {
     public:
@@ -144,8 +140,7 @@ namespace Hermes
       };
     };
 
-    /// @ingroup meshFunctions
-    template<typename Scalar>
+        template<typename Scalar>
     class HERMES_API ConstantSolution : public ExactSolutionScalar<Scalar>
     {
     public:
@@ -169,8 +164,7 @@ namespace Hermes
       Scalar constant;
     };
 
-    /// @ingroup meshFunctions
-    template<typename Scalar>
+        template<typename Scalar>
     class HERMES_API ZeroSolution : public ExactSolutionScalar<Scalar>
     {
     public:
@@ -185,8 +179,7 @@ namespace Hermes
       virtual MeshFunction<Scalar>* clone() const;
     };
 
-    /// @ingroup meshFunctions
-    template<typename Scalar>
+        template<typename Scalar>
     class HERMES_API ConstantSolutionVector : public ExactSolutionVector<Scalar>
     {
     public:
@@ -210,8 +203,7 @@ namespace Hermes
       Scalar constantY;
     };
 
-    /// @ingroup meshFunctions
-    template<typename Scalar>
+        template<typename Scalar>
     class HERMES_API ZeroSolutionVector : public ExactSolutionVector<Scalar>
     {
     public:
@@ -226,8 +218,7 @@ namespace Hermes
       virtual MeshFunction<Scalar>* clone() const;
     };
 
-    /// @ingroup meshFunctions
-    /// Eggshell function.
+        /// Eggshell function.
     class HERMES_API ExactSolutionEggShell : public ExactSolutionScalar<double>
     {
     public:
@@ -249,8 +240,7 @@ namespace Hermes
       MeshFunction<double>* clone() const;
     };
 
-    /// @ingroup meshFunctions
-    /// Function operating on previous nonlinear solutions in assembling (u_ext)
+        /// Function operating on previous nonlinear solutions in assembling (u_ext)
     template<typename Scalar>
     class HERMES_API UExtFunction : public Function<Scalar>
     {
