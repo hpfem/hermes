@@ -68,7 +68,7 @@ namespace Hermes
     //     Jordan canonical form (I think) for better performance. This
     //     can be found, I think, in newer Butcher's papers or presentation
     //     (he has them online), and possibly in his book.
-        /// Runge-Kutta methods implementation for time-dependent problems.
+    /// Runge-Kutta methods implementation for time-dependent problems.
     template<typename Scalar>
     class HERMES_API RungeKutta :
       public Hermes::Mixins::Loggable,

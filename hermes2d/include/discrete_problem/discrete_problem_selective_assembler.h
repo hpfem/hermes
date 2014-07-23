@@ -30,7 +30,7 @@ namespace Hermes
   {
     class PrecalcShapeset;
     template<typename Scalar> class Solver;
-        /// Discrete problem selective assembling class.
+    /// Discrete problem selective assembling class.
     /// \brief Provides capabilities to (re-)assemble a matrix / vector only where necessary.
     /// See also Solver::keep_element_values()
     ///

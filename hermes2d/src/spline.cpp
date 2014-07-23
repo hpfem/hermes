@@ -176,7 +176,7 @@ namespace Hermes
         fclose(f);
         throw Hermes::Exceptions::Exception("The cubic spline has no coefficients. Calculate using calculate_coeffs.");
       }
-      
+
       // Plotting on the left of the area of definition.
       double x_left = point_left - extension;
       double h = extension / subdiv;
@@ -343,13 +343,13 @@ namespace Hermes
       // Choose just one of the following two variables to be True,
       // and state the corresponding value for the derivative.
       offset = 2 * nelem + 2 * (nelem - 1);
-// Left end-point.
+      // Left end-point.
       double xx = points[0];
       if (first_der_left == false)
       {
         matrix[offset + 0][2] = 2;
         matrix[offset + 0][3] = 6 * xx;
-// Value of the second derivative.
+        // Value of the second derivative.
         rhs[n - 2] = bc_left;
       }
       else
@@ -357,16 +357,16 @@ namespace Hermes
         matrix[offset + 0][1] = 1;
         matrix[offset + 0][2] = 2 * xx;
         matrix[offset + 0][3] = 3 * xx*xx;
-// Value of the first derivative.
+        // Value of the first derivative.
         rhs[n - 2] = bc_left;
       }
-// Right end-point.
+      // Right end-point.
       xx = points[nelem];
       if (first_der_right == false)
       {
         matrix[offset + 1][n - 2] = 2;
         matrix[offset + 1][n - 1] = 6 * xx;
-// Value of the second derivative.
+        // Value of the second derivative.
         rhs[n - 1] = bc_right;
       }
       else
@@ -374,7 +374,7 @@ namespace Hermes
         matrix[offset + 1][n - 3] = 1;
         matrix[offset + 1][n - 2] = 2 * xx;
         matrix[offset + 1][n - 1] = 3 * xx*xx;
-// Value of the first derivative.
+        // Value of the first derivative.
         rhs[n - 1] = bc_right;
       }
 

@@ -22,8 +22,8 @@
 #include "memory_handling.h"
 namespace Hermes
 {
-  #ifdef WITH_PJLIB
+#ifdef WITH_PJLIB
   HERMES_COMMON_API pj_caching_pool HermesCommonMemoryPoolCache;
   HERMES_COMMON_API GlobalPoolCache hermesCommonGlobalPoolCache;
-  #endif
+#endif
 }

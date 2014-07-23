@@ -23,7 +23,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-        /// Shape functions based on integrated Jacobi polynomials.
+    /// Shape functions based on integrated Jacobi polynomials.
     class HERMES_API H1ShapesetJacobi : public Shapeset
     {
     public:
@@ -37,7 +37,7 @@ namespace Hermes
       static const unsigned short max_index[H2D_NUM_MODES];
     };
 
-        /// Experimental.
+    /// Experimental.
     /*
     class HERMES_API H1ShapesetEigen : public Shapeset
     {

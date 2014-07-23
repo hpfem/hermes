@@ -36,7 +36,7 @@ namespace Hermes
 #pragma region Geometry
 
     /// Geometry (coordinates, normals, tangents) of either an element or an edge.
-        template<typename T>
+    template<typename T>
     class HERMES_API Geom
     {
     public:
@@ -50,7 +50,7 @@ namespace Hermes
     };
 
     /// Geometry - volumetric.
-        template<typename T>
+    template<typename T>
     class HERMES_API GeomVol : public Geom<T>
     {
     public:
@@ -89,7 +89,7 @@ namespace Hermes
     };
 
     /// Geometry - volumetric - for order calculation.
-        template<>
+    template<>
     class HERMES_API GeomVol<Hermes::Ord>
     {
     public:
@@ -112,7 +112,7 @@ namespace Hermes
     };
 
     /// Geometry - surface - for order calculation.
-        template<>
+    template<>
     class HERMES_API GeomSurf<Hermes::Ord>
     {
     public:
@@ -147,7 +147,7 @@ namespace Hermes
     /// instance is not touched - it must be destroyed separately. You may call the overriden methods
     /// \c free or \c free_ord in order to do this via the instance of InterfaceGeom.
     ///
-        template<typename T>
+    template<typename T>
     class HERMES_API InterfaceGeom : public GeomSurf<T>
     {
     public:
@@ -182,13 +182,13 @@ namespace Hermes
 #pragma region Func
     /// Calculated function values (from the class Function) on an element for assembling.
     /// Internal.
-        template<typename Scalar>
+    template<typename Scalar>
     class HERMES_API Func
     {
     };
 
     /// Calculated function values (from the class Function) on an element for assembling.
-        template<>
+    template<>
     class HERMES_API Func<double>
     {
     public:
@@ -239,7 +239,7 @@ namespace Hermes
     };
 
     /// Calculated function values (from the class Function) on an element for assembling.
-        template<>
+    template<>
     class HERMES_API Func<std::complex<double> >
     {
     public:
@@ -296,19 +296,19 @@ namespace Hermes
       void subtract(Func<Ord>* func);
     };
 
-        /** \class DiscontinuousFunc forms.h "src/form/forms.h"
-    *  \brief This class represents a function with jump discontinuity on an interface of two elements.
-    *
-    *  We will refer to one of the elements sharing the interface of discontinuity as to the \em central element,
-    *  while to the other one as to the \em neighbor element.
-    *
-    *  Instance of the class may be constructed either with two \c Func objects, which represent the continuous
-    *  components on the central and the neighbor element, respectively, or with only one \c Func object and
-    *  information about its support (where it attains non-zero value). The discontinuous function is in the latter
-    *  case constructed by extending the supplied function by zero to the other element. Values and derivatives from
-    *  both elements may then be obtained by querying the corresponding \c Func object, using methods
-    *  \c get_val_central, \c get_val_neighbor, etc.
-    **/
+    /** \class DiscontinuousFunc forms.h "src/form/forms.h"
+*  \brief This class represents a function with jump discontinuity on an interface of two elements.
+*
+*  We will refer to one of the elements sharing the interface of discontinuity as to the \em central element,
+*  while to the other one as to the \em neighbor element.
+*
+*  Instance of the class may be constructed either with two \c Func objects, which represent the continuous
+*  components on the central and the neighbor element, respectively, or with only one \c Func object and
+*  information about its support (where it attains non-zero value). The discontinuous function is in the latter
+*  case constructed by extending the supplied function by zero to the other element. Values and derivatives from
+*  both elements may then be obtained by querying the corresponding \c Func object, using methods
+*  \c get_val_central, \c get_val_neighbor, etc.
+**/
     template<typename T>
     class HERMES_API DiscontinuousFunc : public Func<T>
     {

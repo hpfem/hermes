@@ -37,7 +37,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-        template<typename Scalar>
+    template<typename Scalar>
     class HERMES_API OGProjectionNOX : public Hermes::Mixins::Loggable
     {
     public:

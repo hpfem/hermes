@@ -35,7 +35,7 @@ namespace Hermes
   {
     /// \brief Encapsulation of Amesos linear solver.
     ///
-        template<typename Scalar>
+    template<typename Scalar>
     class HERMES_API AmesosSolver : public DirectSolver<Scalar>
     {
     public:

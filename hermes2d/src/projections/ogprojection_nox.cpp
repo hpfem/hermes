@@ -29,9 +29,9 @@ namespace Hermes
     void OGProjectionNOX<Scalar>::project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* wf,
       Scalar* target_vec, double newton_tol, int newton_max_iter)
     {
-        // Sanity check.
-        if(space == nullptr)
-          throw Hermes::Exceptions::Exception("this->space == nullptr in project_internal().");
+      // Sanity check.
+      if (space == nullptr)
+        throw Hermes::Exceptions::Exception("this->space == nullptr in project_internal().");
 
       // Get dimension of the space.
       int ndof = space->get_num_dofs();
@@ -42,11 +42,11 @@ namespace Hermes
       // Initial coefficient vector for the Newton's method.
       Scalar* coeff_vec = calloc_with_check<Scalar>(ndof);
 
-// Name of the iterative method employed by AztecOO (ignored
+      // Name of the iterative method employed by AztecOO (ignored
       const char* iterative_method = "GMRES";
       // by the other solvers).
       // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
-// Name of the preconditioner employed by AztecOO
+      // Name of the preconditioner employed by AztecOO
       const char* preconditioner = "New Ifpack";
       // Possibilities: None" - No preconditioning.
       // "AztecOO" - AztecOO internal preconditioner.
@@ -54,17 +54,17 @@ namespace Hermes
       // "ML" - Multi level preconditione
       unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::LinearSolverDetails;
       // NOX error messages, see NOX_Utils.h.
-// Tolerance for linear system.
+      // Tolerance for linear system.
       double ls_tolerance = 1e-5;
-// Flag for absolute value of the residuum.
+      // Flag for absolute value of the residuum.
       unsigned flag_absresid = 0;
-// Tolerance for absolute value of the residuum.
+      // Tolerance for absolute value of the residuum.
       double abs_resid = 1.0e-3;
-// Flag for relative value of the residuum.
+      // Flag for relative value of the residuum.
       unsigned flag_relresid = 1;
-// Tolerance for relative value of the residuum.
+      // Tolerance for relative value of the residuum.
       double rel_resid = newton_tol;
-// Max number of iterations.
+      // Max number of iterations.
       int max_iters = newton_max_iter;
 
       // Initialize NOX.
@@ -76,9 +76,9 @@ namespace Hermes
       newton_nox.set_ls_type(iterative_method);
       newton_nox.set_ls_tolerance(ls_tolerance);
       newton_nox.set_conv_iters(max_iters);
-      if(flag_absresid)
+      if (flag_absresid)
         newton_nox.set_conv_abs_resid(abs_resid);
-      if(flag_relresid)
+      if (flag_relresid)
         newton_nox.set_conv_rel_resid(rel_resid);
       newton_nox.set_precond(preconditioner);
       newton_nox.set_precond_reuse("Rebuild");
@@ -88,9 +88,9 @@ namespace Hermes
 
       free_with_check(coeff_vec);
 
-      if(target_vec != nullptr)
-        for (int i = 0; i < ndof; i++)
-          target_vec[i] = newton_nox.get_sln_vector()[i];
+      if (target_vec != nullptr)
+      for (int i = 0; i < ndof; i++)
+        target_vec[i] = newton_nox.get_sln_vector()[i];
     }
 
     template<typename Scalar>
@@ -119,12 +119,12 @@ namespace Hermes
       double newton_tol, int newton_max_iter)
     {
       // Sanity checks.
-      if(target_vec == nullptr) throw Exceptions::NullException(3);
+      if (target_vec == nullptr) throw Exceptions::NullException(3);
 
       // If projection norm is not provided, set it
       // to match the type of the space.
       NormType norm = HERMES_UNSET_NORM;
-      if(proj_norm == HERMES_UNSET_NORM)
+      if (proj_norm == HERMES_UNSET_NORM)
       {
         SpaceType space_type = space->get_type();
         switch (space_type)
@@ -153,7 +153,7 @@ namespace Hermes
       // Clean up.
       delete proj_wf;
     }
-    
+
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
       MeshFunctionSharedPtr<Scalar> source_meshfn, Scalar* target_vec,
@@ -169,7 +169,7 @@ namespace Hermes
       NormType proj_norm,
       double newton_tol, int newton_max_iter)
     {
-      if(proj_norm == HERMES_UNSET_NORM)
+      if (proj_norm == HERMES_UNSET_NORM)
       {
         SpaceType space_type = space->get_type();
         switch (space_type)
@@ -204,14 +204,14 @@ namespace Hermes
       int n = spaces.size();
 
       // Sanity checks.
-      if(n != source_meshfns.size()) throw Exceptions::LengthException(1, 2, n, source_meshfns.size());
-      if(target_vec == nullptr) throw Exceptions::NullException(3);
-      if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+      if (n != source_meshfns.size()) throw Exceptions::LengthException(1, 2, n, source_meshfns.size());
+      if (target_vec == nullptr) throw Exceptions::NullException(3);
+      if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
       for (int i = 0; i < n; i++)
       {
-        if(proj_norms.empty())
+        if (proj_norms.empty())
           project_global(spaces[i], source_meshfns[i], target_vec + start_index, HERMES_UNSET_NORM, newton_tol, newton_max_iter);
         else
           project_global(spaces[i], source_meshfns[i], target_vec + start_index, proj_norms[i], newton_tol, newton_max_iter);
@@ -228,14 +228,14 @@ namespace Hermes
       int n = spaces.size();
 
       // Sanity checks.
-      if(n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
-      if(target_vec == nullptr) throw Exceptions::NullException(3);
-      if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+      if (n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
+      if (target_vec == nullptr) throw Exceptions::NullException(3);
+      if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
       for (int i = 0; i < n; i++)
       {
-        if(proj_norms.empty())
+        if (proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_vec + start_index, HERMES_UNSET_NORM, newton_tol, newton_max_iter);
         else
           project_global(spaces[i], source_slns[i], target_vec + start_index, proj_norms[i], newton_tol, newton_max_iter);
@@ -252,14 +252,14 @@ namespace Hermes
       int n = spaces.size();
 
       // Sanity checks.
-      if(n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
-      if(n != target_slns.size()) throw Exceptions::LengthException(1, 2, n, target_slns.size());
-      if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+      if (n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
+      if (n != target_slns.size()) throw Exceptions::LengthException(1, 2, n, target_slns.size());
+      if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
       for (int i = 0; i < n; i++)
       {
-        if(proj_norms.empty())
+        if (proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_slns[i], HERMES_UNSET_NORM, newton_tol, newton_max_iter);
         else
           project_global(spaces[i], source_slns[i], target_slns[i], proj_norms[i], newton_tol, newton_max_iter);
@@ -268,7 +268,7 @@ namespace Hermes
     }
 
     template class HERMES_API OGProjectionNOX<double>;
-//complex version of nox solver is not implemented
+    //complex version of nox solver is not implemented
     // template class HERMES_API OGProjectionNOX<std::complex<double> >;
   }
 }

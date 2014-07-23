@@ -34,7 +34,7 @@ namespace Hermes
     using namespace Hermes::Solvers;
     /// \brief Preconditioners built on ML.
     ///
-        template <typename Scalar>
+    template <typename Scalar>
     class HERMES_API MlPrecond : public EpetraPrecond<Scalar>
     {
     public:

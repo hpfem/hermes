@@ -23,7 +23,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-        /// H1Space represents a space of continuous Scalar functions over a domain (mesh).<br>
+    /// H1Space represents a space of continuous Scalar functions over a domain (mesh).<br>
     /// Typical usage:<br>
     /// ...<br>
     /// Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential1, &bc_essential2, ...);<br>

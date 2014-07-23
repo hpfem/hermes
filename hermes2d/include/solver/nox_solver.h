@@ -87,7 +87,7 @@ namespace Hermes
 
     /// \brief Encapsulation of NOX nonlinear solver.
     /// \note complex numbers is not implemented yet
-        template <typename Scalar>
+    template <typename Scalar>
     class HERMES_API NewtonSolverNOX : public Hermes::Mixins::Loggable
     {
     private:

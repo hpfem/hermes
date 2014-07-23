@@ -25,7 +25,7 @@ namespace Hermes
   {
     /// Mesh reader from Hermes2D format
     ///
-        /// Typical usage:
+    /// Typical usage:
     /// MeshSharedPtr mesh;
     /// Hermes::Hermes2D::MeshReaderH2D mloader;
     /// try

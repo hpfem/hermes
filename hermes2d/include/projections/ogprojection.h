@@ -24,11 +24,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /** @defgroup projections Projections
-    * \brief Projection classes for various kinds of projecting a MeshFunction onto a Space.
-    */
-
-        /// \brief Class for (global) orthogonal projecting. If the projection is not necessary (if a solution belongs to the space), then its solution vector is used.
+    /// \brief Class for (global) orthogonal projecting. If the projection is not necessary (if a solution belongs to the space), then its solution vector is used.
     template<typename Scalar>
     class HERMES_API OGProjection : public Hermes::Mixins::Loggable
     {

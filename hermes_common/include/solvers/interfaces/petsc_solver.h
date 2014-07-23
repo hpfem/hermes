@@ -135,7 +135,7 @@ namespace Hermes
   {
     /// Encapsulation of PETSc linear solver.
     ///
-        template <typename Scalar>
+    template <typename Scalar>
     class HERMES_API PetscLinearMatrixSolver : public DirectSolver<Scalar>
     {
     public:

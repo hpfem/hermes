@@ -79,7 +79,7 @@ namespace Hermes
     const int H2D_FN_ALL = H2D_FN_DEFAULT | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY;
 #endif
 
-        /// \brief Represents an arbitrary function defined on an element.
+    /// \brief Represents an arbitrary function defined on an element.
     ///
     /// The Function class is an abstraction of a function defined in integration points on an
     /// element. You first specify what quadrature tables you want to use (set_quad_2d()) and select

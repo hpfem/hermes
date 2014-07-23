@@ -99,7 +99,7 @@ namespace Hermes
   {
     /// \brief A PARALUTION preconditioner.
     ///
-        template <typename Scalar>
+    template <typename Scalar>
     class ParalutionPrecond : public Hermes::Preconditioners::Precond<Scalar>
     {
     public:
@@ -155,7 +155,7 @@ namespace Hermes
 
     /// \brief ABSTRACT class containing common functionality of both PARALUTION iterative and AMG linear solver.
     ///
-        template <typename Scalar>
+    template <typename Scalar>
     class HERMES_API AbstractParalutionLinearMatrixSolver : public virtual LoopSolver<Scalar>
     {
     public:
@@ -213,7 +213,7 @@ namespace Hermes
 
     /// \brief Encapsulation of PARALUTION iterative linear solver.
     ///
-        template <typename Scalar>
+    template <typename Scalar>
     class HERMES_API IterativeParalutionLinearMatrixSolver : public AbstractParalutionLinearMatrixSolver<Scalar>, public virtual IterSolver<Scalar>
     {
     public:
@@ -246,7 +246,7 @@ namespace Hermes
 
     /// \brief Encapsulation of PARALUTION AMG linear solver.
     ///
-        template <typename Scalar>
+    template <typename Scalar>
     class HERMES_API AMGParalutionLinearMatrixSolver : public AbstractParalutionLinearMatrixSolver<Scalar>, public virtual AMGSolver<Scalar>
     {
     public:

@@ -71,7 +71,6 @@ namespace Hermes
       this->als = threadAssembler->als;
     }
 
-
     template<typename Scalar>
     NeighborSearch<Scalar>* DiscreteProblemDGAssembler<Scalar>::get_neighbor_search_ext(WeakFormSharedPtr<Scalar> wf, NeighborSearch<Scalar>** neighbor_searches, int index)
     {
@@ -293,7 +292,7 @@ namespace Hermes
 
       if (current_mat && DG_matrix_forms_present && !edge_processed)
       {
-        for(unsigned short current_mfsurf_i = 0; current_mfsurf_i < wf->mfDG.size(); current_mfsurf_i++)
+        for (unsigned short current_mfsurf_i = 0; current_mfsurf_i < wf->mfDG.size(); current_mfsurf_i++)
         {
           if (!this->selectiveAssembler->form_to_be_assembled((MatrixForm<Scalar>*)wf->mfDG[current_mfsurf_i], current_state))
             continue;
@@ -406,7 +405,6 @@ namespace Hermes
       }
 
       delete[] u_ext_func;
-
 
       for (int i = 0; i < this->spaces_size; i++)
       {

@@ -22,7 +22,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-
 #define minus_triangle_x_c 0.3333333333333333333333333
 #define minus_triangle_y_c 0.3333333333333333333333333
 
@@ -317,15 +316,15 @@ namespace Hermes
       taylor_dyy_0, taylor_dyy_1, taylor_dyy_2, taylor_dyy_3, taylor_dyy_4, taylor_dyy_5
     };
 
-    Shapeset::shape_fn_t* shape_fn_table_tri[1]     = { fn_tri };
-    Shapeset::shape_fn_t* shape_fn_table_quad[1]     = { fn_quad };
-    Shapeset::shape_fn_t* shape_fn_table_dx_tri[1]  = { dx_tri };
-    Shapeset::shape_fn_t* shape_fn_table_dx_quad[1]  = { dx_quad };
-    Shapeset::shape_fn_t* shape_fn_table_dy_tri[1]  = { dy_tri };
-    Shapeset::shape_fn_t* shape_fn_table_dy_quad[1]  = { dy_quad };
-    Shapeset::shape_fn_t* mode_shape_fn_table_dxx[1]  = { fn_dxx };
-    Shapeset::shape_fn_t* mode_shape_fn_table_dxy[1]  = { fn_dxy };
-    Shapeset::shape_fn_t* mode_shape_fn_table_dyy[1]  = { fn_dyy };
+    Shapeset::shape_fn_t* shape_fn_table_tri[1] = { fn_tri };
+    Shapeset::shape_fn_t* shape_fn_table_quad[1] = { fn_quad };
+    Shapeset::shape_fn_t* shape_fn_table_dx_tri[1] = { dx_tri };
+    Shapeset::shape_fn_t* shape_fn_table_dx_quad[1] = { dx_quad };
+    Shapeset::shape_fn_t* shape_fn_table_dy_tri[1] = { dy_tri };
+    Shapeset::shape_fn_t* shape_fn_table_dy_quad[1] = { dy_quad };
+    Shapeset::shape_fn_t* mode_shape_fn_table_dxx[1] = { fn_dxx };
+    Shapeset::shape_fn_t* mode_shape_fn_table_dxy[1] = { fn_dxy };
+    Shapeset::shape_fn_t* mode_shape_fn_table_dyy[1] = { fn_dyy };
 
     static short qb_0[] = { 0, };
     static short qb_1_contains_means[] = { 0, 1, 2, };
@@ -333,18 +332,18 @@ namespace Hermes
     static short qb_2_contains_means[] = { 0, 1, 2, 3, 4, 5 };
     static short qb_2[] = { 1, 2, 3, 4, 5 };
 
-    short* mode_bubble_indices_contains_means[3] = {  qb_0,   qb_1_contains_means,  qb_2_contains_means };
-    short* mode_bubble_indices[3] = {  qb_0,   qb_1,  qb_2 };
+    short* mode_bubble_indices_contains_means[3] = { qb_0, qb_1_contains_means, qb_2_contains_means };
+    short* mode_bubble_indices[3] = { qb_0, qb_1, qb_2 };
 
-    unsigned short mode_bubble_count_contains_means[3] = { 1,  3,  6 };
-    unsigned short mode_bubble_count[3] = { 1,  2,  5 };
+    unsigned short mode_bubble_count_contains_means[3] = { 1, 3, 6 };
+    unsigned short mode_bubble_count[3] = { 1, 2, 5 };
 
     short mode_vertex_indices[4] = { -1, -1, -1, -1 };
 
-    static short edge_indices_0[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
-    static short edge_indices_1[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
-    static short edge_indices_2[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
-    static short edge_indices_3[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
+    static short edge_indices_0[22] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+    static short edge_indices_1[22] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+    static short edge_indices_2[22] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+    static short edge_indices_3[22] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
     short* mode_edge_indices[4] =
     {
@@ -448,12 +447,12 @@ namespace Hermes
 
       vertex_indices = s_vertex_indices;
       edge_indices = s_edge_indices;
-      if(contains_means)
+      if (contains_means)
         bubble_indices = s_bubble_indices_contains_means;
       else
         bubble_indices = s_bubble_indices;
 
-      if(contains_means)
+      if (contains_means)
         bubble_count = s_bubble_count_contains_means;
       else
         bubble_count = s_bubble_count;
@@ -462,19 +461,19 @@ namespace Hermes
 
       ref_vert[0][0][0] = -1.0;
       ref_vert[0][0][1] = -1.0;
-      ref_vert[0][1][0] =  1.0;
+      ref_vert[0][1][0] = 1.0;
       ref_vert[0][1][1] = -1.0;
       ref_vert[0][2][0] = -1.0;
-      ref_vert[0][2][1] =  1.0;
+      ref_vert[0][2][1] = 1.0;
 
       ref_vert[1][0][0] = -1.0;
       ref_vert[1][0][1] = -1.0;
-      ref_vert[1][1][0] =  1.0;
+      ref_vert[1][1][0] = 1.0;
       ref_vert[1][1][1] = -1.0;
-      ref_vert[1][2][0] =  1.0;
-      ref_vert[1][2][1] =  1.0;
+      ref_vert[1][2][0] = 1.0;
+      ref_vert[1][2][1] = 1.0;
       ref_vert[1][3][0] = -1.0;
-      ref_vert[1][3][1] =  1.0;
+      ref_vert[1][3][1] = 1.0;
 
       max_order = 2;
       min_order = 0;
@@ -487,7 +486,7 @@ namespace Hermes
 
     short* L2ShapesetTaylor::get_bubble_indices(unsigned short order, ElementMode2D mode) const
     {
-      if(mode == HERMES_MODE_QUAD)
+      if (mode == HERMES_MODE_QUAD)
       {
         assert(H2D_GET_V_ORDER(order) == H2D_GET_H_ORDER(order));
         return bubble_indices[mode][H2D_GET_V_ORDER(order)];
@@ -498,7 +497,7 @@ namespace Hermes
 
     unsigned short L2ShapesetTaylor::get_num_bubbles(unsigned short order, ElementMode2D mode) const
     {
-      if(mode == HERMES_MODE_QUAD)
+      if (mode == HERMES_MODE_QUAD)
       {
         assert(H2D_GET_V_ORDER(order) == H2D_GET_H_ORDER(order));
         return bubble_count[mode][H2D_GET_V_ORDER(order)];

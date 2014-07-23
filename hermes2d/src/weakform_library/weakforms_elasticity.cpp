@@ -27,23 +27,23 @@ namespace Hermes
         (unsigned int i, unsigned int j, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-        this->setSymFlag(HERMES_SYM);
-      }
+          this->setSymFlag(HERMES_SYM);
+        }
 
       template<typename Scalar>
       DefaultJacobianElasticity_0_0<Scalar>::DefaultJacobianElasticity_0_0
         (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-        this->setSymFlag(HERMES_SYM);
-        this->set_area(area);
-      }
+          this->setSymFlag(HERMES_SYM);
+          this->set_area(area);
+        }
 
       template<typename Scalar>
       Scalar DefaultJacobianElasticity_0_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
         Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const
       {
-        return (lambda + 2*mu) * int_dudx_dvdx<double, Scalar>(n, wt, u, v) +
+        return (lambda + 2 * mu) * int_dudx_dvdx<double, Scalar>(n, wt, u, v) +
           mu * int_dudy_dvdy<double, Scalar>(n, wt, u, v);
       }
 
@@ -51,7 +51,7 @@ namespace Hermes
       Ord DefaultJacobianElasticity_0_0<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
         GeomVol<Ord> *e, Func<Ord> **ext) const
       {
-        return (lambda + 2*mu) * int_dudx_dvdx<Ord, Ord>(n, wt, u, v) +
+        return (lambda + 2 * mu) * int_dudx_dvdx<Ord, Ord>(n, wt, u, v) +
           mu * int_dudy_dvdy<Ord, Ord>(n, wt, u, v);
       }
 
@@ -66,17 +66,17 @@ namespace Hermes
         (unsigned int i, unsigned int j, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-        this->setSymFlag(HERMES_SYM);
-      }
+          this->setSymFlag(HERMES_SYM);
+        }
 
       template<typename Scalar>
       DefaultJacobianElasticity_0_1<Scalar>::DefaultJacobianElasticity_0_1
         (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-        this->setSymFlag(HERMES_SYM);
-        this->set_area(area);
-      }
+          this->setSymFlag(HERMES_SYM);
+          this->set_area(area);
+        }
 
       template<typename Scalar>
       Scalar DefaultJacobianElasticity_0_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
@@ -105,21 +105,21 @@ namespace Hermes
         (unsigned int i, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-      }
+        }
 
       template<typename Scalar>
       DefaultResidualElasticity_0_0<Scalar>::DefaultResidualElasticity_0_0
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        this->set_area(area);
-      }
+          this->set_area(area);
+        }
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_0_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
         GeomVol<double> *e, Func<Scalar> **ext) const
       {
-        return (2*mu + lambda) * int_dudx_dvdx<Scalar, double>(n, wt, u_ext[0], v) +
+        return (2 * mu + lambda) * int_dudx_dvdx<Scalar, double>(n, wt, u_ext[0], v) +
           mu * int_dudy_dvdy<Scalar, double>(n, wt, u_ext[0], v);
       }
 
@@ -127,7 +127,7 @@ namespace Hermes
       Ord DefaultResidualElasticity_0_0<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         GeomVol<Ord> *e, Func<Ord> **ext) const
       {
-        return (2*mu + lambda) * int_dudx_dvdx<Ord, Ord>(n, wt, u_ext[0], v) +
+        return (2 * mu + lambda) * int_dudx_dvdx<Ord, Ord>(n, wt, u_ext[0], v) +
           mu * int_dudy_dvdy<Ord, Ord>(n, wt, u_ext[0], v);
       }
 
@@ -142,15 +142,15 @@ namespace Hermes
         (unsigned int i, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-      }
+        }
 
       template<typename Scalar>
       DefaultResidualElasticity_0_1<Scalar>::DefaultResidualElasticity_0_1
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        this->set_area(area);
-      }
+          this->set_area(area);
+        }
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_0_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
@@ -179,15 +179,15 @@ namespace Hermes
         (unsigned int i, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-      }
+        }
 
       template<typename Scalar>
       DefaultResidualElasticity_1_0<Scalar>::DefaultResidualElasticity_1_0
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        this->set_area(area);
-      }
+          this->set_area(area);
+        }
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_1_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
@@ -216,21 +216,21 @@ namespace Hermes
         (unsigned int i, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-      }
+        }
 
       template<typename Scalar>
       DefaultResidualElasticity_1_1<Scalar>::DefaultResidualElasticity_1_1
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        this->set_area(area);
-      }
+          this->set_area(area);
+        }
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_1_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
         GeomVol<double> *e, Func<Scalar> **ext) const
       {
-        return (2*mu + lambda) * int_dudy_dvdy<double, Scalar>(n, wt, u_ext[1], v) +
+        return (2 * mu + lambda) * int_dudy_dvdy<double, Scalar>(n, wt, u_ext[1], v) +
           mu * int_dudx_dvdx<double, Scalar>(n, wt, u_ext[1], v);
       }
 
@@ -238,7 +238,7 @@ namespace Hermes
       Ord DefaultResidualElasticity_1_1<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
         GeomVol<Ord> *e, Func<Ord> **ext) const
       {
-        return (2*mu + lambda) * int_dudy_dvdy<Ord, Ord>(n, wt, u_ext[1], v) +
+        return (2 * mu + lambda) * int_dudy_dvdy<Ord, Ord>(n, wt, u_ext[1], v) +
           mu * int_dudx_dvdx<Ord, Ord>(n, wt, u_ext[1], v);
       }
 
@@ -253,22 +253,22 @@ namespace Hermes
         (unsigned int i, unsigned int j, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-      }
+        }
 
       template<typename Scalar>
       DefaultJacobianElasticity_1_1<Scalar>::DefaultJacobianElasticity_1_1
         (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-        this->set_area(area);
-      }
+          this->set_area(area);
+        }
 
       template<typename Scalar>
       Scalar DefaultJacobianElasticity_1_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
         Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const
       {
         return  mu * int_dudx_dvdx<double, Scalar>(n, wt, u, v) +
-          (lambda + 2*mu) * int_dudy_dvdy<double, Scalar>(n, wt, u, v);
+          (lambda + 2 * mu) * int_dudy_dvdy<double, Scalar>(n, wt, u, v);
       }
 
       template<typename Scalar>
@@ -276,7 +276,7 @@ namespace Hermes
         GeomVol<Ord> *e, Func<Ord> **ext) const
       {
         return  mu * int_dudx_dvdx<Ord, Ord>(n, wt, u, v) +
-          (lambda + 2*mu) * int_dudy_dvdy<Ord, Ord>(n, wt, u, v);
+          (lambda + 2 * mu) * int_dudy_dvdy<Ord, Ord>(n, wt, u, v);
       }
 
       template<typename Scalar>

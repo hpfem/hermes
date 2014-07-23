@@ -8,7 +8,7 @@ namespace Hermes
     {
       HERMES_API const char* get_cand_list_str(const CandList cand_list)
       {
-        switch(cand_list)
+        switch (cand_list)
         {
         case H2D_NONE: return "Custom";
         case H2D_P_ISO: return "P_ISO";
@@ -27,7 +27,7 @@ namespace Hermes
 
       HERMES_API bool is_hp(const CandList cand_list)
       {
-        switch(cand_list)
+        switch (cand_list)
         {
         case H2D_P_ISO:
         case H2D_P_ANISO:
@@ -42,9 +42,9 @@ namespace Hermes
         }
       }
 
-       HERMES_API bool is_p(const CandList cand_list)
+      HERMES_API bool is_p(const CandList cand_list)
       {
-        switch(cand_list)
+        switch (cand_list)
         {
         case H2D_H_ISO:
         case H2D_H_ANISO: return false; break;
@@ -61,7 +61,7 @@ namespace Hermes
 
       HERMES_API bool is_p_aniso(const CandList cand_list)
       {
-        switch(cand_list)
+        switch (cand_list)
         {
         case H2D_NONE: return false;
         case H2D_P_ISO: return false;
@@ -78,18 +78,18 @@ namespace Hermes
 
       Cand::Cand(const RefinementType split, const unsigned short order_elems[H2D_MAX_ELEMENT_SONS])
         : dofs(-1), split(split), score(0) {
-          p[0] = order_elems[0];
-          p[1] = order_elems[1];
-          p[2] = order_elems[2];
-          p[3] = order_elems[3];
+        p[0] = order_elems[0];
+        p[1] = order_elems[1];
+        p[2] = order_elems[2];
+        p[3] = order_elems[3];
       };
 
       Cand::Cand(const RefinementType split, const unsigned short order_elem0, const unsigned short order_elem1, const unsigned short order_elem2, const unsigned short order_elem3)
         : dofs(-1), split(split), score(0) {
-          p[0] = order_elem0;
-          p[1] = order_elem1;
-          p[2] = order_elem2;
-          p[3] = order_elem3;
+        p[0] = order_elem0;
+        p[1] = order_elem1;
+        p[2] = order_elem2;
+        p[3] = order_elem3;
       };
 
       unsigned char Cand::get_num_elems() const {

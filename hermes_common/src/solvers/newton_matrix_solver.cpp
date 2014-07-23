@@ -52,7 +52,7 @@ namespace Hermes
     {
       double residual_norm = this->get_parameter_value(this->p_residual_norms).back();
 
-      if(residual_norm > this->max_allowed_residual_norm)
+      if (residual_norm > this->max_allowed_residual_norm)
         return AboveMaxAllowedResidualNorm;
       else
         return NonlinearMatrixSolver<Scalar>::get_convergence_state();
@@ -62,7 +62,7 @@ namespace Hermes
     double NewtonMatrixSolver<Scalar>::update_solution_return_change_norm(Scalar* linear_system_solution)
     {
       double current_damping_factor = this->get_parameter_value(this->p_damping_factors).back();
-      
+
       double solution_change_norm = 0.;
       for (int i = 0; i < this->problem_size; i++)
       {

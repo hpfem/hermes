@@ -42,11 +42,11 @@ namespace Hermes
       /// Turn on / off the Anderson acceleration. By default it is off.
       void use_Anderson_acceleration(bool to_set);
 
-      /// Set how many last vectors will be used for Anderson acceleration. See the details about the Anderson acceleration for 
+      /// Set how many last vectors will be used for Anderson acceleration. See the details about the Anderson acceleration for
       /// explanation of this parameter.
       void set_num_last_vector_used(int num);
 
-      /// Set the Anderson beta coefficient. See the details about the Anderson acceleration for 
+      /// Set the Anderson beta coefficient. See the details about the Anderson acceleration for
       /// explanation of this parameter.
       void set_anderson_beta(double beta);
 #pragma endregion

@@ -29,7 +29,7 @@ namespace Hermes
     class Element;
     class Mesh;
 
-        /// \brief Represents the reference mapping.
+    /// \brief Represents the reference mapping.
     ///
     /// RefMap represents the mapping from the reference to the physical element.
     /// Its main task is to provide both the (inverse) reference mapping matrix and

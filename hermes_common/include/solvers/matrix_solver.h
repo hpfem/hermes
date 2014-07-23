@@ -45,10 +45,10 @@ namespace Hermes
         PeakMemoryUsage = 1,
         Flops = 2
       };
-      
-       /// Return the solution vector.
+
+      /// Return the solution vector.
       virtual Scalar *get_sln_vector();
-     
+
       /// Sets the jacobian to be constant, i.e. reused whenever possible.
       void set_jacobian_constant(bool to_set = true);
 
@@ -58,7 +58,7 @@ namespace Hermes
       /// \TODO This is not used now.
       /// Set Reporting of UMFPACK numerical factorization data provided the used matrix solver is UMFPACK.
       virtual void set_UMFPACK_output(bool to_set = true, bool with_output = false);
-      
+
       /// \TODO This is not used now.
       /// Get UMFPACK numerical factorization data provided the used matrix solver is UMFPACK
       virtual double get_UMFPACK_reporting_data(UMFPACK_reporting_data_value data_value);
@@ -78,13 +78,13 @@ namespace Hermes
     protected:
       /// Linear solver.
       Hermes::Solvers::LinearMatrixSolver<Scalar>* linear_matrix_solver;
-      
+
       /// Jacobian can be reused if possible.
       bool constant_jacobian;
 
       /// Jacobian is ready to be reused if desirable.
       bool jacobian_reusable;
-      
+
       /// Number of equations.
       int problem_size;
 

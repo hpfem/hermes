@@ -61,14 +61,13 @@ namespace Hermes
     template<typename Scalar>
     L2Space<Scalar>::~L2Space()
     {
-
     }
 
     template<typename Scalar>
     void L2Space<Scalar>::copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh)
     {
       this->set_shapeset(space->get_shapeset(), true);
-      
+
       Space<Scalar>::copy(space, new_mesh);
     }
 
@@ -101,7 +100,7 @@ namespace Hermes
       {
         typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
         ed->bdof = this->next_dof;
-//FIXME: this function might return invalid value because retrieved bubble functions for non-uniform orders might be invalid for the given order.
+        //FIXME: this function might return invalid value because retrieved bubble functions for non-uniform orders might be invalid for the given order.
         ed->n = this->shapeset->get_num_bubbles(ed->order, e->get_mode());
         this->next_dof += ed->n;
         this->bubble_functions_count += ed->n;

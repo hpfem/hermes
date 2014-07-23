@@ -26,7 +26,7 @@ namespace Hermes
   {
     /// Mesh reader from BSON format
     ///
-        /// Typical usage:
+    /// Typical usage:
     /// MeshSharedPtr mesh;
     /// Hermes::Hermes2D::MeshReaderH2DBSON mloader;
     /// try

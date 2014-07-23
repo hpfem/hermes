@@ -60,7 +60,7 @@ namespace Hermes
         DiscreteProblemWeakForm(WeakFormSharedPtr<Scalar> wf = WeakFormSharedPtr<Scalar>(nullptr));
 
         virtual void set_weak_formulation(WeakFormSharedPtr<Scalar> wf);
-        
+
         /// Weak formulation.
         WeakFormSharedPtr<Scalar> wf;
       };

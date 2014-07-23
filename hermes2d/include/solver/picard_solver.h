@@ -29,7 +29,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-        /// Class for the Picard's method.<br>
+    /// Class for the Picard's method.<br>
     /// For details about the optionally applied Anderson acceleration, the following website<br>
     /// http://www.hpfem.org/hermes/hermes-tutorial/doc/_build/html/src/hermes2d/B-nonlinear/01-picard.html
     /// will give an overview.<br>

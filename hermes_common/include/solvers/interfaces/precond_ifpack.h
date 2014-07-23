@@ -35,8 +35,8 @@ namespace Hermes
     using namespace Hermes::Solvers;
     /// \brief Preconditioners built on IFPACK.
     ///
-        template <typename Scalar>
-    class HERMES_API IfpackPrecond: public EpetraPrecond<Scalar>
+    template <typename Scalar>
+    class HERMES_API IfpackPrecond : public EpetraPrecond<Scalar>
     {
     public:
       /// Constructor for relaxation methods.
@@ -79,8 +79,8 @@ namespace Hermes
       Ifpack_Preconditioner *prec;
       Teuchos::ParameterList ilist;
       EpetraMatrix<Scalar> *mat;
-      unsigned owner:1;
-// class of the preconditioner
+      unsigned owner : 1;
+      // class of the preconditioner
       const char *cls;
       const char *type;
       int overlap;

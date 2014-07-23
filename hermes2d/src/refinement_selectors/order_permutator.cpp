@@ -31,9 +31,9 @@ namespace Hermes
 
       bool OrderPermutator::next()
       {
-        if(iso_p)
+        if (iso_p)
         {
-          if(order_h >= end_order_h || order_v >= end_order_v)
+          if (order_h >= end_order_h || order_v >= end_order_v)
             return false;
 
           order_h++;
@@ -41,18 +41,18 @@ namespace Hermes
         }
         else
         {
-          if(order_h >= end_order_h && order_v >= end_order_v)
+          if (order_h >= end_order_h && order_v >= end_order_v)
             return false;
 
           order_h++;
-          if(order_h > end_order_h)
+          if (order_h > end_order_h)
           {
             order_h = start_order_h;
             order_v++;
           }
         }
 
-        if(tgt_quad_order != nullptr)
+        if (tgt_quad_order != nullptr)
           *tgt_quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
         return true;
       }
@@ -61,7 +61,7 @@ namespace Hermes
       {
         order_h = start_order_h;
         order_v = start_order_v;
-        if(tgt_quad_order != nullptr)
+        if (tgt_quad_order != nullptr)
           *tgt_quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
       }
 

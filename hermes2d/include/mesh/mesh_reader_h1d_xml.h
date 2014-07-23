@@ -31,7 +31,7 @@ namespace Hermes
   {
     /// Mesh reader from Hermes1D XML format
     ///
-        /// The format specification is in hermes2d/xml_schemas/mesh_h1d_xml.xsd
+    /// The format specification is in hermes2d/xml_schemas/mesh_h1d_xml.xsd
     class HERMES_API MeshReaderH1DXML : public MeshReader, public Hermes::Hermes2D::Mixins::XMLParsing
     {
     public:

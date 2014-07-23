@@ -304,18 +304,18 @@ namespace Hermes
     unsigned char np = quad->get_num_points(o, ru->get_active_element()->get_mode()); \
     if (ru->is_jacobian_const()){    \
     for (int i = 0; i < np; i++) \
-    result += pt[i][2] * (exp); \
-    result *= ru->get_const_jacobian(); \
+      result += pt[i][2] * (exp); \
+      result *= ru->get_const_jacobian(); \
     } \
     else {      \
-      double* jac = ru->get_jacobian(o); \
-    for (int i = 0; i < np; i++) \
-    result += pt[i][2] * jac[i] * (exp); \
+        double* jac = ru->get_jacobian(o); \
+      for (int i = 0; i < np; i++) \
+        result += pt[i][2] * jac[i] * (exp); \
     }}
 
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      template<typename Scalar>
+    template<typename Scalar>
     inline double int_h1_error(Function<Scalar>* fu, Function<Scalar>* fv, RefMap* ru, RefMap* rv)
     {
       Quad2D* quad = fu->get_quad_2d();

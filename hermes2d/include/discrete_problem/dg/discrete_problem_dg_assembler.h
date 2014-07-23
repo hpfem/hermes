@@ -31,7 +31,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-        /// Discrete problem DG assembling class.
+    /// Discrete problem DG assembling class.
     ///
     /// This class provides methods for assembling DG forms (forms evaluated on internal edges) into external matrix / vector structures.
     ///

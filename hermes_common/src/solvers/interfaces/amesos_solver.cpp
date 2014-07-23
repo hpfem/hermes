@@ -35,13 +35,13 @@ namespace Hermes
     AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
       : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs)
     {
-      solver = factory.Create(solver_type, problem);
-      assert(solver != nullptr);
-      // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver,
-      //          so don't forget to delete it!
-      //          ( Amesos.cpp, line 88, called from factory.Create():
-      //            return new_ Amesos_Klu(LinearProblem); )
-    }
+        solver = factory.Create(solver_type, problem);
+        assert(solver != nullptr);
+        // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver,
+        //          so don't forget to delete it!
+        //          ( Amesos.cpp, line 88, called from factory.Create():
+        //            return new_ Amesos_Klu(LinearProblem); )
+      }
 
     template<typename Scalar>
     void AmesosSolver<Scalar>::free()

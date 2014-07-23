@@ -38,7 +38,7 @@ namespace Hermes
   /// Namespace containing objects for preconditioners.
   namespace Preconditioners
   {
-        /// The preconditioner type.
+    /// The preconditioner type.
     enum PreconditionerType
     {
       Jacobi = 0,
@@ -53,7 +53,7 @@ namespace Hermes
 
     /// \brief Abstract class to define interface for preconditioners.
     ///
-        template <typename Scalar>
+    template <typename Scalar>
     class Precond
     {
     public:
@@ -62,7 +62,7 @@ namespace Hermes
 
     /// \brief Abstract class for Epetra preconditioners.
     ///
-        template <typename Scalar>
+    template <typename Scalar>
     class EpetraPrecond : public Precond<Scalar>
 #ifdef HAVE_EPETRA
       , public Epetra_Operator

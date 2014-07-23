@@ -41,12 +41,12 @@ namespace Hermes
 #define LINEARIZER_DATA_TYPE double
 #endif
 
-/// We refine a quad directionally (horizontally, vertically) only if the error in one direction is this much larger than in the other.
+      /// We refine a quad directionally (horizontally, vertically) only if the error in one direction is this much larger than in the other.
 #ifndef LINEARIZER_DIRECTIONAL_QUAD_REFINEMENT_REQUIREMENT
 #define LINEARIZER_DIRECTIONAL_QUAD_REFINEMENT_REQUIREMENT 5.0
 #endif
 
-/// Very important constant putting an upper bound on the maximum number of successive element division (when dealing with a higher-order FEM solution).
+      /// Very important constant putting an upper bound on the maximum number of successive element division (when dealing with a higher-order FEM solution).
 #define MAX_LINEARIZER_DIVISION_LEVEL 6
 
       /// Typedefs used throughout the Linearizer functionality.

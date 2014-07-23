@@ -21,7 +21,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-        /// HcurlSpace represents a space of vector functions with continuous tangent<br>
+    /// HcurlSpace represents a space of vector functions with continuous tangent<br>
     /// components over a domain (mesh).<br>
     /// Typical usage:<br>
     /// ...<br>

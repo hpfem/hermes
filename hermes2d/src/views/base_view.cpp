@@ -97,7 +97,6 @@ namespace Hermes
           Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, true);
         }
 
-
         complex_filter = MeshFunctionSharedPtr<double>(new Hermes::Hermes2D::RealFilter(sln.get()));
         ScalarView::show(complex_filter, item);
         update_title();

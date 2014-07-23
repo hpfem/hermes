@@ -37,7 +37,7 @@ namespace Hermes
     /// A table of quad sub-subdomain transforms. Only first ::H2D_TRF_QUAD_NUM transformations are valid, the rest are identity transformation.
     extern HERMES_API Trf quad_trf[H2D_TRF_NUM];
 
-        /// Transformable is a base class for all classes that perform some kind of precalculation of
+    /// Transformable is a base class for all classes that perform some kind of precalculation of
     /// function values on elements. These classes (PrecalcShapeset, Solution, RefMap) inherit
     /// from Transformable the ability to transform integration points to the sub-elements
     /// of an element.

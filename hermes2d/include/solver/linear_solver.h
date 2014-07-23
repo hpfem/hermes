@@ -28,7 +28,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-        /// Class for solving linear problems.<br>
+    /// Class for solving linear problems.<br>
     /// Typical usage:<br>
     /// // Initialize linear solver.<br>
     /// // Here wf is Hermes2D::WeakForm<double>, space is Hermes2D::Space<double><br>

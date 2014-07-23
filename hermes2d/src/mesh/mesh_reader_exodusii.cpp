@@ -41,11 +41,11 @@ namespace Hermes
     {
       bool operator()(Vertex a, Vertex b) const
       {
-        if(a.x < b.x) return true;
-        else if(a.x > b.x) return false;
+        if (a.x < b.x) return true;
+        else if (a.x > b.x) return false;
         else
         {
-          if(a.y < b.y) return true;
+          if (a.y < b.y) return true;
           return false;
         }
       }
@@ -65,7 +65,7 @@ namespace Hermes
       int n_dims, n_nodes, n_elems, n_eblocks, n_nodesets, n_sidesets;
       char title[MAX_LINE_LENGTH + 1];
       err = ex_get_init(exoid, title, &n_dims, &n_nodes, &n_elems, &n_eblocks, &n_nodesets, &n_sidesets);
-      if(n_dims != 2)
+      if (n_dims != 2)
         throw Hermes::Exceptions::Exception("File '%s' does not contain 2D mesh", file_name);
 
       // load coordinates
@@ -85,7 +85,7 @@ namespace Hermes
       {
         int k;
         Vertex v = { x[i], y[i] };
-        if(vtx_list.count(v) == 0)
+        if (vtx_list.count(v) == 0)
         {
           vtx_arr.push_back(v);
           k = vid++;
@@ -96,8 +96,8 @@ namespace Hermes
 
         vmap[i + 1] = k;
       }
-      delete [] x;
-      delete [] y;
+      delete[] x;
+      delete[] y;
 
       int n_vtx = vtx_arr.size();
       double2 *vtx = new double2[n_vtx];
@@ -125,11 +125,11 @@ namespace Hermes
         int n_elems_in_blk, n_elem_nodes, n_attrs;
         err = ex_get_elem_block(exoid, id, elem_type, &n_elems_in_blk, &n_elem_nodes, &n_attrs);
 
-        if(n_elem_nodes == 3) n_tri += n_elems_in_blk;
-        else if(n_elem_nodes == 4) n_quad += n_elems_in_blk;
+        if (n_elem_nodes == 3) n_tri += n_elems_in_blk;
+        else if (n_elem_nodes == 4) n_quad += n_elems_in_blk;
         else
         {
-          delete [] vtx;
+          delete[] vtx;
           throw Hermes::Exceptions::Exception("Unknown type of element");
         }
       }
@@ -174,7 +174,7 @@ namespace Hermes
         for (int j = 0; j < n_elems_in_blk; j++)
         {
           el_nv[iel] = n_elem_nodes;
-          if(n_elem_nodes == 3)
+          if (n_elem_nodes == 3)
           {
             tri[it][0] = vmap[connect[ic++]];
             tri[it][1] = vmap[connect[ic++]];
@@ -183,7 +183,7 @@ namespace Hermes
             els[iel] = tri[it];
             it++;
           }
-          else if(n_elem_nodes == 4)
+          else if (n_elem_nodes == 4)
           {
             quad[iq][0] = vmap[connect[ic++]];
             quad[iq][1] = vmap[connect[ic++]];
@@ -195,14 +195,14 @@ namespace Hermes
           }
           else
           {
-            delete [] vtx;
+            delete[] vtx;
             throw Hermes::Exceptions::Exception("Unknown type of element");
           }
           iel++;
         }
-        delete [] connect;
+        delete[] connect;
       }
-      delete [] eid_blocks;
+      delete[] eid_blocks;
 
       // query number of side sets
       int *sid_blocks = new int[n_sidesets];
@@ -253,10 +253,10 @@ namespace Hermes
           im++;
         }
 
-        delete [] elem_list;
-        delete [] side_list;
+        delete[] elem_list;
+        delete[] side_list;
       }
-      delete [] sid_blocks;
+      delete[] sid_blocks;
 
       // we are done
       err = ex_close(exoid);
@@ -264,15 +264,15 @@ namespace Hermes
       mesh->create(n_vtx, vtx, n_tri, tri, tri_markers, n_quad, quad, quad_markers, n_mark, marks, bnd_markers);
 
       // clean-up
-      delete [] marks;
-      delete [] tri;
-      delete [] quad;
-      delete [] tri_markers;
-      delete [] quad_markers;
-      delete [] bnd_markers;
-      delete [] vtx;
-      delete [] el_nv;
-      delete [] els;
+      delete[] marks;
+      delete[] tri;
+      delete[] quad;
+      delete[] tri_markers;
+      delete[] quad_markers;
+      delete[] bnd_markers;
+      delete[] vtx;
+      delete[] el_nv;
+      delete[] els;
     }
   }
 }

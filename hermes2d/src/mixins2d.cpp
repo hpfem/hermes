@@ -29,7 +29,6 @@ namespace Hermes
         this->validate = to_set;
       }
 
-
       Parallel::Parallel() : num_threads_used(HermesCommonApi.get_integral_param_value(numThreads))
       {
       }

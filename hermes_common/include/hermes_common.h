@@ -39,7 +39,6 @@
 #include "solvers/precond.h"
 #include "solvers/interfaces/precond_ifpack.h"
 #include "solvers/interfaces/precond_ml.h"
-#include "solvers/eigensolver.h"
 #include "hermes_function.h"
 #include "util/compat.h"
 #include "util/callstack.h"

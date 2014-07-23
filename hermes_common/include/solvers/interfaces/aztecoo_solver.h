@@ -36,7 +36,7 @@ namespace Hermes
   {
     /// \brief Encapsulation of AztecOO linear solver.
     ///
-        template <typename Scalar>
+    template <typename Scalar>
     class HERMES_API AztecOOSolver : public IterSolver<Scalar>
     {
     public:
@@ -67,7 +67,7 @@ namespace Hermes
       virtual void use_node_wise_ordering(unsigned int num_pdes);
       virtual void use_equations_wise_ordering();
 
-     virtual void solve();
+      virtual void solve();
       virtual void solve(Scalar* initial_guess);
 
       virtual int get_matrix_size();
@@ -82,7 +82,7 @@ namespace Hermes
       void set_param(int param, double value);
 
     protected:
-/// Instance of the Aztec solver.
+      /// Instance of the Aztec solver.
       AztecOO aztec;
       EpetraMatrix<Scalar> *m;
       EpetraVector<Scalar> *rhs;

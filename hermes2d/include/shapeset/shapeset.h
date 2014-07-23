@@ -47,7 +47,7 @@ namespace Hermes
 #define H2D_MAX_LOCAL_BASIS_SIZE_QUAD 308
 #define H2D_MAX_LOCAL_BASIS_SIZE 308
 
-        /// \brief Defines a set of shape functions.
+    /// \brief Defines a set of shape functions.
     ///
     /// This class stores mainly the definitions of the polynomials for all shape functions,
     /// but also their polynomial degrees, their types (vertex, edge, bubble), and contains

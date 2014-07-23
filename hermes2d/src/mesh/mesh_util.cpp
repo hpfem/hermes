@@ -88,7 +88,7 @@ namespace Hermes
         for (int i = ((Nurbs*)curve)->degree + 1; i < ((Nurbs*)curve)->nk - ((Nurbs*)curve)->degree - 1; i++)
           toReturn->kv[((Nurbs*)curve)->nk - 1 - i] = 1.0 - ((Nurbs*)curve)->kv[i];
 
-          return toReturn;
+        return toReturn;
       }
     }
 
@@ -135,14 +135,14 @@ namespace Hermes
 
       *en = mesh->peek_edge_node(p1, p2);
 
-      if(*en == nullptr)
+      if (*en == nullptr)
       {
-        if(!skip_check)
+        if (!skip_check)
           throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
         else
           return nullptr;
       }
-    
+
       // edge endpoints control points.
       curve->pt[0][0] = mesh->nodes[p1].x;
       curve->pt[0][1] = mesh->nodes[p1].y;

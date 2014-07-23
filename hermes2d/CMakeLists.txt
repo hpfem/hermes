@@ -172,7 +172,6 @@ project(hermes2d)
     src/views/mesh_view.cpp
     src/views/order_view.cpp
     src/views/scalar_view.cpp
-    #src/views/stream_view.cpp
     src/views/vector_base_view.cpp
     src/views/vector_view.cpp
     src/views/view.cpp
@@ -281,7 +280,6 @@ project(hermes2d)
     src/views/mesh_view.cpp
     src/views/order_view.cpp
     src/views/scalar_view.cpp
-    #src/views/stream_view.cpp
     src/views/vector_base_view.cpp
     src/views/vector_view.cpp
     src/views/view.cpp
@@ -369,7 +367,6 @@ project(hermes2d)
     include/asmlist.h
     include/forms.h
     include/neighbor_search.h
-    include/sub_element_map.h
     include/norm_form.h
     include/spline.h
     include/quadrature/limit_order.h
@@ -389,6 +386,7 @@ project(hermes2d)
     include/mesh/curved.h
     include/mesh/mesh_reader_exodusii.h
     include/mesh/hash.h
+    include/mesh/mesh_reader.h
     include/mesh/mesh_reader_h2d.h
     include/mesh/mesh_reader_h2d_bson.h
     include/mesh/mesh_reader_h2d_xml.h
@@ -420,13 +418,13 @@ project(hermes2d)
     include/views/mesh_view.h
     include/views/order_view.h
     include/views/scalar_view.h
-    #include/views/stream_view.h
     include/views/vector_base_view.h
     include/views/vector_view.h
     include/views/view.h
     include/views/view_support.h
     include/views/thread_linearizer.h
     include/views/linearizer.h
+    include/views/linearizer_utils.h
     include/views/orderizer.h
 
     include/weakform_library/weakforms_elasticity.h
@@ -477,7 +475,6 @@ project(hermes2d)
     include/asmlist.h
     include/forms.h
     include/neighbor_search.h
-    include/sub_element_map.h
     include/norm_form.h
     include/spline.h
     include/quadrature/limit_order.h
@@ -513,6 +510,7 @@ project(hermes2d)
     include/mesh/curved.h
     include/mesh/mesh_reader_exodusii.h
     include/mesh/hash.h
+    include/mesh/mesh_reader.h
     include/mesh/mesh_reader_h2d.h
     include/mesh/mesh_reader_h2d_bson.h
     include/mesh/mesh_reader_h2d_xml.h
@@ -533,13 +531,13 @@ project(hermes2d)
     include/views/mesh_view.h
     include/views/order_view.h
     include/views/scalar_view.h
-    #include/views/stream_view.h
     include/views/vector_base_view.h
     include/views/vector_view.h
     include/views/view.h
     include/views/view_support.h
     include/views/thread_linearizer.h
     include/views/linearizer.h
+    include/views/linearizer_utils.h
     include/views/orderizer.h
   )
   

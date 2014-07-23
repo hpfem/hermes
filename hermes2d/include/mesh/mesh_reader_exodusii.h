@@ -23,7 +23,7 @@ namespace Hermes
   {
     /// Mesh loader from EXODUSII format
     ///
-        class HERMES_API MeshReaderExodusII : public MeshReader
+    class HERMES_API MeshReaderExodusII : public MeshReader
     {
     public:
       MeshReaderExodusII();
