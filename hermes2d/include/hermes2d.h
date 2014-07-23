@@ -30,7 +30,6 @@
 #include "quadrature/limit_order.h"
 
 #include "api2d.h"
-#include "sub_element_map.h"
 #include "mixins2d.h"
 
 #include "mesh/mesh.h"
@@ -74,7 +73,6 @@
 #include "views/mesh_view.h"
 #include "views/order_view.h"
 #include "views/scalar_view.h"
-#include "views/stream_view.h"
 #include "views/vector_base_view.h"
 #include "views/vector_view.h"
 

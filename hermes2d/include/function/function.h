@@ -16,7 +16,6 @@
 #ifndef __H2D_FUNCTION_H
 #define __H2D_FUNCTION_H
 
-#include "sub_element_map.h"
 #include "transformable.h"
 #include "../quadrature/quad.h"
 #include "exceptions.h"

@@ -30,7 +30,7 @@ namespace Hermes
       // After this, all NeighborSearches in neighbor_searches should have the same count
       // of neighbors and proper set of transformations
       // for the central and the neighbor element(s) alike.
-      // Also check that every NeighborSearch has the same number of neighbor elements.
+      // Also check that every NeighborSearch has the same number o f neighbor elements.
       num_neighbors = 0;
       for (unsigned int i = 0; i < num_neighbor_searches; i++)
       {
