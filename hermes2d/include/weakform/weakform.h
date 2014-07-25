@@ -205,7 +205,11 @@ namespace Hermes
       double current_time;
       double current_time_step;
 
+      /// Number of equations.
       unsigned int neq;
+
+      /// Original number of equations in case this is a Runge-Kutta enlarged system.
+      unsigned int original_neq;
 
       bool is_matfree;
 
@@ -233,6 +237,7 @@ namespace Hermes
       bool** get_blocks(bool force_diagonal_blocks) const;
 
       friend class DiscreteProblem<Scalar>;
+      friend class Form<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
       friend class DiscreteProblemThreadAssembler<Scalar>;
       friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
@@ -294,8 +299,8 @@ namespace Hermes
       unsigned int i;
 
     protected:
-      /// Set pointer to a WeakForm.
-      inline void set_weakform(WeakForm<Scalar>* wf) { this->wf = wf; }
+      /// Set pointer to a WeakForm + handling of internal data.
+      void set_weakform(WeakForm<Scalar>* wf);
 
       /// Markers of the areas where this form will be assembled.
       std::vector<std::string> areas;
@@ -307,6 +312,17 @@ namespace Hermes
       /// True iff areas contain HERMES_ANY - meaning that this form represents an integral over the whole domain (whole boundary in case of surface forms).
       bool assembleEverywhere;
 
+      /// External solutions for this form will start
+      /// with u_ext[u_ext_offset] where u_ext[] are external
+      /// solutions coming to the assembling procedure via the
+      /// external coefficient vector.
+      int u_ext_offset;
+
+      /// When dealing with nonlinear problems of multiple equations, sometimes the nonlinearity has to access different quantity previous iterations. This selector
+      /// servers for that purpose - according to this, the correct one will be selected - see e.g.DefaultJacobianDiffusion class.
+      /// Defaults to 'i' for VectorForm and 'j' for MatrixForm. This can be changed in derived forms.
+      unsigned int previous_iteration_space_index;
+
       /// External solutions.
       std::vector<MeshFunctionSharedPtr<Scalar> > ext;
       std::vector<UExtFunctionSharedPtr<Scalar> > u_ext_fn;
@@ -316,6 +332,7 @@ namespace Hermes
       WeakForm<Scalar>* wf;
     private:
       double stage_time;
+      void set_uExtOffset(int u_ext_offset);
       /// Form will be always multiplied (scaled) with this number.
       double scaling_factor;
       /// For time-dependent right-hand side functions.
@@ -345,7 +362,6 @@ namespace Hermes
       virtual ~MatrixForm();
 
       unsigned int j;
-      unsigned int previous_iteration_space_index;
 
       SymFlag sym;
 
@@ -405,7 +421,6 @@ namespace Hermes
       virtual ~MatrixFormDG();
 
       unsigned int j;
-      unsigned int previous_iteration_space_index;
 
       virtual Scalar value(int n, double *wt, DiscontinuousFunc<Scalar> **u_ext, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v,
         GeomSurf<double> *e, DiscontinuousFunc<Scalar> **ext) const;

@@ -1,7 +1,7 @@
 #include "definitions.h"
 
 CustomWeakFormHeatRK::CustomWeakFormHeatRK(std::string bdy_air, double alpha, double lambda, double heatcap, double rho,
-  double* current_time_ptr, double temp_init, double t_final) : Hermes::Hermes2D::WeakForm<double>(2)
+  double* current_time_ptr, double temp_init, double t_final) : Hermes::Hermes2D::WeakForm<double>(1)
 {
     for (int i = 0; i < this->neq; i++)
     {
@@ -15,8 +15,7 @@ CustomWeakFormHeatRK::CustomWeakFormHeatRK(std::string bdy_air, double alpha, do
       add_vector_form(new WeakFormsH1::DefaultResidualDiffusion<double>(i, HERMES_ANY, new Hermes1DFunction<double>(-lambda / (heatcap * rho))));
 
       // Residual - surface.
-      add_vector_form_surf(new CustomFormResidualSurf(i, this->neq, bdy_air, alpha, rho, heatcap,
-        current_time_ptr, temp_init, t_final));
+      add_vector_form_surf(new CustomFormResidualSurf(i, this->neq, bdy_air, alpha, rho, heatcap, current_time_ptr, temp_init, t_final));
     }
   }
 

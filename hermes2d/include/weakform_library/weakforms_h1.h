@@ -86,8 +86,6 @@ namespace Hermes
         virtual MatrixFormVol<Scalar>* clone() const;
 
       private:
-        int idx_j;
-
         Hermes1DFunction<Scalar>* coeff;
         bool own_coeff;
         GeomType gt;
@@ -114,8 +112,6 @@ namespace Hermes
         virtual MatrixFormVol<Scalar>* clone() const;
 
       private:
-        int idx_j;
-
         Hermes1DFunction<Scalar>* coeff;
         bool own_coeff;
         GeomType gt;
@@ -151,7 +147,6 @@ namespace Hermes
         virtual MatrixFormVol<Scalar>* clone() const;
 
       private:
-        int idx_j;
         Hermes1DFunction<Scalar>* coeff1, *coeff2;
         bool own_coeff1;
         bool own_coeff2;
@@ -214,7 +209,6 @@ namespace Hermes
         virtual VectorFormVol<Scalar>* clone() const;
 
       private:
-        int idx_i;
 
         Hermes2DFunction<Scalar>* coeff;
         bool own_coeff;
@@ -248,8 +242,6 @@ namespace Hermes
         virtual VectorFormVol<Scalar>* clone() const;
 
       private:
-        int idx_i;
-
         Hermes1DFunction<Scalar>* coeff;
         bool own_coeff;
         GeomType gt;
@@ -281,7 +273,6 @@ namespace Hermes
         virtual VectorFormVol<Scalar>* clone() const;
 
       private:
-        int idx_i;
         Hermes1DFunction<Scalar>* coeff1, *coeff2;
         bool own_coeff1;
         bool own_coeff2;
@@ -347,8 +338,6 @@ namespace Hermes
         virtual MatrixFormSurf<Scalar>* clone() const;
 
       private:
-        int idx_j;
-
         Hermes1DFunction<Scalar>* coeff;
         bool own_coeff;
         GeomType gt;
@@ -410,8 +399,6 @@ namespace Hermes
         virtual VectorFormSurf<Scalar>* clone() const;
 
       private:
-        int idx_i;
-
         Hermes2DFunction<Scalar>* coeff;
         bool own_coeff;
         GeomType gt;

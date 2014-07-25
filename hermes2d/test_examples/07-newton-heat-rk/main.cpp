@@ -38,7 +38,7 @@ const int INIT_REF_NUM = 1;
 // Number of initial uniform mesh refinements towards the boundary.
 const int INIT_REF_NUM_BDY = 1;
 // Time step in seconds.
-double time_step = 3e+2;
+double time_step = 3e+1;
 // Stopping criterion for the Newton's method.
 const double NEWTON_TOL = 1e-5;
 // Maximum allowed number of Newton iterations.
@@ -49,7 +49,7 @@ const int max_allowed_iterations = 100;
 // Explicit methods:
 //   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
 // Implicit methods:
-//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2,
+//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SDIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2,
 //   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4,
 //   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_5_4.
 // Embedded explicit methods:
@@ -60,7 +60,7 @@ const int max_allowed_iterations = 100;
 //   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded,
 //   Implicit_DIRK_ISMAIL_7_45_embedded.
 
-ButcherTableType butcher_table_type = Implicit_Lobatto_IIIC_2_2;
+ButcherTableType butcher_table_type = Implicit_Crank_Nicolson_2_2;
 
 // Problem parameters.
 // Temperature of the ground (also initial temperature).
@@ -104,19 +104,18 @@ int main(int argc, char* argv[])
   // space->
   SpaceSharedPtr<double> space1(new H1Space<double>(mesh, &bcs, P_INIT));
   SpaceSharedPtr<double> space2(new H1Space<double>(mesh, &bcs, P_INIT + 1));
-  std::vector<SpaceSharedPtr<double> > spaces({ space1, space2 });
+  std::vector<SpaceSharedPtr<double> > spaces({ space1 });
 
   // Solution pointer.
   MeshFunctionSharedPtr<double> sln_time_prev1(new ConstantSolution<double>(mesh, TEMP_INIT));
   MeshFunctionSharedPtr<double> sln_time_prev2(new ConstantSolution<double>(mesh, TEMP_INIT));
-  std::vector<MeshFunctionSharedPtr<double> > sln_time_prev({ sln_time_prev1, sln_time_prev2 });
+  std::vector<MeshFunctionSharedPtr<double> > sln_time_prev({ sln_time_prev1 });
 
   MeshFunctionSharedPtr<double> sln_time_new1(new Solution<double>(mesh));
   MeshFunctionSharedPtr<double> sln_time_new2(new Solution<double>(mesh));
-  std::vector<MeshFunctionSharedPtr<double> > sln_time_new({ sln_time_new1, sln_time_new2 });
+  std::vector<MeshFunctionSharedPtr<double> > sln_time_new({ sln_time_new1 });
 
-  WeakFormSharedPtr<double> wf(new CustomWeakFormHeatRK("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
-    &current_time, TEMP_INIT, T_FINAL));
+  WeakFormSharedPtr<double> wf(new CustomWeakFormHeatRK("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO, &current_time, TEMP_INIT, T_FINAL));
 
   // Initialize views.
   Hermes::Hermes2D::Views::ScalarView Tview("Temperature", new Hermes::Hermes2D::Views::WinGeom(0, 0, 450, 600));
@@ -150,11 +149,11 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Time %3.2f s", current_time);
     Tview.set_title(title);
-    Tview.show(sln_time_new2);
+    Tview.show(sln_time_new1);
 
     // Copy solution for the new_ time step.
     sln_time_prev1->copy(sln_time_new1);
-    sln_time_prev2->copy(sln_time_new2);
+    //sln_time_prev2->copy(sln_time_new2);
 
     // Increase current time and time step counter.
     current_time += time_step;

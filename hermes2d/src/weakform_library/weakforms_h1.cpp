@@ -165,7 +165,7 @@ namespace Hermes
       DefaultJacobianDiffusion<Scalar>::DefaultJacobianDiffusion(int i, int j, std::string area,
         Hermes1DFunction<Scalar>* coeff,
         SymFlag sym, GeomType gt)
-        : MatrixFormVol<Scalar>(i, j), idx_j(j), coeff(coeff), gt(gt)
+        : MatrixFormVol<Scalar>(i, j), coeff(coeff), gt(gt)
       {
           this->set_area(area);
           this->setSymFlag(sym);
@@ -181,7 +181,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianDiffusion<Scalar>::DefaultJacobianDiffusion(int i, int j, std::vector<std::string> areas,
         Hermes1DFunction<Scalar>* coeff, SymFlag sym, GeomType gt)
-        : MatrixFormVol<Scalar>(i, j), idx_j(j), coeff(coeff), gt(gt)
+        : MatrixFormVol<Scalar>(i, j), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
           this->setSymFlag(sym);
@@ -214,19 +214,19 @@ namespace Hermes
             for (int i = 0; i < n; i++)
             {
               result += wt[i] * ((u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
-              result_der += wt[i] * (u->val[i] * (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i]));
+              result_der += wt[i] * (u->val[i] * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]));
             }
-            result *= coeff->value(u_ext[idx_j]->val[0]);
-            result_der *= coeff->derivative(u_ext[idx_j]->val[0]);
+            result *= coeff->value(u_ext[this->previous_iteration_space_index]->val[0]);
+            result_der *= coeff->derivative(u_ext[this->previous_iteration_space_index]->val[0]);
             result += result_der;
           }
           else
           {
             for (int i = 0; i < n; i++)
             {
-              result += wt[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
-                (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
-                + coeff->value(u_ext[idx_j]->val[i])
+              result += wt[i] * (coeff->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] *
+                (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i])
+                + coeff->value(u_ext[this->previous_iteration_space_index]->val[i])
                 * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
             }
           }
@@ -234,17 +234,17 @@ namespace Hermes
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
-                (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
-                + coeff->value(u_ext[idx_j]->val[i])
+              result += wt[i] * e->y[i] * (coeff->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] *
+                (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i])
+                + coeff->value(u_ext[this->previous_iteration_space_index]->val[i])
                 * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
-                (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
-                + coeff->value(u_ext[idx_j]->val[i])
+              result += wt[i] * e->x[i] * (coeff->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] *
+                (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i])
+                + coeff->value(u_ext[this->previous_iteration_space_index]->val[i])
                 * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
             }
           }
@@ -260,26 +260,26 @@ namespace Hermes
         Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
-              (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
-              + coeff->value(u_ext[idx_j]->val[i])
+            result += wt[i] * (coeff->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] *
+              (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i])
+              + coeff->value(u_ext[this->previous_iteration_space_index]->val[i])
               * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
-                (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
-                + coeff->value(u_ext[idx_j]->val[i])
+              result += wt[i] * e->y[i] * (coeff->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] *
+                (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i])
+                + coeff->value(u_ext[this->previous_iteration_space_index]->val[i])
                 * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
-                (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
-                + coeff->value(u_ext[idx_j]->val[i])
+              result += wt[i] * e->x[i] * (coeff->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] *
+                (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i])
+                + coeff->value(u_ext[this->previous_iteration_space_index]->val[i])
                 * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
             }
           }
@@ -298,7 +298,7 @@ namespace Hermes
       DefaultMatrixFormDiffusion<Scalar>::DefaultMatrixFormDiffusion(int i, int j, std::string area,
         Hermes1DFunction<Scalar>* coeff,
         SymFlag sym, GeomType gt)
-        : MatrixFormVol<Scalar>(i, j), idx_j(j), coeff(coeff), gt(gt)
+        : MatrixFormVol<Scalar>(i, j), coeff(coeff), gt(gt)
       {
           this->set_area(area);
           this->setSymFlag(sym);
@@ -314,7 +314,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultMatrixFormDiffusion<Scalar>::DefaultMatrixFormDiffusion(int i, int j, std::vector<std::string> areas,
         Hermes1DFunction<Scalar>* coeff, SymFlag sym, GeomType gt)
-        : MatrixFormVol<Scalar>(i, j), idx_j(j), coeff(coeff), gt(gt)
+        : MatrixFormVol<Scalar>(i, j), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
           this->setSymFlag(sym);
@@ -397,8 +397,7 @@ namespace Hermes
         Hermes1DFunction<Scalar>* coeff1,
         Hermes1DFunction<Scalar>* coeff2,
         GeomType gt)
-        : MatrixFormVol<Scalar>(i, j),
-        idx_j(j), coeff1(coeff1), coeff2(coeff2), gt(gt)
+        : MatrixFormVol<Scalar>(i, j), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
           this->set_area(area);
 
@@ -426,8 +425,7 @@ namespace Hermes
         Hermes1DFunction<Scalar>* coeff1,
         Hermes1DFunction<Scalar>* coeff2,
         GeomType gt)
-        : MatrixFormVol<Scalar>(i, j),
-        idx_j(j), coeff1(coeff1), coeff2(coeff2), gt(gt)
+        : MatrixFormVol<Scalar>(i, j), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
           this->set_areas(areas);
 
@@ -465,10 +463,10 @@ namespace Hermes
       {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (coeff1->derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dx[i] * v->val[i]
-            + coeff1->value(u_ext[idx_j]->val[i]) * u->dx[i] * v->val[i]
-            + coeff2->derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dy[i] * v->val[i]
-            + coeff2->value(u_ext[idx_j]->val[i]) * u->dy[i] * v->val[i]);
+          result += wt[i] * (coeff1->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] * u_ext[this->previous_iteration_space_index]->dx[i] * v->val[i]
+            + coeff1->value(u_ext[this->previous_iteration_space_index]->val[i]) * u->dx[i] * v->val[i]
+            + coeff2->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] * u_ext[this->previous_iteration_space_index]->dy[i] * v->val[i]
+            + coeff2->value(u_ext[this->previous_iteration_space_index]->val[i]) * u->dy[i] * v->val[i]);
         }
         return result;
       }
@@ -479,10 +477,10 @@ namespace Hermes
       {
         Ord result = Ord(0);
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (coeff1->derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dx[i] * v->val[i]
-            + coeff1->value(u_ext[idx_j]->val[i]) * u->dx[i] * v->val[i]
-            + coeff2->derivative(u_ext[idx_j]->val[i]) * u->val[i] * u_ext[idx_j]->dy[i] * v->val[i]
-            + coeff2->value(u_ext[idx_j]->val[i]) * u->dy[i] * v->val[i]);
+          result += wt[i] * (coeff1->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] * u_ext[this->previous_iteration_space_index]->dx[i] * v->val[i]
+            + coeff1->value(u_ext[this->previous_iteration_space_index]->val[i]) * u->dx[i] * v->val[i]
+            + coeff2->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] * u_ext[this->previous_iteration_space_index]->dy[i] * v->val[i]
+            + coeff2->value(u_ext[this->previous_iteration_space_index]->val[i]) * u->dy[i] * v->val[i]);
         }
         return result;
       }
@@ -594,7 +592,7 @@ namespace Hermes
       DefaultResidualVol<Scalar>::DefaultResidualVol(int i, std::string area,
         Hermes2DFunction<Scalar>* coeff,
         GeomType gt)
-        : VectorFormVol<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
+        : VectorFormVol<Scalar>(i), coeff(coeff), gt(gt)
       {
           this->set_area(area);
           if (coeff == nullptr)
@@ -610,7 +608,7 @@ namespace Hermes
       DefaultResidualVol<Scalar>::DefaultResidualVol(int i, std::vector<std::string> areas,
         Hermes2DFunction<Scalar>* coeff,
         GeomType gt)
-        : VectorFormVol<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
+        : VectorFormVol<Scalar>(i), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
           if (coeff == nullptr)
@@ -636,18 +634,18 @@ namespace Hermes
         Scalar result = 0;
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
             }
           }
         }
@@ -661,18 +659,18 @@ namespace Hermes
         Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
             }
           }
         }
@@ -689,7 +687,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualDiffusion<Scalar>::DefaultResidualDiffusion(int i, std::string area,
         Hermes1DFunction<Scalar>* coeff, GeomType gt)
-        : VectorFormVol<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
+        : VectorFormVol<Scalar>(i), coeff(coeff), gt(gt)
       {
           this->set_area(area);
           if (coeff == nullptr)
@@ -704,7 +702,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualDiffusion<Scalar>::DefaultResidualDiffusion(int i, std::vector<std::string> areas,
         Hermes1DFunction<Scalar>* coeff, GeomType gt)
-        : VectorFormVol<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
+        : VectorFormVol<Scalar>(i), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
           if (coeff == nullptr)
@@ -730,21 +728,21 @@ namespace Hermes
         Scalar result = 0;
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value(u_ext[idx_i]->val[i])
-              * (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
+            result += wt[i] * coeff->value(u_ext[this->previous_iteration_space_index]->val[i])
+              * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]);
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value(u_ext[idx_i]->val[i])
-                * (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
+              result += wt[i] * e->y[i] * coeff->value(u_ext[this->previous_iteration_space_index]->val[i])
+                * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]);
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value(u_ext[idx_i]->val[i])
-                * (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
+              result += wt[i] * e->x[i] * coeff->value(u_ext[this->previous_iteration_space_index]->val[i])
+                * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]);
             }
           }
         }
@@ -758,8 +756,8 @@ namespace Hermes
       {
         Ord result = Ord(0);
         for (int i = 0; i < n; i++) {
-          result += wt[i] * coeff->value(u_ext[idx_i]->val[i])
-            * (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
+          result += wt[i] * coeff->value(u_ext[this->previous_iteration_space_index]->val[i])
+            * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]);
         }
         if (gt != HERMES_PLANAR) result = result * Ord(1);
 
@@ -777,7 +775,7 @@ namespace Hermes
         Hermes1DFunction<Scalar>* coeff1,
         Hermes1DFunction<Scalar>* coeff2,
         GeomType gt)
-        : VectorFormVol<Scalar>(i), idx_i(i), coeff1(coeff1), coeff2(coeff2), gt(gt)
+        : VectorFormVol<Scalar>(i), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
           this->set_area(area);
 
@@ -805,8 +803,7 @@ namespace Hermes
         Hermes1DFunction<Scalar>* coeff1,
         Hermes1DFunction<Scalar>* coeff2,
         GeomType gt)
-        : VectorFormVol<Scalar>(i),
-        idx_i(i), coeff1(coeff1), coeff2(coeff2), gt(gt)
+        : VectorFormVol<Scalar>(i), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
           this->set_areas(areas);
 
@@ -843,7 +840,7 @@ namespace Hermes
         GeomVol<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
-        Func<Scalar>* u_prev = u_ext[idx_i];
+        Func<Scalar>* u_prev = u_ext[this->previous_iteration_space_index];
         for (int i = 0; i < n; i++) {
           result += wt[i] * (coeff1->value(u_prev->val[i]) * (u_prev->dx[i] * v->val[i])
             + coeff2->value(u_prev->val[i]) * (u_prev->dy[i] * v->val[i]));
@@ -856,7 +853,7 @@ namespace Hermes
         GeomVol<Ord> *e, Func<Ord> **ext) const
       {
         Ord result = Ord(0);
-        Func<Ord>* u_prev = u_ext[idx_i];
+        Func<Ord>* u_prev = u_ext[this->previous_iteration_space_index];
         for (int i = 0; i < n; i++) {
           result += wt[i] * (coeff1->value(u_prev->val[i]) * (u_prev->dx[i] * v->val[i])
             + coeff2->value(u_prev->val[i]) * (u_prev->dy[i] * v->val[i]));
@@ -971,8 +968,7 @@ namespace Hermes
       DefaultJacobianFormSurf<Scalar>::DefaultJacobianFormSurf(int i, int j, std::string area,
         Hermes1DFunction<Scalar>* coeff,
         GeomType gt)
-        : MatrixFormSurf<Scalar>(i, j),
-        idx_j(j), coeff(coeff), gt(gt)
+        : MatrixFormSurf<Scalar>(i, j), coeff(coeff), gt(gt)
       {
           this->set_area(area);
           if (coeff == nullptr)
@@ -1013,8 +1009,8 @@ namespace Hermes
       {
         Scalar result = 0;
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u_ext[idx_j]->val[i]
-            + coeff->value(u_ext[idx_j]->val[i]))
+          result += wt[i] * (coeff->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u_ext[this->previous_iteration_space_index]->val[i]
+            + coeff->value(u_ext[this->previous_iteration_space_index]->val[i]))
             * u->val[i] * v->val[i];
         }
         return result;
@@ -1026,8 +1022,8 @@ namespace Hermes
       {
         Ord result = Ord(0);
         for (int i = 0; i < n; i++) {
-          result += wt[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u_ext[idx_j]->val[i]
-            + coeff->value(u_ext[idx_j]->val[i]))
+          result += wt[i] * (coeff->derivative(u_ext[this->previous_iteration_space_index]->val[i]) * u_ext[this->previous_iteration_space_index]->val[i]
+            + coeff->value(u_ext[this->previous_iteration_space_index]->val[i]))
             * u->val[i] * v->val[i];
         }
         return result;
@@ -1141,7 +1137,7 @@ namespace Hermes
       DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, std::string area,
         Hermes2DFunction<Scalar>* coeff,
         GeomType gt)
-        : VectorFormSurf<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
+        : VectorFormSurf<Scalar>(i), coeff(coeff), gt(gt)
       {
           this->set_area(area);
           if (coeff == nullptr)
@@ -1157,7 +1153,7 @@ namespace Hermes
       DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, std::vector<std::string> areas,
         Hermes2DFunction<Scalar>* coeff,
         GeomType gt)
-        : VectorFormSurf<Scalar>(i), idx_i(i), coeff(coeff), gt(gt)
+        : VectorFormSurf<Scalar>(i), coeff(coeff), gt(gt)
       {
           this->set_areas(areas);
           if (coeff == nullptr)
@@ -1183,18 +1179,18 @@ namespace Hermes
         Scalar result = 0;
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
             }
           }
         }
@@ -1209,18 +1205,18 @@ namespace Hermes
         Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * u_ext[this->previous_iteration_space_index]->val[i] * v->val[i];
             }
           }
         }

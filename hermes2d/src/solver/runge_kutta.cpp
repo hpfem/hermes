@@ -187,16 +187,16 @@ namespace Hermes
       // Create spaces for stage solutions K_i. This is necessary
       // to define a num_stages x num_stages block weak formulation.
       for (unsigned int i = 0; i < num_stages; i++)
-      for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
-        stage_spaces_vector.push_back(spaces[space_i]);
+        for (unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+          stage_spaces_vector.push_back(spaces[space_i]);
 
       this->stage_dp_right = new DiscreteProblem<Scalar>(stage_wf_right, stage_spaces_vector);
 
       // Prepare residuals of stage solutions.
       if (!residual_as_vector)
-      for (unsigned int i = 0; i < num_stages; i++)
-      for (unsigned int sln_i = 0; sln_i < spaces.size(); sln_i++)
-        residuals_vector.push_back(new Solution<Scalar>(spaces[sln_i]->get_mesh()));
+        for (unsigned int i = 0; i < num_stages; i++)
+          for (unsigned int sln_i = 0; sln_i < spaces.size(); sln_i++)
+            residuals_vector.push_back(new Solution<Scalar>(spaces[sln_i]->get_mesh()));
     }
 
     template<typename Scalar>
@@ -411,7 +411,7 @@ namespace Hermes
 
         // If residual norm is within tolerance, or the maximum number
         // of iteration has been reached, or the problem is linear, then quit.
-        if (((residual_norm < newton_tol) || (it > newton_max_iter)) && it > 1)
+        if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1)
           break;
 
         bool rhs_only = (freeze_jacobian && it > 1);
@@ -468,8 +468,8 @@ namespace Hermes
 
       // Calculate new_ time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)
-      for (unsigned int j = 0; j < num_stages; j++)
-        coeff_vec[i] += this->time_step * bt->get_B(j) * K_vector[j * ndof + i];
+        for (unsigned int j = 0; j < num_stages; j++)
+          coeff_vec[i] += this->time_step * bt->get_B(j) * K_vector[j * ndof + i];
 
       Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, slns_time_new);
 
@@ -528,6 +528,8 @@ namespace Hermes
       stage_wf_left->delete_all();
       stage_wf_right->delete_all();
 
+      int spaces_size = stage_wf_right->original_neq = spaces.size();
+
       // First let's do the mass matrix (only one block ndof times ndof).
       for (unsigned int component_i = 0; component_i < size; component_i++)
       {
@@ -537,6 +539,7 @@ namespace Hermes
           MatrixDefaultNormFormVol<Scalar>* proj_form = new MatrixDefaultNormFormVol<Scalar>(component_i, component_i, HERMES_L2_NORM);
           proj_form->areas.push_back(HERMES_ANY);
           proj_form->scaling_factor = 1.0;
+          proj_form->u_ext_offset = 0;
           stage_wf_left->add_matrix_form(proj_form);
         }
         if (spaces[component_i]->get_type() == HERMES_HDIV_SPACE
@@ -545,6 +548,7 @@ namespace Hermes
           MatrixDefaultNormFormVol<Scalar>* proj_form = new MatrixDefaultNormFormVol<Scalar>(component_i, component_i, HERMES_HCURL_NORM);
           proj_form->areas.push_back(HERMES_ANY);
           proj_form->scaling_factor = 1.0;
+          proj_form->u_ext_offset = 0;
           stage_wf_left->add_matrix_form(proj_form);
         }
       }
@@ -576,8 +580,10 @@ namespace Hermes
 
             MatrixFormVol<Scalar>* mfv_ij = mfvol_base[m]->clone();
 
-            mfv_ij->i = mfv_ij->i + i * spaces.size();
-            mfv_ij->j = mfv_ij->j + j * spaces.size();
+            mfv_ij->i = mfv_ij->i + i * spaces_size;
+            mfv_ij->j = mfv_ij->j + j * spaces_size;
+
+            mfv_ij->u_ext_offset = i * spaces_size;
 
             // Add the matrix form to the corresponding block of the
             // stage Jacobian matrix.
@@ -599,8 +605,10 @@ namespace Hermes
 
             MatrixFormSurf<Scalar>* mfs_ij = mfsurf_base[m]->clone();
 
-            mfs_ij->i = mfs_ij->i + i * spaces.size();
-            mfs_ij->j = mfs_ij->j + j * spaces.size();
+            mfs_ij->i = mfs_ij->i + i * spaces_size;
+            mfs_ij->j = mfs_ij->j + j * spaces_size;
+
+            mfs_ij->u_ext_offset = i * spaces_size;
 
             // Add the matrix form to the corresponding block of the
             // stage Jacobian matrix.
@@ -618,9 +626,10 @@ namespace Hermes
         {
           VectorFormVol<Scalar>* vfv_i = vfvol_base[m]->clone();
 
-          vfv_i->i = vfv_i->i + i * spaces.size();
+          vfv_i->i = vfv_i->i + i * spaces_size;
 
           vfv_i->scaling_factor = -1.0;
+          vfv_i->u_ext_offset = i * spaces_size;
 
           // Add the matrix form to the corresponding block of the
           // stage Jacobian matrix.
@@ -637,9 +646,10 @@ namespace Hermes
         {
           VectorFormSurf<Scalar>* vfs_i = vfsurf_base[m]->clone();
 
-          vfs_i->i = vfs_i->i + i * spaces.size();
+          vfs_i->i = vfs_i->i + i * spaces_size;
 
           vfs_i->scaling_factor = -1.0;
+          vfs_i->u_ext_offset = i * spaces_size;
 
           // Add the matrix form to the corresponding block of the
           // stage Jacobian matrix.
