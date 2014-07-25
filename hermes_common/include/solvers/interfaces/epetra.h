@@ -117,6 +117,8 @@ namespace Hermes
       virtual Scalar get(unsigned int idx) const;
       virtual void extract(Scalar *v) const;
       virtual void zero();
+      /// Duplicates a matrix (including allocation).
+      Vector<Scalar>* duplicate() const;
       virtual Vector<Scalar>* change_sign();
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);

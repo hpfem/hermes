@@ -358,6 +358,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Vector<Scalar>* EpetraVector<Scalar>::duplicate() const
+    {
+      EpetraVector<Scalar>* new_vector = new EpetraVector<Scalar>();
+      new_vector->size = this->get_size();
+
+      new_vector->vec = new Epetra_Vector(*this->vec);
+      new_vector->std_map = new Epetra_BlockMap(*this->std_map);
+      new_vector->vec_im = new Epetra_Vector(*this->vec_im);
+      
+      return new_vector;
+    }
+
+    template<typename Scalar>
     void EpetraVector<Scalar>::free()
     {
       if (this->owner)

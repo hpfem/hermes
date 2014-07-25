@@ -60,7 +60,7 @@ const int max_allowed_iterations = 100;
 //   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded,
 //   Implicit_DIRK_ISMAIL_7_45_embedded.
 
-ButcherTableType butcher_table_type = Implicit_RK_1;
+ButcherTableType butcher_table_type = Implicit_Lobatto_IIIC_2_2;
 
 // Problem parameters.
 // Temperature of the ground (also initial temperature).
