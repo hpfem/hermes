@@ -3,20 +3,17 @@
 CustomWeakFormHeatRK::CustomWeakFormHeatRK(std::string bdy_air, double alpha, double lambda, double heatcap, double rho,
   double* current_time_ptr, double temp_init, double t_final) : Hermes::Hermes2D::WeakForm<double>(1)
 {
-    for (int i = 0; i < this->neq; i++)
-    {
       // Jacobian volumetric part.
-      add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion<double>(i, i, HERMES_ANY, new Hermes1DFunction<double>(-lambda / (heatcap * rho))));
+      add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion<double>(0, 0, HERMES_ANY, new Hermes1DFunction<double>(-lambda / (heatcap * rho))));
 
       // Jacobian surface part.
-      add_matrix_form_surf(new WeakFormsH1::DefaultMatrixFormSurf<double>(i, i, bdy_air, new Hermes2DFunction<double>(-alpha / (heatcap * rho))));
+      add_matrix_form_surf(new WeakFormsH1::DefaultMatrixFormSurf<double>(0, 0, bdy_air, new Hermes2DFunction<double>(-alpha / (heatcap * rho))));
 
       // Residual - volumetric.
-      add_vector_form(new WeakFormsH1::DefaultResidualDiffusion<double>(i, HERMES_ANY, new Hermes1DFunction<double>(-lambda / (heatcap * rho))));
+      add_vector_form(new WeakFormsH1::DefaultResidualDiffusion<double>(0, HERMES_ANY, new Hermes1DFunction<double>(-lambda / (heatcap * rho))));
 
       // Residual - surface.
-      add_vector_form_surf(new CustomFormResidualSurf(i, this->neq, bdy_air, alpha, rho, heatcap, current_time_ptr, temp_init, t_final));
-    }
+      add_vector_form_surf(new CustomFormResidualSurf(0, bdy_air, alpha, rho, heatcap, current_time_ptr, temp_init, t_final));
   }
 
 template<typename Real, typename Scalar>
@@ -27,7 +24,7 @@ Scalar CustomWeakFormHeatRK::CustomFormResidualSurf::vector_form_surf(int n, dou
 
   for (int pt_i = 0; pt_i < n; pt_i++)
   {
-    result += wt[pt_i] * (T_ext - u_ext[this->i % this->original_neq]->val[pt_i]) * v->val[pt_i];
+    result += wt[pt_i] * (T_ext - u_ext[this->previous_iteration_space_index]->val[pt_i]) * v->val[pt_i];
   }
 
   return alpha / (rho * heatcap) * result;
@@ -41,7 +38,7 @@ double CustomWeakFormHeatRK::CustomFormResidualSurf::value(int n, double *wt, Fu
 
   for (int pt_i = 0; pt_i < n; pt_i++)
   {
-    result += wt[pt_i] * (T_ext - u_ext[this->i % this->original_neq]->val[pt_i]) * v->val[pt_i];
+    result += wt[pt_i] * (T_ext - u_ext[this->previous_iteration_space_index]->val[pt_i]) * v->val[pt_i];
   }
 
   return alpha / (rho * heatcap) * result;

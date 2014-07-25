@@ -49,7 +49,7 @@ const int max_allowed_iterations = 100;
 // Explicit methods:
 //   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
 // Implicit methods:
-//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SDIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2,
+//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2,
 //   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4,
 //   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_5_4.
 // Embedded explicit methods:
@@ -102,18 +102,12 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // space->
-  SpaceSharedPtr<double> space1(new H1Space<double>(mesh, &bcs, P_INIT));
-  SpaceSharedPtr<double> space2(new H1Space<double>(mesh, &bcs, P_INIT + 1));
-  std::vector<SpaceSharedPtr<double> > spaces({ space1 });
+  SpaceSharedPtr<double> space(new H1Space<double>(mesh, &bcs, P_INIT));
 
   // Solution pointer.
-  MeshFunctionSharedPtr<double> sln_time_prev1(new ConstantSolution<double>(mesh, TEMP_INIT));
-  MeshFunctionSharedPtr<double> sln_time_prev2(new ConstantSolution<double>(mesh, TEMP_INIT));
-  std::vector<MeshFunctionSharedPtr<double> > sln_time_prev({ sln_time_prev1 });
+  MeshFunctionSharedPtr<double> sln_time_prev(new ConstantSolution<double>(mesh, TEMP_INIT));
 
-  MeshFunctionSharedPtr<double> sln_time_new1(new Solution<double>(mesh));
-  MeshFunctionSharedPtr<double> sln_time_new2(new Solution<double>(mesh));
-  std::vector<MeshFunctionSharedPtr<double> > sln_time_new({ sln_time_new1 });
+  MeshFunctionSharedPtr<double> sln_time_new(new Solution<double>(mesh));
 
   WeakFormSharedPtr<double> wf(new CustomWeakFormHeatRK("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO, &current_time, TEMP_INIT, T_FINAL));
 
@@ -123,7 +117,7 @@ int main(int argc, char* argv[])
   Tview.fix_scale_width(30);
 
   // Initialize Runge-Kutta time stepping.
-  RungeKutta<double> runge_kutta(wf, spaces, &bt);
+  RungeKutta<double> runge_kutta(wf, space, &bt);
   runge_kutta.set_tolerance(NEWTON_TOL);
   runge_kutta.set_verbose_output(true);
   runge_kutta.set_time_step(time_step);
@@ -149,11 +143,10 @@ int main(int argc, char* argv[])
     char title[100];
     sprintf(title, "Time %3.2f s", current_time);
     Tview.set_title(title);
-    Tview.show(sln_time_new1);
+    Tview.show(sln_time_new);
 
     // Copy solution for the new_ time step.
-    sln_time_prev1->copy(sln_time_new1);
-    //sln_time_prev2->copy(sln_time_new2);
+    sln_time_prev->copy(sln_time_new);
 
     // Increase current time and time step counter.
     current_time += time_step;
