@@ -97,7 +97,7 @@ CustomWeakForm::CustomWeakForm(bool JFNK, bool precondition_jacobian, bool preco
 }
 
 double CustomWeakForm::JacobianFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
-                                              Func<double> *v, Geom<double> *e, Func<double> **ext) const
+  Func<double> *v, GeomVol<double> *e, Func<double> **ext) const
 {
   double result = 0;
   for (int i = 0; i < n; i++)
@@ -110,14 +110,14 @@ double CustomWeakForm::JacobianFormVol::value(int n, double *wt, Func<double> *u
 }
 
 Ord CustomWeakForm::JacobianFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                                         Geom<Ord> *e, Func<Ord> **ext) const
+  GeomVol<Ord> *e, Func<Ord> **ext) const
 {
   // Returning the sum of the degrees of the basis and test function plus two.
   return Ord(10);
 }
 
 double CustomWeakForm::ResidualFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
-                                              Geom<double> *e, Func<double> **ext) const
+  GeomVol<double> *e, Func<double> **ext) const
 {
   Func<double>* u = u_ext[0];
   double result = 0;
@@ -128,14 +128,14 @@ double CustomWeakForm::ResidualFormVol::value(int n, double *wt, Func<double> *u
 }
 
 Ord CustomWeakForm::ResidualFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                                         Geom<Ord> *e, Func<Ord> **ext) const
+                                         GeomVol<Ord> *e, Func<Ord> **ext) const
 {
   // Returning the sum of the degrees of the test function and solution plus two.
   return Ord(10);
 }
 
 double CustomWeakForm::PrecondFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
-                                             Func<double> *v, Geom<double> *e, Func<double> **ext) const
+  Func<double> *v, GeomVol<double> *e, Func<double> **ext) const
 {
   double result = 0;
   for (int i = 0; i < n; i++)
@@ -144,7 +144,7 @@ double CustomWeakForm::PrecondFormVol::value(int n, double *wt, Func<double> *u_
 }
 
 Ord CustomWeakForm::PrecondFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                                        Geom<Ord> *e, Func<Ord> **ext) const
+                                        GeomVol<Ord> *e, Func<Ord> **ext) const
 {
   // Returning the sum of the degrees of the basis and test function plus two.
   return Ord(10);

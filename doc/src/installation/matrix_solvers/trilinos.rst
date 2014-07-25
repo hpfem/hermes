@@ -31,13 +31,13 @@ Find more about :ref:`ref-usage-trilinos`.
 
 Windows
 ~~~~~~~
-First of all - to build Trilinos, one needs CLAPACK (see the optional package in the library installation documentation).
+First of all - to build Trilinos, one needs LAPACK (CLAPACK) (see the optional package in the library installation documentation).
 
-| Download the sources for the latest version from the `Trilinos page <http://trilinos.sandia.gov/download/trilinos-10.6.html>`__ and unpack them in some temporary directory.
+| Download the sources for the latest version from the `Trilinos page <http://trilinos.sandia.gov>`__ and unpack them in some temporary directory.
 | 
 | Go to the Trilinos source directory.
 | 
-| In the following, replace {CLAPACK_DIR}, {TPL_BLAS_LIBRARIES} with the full path to your clapack-3.2.1-CMAKE directory and blas.lib filepath without any quotes.
+| In the following, replace {TPL_LAPACK_LIBRARIES}, {TPL_BLAS_LIBRARIES} with the full path to your lapack.lib and blas.lib without any quotes.
 | Also, replace {CMAKE_INSTALL_PREFIX} with either your dependency root, or any other folder where you want to install Trilinos packages.::
 
 
@@ -45,7 +45,7 @@ First of all - to build Trilinos, one needs CLAPACK (see the optional package in
     cd build_dir
     cmake \
      -D CMAKE_BUILD_TYPE:STRING=DEBUG \
-     -D CLAPACK_DIR:STRING=d:\\hpfem\\hermes\\dependencies\\install\\clapack-3.2.1-CMAKE \
+     -D TPL_LAPACK_LIBRARIES:FILEPATH=d:\\hpfem\\hermes\\dependencies\\lib\\lapack.lib \
      -D TPL_BLAS_LIBRARIES:FILEPATH=d:\\hpfem\\hermes\\dependencies\\lib\\blas.lib \
      -D CMAKE_Fortran_FLAGS:STRING="-fPIC" \
      -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF \

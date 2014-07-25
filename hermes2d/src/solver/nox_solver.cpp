@@ -52,7 +52,7 @@ namespace Hermes
 
       rhs.zero();
 
-      Scalar* coeff_vec = malloc_with_check<DiscreteProblemNOX<Scalar>, Scalar>(xx.get_size(), this);
+      Scalar* coeff_vec = malloc_with_check<Scalar>(xx.get_size());
       xx.extract(coeff_vec);
       // nullptr is for the global matrix.
       this->assemble(coeff_vec, nullptr, &rhs);
@@ -73,7 +73,7 @@ namespace Hermes
 
       jacob.zero();
 
-      Scalar* coeff_vec = malloc_with_check<DiscreteProblemNOX<Scalar>, Scalar>(xx.get_size(), this);
+      Scalar* coeff_vec = malloc_with_check<Scalar>(xx.get_size());
       xx.extract(coeff_vec);
       // nullptr is for the right-hand side.
       this->assemble(coeff_vec, &jacob, nullptr);
@@ -90,7 +90,7 @@ namespace Hermes
       // wrap our structures around core Epetra objects
       EpetraVector<Scalar> xx(x);
 
-      Scalar* coeff_vec = malloc_with_check<DiscreteProblemNOX<Scalar>, Scalar>(xx.get_size(), this);
+      Scalar* coeff_vec = malloc_with_check<Scalar>(xx.get_size());
       xx.extract(coeff_vec);
       this->assemble(coeff_vec, &jacobian);
       free_with_check(coeff_vec);
@@ -121,7 +121,25 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NewtonSolverNOX<Scalar>::NewtonSolverNOX(DiscreteProblemNOX<Scalar>* problem) : dp(problem), sln_vector(nullptr)
+    NewtonSolverNOX<Scalar>::NewtonSolverNOX(DiscreteProblemNOX<Scalar>* problem) : dp(problem), sln_vector(nullptr), own_dp(false)
+    {
+      init();
+    }
+
+    template<typename Scalar>
+    NewtonSolverNOX<Scalar>::NewtonSolverNOX(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces) : dp(new DiscreteProblemNOX<Scalar>(wf, spaces)), sln_vector(nullptr), own_dp(true)
+    {
+      init();
+    }
+
+    template<typename Scalar>
+    NewtonSolverNOX<Scalar>::NewtonSolverNOX(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space) : dp(new DiscreteProblemNOX<Scalar>(wf, space)), sln_vector(nullptr), own_dp(true)
+    {
+      init();
+    }
+
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::init()
     {
       // default values
       // convergence test
@@ -166,6 +184,8 @@ namespace Hermes
       ls_pars.set("Max Age Of Prec", 999);
     }
 
+    
+
     template<typename Scalar>
     void NewtonSolverNOX<Scalar>::set_time(double time)
     {
@@ -181,6 +201,8 @@ namespace Hermes
     {
       // FIXME: this does not destroy the "interface_", and Trilinos
       // complains at closing main.cpp.
+      if (this->own_dp)
+        delete this->dp;
     }
 
     template<typename Scalar>

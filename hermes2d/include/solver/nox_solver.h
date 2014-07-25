@@ -95,6 +95,13 @@ namespace Hermes
     public:
       /// Constructor.
       NewtonSolverNOX(DiscreteProblemNOX<Scalar> *problem);
+      /// Constructor for multiple components / equations.
+      NewtonSolverNOX(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces);
+      /// Constructor for one equation.
+      NewtonSolverNOX(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space);
+
+      /// Utilities for constructors.
+      void init();
 
       virtual ~NewtonSolverNOX();
 
@@ -197,6 +204,9 @@ namespace Hermes
 
       Scalar* sln_vector;
       DiscreteProblemNOX<Scalar> *dp;
+
+      /// This instance owns its DP.
+      bool own_dp;
 
     protected:
       int num_iters;

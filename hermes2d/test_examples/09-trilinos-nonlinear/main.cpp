@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
   int ndof = Space<double>::get_num_dofs(space1);
 
   // Initialize weak formulation,
-  CustomWeakForm wf1;
+  WeakFormSharedPtr<double> wf1(new CustomWeakForm);
 
   // Initialize the discrete problem.
   DiscreteProblem<double> dp1(wf1, space1);
@@ -100,20 +100,16 @@ int main(int argc, char* argv[])
   // Show UMFPACK solution.
   Views::ScalarView view1("Solution 1", new Views::WinGeom(0, 0, 500, 400));
   view1.show(sln1);
-  Views::View::wait();
 
   MeshFunctionSharedPtr<double> ex(new CustomExactSolution(mesh));
 
   // TRILINOS PART:
 
   // Initialize the weak formulation for Trilinos.
-  CustomWeakForm wf2(JFNK, PRECOND == 1, PRECOND == 2);
-
-  // Initialize DiscreteProblem.
-  DiscreteProblemNOX<double> dp2(wf2, space2);
+  WeakFormSharedPtr<double> wf2(new CustomWeakForm(JFNK, PRECOND == 1, PRECOND == 2));
 
   // Initialize the NOX solver with the vector "coeff_vec".
-  NewtonSolverNOX<double> nox_solver(&dp2);
+  NewtonSolverNOX<double> nox_solver(wf2, space2);
   nox_solver.set_output_flags(message_type);
   nox_solver.set_ls_tolerance(ls_tolerance);
   nox_solver.set_conv_rel_resid(rel_resid);

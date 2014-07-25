@@ -67,10 +67,10 @@ private:
     };
 
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
-                 Func<double> *v, Geom<double> *e, Func<double> **ext) const;
+      Func<double> *v, GeomVol<double> *e, Func<double> **ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-            Geom<Ord> *e, Func<Ord> **ext) const;
+      GeomVol<Ord> *e, Func<Ord> **ext) const;
 
     virtual MatrixFormVol<double>* clone() const { return new JacobianFormVol(i, j); }
   };
@@ -81,10 +81,10 @@ private:
     ResidualFormVol(int i, CustomRightHandSide* rhs) : VectorFormVol<double>(i), rhs(rhs) {};
 
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
-                         Geom<double> *e, Func<double> **ext) const;
+      GeomVol<double> *e, Func<double> **ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                    Geom<Ord> *e, Func<Ord> **ext) const;
+      GeomVol<Ord> *e, Func<Ord> **ext) const;
 
     virtual VectorFormVol<double>* clone() const { return new ResidualFormVol(i, rhs); }
   private:
@@ -101,10 +101,10 @@ private:
     };
 
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
-                 Func<double> *v, Geom<double> *e, Func<double> **ext) const;
+      Func<double> *v, GeomVol<double> *e, Func<double> **ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-            Geom<Ord> *e, Func<Ord> **ext) const;
+      GeomVol<Ord> *e, Func<Ord> **ext) const;
 
     virtual MatrixFormVol<double>* clone() const { return new PrecondFormVol(i, j); }
   };

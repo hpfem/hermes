@@ -48,6 +48,7 @@
       # Trilinos
       set(WITH_TRILINOS NO)
         set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies")
+        set(CLAPACK_ROOT "d:/hpfem/hermes/dependencies")
       
     # Mesh format Exodus II
     set(WITH_EXODUSII NO)
