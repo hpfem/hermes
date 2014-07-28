@@ -16,6 +16,7 @@
 \brief NOX (nonliner) solver interface.
 */
 #include "solver/nox_solver.h"
+#include "projections/ogprojection.h"
 
 #if(defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 
@@ -26,21 +27,29 @@ namespace Hermes
     static Epetra_SerialComm seq_comm;
 
     template<typename Scalar>
-    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX() : DiscreteProblem<Scalar>()
+    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX() : DiscreteProblem<Scalar>(), jacobian(nullptr)
     {
       this->precond = Teuchos::null;
     }
 
     template<typename Scalar>
-    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces) : DiscreteProblem<Scalar>(wf, spaces)
+    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(WeakFormSharedPtr<Scalar> wf, std::vector<SpaceSharedPtr<Scalar> > spaces) : DiscreteProblem<Scalar>(wf, spaces), jacobian(new EpetraMatrix<Scalar>())
     {
       this->precond = Teuchos::null;
+      this->jacobian->prealloc(Space<Scalar>::get_num_dofs(spaces));
     }
 
     template<typename Scalar>
-    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space) : DiscreteProblem<Scalar>(wf, space)
+    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space) : DiscreteProblem<Scalar>(wf, space), jacobian(new EpetraMatrix<Scalar>())
     {
       this->precond = Teuchos::null;
+      this->jacobian->prealloc(Space<Scalar>::get_num_dofs(space));
+    }
+
+    template<typename Scalar>
+    DiscreteProblemNOX<Scalar>::~DiscreteProblemNOX()
+    {
+      delete this->jacobian;
     }
 
     template<typename Scalar>
@@ -92,10 +101,10 @@ namespace Hermes
 
       Scalar* coeff_vec = malloc_with_check<Scalar>(xx.get_size());
       xx.extract(coeff_vec);
-      this->assemble(coeff_vec, &jacobian);
+      this->assemble(coeff_vec, jacobian);
       free_with_check(coeff_vec);
 
-      precond->create(&jacobian);
+      precond->create(jacobian);
       precond->compute();
       m = *precond->get_obj();
 
@@ -111,7 +120,7 @@ namespace Hermes
     template<typename Scalar>
     EpetraMatrix<Scalar> *DiscreteProblemNOX<Scalar>::get_jacobian()
     {
-      return &jacobian;
+      return jacobian;
     }
 
     template<typename Scalar>
@@ -267,6 +276,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::solve(std::vector<MeshFunctionSharedPtr<Scalar> > initial_guess)
+    {
+      Scalar* coeff_vec = malloc_with_check<Scalar>(Space<Scalar>::get_num_dofs(this->dp->spaces));
+      OGProjection<Scalar>::project_global(this->dp->spaces, initial_guess, coeff_vec);
+      this->solve(coeff_vec);
+      free_with_check(coeff_vec);
+    }
+
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::solve(MeshFunctionSharedPtr<Scalar> initial_guess)
+    {
+      Scalar* coeff_vec = malloc_with_check<Scalar>(Space<Scalar>::get_num_dofs(this->dp->spaces));
+      OGProjection<Scalar>::project_global(this->dp->spaces[0], initial_guess, coeff_vec);
+      this->solve(coeff_vec);
+      free_with_check(coeff_vec);
+    }
+
+    template<typename Scalar>
     void NewtonSolverNOX<Scalar>::solve(Scalar* coeff_vec)
     {
       // Put the initial coeff_vec into the inner structure for the initial guess.
@@ -276,8 +303,10 @@ namespace Hermes
       if (!coeff_vec)
         temp_init_sln.zero();
       else
-      for (int i = 0; i < ndofs; i++)
-        temp_init_sln.set(i, coeff_vec[i]);
+      {
+        for (int i = 0; i < ndofs; i++)
+          temp_init_sln.set(i, coeff_vec[i]);
+      }
 
       NOX::Epetra::Vector init_sln(*temp_init_sln.vec);
 

@@ -286,6 +286,7 @@ namespace Hermes
         // apply the filter
         filter_fn(np, values, this->values[j][0]);
       }
+      this->values_valid = true;
     }
 
     template<typename Scalar>
@@ -382,6 +383,7 @@ namespace Hermes
       filter_fn(np, const_cast<std::complex<double>*>(this->sln_complex->get_values(0, 0)), this->values[0][0]);
       if (num_components > 1)
         filter_fn(np, const_cast<std::complex<double>*>(this->sln_complex->get_values(1, 0)), this->values[1][0]);
+      this->values_valid = true;
     }
 
     Func<double>* ComplexFilter::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)
@@ -479,6 +481,8 @@ namespace Hermes
         // apply the filter
         filter_fn(np, x, y, values_vector, dx_vector, dy_vector, this->values[j][0], this->values[j][1], this->values[j][2]);
       }
+
+      this->values_valid = true;
     }
 
     template<typename Scalar>
@@ -937,6 +941,7 @@ namespace Hermes
         // Von Mises stress
         this->values[0][0][i] = 1.0 / sqrt(2.0) * sqrt(sqr(tx - ty) + sqr(ty - tz) + sqr(tz - tx) + 6 * sqr(txy));
       }
+      this->values_valid = true;
     }
 
     Func<double>* VonMisesFilter::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)
@@ -1015,6 +1020,7 @@ namespace Hermes
           node->values[j][2][i] = dy[0][i];
         }
       }
+      this->values_valid = true;
 
       if (this->nodes->present(order))
       {

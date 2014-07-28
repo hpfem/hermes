@@ -47,6 +47,8 @@ public:
   virtual void derivatives (double x, double y, double& dx, double& dy) const;
 
   virtual Ord ord(double x, double y) const;
+
+  MeshFunction<double>* clone() const { return new CustomExactSolution(mesh); }
 };
 
 /* Weak form */

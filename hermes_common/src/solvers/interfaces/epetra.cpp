@@ -81,6 +81,9 @@ namespace Hermes
       // alloc trilinos structs
       std_map = new Epetra_Map(n, 0, seq_comm);
       grph = new Epetra_CrsGraph(Copy, *std_map, 0);
+      mat = new Epetra_CrsMatrix(Copy, *grph);
+      if (Hermes::Helpers::TypeIsComplex<Scalar>::value)
+        mat_im = new Epetra_CrsMatrix(Copy, *grph);
     }
 
     template<typename Scalar>
@@ -103,21 +106,21 @@ namespace Hermes
       mat_im->FillComplete();
     }
 
-    template<>
-    void EpetraMatrix<double>::alloc()
+    template<typename Scalar>
+    void EpetraMatrix<Scalar>::alloc()
     {
       // create the matrix
       grph->FillComplete();
+      if (mat)
+        delete mat;
       mat = new Epetra_CrsMatrix(Copy, *grph);
-    }
 
-    template<>
-    void EpetraMatrix<std::complex<double> >::alloc()
-    {
-      grph->FillComplete();
-      // create the matrix
-      mat = new Epetra_CrsMatrix(Copy, *grph);
-      mat_im = new Epetra_CrsMatrix(Copy, *grph);
+      if (Hermes::Helpers::TypeIsComplex<Scalar>::value)
+      {
+        if (mat_im)
+          delete mat_im;
+        mat_im = new Epetra_CrsMatrix(Copy, *grph);
+      }
     }
 
     template<>
@@ -151,8 +154,8 @@ namespace Hermes
       std::vector<int> idxs(n_entries);
       mat->ExtractGlobalRowCopy(m, n_entries, n_entries, &vals[0], &idxs[0]);
       for (int i = 0; i < n_entries; i++)
-      if (idxs[i] == (int)n)
-        return vals[i];
+        if (idxs[i] == (int)n)
+          return vals[i];
       return 0.0;
     }
 
@@ -236,9 +239,9 @@ namespace Hermes
     void EpetraMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar *mat, int *rows, int *cols, const int size)
     {
       for (unsigned int i = 0; i < m; i++)        // rows
-      for (unsigned int j = 0; j < n; j++)      // cols
-      if (rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
-        add(rows[i], cols[j], mat[i * size + j]);
+        for (unsigned int j = 0; j < n; j++)      // cols
+          if (rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+            add(rows[i], cols[j], mat[i * size + j]);
     }
 
     template<>
@@ -267,15 +270,17 @@ namespace Hermes
     template<>
     void EpetraMatrix<double>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
-      throw Exceptions::MethodNotImplementedException("EpetraMatrix<double>::export_to_file");
-      /*
+      FILE* file;
       switch (fmt)
       {
-      case DF_MATLAB_SPARSE:
+      case EXPORT_FORMAT_MATLAB_SIMPLE:
       case EXPORT_FORMAT_PLAIN_ASCII:
-      EpetraExt::RowMatrixToHandle(file, *this->mat);
+        file = fopen(filename, "w");
+        EpetraExt::RowMatrixToHandle(file, *this->mat);
+        fclose(file);
+      default:
+        throw Exceptions::MethodNotImplementedException("EpetraMatrix<double>::export_to_file");
       }
-      */
     }
 
     template<>
@@ -331,11 +336,16 @@ namespace Hermes
     template<typename Scalar>
     void EpetraVector<Scalar>::alloc(unsigned int n)
     {
-      free();
-      this->size = n;
-      std_map = new Epetra_Map(this->size, 0, seq_comm);
-      vec = new Epetra_Vector(*std_map);
-      vec_im = new Epetra_Vector(*std_map);
+      if (this->owner)
+      {
+        free();
+        this->size = n;
+        std_map = new Epetra_Map(this->size, 0, seq_comm);
+        vec = new Epetra_Vector(*std_map);
+        vec_im = new Epetra_Vector(*std_map);
+      }
+      else
+        assert(this->get_size() == n);
       zero();
     }
 
@@ -344,7 +354,7 @@ namespace Hermes
     {
       for (unsigned int i = 0; i < this->size; i++) (*vec)[i] = 0.0;
       if (vec_im)
-      for (unsigned int i = 0; i < this->size; i++) (*vec_im)[i] = 0.0;
+        for (unsigned int i = 0; i < this->size; i++) (*vec_im)[i] = 0.0;
     }
 
     template<typename Scalar>
@@ -366,7 +376,7 @@ namespace Hermes
       new_vector->vec = new Epetra_Vector(*this->vec);
       new_vector->std_map = new Epetra_BlockMap(*this->std_map);
       new_vector->vec_im = new Epetra_Vector(*this->vec_im);
-      
+
       return new_vector;
     }
 
@@ -437,16 +447,17 @@ namespace Hermes
         EpetraExt::VectorToMatrixMarketFile(filename, *this->vec);
         return;
       case EXPORT_FORMAT_MATLAB_MATIO:
+      case EXPORT_FORMAT_MATLAB_SIMPLE:
       case EXPORT_FORMAT_PLAIN_ASCII:
         EpetraExt::VectorToMatlabFile(filename, *this->vec);
         return;
       }
     }
 
-    template class HERMES_API EpetraMatrix<double>;
-    template class HERMES_API EpetraMatrix<std::complex<double> >;
-    template class HERMES_API EpetraVector<double>;
-    template class HERMES_API EpetraVector<std::complex<double> >;
+    template class HERMES_API EpetraMatrix < double > ;
+    template class HERMES_API EpetraMatrix < std::complex<double> > ;
+    template class HERMES_API EpetraVector < double > ;
+    template class HERMES_API EpetraVector < std::complex<double> > ;
   }
 }
 #endif

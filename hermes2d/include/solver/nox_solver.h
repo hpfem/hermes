@@ -41,6 +41,8 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    template <typename Scalar> class NewtonSolverNOX;
+
     /// \brief discrete problem used in NOX solver
     /// Implents interfaces needed by NOX Epetra
     template <typename Scalar>
@@ -57,6 +59,7 @@ namespace Hermes
       DiscreteProblemNOX(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space);
       /// Non-parameterized constructor.
       DiscreteProblemNOX();
+      ~DiscreteProblemNOX();
 
       /// \brief Setter for preconditioner.
       void set_precond(Teuchos::RCP<Hermes::Preconditioners::EpetraPrecond<Scalar> > &pc);
@@ -80,9 +83,11 @@ namespace Hermes
 
     private:
       /// \brief Jacobian (optional).
-      EpetraMatrix<Scalar> jacobian;
+      EpetraMatrix<Scalar>* jacobian;
       /// \brief Preconditioner (optional).
       Teuchos::RCP<Hermes::Preconditioners::EpetraPrecond<Scalar> > precond;
+
+      friend class NewtonSolverNOX <Scalar> ;
     };
 
     /// \brief Encapsulation of NOX nonlinear solver.
@@ -109,7 +114,9 @@ namespace Hermes
       virtual void set_time(double time);
       virtual void set_time_step(double time_step);
 
-      virtual void solve(Scalar* coeff_vec);
+      virtual void solve(Scalar* coeff_vec = nullptr);
+      virtual void solve(std::vector<MeshFunctionSharedPtr<Scalar> > initial_guess);
+      virtual void solve(MeshFunctionSharedPtr<Scalar> initial_guess);
 
       Scalar* get_sln_vector();
 
