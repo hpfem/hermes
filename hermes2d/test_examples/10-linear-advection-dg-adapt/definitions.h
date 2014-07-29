@@ -71,11 +71,11 @@ private:
     };
 
     template<typename Real, typename Scalar>
-    Scalar matrix_form(int n, double *wt, DiscontinuousFunc<Scalar> **u_ext, DiscontinuousFunc<Real> *u, DiscontinuousFunc<Real> *v, GeomSurf<Real> *e, DiscontinuousFunc<Scalar> **ext) const;
+    Scalar matrix_form(int n, double *wt, DiscontinuousFunc<Scalar> **u_ext, DiscontinuousFunc<Real> *u, DiscontinuousFunc<Real> *v, InterfaceGeom<Real> *e, DiscontinuousFunc<Scalar> **ext) const;
 
-    virtual double value(int n, double *wt, DiscontinuousFunc<double> **u_ext, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v, GeomSurf<double> *e, DiscontinuousFunc<double> **ext) const;
+    virtual double value(int n, double *wt, DiscontinuousFunc<double> **u_ext, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v, InterfaceGeom<double> *e, DiscontinuousFunc<double> **ext) const;
 
-    virtual Ord ord(int n, double *wt, DiscontinuousFunc<Ord> **u_ext, DiscontinuousFunc<Ord> *u, DiscontinuousFunc<Ord> *v, GeomSurf<Ord> *e, DiscontinuousFunc<Ord> **ext) const;
+    virtual Ord ord(int n, double *wt, DiscontinuousFunc<Ord> **u_ext, DiscontinuousFunc<Ord> *u, DiscontinuousFunc<Ord> *v, InterfaceGeom<Ord> *e, DiscontinuousFunc<Ord> **ext) const;
 
     MatrixFormDG<double>* clone() const;
 

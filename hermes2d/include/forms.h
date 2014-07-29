@@ -83,9 +83,6 @@ namespace Hermes
       /// otherwise 1 (each edge has a unique global normal).
       /// Only for edge.
       bool orientation;
-
-      /// For InterfaceGeom purposes.
-      unsigned char np;
     };
 
     /// Geometry - volumetric - for order calculation.
@@ -100,8 +97,6 @@ namespace Hermes
       Hermes::Ord x[1];
       Hermes::Ord y[1];
 
-      /// ID number of the element.
-      int id;
       /// Element marker (for both volumetric and surface forms).
       int elem_marker;
 
@@ -127,8 +122,28 @@ namespace Hermes
       Hermes::Ord nx[1];
       Hermes::Ord ny[1];
 
-      /// Internal number of an edge of the element.
-      unsigned char isurf;
+      /// For InterfaceGeom purposes.
+      unsigned char np;
+    };
+
+    /// Small class which contains information about the element on the other side of an interface.
+    ///
+    /// Due to a very varied nature of data one may need in DG assembling, both central and neighbor elements are fully accessible in this class.
+    ///
+    template<typename T>
+    class HERMES_API InterfaceGeom
+    {
+    public:
+      /// Constructor.
+      InterfaceGeom(GeomSurf<T>* geom, Element* central_el, Element* neighb_el);
+      T* x;
+      T* y;
+      T* nx;
+      T* ny;
+      T* tx;
+      T* ty;
+      Element* central_el;
+      Element* neighb_el;
 
       /// Element marker (for both volumetric and surface forms).
       int elem_marker;
@@ -139,34 +154,41 @@ namespace Hermes
       /// otherwise 1 (each edge has a unique global normal).
       /// Only for edge.
       bool orientation;
-    };
 
-    /// Small class which contains information about the element on the other side of an interface.
-    ///
-    /// It just appends three new_ parameters to an instance of Geom. During destruction, the wrapped
-    /// instance is not touched - it must be destroyed separately. You may call the overriden methods
-    /// \c free or \c free_ord in order to do this via the instance of InterfaceGeom.
-    ///
-    template<typename T>
-    class HERMES_API InterfaceGeom : public GeomSurf<T>
-    {
-    public:
-      int neighb_id;
-      T   neighb_diam;
-      int get_neighbor_marker() const;
-      int get_neighbor_id()  const;
-      T get_neighbor_diam() const;
+      /// Internal number of an edge of the element.
+      unsigned char isurf;
 
-      /// Constructor.
-      InterfaceGeom(GeomSurf<T>* geom, int n_marker, int n_id, T n_diam);
-
-      void free();
-      void free_ord();
+      /// Element diameter approximation.
+      T get_diam_approximation(unsigned char n);
+      /// Element area.
+      T get_area(unsigned char n, double* wt);
 
     private:
       GeomSurf<T>* wrapped_geom;
-      int neighb_marker;
       template<typename Scalar> friend class KellyTypeAdapt;
+    };
+
+    /// Geometry - interface (DG) - for order calculation.
+    template<>
+    class HERMES_API InterfaceGeom<Hermes::Ord>
+    {
+    public:
+      /// Constructor.
+      InterfaceGeom()
+      {
+        x[0] = y[0] = tx[0] = ty[0] = nx[0] = ny[0] = Hermes::Ord(1);
+      }
+      Hermes::Ord x[1];
+      Hermes::Ord y[1];
+      Hermes::Ord tx[1];
+      Hermes::Ord ty[1];
+      Hermes::Ord nx[1];
+      Hermes::Ord ny[1];
+
+      /// Element diameter approximation.
+      Hermes::Ord get_diam_approximation(unsigned char n) { return Hermes::Ord(1); };
+      /// Element area.
+      Hermes::Ord get_area(unsigned char n, double* wt) { return Hermes::Ord(1); };
     };
 
     /// Init element geometry for volumetric integrals.

@@ -272,11 +272,11 @@ namespace Hermes
       assert(order >= 1);
       Scalar* proj = malloc_with_check<H1Space<Scalar>, Scalar>(order + 1, this);
 
-      if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
+      if (bc->get_value_type() == BC_CONST)
       {
         proj[0] = proj[1] = bc->value_const;
       } // If the BC is not constant.
-      else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
+      else if (bc->get_value_type() == BC_FUNCTION)
       {
         surf_pos->t = surf_pos->lo;
         // Find out the (x, y) coordinates for the first endpoint.
@@ -317,11 +317,11 @@ namespace Hermes
             Scalar l = proj[0] * s + proj[1] * t;
             surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
-            if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
+            if (bc->get_value_type() == BC_CONST)
               rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())
               * (bc->value_const - l);
             // If the BC is not constant.
-            else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
+            else if (bc->get_value_type() == BC_FUNCTION)
             {
               // Find out the (x, y) coordinate.
               double x, y;

@@ -229,7 +229,7 @@ namespace Hermes
       int n_quadrature_points;
       GeomSurf<double>* geometry = malloc_with_check<GeomSurf<double>>(this->spaces_size);
       double** jacobian_x_weights = malloc_with_check<double*>(this->spaces_size);
-      GeomSurf<double>** e = malloc_with_check<GeomSurf<double>*>(this->spaces_size);
+      InterfaceGeom<double>** e = malloc_with_check<InterfaceGeom<double>*>(this->spaces_size);
       DiscontinuousFunc<double>*** testFunctions = malloc_with_check<DiscontinuousFunc<double>**>(this->spaces_size);
 
       // Create the extended shapeset on the union of the central element and its current neighbor.
@@ -243,7 +243,7 @@ namespace Hermes
         order_base = order;
         jacobian_x_weights[i] = new double[refmaps[i]->get_quad_2d()->get_num_points(order_base, current_state->e[i]->get_mode())];
         n_quadrature_points = init_surface_geometry_points_allocated(refmaps, this->spaces_size, order_base, current_state->isurf, current_state->rep->marker, geometry[i], jacobian_x_weights[i]);
-        e[i] = new InterfaceGeom<double>(&geometry[i], current_neighbor_searches[i]->neighb_el->marker, current_neighbor_searches[i]->neighb_el->id, current_neighbor_searches[i]->neighb_el->diameter);
+        e[i] = new InterfaceGeom<double>(&geometry[i], current_neighbor_searches[i]->central_el, current_neighbor_searches[i]->neighb_el);
 
         if (current_mat && DG_matrix_forms_present && !edge_processed)
         {

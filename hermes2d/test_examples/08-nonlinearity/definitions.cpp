@@ -48,9 +48,9 @@ MeshFunction<double>* CustomInitialCondition::clone() const
   return new CustomInitialCondition(this->mesh);
 }
 
-EssentialBoundaryCondition<double>::EssentialBCValueType CustomEssentialBCNonConst::get_value_type() const 
+EssentialBCValueType CustomEssentialBCNonConst::get_value_type() const 
 { 
-  return EssentialBoundaryCondition<double>::BC_FUNCTION; 
+  return BC_FUNCTION; 
 }
 
 double CustomEssentialBCNonConst::value(double x, double y) const

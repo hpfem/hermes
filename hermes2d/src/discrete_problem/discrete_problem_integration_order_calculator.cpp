@@ -36,6 +36,7 @@ namespace Hermes
     /// Geometry instance for order calculation.
     static GeomVol<Hermes::Ord> geom_order_vol;
     static GeomSurf<Hermes::Ord> geom_order_surf;
+    static InterfaceGeom<Hermes::Ord> geom_order_interface;
     /// "Fake" integration weight for order calculation.
     double wt_order = 1.0;
 
@@ -444,7 +445,7 @@ namespace Hermes
       // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
 
       // Total order of the matrix form.
-      Ord o = mfDG->ord(1, &wt_order, u_ext_ord, ou, ov, &geom_order_surf, ext_ord);
+      Ord o = mfDG->ord(1, &wt_order, u_ext_ord, ou, ov, &geom_order_interface, ext_ord);
 
       adjust_order_to_refmaps(mfDG, order, &o, current_refmaps);
 
@@ -493,7 +494,7 @@ namespace Hermes
       DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(&func_order[max_order_i], neighbor_supp_v);
 
       // Total order of the matrix form.
-      Ord o = vfDG->ord(1, &wt_order, u_ext_ord, ov, &geom_order_surf, ext_ord);
+      Ord o = vfDG->ord(1, &wt_order, u_ext_ord, ov, &geom_order_interface, ext_ord);
 
       adjust_order_to_refmaps(vfDG, order, &o, current_refmaps);
 

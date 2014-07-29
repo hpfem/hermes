@@ -1234,7 +1234,7 @@ namespace Hermes
           public:
             SourceFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, const MaterialPropertyMaps* matprop,
               const std::string& source_area)
-              : SimpleFilter<double>(solutions, std::vector<int>())
+              : SimpleFilter<double>(solutions, std::vector<int>()), matprop(matprop), source_area(source_area)
             {
                 nu = matprop->get_nu().at(source_area);
                 Sigma_f = matprop->get_Sigma_f().at(source_area);
@@ -1242,8 +1242,12 @@ namespace Hermes
           private:
             rank1 nu;
             rank1 Sigma_f;
+            const MaterialPropertyMaps* matprop;
+            const std::string& source_area;
 
             void filter_fn(int n, std::vector<double*> values, double* result);
+
+            MeshFunction<double>* clone() const { return new SourceFilter(this->sln, matprop, source_area); }
           };
         }
       }

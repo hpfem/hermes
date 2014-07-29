@@ -15,7 +15,7 @@
 // Number of initial uniform mesh refinements.
 const int INIT_REF = 1;
 // Initial polynomial degrees of mesh elements in vertical and horizontal directions.
-int P_INIT = 2;
+int P_INIT = 1;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
 const double THRESHOLD = 0.5;

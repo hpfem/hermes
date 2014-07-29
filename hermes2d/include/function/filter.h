@@ -37,7 +37,6 @@ namespace Hermes
     public:
       Filter();
       Filter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions);
-      Filter(MeshFunctionSharedPtr<Scalar>* solutions, int num);
 
       virtual ~Filter();
 
@@ -65,9 +64,9 @@ namespace Hermes
 
       int num;
 
-      MeshFunctionSharedPtr<Scalar> sln[H2D_MAX_COMPONENTS];
+      std::vector<MeshFunctionSharedPtr<Scalar> > sln;
 
-      uint64_t sln_sub[H2D_MAX_COMPONENTS];
+      std::vector<uint64_t> sln_sub;
 
       bool unimesh;
 
@@ -350,8 +349,6 @@ namespace Hermes
     public: /// \todo cylindrical coordinates
 
       VonMisesFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, double lambda, double mu,
-        int cyl = 0, int item1 = H2D_FN_VAL, int item2 = H2D_FN_VAL);
-      VonMisesFilter(MeshFunctionSharedPtr<double>* solutions, int num, double lambda, double mu,
         int cyl = 0, int item1 = H2D_FN_VAL, int item2 = H2D_FN_VAL);
 
       virtual Func<double>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);

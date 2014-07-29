@@ -36,6 +36,7 @@ namespace Hermes
     class Shapeset;
     template<typename T> class Func;
     template<typename T> class DiscontinuousFunc;
+    template<typename T> class InterfaceGeom;
     template<typename T> class GeomVol;
     template<typename T> class GeomSurf;
 
@@ -423,10 +424,10 @@ namespace Hermes
       unsigned int j;
 
       virtual Scalar value(int n, double *wt, DiscontinuousFunc<Scalar> **u_ext, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v,
-        GeomSurf<double> *e, DiscontinuousFunc<Scalar> **ext) const;
+        InterfaceGeom<double> *e, DiscontinuousFunc<Scalar> **ext) const;
 
       virtual Hermes::Ord ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> **u_ext, DiscontinuousFunc<Hermes::Ord> *u, DiscontinuousFunc<Hermes::Ord> *v,
-        GeomSurf<Hermes::Ord> *e, DiscontinuousFunc<Ord> **ext) const;
+        InterfaceGeom<Hermes::Ord> *e, DiscontinuousFunc<Ord> **ext) const;
 
       virtual MatrixFormDG* clone() const;
     protected:
@@ -496,9 +497,9 @@ namespace Hermes
       virtual ~VectorFormDG();
 
       virtual Scalar value(int n, double *wt, DiscontinuousFunc<Scalar> **u_ext, Func<double> *v,
-        GeomSurf<double> *e, DiscontinuousFunc<Scalar> **ext) const;
+        InterfaceGeom<double> *e, DiscontinuousFunc<Scalar> **ext) const;
 
-      virtual Hermes::Ord ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> **u_ext, Func<Hermes::Ord> *v, GeomSurf<Hermes::Ord> *e,
+      virtual Hermes::Ord ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> **u_ext, Func<Hermes::Ord> *v, InterfaceGeom<Hermes::Ord> *e,
         DiscontinuousFunc<Ord> **ext) const;
 
       virtual VectorFormDG* clone() const;

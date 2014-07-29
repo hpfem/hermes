@@ -81,7 +81,7 @@ public:
     this->markers.push_back(marker);
   };
 
-  virtual EssentialBoundaryCondition<double>::EssentialBCValueType get_value_type() const;
+  virtual EssentialBCValueType get_value_type() const;
 
   virtual double value(double x, double y) const;
 };

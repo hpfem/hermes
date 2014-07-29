@@ -32,9 +32,9 @@ CustomDirichletCondition::CustomDirichletCondition(std::vector<std::string> mark
 {
   }
 
-Hermes::Hermes2D::EssentialBoundaryCondition<double>::EssentialBCValueType CustomDirichletCondition::get_value_type() const
+Hermes::Hermes2D::EssentialBCValueType CustomDirichletCondition::get_value_type() const
 {
-  return Hermes::Hermes2D::EssentialBoundaryCondition<double>::BC_FUNCTION;
+  return Hermes::Hermes2D::BC_FUNCTION;
 }
 
 double CustomDirichletCondition::value(double x, double y) const

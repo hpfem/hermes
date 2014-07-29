@@ -366,62 +366,53 @@ namespace Hermes
     }
 
     template<typename T>
-    InterfaceGeom<T>::InterfaceGeom(GeomSurf<T>* geom, int n_marker, int n_id, T n_diam) :
-      GeomSurf<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
+    InterfaceGeom<T>::InterfaceGeom(GeomSurf<T>* geom, Element* central_el, Element* neighb_el) : central_el(central_el), neighb_el(neighb_el)
     {
         // Let this class expose the standard Geom interface.
         this->elem_marker = geom->elem_marker;
+        this->edge_marker = geom->edge_marker;
         this->isurf = geom->isurf;
-        memcpy(this->x, geom->x, geom->np * sizeof(T));
-        memcpy(this->y, geom->y, geom->np * sizeof(T));
-        memcpy(this->tx, geom->tx, geom->np * sizeof(T));
-        memcpy(this->ty, geom->ty, geom->np * sizeof(T));
-        memcpy(this->nx, geom->nx, geom->np * sizeof(T));
-        memcpy(this->ny, geom->ny, geom->np * sizeof(T));
         this->orientation = geom->orientation;
+        this->x = geom->x;
+        this->y = geom->y;
+        this->tx = geom->tx;
+        this->ty = geom->ty;
+        this->nx = geom->nx;
+        this->ny = geom->ny;
         this->wrapped_geom = geom;
+    }
+
+    template<>
+    double InterfaceGeom<double>::get_diam_approximation(unsigned char n)
+    {
+      double x_min = std::numeric_limits<double>::max(),
+        x_max = std::numeric_limits<double>::min(),
+        y_min = std::numeric_limits<double>::max(),
+        y_max = std::numeric_limits<double>::min();
+
+      for (unsigned char i = 0; i < n; i++)
+      {
+        if (this->x[i] < x_min)
+          x_min = this->x[i];
+        if (this->x[i] > x_max)
+          x_max = this->x[i];
+
+        if (this->y[i] < y_min)
+          y_min = this->y[i];
+        if (this->y[i] > y_max)
+          y_max = this->y[i];
       }
 
-    template<>
-    InterfaceGeom<Hermes::Ord>::InterfaceGeom(GeomSurf<Hermes::Ord>* geom, int n_marker, int n_id, Hermes::Ord n_diam) : GeomSurf<Hermes::Ord>()
-    {
-      this->wrapped_geom = geom;
-    }
-
-    template<typename T>
-    void InterfaceGeom<T>::free()
-    {
-      delete wrapped_geom;
-    }
-
-    template<typename T>
-    void InterfaceGeom<T>::free_ord()
-    {
-      delete wrapped_geom;
+      return std::sqrt((x_max - x_min) * (x_max - x_min) + (y_max - y_min) * (y_max - y_min));
     }
 
     template<>
-    void InterfaceGeom<Hermes::Ord>::free()
+    double InterfaceGeom<double>::get_area(unsigned char n, double* wt)
     {
-      delete wrapped_geom;
-    }
-
-    template<typename T>
-    int InterfaceGeom<T>::get_neighbor_marker() const
-    {
-      return neighb_marker;
-    }
-
-    template<typename T>
-    int InterfaceGeom<T>::get_neighbor_id() const
-    {
-      return neighb_id;
-    }
-
-    template<typename T>
-    T InterfaceGeom<T>::get_neighbor_diam() const
-    {
-      return neighb_diam;
+      double area = 0.;
+      for (unsigned char i = 0; i < n; i++)
+        area += wt[i];
+      return area;
     }
 
     GeomVol<double>* init_geom_vol(RefMap *rm, const int order)
@@ -463,7 +454,6 @@ namespace Hermes
 
       Quad2D* quad = rm->get_quad_2d();
       unsigned char np = quad->get_num_points(order, mode);
-      geom.np = np;
 
       memcpy(geom.x, rm->get_phys_x(order), np * sizeof(double));
       memcpy(geom.y, rm->get_phys_y(order), np * sizeof(double));

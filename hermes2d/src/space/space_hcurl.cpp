@@ -218,13 +218,13 @@ namespace Hermes
           double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
           surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
-          if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
+          if (bc->get_value_type() == BC_CONST)
           {
             rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())
               * bc->value_const * el;
           }
           // If the BC is not constant.
-          else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
+          else if (bc->get_value_type() == BC_FUNCTION)
           {
             // Find out the (x, y) coordinate.
             double x, y;

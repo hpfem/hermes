@@ -31,9 +31,9 @@ EssentialBCNonConst::EssentialBCNonConst(std::string marker) : EssentialBoundary
   markers.push_back(marker);
 }
 
-EssentialBoundaryCondition<double>::EssentialBCValueType EssentialBCNonConst::get_value_type() const
+EssentialBCValueType EssentialBCNonConst::get_value_type() const
 {
-  return EssentialBoundaryCondition<double>::BC_FUNCTION;
+  return BC_FUNCTION;
 }
 
 double EssentialBCNonConst::value(double x, double y) const

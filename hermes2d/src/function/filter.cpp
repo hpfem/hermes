@@ -29,17 +29,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Filter<Scalar>::Filter(MeshFunctionSharedPtr<Scalar>* solutions, int num) : MeshFunction<Scalar>()
-    {
-      this->num = num;
-      if (num > H2D_MAX_COMPONENTS)
-        throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
-      for (int i = 0; i < this->num; i++)
-        this->sln[i] = solutions[i];
-      this->init();
-    }
-
-    template<typename Scalar>
     Filter<Scalar>::Filter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions) : MeshFunction<Scalar>()
     {
       this->num = solutions.size();
@@ -78,7 +67,7 @@ namespace Hermes
 
       unimesh = false;
 
-      for (int i = 1; i < num; i++)
+      for (int i = 1; i < this->num; i++)
 
       {
         if (meshes[i] == nullptr)
@@ -107,7 +96,6 @@ namespace Hermes
       this->num_components = 1;
       this->order = 0;
 
-      memset(sln_sub, 0, sizeof(sln_sub));
       set_quad_2d(&g_quad_2d_std);
     }
 
@@ -121,7 +109,7 @@ namespace Hermes
     void Filter<Scalar>::set_quad_2d(Quad2D* quad_2d)
     {
       MeshFunction<Scalar>::set_quad_2d(quad_2d);
-      for (int i = 0; i < num; i++)
+      for (int i = 0; i < this->num; i++)
         // nodup
         this->sln[i]->set_quad_2d(quad_2d);
     }
@@ -132,14 +120,16 @@ namespace Hermes
       MeshFunction<Scalar>::set_active_element(e);
       if (!unimesh)
       {
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < this->num; i++)
           // nodup
           this->sln[i]->set_active_element(e);
-        memset(sln_sub, 0, sizeof(sln_sub));
+
+        for (int i = 0; i < this->num; i++)
+          sln_sub[i] = 0;
       }
       else
       {
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < this->num; i++)
         {
           this->sln[i]->set_active_element(unidata[i][e->id].e);
           this->sln[i]->set_transform(unidata[i][e->id].idx);
@@ -156,7 +146,7 @@ namespace Hermes
     {
       if (unimesh)
       {
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < this->num; i++)
           free_with_check(unidata[i]);
         free_with_check(unidata);
       }
@@ -173,7 +163,7 @@ namespace Hermes
     void Filter<Scalar>::push_transform(int son)
     {
       MeshFunction<Scalar>::push_transform(son);
-      for (int i = 0; i < num; i++)
+      for (int i = 0; i < this->num; i++)
       {
         // sln_sub[i] contains the value sln[i]->sub_idx, which the Filter thinks
         // the solution has, or at least had last time. If the filter graph is
@@ -194,7 +184,7 @@ namespace Hermes
     void Filter<Scalar>::pop_transform()
     {
       MeshFunction<Scalar>::pop_transform();
-      for (int i = 0; i < num; i++)
+      for (int i = 0; i < this->num; i++)
       {
         if (this->sln[i]->get_transform() == sln_sub[i] && sln_sub[i] != 0)
           this->sln[i]->pop_transform();
@@ -344,10 +334,10 @@ namespace Hermes
     void ComplexFilter::set_active_element(Element* e)
     {
       MeshFunction<double>::set_active_element(e);
-
       this->sln_complex->set_active_element(e);
 
-      memset(sln_sub, 0, sizeof(sln_sub));
+      for (int i = 0; i < this->num; i++)
+        sln_sub[i] = 0;
 
       // fixme
       this->order = 20;
@@ -961,16 +951,6 @@ namespace Hermes
         this->item2 = item2;
       }
 
-    VonMisesFilter::VonMisesFilter(MeshFunctionSharedPtr<double>* solutions, int num, double lambda, double mu,
-      int cyl, int item1, int item2) : Filter<double>(solutions, num)
-    {
-        this->mu = mu;
-        this->lambda = lambda;
-        this->cyl = cyl;
-        this->item1 = item1;
-        this->item2 = item2;
-      }
-
     VonMisesFilter::~VonMisesFilter()
     {
     }
@@ -978,9 +958,9 @@ namespace Hermes
     MeshFunction<double>* VonMisesFilter::clone() const
     {
       std::vector<MeshFunctionSharedPtr<double> > slns;
-      for (int i = 0; i < num; i++)
+      for (int i = 0; i < this->num; i++)
         slns.push_back(sln[i]->clone());
-      VonMisesFilter* filter = new VonMisesFilter(&slns[0], num, lambda, mu, cyl, item1, item2);
+      VonMisesFilter* filter = new VonMisesFilter(slns, lambda, mu, cyl, item1, item2);
       return filter;
     }
 

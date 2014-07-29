@@ -86,9 +86,9 @@ VectorFormVol<double>* CustomWeakFormPicard::CustomResidual::clone() const
   return new CustomResidual(this->i, this->lambda, this->f);
 }
 
-EssentialBoundaryCondition<double>::EssentialBCValueType CustomEssentialBCNonConst::get_value_type() const
+EssentialBCValueType CustomEssentialBCNonConst::get_value_type() const
 {
-  return EssentialBoundaryCondition<double>::BC_FUNCTION; 
+  return BC_FUNCTION; 
 }
 
 double CustomEssentialBCNonConst::value(double x, double y) const

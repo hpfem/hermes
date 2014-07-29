@@ -29,6 +29,13 @@ namespace Hermes
     template<typename Scalar> class ExactSolutionVector;
     template<typename Scalar> class EssentialBCs;
 
+    /// Types of description of boundary values, either a function (callback), or a constant.
+    enum EssentialBCValueType
+    {
+      BC_FUNCTION,
+      BC_CONST
+    };
+
     /// Base, abstract class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential.
     /// Internal.
     template<typename Scalar>
@@ -42,12 +49,6 @@ namespace Hermes
 
       /// Virtual destructor.
       virtual ~EssentialBoundaryCondition();
-
-      /// Types of description of boundary values, either a function (callback), or a constant.
-      enum EssentialBCValueType {
-        BC_FUNCTION,
-        BC_CONST
-      };
 
       /// Pure virtual function reporting the type of the essential boundary condition.
       virtual EssentialBCValueType get_value_type() const = 0;
@@ -88,7 +89,7 @@ namespace Hermes
 
     /// Class representing constant essential boundary condition.
     template<typename Scalar>
-    class HERMES_API DefaultEssentialBCConst : public EssentialBoundaryCondition<Scalar>
+    class HERMES_API DefaultEssentialBCConst : public EssentialBoundaryCondition < Scalar >
     {
     public:
       /// Constructors.
@@ -98,7 +99,7 @@ namespace Hermes
       Scalar value(double x, double y) const;
 
       /// Function giving info that u_Essential is a constant.
-      inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
+      inline typename EssentialBCValueType get_value_type() const { return BC_CONST; }
     };
 
     /// Class representing non-constant essential boundary condition for Scalar approximation.
@@ -131,7 +132,7 @@ namespace Hermes
     ///};
 
     template<typename Scalar>
-    class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition<Scalar>
+    class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition < Scalar >
     {
     public:
       DefaultEssentialBCNonConst(std::vector<std::string> markers_,
@@ -144,7 +145,7 @@ namespace Hermes
       virtual Scalar value(double x, double y) const;
 
       /// Function giving info that u_Essential is a non-constant function.
-      inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
+      inline typename EssentialBCValueType get_value_type() const { return BC_FUNCTION; }
 
       ExactSolutionScalar<Scalar>* exact_solution;
     };
