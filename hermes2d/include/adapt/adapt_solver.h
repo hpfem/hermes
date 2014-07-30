@@ -95,7 +95,7 @@ namespace Hermes
       MeshFunctionSharedPtr<Scalar> get_ref_sln(int index);
 
       /// Switch visualization on / off.
-      void switch_visualization(bool on_off);
+      void switch_visualization(bool on_off, bool wait_for_keypress);
 
       /// Add exact solutions for exact solver calculation.
       void set_exact_solutions(std::vector<MeshFunctionSharedPtr<Scalar> > exact_slns);
@@ -208,6 +208,9 @@ namespace Hermes
 
       /// Use Hermes views to display stuff.
       bool visualization;
+      
+      /// Wait for keypress to continue with calculation when views are updated.
+      bool wait_for_keypress;
 
       /// For info only.
       unsigned int total_elements_prev_spaces;

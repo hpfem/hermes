@@ -73,6 +73,7 @@ namespace Hermes
       Helpers::check_length(this->selectors, this->number_of_equations);
       this->solve_method_running = false;
       this->visualization = false;
+      this->wait_for_keypress = false;
       this->prev_mat = nullptr;
       this->prev_rhs = nullptr;
       this->prev_dirichlet_lift_rhs = nullptr;
@@ -103,9 +104,10 @@ namespace Hermes
     }
 
     template<typename Scalar, typename SolverType>
-    void AdaptSolver<Scalar, SolverType>::switch_visualization(bool on_off)
+    void AdaptSolver<Scalar, SolverType>::switch_visualization(bool on_off, bool wait_for_keypress_on_off)
     {
       this->visualization = on_off;
+      this->wait_for_keypress = wait_for_keypress_on_off;
     }
 
     template<typename Scalar>
@@ -780,7 +782,8 @@ namespace Hermes
         this->base_views[i]->show(ref_spaces[i]);
       }
 
-      Views::View::wait_for_keypress();
+      if (this->wait_for_keypress)
+        Views::View::wait_for_keypress();
     }
 
     template<typename Scalar, typename SolverType>

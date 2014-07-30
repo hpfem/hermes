@@ -182,7 +182,7 @@ namespace Hermes
     };
 
     template<typename Scalar, NormType normType>
-    class HERMES_API DefaultNormCalculator : protected ErrorCalculator < Scalar >
+    class HERMES_API DefaultNormCalculator : public ErrorCalculator < Scalar >
     {
     public:
       DefaultNormCalculator(int component_count);

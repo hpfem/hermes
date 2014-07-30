@@ -48,8 +48,6 @@ namespace Hermes
       inline std::string getClassName() const { return "Filter"; }
 
     protected:
-      void init(std::vector<MeshFunctionSharedPtr<Scalar> > solutions);
-
       virtual void set_quad_2d(Quad2D* quad_2d);
 
       virtual void set_active_element(Element* e);
@@ -62,11 +60,9 @@ namespace Hermes
 
       virtual void init();
 
-      int num;
+      std::vector<MeshFunctionSharedPtr<Scalar> > solutions;
 
-      std::vector<MeshFunctionSharedPtr<Scalar> > sln;
-
-      std::vector<uint64_t> sln_sub;
+      std::vector<uint64_t> solutions_sub_idx;
 
       bool unimesh;
 
@@ -104,7 +100,7 @@ namespace Hermes
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
 
     protected:
-      int item[H2D_MAX_COMPONENTS];
+      std::vector<int> items;
 
       virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result) = 0;
 
@@ -177,7 +173,7 @@ namespace Hermes
     class HERMES_API MagFilter : public SimpleFilter < Scalar >
     {
     public:
-      MagFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, std::vector<int> items = *(new std::vector<int>));
+      MagFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, std::vector<int> items = std::vector<int>());
 
       /// for vector-valued sln1
       MagFilter(MeshFunctionSharedPtr<Scalar> sln1, int item1 = H2D_FN_VAL);

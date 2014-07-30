@@ -596,7 +596,7 @@ namespace Hermes
                 }
 
                 // This is to make the form usable in rk_time_step_newton().
-                virtual MatrixFormSurf<Scalar>* clone() {
+                virtual MatrixFormSurf<Scalar>* clone() const {
                   return new Jacobian(*this);
                 }
 
@@ -636,7 +636,7 @@ namespace Hermes
                 }
 
                 // This is to make the form usable in rk_time_step_newton().
-                virtual VectorFormSurf<Scalar>* clone() {
+                virtual VectorFormSurf<Scalar>* clone() const {
                   return new Residual(*this);
                 }
 
@@ -699,7 +699,7 @@ namespace Hermes
                 }
 
                 // This is to make the form usable in rk_time_step_newton().
-                virtual MatrixFormVol<Scalar>* clone() {
+                virtual MatrixFormVol<Scalar>* clone() const {
                   return new Jacobian(*this);
                 }
 
@@ -760,7 +760,7 @@ namespace Hermes
                 }
 
                 // This is to make the form usable in rk_time_step_newton().
-                virtual VectorFormVol<Scalar>* clone() {
+                virtual VectorFormVol<Scalar>* clone() const {
                   return new Residual(*this);
                 }
 
@@ -824,7 +824,7 @@ namespace Hermes
                 }
 
                 // This is to make the form usable in rk_time_step_newton().
-                virtual MatrixFormVol<Scalar>* clone() {
+                virtual MatrixFormVol<Scalar>* clone() const {
                   return new Jacobian(*this);
                 }
 
@@ -847,7 +847,7 @@ namespace Hermes
                   GenericForm(matprop, geom_type),
                   g(g), keff(keff)
                 {
-                  this->wf->set_ext(iterates);
+                  //this->wf->set_ext(iterates);
                   if (g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -862,7 +862,7 @@ namespace Hermes
                   g(g), keff(keff)
                 {
                   this->set_area(area);
-                  this->wf->set_ext(iterates);
+                  //this->wf->set_ext(iterates);
                   if (g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -876,7 +876,7 @@ namespace Hermes
                   GenericForm(matprop, mesh, geom_type),
                   g(g), keff(keff)
                 {
-                  this->wf->set_ext(iterates);
+                  //this->wf->set_ext(iterates);
                   if (g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -891,7 +891,7 @@ namespace Hermes
                   g(g), keff(keff)
                 {
                   this->set_area(area);
-                  this->wf->set_ext(iterates);
+                  //this->wf->set_ext(iterates);
                   if (g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -911,7 +911,7 @@ namespace Hermes
                 }
 
                 // This is to make the form usable in rk_time_step_newton().
-                virtual VectorFormVol<Scalar>* clone() {
+                virtual VectorFormVol<Scalar>* clone() const {
                   return new OuterIterationForm(*this);
                 }
 
@@ -974,7 +974,7 @@ namespace Hermes
                 }
 
                 // This is to make the form usable in rk_time_step_newton().
-                virtual VectorFormVol<Scalar>* clone() {
+                virtual VectorFormVol<Scalar>* clone() const {
                   return new Residual(*this);
                 }
 
@@ -1034,7 +1034,7 @@ namespace Hermes
                 }
 
                 // This is to make the form usable in rk_time_step_newton().
-                virtual MatrixFormVol<Scalar>* clone() {
+                virtual MatrixFormVol<Scalar>* clone() const {
                   return new Jacobian(*this);
                 }
 
@@ -1094,7 +1094,7 @@ namespace Hermes
                 }
 
                 // This is to make the form usable in rk_time_step_newton().
-                virtual VectorFormVol<Scalar>* clone() {
+                virtual VectorFormVol<Scalar>* clone() const {
                   return new Residual(*this);
                 }
 
@@ -1154,7 +1154,7 @@ namespace Hermes
                 }
 
                 // This is to make the form usable in rk_time_step_newton().
-                virtual VectorFormVol<Scalar>* clone() {
+                virtual VectorFormVol<Scalar>* clone() const {
                   return new LinearForm(*this);
                 }
 
@@ -1247,7 +1247,7 @@ namespace Hermes
 
             void filter_fn(int n, std::vector<double*> values, double* result);
 
-            MeshFunction<double>* clone() const { return new SourceFilter(this->sln, matprop, source_area); }
+            MeshFunction<double>* clone() const { return new SourceFilter(this->solutions, matprop, source_area); }
           };
         }
       }

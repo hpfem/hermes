@@ -29,24 +29,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Filter<Scalar>::Filter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions) : MeshFunction<Scalar>()
+    Filter<Scalar>::Filter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions) : MeshFunction<Scalar>(), solutions(solutions)
     {
-      this->num = solutions.size();
-      if (num > H2D_MAX_COMPONENTS)
-        throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
-      for (int i = 0; i < this->num; i++)
-        this->sln[i] = solutions.at(i);
-      this->init();
-    }
-
-    template<typename Scalar>
-    void Filter<Scalar>::init(std::vector<MeshFunctionSharedPtr<Scalar> > solutions)
-    {
-      this->num = solutions.size();
-      if (num > H2D_MAX_COMPONENTS)
-        throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
-      for (int i = 0; i < this->num; i++)
-        this->sln[i] = solutions.at(i);
       this->init();
     }
 
@@ -54,12 +38,15 @@ namespace Hermes
     void Filter<Scalar>::init()
     {
       // construct the union mesh, if necessary
-      MeshSharedPtr meshes[H2D_MAX_COMPONENTS];
-      for (int i = 0; i < this->num; i++)
-        meshes[i] = this->sln[i]->get_mesh();
+      std::vector<MeshSharedPtr> meshes;
+      for (int i = 0; i < this->solutions.size(); i++)
+        meshes.push_back(this->solutions[i]->get_mesh());
       this->mesh = meshes[0];
 
-      Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(this->sln[0].get());
+      for (int i = 0; i < this->solutions.size(); i++)
+        this->solutions_sub_idx.push_back(0);
+
+      Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(this->solutions[0].get());
       if (sln == nullptr)
         this->space_type = HERMES_INVALID_SPACE;
       else
@@ -67,8 +54,7 @@ namespace Hermes
 
       unimesh = false;
 
-      for (int i = 1; i < this->num; i++)
-
+      for (int i = 1; i < this->solutions.size(); i++)
       {
         if (meshes[i] == nullptr)
         {
@@ -81,7 +67,7 @@ namespace Hermes
           break;
         }
 
-        sln = dynamic_cast<Solution<Scalar>*>(this->sln[i].get());
+        sln = dynamic_cast<Solution<Scalar>*>(this->solutions[i].get());
         if (sln == nullptr || sln->get_space_type() != this->space_type)
           this->space_type = HERMES_INVALID_SPACE;
       }
@@ -89,7 +75,7 @@ namespace Hermes
       if (unimesh)
       {
         this->mesh = MeshSharedPtr(new Mesh);
-        this->unidata = Traverse::construct_union_mesh(num, meshes, this->mesh);
+        this->unidata = Traverse::construct_union_mesh(this->solutions.size(), &meshes[0], this->mesh);
       }
 
       // misc init
@@ -109,9 +95,9 @@ namespace Hermes
     void Filter<Scalar>::set_quad_2d(Quad2D* quad_2d)
     {
       MeshFunction<Scalar>::set_quad_2d(quad_2d);
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
         // nodup
-        this->sln[i]->set_quad_2d(quad_2d);
+        this->solutions[i]->set_quad_2d(quad_2d);
     }
 
     template<typename Scalar>
@@ -120,20 +106,20 @@ namespace Hermes
       MeshFunction<Scalar>::set_active_element(e);
       if (!unimesh)
       {
-        for (int i = 0; i < this->num; i++)
+        for (int i = 0; i < this->solutions.size(); i++)
           // nodup
-          this->sln[i]->set_active_element(e);
+          this->solutions[i]->set_active_element(e);
 
-        for (int i = 0; i < this->num; i++)
-          sln_sub[i] = 0;
+        for (int i = 0; i < this->solutions.size(); i++)
+          solutions_sub_idx[i] = 0;
       }
       else
       {
-        for (int i = 0; i < this->num; i++)
+        for (int i = 0; i < this->solutions.size(); i++)
         {
-          this->sln[i]->set_active_element(unidata[i][e->id].e);
-          this->sln[i]->set_transform(unidata[i][e->id].idx);
-          sln_sub[i] = this->sln[i]->get_transform();
+          this->solutions[i]->set_active_element(unidata[i][e->id].e);
+          this->solutions[i]->set_transform(unidata[i][e->id].idx);
+          solutions_sub_idx[i] = this->solutions[i]->get_transform();
         }
       }
 
@@ -146,7 +132,7 @@ namespace Hermes
     {
       if (unimesh)
       {
-        for (int i = 0; i < this->num; i++)
+        for (int i = 0; i < this->solutions.size(); i++)
           free_with_check(unidata[i]);
         free_with_check(unidata);
       }
@@ -163,9 +149,9 @@ namespace Hermes
     void Filter<Scalar>::push_transform(int son)
     {
       MeshFunction<Scalar>::push_transform(son);
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        // sln_sub[i] contains the value sln[i]->sub_idx, which the Filter thinks
+        // solutions_sub_idx[i] contains the value sln[i]->sub_idx, which the Filter thinks
         // the solution has, or at least had last time. If the filter graph is
         // cyclic, it could happen that some solutions would get pushed the transform
         // more than once. This mechanism prevents it. If the filter sees that the
@@ -174,9 +160,9 @@ namespace Hermes
         // is actually the case for cyclic filter graphs and filters used in multi-mesh
         // computation.
 
-        if (this->sln[i]->get_transform() == sln_sub[i])
-          this->sln[i]->push_transform(son);
-        sln_sub[i] = this->sln[i]->get_transform();
+        if (this->solutions[i]->get_transform() == solutions_sub_idx[i])
+          this->solutions[i]->push_transform(son);
+        solutions_sub_idx[i] = this->solutions[i]->get_transform();
       }
     }
 
@@ -184,11 +170,11 @@ namespace Hermes
     void Filter<Scalar>::pop_transform()
     {
       MeshFunction<Scalar>::pop_transform();
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        if (this->sln[i]->get_transform() == sln_sub[i] && sln_sub[i] != 0)
-          this->sln[i]->pop_transform();
-        sln_sub[i] = this->sln[i]->get_transform();
+        if (this->solutions[i]->get_transform() == solutions_sub_idx[i] && solutions_sub_idx[i] != 0)
+          this->solutions[i]->pop_transform();
+        solutions_sub_idx[i] = this->solutions[i]->get_transform();
       }
     }
 
@@ -198,26 +184,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    SimpleFilter<Scalar>::SimpleFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, const std::vector<int> items)
+    SimpleFilter<Scalar>::SimpleFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, const std::vector<int> items) : Filter<Scalar>(solutions), items(items)
     {
-      this->num = solutions.size();
-      if (this->num > H2D_MAX_COMPONENTS)
-        throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
-      if (items.size() != (unsigned) this->num)
-        if (items.size() > 0)
-          throw Hermes::Exceptions::Exception("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
+      if (this->items.size() > 0)
+        Hermes::Helpers::check_length(solutions, items);
+      else
+        for (int i = 0; i < this->solutions.size(); i++)
+          this->items.push_back(H2D_FN_VAL);
 
-      for (int i = 0; i < this->num; i++)
-
-      {
-        this->sln[i] = solutions.at(i);
-        if (items.size() > 0)
-          this->item[i] = items.at(i);
-        else
-          this->item[i] = H2D_FN_VAL;
-      }
       this->init();
-      init_components();
+      this->init_components();
     }
 
     template<typename Scalar>
@@ -229,11 +205,16 @@ namespace Hermes
     void SimpleFilter<Scalar>::init_components()
     {
       bool vec1 = false, vec2 = false;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        if (this->sln[i]->get_num_components() > 1) vec1 = true;
-        if ((item[i] & H2D_FN_COMPONENT_0) && (item[i] & H2D_FN_COMPONENT_1)) vec2 = true;
-        if (this->sln[i]->get_num_components() == 1) item[i] &= H2D_FN_COMPONENT_0;
+        if (this->solutions[i]->get_num_components() > 1)
+          vec1 = true;
+        
+        if ((this->items[i] & H2D_FN_COMPONENT_0) && (this->items[i] & H2D_FN_COMPONENT_1))
+          vec2 = true;
+        
+        if (this->solutions[i]->get_num_components() == 1)
+          this->items[i] &= H2D_FN_COMPONENT_0;
       }
       this->num_components = (vec1 && vec2) ? 2 : 1;
     }
@@ -252,29 +233,25 @@ namespace Hermes
       unsigned char np = quad->get_num_points(order, this->element->get_mode());
 
       // precalculate all solutions
-      for (int i = 0; i < this->num; i++)
-        this->sln[i]->set_quad_order(order, item[i]);
+      for (int i = 0; i < this->solutions.size(); i++)
+        this->solutions[i]->set_quad_order(order, this->items[i]);
 
       for (int j = 0; j < this->num_components; j++)
       {
         // obtain corresponding tables
-        Scalar* tab[H2D_MAX_COMPONENTS];
-        for (int i = 0; i < this->num; i++)
+        std::vector<Scalar*> tab;
+        for (int i = 0; i < this->solutions.size(); i++)
         {
-          int a = 0, b = 0, mask = item[i];
+          int a = 0, b = 0, mask = this->items[i];
           if (mask >= 0x40) { a = 1; mask >>= 6; }
           while (!(mask & 1)) { mask >>= 1; b++; }
-          tab[i] = const_cast<Scalar*>(this->sln[i]->get_values(this->num_components == 1 ? a : j, b));
+          tab.push_back(const_cast<Scalar*>(this->solutions[i]->get_values(this->num_components == 1 ? a : j, b)));
           if (tab[i] == nullptr)
             throw Hermes::Exceptions::Exception("Value of 'item%d' is incorrect in filter definition.", i + 1);
         }
 
-        std::vector<Scalar*> values;
-        for (int i = 0; i < this->num; i++)
-          values.push_back(tab[i]);
-
         // apply the filter
-        filter_fn(np, values, this->values[j][0]);
+        filter_fn(np, tab, this->values[j][0]);
       }
       this->values_valid = true;
     }
@@ -282,15 +259,15 @@ namespace Hermes
     template<typename Scalar>
     Func<Scalar>* SimpleFilter<Scalar>::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)
     {
-      Scalar val[H2D_MAX_COMPONENTS];
-      for (int i = 0; i < this->num; i++)
-        val[i] = this->sln[i]->get_pt_value(x, y, use_MeshHashGrid, e)->val[0];
+      std::vector<Scalar> val;
+      for (int i = 0; i < this->solutions.size(); i++)
+        val.push_back(this->solutions[i]->get_pt_value(x, y, use_MeshHashGrid, e)->val[0]);
 
       Func<Scalar>* toReturn = new Func<Scalar>(1, 1);
 
       Scalar result;
       std::vector<Scalar*> values;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
         values.push_back(&val[i]);
 
       // apply the filter
@@ -302,17 +279,16 @@ namespace Hermes
 
     ComplexFilter::ComplexFilter() : Filter<double>()
     {
-      this->num = 0;
       this->unimesh = false;
     }
 
     ComplexFilter::ComplexFilter(MeshFunctionSharedPtr<std::complex<double> > solution, int item) : Filter<double>()
     {
-      this->num = 0;
       this->unimesh = false;
       this->sln_complex = solution;
       this->num_components = solution->get_num_components();
       this->mesh = solution->get_mesh();
+      this->solutions_sub_idx.push_back(0);
       set_quad_2d(&g_quad_2d_std);
     }
 
@@ -335,9 +311,7 @@ namespace Hermes
     {
       MeshFunction<double>::set_active_element(e);
       this->sln_complex->set_active_element(e);
-
-      for (int i = 0; i < this->num; i++)
-        sln_sub[i] = 0;
+      this->solutions_sub_idx[0] = 0;
 
       // fixme
       this->order = 20;
@@ -419,16 +393,16 @@ namespace Hermes
     template<typename Scalar>
     void DXDYFilter<Scalar>::init_components()
     {
-      this->num_components = this->sln[0]->get_num_components();
-      for (int i = 1; i < this->num; i++)
-        if (this->sln[i]->get_num_components() != this->num_components)
+      this->num_components = this->solutions[0]->get_num_components();
+      for (int i = 1; i < this->solutions.size(); i++)
+        if (this->solutions[i]->get_num_components() != this->num_components)
           throw Hermes::Exceptions::Exception("Filter: Solutions do not have the same number of components!");
     }
 
     template<typename Scalar>
     void DXDYFilter<Scalar>::init(std::vector<MeshFunctionSharedPtr<Scalar> > solutions)
     {
-      Filter<Scalar>::init(solutions);
+      Filter<Scalar>::init();
       init_components();
     }
 
@@ -439,29 +413,29 @@ namespace Hermes
       unsigned char np = quad->get_num_points(order, this->element->get_mode());
 
       // precalculate all solutions
-      for (int i = 0; i < this->num; i++)
-        this->sln[i]->set_quad_order(order, H2D_FN_DEFAULT);
+      for (int i = 0; i < this->solutions.size(); i++)
+        this->solutions[i]->set_quad_order(order, H2D_FN_DEFAULT);
 
       for (int j = 0; j < this->num_components; j++)
       {
         // obtain solution tables
         double *x, *y;
         const Scalar *val[H2D_MAX_COMPONENTS], *dx[H2D_MAX_COMPONENTS], *dy[H2D_MAX_COMPONENTS];
-        x = this->sln[0]->get_refmap()->get_phys_x(order);
-        y = this->sln[0]->get_refmap()->get_phys_y(order);
+        x = this->solutions[0]->get_refmap()->get_phys_x(order);
+        y = this->solutions[0]->get_refmap()->get_phys_y(order);
 
-        for (int i = 0; i < this->num; i++)
+        for (int i = 0; i < this->solutions.size(); i++)
         {
-          val[i] = this->sln[i]->get_fn_values(j);
-          dx[i] = this->sln[i]->get_dx_values(j);
-          dy[i] = this->sln[i]->get_dy_values(j);
+          val[i] = this->solutions[i]->get_fn_values(j);
+          dx[i] = this->solutions[i]->get_dx_values(j);
+          dy[i] = this->solutions[i]->get_dy_values(j);
         }
 
         std::vector<const Scalar *> values_vector;
         std::vector<const Scalar *> dx_vector;
         std::vector<const Scalar *> dy_vector;
 
-        for (int i = 0; i < this->num; i++)
+        for (int i = 0; i < this->solutions.size(); i++)
         {
           values_vector.push_back(val[i]);
           dx_vector.push_back(dx[i]);
@@ -498,18 +472,18 @@ namespace Hermes
     template<typename Scalar>
     MagFilter<Scalar>::MagFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, std::vector<int> items) : SimpleFilter<Scalar>(solutions, items)
     {
+      Filter<Scalar>::init();
     };
 
     template<typename Scalar>
     MagFilter<Scalar>::MagFilter(MeshFunctionSharedPtr<Scalar> sln1, int item1)
-      : SimpleFilter<Scalar>(std::vector<MeshFunctionSharedPtr<Scalar> >(), std::vector<int>())
+      : SimpleFilter<Scalar>()
     {
-      this->sln[0] = sln1;
-      this->sln[1] = sln1;
-      this->item[0] = item1 & H2D_FN_COMPONENT_0;
-      this->item[1] = item1 & H2D_FN_COMPONENT_1;
+      this->solutions = { sln1, sln1 };
+      this->items = { item1 & H2D_FN_COMPONENT_0, item1 & H2D_FN_COMPONENT_1 };
       if (sln1->get_num_components() < 2)
         throw Hermes::Exceptions::Exception("The single-argument constructor is intended for vector-valued solutions.");
+      Filter<Scalar>::init();
     };
 
     template<typename Scalar>
@@ -522,10 +496,10 @@ namespace Hermes
     {
       std::vector<MeshFunctionSharedPtr<Scalar> > slns;
       std::vector<int> items;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        slns.push_back(this->sln[i]->clone());
-        items.push_back(this->item[i]);
+        slns.push_back(this->solutions[i]->clone());
+        items.push_back(this->items[i]);
       }
       MagFilter<Scalar>* filter = new MagFilter<Scalar>(slns, items);
       return filter;
@@ -552,9 +526,8 @@ namespace Hermes
       : SimpleFilter<double>()
     {
       this->limits.push_back(limit);
-      this->sln[0] = sln;
-      this->item[0] = item;
-      this->num = 1;
+      this->solutions.push_back(sln);
+      this->items.push_back(item);
       Filter<double>::init();
     };
 
@@ -566,10 +539,10 @@ namespace Hermes
     {
       std::vector<MeshFunctionSharedPtr<double> > slns;
       std::vector<int> items;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        slns.push_back(this->sln[i]->clone());
-        items.push_back(this->item[i]);
+        slns.push_back(this->solutions[i]->clone());
+        items.push_back(this->items[i]);
       }
       TopValFilter* filter = new TopValFilter(slns, limits, items);
       return filter;
@@ -596,9 +569,8 @@ namespace Hermes
       : SimpleFilter<double>()
     {
       this->limits.push_back(limit);
-      this->sln[0] = sln;
-      this->item[0] = item;
-      this->num = 1;
+      this->solutions.push_back(sln);
+      this->items.push_back(item);
       Filter<double>::init();
     };
 
@@ -610,10 +582,10 @@ namespace Hermes
     {
       std::vector<MeshFunctionSharedPtr<double> > slns;
       std::vector<int> items;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        slns.push_back(this->sln[i]->clone());
-        items.push_back(this->item[i]);
+        slns.push_back(this->solutions[i]->clone());
+        items.push_back(this->items[i]);
       }
       BottomValFilter* filter = new BottomValFilter(slns, limits, items);
       return filter;
@@ -644,9 +616,8 @@ namespace Hermes
     {
       this->low_limits.push_back(low_limit);
       this->high_limits.push_back(high_limit);
-      this->sln[0] = sln;
-      this->item[0] = item;
-      this->num = 1;
+      this->solutions.push_back(sln);
+      this->items.push_back(item);
       Filter<double>::init();
     };
 
@@ -658,10 +629,10 @@ namespace Hermes
     {
       std::vector<MeshFunctionSharedPtr<double> > slns;
       std::vector<int> items;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        slns.push_back(this->sln[i]->clone());
-        items.push_back(this->item[i]);
+        slns.push_back(this->solutions[i]->clone());
+        items.push_back(this->items[i]);
       }
       ValFilter* filter = new ValFilter(slns, low_limits, high_limits, items);
       return filter;
@@ -686,10 +657,10 @@ namespace Hermes
     {
       std::vector<MeshFunctionSharedPtr<Scalar> > slns;
       std::vector<int> items;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        slns.push_back(this->sln[i]->clone());
-        items.push_back(this->item[i]);
+        slns.push_back(this->solutions[i]->clone());
+        items.push_back(this->items[i]);
       }
       DiffFilter* filter = new DiffFilter<Scalar>(slns, items);
       return filter;
@@ -719,10 +690,10 @@ namespace Hermes
     {
       std::vector<MeshFunctionSharedPtr<Scalar> > slns;
       std::vector<int> items;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        slns.push_back(this->sln[i]->clone());
-        items.push_back(this->item[i]);
+        slns.push_back(this->solutions[i]->clone());
+        items.push_back(this->items[i]);
       }
       SumFilter<Scalar>* filter = new SumFilter<Scalar>(slns, items);
       return filter;
@@ -760,10 +731,10 @@ namespace Hermes
     {
       std::vector<MeshFunctionSharedPtr<Scalar> > slns;
       std::vector<int> items;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        slns.push_back(this->sln[i]->clone());
-        items.push_back(this->item[i]);
+        slns.push_back(this->solutions[i]->clone());
+        items.push_back(this->items[i]);
       }
       SquareFilter<Scalar>* filter = new SquareFilter<Scalar>(slns, items);
       return filter;
@@ -785,10 +756,9 @@ namespace Hermes
     AbsFilter::AbsFilter(MeshFunctionSharedPtr<double> solution)
       : SimpleFilter<double>()
     {
-      this->num = 1;
-      this->sln[0] = solution;
+      this->solutions.push_back(solution);
 
-      this->item[0] = H2D_FN_VAL;
+      this->items.push_back(H2D_FN_VAL);
 
       this->init();
       init_components();
@@ -802,10 +772,10 @@ namespace Hermes
     {
       std::vector<MeshFunctionSharedPtr<double> > slns;
       std::vector<int> items;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        slns.push_back(this->sln[i]->clone());
-        items.push_back(this->item[i]);
+        slns.push_back(this->solutions[i]->clone());
+        items.push_back(this->items[i]);
       }
       AbsFilter* filter = new AbsFilter(slns, items);
       return filter;
@@ -908,14 +878,14 @@ namespace Hermes
       Quad2D* quad = this->quads[this->cur_quad];
       unsigned char np = quad->get_num_points(order, this->element->get_mode());
 
-      this->sln[0]->set_quad_order(order, H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY);
-      this->sln[1]->set_quad_order(order, H2D_FN_DX | H2D_FN_DY);
+      this->solutions[0]->set_quad_order(order, H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY);
+      this->solutions[1]->set_quad_order(order, H2D_FN_DX | H2D_FN_DY);
 
-      const double *dudx = this->sln[0]->get_dx_values();
-      const double *dudy = this->sln[0]->get_dy_values();
-      const double *dvdx = this->sln[1]->get_dx_values();
-      const double *dvdy = this->sln[1]->get_dy_values();
-      const double *uval = this->sln[0]->get_fn_values();
+      const double *dudx = this->solutions[0]->get_dx_values();
+      const double *dudy = this->solutions[0]->get_dy_values();
+      const double *dvdx = this->solutions[1]->get_dx_values();
+      const double *dvdy = this->solutions[1]->get_dy_values();
+      const double *uval = this->solutions[0]->get_fn_values();
       update_refmap();
       double *x = refmap.get_phys_x(order);
 
@@ -958,8 +928,8 @@ namespace Hermes
     MeshFunction<double>* VonMisesFilter::clone() const
     {
       std::vector<MeshFunctionSharedPtr<double> > slns;
-      for (int i = 0; i < this->num; i++)
-        slns.push_back(sln[i]->clone());
+      for (int i = 0; i < this->solutions.size(); i++)
+        slns.push_back(this->solutions[i]->clone());
       VonMisesFilter* filter = new VonMisesFilter(slns, lambda, mu, cyl, item1, item2);
       return filter;
     }
@@ -972,43 +942,39 @@ namespace Hermes
       struct Filter<Scalar>::Node* node = this->new_node(H2D_FN_DEFAULT, np);
 
       // precalculate all solutions
-      for (int i = 0; i < this->num; i++)
-        this->sln[i]->set_quad_order(order);
+      for (int i = 0; i < this->solutions.size(); i++)
+        this->solutions[i]->set_quad_order(order);
 
       for (int j = 0; j < this->num_components; j++)
       {
         // obtain solution tables
-        Scalar *val[H2D_MAX_COMPONENTS], *dx[H2D_MAX_COMPONENTS], *dy[H2D_MAX_COMPONENTS];
-        for (int i = 0; i < this->num; i++)
+        std::vector<Scalar*> val, dx, dy;
+        for (int i = 0; i < this->solutions.size(); i++)
         {
-          val[i] = this->sln[i]->get_fn_values(j);
-          dx[i] = this->sln[i]->get_dx_values(j);
-          dy[i] = this->sln[i]->get_dy_values(j);
+          val.push_back(this->solutions[i]->get_fn_values(j));
+          dx.push_back(this->solutions[i]->get_dx_values(j));
+          dy.push_back(this->solutions[i]->get_dy_values(j));
         }
-        if (this->num == 2)
+        if (this->solutions.size() == 2)
+        {
           for (int i = 0; i < np; i++)
           {
-          node->values[j][0][i] = tau_frac * (val[1][i] - val[0][i]) + val[1][i];
-          node->values[j][1][i] = tau_frac * (dx[1][i] - dx[0][i]) + dx[1][i];
-          node->values[j][2][i] = tau_frac * (dy[1][i] - dy[0][i]) + dy[1][i];
+            node->values[j][0][i] = tau_frac * (val[1][i] - val[0][i]) + val[1][i];
+            node->values[j][1][i] = tau_frac * (dx[1][i] - dx[0][i]) + dx[1][i];
+            node->values[j][2][i] = tau_frac * (dy[1][i] - dy[0][i]) + dy[1][i];
           }
+        }
         else
+        {
           for (int i = 0; i < np; i++)
           {
-          node->values[j][0][i] = val[0][i];
-          node->values[j][1][i] = dx[0][i];
-          node->values[j][2][i] = dy[0][i];
+            node->values[j][0][i] = val[0][i];
+            node->values[j][1][i] = dx[0][i];
+            node->values[j][2][i] = dy[0][i];
           }
+        }
       }
       this->values_valid = true;
-
-      if (this->nodes->present(order))
-      {
-        assert(this->nodes->get(order) == this->cur_node);
-        free_with_check(this->nodes->get(order));
-      }
-      this->nodes->add(node, order);
-      this->cur_node = node;
     }
 
     template<typename Scalar>
@@ -1040,9 +1006,9 @@ namespace Hermes
     template<typename Scalar>
     void LinearFilter<Scalar>::init_components()
     {
-      this->num_components = this->sln[0]->get_num_components();
-      for (int i = 1; i < this->num; i++)
-        if (this->sln[i]->get_num_components() != this->num_components)
+      this->num_components = this->solutions[0]->get_num_components();
+      for (int i = 1; i < this->solutions.size(); i++)
+        if (this->solutions[i]->get_num_components() != this->num_components)
           throw Hermes::Exceptions::Exception("Filter: Solutions do not have the same number of components!");
     }
 
@@ -1052,9 +1018,9 @@ namespace Hermes
       Filter<Scalar>::set_active_element(e);
 
       this->order = 0;
-      for (int i = 0; i < this->num; i++)
+      for (int i = 0; i < this->solutions.size(); i++)
       {
-        int o = this->sln[i]->get_fn_order();
+        int o = this->solutions[i]->get_fn_order();
         if (o > this->order) this->order = o;
       }
     }

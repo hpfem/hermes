@@ -879,8 +879,8 @@ namespace Hermes
                   }
                 }
 
-                FissionYield::OuterIterationForm<Scalar>* keff_iteration_form =
-                  new FissionYield::OuterIterationForm<Scalar>(gto, matprop, mesh, iterates, initial_keff_guess, geom_type);
+                FissionYield::OuterIterationForm<Scalar>* keff_iteration_form = new FissionYield::OuterIterationForm<Scalar>(gto, matprop, mesh, iterates, initial_keff_guess, geom_type);
+                this->set_ext(iterates);
                 keff_iteration_forms.push_back(keff_iteration_form);
                 this->add_vector_form(keff_iteration_form);
               }

@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 
   AdaptSolver<double, LinearSolver<double> > adaptSolver(space, wf, &errorCalculator, &criterion, &selector, &global_criterion);
 
-  adaptSolver.switch_visualization(true);
+  adaptSolver.switch_visualization(true, false);
   adaptSolver.set_verbose_output(true);
   adaptSolver.solve(hpAdaptivity);
 

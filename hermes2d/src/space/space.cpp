@@ -331,7 +331,7 @@ namespace Hermes
 
       resize_tables();
 
-      if (mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && get_type() != HERMES_L2_MARKERWISE_CONST_SPACE && H2D_GET_V_ORDER(order) == 0)
+      if (mesh->get_element(id)->is_quad() && H2D_GET_V_ORDER(order) == 0)
         if (order_v != -1)
           order = H2D_MAKE_QUAD_ORDER(order, order_v);
         else
@@ -895,7 +895,7 @@ namespace Hermes
       update_constraints();
       post_assign();
 
-      mesh_seq = mesh->get_seq();
+      this->mesh_seq = mesh->get_seq();
       seq_assigned = this->seq;
       this->ndof = next_dof - first_dof;
 
