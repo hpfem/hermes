@@ -99,7 +99,7 @@ namespace Hermes
       Scalar value(double x, double y) const;
 
       /// Function giving info that u_Essential is a constant.
-      inline typename EssentialBCValueType get_value_type() const { return BC_CONST; }
+      inline EssentialBCValueType get_value_type() const { return BC_CONST; }
     };
 
     /// Class representing non-constant essential boundary condition for Scalar approximation.
@@ -145,7 +145,7 @@ namespace Hermes
       virtual Scalar value(double x, double y) const;
 
       /// Function giving info that u_Essential is a non-constant function.
-      inline typename EssentialBCValueType get_value_type() const { return BC_FUNCTION; }
+      inline EssentialBCValueType get_value_type() const { return BC_FUNCTION; }
 
       ExactSolutionScalar<Scalar>* exact_solution;
     };
