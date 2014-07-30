@@ -112,6 +112,7 @@ namespace Hermes
 
       friend struct Node;
       friend class MeshUtil;
+      friend class EggShell;
       friend class MeshReaderH2D;
       template<typename Scalar> friend class NeighborSearch;
       template<typename Scalar> friend class Space;

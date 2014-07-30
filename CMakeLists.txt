@@ -1,95 +1,73 @@
 project(hermes)
   cmake_minimum_required(VERSION 2.8)
 
-  #---------------------------------------------------------------------------------------------
-  # Main configuration options.
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
   ### BEGIN DEFAULT CONFIGURATION ##############################################################
+  ### BEGIN BASIC DEFAULT CONFIGURATION ##############################################################
 
-  # The values below are sane defaults to produce a build on all platforms,
-  # if you want to override them, set them in CMake.vars
+    # The values below are sane defaults to produce a build on all platforms,
+    # if you want to override them, set them in CMake.vars rather than here.
 
-  # Global
-  # Generate static libs (instead of dynamic)
-  set(HERMES_STATIC_LIBS NO)
-  
-  # For Win64
-  if(${CMAKE_CL_64})
-    set(WIN64 YES)
-  else(${CMAKE_CL_64})
-    set(WIN64 NO)
-  endif(${CMAKE_CL_64})
-    
-  # HermesCommon
-  # These are ignored for MSVC (where debug / release are handled differently)
-  set(HERMES_COMMON_DEBUG     YES)
-  set(HERMES_COMMON_RELEASE   YES)
+    # Global
+    # Generate static libs (instead of dynamic)
+    set(HERMES_STATIC_LIBS NO)
+      
+    # HermesCommon
+    # These are ignored for MSVC (where debug / release are handled differently)
+    set(HERMES_COMMON_DEBUG     YES)
+    set(HERMES_COMMON_RELEASE   YES)
 
-  # Hermes2D:
-  set(WITH_H2D                  YES)
+    # Hermes2D:
+    set(WITH_H2D                  YES)
     # Release and debug versions.
     # These are ignored for MSVC (where debug / release are handled differently)
     set(H2D_DEBUG               YES)
     set(H2D_RELEASE             YES)
-	
+
     # Optional parts of the library.
     set(H2D_WITH_GLUT           YES)
     set(H2D_WITH_TEST_EXAMPLES  YES)
-	
-    # Advanced settings.
-    # Number of solution / filter components.
-    # Minimum is 1, maximum 999.
-    set(H2D_MAX_COMPONENTS 10)
-    # Number of quadratures, recommended is 4.
-    # Minimum is 2, maximum 999.
-    set(H2D_MAX_QUADRATURES 4)
-    #  This number has to be smaller than 21.
-    set(H2D_MAX_HANGING_NODES_LEVEL 15)
-    #  Use second derivatives (that are turned off by default).
-    set(H2D_USE_SECOND_DERIVATIVES NO)
-  
-  # TC_MALLOC
-  set(WITH_TC_MALLOC NO)
-
-  # BSON 
-  set(WITH_BSON NO)
-
-  # MATIO
-  set(WITH_MATIO NO)
-  set(MATIO_WITH_HDF5 NO)
-  
-  # BFD
-  set(WITH_BFD NO)
-
-  #### Solvers ###
-  # UMFPACK is chosen by default.
-  set(WITH_UMFPACK YES)
-  
-  # PARALUTION
-  set(WITH_PARALUTION NO)
-  
-  # MUMPS
-  # Sequential version of MUMPS may be enabled by setting YES on the following line
-  # and pointing to the package installation directory with MUMPS_ROOT. To enable the
-  # parallel version, setting WITH_MPI to YES in addition to that should suffice. If link
-  # problems arise, it may be that the automatically found SCALAPACK libraries (reported
-  # during the CMake configuration phase) do not match those used when compiling MUMPS.
-  # In this case, set SCALAPACK_LIBRARIES manually in CMake.vars and reconfigure Hermes.
-  set(WITH_MUMPS              NO)
-  # set(MUMPS_ROOT            root/dir/of/mumps/)
-  # set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
-
-  # Trilinos
-  # Enable support for Trilinos solvers.
-  set(WITH_TRILINOS           NO)
     
-  ### Mesh format ###
-  set(WITH_EXODUSII           NO)
-  set(WITH_HDF5               NO)
+    # TC_MALLOC
+    set(WITH_TC_MALLOC NO)
 
-  ### Others ###
-  # Parallel execution.
+    # BSON 
+    set(WITH_BSON NO)
+
+    # MATIO
+    set(WITH_MATIO NO)
+    set(MATIO_WITH_HDF5 NO)
+    
+    # BFD
+    set(WITH_BFD NO)
+
+    #### Solvers ###
+    # UMFPACK is chosen by default.
+    set(WITH_UMFPACK YES)
+    
+    # PARALUTION
+    set(WITH_PARALUTION NO)
+    
+    # MUMPS
+    # Sequential version of MUMPS may be enabled by setting YES on the following line
+    # and pointing to the package installation directory with MUMPS_ROOT. To enable the
+    # parallel version, setting WITH_MPI to YES in addition to that should suffice. If link
+    # problems arise, it may be that the automatically found SCALAPACK libraries (reported
+    # during the CMake configuration phase) do not match those used when compiling MUMPS.
+    # In this case, set SCALAPACK_LIBRARIES manually in CMake.vars and reconfigure Hermes.
+    set(WITH_MUMPS              NO)
+    # set(MUMPS_ROOT            root/dir/of/mumps/)
+    # set(SCALAPACK_LIBRARIES   -lscalapack -lblacs)
+
+    # Trilinos
+    # Enable support for Trilinos solvers.
+    set(WITH_TRILINOS           NO)
+      
+    ### Mesh format ###
+    set(WITH_EXODUSII           NO)
+    set(WITH_HDF5               NO)
+
+    ### Others ###
+    # Parallel execution.
     # (tells the linker to use parallel versions of the selected solvers, if available):
     #
     # Enable OpenMP for shared memory processing.
@@ -109,38 +87,61 @@ project(hermes)
       
     # Optional Windows stacktrace
     set(WITH_WINDOWS_STACKWALKER NO)
+
+  ### END BASIC DEFAULT CONFIGURATION ##############################################################
+
+    ################################## CURRENTLY NOT SUPPORTED ###################################
+    #  \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/
     
-  ################################## CURRENTLY NOT SUPPORTED ###################################
-  #  \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/
-  
-  # SuperLU
-    # First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
-    # and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
-    # for in system directories. If SUPERLU_MT is set to YES, the multithreaded version of
-    # SuperLU will be used. In this case, there should be either superlu_mt_PTHREAD.a and/or
-    # superlu_mt_OPENMP.a libraries present in the search path (the former will be chosen if
-    # WITH_OPENMP is set to NO, the latter otherwise). There should also be a subdirectory
-    # SLU_MT in the include directory since SuperLU_MT uses different versions of the same-named
-    # header files as the serial library.
-    set(WITH_SUPERLU            NO)
-    set(SUPERLU_ROOT            /opt/SuperLU_4.0/)
-    set(SUPERLU_MT              NO)
+    # SuperLU
+      # First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
+      # and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
+      # for in system directories. If SUPERLU_MT is set to YES, the multithreaded version of
+      # SuperLU will be used. In this case, there should be either superlu_mt_PTHREAD.a and/or
+      # superlu_mt_OPENMP.a libraries present in the search path (the former will be chosen if
+      # WITH_OPENMP is set to NO, the latter otherwise). There should also be a subdirectory
+      # SLU_MT in the include directory since SuperLU_MT uses different versions of the same-named
+      # header files as the serial library.
+      set(WITH_SUPERLU            NO)
+      set(SUPERLU_ROOT            /opt/SuperLU_4.0/)
+      set(SUPERLU_MT              NO)
 
-  # PETSc
-    # If PETSc is enabled, PETSC_ROOT and PETSC_ARCH must be set as well;
-    # if PETSc is disabled, PETSC_ROOT and PETSC_ARCH will be ignored.
-    set(WITH_PETSC              NO)
-    set(PETSC_ROOT              /opt/petsc/petsc-3.1-p7)
-    set(PETSC_ARCH              petsc-arch-without-scalar-type)
+    # PETSc
+      # If PETSc is enabled, PETSC_ROOT and PETSC_ARCH must be set as well;
+      # if PETSc is disabled, PETSC_ROOT and PETSC_ARCH will be ignored.
+      set(WITH_PETSC              NO)
+      set(PETSC_ROOT              /opt/petsc/petsc-3.1-p7)
+      set(PETSC_ARCH              petsc-arch-without-scalar-type)
 
-  #  /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\
-  ################################## CURRENTLY NOT SUPPORTED ###################################
-  
+    #  /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\
+    ################################## CURRENTLY NOT SUPPORTED ###################################
+  	
+  ### BEGIN ADVANCED DEFAULT CONFIGURATION ##############################################################
+    
+    # Number of solution / filter components.
+    # Minimum is 1, maximum 999.
+    set(H2D_MAX_COMPONENTS 10)
+    # Number of quadratures, recommended is 4.
+    # Minimum is 2, maximum 999.
+    set(H2D_MAX_QUADRATURES 4)
+    #  This number has to be smaller than 21.
+    set(H2D_MAX_HANGING_NODES_LEVEL 15)
+    #  Use second derivatives (that are turned off by default).
+    set(H2D_USE_SECOND_DERIVATIVES NO)
+    
+  ### END ADVANCED DEFAULT CONFIGURATION ##############################################################
   ### END DEFAULT CONFIGURATION ################################################################
   ##############################################################################################
   ##############################################################################################
   ### INTERNALS FOLLOW - DO NOT CHANGE #########################################################
-    
+  
+  # For Win64
+  if(${CMAKE_CL_64})
+    set(WIN64 YES)
+  else(${CMAKE_CL_64})
+    set(WIN64 NO)
+  endif(${CMAKE_CL_64})
+  
   # Allow to override the default values in CMake.vars:
 	include(CMake.vars OPTIONAL)
     include(../CMakeHermes.cmake OPTIONAL)
