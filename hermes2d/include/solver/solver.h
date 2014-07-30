@@ -42,7 +42,7 @@ namespace Hermes
       public Hermes::Algebra::Mixins::MatrixRhsOutput<Scalar>,
       public Hermes::Mixins::IntegrableWithGlobalOrder,
       public virtual Hermes::Mixins::StateQueryable,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>
+      public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm < Scalar >
     {
     public:
       Solver(bool initialize_discrete_problem = true);

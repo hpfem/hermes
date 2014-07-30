@@ -285,13 +285,13 @@ namespace Hermes
     };
 
     template<>
-    struct TypeIsReal<double>
+    struct TypeIsReal < double >
     {
       static const bool value = true;
     };
 
     template<>
-    struct TypeIsComplex<std::complex<double> >
+    struct TypeIsComplex < std::complex<double> >
     {
       static const bool value = true;
     };

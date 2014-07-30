@@ -186,8 +186,8 @@ namespace Hermes
           this->funcs[space_i][j] = preallocate_fn<double>(this->FuncMemoryPool);
 
         for (int edge_i = 0; edge_i < H2D_MAX_NUMBER_EDGES; edge_i++)
-        for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
-          this->funcsSurface[edge_i][space_i][j] = preallocate_fn<double>(this->FuncMemoryPool);
+          for (unsigned int j = 0; j < H2D_MAX_LOCAL_BASIS_SIZE; j++)
+            this->funcsSurface[edge_i][space_i][j] = preallocate_fn<double>(this->FuncMemoryPool);
 
         if (this->nonlinear)
           this->u_ext_funcs[space_i] = preallocate_fn<Scalar>(this->FuncMemoryPool);
@@ -789,7 +789,7 @@ namespace Hermes
       }
     }
 
-    template class HERMES_API DiscreteProblemThreadAssembler<double>;
-    template class HERMES_API DiscreteProblemThreadAssembler<std::complex<double> >;
+    template class HERMES_API DiscreteProblemThreadAssembler < double > ;
+    template class HERMES_API DiscreteProblemThreadAssembler < std::complex<double> > ;
   }
 }

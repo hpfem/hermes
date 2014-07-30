@@ -135,7 +135,7 @@ namespace Hermes
       this->jacobian_reusable = false;
     }
 
-    template class HERMES_API NewtonSolver<double>;
-    template class HERMES_API NewtonSolver<std::complex<double> >;
+    template class HERMES_API NewtonSolver < double > ;
+    template class HERMES_API NewtonSolver < std::complex<double> > ;
   }
 }

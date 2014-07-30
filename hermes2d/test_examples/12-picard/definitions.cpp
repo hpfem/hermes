@@ -1,6 +1,6 @@
 #include "definitions.h"
 
-CustomNonlinearity::CustomNonlinearity(double alpha): Hermes1DFunction<double>()
+CustomNonlinearity::CustomNonlinearity(double alpha) : Hermes1DFunction<double>()
 {
   this->is_const = false;
   this->alpha = alpha;
@@ -16,9 +16,9 @@ Ord CustomNonlinearity::value(Ord u) const
   return Ord(10);
 }
 
-CustomWeakFormPicard::CustomWeakFormPicard(MeshFunctionSharedPtr<double> prev_iter_sln, 
-                                           Hermes1DFunction<double>* lambda, 
-                                           Hermes2DFunction<double>* f) 
+CustomWeakFormPicard::CustomWeakFormPicard(MeshFunctionSharedPtr<double> prev_iter_sln,
+  Hermes1DFunction<double>* lambda,
+  Hermes2DFunction<double>* f)
   : WeakForm<double>(1)
 {
   // Jacobian.
@@ -30,24 +30,24 @@ CustomWeakFormPicard::CustomWeakFormPicard(MeshFunctionSharedPtr<double> prev_it
   add_vector_form(vector_form);
 }
 
-double CustomWeakFormPicard::CustomJacobian::value(int n, double *wt, Func<double> *u_ext[], 
-                                                   Func<double> *u, Func<double> *v, 
-                                                   GeomVol<double> *e, Func<double> **ext) const
+double CustomWeakFormPicard::CustomJacobian::value(int n, double *wt, Func<double> *u_ext[],
+  Func<double> *u, Func<double> *v,
+  GeomVol<double> *e, Func<double> **ext) const
 {
   double result = 0;
-  for (int i = 0; i < n; i++) 
+  for (int i = 0; i < n; i++)
   {
     result += wt[i] * lambda->value(u_ext[0]->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
   }
   return result;
 }
 
-Ord CustomWeakFormPicard::CustomJacobian::ord(int n, double *wt, Func<Ord> *u_ext[], 
-                                              Func<Ord> *u, Func<Ord> *v,
-                                              GeomVol<Ord> *e, Func<Ord> **ext) const
+Ord CustomWeakFormPicard::CustomJacobian::ord(int n, double *wt, Func<Ord> *u_ext[],
+  Func<Ord> *u, Func<Ord> *v,
+  GeomVol<Ord> *e, Func<Ord> **ext) const
 {
   Ord result = Ord(0);
-  for (int i = 0; i < n; i++) 
+  for (int i = 0; i < n; i++)
   {
     result += wt[i] * lambda->value(u_ext[0]->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
   }
@@ -63,18 +63,18 @@ double CustomWeakFormPicard::CustomResidual::value(int n, double *wt, Func<doubl
   Func<double> *v, GeomVol<double> *e, Func<double> **ext) const
 {
   double result = 0;
-  for (int i = 0; i < n; i++) 
+  for (int i = 0; i < n; i++)
   {
     result -= wt[i] * f->value(e->x[i], e->y[i]) * v->val[i];
   }
   return result;
 }
 
-Ord CustomWeakFormPicard::CustomResidual::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+Ord CustomWeakFormPicard::CustomResidual::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
   GeomVol<Ord> *e, Func<Ord> **ext) const
 {
   Ord result = Ord(0);
-  for (int i = 0; i < n; i++) 
+  for (int i = 0; i < n; i++)
   {
     result += wt[i] * f->value(e->x[i], e->y[i]) * v->val[i];
   }
@@ -88,10 +88,10 @@ VectorFormVol<double>* CustomWeakFormPicard::CustomResidual::clone() const
 
 EssentialBCValueType CustomEssentialBCNonConst::get_value_type() const
 {
-  return BC_FUNCTION; 
+  return BC_FUNCTION;
 }
 
 double CustomEssentialBCNonConst::value(double x, double y) const
 {
-  return (x+10) * (y+10) / 100.;
+  return (x + 10) * (y + 10) / 100.;
 }

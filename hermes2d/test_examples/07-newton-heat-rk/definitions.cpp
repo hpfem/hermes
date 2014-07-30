@@ -3,18 +3,18 @@
 CustomWeakFormHeatRK::CustomWeakFormHeatRK(std::string bdy_air, double alpha, double lambda, double heatcap, double rho,
   double* current_time_ptr, double temp_init, double t_final) : Hermes::Hermes2D::WeakForm<double>(1)
 {
-      // Jacobian volumetric part.
-      add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion<double>(0, 0, HERMES_ANY, new Hermes1DFunction<double>(-lambda / (heatcap * rho))));
+  // Jacobian volumetric part.
+  add_matrix_form(new WeakFormsH1::DefaultJacobianDiffusion<double>(0, 0, HERMES_ANY, new Hermes1DFunction<double>(-lambda / (heatcap * rho))));
 
-      // Jacobian surface part.
-      add_matrix_form_surf(new WeakFormsH1::DefaultMatrixFormSurf<double>(0, 0, bdy_air, new Hermes2DFunction<double>(-alpha / (heatcap * rho))));
+  // Jacobian surface part.
+  add_matrix_form_surf(new WeakFormsH1::DefaultMatrixFormSurf<double>(0, 0, bdy_air, new Hermes2DFunction<double>(-alpha / (heatcap * rho))));
 
-      // Residual - volumetric.
-      add_vector_form(new WeakFormsH1::DefaultResidualDiffusion<double>(0, HERMES_ANY, new Hermes1DFunction<double>(-lambda / (heatcap * rho))));
+  // Residual - volumetric.
+  add_vector_form(new WeakFormsH1::DefaultResidualDiffusion<double>(0, HERMES_ANY, new Hermes1DFunction<double>(-lambda / (heatcap * rho))));
 
-      // Residual - surface.
-      add_vector_form_surf(new CustomFormResidualSurf(0, bdy_air, alpha, rho, heatcap, current_time_ptr, temp_init, t_final));
-  }
+  // Residual - surface.
+  add_vector_form_surf(new CustomFormResidualSurf(0, bdy_air, alpha, rho, heatcap, current_time_ptr, temp_init, t_final));
+}
 
 template<typename Real, typename Scalar>
 Scalar CustomWeakFormHeatRK::CustomFormResidualSurf::vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, GeomSurf<Real> *e, Func<Scalar> **ext) const

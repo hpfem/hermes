@@ -1,4 +1,4 @@
-#include "definitions.h" 
+#include "definitions.h"
 
 using namespace Teuchos;
 
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   SpaceSharedPtr<double> space(new H1Space<double>(mesh, &bcs, P_INIT));
-  
+
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   MeshFunctionSharedPtr<double> sln(new Hermes::Hermes2D::Solution<double>());
 

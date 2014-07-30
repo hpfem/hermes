@@ -131,7 +131,7 @@ namespace Hermes
       return this->dp->get_spaces();
     }
 
-    template class HERMES_API Solver<double>;
-    template class HERMES_API Solver<std::complex<double> >;
+    template class HERMES_API Solver < double > ;
+    template class HERMES_API Solver < std::complex<double> > ;
   }
 }

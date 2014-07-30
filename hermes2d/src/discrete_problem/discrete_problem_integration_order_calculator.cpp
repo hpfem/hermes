@@ -505,7 +505,7 @@ namespace Hermes
       return order;
     }
 
-    template class HERMES_API DiscreteProblemIntegrationOrderCalculator<double>;
-    template class HERMES_API DiscreteProblemIntegrationOrderCalculator<std::complex<double> >;
+    template class HERMES_API DiscreteProblemIntegrationOrderCalculator < double > ;
+    template class HERMES_API DiscreteProblemIntegrationOrderCalculator < std::complex<double> > ;
   }
 }

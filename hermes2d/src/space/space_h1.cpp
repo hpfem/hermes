@@ -51,15 +51,15 @@ namespace Hermes
     H1Space<Scalar>::H1Space(MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs)
     {
-        init(shapeset, p_init);
-      }
+      init(shapeset, p_init);
+    }
 
     template<typename Scalar>
     H1Space<Scalar>::H1Space(MeshSharedPtr mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, nullptr)
     {
-        init(shapeset, p_init);
-      }
+      init(shapeset, p_init);
+    }
 
     template<typename Scalar>
     H1Space<Scalar>::~H1Space()
@@ -165,21 +165,21 @@ namespace Hermes
                 nd->n = ndofs;
 
                 if (en->bnd)
-                if (this->essential_bcs != nullptr)
-                if (this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker).marker) != nullptr)
-                  nd->dof = this->H2D_CONSTRAINED_DOF;
-                else
-                {
-                  nd->dof = this->next_dof;
-                  this->next_dof += ndofs;
-                  this->edge_functions_count += ndofs;
-                }
-                else
-                {
-                  nd->dof = this->next_dof;
-                  this->next_dof += ndofs;
-                  this->edge_functions_count += ndofs;
-                }
+                  if (this->essential_bcs != nullptr)
+                    if (this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker).marker) != nullptr)
+                      nd->dof = this->H2D_CONSTRAINED_DOF;
+                    else
+                    {
+                      nd->dof = this->next_dof;
+                      this->next_dof += ndofs;
+                      this->edge_functions_count += ndofs;
+                    }
+                  else
+                  {
+                    nd->dof = this->next_dof;
+                    this->next_dof += ndofs;
+                    this->edge_functions_count += ndofs;
+                  }
                 else
                 {
                   nd->dof = this->next_dof;
@@ -225,10 +225,10 @@ namespace Hermes
       else // constrained
       {
         for (int j = 0; j < nd->ncomponents; j++)
-        if (nd->baselist[j].coef != (Scalar)0)
-        {
+          if (nd->baselist[j].coef != (Scalar)0)
+          {
           al->add_triplet(index, nd->baselist[j].dof, nd->baselist[j].coef);
-        }
+          }
       }
     }
 
@@ -582,7 +582,7 @@ namespace Hermes
         update_constrained_nodes(e, nullptr, nullptr, nullptr, nullptr);
     }
 
-    template HERMES_API class H1Space<double>;
-    template HERMES_API class H1Space<std::complex<double> >;
+    template HERMES_API class H1Space < double > ;
+    template HERMES_API class H1Space < std::complex<double> > ;
   }
 }

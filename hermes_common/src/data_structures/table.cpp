@@ -759,7 +759,7 @@ namespace Hermes
     bool result = true;
     for (unsigned int i = 0; i < size; i++)
     {
-      for (unsigned int j = 0; j<size; j++)
+      for (unsigned int j = 0; j < size; j++)
       {
         double val_ij = get_A(i, j);
         if (j >= i && fabs(val_ij) > Hermes::HermesSqrtEpsilon) result = false;

@@ -119,7 +119,7 @@ namespace Hermes
 #pragma omp critical (DG)
       {
         for (unsigned int i = 0; i < current_state->num; i++)
-        current_state->e[i]->visited = true;
+          current_state->e[i]->visited = true;
 
         for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
         {
@@ -277,17 +277,17 @@ namespace Hermes
         if (u_ext)
         {
           for (int u_ext_func_i = 0; u_ext_func_i < this->spaces_size; u_ext_func_i++)
-          if (u_ext[u_ext_func_i])
-          {
+            if (u_ext[u_ext_func_i])
+            {
             current_neighbor_searches[u_ext_func_i]->set_quad_order(order);
             u_ext_func[u_ext_func_i] = current_neighbor_searches[u_ext_func_i]->init_ext_fn(u_ext[u_ext_func_i]);
-          }
-          else
-            u_ext_func[u_ext_func_i] = nullptr;
+            }
+            else
+              u_ext_func[u_ext_func_i] = nullptr;
         }
         else
-        for (int u_ext_func_i = 0; u_ext_func_i < this->spaces_size; u_ext_func_i++)
-          u_ext_func[u_ext_func_i] = nullptr;
+          for (int u_ext_func_i = 0; u_ext_func_i < this->spaces_size; u_ext_func_i++)
+            u_ext_func[u_ext_func_i] = nullptr;
       }
 
       if (current_mat && DG_matrix_forms_present && !edge_processed)
@@ -397,10 +397,10 @@ namespace Hermes
         if (u_ext)
         {
           for (int u_ext_i = 0; u_ext_i < this->spaces_size; u_ext_i++)
-          if (u_ext[u_ext_i])
-          {
+            if (u_ext[u_ext_i])
+            {
             delete u_ext_func[u_ext_i];
-          }
+            }
         }
       }
 
@@ -459,12 +459,12 @@ namespace Hermes
       {
         bool existing_ns = false;
         for (int j = i - 1; j >= 0; j--)
-        if (current_state->e[i] == current_state->e[j])
-        {
+          if (current_state->e[i] == current_state->e[j])
+          {
           current_neighbor_searches[i] = current_neighbor_searches[j];
           existing_ns = true;
           break;
-        }
+          }
         if (!existing_ns)
         {
           NeighborSearch<Scalar>* ns = new NeighborSearch<Scalar>(current_state->e[i], this->meshes[i]);
@@ -486,11 +486,11 @@ namespace Hermes
       {
         bool existing_ns = false;
         for (int j = i - 1; j >= 0; j--)
-        if (current_state->e[i] == current_state->e[j])
-        {
+          if (current_state->e[i] == current_state->e[j])
+          {
           existing_ns = true;
           break;
-        }
+          }
         if (!existing_ns)
           delete current_neighbor_searches[i];
       }
@@ -506,16 +506,16 @@ namespace Hermes
         if (DEBUG_DG_ASSEMBLING_ELEMENT != -1)
         {
           for (unsigned int i = 0; i < this->current_state->num; i++)
-          if (neighbor_searches[current_state->isurf][i]->central_el->id == DEBUG_DG_ASSEMBLING_ELEMENT)
-            pass = false;
+            if (neighbor_searches[current_state->isurf][i]->central_el->id == DEBUG_DG_ASSEMBLING_ELEMENT)
+              pass = false;
         }
         else
           pass = false;
 
         if (!pass)
-        if (DEBUG_DG_ASSEMBLING_ISURF != -1)
-        if (current_state->isurf != DEBUG_DG_ASSEMBLING_ISURF)
-          pass = true;
+          if (DEBUG_DG_ASSEMBLING_ISURF != -1)
+            if (current_state->isurf != DEBUG_DG_ASSEMBLING_ISURF)
+              pass = true;
 
         if (!pass)
         {
@@ -547,7 +547,7 @@ namespace Hermes
     }
 #endif
 
-    template class HERMES_API DiscreteProblemDGAssembler<double>;
-    template class HERMES_API DiscreteProblemDGAssembler<std::complex<double> >;
+    template class HERMES_API DiscreteProblemDGAssembler < double > ;
+    template class HERMES_API DiscreteProblemDGAssembler < std::complex<double> > ;
   }
 }

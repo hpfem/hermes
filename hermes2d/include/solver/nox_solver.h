@@ -87,7 +87,7 @@ namespace Hermes
       /// \brief Preconditioner (optional).
       Teuchos::RCP<Hermes::Preconditioners::EpetraPrecond<Scalar> > precond;
 
-      friend class NewtonSolverNOX <Scalar> ;
+      friend class NewtonSolverNOX < Scalar > ;
     };
 
     /// \brief Encapsulation of NOX nonlinear solver.

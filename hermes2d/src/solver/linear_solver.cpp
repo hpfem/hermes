@@ -139,7 +139,7 @@ namespace Hermes
       this->info("\tLinearSolver: solving done in %s.", this->last_str().c_str());
     }
 
-    template class HERMES_API LinearSolver<double>;
-    template class HERMES_API LinearSolver<std::complex<double> >;
+    template class HERMES_API LinearSolver < double > ;
+    template class HERMES_API LinearSolver < std::complex<double> > ;
   }
 }

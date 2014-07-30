@@ -130,75 +130,75 @@ namespace Hermes
       {
       case EXPORT_FORMAT_MATRIX_MARKET:
       {
-                                        FILE* file = fopen(filename, "w");
-                                        if (!file)
-                                          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
-                                        if (Hermes::Helpers::TypeIsReal<Scalar>::value)
-                                          fprintf(file, "%%%%MatrixMarket matrix coordinate real general\n");
-                                        else
-                                          fprintf(file, "%%%%MatrixMarket matrix coordinate complex general\n");
+        FILE* file = fopen(filename, "w");
+        if (!file)
+          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+        if (Hermes::Helpers::TypeIsReal<Scalar>::value)
+          fprintf(file, "%%%%MatrixMarket matrix coordinate real general\n");
+        else
+          fprintf(file, "%%%%MatrixMarket matrix coordinate complex general\n");
 
-                                        fprintf(file, "%d 1 %d\n", this->size, this->size);
+        fprintf(file, "%d 1 %d\n", this->size, this->size);
 
-                                        for (unsigned int j = 0; j < this->size; j++)
-                                        {
-                                          Hermes::Helpers::fprint_coordinate_num(file, j + 1, 1, v[j], number_format);
-                                          fprintf(file, "\n");
-                                        }
+        for (unsigned int j = 0; j < this->size; j++)
+        {
+          Hermes::Helpers::fprint_coordinate_num(file, j + 1, 1, v[j], number_format);
+          fprintf(file, "\n");
+        }
 
-                                        fclose(file);
+        fclose(file);
       }
         break;
 
       case EXPORT_FORMAT_MATLAB_MATIO:
       {
 #ifdef WITH_MATIO
-                                       size_t dims[2];
-                                       dims[0] = this->size;
-                                       dims[1] = 1;
+        size_t dims[2];
+        dims[0] = this->size;
+        dims[1] = 1;
 
-                                       mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
-                                       matvar_t *matvar;
+        mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
+        matvar_t *matvar;
 
-                                       // For complex.
-                                       double* v_re = nullptr;
-                                       double* v_im = nullptr;
+        // For complex.
+        double* v_re = nullptr;
+        double* v_im = nullptr;
 
-                                       void* data;
-                                       if (Hermes::Helpers::TypeIsReal<Scalar>::value)
-                                       {
-                                         data = v;
-                                         matvar = Mat_VarCreate(var_name, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA);
-                                       }
-                                       else
-                                       {
-                                         v_re = malloc_with_check<SimpleVector<Scalar>, double>(this->size, this);
-                                         v_im = malloc_with_check<SimpleVector<Scalar>, double>(this->size, this);
-                                         struct mat_complex_split_t z = { v_re, v_im };
+        void* data;
+        if (Hermes::Helpers::TypeIsReal<Scalar>::value)
+        {
+          data = v;
+          matvar = Mat_VarCreate(var_name, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA);
+        }
+        else
+        {
+          v_re = malloc_with_check<SimpleVector<Scalar>, double>(this->size, this);
+          v_im = malloc_with_check<SimpleVector<Scalar>, double>(this->size, this);
+          struct mat_complex_split_t z = { v_re, v_im };
 
-                                         for (int i = 0; i < this->size; i++)
-                                         {
-                                           v_re[i] = ((std::complex<double>)(this->v[i])).real();
-                                           v_im[i] = ((std::complex<double>)(this->v[i])).imag();
-                                           data = &z;
-                                         }
-                                         matvar = Mat_VarCreate(var_name, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
-                                       }
+          for (int i = 0; i < this->size; i++)
+          {
+            v_re[i] = ((std::complex<double>)(this->v[i])).real();
+            v_im[i] = ((std::complex<double>)(this->v[i])).imag();
+            data = &z;
+          }
+          matvar = Mat_VarCreate(var_name, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
+        }
 
-                                       if (matvar)
-                                       {
-                                         Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
-                                         Mat_VarFree(matvar);
-                                       }
+        if (matvar)
+        {
+          Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+          Mat_VarFree(matvar);
+        }
 
-                                       free_with_check(v_re);
-                                       free_with_check(v_im);
-                                       Mat_Close(mat);
+        free_with_check(v_re);
+        free_with_check(v_im);
+        Mat_Close(mat);
 
-                                       if (!matvar)
-                                         throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+        if (!matvar)
+          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
 #else
-                                       throw Exceptions::Exception("MATIO not included.");
+        throw Exceptions::Exception("MATIO not included.");
 #endif
       }
         break;
@@ -206,52 +206,52 @@ namespace Hermes
       case EXPORT_FORMAT_PLAIN_ASCII:
       case EXPORT_FORMAT_MATLAB_SIMPLE:
       {
-                                        FILE* file = fopen(filename, "w");
-                                        if (!file)
-                                          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
-                                        for (unsigned int i = 0; i < this->size; i++)
-                                        {
-                                          Hermes::Helpers::fprint_num(file, v[i], number_format);
-                                          fprintf(file, "\n");
-                                        }
-                                        fclose(file);
+        FILE* file = fopen(filename, "w");
+        if (!file)
+          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+        for (unsigned int i = 0; i < this->size; i++)
+        {
+          Hermes::Helpers::fprint_num(file, v[i], number_format);
+          fprintf(file, "\n");
+        }
+        fclose(file);
       }
         break;
 
 #ifdef WITH_BSON
       case EXPORT_FORMAT_BSON:
       {
-                               // Init bson
-                               bson bw;
-                               bson_init(&bw);
+        // Init bson
+        bson bw;
+        bson_init(&bw);
 
-                               // Matrix size.
-                               bson_append_int(&bw, "size", this->size);
+        // Matrix size.
+        bson_append_int(&bw, "size", this->size);
 
-                               bson_append_start_array(&bw, "v");
-                               for (unsigned int i = 0; i < this->size; i++)
-                                 bson_append_double(&bw, "v_i", real(this->v[i]));
-                               bson_append_finish_array(&bw);
+        bson_append_start_array(&bw, "v");
+        for (unsigned int i = 0; i < this->size; i++)
+          bson_append_double(&bw, "v_i", real(this->v[i]));
+        bson_append_finish_array(&bw);
 
-                               if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
-                               {
-                                 bson_append_start_array(&bw, "v-imag");
-                                 for (unsigned int i = 0; i < this->size; i++)
-                                   bson_append_double(&bw, "v_i", imag(this->v[i]));
-                                 bson_append_finish_array(&bw);
-                               }
+        if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+        {
+          bson_append_start_array(&bw, "v-imag");
+          for (unsigned int i = 0; i < this->size; i++)
+            bson_append_double(&bw, "v_i", imag(this->v[i]));
+          bson_append_finish_array(&bw);
+        }
 
-                               // Done.
-                               bson_finish(&bw);
+        // Done.
+        bson_finish(&bw);
 
-                               // Write to disk.
-                               FILE *fpw;
-                               fpw = fopen(filename, "wb");
-                               const char *dataw = (const char *)bson_data(&bw);
-                               fwrite(dataw, bson_size(&bw), 1, fpw);
-                               fclose(fpw);
+        // Write to disk.
+        FILE *fpw;
+        fpw = fopen(filename, "wb");
+        const char *dataw = (const char *)bson_data(&bw);
+        fwrite(dataw, bson_size(&bw), 1, fpw);
+        fclose(fpw);
 
-                               bson_destroy(&bw);
+        bson_destroy(&bw);
       }
 #endif
       }
@@ -264,22 +264,22 @@ namespace Hermes
       {
       case EXPORT_FORMAT_PLAIN_ASCII:
       {
-                                      std::vector<Scalar> data;
-                                      std::ifstream input(filename);
-                                      if (input.bad())
-                                        throw Exceptions::IOException(Exceptions::IOException::Read, filename);
-                                      std::string lineData;
+        std::vector<Scalar> data;
+        std::ifstream input(filename);
+        if (input.bad())
+          throw Exceptions::IOException(Exceptions::IOException::Read, filename);
+        std::string lineData;
 
-                                      while (getline(input, lineData))
-                                      {
-                                        Scalar d;
-                                        std::stringstream lineStream(lineData);
-                                        lineStream >> d;
-                                        data.push_back(d);
-                                      }
+        while (getline(input, lineData))
+        {
+          Scalar d;
+          std::stringstream lineStream(lineData);
+          lineStream >> d;
+          data.push_back(d);
+        }
 
-                                      this->alloc(data.size());
-                                      memcpy(this->v, &data[0], sizeof(Scalar)*data.size());
+        this->alloc(data.size());
+        memcpy(this->v, &data[0], sizeof(Scalar)*data.size());
       }
         break;
       case EXPORT_FORMAT_MATLAB_MATIO:
@@ -326,49 +326,49 @@ namespace Hermes
 #ifdef WITH_BSON
       case EXPORT_FORMAT_BSON:
       {
-                               FILE *fpr;
-                               fpr = fopen(filename, "rb");
+        FILE *fpr;
+        fpr = fopen(filename, "rb");
 
-                               // file size:
-                               fseek(fpr, 0, SEEK_END);
-                               int size = ftell(fpr);
-                               rewind(fpr);
+        // file size:
+        fseek(fpr, 0, SEEK_END);
+        int size = ftell(fpr);
+        rewind(fpr);
 
-                               // allocate memory to contain the whole file:
-                               char *datar = malloc_with_check<char>(size);
-                               fread(datar, size, 1, fpr);
-                               fclose(fpr);
+        // allocate memory to contain the whole file:
+        char *datar = malloc_with_check<char>(size);
+        fread(datar, size, 1, fpr);
+        fclose(fpr);
 
-                               bson br;
-                               bson_init_finished_data(&br, datar, 0);
+        bson br;
+        bson_init_finished_data(&br, datar, 0);
 
-                               bson_iterator it;
-                               bson sub;
-                               bson_find(&it, &br, "size");
-                               this->size = bson_iterator_int(&it);
+        bson_iterator it;
+        bson sub;
+        bson_find(&it, &br, "size");
+        this->size = bson_iterator_int(&it);
 
-                               this->v = malloc_with_check<SimpleVector<Scalar>, Scalar>(this->size, this);
+        this->v = malloc_with_check<SimpleVector<Scalar>, Scalar>(this->size, this);
 
-                               bson_iterator it_coeffs;
-                               bson_find(&it_coeffs, &br, "v");
-                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
-                               bson_iterator_init(&it, &sub);
-                               int index_coeff = 0;
-                               while (bson_iterator_next(&it))
-                                 this->v[index_coeff++] = bson_iterator_double(&it);
+        bson_iterator it_coeffs;
+        bson_find(&it_coeffs, &br, "v");
+        bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        int index_coeff = 0;
+        while (bson_iterator_next(&it))
+          this->v[index_coeff++] = bson_iterator_double(&it);
 
-                               if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
-                               {
-                                 bson_find(&it_coeffs, &br, "v-imag");
-                                 bson_iterator_subobject_init(&it_coeffs, &sub, 0);
-                                 bson_iterator_init(&it, &sub);
-                                 index_coeff = 0;
-                                 while (bson_iterator_next(&it))
-                                   ((std::complex<double>)this->v[index_coeff++]).imag(bson_iterator_double(&it));
-                               }
+        if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+        {
+          bson_find(&it_coeffs, &br, "v-imag");
+          bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+          bson_iterator_init(&it, &sub);
+          index_coeff = 0;
+          while (bson_iterator_next(&it))
+            ((std::complex<double>)this->v[index_coeff++]).imag(bson_iterator_double(&it));
+        }
 
-                               bson_destroy(&br);
-                               free_with_check(datar);
+        bson_destroy(&br);
+        free_with_check(datar);
       }
         break;
 #endif
@@ -531,77 +531,77 @@ namespace Hermes
       {
       case Hermes::SOLVER_EXTERNAL:
       {
-                                    return new SimpleVector<double>;
+        return new SimpleVector < double > ;
       }
       case Hermes::SOLVER_AMESOS:
       {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
-                                  return new EpetraVector<double>;
+        return new EpetraVector < double > ;
 #else
-                                  throw Hermes::Exceptions::Exception("Amesos not installed.");
+        throw Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
-                                  break;
+        break;
       }
       case Hermes::SOLVER_AZTECOO:
       {
-                                   if (use_direct_solver)
-                                     throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
-                                   return new EpetraVector<double>;
+        return new EpetraVector < double > ;
 #else
-                                   throw Hermes::Exceptions::Exception("AztecOO not installed.");
+        throw Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_MUMPS:
       {
 #ifdef WITH_MUMPS
-                                 return new SimpleVector<double>;
+        return new SimpleVector < double > ;
 #else
-                                 throw Hermes::Exceptions::Exception("MUMPS was not installed.");
+        throw Hermes::Exceptions::Exception("MUMPS was not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_PETSC:
       {
-                                 if (use_direct_solver)
-                                   throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
 #ifdef WITH_PETSC
-                                 return new PetscVector<double>;
+        return new PetscVector < double > ;
 #else
-                                 throw Hermes::Exceptions::Exception("PETSc not installed.");
+        throw Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_UMFPACK:
       {
 #ifdef WITH_UMFPACK
-                                   return new SimpleVector<double>;
+        return new SimpleVector < double > ;
 #else
-                                   throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
+        throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_PARALUTION_ITERATIVE:
       case Hermes::SOLVER_PARALUTION_AMG:
       {
-                                          if (use_direct_solver)
-                                            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
-                                          return new ParalutionVector<double>;
+        return new ParalutionVector < double > ;
 #else
-                                          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
+        throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
 #endif
-                                          break;
+        break;
       }
       case Hermes::SOLVER_SUPERLU:
       {
 #ifdef WITH_SUPERLU
-                                   return new SimpleVector<double>;
+        return new SimpleVector < double > ;
 #else
-                                   throw Hermes::Exceptions::Exception("SuperLU was not installed.");
+        throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
-                                   break;
+        break;
       }
       default:
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_vector().");
@@ -616,79 +616,79 @@ namespace Hermes
       {
       case Hermes::SOLVER_EXTERNAL:
       {
-                                    return new SimpleVector<std::complex<double> >;
+        return new SimpleVector < std::complex<double> > ;
       }
 
       case Hermes::SOLVER_AMESOS:
       {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
-                                  return new EpetraVector<std::complex<double> >;
+        return new EpetraVector < std::complex<double> > ;
 #else
-                                  throw Hermes::Exceptions::Exception("Amesos not installed.");
+        throw Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
-                                  break;
+        break;
       }
       case Hermes::SOLVER_AZTECOO:
       {
-                                   if (use_direct_solver)
-                                     throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
 
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
-                                   return new EpetraVector<std::complex<double> >;
+        return new EpetraVector < std::complex<double> > ;
 #else
-                                   throw Hermes::Exceptions::Exception("AztecOO not installed.");
+        throw Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_MUMPS:
       {
 #ifdef WITH_MUMPS
-                                 return new SimpleVector<std::complex<double> >;
+        return new SimpleVector < std::complex<double> > ;
 #else
-                                 throw Hermes::Exceptions::Exception("MUMPS was not installed.");
+        throw Hermes::Exceptions::Exception("MUMPS was not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_PETSC:
       {
-                                 if (use_direct_solver)
-                                   throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
 #ifdef WITH_PETSC
-                                 return new PetscVector<std::complex<double> >;
+        return new PetscVector < std::complex<double> > ;
 #else
-                                 throw Hermes::Exceptions::Exception("PETSc not installed.");
+        throw Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_UMFPACK:
       {
 #ifdef WITH_UMFPACK
-                                   return new SimpleVector<std::complex<double> >;
+        return new SimpleVector < std::complex<double> > ;
 #else
-                                   throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
+        throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_PARALUTION_ITERATIVE:
       case Hermes::SOLVER_PARALUTION_AMG:
       {
-                                          if (use_direct_solver)
-                                            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
-                                          throw Hermes::Exceptions::Exception("PARALUTION works only for real problems.");
+        throw Hermes::Exceptions::Exception("PARALUTION works only for real problems.");
 #else
-                                          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
+        throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
 #endif
-                                          break;
+        break;
       }
       case Hermes::SOLVER_SUPERLU:
       {
 #ifdef WITH_SUPERLU
-                                   return new SimpleVector<std::complex<double> >;
+        return new SimpleVector < std::complex<double> > ;
 #else
-                                   throw Hermes::Exceptions::Exception("SuperLU was not installed.");
+        throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
-                                   break;
+        break;
       }
       default:
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_vector().");
@@ -696,10 +696,10 @@ namespace Hermes
       return nullptr;
     }
 
-    template class Vector<double>;
-    template class Vector<std::complex<double> >;
+    template class Vector < double > ;
+    template class Vector < std::complex<double> > ;
 
-    template class SimpleVector<double>;
-    template class SimpleVector<std::complex<double> >;
+    template class SimpleVector < double > ;
+    template class SimpleVector < std::complex<double> > ;
   }
 }

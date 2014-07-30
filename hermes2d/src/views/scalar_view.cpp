@@ -139,11 +139,11 @@ namespace Hermes
         // Now we reset the active element if it was set before the MeshFunction sln entered this method.
         // Only for Solutions. This method may fail for filters, as they may not have RefMaps correctly set.
         if (dynamic_cast<Solution<double>*>(sln.get()) != nullptr)
-        if (active_element != nullptr)
-          // Also when there has not been a call to set_active_element since assignment to this MeshFunction,
-          // there is nothing to restore to.
-        if (active_element->active)
-          sln->set_active_element(active_element);
+          if (active_element != nullptr)
+            // Also when there has not been a call to set_active_element since assignment to this MeshFunction,
+            // there is nothing to restore to.
+            if (active_element->active)
+              sln->set_active_element(active_element);
       }
 
       void ScalarView::show_linearizer_data(double eps, int item)

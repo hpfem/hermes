@@ -64,8 +64,8 @@ namespace Hermes
     {
       bool toleranceSet = false;
       for (int i = 0; i < NonlinearConvergenceMeasurementTypeCount; i++)
-      if (this->tolerance_set[i])
-        toleranceSet = true;
+        if (this->tolerance_set[i])
+          toleranceSet = true;
       if (!toleranceSet)
       {
         throw Exceptions::Exception("No tolerance set in NonlinearMatrixSolver.");
@@ -130,38 +130,38 @@ namespace Hermes
       {
       case ResidualNormRelativeToPrevious:
       {
-                                           this->tolerance[0] = tolerance_;
-                                           this->tolerance_set[0] = true;
+        this->tolerance[0] = tolerance_;
+        this->tolerance_set[0] = true;
       }
         break;
       case ResidualNormRatioToInitial:
       {
-                                       this->tolerance[1] = tolerance_;
-                                       this->tolerance_set[1] = true;
+        this->tolerance[1] = tolerance_;
+        this->tolerance_set[1] = true;
       }
         break;
       case ResidualNormRatioToPrevious:
       {
-                                        this->tolerance[2] = tolerance_;
-                                        this->tolerance_set[2] = true;
+        this->tolerance[2] = tolerance_;
+        this->tolerance_set[2] = true;
       }
         break;
       case ResidualNormAbsolute:
       {
-                                 this->tolerance[3] = tolerance_;
-                                 this->tolerance_set[3] = true;
+        this->tolerance[3] = tolerance_;
+        this->tolerance_set[3] = true;
       }
         break;
       case SolutionChangeAbsolute:
       {
-                                   this->tolerance[4] = tolerance_;
-                                   this->tolerance_set[4] = true;
+        this->tolerance[4] = tolerance_;
+        this->tolerance_set[4] = true;
       }
         break;
       case SolutionChangeRelative:
       {
-                                   this->tolerance[5] = tolerance_;
-                                   this->tolerance_set[5] = true;
+        this->tolerance[5] = tolerance_;
+        this->tolerance_set[5] = true;
       }
         break;
       default:
@@ -710,8 +710,8 @@ namespace Hermes
     {
     }
 
-    template class HERMES_API NonlinearMatrixSolver<double>;
-    template class HERMES_API NonlinearMatrixSolver<std::complex<double> >;
+    template class HERMES_API NonlinearMatrixSolver < double > ;
+    template class HERMES_API NonlinearMatrixSolver < std::complex<double> > ;
   }
 
   namespace Exceptions

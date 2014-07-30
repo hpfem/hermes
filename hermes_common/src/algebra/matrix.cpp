@@ -277,8 +277,8 @@ namespace Hermes
       qsort_int(buffer, end - buffer);
       int *q = buffer;
       for (int *p = buffer, last = -1; p < end; p++)
-      if (*p != last)
-        *q++ = last = *p;
+        if (*p != last)
+          *q++ = last = *p;
 
       return q - buffer;
     }
@@ -288,8 +288,8 @@ namespace Hermes
     {
       int total = 0;
       for (unsigned int i = 0; i < this->size; i++)
-      for (Page *page = &pages[i]; page != nullptr; page = page->next)
-        total += page->count;
+        for (Page *page = &pages[i]; page != nullptr; page = page->next)
+          total += page->count;
 
       return total;
     }
@@ -301,78 +301,78 @@ namespace Hermes
       {
       case Hermes::SOLVER_EXTERNAL:
       {
-                                    return new CSCMatrix<double>;
+        return new CSCMatrix < double > ;
       }
 
       case Hermes::SOLVER_AMESOS:
       {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
-                                  return new EpetraMatrix<double>;
+        return new EpetraMatrix < double > ;
 #else
-                                  throw Hermes::Exceptions::Exception("Amesos not installed.");
+        throw Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
-                                  break;
+        break;
       }
       case Hermes::SOLVER_AZTECOO:
       {
-                                   if (use_direct_solver)
-                                     throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
-                                   return new EpetraMatrix<double>;
+        return new EpetraMatrix < double > ;
 #else
-                                   throw Hermes::Exceptions::Exception("AztecOO not installed.");
+        throw Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_MUMPS:
       {
 #ifdef WITH_MUMPS
-                                 return new MumpsMatrix<double>;
+        return new MumpsMatrix < double > ;
 #else
-                                 throw Hermes::Exceptions::Exception("MUMPS not installed.");
+        throw Hermes::Exceptions::Exception("MUMPS not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_PETSC:
       {
-                                 if (use_direct_solver)
-                                   throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
 #ifdef WITH_PETSC
-                                 return new PetscMatrix<double>;
+        return new PetscMatrix < double > ;
 #else
-                                 throw Hermes::Exceptions::Exception("PETSc not installed.");
+        throw Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_UMFPACK:
       {
 #ifdef WITH_UMFPACK
-                                   return new CSCMatrix<double>;
+        return new CSCMatrix < double > ;
 #else
-                                   throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
+        throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_PARALUTION_ITERATIVE:
       case Hermes::SOLVER_PARALUTION_AMG:
       {
-                                          if (use_direct_solver)
-                                            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
-                                          return new ParalutionMatrix<double>;
+        return new ParalutionMatrix < double > ;
 #else
-                                          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
+        throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
 #endif
-                                          break;
+        break;
       }
       case Hermes::SOLVER_SUPERLU:
       {
 #ifdef WITH_SUPERLU
-                                   return new CSCMatrix<double>;
+        return new CSCMatrix < double > ;
 #else
-                                   throw Hermes::Exceptions::Exception("SuperLU was not installed.");
+        throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
-                                   break;
+        break;
       }
       default:
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_matrix().");
@@ -387,77 +387,77 @@ namespace Hermes
       {
       case Hermes::SOLVER_EXTERNAL:
       {
-                                    return new CSCMatrix<std::complex<double> >;
+        return new CSCMatrix < std::complex<double> > ;
       }
       case Hermes::SOLVER_AMESOS:
       {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
-                                  return new EpetraMatrix<std::complex<double> >;
+        return new EpetraMatrix < std::complex<double> > ;
 #else
-                                  throw Hermes::Exceptions::Exception("Amesos not installed.");
+        throw Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
-                                  break;
+        break;
       }
       case Hermes::SOLVER_AZTECOO:
       {
-                                   if (use_direct_solver)
-                                     throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
-                                   return new EpetraMatrix<std::complex<double> >;
+        return new EpetraMatrix < std::complex<double> > ;
 #else
-                                   throw Hermes::Exceptions::Exception("AztecOO not installed.");
+        throw Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_MUMPS:
       {
 #ifdef WITH_MUMPS
-                                 return new MumpsMatrix<std::complex<double> >;
+        return new MumpsMatrix < std::complex<double> > ;
 #else
-                                 throw Hermes::Exceptions::Exception("MUMPS not installed.");
+        throw Hermes::Exceptions::Exception("MUMPS not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_PETSC:
       {
-                                 if (use_direct_solver)
-                                   throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
 #ifdef WITH_PETSC
-                                 return new PetscMatrix<std::complex<double> >;
+        return new PetscMatrix < std::complex<double> > ;
 #else
-                                 throw Hermes::Exceptions::Exception("PETSc not installed.");
+        throw Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_UMFPACK:
       {
 #ifdef WITH_UMFPACK
-                                   return new CSCMatrix<std::complex<double> >;
+        return new CSCMatrix < std::complex<double> > ;
 #else
-                                   throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
+        throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_PARALUTION_ITERATIVE:
       case Hermes::SOLVER_PARALUTION_AMG:
       {
-                                          if (use_direct_solver)
-                                            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
-                                          throw Hermes::Exceptions::Exception("PARALUTION works only for real problems.");
+        throw Hermes::Exceptions::Exception("PARALUTION works only for real problems.");
 #else
-                                          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
+        throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
 #endif
-                                          break;
+        break;
       }
       case Hermes::SOLVER_SUPERLU:
       {
 #ifdef WITH_SUPERLU
-                                   return new CSCMatrix<std::complex<double> >;
+        return new CSCMatrix < std::complex<double> > ;
 #else
-                                   throw Hermes::Exceptions::Exception("SuperLU was not installed.");
+        throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
-                                   break;
+        break;
       }
       default:
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_matrix().");
@@ -465,10 +465,10 @@ namespace Hermes
       return nullptr;
     }
 
-    template class Matrix<double>;
-    template class Matrix<std::complex<double> >;
+    template class Matrix < double > ;
+    template class Matrix < std::complex<double> > ;
 
-    template class SparseMatrix<double>;
-    template class SparseMatrix<std::complex<double> >;
+    template class SparseMatrix < double > ;
+    template class SparseMatrix < std::complex<double> > ;
   }
 }

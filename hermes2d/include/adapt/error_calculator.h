@@ -169,12 +169,12 @@ namespace Hermes
           return 1;
       };
 
-      friend class Adapt<Scalar>;
-      friend class ErrorThreadCalculator<Scalar>;
+      friend class Adapt < Scalar > ;
+      friend class ErrorThreadCalculator < Scalar > ;
     };
 
     template<typename Scalar, NormType normType>
-    class HERMES_API DefaultErrorCalculator : public ErrorCalculator<Scalar>
+    class HERMES_API DefaultErrorCalculator : public ErrorCalculator < Scalar >
     {
     public:
       DefaultErrorCalculator(CalculatedErrorType errorType, int component_count);
@@ -182,7 +182,7 @@ namespace Hermes
     };
 
     template<typename Scalar, NormType normType>
-    class HERMES_API DefaultNormCalculator : protected ErrorCalculator<Scalar>
+    class HERMES_API DefaultNormCalculator : protected ErrorCalculator < Scalar >
     {
     public:
       DefaultNormCalculator(int component_count);

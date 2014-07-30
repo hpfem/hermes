@@ -129,7 +129,7 @@ namespace Hermes
                     if ((blocks[m][el] || blocks[el][m]) && current_state->e[m])
                     {
                       AsmList<Scalar>*am = &(al[m]);
-                      AsmList<Scalar>*an = new AsmList<Scalar>;
+                      AsmList<Scalar>*an = new AsmList < Scalar > ;
                       spaces[el]->get_element_assembly_list(neighbor_elems_arrays[el][ed][neigh], an);
 
                       // pretend assembling of the element stiffness matrix
@@ -186,8 +186,8 @@ namespace Hermes
                 if (dofs_m[i] >= 0)
                 {
                   for (unsigned int j = 0; j < cnts_m; j++)
-                  if (dofs_m[j] >= 0)
-                    mat->pre_add_ij(dofs_m[i], dofs_m[j]);
+                    if (dofs_m[j] >= 0)
+                      mat->pre_add_ij(dofs_m[i], dofs_m[j]);
                 }
               }
             }
@@ -209,9 +209,9 @@ namespace Hermes
                   for (unsigned int i = 0; i < cnts_m; i++)
                   {
                     if (dofs_m[i] >= 0)
-                    for (unsigned int j = 0; j < cnts_n; j++)
-                    if (dofs_n[j] >= 0)
-                      mat->pre_add_ij(dofs_m[i], dofs_n[j]);
+                      for (unsigned int j = 0; j < cnts_n; j++)
+                        if (dofs_n[j] >= 0)
+                          mat->pre_add_ij(dofs_m[i], dofs_n[j]);
                   }
                 }
               }
@@ -293,8 +293,8 @@ namespace Hermes
         // If a block scaling table is provided, and if the scaling coefficient
         // A_mn for this block is zero, then the form does not need to be assembled.
         if (this->block_weights)
-        if (fabs(this->block_weights->get_A(form->i / this->RK_original_spaces_count, form->j / this->RK_original_spaces_count)) < Hermes::HermesSqrtEpsilon)
-          return false;
+          if (fabs(this->block_weights->get_A(form->i / this->RK_original_spaces_count, form->j / this->RK_original_spaces_count)) < Hermes::HermesSqrtEpsilon)
+            return false;
         return true;
       }
       return false;
@@ -311,8 +311,8 @@ namespace Hermes
 
       int this_marker = current_state->rep->marker;
       for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
-      if (form->areas_internal[ss] == this_marker)
-        return true;
+        if (form->areas_internal[ss] == this_marker)
+          return true;
 
       return false;
     }
@@ -331,8 +331,8 @@ namespace Hermes
 
       int this_marker = current_state->rep->en[current_state->isurf]->marker;
       for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
-      if (form->areas_internal[ss] == this_marker)
-        return true;
+        if (form->areas_internal[ss] == this_marker)
+          return true;
 
       return false;
     }
@@ -365,8 +365,8 @@ namespace Hermes
 
       int this_marker = current_state->rep->marker;
       for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
-      if (form->areas_internal[ss] == this_marker)
-        return true;
+        if (form->areas_internal[ss] == this_marker)
+          return true;
 
       return false;
     }
@@ -385,8 +385,8 @@ namespace Hermes
 
       int this_marker = current_state->rep->en[current_state->isurf]->marker;
       for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
-      if (form->areas_internal[ss] == this_marker)
-        return true;
+        if (form->areas_internal[ss] == this_marker)
+          return true;
 
       return false;
     }
@@ -397,7 +397,7 @@ namespace Hermes
       return form_to_be_assembled((VectorForm<Scalar>*)form, current_state);
     }
 
-    template class HERMES_API DiscreteProblemSelectiveAssembler<double>;
-    template class HERMES_API DiscreteProblemSelectiveAssembler<std::complex<double> >;
+    template class HERMES_API DiscreteProblemSelectiveAssembler < double > ;
+    template class HERMES_API DiscreteProblemSelectiveAssembler < std::complex<double> > ;
   }
 }

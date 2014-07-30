@@ -1,11 +1,11 @@
 #include "definitions.h"
 
 CustomWeakFormSteadyState::CustomWeakFormSteadyState(Hermes1DFunction<double>* thermal_conductivity,
-                                                     Hermes2DFunction<double>* heat_source)
-                                                     : WeakForm<double>(1)
+  Hermes2DFunction<double>* heat_source)
+  : WeakForm<double>(1)
 {
 #ifdef LINEAR_NONLINEAR_SWITCH
-  
+
   // Matrix.
   this->add_matrix_form(new DefaultMatrixFormDiffusion<double>(0, 0, HERMES_ANY_MARKER, thermal_conductivity));
 
@@ -25,27 +25,23 @@ CustomWeakFormSteadyState::CustomWeakFormSteadyState(Hermes1DFunction<double>* t
 #endif
 };
 
-
-
 CustomWeakFormTimeDependent::CustomWeakFormTimeDependent(Hermes1DFunction<double>* thermal_conductivity,
-                                                         Hermes2DFunction<double>* heat_source,
-                                                         MeshFunctionSharedPtr<double> prev_sln)
-                                                         : CustomWeakFormSteadyState(thermal_conductivity, heat_source)
+  Hermes2DFunction<double>* heat_source,
+  MeshFunctionSharedPtr<double> prev_sln)
+  : CustomWeakFormSteadyState(thermal_conductivity, heat_source)
 {
   // Jacobian.
   this->add_matrix_form(new CustomMatrixFormVol(0, 0));
 
   // Residual.
   add_vector_form(new CustomResidualFormVol(0));
-  
+
   CustomVectorFormVol* vec_form_vol = new CustomVectorFormVol(0);
   vec_form_vol->set_ext(prev_sln);
   add_vector_form(vec_form_vol);
 };
 
-
-
-CustomNonlinearity::CustomNonlinearity(double alpha): Hermes1DFunction<double>()
+CustomNonlinearity::CustomNonlinearity(double alpha) : Hermes1DFunction<double>()
 {
   this->is_const = false;
   this->alpha = alpha;
@@ -57,7 +53,7 @@ double CustomNonlinearity::value(double u) const
 }
 
 Ord CustomNonlinearity::value(Ord u) const
-{ 
+{
   return Ord(10);
 }
 
@@ -76,9 +72,9 @@ CustomEssentialBCNonConst::CustomEssentialBCNonConst(std::string marker) : Essen
   markers.push_back(marker);
 }
 
-EssentialBCValueType CustomEssentialBCNonConst::get_value_type() const 
-{ 
-  return BC_FUNCTION; 
+EssentialBCValueType CustomEssentialBCNonConst::get_value_type() const
+{
+  return BC_FUNCTION;
 }
 
 double CustomEssentialBCNonConst::value(double x, double y) const
@@ -86,22 +82,22 @@ double CustomEssentialBCNonConst::value(double x, double y) const
   return (x + 10) * (y + 10) / 100.;
 }
 
-void CustomInitialCondition::derivatives (double x, double y, double& dx, double& dy) const 
+void CustomInitialCondition::derivatives(double x, double y, double& dx, double& dy) const
 {
-  dx = (y + 10)/100.;
-  dy = (x + 10)/100.;
+  dx = (y + 10) / 100.;
+  dy = (x + 10) / 100.;
 };
 
-double CustomInitialCondition::value (double x, double y) const 
+double CustomInitialCondition::value(double x, double y) const
 {
   return (x + 10) * (y + 10) / 100.;
 }
 
-Ord CustomInitialCondition::ord(double x, double y) const 
+Ord CustomInitialCondition::ord(double x, double y) const
 {
   return Hermes::Ord(x*y);
 }
-  
+
 MeshFunction<double>* CustomInitialCondition::clone() const
 {
   return new CustomInitialCondition(mesh);
@@ -111,7 +107,7 @@ CustomInitialCondition::~CustomInitialCondition()
 {
 }
 
-CustomWeakFormTimeDependent::CustomMatrixFormVol::CustomMatrixFormVol(int i, int j) : DefaultMatrixFormVol<double>(i, j, HERMES_ANY_MARKER) 
+CustomWeakFormTimeDependent::CustomMatrixFormVol::CustomMatrixFormVol(int i, int j) : DefaultMatrixFormVol<double>(i, j, HERMES_ANY_MARKER)
 {
 }
 
@@ -132,10 +128,10 @@ CustomWeakFormTimeDependent::CustomVectorFormVol::CustomVectorFormVol(int i) : D
 double CustomWeakFormTimeDependent::CustomVectorFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<double> **ext) const
 {
   double result = 0;
-  
+
   for (int i = 0; i < n; i++)
     result += wt[i] * ext[0]->val[i] * v->val[i];
-         
+
   return -result / this->wf->get_current_time_step();
 }
 
@@ -151,10 +147,10 @@ CustomWeakFormTimeDependent::CustomResidualFormVol::CustomResidualFormVol(int i)
 double CustomWeakFormTimeDependent::CustomResidualFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<double> **ext) const
 {
   double result = 0;
-  
+
   for (int i = 0; i < n; i++)
     result += wt[i] * u_ext[0]->val[i] * v->val[i];
-         
+
   return result / this->wf->get_current_time_step();
 }
 

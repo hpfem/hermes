@@ -100,8 +100,8 @@ namespace Hermes
 
       // Also handle the errorMeshFunction.
       for (int i = 0; i < this->component_count; i++)
-      if (this->errorMeshFunction[i])
-        this->errorMeshFunction[i].reset();
+        if (this->errorMeshFunction[i])
+          this->errorMeshFunction[i].reset();
     }
 
     template<typename Scalar>
@@ -248,13 +248,13 @@ namespace Hermes
         }
 
         if (this->errorType == RelativeErrorToGlobalNorm)
-        for (int j = 0; j < this->element_count[i]; j++)
-        {
+          for (int j = 0; j < this->element_count[i]; j++)
+          {
           if (component_norms[i] < Hermes::HermesEpsilon)
             *(this->element_references[running_indexer + j].error) = 0.;
           else
             *(this->element_references[running_indexer + j].error) /= component_norms[i];
-        }
+          }
 
         norms_squared_sum += component_norms[i];
         errors_squared_sum += component_errors[i];
@@ -428,29 +428,29 @@ namespace Hermes
         delete this->mfvol[i];
     }
 
-    template HERMES_API class DefaultErrorCalculator<double, HERMES_H1_NORM>;
-    template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_H1_NORM>;
-    template HERMES_API class DefaultErrorCalculator<double, HERMES_L2_NORM>;
-    template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_L2_NORM>;
-    template HERMES_API class DefaultErrorCalculator<double, HERMES_H1_SEMINORM>;
-    template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_H1_SEMINORM>;
-    template HERMES_API class DefaultErrorCalculator<double, HERMES_HCURL_NORM>;
-    template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_HCURL_NORM>;
-    template HERMES_API class DefaultErrorCalculator<double, HERMES_HDIV_NORM>;
-    template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_HDIV_NORM>;
+    template HERMES_API class DefaultErrorCalculator < double, HERMES_H1_NORM > ;
+    template HERMES_API class DefaultErrorCalculator < std::complex<double>, HERMES_H1_NORM > ;
+    template HERMES_API class DefaultErrorCalculator < double, HERMES_L2_NORM > ;
+    template HERMES_API class DefaultErrorCalculator < std::complex<double>, HERMES_L2_NORM > ;
+    template HERMES_API class DefaultErrorCalculator < double, HERMES_H1_SEMINORM > ;
+    template HERMES_API class DefaultErrorCalculator < std::complex<double>, HERMES_H1_SEMINORM > ;
+    template HERMES_API class DefaultErrorCalculator < double, HERMES_HCURL_NORM > ;
+    template HERMES_API class DefaultErrorCalculator < std::complex<double>, HERMES_HCURL_NORM > ;
+    template HERMES_API class DefaultErrorCalculator < double, HERMES_HDIV_NORM > ;
+    template HERMES_API class DefaultErrorCalculator < std::complex<double>, HERMES_HDIV_NORM > ;
 
-    template HERMES_API class DefaultNormCalculator<double, HERMES_H1_NORM>;
-    template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_H1_NORM>;
-    template HERMES_API class DefaultNormCalculator<double, HERMES_L2_NORM>;
-    template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_L2_NORM>;
-    template HERMES_API class DefaultNormCalculator<double, HERMES_H1_SEMINORM>;
-    template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_H1_SEMINORM>;
-    template HERMES_API class DefaultNormCalculator<double, HERMES_HCURL_NORM>;
-    template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_HCURL_NORM>;
-    template HERMES_API class DefaultNormCalculator<double, HERMES_HDIV_NORM>;
-    template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_HDIV_NORM>;
+    template HERMES_API class DefaultNormCalculator < double, HERMES_H1_NORM > ;
+    template HERMES_API class DefaultNormCalculator < std::complex<double>, HERMES_H1_NORM > ;
+    template HERMES_API class DefaultNormCalculator < double, HERMES_L2_NORM > ;
+    template HERMES_API class DefaultNormCalculator < std::complex<double>, HERMES_L2_NORM > ;
+    template HERMES_API class DefaultNormCalculator < double, HERMES_H1_SEMINORM > ;
+    template HERMES_API class DefaultNormCalculator < std::complex<double>, HERMES_H1_SEMINORM > ;
+    template HERMES_API class DefaultNormCalculator < double, HERMES_HCURL_NORM > ;
+    template HERMES_API class DefaultNormCalculator < std::complex<double>, HERMES_HCURL_NORM > ;
+    template HERMES_API class DefaultNormCalculator < double, HERMES_HDIV_NORM > ;
+    template HERMES_API class DefaultNormCalculator < std::complex<double>, HERMES_HDIV_NORM > ;
 
-    template HERMES_API class ErrorCalculator<double>;
-    template HERMES_API class ErrorCalculator<std::complex<double> >;
+    template HERMES_API class ErrorCalculator < double > ;
+    template HERMES_API class ErrorCalculator < std::complex<double> > ;
   }
 }

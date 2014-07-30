@@ -1,6 +1,6 @@
 #include "definitions.h"
 
-CustomNonlinearity::CustomNonlinearity(double alpha): Hermes1DFunction<double>()
+CustomNonlinearity::CustomNonlinearity(double alpha) : Hermes1DFunction<double>()
 {
   this->is_const = false;
   this->alpha = alpha;
@@ -27,33 +27,33 @@ Ord CustomNonlinearity::derivative(Ord u) const
   return Ord(10);
 }
 
-double CustomInitialCondition::value(double x, double y) const 
+double CustomInitialCondition::value(double x, double y) const
 {
-  return (x+10) * (y+10) / 100. + 2;
+  return (x + 10) * (y + 10) / 100. + 2;
 }
 
-void CustomInitialCondition::derivatives(double x, double y, double& dx, double& dy) const 
-{   
-  dx = (y+10) / 100.;
-  dy = (x+10) / 100.;
+void CustomInitialCondition::derivatives(double x, double y, double& dx, double& dy) const
+{
+  dx = (y + 10) / 100.;
+  dy = (x + 10) / 100.;
 }
 
-Ord CustomInitialCondition::ord(double x, double y) const 
+Ord CustomInitialCondition::ord(double x, double y) const
 {
   return Hermes::Ord(x*y);
 }
-  
+
 MeshFunction<double>* CustomInitialCondition::clone() const
 {
   return new CustomInitialCondition(this->mesh);
 }
 
-EssentialBCValueType CustomEssentialBCNonConst::get_value_type() const 
-{ 
-  return BC_FUNCTION; 
+EssentialBCValueType CustomEssentialBCNonConst::get_value_type() const
+{
+  return BC_FUNCTION;
 }
 
 double CustomEssentialBCNonConst::value(double x, double y) const
 {
-  return (x+10) * (y+10) / 100.;
+  return (x + 10) * (y + 10) / 100.;
 }

@@ -100,8 +100,8 @@ namespace Hermes
         this->spaces[space_i]->check();
 
       for (unsigned short space_i = 0; space_i < this->spaces_size; space_i++)
-      if (!this->spaces[space_i]->is_up_to_date())
-        throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
+        if (!this->spaces[space_i]->is_up_to_date())
+          throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
 
       return true;
     }
@@ -254,9 +254,9 @@ namespace Hermes
       for (unsigned int ext_i = 0; ext_i < this->wf->ext.size(); ext_i++)
         meshes.push_back(this->wf->ext[ext_i]->get_mesh());
       for (unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
-      for (unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
-      if (this->wf->get_forms()[form_i]->ext[ext_i])
-        meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
+        for (unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
+          if (this->wf->get_forms()[form_i]->ext[ext_i])
+            meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
 
       if (this->nonlinear)
       {
@@ -438,7 +438,7 @@ namespace Hermes
         this->current_rhs->add_vector(this->dirichlet_lift_rhs);
     }
 
-    template class HERMES_API DiscreteProblem<double>;
-    template class HERMES_API DiscreteProblem<std::complex<double> >;
+    template class HERMES_API DiscreteProblem < double > ;
+    template class HERMES_API DiscreteProblem < std::complex<double> > ;
   }
 }

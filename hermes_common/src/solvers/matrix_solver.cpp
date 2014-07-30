@@ -141,7 +141,7 @@ namespace Hermes
       }
     }
 #endif
-    template class HERMES_API MatrixSolver<double>;
-    template class HERMES_API MatrixSolver<std::complex<double> >;
+    template class HERMES_API MatrixSolver < double > ;
+    template class HERMES_API MatrixSolver < std::complex<double> > ;
   }
 }

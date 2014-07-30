@@ -31,7 +31,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultMatrixFormVol : public MatrixFormVol<Scalar>
+      class HERMES_API DefaultMatrixFormVol : public MatrixFormVol < Scalar >
       {
       public:
         DefaultMatrixFormVol(int i, int j, std::string area = HERMES_ANY,
@@ -66,7 +66,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultJacobianDiffusion : public MatrixFormVol<Scalar>
+      class HERMES_API DefaultJacobianDiffusion : public MatrixFormVol < Scalar >
       {
       public:
         DefaultJacobianDiffusion(int i, int j, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = nullptr,
@@ -92,7 +92,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultMatrixFormDiffusion : public MatrixFormVol<Scalar>
+      class HERMES_API DefaultMatrixFormDiffusion : public MatrixFormVol < Scalar >
       {
       public:
         DefaultMatrixFormDiffusion(int i, int j, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = nullptr,
@@ -126,7 +126,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultJacobianAdvection : public MatrixFormVol<Scalar>
+      class HERMES_API DefaultJacobianAdvection : public MatrixFormVol < Scalar >
       {
       public:
         DefaultJacobianAdvection(int i, int j, std::string area = HERMES_ANY,
@@ -159,7 +159,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultVectorFormVol : public VectorFormVol<Scalar>
+      class HERMES_API DefaultVectorFormVol : public VectorFormVol < Scalar >
       {
       public:
         DefaultVectorFormVol(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = nullptr,
@@ -190,7 +190,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualVol : public VectorFormVol<Scalar>
+      class HERMES_API DefaultResidualVol : public VectorFormVol < Scalar >
       {
       public:
         DefaultResidualVol(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = nullptr,
@@ -222,7 +222,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualDiffusion : public VectorFormVol<Scalar>
+      class HERMES_API DefaultResidualDiffusion : public VectorFormVol < Scalar >
       {
       public:
         DefaultResidualDiffusion(int i, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = nullptr,
@@ -253,7 +253,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualAdvection : public VectorFormVol<Scalar>
+      class HERMES_API DefaultResidualAdvection : public VectorFormVol < Scalar >
       {
       public:
         DefaultResidualAdvection(int i, std::string area = HERMES_ANY,
@@ -285,7 +285,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultMatrixFormSurf : public MatrixFormSurf<Scalar>
+      class HERMES_API DefaultMatrixFormSurf : public MatrixFormSurf < Scalar >
       {
       public:
         DefaultMatrixFormSurf(int i, int j, std::string area = HERMES_ANY,
@@ -319,7 +319,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultJacobianFormSurf : public MatrixFormSurf<Scalar>
+      class HERMES_API DefaultJacobianFormSurf : public MatrixFormSurf < Scalar >
       {
       public:
         DefaultJacobianFormSurf(int i, int j, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = nullptr,
@@ -349,7 +349,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultVectorFormSurf : public VectorFormSurf<Scalar>
+      class HERMES_API DefaultVectorFormSurf : public VectorFormSurf < Scalar >
       {
       public:
         DefaultVectorFormSurf(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = nullptr,
@@ -380,7 +380,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualSurf : public VectorFormSurf<Scalar>
+      class HERMES_API DefaultResidualSurf : public VectorFormSurf < Scalar >
       {
       public:
         DefaultResidualSurf(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = nullptr,
@@ -407,7 +407,7 @@ namespace Hermes
       /* Default weak form for the Laplace equation -div(const_coeff spline_coeff(u) grad u) = 0. */
 
       template<typename Scalar>
-      class HERMES_API DefaultWeakFormLaplace : public WeakForm<Scalar>
+      class HERMES_API DefaultWeakFormLaplace : public WeakForm < Scalar >
       {
       public:
         DefaultWeakFormLaplace(std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = nullptr,
@@ -415,7 +415,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultWeakFormLaplaceLinear : public WeakForm<Scalar>
+      class HERMES_API DefaultWeakFormLaplaceLinear : public WeakForm < Scalar >
       {
       public:
         DefaultWeakFormLaplaceLinear(std::string area = HERMES_ANY, GeomType gt = HERMES_PLANAR);
@@ -424,7 +424,7 @@ namespace Hermes
       /* Default weak form for the Poisson equation -div(const_coeff spline_coeff(u) grad u) - rhs = 0. */
 
       template<typename Scalar>
-      class HERMES_API DefaultWeakFormPoisson : public WeakForm<Scalar>
+      class HERMES_API DefaultWeakFormPoisson : public WeakForm < Scalar >
       {
       public:
         DefaultWeakFormPoisson();
@@ -432,7 +432,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultWeakFormPoissonLinear : public WeakForm<Scalar>
+      class HERMES_API DefaultWeakFormPoissonLinear : public WeakForm < Scalar >
       {
       public:
         DefaultWeakFormPoissonLinear(std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* f = nullptr, GeomType gt = HERMES_PLANAR);

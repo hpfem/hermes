@@ -251,7 +251,7 @@ namespace Hermes
       }
     }
 
-    template class HERMES_API OGProjection<double>;
-    template class HERMES_API OGProjection<std::complex<double> >;
+    template class HERMES_API OGProjection < double > ;
+    template class HERMES_API OGProjection < std::complex<double> > ;
   }
 }

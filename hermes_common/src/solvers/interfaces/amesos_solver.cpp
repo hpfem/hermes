@@ -35,13 +35,13 @@ namespace Hermes
     AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
       : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs)
     {
-        solver = factory.Create(solver_type, problem);
-        assert(solver != nullptr);
-        // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver,
-        //          so don't forget to delete it!
-        //          ( Amesos.cpp, line 88, called from factory.Create():
-        //            return new_ Amesos_Klu(LinearProblem); )
-      }
+      solver = factory.Create(solver_type, problem);
+      assert(solver != nullptr);
+      // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver,
+      //          so don't forget to delete it!
+      //          ( Amesos.cpp, line 88, called from factory.Create():
+      //            return new_ Amesos_Klu(LinearProblem); )
+    }
 
     template<typename Scalar>
     void AmesosSolver<Scalar>::free()
@@ -96,11 +96,11 @@ namespace Hermes
       Epetra_Vector x(*rhs->std_map);
       problem.SetLHS(&x);
 
-      if(!setup_factorization())
+      if (!setup_factorization())
         this->warn("AmesosSolver: LU factorization could not be completed");
 
       int status = solver->Solve();
-      if(status != 0)
+      if (status != 0)
         throw Hermes::Exceptions::Exception("AmesosSolver: Solution failed.");
 
       this->tick();
@@ -125,11 +125,11 @@ namespace Hermes
 
       throw Hermes::Exceptions::Exception("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
 
-      if(!setup_factorization())
+      if (!setup_factorization())
         this->warn("AmesosSolver: LU factorization could not be completed");
 
       int status = solver->Solve();
-      if(status != 0)
+      if (status != 0)
         throw Hermes::Exceptions::Exception("AmesosSolver: Solution failed.");
 
       this->tick();
@@ -146,19 +146,19 @@ namespace Hermes
     {
       // Perform both factorization phases for the first time.
       int eff_fact_scheme;
-      if(this->reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH &&
+      if (this->reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH &&
         solver->NumSymbolicFact() == 0 && solver->NumNumericFact() == 0)
         eff_fact_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
       else
         eff_fact_scheme = this->reuse_scheme;
 
       int status;
-      switch(eff_fact_scheme)
+      switch (eff_fact_scheme)
       {
       case HERMES_CREATE_STRUCTURE_FROM_SCRATCH:
         //debug_log("Factorizing symbolically.");
         status = solver->SymbolicFactorization();
-        if(status != 0)
+        if (status != 0)
         {
           this->warn("Symbolic factorization failed.");
           return false;
@@ -167,7 +167,7 @@ namespace Hermes
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
         status = solver->NumericFactorization();
-        if(status != 0)
+        if (status != 0)
         {
           this->warn("Numeric factorization failed.");
           return false;
@@ -177,8 +177,8 @@ namespace Hermes
       return true;
     }
 
-    template class HERMES_API AmesosSolver<double>;
-    template class HERMES_API AmesosSolver<std::complex<double> >;
+    template class HERMES_API AmesosSolver < double > ;
+    template class HERMES_API AmesosSolver < std::complex<double> > ;
   }
 }
 #endif

@@ -32,7 +32,7 @@ namespace Hermes
     /// (This class cannot be instantiated.)
     ///
     template<typename Scalar>
-    class HERMES_API Filter : public MeshFunction<Scalar>
+    class HERMES_API Filter : public MeshFunction < Scalar >
     {
     public:
       Filter();
@@ -93,7 +93,7 @@ namespace Hermes
     /// Otherwise it is Scalar-valued.
     ///
     template<typename Scalar>
-    class HERMES_API SimpleFilter : public Filter<Scalar>
+    class HERMES_API SimpleFilter : public Filter < Scalar >
     {
     public:
       SimpleFilter();
@@ -114,7 +114,7 @@ namespace Hermes
 
     /// ComplexFilter is used to transform complex solutions into its real parts.
     ///
-    class HERMES_API ComplexFilter : public Filter<double>
+    class HERMES_API ComplexFilter : public Filter < double >
     {
     public:
       ComplexFilter();
@@ -149,7 +149,7 @@ namespace Hermes
     /// return also the DX and DY values.
     ///
     template<typename Scalar>
-    class HERMES_API DXDYFilter : public Filter<Scalar>
+    class HERMES_API DXDYFilter : public Filter < Scalar >
     {
     public:
       // one result (rslt), all inputs and result including derivatives
@@ -174,7 +174,7 @@ namespace Hermes
     /// calculates the vector magnitude, sqrt(x^2 + y^2).
     /// \brief Calculates the magnitude of a vector function.
     template<typename Scalar>
-    class HERMES_API MagFilter : public SimpleFilter<Scalar>
+    class HERMES_API MagFilter : public SimpleFilter < Scalar >
     {
     public:
       MagFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, std::vector<int> items = *(new std::vector<int>));
@@ -189,7 +189,7 @@ namespace Hermes
     };
 
     /// TopValFilter takes functions and puts a threshold on their highest values.
-    class HERMES_API TopValFilter : public SimpleFilter<double>
+    class HERMES_API TopValFilter : public SimpleFilter < double >
     {
     public:
       TopValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> limits, std::vector<int> items = *(new std::vector<int>));
@@ -205,7 +205,7 @@ namespace Hermes
     };
 
     /// BottomValFilter takes functions and puts a threshold on their lowest values.
-    class HERMES_API BottomValFilter : public SimpleFilter<double>
+    class HERMES_API BottomValFilter : public SimpleFilter < double >
     {
     public:
       BottomValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> limits, std::vector<int> items = *(new std::vector<int>));
@@ -221,7 +221,7 @@ namespace Hermes
     };
 
     /// ValFilter takes functions and puts a threshold on their lowest AND highest values.
-    class HERMES_API ValFilter : public SimpleFilter<double>
+    class HERMES_API ValFilter : public SimpleFilter < double >
     {
     public:
       ValFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<double> low_limits, std::vector<double> high_limits, std::vector<int> items = *(new std::vector<int>));
@@ -239,7 +239,7 @@ namespace Hermes
 
     /// Calculates the difference of two functions.
     template<typename Scalar>
-    class HERMES_API DiffFilter : public SimpleFilter<Scalar>
+    class HERMES_API DiffFilter : public SimpleFilter < Scalar >
     {
     public:
       DiffFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, std::vector<int> items = *(new std::vector<int>));
@@ -252,7 +252,7 @@ namespace Hermes
 
     /// Calculates the sum of two functions.
     template<typename Scalar>
-    class HERMES_API SumFilter : public SimpleFilter<Scalar>
+    class HERMES_API SumFilter : public SimpleFilter < Scalar >
     {
     public:
       SumFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, std::vector<int> items = *(new std::vector<int>));
@@ -265,7 +265,7 @@ namespace Hermes
 
     /// Calculates the square of a function.
     template<typename Scalar>
-    class HERMES_API SquareFilter : public SimpleFilter<Scalar>
+    class HERMES_API SquareFilter : public SimpleFilter < Scalar >
     {
     public:
       SquareFilter(std::vector<MeshFunctionSharedPtr<Scalar> > solutions, std::vector<int> items = *(new std::vector<int>));
@@ -277,7 +277,7 @@ namespace Hermes
     };
 
     /// Calculates absolute value of a real solution.
-    class HERMES_API AbsFilter : public SimpleFilter<double>
+    class HERMES_API AbsFilter : public SimpleFilter < double >
     {
     public:
       AbsFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<int> items = *(new std::vector<int>));
@@ -330,7 +330,7 @@ namespace Hermes
     };
 
     /// Computes the angle of a complex solution.
-    class HERMES_API AngleFilter : public SimpleFilter<std::complex<double> >
+    class HERMES_API AngleFilter : public SimpleFilter < std::complex<double> >
     {
     public:
       AngleFilter(std::vector<MeshFunctionSharedPtr<std::complex<double> > > solutions, std::vector<int> items = *(new std::vector<int>));
@@ -344,7 +344,7 @@ namespace Hermes
     /// It calculates the stress tensor and applies the Von Mises equivalent stress formula
     /// to obtain the resulting stress measure.
     /// \brief Calculates the Von Mises stress.
-    class HERMES_API VonMisesFilter : public Filter<double>
+    class HERMES_API VonMisesFilter : public Filter < double >
     {
     public: /// \todo cylindrical coordinates
 
@@ -368,7 +368,7 @@ namespace Hermes
     /// solution values it extrapolates an estimate of the new_ one.
     /// With adaptive time step: tau_frac = tau_new_ / tau_old
     template<typename Scalar>
-    class HERMES_API LinearFilter : public Filter<Scalar>
+    class HERMES_API LinearFilter : public Filter < Scalar >
     {
     public:
       LinearFilter(MeshFunctionSharedPtr<Scalar> old);

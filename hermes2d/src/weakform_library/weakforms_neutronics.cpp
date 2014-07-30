@@ -34,27 +34,27 @@ namespace Hermes
             std::vector<double> Sigma_a_map,
             std::vector<double> Q_map) : WeakForm<Scalar>(1)
           {
-              using namespace WeakFormsH1;
+            using namespace WeakFormsH1;
 
-              for (unsigned int i = 0; i < regions.size(); i++)
-              {
-                /* Jacobian */
-                // Diffusion.
-                this->add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, regions[i], new Hermes1DFunction<Scalar>(D_map[i]),
-                  HERMES_SYM));
-                // Absorption.
-                this->add_matrix_form(new DefaultMatrixFormVol<Scalar>(0, 0, regions[i], new Hermes2DFunction<Scalar>(Sigma_a_map[i]),
-                  HERMES_SYM));
+            for (unsigned int i = 0; i < regions.size(); i++)
+            {
+              /* Jacobian */
+              // Diffusion.
+              this->add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, regions[i], new Hermes1DFunction<Scalar>(D_map[i]),
+                HERMES_SYM));
+              // Absorption.
+              this->add_matrix_form(new DefaultMatrixFormVol<Scalar>(0, 0, regions[i], new Hermes2DFunction<Scalar>(Sigma_a_map[i]),
+                HERMES_SYM));
 
-                /* Residual */
-                // Diffusion.
-                this->add_vector_form(new DefaultResidualDiffusion<Scalar>(0, regions[i], new Hermes1DFunction<Scalar>(D_map[i])));
-                // Absorption.
-                this->add_vector_form(new DefaultResidualVol<Scalar>(0, regions[i], new Hermes2DFunction<Scalar>(Sigma_a_map[i])));
-                // Sources.
-                this->add_vector_form(new DefaultVectorFormVol<Scalar>(0, regions[i], new Hermes2DFunction<Scalar>(-Q_map[i])));
-              }
+              /* Residual */
+              // Diffusion.
+              this->add_vector_form(new DefaultResidualDiffusion<Scalar>(0, regions[i], new Hermes1DFunction<Scalar>(D_map[i])));
+              // Absorption.
+              this->add_vector_form(new DefaultResidualVol<Scalar>(0, regions[i], new Hermes2DFunction<Scalar>(Sigma_a_map[i])));
+              // Sources.
+              this->add_vector_form(new DefaultVectorFormVol<Scalar>(0, regions[i], new Hermes2DFunction<Scalar>(-Q_map[i])));
             }
+          }
         }
       }
 
@@ -169,8 +169,8 @@ namespace Hermes
                   rank1::const_iterator f = itf->second.begin();
 
                   for (; a != ita->second.end(); ++a, ++f)
-                  if (*a < *f)
-                    this->warn(W_SA_LT_SF);
+                    if (*a < *f)
+                      this->warn(W_SA_LT_SF);
                 }
               }
             }
@@ -396,9 +396,9 @@ namespace Hermes
 
                   scattering_multigroup_structure = bool2(G, std::vector<bool>(G, false));
                   for (unsigned int gto = 0; gto < G; gto++)
-                  for (unsigned int gfrom = 0; gfrom < G; gfrom++)
-                  if (gto == gfrom)
-                    scattering_multigroup_structure[gto][gfrom] = true;
+                    for (unsigned int gfrom = 0; gfrom < G; gfrom++)
+                      if (gto == gfrom)
+                        scattering_multigroup_structure[gto][gfrom] = true;
                 }
                 else
                 {
@@ -416,8 +416,8 @@ namespace Hermes
               {
                 MaterialPropertyMap1::const_iterator Sr_elem = Sigma_r.begin();
                 for (; Sr_elem != Sigma_r.end(); ++Sr_elem)
-                for (unsigned int g = 0; g < G; g++)
-                  D[Sr_elem->first][g] = 1. / (3.*Sr_elem->second[g]);
+                  for (unsigned int g = 0; g < G; g++)
+                    D[Sr_elem->first][g] = 1. / (3.*Sr_elem->second[g]);
 
                 D_given = true;
               }
@@ -803,20 +803,20 @@ namespace Hermes
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
               GeomType geom_type) : WeakForm<Scalar>(matprop.get_G())
             {
-                lhs_init(matprop.get_G(), matprop, mesh, geom_type);
-                for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                  this->add_vector_form(new ExternalSources::LinearForm<Scalar>(gto, matprop, mesh, geom_type));
-              }
+              lhs_init(matprop.get_G(), matprop, mesh, geom_type);
+              for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+                this->add_vector_form(new ExternalSources::LinearForm<Scalar>(gto, matprop, mesh, geom_type));
+            }
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
               Hermes2DFunction<Scalar>*f_src, std::string src_area,
               GeomType geom_type) : WeakForm<Scalar>(matprop.get_G())
             {
-                lhs_init(matprop.get_G(), matprop, mesh, geom_type);
-                for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                  this->add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_area, f_src, geom_type));
-              }
+              lhs_init(matprop.get_G(), matprop, mesh, geom_type);
+              for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+                this->add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_area, f_src, geom_type));
+            }
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
@@ -824,10 +824,10 @@ namespace Hermes
               std::vector<std::string> src_areas,
               GeomType geom_type) : WeakForm<Scalar>(matprop.get_G())
             {
-                lhs_init(matprop.get_G(), matprop, mesh, geom_type);
-                for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                  this->add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_areas, f_src, geom_type));
-              }
+              lhs_init(matprop.get_G(), matprop, mesh, geom_type);
+              for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+                this->add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_areas, f_src, geom_type));
+            }
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
@@ -835,13 +835,13 @@ namespace Hermes
               std::string src_area,
               GeomType geom_type) : WeakForm<Scalar>(matprop.get_G())
             {
-                if (f_src.size() != matprop.get_G())
-                  throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
+              if (f_src.size() != matprop.get_G())
+                throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
 
-                lhs_init(matprop.get_G(), matprop, mesh, geom_type);
-                for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                  this->add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_area, f_src[gto], geom_type));
-              }
+              lhs_init(matprop.get_G(), matprop, mesh, geom_type);
+              for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+                this->add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_area, f_src[gto], geom_type));
+            }
 
             template<typename Scalar>
             DefaultWeakFormFixedSource<Scalar>::DefaultWeakFormFixedSource(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
@@ -849,13 +849,13 @@ namespace Hermes
               std::vector<std::string> src_areas,
               GeomType geom_type) : WeakForm<Scalar>(matprop.get_G())
             {
-                if (f_src.size() != matprop.get_G())
-                  throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
+              if (f_src.size() != matprop.get_G())
+                throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
 
-                lhs_init(matprop.get_G(), matprop, mesh, geom_type);
-                for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                  this->add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_areas, f_src[gto], geom_type));
-              }
+              lhs_init(matprop.get_G(), matprop, mesh, geom_type);
+              for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+                this->add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_areas, f_src[gto], geom_type));
+            }
 
             template<typename Scalar>
             DefaultWeakFormSourceIteration<Scalar>::DefaultWeakFormSourceIteration(const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
@@ -863,28 +863,28 @@ namespace Hermes
               double initial_keff_guess,
               GeomType geom_type) : WeakForm<Scalar>(matprop.get_G())
             {
-                bool2 Ss_nnz = matprop.get_scattering_multigroup_structure();
+              bool2 Ss_nnz = matprop.get_scattering_multigroup_structure();
 
-                for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+              for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
+              {
+                this->add_matrix_form(new DiffusionReaction::Jacobian<Scalar>(gto, matprop, mesh, geom_type));
+                this->add_vector_form(new DiffusionReaction::Residual<Scalar>(gto, matprop, mesh, geom_type));
+
+                for (unsigned int gfrom = 0; gfrom < matprop.get_G(); gfrom++)
                 {
-                  this->add_matrix_form(new DiffusionReaction::Jacobian<Scalar>(gto, matprop, mesh, geom_type));
-                  this->add_vector_form(new DiffusionReaction::Residual<Scalar>(gto, matprop, mesh, geom_type));
-
-                  for (unsigned int gfrom = 0; gfrom < matprop.get_G(); gfrom++)
+                  if (Ss_nnz[gto][gfrom])
                   {
-                    if (Ss_nnz[gto][gfrom])
-                    {
-                      this->add_matrix_form(new Scattering::Jacobian<Scalar>(gto, gfrom, matprop, mesh, geom_type));
-                      this->add_vector_form(new Scattering::Residual<Scalar>(gto, gfrom, matprop, mesh, geom_type));
-                    }
+                    this->add_matrix_form(new Scattering::Jacobian<Scalar>(gto, gfrom, matprop, mesh, geom_type));
+                    this->add_vector_form(new Scattering::Residual<Scalar>(gto, gfrom, matprop, mesh, geom_type));
                   }
-
-                  FissionYield::OuterIterationForm<Scalar>* keff_iteration_form =
-                    new FissionYield::OuterIterationForm<Scalar>(gto, matprop, mesh, iterates, initial_keff_guess, geom_type);
-                  keff_iteration_forms.push_back(keff_iteration_form);
-                  this->add_vector_form(keff_iteration_form);
                 }
+
+                FissionYield::OuterIterationForm<Scalar>* keff_iteration_form =
+                  new FissionYield::OuterIterationForm<Scalar>(gto, matprop, mesh, iterates, initial_keff_guess, geom_type);
+                keff_iteration_forms.push_back(keff_iteration_form);
+                this->add_vector_form(keff_iteration_form);
               }
+            }
 
             template<typename Scalar>
             void DefaultWeakFormSourceIteration<Scalar>::update_keff(double new_keff)
@@ -917,8 +917,8 @@ namespace Hermes
       {
         namespace Diffusion
         {
-          template class HERMES_API DefaultWeakFormFixedSource<double>;
-          template class HERMES_API DefaultWeakFormFixedSource<std::complex<double> >;
+          template class HERMES_API DefaultWeakFormFixedSource < double > ;
+          template class HERMES_API DefaultWeakFormFixedSource < std::complex<double> > ;
         }
       }
       namespace Multigroup
@@ -927,17 +927,17 @@ namespace Hermes
         {
           namespace Diffusion
           {
-            template class HERMES_API FissionYield::Jacobian<double>;
-            template class HERMES_API FissionYield::Jacobian<std::complex<double> >;
-            template class HERMES_API FissionYield::OuterIterationForm<double>;
-            template class HERMES_API FissionYield::OuterIterationForm<std::complex<double> >;
-            template class HERMES_API FissionYield::Residual<double>;
-            template class HERMES_API FissionYield::Residual<std::complex<double> >;
+            template class HERMES_API FissionYield::Jacobian < double > ;
+            template class HERMES_API FissionYield::Jacobian < std::complex<double> > ;
+            template class HERMES_API FissionYield::OuterIterationForm < double > ;
+            template class HERMES_API FissionYield::OuterIterationForm < std::complex<double> > ;
+            template class HERMES_API FissionYield::Residual < double > ;
+            template class HERMES_API FissionYield::Residual < std::complex<double> > ;
 
-            template class HERMES_API VacuumBoundaryCondition::Jacobian<double>;
-            template class HERMES_API VacuumBoundaryCondition::Jacobian<std::complex<double> >;
-            template class HERMES_API VacuumBoundaryCondition::Residual<double>;
-            template class HERMES_API VacuumBoundaryCondition::Residual<std::complex<double> >;
+            template class HERMES_API VacuumBoundaryCondition::Jacobian < double > ;
+            template class HERMES_API VacuumBoundaryCondition::Jacobian < std::complex<double> > ;
+            template class HERMES_API VacuumBoundaryCondition::Residual < double > ;
+            template class HERMES_API VacuumBoundaryCondition::Residual < std::complex<double> > ;
 
             template double VacuumBoundaryCondition::Jacobian<double>::matrix_form<double, double>(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
               Func<double> *v, GeomSurf<double> *e, Func<double> **ext) const;
@@ -975,11 +975,11 @@ namespace Hermes
         {
           namespace Diffusion
           {
-            template class HERMES_API DefaultWeakFormFixedSource<double>;
-            template class HERMES_API DefaultWeakFormFixedSource<std::complex<double> >;
+            template class HERMES_API DefaultWeakFormFixedSource < double > ;
+            template class HERMES_API DefaultWeakFormFixedSource < std::complex<double> > ;
 
-            template class HERMES_API DefaultWeakFormSourceIteration<double>;
-            template class HERMES_API DefaultWeakFormSourceIteration<std::complex<double> >;
+            template class HERMES_API DefaultWeakFormSourceIteration < double > ;
+            template class HERMES_API DefaultWeakFormSourceIteration < std::complex<double> > ;
           }
         }
       }

@@ -740,7 +740,7 @@ namespace Hermes
         }
       }
     }
-    template class HERMES_API RungeKutta<double>;
-    template class HERMES_API RungeKutta<std::complex<double> >;
+    template class HERMES_API RungeKutta < double > ;
+    template class HERMES_API RungeKutta < std::complex<double> > ;
   }
 }

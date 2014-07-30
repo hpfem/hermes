@@ -52,7 +52,7 @@ namespace Hermes
 
     /// \brief Used to pass the instances of WeakForm around.
     template<typename Scalar>
-    class HERMES_API WeakFormSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::WeakForm<Scalar> >
+    class HERMES_API WeakFormSharedPtr : public std::tr1::shared_ptr < Hermes::Hermes2D::WeakForm<Scalar> >
     {
     public:
       WeakFormSharedPtr(Hermes::Hermes2D::WeakForm<Scalar>* ptr = nullptr);
@@ -237,15 +237,15 @@ namespace Hermes
 
       bool** get_blocks(bool force_diagonal_blocks) const;
 
-      friend class DiscreteProblem<Scalar>;
-      friend class Form<Scalar>;
-      friend class DiscreteProblemDGAssembler<Scalar>;
-      friend class DiscreteProblemThreadAssembler<Scalar>;
-      friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
-      friend class DiscreteProblemSelectiveAssembler<Scalar>;
-      friend class RungeKutta<Scalar>;
-      friend class OGProjection<Scalar>;
-      friend class Hermes::Preconditioners::Precond<Scalar>;
+      friend class DiscreteProblem < Scalar > ;
+      friend class Form < Scalar > ;
+      friend class DiscreteProblemDGAssembler < Scalar > ;
+      friend class DiscreteProblemThreadAssembler < Scalar > ;
+      friend class DiscreteProblemIntegrationOrderCalculator < Scalar > ;
+      friend class DiscreteProblemSelectiveAssembler < Scalar > ;
+      friend class RungeKutta < Scalar > ;
+      friend class OGProjection < Scalar > ;
+      friend class Hermes::Preconditioners::Precond < Scalar > ;
 
       // Internal.
       virtual void cloneMembers(const WeakFormSharedPtr<Scalar>& other_wf);
@@ -341,20 +341,20 @@ namespace Hermes
       void set_current_stage_time(double time);
       /// Copy the basic data from other_form - used in cloning.
       void copy_base(Form<Scalar>* other_form);
-      friend class WeakForm<Scalar>;
-      friend class RungeKutta<Scalar>;
-      friend class DiscreteProblem<Scalar>;
-      friend class DiscreteProblemDGAssembler<Scalar>;
-      friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
-      friend class DiscreteProblemSelectiveAssembler<Scalar>;
-      friend class DiscreteProblemThreadAssembler<Scalar>;
+      friend class WeakForm < Scalar > ;
+      friend class RungeKutta < Scalar > ;
+      friend class DiscreteProblem < Scalar > ;
+      friend class DiscreteProblemDGAssembler < Scalar > ;
+      friend class DiscreteProblemIntegrationOrderCalculator < Scalar > ;
+      friend class DiscreteProblemSelectiveAssembler < Scalar > ;
+      friend class DiscreteProblemThreadAssembler < Scalar > ;
     };
 
     /// \brief Abstract, base class for matrix form - i.e. a single integral in the bilinear form on the left hand side of the variational formulation of a (system of) PDE.<br>
     /// By default, the matrix form is initialized with the following natural attribute:<br>
     /// - nonsymmetrical (if the user omits the HERMES_SYM / HERMES_ANTISYM parameters, nothing worse than a non-necessary calculations happen).
     template<typename Scalar>
-    class HERMES_API MatrixForm : public Form<Scalar>
+    class HERMES_API MatrixForm : public Form < Scalar >
     {
     public:
       /// Constructor with coordinates.
@@ -367,12 +367,12 @@ namespace Hermes
       SymFlag sym;
 
     protected:
-      friend class DiscreteProblem<Scalar>;
+      friend class DiscreteProblem < Scalar > ;
     };
 
     /// \brief Abstract, base class for matrix Volumetric form - i.e. MatrixForm, where the integration is with respect to 2D-Lebesgue measure (elements).
     template<typename Scalar>
-    class HERMES_API MatrixFormVol : public MatrixForm<Scalar>
+    class HERMES_API MatrixFormVol : public MatrixForm < Scalar >
     {
     public:
       /// Constructor with coordinates.
@@ -394,7 +394,7 @@ namespace Hermes
 
     /// \brief Abstract, base class for matrix Surface form - i.e. MatrixForm, where the integration is with respect to 1D-Lebesgue measure (element domain-boundary edges).
     template<typename Scalar>
-    class HERMES_API MatrixFormSurf : public MatrixForm<Scalar>
+    class HERMES_API MatrixFormSurf : public MatrixForm < Scalar >
     {
     public:
       /// Constructor with coordinates.
@@ -413,7 +413,7 @@ namespace Hermes
 
     /// \brief Abstract, base class for matrix DG form - i.e. bilinear form, where the integration is with respect to 1D-Lebesgue measure (element inner-domain edges).
     template<typename Scalar>
-    class HERMES_API MatrixFormDG : public Form<Scalar>
+    class HERMES_API MatrixFormDG : public Form < Scalar >
     {
     public:
       /// Constructor with coordinates.
@@ -431,12 +431,12 @@ namespace Hermes
 
       virtual MatrixFormDG* clone() const;
     protected:
-      friend class DiscreteProblem<Scalar>;
+      friend class DiscreteProblem < Scalar > ;
     };
 
     /// \brief Abstract, base class for vector form - i.e. a single integral in the linear form on the right hand side of the variational formulation of a (system of) PDE.
     template<typename Scalar>
-    class VectorForm : public Form<Scalar>
+    class VectorForm : public Form < Scalar >
     {
     public:
       /// Constructor with coordinates.
@@ -445,12 +445,12 @@ namespace Hermes
       virtual ~VectorForm();
 
     protected:
-      friend class DiscreteProblem<Scalar>;
+      friend class DiscreteProblem < Scalar > ;
     };
 
     /// \brief Abstract, base class for vector Volumetric form - i.e. VectorForm, where the integration is with respect to 2D-Lebesgue measure (elements).
     template<typename Scalar>
-    class VectorFormVol : public VectorForm<Scalar>
+    class VectorFormVol : public VectorForm < Scalar >
     {
     public:
       /// Constructor with coordinates.
@@ -469,7 +469,7 @@ namespace Hermes
 
     /// \brief Abstract, base class for vector Surface form - i.e. VectorForm, where the integration is with respect to 1D-Lebesgue measure (element domain-boundary edges).
     template<typename Scalar>
-    class VectorFormSurf : public VectorForm<Scalar>
+    class VectorFormSurf : public VectorForm < Scalar >
     {
     public:
       /// Constructor with coordinates.
@@ -488,7 +488,7 @@ namespace Hermes
 
     /// \brief Abstract, base class for vector DG form - i.e. linear Form, where the integration is with respect to 1D-Lebesgue measure (element inner-domain edges).
     template<typename Scalar>
-    class VectorFormDG : public Form<Scalar>
+    class VectorFormDG : public Form < Scalar >
     {
     public:
       /// Constructor with coordinates.
@@ -504,7 +504,7 @@ namespace Hermes
 
       virtual VectorFormDG* clone() const;
     protected:
-      friend class DiscreteProblem<Scalar>;
+      friend class DiscreteProblem < Scalar > ;
     };
   }
 }

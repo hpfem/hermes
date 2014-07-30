@@ -193,8 +193,6 @@ namespace Hermes
       ls_pars.set("Max Age Of Prec", 999);
     }
 
-    
-
     template<typename Scalar>
     void NewtonSolverNOX<Scalar>::set_time(double time)
     {
@@ -527,10 +525,10 @@ namespace Hermes
       conv.wrms_atol = atol;
     }
 
-    template class HERMES_API DiscreteProblemNOX<double>;
+    template class HERMES_API DiscreteProblemNOX < double > ;
     //complex version of nox solver is not implemented
     // template class HERMES_API DiscreteProblemNOX<std::complex<double> >;
-    template class HERMES_API NewtonSolverNOX<double>;
+    template class HERMES_API NewtonSolverNOX < double > ;
     //complex version of nox solver is not implemented
     // template class HERMES_API NewtonSolverNOX<std::complex<double> >;
   }

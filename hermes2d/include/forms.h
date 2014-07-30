@@ -51,7 +51,7 @@ namespace Hermes
 
     /// Geometry - volumetric.
     template<typename T>
-    class HERMES_API GeomVol : public Geom<T>
+    class HERMES_API GeomVol : public Geom < T >
     {
     public:
       /// ID number of the element.
@@ -65,7 +65,7 @@ namespace Hermes
 
     /// Geometry - surface.
     template<typename T>
-    class HERMES_API GeomSurf : public Geom<T>
+    class HERMES_API GeomSurf : public Geom < T >
     {
     public:
       T nx[H2D_MAX_INTEGRATION_POINTS_COUNT];
@@ -87,7 +87,7 @@ namespace Hermes
 
     /// Geometry - volumetric - for order calculation.
     template<>
-    class HERMES_API GeomVol<Hermes::Ord>
+    class HERMES_API GeomVol < Hermes::Ord >
     {
     public:
       GeomVol()
@@ -108,7 +108,7 @@ namespace Hermes
 
     /// Geometry - surface - for order calculation.
     template<>
-    class HERMES_API GeomSurf<Hermes::Ord>
+    class HERMES_API GeomSurf < Hermes::Ord >
     {
     public:
       GeomSurf()
@@ -170,7 +170,7 @@ namespace Hermes
 
     /// Geometry - interface (DG) - for order calculation.
     template<>
-    class HERMES_API InterfaceGeom<Hermes::Ord>
+    class HERMES_API InterfaceGeom < Hermes::Ord >
     {
     public:
       /// Constructor.
@@ -211,7 +211,7 @@ namespace Hermes
 
     /// Calculated function values (from the class Function) on an element for assembling.
     template<>
-    class HERMES_API Func<double>
+    class HERMES_API Func < double >
     {
     public:
       /// Constructor.
@@ -262,7 +262,7 @@ namespace Hermes
 
     /// Calculated function values (from the class Function) on an element for assembling.
     template<>
-    class HERMES_API Func<std::complex<double> >
+    class HERMES_API Func < std::complex<double> >
     {
     public:
       /// Constructor.
@@ -301,7 +301,7 @@ namespace Hermes
     };
 
     template<>
-    class HERMES_API Func<Ord>
+    class HERMES_API Func < Ord >
     {
     public:
       Func(const int order);
@@ -332,7 +332,7 @@ namespace Hermes
 *  \c get_val_central, \c get_val_neighbor, etc.
 **/
     template<typename T>
-    class HERMES_API DiscontinuousFunc : public Func<T>
+    class HERMES_API DiscontinuousFunc : public Func < T >
     {
     public:
       /// Central element's component.
@@ -379,7 +379,7 @@ namespace Hermes
     };
 
     template<>
-    class HERMES_API DiscontinuousFunc<Ord> : public Func<Ord>
+    class HERMES_API DiscontinuousFunc<Ord> : public Func < Ord >
     {
     public:
       /// Central element's component.

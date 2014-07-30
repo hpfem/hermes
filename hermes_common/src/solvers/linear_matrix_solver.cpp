@@ -172,9 +172,9 @@ namespace Hermes
     }
 
     template<>
-    ExternalSolver<double>::creation ExternalSolver<double>::create_external_solver = static_create_external_solver<double>;
+    ExternalSolver<double>::creation ExternalSolver<double>::create_external_solver = static_create_external_solver < double > ;
     template<>
-    ExternalSolver<std::complex<double> >::creation ExternalSolver<std::complex<double> >::create_external_solver = static_create_external_solver<std::complex<double> >;
+    ExternalSolver<std::complex<double> >::creation ExternalSolver<std::complex<double> >::create_external_solver = static_create_external_solver < std::complex<double> > ;
 
     template<>
     HERMES_API LinearMatrixSolver<double>* create_linear_solver(Matrix<double>* matrix, Vector<double>* rhs, bool use_direct_solver)
@@ -184,96 +184,96 @@ namespace Hermes
       {
       case Hermes::SOLVER_EXTERNAL:
       {
-                                    if (rhs != nullptr)
-                                      return ExternalSolver<double>::create_external_solver(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-                                    else
-                                      return ExternalSolver<double>::create_external_solver(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
+        if (rhs != nullptr)
+          return ExternalSolver<double>::create_external_solver(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
+        else
+          return ExternalSolver<double>::create_external_solver(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
       }
       case Hermes::SOLVER_AZTECOO:
       {
-                                   if (use_direct_solver)
-                                     throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
-                                   if (rhs != nullptr) return new AztecOOSolver<double>(static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs));
-                                   else return new AztecOOSolver<double>(static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs_dummy));
+        if (rhs != nullptr) return new AztecOOSolver<double>(static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs));
+        else return new AztecOOSolver<double>(static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs_dummy));
 #else
-                                   throw Hermes::Exceptions::Exception("AztecOO not installed.");
+        throw Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_AMESOS:
       {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
-                                  if (rhs != nullptr) return new AmesosSolver<double>("Amesos_Klu", static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs));
-                                  else return new AmesosSolver<double>("Amesos_Klu", static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs_dummy));
+        if (rhs != nullptr) return new AmesosSolver<double>("Amesos_Klu", static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs));
+        else return new AmesosSolver<double>("Amesos_Klu", static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs_dummy));
 #else
-                                  throw Hermes::Exceptions::Exception("Amesos not installed.");
+        throw Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
-                                  break;
+        break;
       }
       case Hermes::SOLVER_MUMPS:
       {
 #ifdef WITH_MUMPS
-                                 if (rhs != nullptr) return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-                                 else return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
+        if (rhs != nullptr) return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
+        else return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
 #else
-                                 throw Hermes::Exceptions::Exception("MUMPS was not installed.");
+        throw Hermes::Exceptions::Exception("MUMPS was not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_PETSC:
       {
-                                 if (use_direct_solver)
-                                   throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
 #ifdef WITH_PETSC
-                                 if (rhs != nullptr) return new PetscLinearMatrixSolver<double>(static_cast<PetscMatrix<double>*>(matrix), static_cast<PetscVector<double>*>(rhs));
-                                 else return new PetscLinearMatrixSolver<double>(static_cast<PetscMatrix<double>*>(matrix), static_cast<PetscVector<double>*>(rhs_dummy));
+        if (rhs != nullptr) return new PetscLinearMatrixSolver<double>(static_cast<PetscMatrix<double>*>(matrix), static_cast<PetscVector<double>*>(rhs));
+        else return new PetscLinearMatrixSolver<double>(static_cast<PetscMatrix<double>*>(matrix), static_cast<PetscVector<double>*>(rhs_dummy));
 #else
-                                 throw Hermes::Exceptions::Exception("PETSc not installed.");
+        throw Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_UMFPACK:
       {
 #ifdef WITH_UMFPACK
-                                   if (rhs != nullptr) return new UMFPackLinearMatrixSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-                                   else return new UMFPackLinearMatrixSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
+        if (rhs != nullptr) return new UMFPackLinearMatrixSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
+        else return new UMFPackLinearMatrixSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
 #else
-                                   throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
+        throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_PARALUTION_ITERATIVE:
       {
-                                                if (use_direct_solver)
-                                                  throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
-                                                return new IterativeParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
+        return new IterativeParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
 #else
-                                                throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
+        throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
 #endif
-                                                break;
+        break;
       }
       case Hermes::SOLVER_PARALUTION_AMG:
       {
-                                          if (use_direct_solver)
-                                            throw Hermes::Exceptions::Exception("The AMG solver PARALUTION selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The AMG solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
-                                          return new AMGParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
+        return new AMGParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
 #else
-                                          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
+        throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
 #endif
-                                          break;
+        break;
       }
       case Hermes::SOLVER_SUPERLU:
       {
 #ifdef WITH_SUPERLU
-                                   if (rhs != nullptr) return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
-                                   else return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
+        if (rhs != nullptr) return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
+        else return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
 #else
-                                   throw Hermes::Exceptions::Exception("SuperLU was not installed.");
+        throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
-                                   break;
+        break;
       }
       default:
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_linear_solver().");
@@ -289,86 +289,86 @@ namespace Hermes
       {
       case Hermes::SOLVER_EXTERNAL:
       {
-                                    if (rhs != nullptr)
-                                      return ExternalSolver<std::complex<double> >::create_external_solver(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-                                    else
-                                      return ExternalSolver<std::complex<double> >::create_external_solver(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
+        if (rhs != nullptr)
+          return ExternalSolver<std::complex<double> >::create_external_solver(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
+        else
+          return ExternalSolver<std::complex<double> >::create_external_solver(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
       }
       case Hermes::SOLVER_AZTECOO:
       {
-                                   if (use_direct_solver)
-                                     throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
-                                   if (rhs != nullptr) return new AztecOOSolver<std::complex<double> >(static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs));
-                                   else return new AztecOOSolver<std::complex<double> >(static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs_dummy));
+        if (rhs != nullptr) return new AztecOOSolver<std::complex<double> >(static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs));
+        else return new AztecOOSolver<std::complex<double> >(static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs_dummy));
 #else
-                                   throw Hermes::Exceptions::Exception("AztecOO not installed.");
+        throw Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_AMESOS:
       {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
-                                  if (rhs != nullptr) return new AmesosSolver<std::complex<double> >("Amesos_Klu", static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs));
-                                  else return new AmesosSolver<std::complex<double> >("Amesos_Klu", static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs_dummy));
+        if (rhs != nullptr) return new AmesosSolver<std::complex<double> >("Amesos_Klu", static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs));
+        else return new AmesosSolver<std::complex<double> >("Amesos_Klu", static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs_dummy));
 #else
-                                  throw Hermes::Exceptions::Exception("Amesos not installed.");
+        throw Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
-                                  break;
+        break;
       }
       case Hermes::SOLVER_MUMPS:
       {
 #ifdef WITH_MUMPS
-                                 if (rhs != nullptr) return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-                                 else return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
+        if (rhs != nullptr) return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
+        else return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
 #else
-                                 throw Hermes::Exceptions::Exception("MUMPS was not installed.");
+        throw Hermes::Exceptions::Exception("MUMPS was not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_PETSC:
       {
-                                 if (use_direct_solver)
-                                   throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
 #ifdef WITH_PETSC
-                                 if (rhs != nullptr) return new PetscLinearMatrixSolver<std::complex<double> >(static_cast<PetscMatrix<std::complex<double> >*>(matrix), static_cast<PetscVector<std::complex<double> >*>(rhs));
-                                 else return new PetscLinearMatrixSolver<std::complex<double> >(static_cast<PetscMatrix<std::complex<double> >*>(matrix), static_cast<PetscVector<std::complex<double> >*>(rhs_dummy));
+        if (rhs != nullptr) return new PetscLinearMatrixSolver<std::complex<double> >(static_cast<PetscMatrix<std::complex<double> >*>(matrix), static_cast<PetscVector<std::complex<double> >*>(rhs));
+        else return new PetscLinearMatrixSolver<std::complex<double> >(static_cast<PetscMatrix<std::complex<double> >*>(matrix), static_cast<PetscVector<std::complex<double> >*>(rhs_dummy));
 #else
-                                 throw Hermes::Exceptions::Exception("PETSc not installed.");
+        throw Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
-                                 break;
+        break;
       }
       case Hermes::SOLVER_UMFPACK:
       {
 #ifdef WITH_UMFPACK
-                                   if (rhs != nullptr) return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-                                   else return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
+        if (rhs != nullptr) return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
+        else return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
 #else
-                                   throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
+        throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
-                                   break;
+        break;
       }
       case Hermes::SOLVER_PARALUTION_ITERATIVE:
       case Hermes::SOLVER_PARALUTION_AMG:
       {
-                                          if (use_direct_solver)
-                                            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
+        if (use_direct_solver)
+          throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
-                                          throw Hermes::Exceptions::Exception("PARALUTION only works for real problems.");
+        throw Hermes::Exceptions::Exception("PARALUTION only works for real problems.");
 #else
-                                          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
+        throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
 #endif
-                                          break;
+        break;
       }
       case Hermes::SOLVER_SUPERLU:
       {
 #ifdef WITH_SUPERLU
-                                   if (rhs != nullptr) return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
-                                   else return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
+        if (rhs != nullptr) return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
+        else return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
 #else
-                                   throw Hermes::Exceptions::Exception("SuperLU was not installed.");
+        throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
-                                   break;
+        break;
       }
       default:
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_linear_solver().");
@@ -469,19 +469,19 @@ namespace Hermes
       this->smootherSolverType = solverType_;
     }
 
-    template class HERMES_API LinearMatrixSolver<double>;
-    template class HERMES_API LinearMatrixSolver<std::complex<double> >;
-    template class HERMES_API SimpleExternalSolver<double>;
-    template class HERMES_API SimpleExternalSolver<std::complex<double> >;
-    template class HERMES_API ExternalSolver<double>;
-    template class HERMES_API ExternalSolver<std::complex<double> >;
-    template class HERMES_API DirectSolver<double>;
-    template class HERMES_API DirectSolver<std::complex<double> >;
-    template class HERMES_API LoopSolver<double>;
-    template class HERMES_API LoopSolver<std::complex<double> >;
-    template class HERMES_API IterSolver<double>;
-    template class HERMES_API IterSolver<std::complex<double> >;
-    template class HERMES_API AMGSolver<double>;
-    template class HERMES_API AMGSolver<std::complex<double> >;
+    template class HERMES_API LinearMatrixSolver < double > ;
+    template class HERMES_API LinearMatrixSolver < std::complex<double> > ;
+    template class HERMES_API SimpleExternalSolver < double > ;
+    template class HERMES_API SimpleExternalSolver < std::complex<double> > ;
+    template class HERMES_API ExternalSolver < double > ;
+    template class HERMES_API ExternalSolver < std::complex<double> > ;
+    template class HERMES_API DirectSolver < double > ;
+    template class HERMES_API DirectSolver < std::complex<double> > ;
+    template class HERMES_API LoopSolver < double > ;
+    template class HERMES_API LoopSolver < std::complex<double> > ;
+    template class HERMES_API IterSolver < double > ;
+    template class HERMES_API IterSolver < std::complex<double> > ;
+    template class HERMES_API AMGSolver < double > ;
+    template class HERMES_API AMGSolver < std::complex<double> > ;
   }
 }
