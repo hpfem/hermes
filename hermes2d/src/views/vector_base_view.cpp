@@ -158,8 +158,8 @@ namespace Hermes
   {
     namespace Views
     {
-      template class HERMES_API VectorBaseView<double>;
-      template class HERMES_API VectorBaseView<std::complex<double> >;
+      template class HERMES_API VectorBaseView < double > ;
+      template class HERMES_API VectorBaseView < std::complex<double> > ;
     }
   }
 }

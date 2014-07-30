@@ -137,8 +137,8 @@ namespace Hermes
     {
       return mat->mat->OperatorRangeMap();
     }
-    template class HERMES_API MlPrecond<double>;
-    template class HERMES_API MlPrecond<std::complex<double> >;
+    template class HERMES_API MlPrecond < double > ;
+    template class HERMES_API MlPrecond < std::complex<double> > ;
   }
 }
 #endif

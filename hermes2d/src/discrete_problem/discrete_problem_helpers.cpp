@@ -91,14 +91,14 @@ namespace Hermes
         return true;
       }
 
-      template class HERMES_API DiscreteProblemRungeKutta<double>;
-      template class HERMES_API DiscreteProblemRungeKutta<std::complex<double> >;
+      template class HERMES_API DiscreteProblemRungeKutta < double > ;
+      template class HERMES_API DiscreteProblemRungeKutta < std::complex<double> > ;
 
-      template class HERMES_API DiscreteProblemWeakForm<double>;
-      template class HERMES_API DiscreteProblemWeakForm<std::complex<double> >;
+      template class HERMES_API DiscreteProblemWeakForm < double > ;
+      template class HERMES_API DiscreteProblemWeakForm < std::complex<double> > ;
 
-      template class HERMES_API DiscreteProblemMatrixVector<double>;
-      template class HERMES_API DiscreteProblemMatrixVector<std::complex<double> >;
+      template class HERMES_API DiscreteProblemMatrixVector < double > ;
+      template class HERMES_API DiscreteProblemMatrixVector < std::complex<double> > ;
     }
 
     unsigned char init_geometry_points_allocated(RefMap** reference_mapping, unsigned short reference_mapping_count, int order, GeomVol<double>& geometry, double* jacobian_x_weights)

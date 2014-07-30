@@ -45,7 +45,7 @@ namespace Hermes
       *  - evaluate_error_squared_subdomain()
       */
       template<typename Scalar>
-      class HERMES_API ProjBasedSelector : public OptimumSelector<Scalar> {
+      class HERMES_API ProjBasedSelector : public OptimumSelector < Scalar > {
       protected:
         class TrfShapeExp;
 

@@ -47,8 +47,8 @@ namespace Hermes
     UMFPackLinearMatrixSolver<Scalar>::UMFPackLinearMatrixSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs)
       : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs), symbolic(nullptr), numeric(nullptr)
     {
-        umfpack_di_defaults(Control);
-      }
+      umfpack_di_defaults(Control);
+    }
 
     template<typename Scalar>
     UMFPackLinearMatrixSolver<Scalar>::~UMFPackLinearMatrixSolver()
@@ -252,8 +252,8 @@ namespace Hermes
       return to_return;
     }
 
-    template class HERMES_API UMFPackLinearMatrixSolver<double>;
-    template class HERMES_API UMFPackLinearMatrixSolver<std::complex<double> >;
+    template class HERMES_API UMFPackLinearMatrixSolver < double > ;
+    template class HERMES_API UMFPackLinearMatrixSolver < std::complex<double> > ;
   }
 }
 #endif

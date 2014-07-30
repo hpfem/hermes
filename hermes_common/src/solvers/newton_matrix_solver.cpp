@@ -72,7 +72,7 @@ namespace Hermes
       return std::sqrt(solution_change_norm) * current_damping_factor;
     }
 
-    template class HERMES_API NewtonMatrixSolver<double>;
-    template class HERMES_API NewtonMatrixSolver<std::complex<double> >;
+    template class HERMES_API NewtonMatrixSolver < double > ;
+    template class HERMES_API NewtonMatrixSolver < std::complex<double> > ;
   }
 }

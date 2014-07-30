@@ -32,7 +32,7 @@ namespace Hermes
     /// \brief General CS Matrix class.
     /// Either row- or column- specific (see subclassses).
     template <typename Scalar>
-    class HERMES_API CSMatrix : public SparseMatrix<Scalar>
+    class HERMES_API CSMatrix : public SparseMatrix < Scalar >
     {
     public:
       /// Creates matrix in CS format using size, nnz, and the three arrays.
@@ -128,7 +128,7 @@ namespace Hermes
     /// (can be used in umfpack, in that case use the
     /// CSCMatrix subclass, or with EigenSolver, or anything else).
     template <typename Scalar>
-    class HERMES_API CSCMatrix : public CSMatrix<Scalar>
+    class HERMES_API CSCMatrix : public CSMatrix < Scalar >
     {
     public:
       /// \brief Default constructor.
@@ -158,7 +158,7 @@ namespace Hermes
     /// (can be used in umfpack, in that case use the
     /// CSCMatrix subclass, or with EigenSolver, or anything else).
     template <typename Scalar>
-    class HERMES_API CSRMatrix : public CSMatrix<Scalar>
+    class HERMES_API CSRMatrix : public CSMatrix < Scalar >
     {
     public:
       /// \brief Default constructor.

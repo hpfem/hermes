@@ -35,7 +35,7 @@ namespace Hermes
     /// \brief Preconditioners built on ML.
     ///
     template <typename Scalar>
-    class HERMES_API MlPrecond : public EpetraPrecond<Scalar>
+    class HERMES_API MlPrecond : public EpetraPrecond < Scalar >
     {
     public:
       /// @param[in] type - type of the preconditioner[ sa | dd ]
@@ -75,7 +75,7 @@ namespace Hermes
       EpetraMatrix<Scalar> *mat;
       unsigned owner : 1;
 
-      friend class AztecOOSolver<Scalar>;
+      friend class AztecOOSolver < Scalar > ;
     };
   }
 }

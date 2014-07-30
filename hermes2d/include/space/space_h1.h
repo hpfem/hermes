@@ -32,7 +32,7 @@ namespace Hermes
     /// int globalPolynomialOrder = 4;<br>
     /// SpaceSharedPtr<double> space(&mesh, &bcs, globalPolynomialOrder);<br>
     template<typename Scalar>
-    class HERMES_API H1Space : public Space<Scalar>
+    class HERMES_API H1Space : public Space < Scalar >
     {
     public:
       H1Space();

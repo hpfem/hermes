@@ -51,7 +51,7 @@ namespace Hermes
     /// Setter handler type.
     /// Serve for a custom reaction to some parameter settings.
     /// Such a handler must be registered in the map setter_handlers.
-    typedef void (*SetterHandler)();
+    typedef void(*SetterHandler)();
 
   protected:
     /// Parameter class, representing one parameter.

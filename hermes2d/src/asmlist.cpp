@@ -69,7 +69,7 @@ namespace Hermes
       coef[cnt++] = c;
     }
 
-    template HERMES_API class AsmList<double>;
-    template HERMES_API class AsmList<std::complex<double> >;
+    template HERMES_API class AsmList < double > ;
+    template HERMES_API class AsmList < std::complex<double> > ;
   }
 }

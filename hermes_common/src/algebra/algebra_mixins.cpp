@@ -203,10 +203,10 @@ namespace Hermes
         this->import_from_file(filename.c_str(), var_name.c_str(), fmt);
       }
 
-      template HERMES_API class MatrixRhsOutput<double>;
-      template HERMES_API class MatrixRhsOutput<std::complex<double> >;
-      template HERMES_API class MatrixRhsImportExport<double>;
-      template HERMES_API class MatrixRhsImportExport<std::complex<double> >;
+      template HERMES_API class MatrixRhsOutput < double > ;
+      template HERMES_API class MatrixRhsOutput < std::complex<double> > ;
+      template HERMES_API class MatrixRhsImportExport < double > ;
+      template HERMES_API class MatrixRhsImportExport < std::complex<double> > ;
     }
   }
 }

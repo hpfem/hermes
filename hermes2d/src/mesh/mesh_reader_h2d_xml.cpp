@@ -105,28 +105,28 @@ namespace Hermes
       {
         e = mesh->get_element_fast(i);
         if (e->used)
-        if (e->is_triangle())
-          elements.el().push_back(XMLMesh::t_t(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str()));
-        else
-          elements.el().push_back(XMLMesh::q_t(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->vn[3]->id));
+          if (e->is_triangle())
+            elements.el().push_back(XMLMesh::t_t(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str()));
+          else
+            elements.el().push_back(XMLMesh::q_t(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->vn[3]->id));
       }
       // save boundary markers
       XMLMesh::edges_type edges;
       for_all_base_elements(e, mesh)
-      for (unsigned char i = 0; i < e->get_nvert(); i++)
-      if (MeshUtil::get_base_edge_node(e, i)->marker)
-        edges.ed().push_back(XMLMesh::ed(e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker.c_str()));
+        for (unsigned char i = 0; i < e->get_nvert(); i++)
+          if (MeshUtil::get_base_edge_node(e, i)->marker)
+            edges.ed().push_back(XMLMesh::ed(e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(MeshUtil::get_base_edge_node(e, i)->marker).marker.c_str()));
 
       // save curved edges
       XMLMesh::curves_type curves;
       for_all_base_elements(e, mesh)
-      if (e->is_curved())
-      for (unsigned char i = 0; i < e->get_nvert(); i++)
-      if (e->cm->curves[i] != nullptr)
-      if (e->cm->curves[i]->type == ArcType)
-        save_arc(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, (Arc*)e->cm->curves[i], curves);
-      else
-        save_nurbs(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, (Nurbs*)e->cm->curves[i], curves);
+        if (e->is_curved())
+          for (unsigned char i = 0; i < e->get_nvert(); i++)
+            if (e->cm->curves[i] != nullptr)
+              if (e->cm->curves[i]->type == ArcType)
+                save_arc(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, (Arc*)e->cm->curves[i], curves);
+              else
+                save_nurbs(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, (Nurbs*)e->cm->curves[i], curves);
 
       // save refinements
       XMLMesh::refinements_type refinements;
@@ -189,16 +189,16 @@ namespace Hermes
 
         int max_vertex_i = -1;
         for (std::map<int, int>::iterator it = vertex_is.begin(); it != vertex_is.end(); ++it)
-        if (it->first > max_vertex_i)
-          max_vertex_i = it->first;
+          if (it->first > max_vertex_i)
+            max_vertex_i = it->first;
         int max_element_i = -1;
         for (std::map<int, int>::iterator it = element_is.begin(); it != element_is.end(); ++it)
-        if (it->first > max_element_i)
-          max_element_i = it->first;
+          if (it->first > max_element_i)
+            max_element_i = it->first;
         int max_edge_i = -1;
         for (std::map<int, int>::iterator it = edge_is.begin(); it != edge_is.end(); ++it)
-        if (it->first > max_edge_i)
-          max_edge_i = it->first;
+          if (it->first > max_edge_i)
+            max_edge_i = it->first;
 
         // Subdomains //
         unsigned int subdomains_count = parsed_xml_domain->subdomains().subdomain().size();
@@ -671,8 +671,8 @@ namespace Hermes
         {
           subdomain.inner_edges().set(XMLSubdomains::subdomain::inner_edges_type());
           for_all_base_elements(e, meshes[meshes_i])
-          for (unsigned char i = 0; i < e->get_nvert(); i++)
-          {
+            for (unsigned char i = 0; i < e->get_nvert(); i++)
+            {
             if (!MeshUtil::get_base_edge_node(e, i)->bnd)
             {
               if (vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_boundaries.end())
@@ -684,23 +684,23 @@ namespace Hermes
               if (!hasAllElements)
                 subdomain.inner_edges()->i().push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
             }
-          }
+            }
         }
 
         // save curved edges
         for_all_base_elements(e, meshes[meshes_i])
         {
           if (e->is_curved())
-          for (unsigned char i = 0; i < e->get_nvert(); i++)
-          if (e->cm->curves[i] != nullptr)
-          if (vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
-          {
+            for (unsigned char i = 0; i < e->get_nvert(); i++)
+              if (e->cm->curves[i] != nullptr)
+                if (vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
+                {
             if (e->cm->curves[i]->type == ArcType)
               save_arc(meshes[meshes_i], vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, (Arc*)e->cm->curves[i], curves);
             else
               save_nurbs(meshes[meshes_i], vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, (Nurbs*)e->cm->curves[i], curves);
             vertices_to_curves.insert(std::pair<std::pair<unsigned int, unsigned int>, bool>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), true));
-          }
+                }
         }
 
         // save refinements
@@ -888,8 +888,8 @@ namespace Hermes
 
         // check that all boundary edges have a marker assigned
         for_all_edge_nodes(en, mesh)
-        if (en->ref < 2 && en->marker == 0)
-          this->warn("Boundary edge node does not have a boundary marker.");
+          if (en->ref < 2 && en->marker == 0)
+            this->warn("Boundary edge node does not have a boundary marker.");
 
         // Curves //
         // Arcs & NURBSs //
@@ -1131,8 +1131,8 @@ namespace Hermes
 
         // check that all boundary edges have a marker assigned
         for_all_edge_nodes(en, mesh)
-        if (en->ref < 2 && en->marker == 0)
-          this->warn("Boundary edge node does not have a boundary marker.");
+          if (en->ref < 2 && en->marker == 0)
+            this->warn("Boundary edge node does not have a boundary marker.");
 
         // Curves //
         // Arcs & NURBSs //
@@ -1235,8 +1235,8 @@ namespace Hermes
         nurbs->kv[i] = 0.0;
 
       if (inner > 0)
-      for (int i = outer / 2; i < inner + outer / 2; i++)
-        nurbs->kv[i] = parsed_xml_entity->curves()->NURBS().at(id).knot().at(i - (outer / 2)).value();
+        for (int i = outer / 2; i < inner + outer / 2; i++)
+          nurbs->kv[i] = parsed_xml_entity->curves()->NURBS().at(id).knot().at(i - (outer / 2)).value();
 
       for (int i = outer / 2 + inner; i < nurbs->nk; i++)
         nurbs->kv[i] = 1.0;

@@ -55,8 +55,8 @@ namespace Hermes
     L2Space<Scalar>::L2Space(MeshSharedPtr mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, nullptr)
     {
-        init(shapeset, p_init);
-      }
+      init(shapeset, p_init);
+    }
 
     template<typename Scalar>
     L2Space<Scalar>::~L2Space()
@@ -168,10 +168,10 @@ namespace Hermes
       this->bubble_functions_count = max_marker;
     }
 
-    template HERMES_API class L2Space<double>;
-    template HERMES_API class L2Space<std::complex<double> >;
+    template HERMES_API class L2Space < double > ;
+    template HERMES_API class L2Space < std::complex<double> > ;
 
-    template HERMES_API class L2MarkerWiseConstSpace<double>;
-    template HERMES_API class L2MarkerWiseConstSpace<std::complex<double> >;
+    template HERMES_API class L2MarkerWiseConstSpace < double > ;
+    template HERMES_API class L2MarkerWiseConstSpace < std::complex<double> > ;
   }
 }

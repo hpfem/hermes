@@ -89,8 +89,8 @@ namespace Hermes
       free_with_check(coeff_vec);
 
       if (target_vec != nullptr)
-      for (int i = 0; i < ndof; i++)
-        target_vec[i] = newton_nox.get_sln_vector()[i];
+        for (int i = 0; i < ndof; i++)
+          target_vec[i] = newton_nox.get_sln_vector()[i];
     }
 
     template<typename Scalar>
@@ -267,7 +267,7 @@ namespace Hermes
       }
     }
 
-    template class HERMES_API OGProjectionNOX<double>;
+    template class HERMES_API OGProjectionNOX < double > ;
     //complex version of nox solver is not implemented
     // template class HERMES_API OGProjectionNOX<std::complex<double> >;
   }

@@ -118,7 +118,7 @@ namespace Hermes
         {
           for (int j = 0; j <= 10; j++)
           {
-            assert((unsigned)p < sizeof(buffer)-5);
+            assert((unsigned)p < sizeof(buffer) - 5);
             if (i == j)
               sprintf(buffer + p, "%d", i);
             else
@@ -246,16 +246,16 @@ namespace Hermes
         {
           oo = o[4] = o[5] = space->get_element_order(e->id);
           if (show_edge_orders)
-          for (unsigned int k = 0; k < e->get_nvert(); k++)
-            o[k] = space->get_edge_order(e, k);
+            for (unsigned int k = 0; k < e->get_nvert(); k++)
+              o[k] = space->get_edge_order(e, k);
           else if (e->is_curved())
           {
             if (e->is_triangle())
-            for (unsigned int k = 0; k < e->get_nvert(); k++)
-              o[k] = oo;
+              for (unsigned int k = 0; k < e->get_nvert(); k++)
+                o[k] = oo;
             else
-            for (unsigned int k = 0; k < e->get_nvert(); k++)
-              o[k] = H2D_GET_H_ORDER(oo);
+              for (unsigned int k = 0; k < e->get_nvert(); k++)
+                o[k] = H2D_GET_H_ORDER(oo);
           }
 
           double3* pt;

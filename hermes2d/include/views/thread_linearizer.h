@@ -166,7 +166,7 @@ namespace Hermes
         /// Standard and curvature epsilon.
         double curvature_epsilon;
 
-        friend class LinearizerMultidimensional<LinearizerDataDimensions>;
+        friend class LinearizerMultidimensional < LinearizerDataDimensions > ;
       };
     }
   }

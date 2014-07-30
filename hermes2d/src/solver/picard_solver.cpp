@@ -147,7 +147,7 @@ namespace Hermes
       this->jacobian_reusable = false;
     }
 
-    template class HERMES_API PicardSolver<double>;
-    template class HERMES_API PicardSolver<std::complex<double> >;
+    template class HERMES_API PicardSolver < double > ;
+    template class HERMES_API PicardSolver < std::complex<double> > ;
   }
 }

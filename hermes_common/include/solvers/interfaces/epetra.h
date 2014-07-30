@@ -56,7 +56,7 @@ namespace Hermes
   namespace Algebra
   {
     template <typename Scalar>
-    class HERMES_API EpetraMatrix : public SparseMatrix<Scalar>
+    class HERMES_API EpetraMatrix : public SparseMatrix < Scalar >
     {
     public:
       EpetraMatrix();
@@ -98,14 +98,14 @@ namespace Hermes
 
       bool owner;
 
-      friend class Hermes::Solvers::AmesosSolver<Scalar>;
-      friend class Hermes::Solvers::AztecOOSolver<Scalar>;
-      friend class Hermes::Preconditioners::IfpackPrecond<Scalar>;
-      friend class Hermes::Preconditioners::MlPrecond<Scalar>;
+      friend class Hermes::Solvers::AmesosSolver < Scalar > ;
+      friend class Hermes::Solvers::AztecOOSolver < Scalar > ;
+      friend class Hermes::Preconditioners::IfpackPrecond < Scalar > ;
+      friend class Hermes::Preconditioners::MlPrecond < Scalar > ;
     };
 
     template <typename Scalar>
-    class HERMES_API EpetraVector : public Vector<Scalar>
+    class HERMES_API EpetraVector : public Vector < Scalar >
     {
     public:
       EpetraVector();
@@ -133,8 +133,8 @@ namespace Hermes
       Epetra_Vector *vec_im;
       bool owner;
 
-      friend class Hermes::Solvers::AmesosSolver<Scalar>;
-      friend class Hermes::Solvers::AztecOOSolver<Scalar>;
+      friend class Hermes::Solvers::AmesosSolver < Scalar > ;
+      friend class Hermes::Solvers::AztecOOSolver < Scalar > ;
     };
   }
 }

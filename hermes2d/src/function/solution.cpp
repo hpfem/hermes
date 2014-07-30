@@ -57,11 +57,11 @@ namespace Hermes
             tables[mode_i][k] = pt = malloc_with_check<double3>(n);
 
             for (i = k, m = 0; i >= 0; i--)
-            for (j = k; j >= (mode_i ? 0 : k - i); j--, m++) {
+              for (j = k; j >= (mode_i ? 0 : k - i); j--, m++) {
               pt[m][0] = k ? cos(j * M_PI / k) : 1.0;
               pt[m][1] = k ? cos(i * M_PI / k) : 1.0;
               pt[m][2] = 1.0;
-            }
+              }
           }
         }
       };
@@ -69,8 +69,8 @@ namespace Hermes
       ~Quad2DCheb()
       {
         for (int mode_i = 0; mode_i <= 1; mode_i++)
-        for (int k = 1; k <= 10; k++)
-          free_with_check(tables[mode_i][k]);
+          for (int k = 1; k <= 10; k++)
+            free_with_check(tables[mode_i][k]);
       }
 
       virtual unsigned char get_id()
@@ -111,17 +111,17 @@ namespace Hermes
     Solution<double>::Solution()
       : MeshFunction<double>()
     {
-        space_type = HERMES_INVALID_SPACE;
-        this->init();
-      }
+      space_type = HERMES_INVALID_SPACE;
+      this->init();
+    }
 
     template<>
     Solution<std::complex<double> >::Solution()
       : MeshFunction<std::complex<double> >()
     {
-        space_type = HERMES_INVALID_SPACE;
-        this->init();
-      }
+      space_type = HERMES_INVALID_SPACE;
+      this->init();
+    }
 
     template<>
     Solution<double>::Solution(MeshSharedPtr mesh) : MeshFunction<double>(mesh)
@@ -297,8 +297,8 @@ namespace Hermes
 
             // each row of the matrix contains all the monomials x^i*y^j
             for (i = 0, yn = 1.0, m = n - 1; i <= o; i++, yn *= y)
-            for (j = (this->mode ? 0 : i), xn = 1.0; j <= o; j++, xn *= x, m--)
-              mono_lu.mat[mode][o][row][m] = xn * yn;
+              for (j = (this->mode ? 0 : i), xn = 1.0; j <= o; j++, xn *= x, m--)
+                mono_lu.mat[mode][o][row][m] = xn * yn;
           }
         }
 
@@ -381,8 +381,8 @@ namespace Hermes
 
         // Hcurl and Hdiv: actual order of functions is one higher than element order
         if (space->shapeset->get_num_components() == 2)
-        if (o < space->shapeset->get_max_order())
-          o++;
+          if (o < space->shapeset->get_max_order())
+            o++;
 
         num_coeffs += this->mode ? sqr(o + 1) : (o + 1)*(o + 2) / 2;
         elem_orders[e->id] = o;
@@ -675,8 +675,8 @@ namespace Hermes
         for (j = 0; j <= o; j++)
           *result++ = 0.0;
         for (i = 0; i < o; i++)
-        for (j = 0; j <= o; j++)
-          *result++ = (Scalar)(o - i) * (*mono++);
+          for (j = 0; j <= o; j++)
+            *result++ = (Scalar)(o - i) * (*mono++);
       }
       else {
         for (i = 0; i <= o; i++)
@@ -1313,8 +1313,8 @@ namespace Hermes
             this->elem_orders[parsed_xml_solution->elem_orders().at(elems_i).id()] = parsed_xml_solution->elem_orders().at(elems_i).ord();
 
           for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
-          for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
-            this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).c();
+            for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
+              this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).c();
         }
         init_dxdy_buffer();
       }
@@ -1375,8 +1375,8 @@ namespace Hermes
             this->elem_orders[parsed_xml_solution->elem_orders().at(elems_i).id()] = parsed_xml_solution->elem_orders().at(elems_i).ord();
 
           for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
-          for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
-            this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).c();
+            for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
+              this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).c();
         }
 
         init_dxdy_buffer();
@@ -1654,24 +1654,24 @@ namespace Hermes
     void Solution<Scalar>::check_space_type_compliance(const char* space_type_to_check) const
     {
       if (!strcmp(space_type_to_check, "h1"))
-      if (this->space_type != HERMES_H1_SPACE)
-        throw Exceptions::Exception("Space types not compliant in Solution::load().");
+        if (this->space_type != HERMES_H1_SPACE)
+          throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
       if (!strcmp(space_type_to_check, "l2"))
-      if (this->space_type != HERMES_L2_SPACE)
-        throw Exceptions::Exception("Space types not compliant in Solution::load().");
+        if (this->space_type != HERMES_L2_SPACE)
+          throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
       if (!strcmp(space_type_to_check, "hcurl"))
-      if (this->space_type != HERMES_HCURL_SPACE)
-        throw Exceptions::Exception("Space types not compliant in Solution::load().");
+        if (this->space_type != HERMES_HCURL_SPACE)
+          throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
       if (!strcmp(space_type_to_check, "hdiv"))
-      if (this->space_type != HERMES_HDIV_SPACE)
-        throw Exceptions::Exception("Space types not compliant in Solution::load().");
+        if (this->space_type != HERMES_HDIV_SPACE)
+          throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
       if (!strcmp(space_type_to_check, "l2-markerwise"))
-      if (this->space_type != HERMES_L2_MARKERWISE_CONST_SPACE)
-        throw Exceptions::Exception("Space types not compliant in Solution::load().");
+        if (this->space_type != HERMES_L2_MARKERWISE_CONST_SPACE)
+          throw Exceptions::Exception("Space types not compliant in Solution::load().");
     }
 
     template<typename Scalar>
@@ -1927,7 +1927,7 @@ namespace Hermes
       }
     }
 
-    template class HERMES_API Solution<double>;
-    template class HERMES_API Solution<std::complex<double> >;
+    template class HERMES_API Solution < double > ;
+    template class HERMES_API Solution < std::complex<double> > ;
   }
 }

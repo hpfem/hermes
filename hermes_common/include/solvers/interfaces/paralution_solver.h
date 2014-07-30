@@ -52,7 +52,7 @@ namespace Hermes
 
     /// \brief General Paralution matrix.
     template <typename Scalar>
-    class HERMES_API ParalutionMatrix : public CSRMatrix<Scalar>
+    class HERMES_API ParalutionMatrix : public CSRMatrix < Scalar >
     {
     public:
       /// \brief Default constructor.
@@ -75,7 +75,7 @@ namespace Hermes
 
     /// \brief Class representing the vector for UMFPACK.
     template <typename Scalar>
-    class HERMES_API ParalutionVector : public SimpleVector<Scalar>
+    class HERMES_API ParalutionVector : public SimpleVector < Scalar >
     {
     public:
       /// Default constructor.
@@ -100,7 +100,7 @@ namespace Hermes
     /// \brief A PARALUTION preconditioner.
     ///
     template <typename Scalar>
-    class ParalutionPrecond : public Hermes::Preconditioners::Precond<Scalar>
+    class ParalutionPrecond : public Hermes::Preconditioners::Precond < Scalar >
     {
     public:
       /// Constructor.
@@ -156,7 +156,7 @@ namespace Hermes
     /// \brief ABSTRACT class containing common functionality of both PARALUTION iterative and AMG linear solver.
     ///
     template <typename Scalar>
-    class HERMES_API AbstractParalutionLinearMatrixSolver : public virtual LoopSolver<Scalar>
+    class HERMES_API AbstractParalutionLinearMatrixSolver : public virtual LoopSolver < Scalar >
     {
     public:
       virtual void solve(Scalar* initial_guess);
@@ -214,7 +214,7 @@ namespace Hermes
     /// \brief Encapsulation of PARALUTION iterative linear solver.
     ///
     template <typename Scalar>
-    class HERMES_API IterativeParalutionLinearMatrixSolver : public AbstractParalutionLinearMatrixSolver<Scalar>, public virtual IterSolver<Scalar>
+    class HERMES_API IterativeParalutionLinearMatrixSolver : public AbstractParalutionLinearMatrixSolver<Scalar>, public virtual IterSolver < Scalar >
     {
     public:
       /// Constructor of Iterative PARALUTION solver.
@@ -247,7 +247,7 @@ namespace Hermes
     /// \brief Encapsulation of PARALUTION AMG linear solver.
     ///
     template <typename Scalar>
-    class HERMES_API AMGParalutionLinearMatrixSolver : public AbstractParalutionLinearMatrixSolver<Scalar>, public virtual AMGSolver<Scalar>
+    class HERMES_API AMGParalutionLinearMatrixSolver : public AbstractParalutionLinearMatrixSolver<Scalar>, public virtual AMGSolver < Scalar >
     {
     public:
       /// Constructor of UMFPack solver.

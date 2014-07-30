@@ -59,7 +59,7 @@ namespace Hermes
     /// The method add_refinement will return false as soon as the already processed refinements counted for AdaptStoppingCriterionCumulative::threshold
     /// of the total error.
     template<typename Scalar>
-    class HERMES_API AdaptStoppingCriterionCumulative : public AdaptivityStoppingCriterion<Scalar>
+    class HERMES_API AdaptStoppingCriterionCumulative : public AdaptivityStoppingCriterion < Scalar >
     {
     public:
       /// Constructor specifying the threshold (see description of threshold).
@@ -79,7 +79,7 @@ namespace Hermes
     /// The method add_refinement will return false as soon as the particular element carries lower error than AdaptStoppingCriterionSingleElement::threshold
     /// times the maximum element error.
     template<typename Scalar>
-    class HERMES_API AdaptStoppingCriterionSingleElement : public AdaptivityStoppingCriterion<Scalar>
+    class HERMES_API AdaptStoppingCriterionSingleElement : public AdaptivityStoppingCriterion < Scalar >
     {
     public:
       /// Constructor specifying the threshold (see description of threshold).
@@ -97,7 +97,7 @@ namespace Hermes
     /// The method add_refinement will return false as soon as the particular element carries significantly less error than the previous one in the descending sequence.
     /// Useful e.g. when we are more interested in overall solution quality than resolution of a steep singularity etc.
     template<typename Scalar>
-    class HERMES_API AdaptStoppingCriterionLevels : public AdaptivityStoppingCriterion<Scalar>
+    class HERMES_API AdaptStoppingCriterionLevels : public AdaptivityStoppingCriterion < Scalar >
     {
     public:
       /// Constructor specifying the threshold (see description of threshold).

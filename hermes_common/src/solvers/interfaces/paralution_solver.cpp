@@ -32,7 +32,7 @@ namespace Hermes
     ParalutionMatrix<Scalar>::ParalutionMatrix(ParalutionMatrixType type)
       : CSRMatrix<Scalar>(), paralutionMatrixType(type)
     {
-      }
+    }
 
     template<typename Scalar>
     ParalutionMatrix<Scalar>::~ParalutionMatrix()
@@ -124,8 +124,8 @@ namespace Hermes
       memset(this->v, 0, this->size * sizeof(Scalar));
     }
 
-    template class HERMES_API ParalutionMatrix<double>;
-    template class HERMES_API ParalutionVector<double>;
+    template class HERMES_API ParalutionMatrix < double > ;
+    template class HERMES_API ParalutionVector < double > ;
   }
   namespace Solvers
   {
@@ -315,40 +315,40 @@ namespace Hermes
     paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>*
       IterativeParalutionLinearMatrixSolver<Scalar>::return_paralutionSolver(IterSolverType type)
     {
-        switch (type)
-        {
-        case CG:
-        {
-                 return new paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
-          break;
-        case GMRES:
-        {
-                    return new paralution::GMRES<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
-          break;
-        case BiCGStab:
-        {
-                       return new paralution::BiCGStab<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
-          break;
-#if __PARALUTION_VER >= 500
-        case CR:
-        {
-                 return new paralution::CR<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
-          break;
-        case IDR:
-        {
-                  return new paralution::IDR<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        }
-          break;
-#endif
-        default:
-          throw Hermes::Exceptions::Exception("A wrong solver type detected in PARALUTION.");
-          return nullptr;
-        }
+      switch (type)
+      {
+      case CG:
+      {
+        return new paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
       }
+        break;
+      case GMRES:
+      {
+        return new paralution::GMRES<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+      }
+        break;
+      case BiCGStab:
+      {
+        return new paralution::BiCGStab<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+      }
+        break;
+#if __PARALUTION_VER >= 500
+      case CR:
+      {
+        return new paralution::CR<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+      }
+        break;
+      case IDR:
+      {
+        return new paralution::IDR<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+      }
+        break;
+#endif
+      default:
+        throw Hermes::Exceptions::Exception("A wrong solver type detected in PARALUTION.");
+        return nullptr;
+      }
+    }
 
     template<typename Scalar>
     void IterativeParalutionLinearMatrixSolver<Scalar>::init_internal_solver()
@@ -432,8 +432,8 @@ namespace Hermes
       }
     }
 
-    template class HERMES_API IterativeParalutionLinearMatrixSolver<double>;
-    template class HERMES_API AMGParalutionLinearMatrixSolver<double>;
+    template class HERMES_API IterativeParalutionLinearMatrixSolver < double > ;
+    template class HERMES_API AMGParalutionLinearMatrixSolver < double > ;
   }
 
   namespace Preconditioners
@@ -464,23 +464,23 @@ namespace Hermes
 #if __PARALUTION_VER >= 500
       case MultiElimination:
       {
-                             this->mcilu_p = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar >;
-                             mcilu_p->Init(0);
+        this->mcilu_p = new paralution::MultiColoredILU < paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar > ;
+        mcilu_p->Init(0);
 
-                             paralution::MultiElimination<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* multiEliminationPreconditioner =
-                               new paralution::MultiElimination<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-                             multiEliminationPreconditioner->Init(*mcilu_p, 2, 0.4);
-                             this->paralutionPreconditioner = multiEliminationPreconditioner;
+        paralution::MultiElimination<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* multiEliminationPreconditioner =
+          new paralution::MultiElimination<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        multiEliminationPreconditioner->Init(*mcilu_p, 2, 0.4);
+        this->paralutionPreconditioner = multiEliminationPreconditioner;
       }
         break;
       case SaddlePoint:
       {
-                        paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePointPrecond =
-                          new paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-                        this->saddlePoint_p_k = new paralution::FSAI<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>;
-                        this->saddlePoint_p_s = new paralution::SPAI<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>;
-                        saddlePointPrecond->Init(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
-                        this->paralutionPreconditioner = saddlePointPrecond;
+        paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePointPrecond =
+          new paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        this->saddlePoint_p_k = new paralution::FSAI < paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar > ;
+        this->saddlePoint_p_s = new paralution::SPAI < paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar > ;
+        saddlePointPrecond->Init(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
+        this->paralutionPreconditioner = saddlePointPrecond;
       }
         break;
 #endif
@@ -539,7 +539,7 @@ namespace Hermes
       }
     }
 
-    template class HERMES_API ParalutionPrecond<double>;
+    template class HERMES_API ParalutionPrecond < double > ;
   }
 }
 #endif

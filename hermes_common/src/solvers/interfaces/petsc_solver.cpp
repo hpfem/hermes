@@ -437,10 +437,10 @@ namespace Hermes
       */
     }
 
-    template class HERMES_API PetscMatrix<double>;
-    template class HERMES_API PetscMatrix<std::complex<double> >;
-    template class HERMES_API PetscVector<double>;
-    template class HERMES_API PetscVector<std::complex<double> >;
+    template class HERMES_API PetscMatrix < double > ;
+    template class HERMES_API PetscMatrix < std::complex<double> > ;
+    template class HERMES_API PetscVector < double > ;
+    template class HERMES_API PetscVector < std::complex<double> > ;
   }
   namespace Solvers
   {
@@ -448,8 +448,8 @@ namespace Hermes
     PetscLinearMatrixSolver<Scalar>::PetscLinearMatrixSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs)
       : DirectSolver<Scalar>(mat, rhs), m(mat), rhs(rhs)
     {
-        add_petsc_object();
-      }
+      add_petsc_object();
+    }
 
     template<typename Scalar>
     PetscLinearMatrixSolver<Scalar>::~PetscLinearMatrixSolver()
@@ -504,8 +504,8 @@ namespace Hermes
       VecDestroy(&x);
     }
 
-    template class HERMES_API PetscLinearMatrixSolver<double>;
-    template class HERMES_API PetscLinearMatrixSolver<std::complex<double> >;
+    template class HERMES_API PetscLinearMatrixSolver < double > ;
+    template class HERMES_API PetscLinearMatrixSolver < std::complex<double> > ;
   }
 }
 #endif

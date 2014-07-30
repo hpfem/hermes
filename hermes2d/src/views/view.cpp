@@ -460,38 +460,38 @@ namespace Hermes
         {
         case 'h':
         {
-                  hq_frame = true;
-                  refresh();
-                  break;
+          hq_frame = true;
+          refresh();
+          break;
         }
 
         case 27:
         case 'q':
         {
-                  close();
-                  break;
+          close();
+          break;
         }
 
         case 's':
         {
-                  const char *file_name = get_screenshot_file_name();
-                  glReadBuffer(GL_FRONT_LEFT);
-                  save_screenshot_internal(file_name);
-                  break;
+          const char *file_name = get_screenshot_file_name();
+          glReadBuffer(GL_FRONT_LEFT);
+          save_screenshot_internal(file_name);
+          break;
         }
 
         case 'p':
         {
-                  switch (pal_type)
-                  {
-                  case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
-                  case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
-                  case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_HUESCALE; break;
-                  default: throw Hermes::Exceptions::Exception("Invalid palette type");
-                  }
-                  create_gl_palette();
-                  refresh();
-                  break;
+          switch (pal_type)
+          {
+          case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
+          case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
+          case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_HUESCALE; break;
+          default: throw Hermes::Exceptions::Exception("Invalid palette type");
+          }
+          create_gl_palette();
+          refresh();
+          break;
         }
 
         default:
@@ -761,7 +761,7 @@ namespace Hermes
 
         int n = 1;
         for (const char* p = text; *p; p++)
-        if (*p == '\n') n++;
+          if (*p == '\n') n++;
 
         int width = get_text_width(text);
         int height = n * glutBitmapHeight(GLUT_BITMAP_9_BY_15);
@@ -855,7 +855,7 @@ namespace Hermes
 
         // fill in bitmap header
         file_header.type = BITMAP_ID;
-        file_header.size = sizeof(BitmapFileHeader)+sizeof(BitmapInfoHeader)+
+        file_header.size = sizeof(BitmapFileHeader) + sizeof(BitmapInfoHeader) +
           4 * output_width * output_height;
         file_header.reserved1 = file_header.reserved2 = 0;
         // length of both headers

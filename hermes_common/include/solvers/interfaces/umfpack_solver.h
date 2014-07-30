@@ -45,7 +45,7 @@ namespace Hermes
     /// \brief Encapsulation of UMFPACK linear solver.
     ///
     template <typename Scalar>
-    class HERMES_API UMFPackLinearMatrixSolver : public DirectSolver<Scalar>
+    class HERMES_API UMFPackLinearMatrixSolver : public DirectSolver < Scalar >
     {
     public:
       /// Constructor of UMFPack solver.

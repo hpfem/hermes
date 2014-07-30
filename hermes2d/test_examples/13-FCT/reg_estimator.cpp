@@ -7,7 +7,7 @@ R_h_2(MeshFunctionSharedPtr<double>(new Solution<double>)), sln(MeshFunctionShar
 
   smooth_elem_patch = nullptr;
   smooth_dof = nullptr;
-  al = new 	AsmList<double>;
+  al = new 	AsmList < double > ;
   rhs_1 = nullptr;
   rhs_2 = nullptr;
   grad_1 = WeakFormSharedPtr<double>(new GradientReconstruction_1(sln));
@@ -125,7 +125,7 @@ void Regularity_Estimator::smoothness_indicator(CSCMatrix<double> * mass_matrix)
   bool own_mass_matrix = false;
   if (mass_matrix == nullptr)
   {
-    mass_matrix = new CSCMatrix<double>;
+    mass_matrix = new CSCMatrix < double > ;
     dp_1->assemble(mass_matrix, rhs_1);
     own_mass_matrix = true;
   }

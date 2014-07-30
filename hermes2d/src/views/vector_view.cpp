@@ -294,45 +294,45 @@ namespace Hermes
               double wh = output_height + gt, ww = output_width + gs;
 
               double vert[3][4] = {
-                {
-                  triangle[0][0],
-                  triangle[0][1],
-                  triangle[0][2],
-                  triangle[0][3]
-                },
-                {
-                  triangle[1][0],
-                  triangle[1][1],
-                  triangle[1][2],
-                  triangle[1][3]
-                },
-                {
-                  triangle[2][0],
-                  triangle[2][1],
-                  triangle[2][2],
-                  triangle[2][3]
-                }
+                  {
+                    triangle[0][0],
+                    triangle[0][1],
+                    triangle[0][2],
+                    triangle[0][3]
+                  },
+                  {
+                    triangle[1][0],
+                    triangle[1][1],
+                    triangle[1][2],
+                    triangle[1][3]
+                  },
+                  {
+                    triangle[2][0],
+                    triangle[2][1],
+                    triangle[2][2],
+                    triangle[2][3]
+                  }
               };
 
               double tvert[3][2] = {
-                {
-                  transform_x(triangle[0][0]),
-                  transform_y(triangle[0][1])
-                },
-                {
-                  transform_x(triangle[1][0]),
-                  transform_y(triangle[1][1])
-                },
-                {
-                  transform_x(triangle[2][0]),
-                  transform_y(triangle[2][1])
-                }
+                  {
+                    transform_x(triangle[0][0]),
+                    transform_y(triangle[0][1])
+                  },
+                  {
+                    transform_x(triangle[1][0]),
+                    transform_y(triangle[1][1])
+                  },
+                  {
+                    transform_x(triangle[2][0]),
+                    transform_y(triangle[2][1])
+                  }
               };
 
               if ((tvert[0][0] < -gs) && (tvert[1][0] < -gs) && (tvert[2][0] < -gs)) continue;
-              if ((tvert[0][0] >  ww) && (tvert[1][0] >  ww) && (tvert[2][0] >  ww)) continue;
+              if ((tvert[0][0] >  ww) && (tvert[1][0] >  ww) && (tvert[2][0] > ww)) continue;
               if ((tvert[0][1] < -gt) && (tvert[1][1] < -gt) && (tvert[2][1] < -gt)) continue;
-              if ((tvert[0][1] >  wh) && (tvert[1][1] >  wh) && (tvert[2][1] >  wh)) continue;
+              if ((tvert[0][1] >  wh) && (tvert[1][1] >  wh) && (tvert[2][1] > wh)) continue;
 
               // find vertex with min y-coordinate
               for (k = 0; k < 3; k++)

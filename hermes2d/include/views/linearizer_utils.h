@@ -57,7 +57,7 @@ namespace Hermes
 
       /// Typedefs used throughout the Linearizer functionality.
       template<>
-      struct ScalarLinearizerDataDimensions<float>
+      struct ScalarLinearizerDataDimensions < float >
       {
         static const int dimension = 1;
 
@@ -68,7 +68,7 @@ namespace Hermes
 
       /// Typedefs used throughout the Linearizer functionality.
       template<>
-      struct ScalarLinearizerDataDimensions<double>
+      struct ScalarLinearizerDataDimensions < double >
       {
         static const int dimension = 1;
 
@@ -85,7 +85,7 @@ namespace Hermes
 
       /// Typedefs used throughout the Linearizer functionality.
       template<>
-      struct VectorLinearizerDataDimensions<float>
+      struct VectorLinearizerDataDimensions < float >
       {
         static const int dimension = 2;
 
@@ -96,7 +96,7 @@ namespace Hermes
 
       /// Typedefs used throughout the Linearizer functionality.
       template<>
-      struct VectorLinearizerDataDimensions<double>
+      struct VectorLinearizerDataDimensions < double >
       {
         static const int dimension = 2;
 

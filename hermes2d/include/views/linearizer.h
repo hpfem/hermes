@@ -194,7 +194,7 @@ namespace Hermes
 
         void find_min_max();
 
-        friend class ThreadLinearizerMultidimensional<LinearizerDataDimensions>;
+        friend class ThreadLinearizerMultidimensional < LinearizerDataDimensions > ;
       };
 
       /// Linearizer for scalar cases - historically called Linearizer.

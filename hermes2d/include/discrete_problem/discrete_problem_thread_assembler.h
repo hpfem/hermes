@@ -34,7 +34,7 @@ namespace Hermes
     class HERMES_API DiscreteProblemThreadAssembler :
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
+      public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector < Scalar >
     {
     public:
       /// Free all data.
@@ -148,8 +148,8 @@ namespace Hermes
       unsigned short spaces_size;
       bool nonlinear, add_dirichlet_lift;
 
-      friend class DiscreteProblem<Scalar>;
-      friend class DiscreteProblemDGAssembler<Scalar>;
+      friend class DiscreteProblem < Scalar > ;
+      friend class DiscreteProblemDGAssembler < Scalar > ;
 
       /// Experimental.
       bool** reusable_DOFs;

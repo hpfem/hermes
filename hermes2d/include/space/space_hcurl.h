@@ -31,7 +31,7 @@ namespace Hermes
     /// int globalPolynomialOrder = 4;<br>
     /// Hermes::Hermes2D::HcurlSpace<std::complex<double> > space(&mesh, &bcs, globalPolynomialOrder);<br>
     template<typename Scalar>
-    class HERMES_API HcurlSpace : public Space<Scalar>
+    class HERMES_API HcurlSpace : public Space < Scalar >
     {
     public:
       HcurlSpace();

@@ -251,19 +251,19 @@ namespace Hermes
       return new VectorDefaultNormFormVol(this->i, this->normType);
     }
 
-    template HERMES_API class NormFormVol<double>;
-    template HERMES_API class NormFormVol<std::complex<double> >;
-    template HERMES_API class NormFormSurf<double>;
-    template HERMES_API class NormFormSurf<std::complex<double> >;
-    template HERMES_API class NormFormDG<double>;
-    template HERMES_API class NormFormDG<std::complex<double> >;
-    template HERMES_API class DefaultNormFormVol<double>;
-    template HERMES_API class DefaultNormFormVol<std::complex<double> >;
-    template HERMES_API class DefaultNormFormSurf<double>;
-    template HERMES_API class DefaultNormFormSurf<std::complex<double> >;
-    template HERMES_API class MatrixDefaultNormFormVol<double>;
-    template HERMES_API class MatrixDefaultNormFormVol<std::complex<double> >;
-    template HERMES_API class VectorDefaultNormFormVol<double>;
-    template HERMES_API class VectorDefaultNormFormVol<std::complex<double> >;
+    template HERMES_API class NormFormVol < double > ;
+    template HERMES_API class NormFormVol < std::complex<double> > ;
+    template HERMES_API class NormFormSurf < double > ;
+    template HERMES_API class NormFormSurf < std::complex<double> > ;
+    template HERMES_API class NormFormDG < double > ;
+    template HERMES_API class NormFormDG < std::complex<double> > ;
+    template HERMES_API class DefaultNormFormVol < double > ;
+    template HERMES_API class DefaultNormFormVol < std::complex<double> > ;
+    template HERMES_API class DefaultNormFormSurf < double > ;
+    template HERMES_API class DefaultNormFormSurf < std::complex<double> > ;
+    template HERMES_API class MatrixDefaultNormFormVol < double > ;
+    template HERMES_API class MatrixDefaultNormFormVol < std::complex<double> > ;
+    template HERMES_API class VectorDefaultNormFormVol < double > ;
+    template HERMES_API class VectorDefaultNormFormVol < std::complex<double> > ;
   }
 }

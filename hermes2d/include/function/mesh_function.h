@@ -26,7 +26,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    class HERMES_API MeshFunctionSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
+    class HERMES_API MeshFunctionSharedPtr : public std::tr1::shared_ptr < Hermes::Hermes2D::MeshFunction<Scalar> >
     {
     public:
       MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = nullptr);

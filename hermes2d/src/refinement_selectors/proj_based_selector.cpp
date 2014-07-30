@@ -37,19 +37,19 @@ namespace Hermes
         error_weight_p(H2DRS_DEFAULT_ERR_WEIGHT_P),
         error_weight_aniso(H2DRS_DEFAULT_ERR_WEIGHT_ANISO)
       {
-          cached_shape_vals_valid = new bool[2];
-          cached_shape_ortho_vals = new TrfShape[2];
-          cached_shape_vals = new TrfShape[2];
+        cached_shape_vals_valid = new bool[2];
+        cached_shape_ortho_vals = new TrfShape[2];
+        cached_shape_vals = new TrfShape[2];
 
-          //clean svals initialization state
-          std::fill(cached_shape_vals_valid, cached_shape_vals_valid + H2D_NUM_MODES, false);
+        //clean svals initialization state
+        std::fill(cached_shape_vals_valid, cached_shape_vals_valid + H2D_NUM_MODES, false);
 
-          //clear matrix cache
-          for (int m = 0; m < H2D_NUM_MODES; m++)
+        //clear matrix cache
+        for (int m = 0; m < H2D_NUM_MODES; m++)
           for (int i = 0; i < H2DRS_MAX_ORDER + 2; i++)
-          for (int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
-            proj_matrix_cache[m][i][k] = nullptr;
-        }
+            for (int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
+              proj_matrix_cache[m][i][k] = nullptr;
+      }
 
       template<typename Scalar>
       ProjBasedSelector<Scalar>::~ProjBasedSelector()
@@ -58,11 +58,11 @@ namespace Hermes
         for (int m = 0; m < H2D_NUM_MODES; m++)
         {
           for (int i = 0; i < H2DRS_MAX_ORDER + 2; i++)
-          for (int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
-          {
+            for (int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
+            {
             if (proj_matrix_cache[m][i][k] != nullptr)
               free_with_check<double*>(proj_matrix_cache[m][i][k], true);
-          }
+            }
         }
 
         delete[] cached_shape_vals_valid;
@@ -162,9 +162,9 @@ namespace Hermes
 
             case H2D_REFINEMENT_P:
             {
-                                   int order = H2D_GET_H_ORDER(c.p[0]);
-                                   c.errors[0] = perr[order][order];
-                                   error_squared = perr[order][order];
+              int order = H2D_GET_H_ORDER(c.p[0]);
+              c.errors[0] = perr[order][order];
+              error_squared = perr[order][order];
             }
               break;
 
@@ -192,22 +192,22 @@ namespace Hermes
             case H2D_REFINEMENT_H_ANISO_H:
             case H2D_REFINEMENT_H_ANISO_V:
             {
-                                           error_squared = 0.0;
-                                           for (int j = 0; j < 2; j++)
-                                           {
-                                             c.errors[j] = anisoerr[(c.split == H2D_REFINEMENT_H_ANISO_H) ? j : j + 2][H2D_GET_H_ORDER(c.p[j])][H2D_GET_V_ORDER(c.p[j])];
-                                             error_squared += c.errors[j];
-                                           }
-                                           //element of a candidate occupies 1/2 of the reference domain defined over a candidate
-                                           error_squared *= 0.5;
+              error_squared = 0.0;
+              for (int j = 0; j < 2; j++)
+              {
+                c.errors[j] = anisoerr[(c.split == H2D_REFINEMENT_H_ANISO_H) ? j : j + 2][H2D_GET_H_ORDER(c.p[j])][H2D_GET_V_ORDER(c.p[j])];
+                error_squared += c.errors[j];
+              }
+              //element of a candidate occupies 1/2 of the reference domain defined over a candidate
+              error_squared *= 0.5;
             }
               break;
 
             case H2D_REFINEMENT_P:
             {
-                                   int order_h = H2D_GET_H_ORDER(c.p[0]), order_v = H2D_GET_V_ORDER(c.p[0]);
-                                   c.errors[0] = perr[order_h][order_v];
-                                   error_squared = c.errors[0];
+              int order_h = H2D_GET_H_ORDER(c.p[0]), order_v = H2D_GET_V_ORDER(c.p[0]);
+              c.errors[0] = perr[order_h][order_v];
+              error_squared = c.errors[0];
             }
               break;
 
@@ -572,8 +572,8 @@ namespace Hermes
         delete[] d;
       }
 
-      template class HERMES_API ProjBasedSelector<double>;
-      template class HERMES_API ProjBasedSelector<std::complex<double> >;
+      template class HERMES_API ProjBasedSelector < double > ;
+      template class HERMES_API ProjBasedSelector < std::complex<double> > ;
     }
   }
 }

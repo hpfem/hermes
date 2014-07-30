@@ -40,7 +40,7 @@ namespace Hermes
       public Hermes::Hermes2D::Mixins::Parallel,
       public Hermes::Mixins::Loggable,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>
+      public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm < Scalar >
     {
     public:
       DiscreteProblemSelectiveAssembler();
@@ -94,9 +94,9 @@ namespace Hermes
       bool vector_structure_reusable;
       Vector<Scalar>* previous_rhs;
 
-      friend class DiscreteProblem<Scalar>;
-      friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
-      friend class Solver<Scalar>;
+      friend class DiscreteProblem < Scalar > ;
+      friend class DiscreteProblemIntegrationOrderCalculator < Scalar > ;
+      friend class Solver < Scalar > ;
     };
   }
 }

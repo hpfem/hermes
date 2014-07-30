@@ -217,8 +217,8 @@ namespace Hermes
       if (this->refinementInfoMeshFunctionGlobal)
         this->refinementInfoMeshFunctionGlobal.reset();
       for (int i = 0; i < this->num; i++)
-      if (this->refinementInfoMeshFunction[i])
-        this->refinementInfoMeshFunction[i].reset();
+        if (this->refinementInfoMeshFunction[i])
+          this->refinementInfoMeshFunction[i].reset();
 
       // Init the caught parallel exception message.
       this->exceptionMessageCaughtInParallelBlock.clear();
@@ -394,8 +394,8 @@ namespace Hermes
           int* parents;
           parents = meshes[i]->regularize(this->regularization);
           for (int j = 0; j < this->num; j++)
-          if (this->meshes[i]->get_seq() == this->meshes[j]->get_seq())
-            this->spaces[j]->distribute_orders(meshes[i], parents);
+            if (this->meshes[i]->get_seq() == this->meshes[j]->get_seq())
+              this->spaces[j]->distribute_orders(meshes[i], parents);
           free_with_check(parents);
         }
       }
@@ -485,8 +485,8 @@ namespace Hermes
               else
               {
                 for (int sons_i = 0; sons_i < H2D_MAX_ELEMENT_SONS; sons_i++)
-                if (this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i])
-                  info_array[this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i]->id] = this->elements_to_refine[i].split == H2D_REFINEMENT_H ? 1 : 2;
+                  if (this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i])
+                    info_array[this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i]->id] = this->elements_to_refine[i].split == H2D_REFINEMENT_H ? 1 : 2;
               }
             }
           }
@@ -683,14 +683,14 @@ namespace Hermes
       }
     }
 
-    template HERMES_API class AdaptStoppingCriterionCumulative<double>;
-    template HERMES_API class AdaptStoppingCriterionCumulative<std::complex<double> >;
-    template HERMES_API class AdaptStoppingCriterionSingleElement<double>;
-    template HERMES_API class AdaptStoppingCriterionSingleElement<std::complex<double> >;
-    template HERMES_API class AdaptStoppingCriterionLevels<double>;
-    template HERMES_API class AdaptStoppingCriterionLevels<std::complex<double> >;
+    template HERMES_API class AdaptStoppingCriterionCumulative < double > ;
+    template HERMES_API class AdaptStoppingCriterionCumulative < std::complex<double> > ;
+    template HERMES_API class AdaptStoppingCriterionSingleElement < double > ;
+    template HERMES_API class AdaptStoppingCriterionSingleElement < std::complex<double> > ;
+    template HERMES_API class AdaptStoppingCriterionLevels < double > ;
+    template HERMES_API class AdaptStoppingCriterionLevels < std::complex<double> > ;
 
-    template HERMES_API class Adapt<double>;
-    template HERMES_API class Adapt<std::complex<double> >;
+    template HERMES_API class Adapt < double > ;
+    template HERMES_API class Adapt < std::complex<double> > ;
   }
 }

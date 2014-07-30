@@ -33,7 +33,7 @@ namespace Hermes
   {
     /// \brief General (abstract) vector representation in Hermes.
     template<typename Scalar>
-    class HERMES_API Vector : public Hermes::Mixins::Loggable, public Algebra::Mixins::MatrixRhsImportExport<Scalar>
+    class HERMES_API Vector : public Hermes::Mixins::Loggable, public Algebra::Mixins::MatrixRhsImportExport < Scalar >
     {
     public:
       /// Default constructor.
@@ -113,7 +113,7 @@ namespace Hermes
 
     /** \brief Vector used with MUMPS solver */
     template <typename Scalar>
-    class HERMES_API SimpleVector : public Vector<Scalar>
+    class HERMES_API SimpleVector : public Vector < Scalar >
     {
     public:
       SimpleVector();

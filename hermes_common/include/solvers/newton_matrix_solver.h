@@ -29,7 +29,7 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    class HERMES_API NewtonMatrixSolver : public NonlinearMatrixSolver<Scalar>
+    class HERMES_API NewtonMatrixSolver : public NonlinearMatrixSolver < Scalar >
     {
     public:
       NewtonMatrixSolver();

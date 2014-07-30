@@ -31,7 +31,7 @@ double CustomExactFunction2::ddxx(double x)
 }
 
 CustomRightHandSide1::CustomRightHandSide1(double K, double d_u, double sigma)
-: Hermes2DFunction<double>(), d_u(d_u), sigma(sigma)
+  : Hermes2DFunction<double>(), d_u(d_u), sigma(sigma)
 {
   cef1 = new CustomExactFunction1();
   cef2 = new CustomExactFunction2(K);
@@ -58,7 +58,7 @@ CustomRightHandSide1::~CustomRightHandSide1()
 }
 
 CustomRightHandSide2::CustomRightHandSide2(double K, double d_v)
-: Hermes2DFunction<double>(), d_v(d_v)
+  : Hermes2DFunction<double>(), d_v(d_v)
 {
   cef1 = new CustomExactFunction1();
   cef2 = new CustomExactFunction2(K);
@@ -85,7 +85,7 @@ CustomRightHandSide2::~CustomRightHandSide2()
 }
 
 ExactSolutionFitzHughNagumo1::ExactSolutionFitzHughNagumo1(MeshSharedPtr mesh)
-: ExactSolutionScalar<double>(mesh)
+  : ExactSolutionScalar<double>(mesh)
 {
   cef1 = new CustomExactFunction1();
 }
@@ -117,7 +117,7 @@ MeshFunction<double>* ExactSolutionFitzHughNagumo1::clone() const
 }
 
 ExactSolutionFitzHughNagumo2::ExactSolutionFitzHughNagumo2(MeshSharedPtr mesh, double K)
-: ExactSolutionScalar<double>(mesh), K(K)
+  : ExactSolutionScalar<double>(mesh), K(K)
 {
   cef2 = new CustomExactFunction2(K);
 }

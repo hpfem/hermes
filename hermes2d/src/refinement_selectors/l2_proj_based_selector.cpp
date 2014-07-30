@@ -11,12 +11,12 @@ namespace Hermes
       L2ProjBasedSelector<Scalar>::L2ProjBasedSelector(CandList cand_list, int max_order, L2Shapeset* user_shapeset)
         : ProjBasedSelector<Scalar>(cand_list, max_order, user_shapeset == nullptr ? new L2Shapeset() : user_shapeset, Range(1, 1), Range(0, H2DRS_MAX_ORDER)), user_shapeset(user_shapeset == nullptr ? false : true)
       {
-          if (user_shapeset != nullptr)
-          {
-            this->warn("Warning: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
-            this->warn("Warning: The functionality for cloning user shapeset is to be implemented yet.");
-          }
+        if (user_shapeset != nullptr)
+        {
+          this->warn("Warning: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
+          this->warn("Warning: The functionality for cloning user shapeset is to be implemented yet.");
         }
+      }
 
       template<typename Scalar>
       L2ProjBasedSelector<Scalar>::~L2ProjBasedSelector()
@@ -279,8 +279,8 @@ namespace Hermes
 
         return total_error_squared;
       }
-      template class HERMES_API L2ProjBasedSelector<double>;
-      template class HERMES_API L2ProjBasedSelector<std::complex<double> >;
+      template class HERMES_API L2ProjBasedSelector < double > ;
+      template class HERMES_API L2ProjBasedSelector < std::complex<double> > ;
     }
   }
 }

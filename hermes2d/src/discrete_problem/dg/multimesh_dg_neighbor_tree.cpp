@@ -72,8 +72,8 @@ namespace Hermes
         if (ns->n_neighbors == 1 && (ns->central_transformations_size == 0 || ns->central_transformations[0]->num_levels == 0))
           continue;
         for (unsigned int j = 0; j < ns->n_neighbors; j++)
-        if (j < ns->central_transformations_alloc_size && ns->central_transformations[j])
-          insert_into_multimesh_tree(root, ns->central_transformations[j]->transf, ns->central_transformations[j]->num_levels);
+          if (j < ns->central_transformations_alloc_size && ns->central_transformations[j])
+            insert_into_multimesh_tree(root, ns->central_transformations[j]->transf, ns->central_transformations[j]->num_levels);
       }
     }
 
@@ -145,7 +145,7 @@ namespace Hermes
       if (node->get_left_son() == nullptr && node->get_right_son() == nullptr)
       {
         // Create a vector for the new_ neighbor.
-        std::vector<unsigned int>* new_neighbor_transformations = new std::vector<unsigned int>;
+        std::vector<unsigned int>* new_neighbor_transformations = new std::vector < unsigned int > ;
         // Copy there the whole path except for this leaf.
         for (unsigned int i = 0; i < running_transformations.back()->size(); i++)
           new_neighbor_transformations->push_back((*running_transformations.back())[i]);
@@ -310,8 +310,8 @@ namespace Hermes
       if (node->get_left_son() == nullptr && node->get_right_son() == nullptr)
       {
         // Create vectors for the new_ neighbor.
-        std::vector<unsigned int>* new_neighbor_central_transformations = new std::vector<unsigned int>;
-        std::vector<unsigned int>* new_neighbor_neighbor_transformations = new std::vector<unsigned int>;
+        std::vector<unsigned int>* new_neighbor_central_transformations = new std::vector < unsigned int > ;
+        std::vector<unsigned int>* new_neighbor_neighbor_transformations = new std::vector < unsigned int > ;
 
         // Copy there the whole path except for this leaf.
         for (unsigned int i = 0; i < running_central_transformations.back()->size(); i++)
@@ -328,21 +328,21 @@ namespace Hermes
         // Take care of the neighbor transformation.
         // Insert appropriate info from this leaf into the current running neighbor transformation, thus complete it.
         if (mode == HERMES_MODE_TRIANGLE)
-        if ((active_edge == 0 && node->get_transformation() == 0) ||
-          (active_edge == 1 && node->get_transformation() == 1) ||
-          (active_edge == 2 && node->get_transformation() == 2))
-          running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
-        else
-          running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
+          if ((active_edge == 0 && node->get_transformation() == 0) ||
+            (active_edge == 1 && node->get_transformation() == 1) ||
+            (active_edge == 2 && node->get_transformation() == 2))
+            running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
+          else
+            running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
         // Quads.
         else
-        if ((active_edge == 0 && (node->get_transformation() == 0 || node->get_transformation() == 6)) ||
-          (active_edge == 1 && (node->get_transformation() == 1 || node->get_transformation() == 4)) ||
-          (active_edge == 2 && (node->get_transformation() == 2 || node->get_transformation() == 7)) ||
-          (active_edge == 3 && (node->get_transformation() == 3 || node->get_transformation() == 5)))
-          running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
-        else
-          running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
+          if ((active_edge == 0 && (node->get_transformation() == 0 || node->get_transformation() == 6)) ||
+            (active_edge == 1 && (node->get_transformation() == 1 || node->get_transformation() == 4)) ||
+            (active_edge == 2 && (node->get_transformation() == 2 || node->get_transformation() == 7)) ||
+            (active_edge == 3 && (node->get_transformation() == 3 || node->get_transformation() == 5)))
+            running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
+          else
+            running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
 
         // Make the new_neighbor_neighbor_transformations the current running neighbor transformation.
         running_neighbor_transformations.push_back(new_neighbor_neighbor_transformations);
@@ -357,21 +357,21 @@ namespace Hermes
         // Insert appropriate info from this leaf into the current running neighbor transformation, thus complete it.
         // Triangles.
         if (mode == HERMES_MODE_TRIANGLE)
-        if ((active_edge == 0 && node->get_transformation() == 0) ||
-          (active_edge == 1 && node->get_transformation() == 1) ||
-          (active_edge == 2 && node->get_transformation() == 2))
-          running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
-        else
-          running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
+          if ((active_edge == 0 && node->get_transformation() == 0) ||
+            (active_edge == 1 && node->get_transformation() == 1) ||
+            (active_edge == 2 && node->get_transformation() == 2))
+            running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
+          else
+            running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
         // Quads.
         else
-        if ((active_edge == 0 && (node->get_transformation() == 0 || node->get_transformation() == 6)) ||
-          (active_edge == 1 && (node->get_transformation() == 1 || node->get_transformation() == 4)) ||
-          (active_edge == 2 && (node->get_transformation() == 2 || node->get_transformation() == 7)) ||
-          (active_edge == 3 && (node->get_transformation() == 3 || node->get_transformation() == 5)))
-          running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
-        else
-          running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
+          if ((active_edge == 0 && (node->get_transformation() == 0 || node->get_transformation() == 6)) ||
+            (active_edge == 1 && (node->get_transformation() == 1 || node->get_transformation() == 4)) ||
+            (active_edge == 2 && (node->get_transformation() == 2 || node->get_transformation() == 7)) ||
+            (active_edge == 3 && (node->get_transformation() == 3 || node->get_transformation() == 5)))
+            running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
+          else
+            running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
 
         // Move down.
         if (node->get_left_son())
@@ -389,7 +389,7 @@ namespace Hermes
       return;
     }
 
-    template class HERMES_API MultimeshDGNeighborTree<double>;
-    template class HERMES_API MultimeshDGNeighborTree<std::complex<double> >;
+    template class HERMES_API MultimeshDGNeighborTree < double > ;
+    template class HERMES_API MultimeshDGNeighborTree < std::complex<double> > ;
   }
 }

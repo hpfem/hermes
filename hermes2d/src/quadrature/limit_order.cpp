@@ -66,8 +66,8 @@ namespace Hermes
     HERMES_API void warn_order()
     {
       if (HermesCommonApi.get_integral_param_value(Hermes::showInternalWarnings))
-      if (!warned_order)
-      {
+        if (!warned_order)
+        {
 #pragma omp critical (warn_oder)
         if (!warned_order)
         {
@@ -75,7 +75,7 @@ namespace Hermes
           Hermes::Mixins::Loggable::Static::warn("Warning: Not enough integration rules for exact integration.");
           warned_order = true;
         }
-      }
+        }
     }
 
     HERMES_API void limit_order(int& o, ElementMode2D mode)

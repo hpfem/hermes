@@ -4,8 +4,8 @@ using namespace Hermes;
 
 Low_Order::Low_Order(double theta) : theta(theta)
 {
-  lowmat_rhs = new CSCMatrix<double>;
-  low_matrix = new CSCMatrix<double>;
+  lowmat_rhs = new CSCMatrix < double > ;
+  low_matrix = new CSCMatrix < double > ;
   u_L = nullptr;
   rhs = nullptr;
   u_new = nullptr;

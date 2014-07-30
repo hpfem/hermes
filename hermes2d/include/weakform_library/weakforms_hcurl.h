@@ -31,7 +31,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultMatrixFormVol : public MatrixFormVol<Scalar>
+      class HERMES_API DefaultMatrixFormVol : public MatrixFormVol < Scalar >
       {
       public:
         DefaultMatrixFormVol<Scalar>(int i, int j, std::string area = HERMES_ANY,
@@ -64,7 +64,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultJacobianCurlCurl : public MatrixFormVol<Scalar>
+      class HERMES_API DefaultJacobianCurlCurl : public MatrixFormVol < Scalar >
       {
       public:
         DefaultJacobianCurlCurl(int i, int j, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
@@ -98,7 +98,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultVectorFormVol : public VectorFormVol<Scalar>
+      class HERMES_API DefaultVectorFormVol : public VectorFormVol < Scalar >
       {
       public:
         DefaultVectorFormVol<Scalar>(int i, std::string area = HERMES_ANY,
@@ -135,7 +135,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualVol : public VectorFormVol<Scalar>
+      class HERMES_API DefaultResidualVol : public VectorFormVol < Scalar >
       {
       public:
         DefaultResidualVol(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
@@ -171,7 +171,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualCurlCurl : public VectorFormVol<Scalar>
+      class HERMES_API DefaultResidualCurlCurl : public VectorFormVol < Scalar >
       {
       public:
         DefaultResidualCurlCurl(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
@@ -205,7 +205,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultMatrixFormSurf : public MatrixFormSurf<Scalar>
+      class HERMES_API DefaultMatrixFormSurf : public MatrixFormSurf < Scalar >
       {
       public:
         DefaultMatrixFormSurf<Scalar>(int i, int j, std::string area = HERMES_ANY,
@@ -239,7 +239,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultVectorFormSurf : public VectorFormSurf<Scalar>
+      class HERMES_API DefaultVectorFormSurf : public VectorFormSurf < Scalar >
       {
       public:
         DefaultVectorFormSurf<Scalar>(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
@@ -272,7 +272,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualSurf : public VectorFormSurf<Scalar>
+      class HERMES_API DefaultResidualSurf : public VectorFormSurf < Scalar >
       {
       public:
         DefaultResidualSurf(int i, std::string area = HERMES_ANY,

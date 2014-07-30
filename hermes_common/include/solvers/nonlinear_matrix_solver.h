@@ -300,7 +300,7 @@ namespace Hermes
 
       Scalar* previous_sln_vector;
       bool use_initial_guess_for_iterative_solvers;
-      friend class NonlinearConvergenceMeasurement<Scalar>;
+      friend class NonlinearConvergenceMeasurement < Scalar > ;
     };
   }
 

@@ -247,7 +247,7 @@ namespace Hermes
     {
       Element* e = nullptr;
       for (int i = 0; i < num; i++)
-      if ((e = s->e[i]) != nullptr) break;
+        if ((e = s->e[i]) != nullptr) break;
 
       if (e->is_triangle())
       {
@@ -300,8 +300,8 @@ namespace Hermes
       int count = 0, predictedCount = 0;
       this->num = meshes_count;
       for (int i = 0; i < meshes_count; i++)
-      if (meshes[i]->get_num_active_elements() > predictedCount)
-        predictedCount = meshes[i]->get_num_active_elements();
+        if (meshes[i]->get_num_active_elements() > predictedCount)
+          predictedCount = meshes[i]->get_num_active_elements();
       State** states = malloc_with_check<State*>(predictedCount);
 
       this->begin(num);
@@ -367,8 +367,8 @@ namespace Hermes
           (id)++;
 
           if (s->is_triangle())
-          for (i = 0; i < 3; i++)
-            s->bnd[i] = true;
+            for (i = 0; i < 3; i++)
+              s->bnd[i] = true;
         }
 
         // Entering a new_ state, perform transformations.
@@ -377,9 +377,9 @@ namespace Hermes
         {
           // ..where the element is used ..
           if (s->e[i] != nullptr && s->e[i]->used)
-          if (s->sub_idx[i] == 0 && s->e[i]->active)
-          if (!s->e[i]->is_triangle())
-            init_transforms(s, i);
+            if (s->sub_idx[i] == 0 && s->e[i]->active)
+              if (!s->e[i]->is_triangle())
+                init_transforms(s, i);
         }
 
         // Is this the leaf state?
@@ -387,11 +387,11 @@ namespace Hermes
         for (i = 0; i < num; i++)
         {
           if (s->e[i] != nullptr && s->e[i]->used)
-          if (!s->e[i]->active)
-          {
+            if (!s->e[i]->active)
+            {
             leaf = false;
             break;
-          }
+            }
         }
 
         // if yes, set boundary flags and return the state
@@ -411,11 +411,11 @@ namespace Hermes
           // The reason is not to include states that only have elements
           // on meshes that are not a part of the weak form.
           for (int j = 0; j < this->spaces_size; j++)
-          if (s->e[j] != nullptr && s->e[j]->used)
-          {
+            if (s->e[j] != nullptr && s->e[j]->used)
+            {
             s->rep = s->e[j];
             s->rep_i = j;
-          }
+            }
           if (s->rep)
             states[count++] = State::clone(s);
           continue;
@@ -477,8 +477,8 @@ namespace Hermes
           int4* current_sons = new int4[num];
           int split = 0;
           for (i = 0; i < num; i++)
-          if (s->e[i] != nullptr && !s->e[i]->active)
-            split |= get_split_and_sons(s->e[i], &s->cr, s->er + i, current_sons[i]);
+            if (s->e[i] != nullptr && !s->e[i]->active)
+              split |= get_split_and_sons(s->e[i], &s->cr, s->er + i, current_sons[i]);
 
           // Both splits: recur to four sons, similar to triangles.
           if (split == 3)
@@ -590,8 +590,8 @@ namespace Hermes
       // Test whether all master meshes have the same number of elements.
       int base_elem_num = meshes[0]->get_num_base_elements();
       for (int i = 1; i < n; i++)
-      if (base_elem_num != meshes[i]->get_num_base_elements())
-        throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
+        if (base_elem_num != meshes[i]->get_num_base_elements())
+          throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
     }
 
     static void testMeshesQuality(int n, MeshSharedPtr* meshes)
@@ -631,10 +631,10 @@ namespace Hermes
         for_all_base_elements_incl_inactive(e, meshes[i])
         {
           if (e->used)
-          if (fabs(areas[counter] - e->area) > tolerance && areas[counter] > Hermes::HermesSqrtEpsilon)
-          {
+            if (fabs(areas[counter] - e->area) > tolerance && areas[counter] > Hermes::HermesSqrtEpsilon)
+            {
             throw Hermes::Exceptions::Exception("An element is probably too distorted, try different meshing.");
-          }
+            }
           counter++;
         }
       }
@@ -668,8 +668,8 @@ namespace Hermes
         return;
 
       for (int i = 0; i < size; i++)
-      if (stack[i].e != nullptr)
-        free_state(stack + i);
+        if (stack[i].e != nullptr)
+          free_state(stack + i);
 
       delete[] stack;
       stack = nullptr;
@@ -768,8 +768,8 @@ namespace Hermes
         // obtain split types and son numbers for the current rectangle on all elements
         int split = 0;
         for (i = 0; i < num; i++)
-        if (!e[i]->active)
-          split |= get_split_and_sons(e[i], cr, er + i, sons[i]);
+          if (!e[i]->active)
+            split |= get_split_and_sons(e[i], cr, er + i, sons[i]);
 
         // both splits: recur to four sons
         if (split == 3)

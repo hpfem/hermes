@@ -89,20 +89,20 @@ namespace Hermes
 
           // test of value if no variable found.
           if (!x_found)
-          if (std::strtod(x.c_str(), nullptr) != 0.0)
-            x_value = std::strtod(x.c_str(), nullptr);
-          else
-          {
-            // This is a hard part, to find out if it is really zero.
-            int dot_position = strchr(x.c_str(), '.') == nullptr ? -1 : strchr(x.c_str(), '.') - x.c_str();
-            for (int i = 0; i < dot_position; i++)
-            if (strncmp(x.c_str() + i, "0", 1) != 0)
-              this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
-            for (int i = dot_position + 1; i < x.length(); i++)
-            if (strncmp(x.c_str() + i, "0", 1) != 0)
-              this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
-            x_value = std::strtod(x.c_str(), nullptr);
-          }
+            if (std::strtod(x.c_str(), nullptr) != 0.0)
+              x_value = std::strtod(x.c_str(), nullptr);
+            else
+            {
+              // This is a hard part, to find out if it is really zero.
+              int dot_position = strchr(x.c_str(), '.') == nullptr ? -1 : strchr(x.c_str(), '.') - x.c_str();
+              for (int i = 0; i < dot_position; i++)
+                if (strncmp(x.c_str() + i, "0", 1) != 0)
+                  this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
+              for (int i = dot_position + 1; i < x.length(); i++)
+                if (strncmp(x.c_str() + i, "0", 1) != 0)
+                  this->warn("Probably wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
+              x_value = std::strtod(x.c_str(), nullptr);
+            }
 
           // assignment.
           node->x = x_value;
@@ -120,10 +120,10 @@ namespace Hermes
 
         Node* node;
         for_all_nodes(node, mesh)
-        if (node->y == 0)
-          node->y = 0;
-        else
-          node->y = (b - a) / 100;
+          if (node->y == 0)
+            node->y = 0;
+          else
+            node->y = (b - a) / 100;
 
         // Elements //
         mesh->nbase = mesh->nactive = mesh->ninitial = vertices_count - 1;

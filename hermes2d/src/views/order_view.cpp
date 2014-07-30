@@ -166,9 +166,9 @@ namespace Hermes
           double2* lbox;
           int nl = ord.get_labels(lvert, ltext, lbox);
           for (i = 0; i < nl; i++)
-          if (lbox[i][0] * scale > get_text_width(ltext[i]) &&
-            lbox[i][1] * scale > 13)
-          {
+            if (lbox[i][0] * scale > get_text_width(ltext[i]) &&
+              lbox[i][1] * scale > 13)
+            {
             //color = get_palette_color((vert[lvert[i]][2] - 1) / 9.0);
             const float* color = order_colors[(int)vert[lvert[i]][2]];
             if ((color[0] * 0.39f + color[1] * 0.50f + color[2] * 0.11f) > 0.5f)
@@ -177,7 +177,7 @@ namespace Hermes
               glColor3f(1, 1, 1);
 
             draw_text(tvert[lvert[i]][0], tvert[lvert[i]][1], ltext[i], 0);
-          }
+            }
         }
 
         free_with_check(tvert);
@@ -210,18 +210,18 @@ namespace Hermes
 
         case 'p':
         {
-                  switch (pal_type)
-                  {
-                  case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
-                  case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
-                  case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_HUESCALE; break;
-                  default: throw Hermes::Exceptions::Exception("Invalid palette type");
-                  }
-                  ord.lock_data();
-                  init_order_palette(ord.get_vertices());
-                  ord.unlock_data();
-                  refresh();
-                  break;
+          switch (pal_type)
+          {
+          case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
+          case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
+          case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_HUESCALE; break;
+          default: throw Hermes::Exceptions::Exception("Invalid palette type");
+          }
+          ord.lock_data();
+          init_order_palette(ord.get_vertices());
+          ord.unlock_data();
+          refresh();
+          break;
         }
 
         default:

@@ -474,8 +474,8 @@ namespace Hermes
             this->pop_transforms();
           }
           else
-          if (split == 1) // h-split
-          {
+            if (split == 1) // h-split
+            {
             this->push_transforms(4);
             process_quad(iv0, iv1, mid1, mid3, level + 1);
             this->pop_transforms();
@@ -483,17 +483,17 @@ namespace Hermes
             this->push_transforms(5);
             process_quad(mid3, mid1, iv2, iv3, level + 1);
             this->pop_transforms();
-          }
-          else // v-split
-          {
-            this->push_transforms(6);
-            process_quad(iv0, mid0, mid2, iv3, level + 1);
-            this->pop_transforms();
+            }
+            else // v-split
+            {
+              this->push_transforms(6);
+              process_quad(iv0, mid0, mid2, iv3, level + 1);
+              this->pop_transforms();
 
-            this->push_transforms(7);
-            process_quad(mid0, iv1, iv2, mid2, level + 1);
-            this->pop_transforms();
-          }
+              this->push_transforms(7);
+              process_quad(mid0, iv1, iv2, mid2, level + 1);
+              this->pop_transforms();
+            }
         }
         else
         {
@@ -815,10 +815,10 @@ namespace Hermes
         this->triangle_markers[triangle_count++] = marker;
       }
 
-      template class HERMES_API ThreadLinearizerMultidimensional<ScalarLinearizerDataDimensions<double> >;
-      template class HERMES_API ThreadLinearizerMultidimensional<VectorLinearizerDataDimensions<double> >;
-      template class HERMES_API ThreadLinearizerMultidimensional<ScalarLinearizerDataDimensions<float> >;
-      template class HERMES_API ThreadLinearizerMultidimensional<VectorLinearizerDataDimensions<float> >;
+      template class HERMES_API ThreadLinearizerMultidimensional < ScalarLinearizerDataDimensions<double> > ;
+      template class HERMES_API ThreadLinearizerMultidimensional < VectorLinearizerDataDimensions<double> > ;
+      template class HERMES_API ThreadLinearizerMultidimensional < ScalarLinearizerDataDimensions<float> > ;
+      template class HERMES_API ThreadLinearizerMultidimensional < VectorLinearizerDataDimensions<float> > ;
     }
   }
 }

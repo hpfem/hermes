@@ -87,27 +87,27 @@ namespace Hermes
       MeshFunctionSharedPtr<Scalar> exact_solution_)
       : EssentialBoundaryCondition<Scalar>(std::vector<std::string>())
     {
-        ExactSolutionScalar<Scalar>* exact = dynamic_cast<ExactSolutionScalar<Scalar>*>(exact_solution_.get());
-        if (exact)
-          this->exact_solution = exact;
-        else
-          throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
+      ExactSolutionScalar<Scalar>* exact = dynamic_cast<ExactSolutionScalar<Scalar>*>(exact_solution_.get());
+      if (exact)
+        this->exact_solution = exact;
+      else
+        throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
 
-        for (unsigned int i = 0; i < markers_.size(); i++)
-          this->markers.push_back(markers_[i]);
-      }
+      for (unsigned int i = 0; i < markers_.size(); i++)
+        this->markers.push_back(markers_[i]);
+    }
 
     template<typename Scalar>
     DefaultEssentialBCNonConst<Scalar>::DefaultEssentialBCNonConst(std::string marker, MeshFunctionSharedPtr<Scalar> exact_solution_)
       : EssentialBoundaryCondition<Scalar>(std::vector<std::string>())
     {
-        ExactSolutionScalar<Scalar>* exact = dynamic_cast<ExactSolutionScalar<Scalar>*>(exact_solution_.get());
-        if (exact)
-          this->exact_solution = exact;
-        else
-          throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
-        this->markers.push_back(marker);
-      }
+      ExactSolutionScalar<Scalar>* exact = dynamic_cast<ExactSolutionScalar<Scalar>*>(exact_solution_.get());
+      if (exact)
+        this->exact_solution = exact;
+      else
+        throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
+      this->markers.push_back(marker);
+    }
 
     template<typename Scalar>
     Scalar DefaultEssentialBCNonConst<Scalar>::value(double x, double y) const
@@ -177,8 +177,8 @@ namespace Hermes
       this->BCs.clear();
       EssentialBoundaryCondition<Scalar>* any_set = nullptr;
       for (this->iterator = begin(); iterator != end(); ++iterator)
-      for (std::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); ++it)
-      {
+        for (std::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); ++it)
+        {
         if (hermes_any_set)
           throw Hermes::Exceptions::Exception("Attempt to define a BC on HERMES_ANY together with a BC on a specific part: '%s'.", it->c_str());
         if ((*it) == HERMES_ANY)
@@ -192,12 +192,12 @@ namespace Hermes
         {
           any_set = *iterator;
           for (unsigned short i = 0; i < this->markers.size(); i++)
-          if (this->markers[i] == *it)
-            throw Hermes::Exceptions::Exception("Attempt to define more than one description of the BC on the same part of the boundary with marker '%s'.", it->c_str());
+            if (this->markers[i] == *it)
+              throw Hermes::Exceptions::Exception("Attempt to define more than one description of the BC on the same part of the boundary with marker '%s'.", it->c_str());
           this->markers.push_back(*it);
           this->BCs.push_back(*iterator);
         }
-      }
+        }
     }
 
     template<typename Scalar>
@@ -212,8 +212,8 @@ namespace Hermes
       if (this->HermesAnyBC != nullptr)
         return this->HermesAnyBC;
       for (unsigned short i = 0; i < this->markers.size(); i++)
-      if (this->markers[i] == marker)
-        return this->BCs[i];
+        if (this->markers[i] == marker)
+          return this->BCs[i];
       return nullptr;
     }
 
@@ -224,13 +224,13 @@ namespace Hermes
         (*iterator)->set_current_time(time);
     }
 
-    template HERMES_API class EssentialBoundaryCondition<double>;
-    template HERMES_API class EssentialBoundaryCondition<std::complex<double> >;
-    template HERMES_API class DefaultEssentialBCConst<double>;
-    template HERMES_API class DefaultEssentialBCConst<std::complex<double> >;
-    template HERMES_API class DefaultEssentialBCNonConst<double>;
-    template HERMES_API class DefaultEssentialBCNonConst<std::complex<double> >;
-    template HERMES_API class EssentialBCs<double>;
-    template HERMES_API class EssentialBCs<std::complex<double> >;
+    template HERMES_API class EssentialBoundaryCondition < double > ;
+    template HERMES_API class EssentialBoundaryCondition < std::complex<double> > ;
+    template HERMES_API class DefaultEssentialBCConst < double > ;
+    template HERMES_API class DefaultEssentialBCConst < std::complex<double> > ;
+    template HERMES_API class DefaultEssentialBCNonConst < double > ;
+    template HERMES_API class DefaultEssentialBCNonConst < std::complex<double> > ;
+    template HERMES_API class EssentialBCs < double > ;
+    template HERMES_API class EssentialBCs < std::complex<double> > ;
   }
 }

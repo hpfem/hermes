@@ -48,7 +48,7 @@ namespace Hermes
   {
     /// \brief Wrapper of PETSc matrix, to store matrices used with PETSc in its native format.
     template <typename Scalar>
-    class PetscMatrix : public SparseMatrix<Scalar>
+    class PetscMatrix : public SparseMatrix < Scalar >
     {
     public:
       PetscMatrix();
@@ -94,13 +94,13 @@ namespace Hermes
       /// Is matrix inited (allocated)?
       bool inited;
 
-      friend class Solvers::PetscLinearMatrixSolver<Scalar>;
+      friend class Solvers::PetscLinearMatrixSolver < Scalar > ;
     };
 
     /// Wrapper of PETSc vector, to store vectors used with PETSc in its native format.
     ///
     template <typename Scalar>
-    class PetscVector : public Vector<Scalar>
+    class PetscVector : public Vector < Scalar >
     {
     public:
       PetscVector();
@@ -128,7 +128,7 @@ namespace Hermes
       /// Is vector initiated (allocated)?
       bool inited;
 
-      friend class Solvers::PetscLinearMatrixSolver<Scalar>;
+      friend class Solvers::PetscLinearMatrixSolver < Scalar > ;
     };
   }
   namespace Solvers
@@ -136,7 +136,7 @@ namespace Hermes
     /// Encapsulation of PETSc linear solver.
     ///
     template <typename Scalar>
-    class HERMES_API PetscLinearMatrixSolver : public DirectSolver<Scalar>
+    class HERMES_API PetscLinearMatrixSolver : public DirectSolver < Scalar >
     {
     public:
       PetscLinearMatrixSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs);

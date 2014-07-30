@@ -27,17 +27,17 @@ namespace Hermes
         (unsigned int i, unsigned int j, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-          this->setSymFlag(HERMES_SYM);
-        }
+        this->setSymFlag(HERMES_SYM);
+      }
 
       template<typename Scalar>
       DefaultJacobianElasticity_0_0<Scalar>::DefaultJacobianElasticity_0_0
         (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-          this->setSymFlag(HERMES_SYM);
-          this->set_area(area);
-        }
+        this->setSymFlag(HERMES_SYM);
+        this->set_area(area);
+      }
 
       template<typename Scalar>
       Scalar DefaultJacobianElasticity_0_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
@@ -66,17 +66,17 @@ namespace Hermes
         (unsigned int i, unsigned int j, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-          this->setSymFlag(HERMES_SYM);
-        }
+        this->setSymFlag(HERMES_SYM);
+      }
 
       template<typename Scalar>
       DefaultJacobianElasticity_0_1<Scalar>::DefaultJacobianElasticity_0_1
         (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-          this->setSymFlag(HERMES_SYM);
-          this->set_area(area);
-        }
+        this->setSymFlag(HERMES_SYM);
+        this->set_area(area);
+      }
 
       template<typename Scalar>
       Scalar DefaultJacobianElasticity_0_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
@@ -105,15 +105,15 @@ namespace Hermes
         (unsigned int i, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        }
+      }
 
       template<typename Scalar>
       DefaultResidualElasticity_0_0<Scalar>::DefaultResidualElasticity_0_0
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-          this->set_area(area);
-        }
+        this->set_area(area);
+      }
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_0_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
@@ -142,15 +142,15 @@ namespace Hermes
         (unsigned int i, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        }
+      }
 
       template<typename Scalar>
       DefaultResidualElasticity_0_1<Scalar>::DefaultResidualElasticity_0_1
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-          this->set_area(area);
-        }
+        this->set_area(area);
+      }
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_0_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
@@ -179,15 +179,15 @@ namespace Hermes
         (unsigned int i, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        }
+      }
 
       template<typename Scalar>
       DefaultResidualElasticity_1_0<Scalar>::DefaultResidualElasticity_1_0
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-          this->set_area(area);
-        }
+        this->set_area(area);
+      }
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_1_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
@@ -216,15 +216,15 @@ namespace Hermes
         (unsigned int i, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        }
+      }
 
       template<typename Scalar>
       DefaultResidualElasticity_1_1<Scalar>::DefaultResidualElasticity_1_1
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-          this->set_area(area);
-        }
+        this->set_area(area);
+      }
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_1_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
@@ -253,15 +253,15 @@ namespace Hermes
         (unsigned int i, unsigned int j, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-        }
+      }
 
       template<typename Scalar>
       DefaultJacobianElasticity_1_1<Scalar>::DefaultJacobianElasticity_1_1
         (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-          this->set_area(area);
-        }
+        this->set_area(area);
+      }
 
       template<typename Scalar>
       Scalar DefaultJacobianElasticity_1_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
@@ -285,13 +285,13 @@ namespace Hermes
         return new DefaultJacobianElasticity_1_1<Scalar>(this->i, this->j, this->areas[0], this->lambda, this->mu);
       }
 
-      template class HERMES_API DefaultJacobianElasticity_0_0<double>;
-      template class HERMES_API DefaultJacobianElasticity_0_1<double>;
-      template class HERMES_API DefaultResidualElasticity_0_0<double>;
-      template class HERMES_API DefaultResidualElasticity_0_1<double>;
-      template class HERMES_API DefaultResidualElasticity_1_0<double>;
-      template class HERMES_API DefaultResidualElasticity_1_1<double>;
-      template class HERMES_API DefaultJacobianElasticity_1_1<double>;
+      template class HERMES_API DefaultJacobianElasticity_0_0 < double > ;
+      template class HERMES_API DefaultJacobianElasticity_0_1 < double > ;
+      template class HERMES_API DefaultResidualElasticity_0_0 < double > ;
+      template class HERMES_API DefaultResidualElasticity_0_1 < double > ;
+      template class HERMES_API DefaultResidualElasticity_1_0 < double > ;
+      template class HERMES_API DefaultResidualElasticity_1_1 < double > ;
+      template class HERMES_API DefaultJacobianElasticity_1_1 < double > ;
     };
   }
 }

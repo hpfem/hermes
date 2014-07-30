@@ -53,7 +53,7 @@ namespace Hermes
 
     /** Type for storing number in Mumps complex structures */
     template <>
-    struct mumps_type<std::complex<double> >
+    struct mumps_type < std::complex<double> >
     {
       /** Type for storing mumps struct in Mumps complex structures */
       typedef ZMUMPS_STRUC_C mumps_struct;
@@ -63,7 +63,7 @@ namespace Hermes
 
     /** Type for storing number in Mumps real structures */
     template <>
-    struct mumps_type<double>
+    struct mumps_type < double >
     {
       /** Type for storing mumps struct in Mumps real structures */
       typedef DMUMPS_STRUC_C mumps_struct;
@@ -74,7 +74,7 @@ namespace Hermes
     /** \brief Matrix used with MUMPS solver */
     /// Important: MUMPS is indexing from 1
     template <typename Scalar>
-    class MumpsMatrix : public CSCMatrix<Scalar>
+    class MumpsMatrix : public CSCMatrix < Scalar >
     {
     public:
       MumpsMatrix();
@@ -117,7 +117,7 @@ namespace Hermes
       /// Matrix entries (column-wise).
       typename mumps_type<Scalar>::mumps_Scalar *Ax;
 
-      friend class Solvers::MumpsSolver<Scalar>;
+      friend class Solvers::MumpsSolver < Scalar > ;
       template<typename T> friend SparseMatrix<T>*  create_matrix();
     };
   }
@@ -127,7 +127,7 @@ namespace Hermes
     /// Encapsulation of MUMPS linear solver.
     ///
     template <typename Scalar>
-    class HERMES_API MumpsSolver : public DirectSolver<Scalar>
+    class HERMES_API MumpsSolver : public DirectSolver < Scalar >
     {
     public:
       /// Constructor of MumpsSolver.

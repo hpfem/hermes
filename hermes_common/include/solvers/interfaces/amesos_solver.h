@@ -36,7 +36,7 @@ namespace Hermes
     /// \brief Encapsulation of Amesos linear solver.
     ///
     template<typename Scalar>
-    class HERMES_API AmesosSolver : public DirectSolver<Scalar>
+    class HERMES_API AmesosSolver : public DirectSolver < Scalar >
     {
     public:
       static bool is_available(const char *name);

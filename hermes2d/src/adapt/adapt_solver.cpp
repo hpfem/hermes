@@ -531,12 +531,12 @@ namespace Hermes
       this->solve_method_running = false;
 
       if (this->visualization)
-      for (unsigned short i = 0; i < this->number_of_equations; i++)
-      {
+        for (unsigned short i = 0; i < this->number_of_equations; i++)
+        {
         delete this->scalar_views[i];
         delete this->order_views[i];
         delete this->base_views[i];
-      }
+        }
 
       delete this->adaptivity_internal;
       delete StateReassemblyHelper<Scalar>::reusable_DOFs;
@@ -922,8 +922,8 @@ namespace Hermes
       return true;
     }
 
-    template HERMES_API class AdaptSolver<double, LinearSolver<double> >;
-    template HERMES_API class AdaptSolver<std::complex<double>, LinearSolver<std::complex<double > > >;
+    template HERMES_API class AdaptSolver < double, LinearSolver<double> > ;
+    template HERMES_API class AdaptSolver < std::complex<double>, LinearSolver<std::complex<double > > > ;
 
     /** \todo Uncomment this once we figure out how to do it
     template HERMES_API class AdaptSolver<double, NewtonSolver<double> >;

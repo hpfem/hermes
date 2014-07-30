@@ -33,7 +33,7 @@ namespace Hermes
   {
     /// \brief General (abstract) matrix representation in Hermes.
     template<typename Scalar>
-    class HERMES_API Matrix : public Hermes::Mixins::Loggable, public Algebra::Mixins::MatrixRhsImportExport<Scalar>
+    class HERMES_API Matrix : public Hermes::Mixins::Loggable, public Algebra::Mixins::MatrixRhsImportExport < Scalar >
     {
     public:
       /// constructor of matrix
@@ -99,7 +99,7 @@ namespace Hermes
 
     /// \brief General (abstract) sparse matrix representation in Hermes.
     template<typename Scalar>
-    class HERMES_API SparseMatrix : public Matrix<Scalar> {
+    class HERMES_API SparseMatrix : public Matrix < Scalar > {
     public:
       SparseMatrix();
       /// Constructor of sparse matrix

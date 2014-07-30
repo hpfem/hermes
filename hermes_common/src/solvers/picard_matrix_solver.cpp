@@ -282,7 +282,7 @@ namespace Hermes
       free_with_check(rhs);
     }
 
-    template class HERMES_API PicardMatrixSolver<double>;
-    template class HERMES_API PicardMatrixSolver<std::complex<double> >;
+    template class HERMES_API PicardMatrixSolver < double > ;
+    template class HERMES_API PicardMatrixSolver < std::complex<double> > ;
   }
 }

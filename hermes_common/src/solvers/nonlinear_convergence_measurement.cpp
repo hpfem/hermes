@@ -80,14 +80,14 @@ namespace Hermes
         if (nonlinear_solver->handleMultipleTolerancesAnd)
           converged = converged && converged_this_tolerance;
         else
-        if (converged_this_tolerance)
-          return true;
+          if (converged_this_tolerance)
+            return true;
       }
 
       return converged;
     }
 
-    template class HERMES_API NonlinearConvergenceMeasurement<double>;
-    template class HERMES_API NonlinearConvergenceMeasurement<std::complex<double> >;
+    template class HERMES_API NonlinearConvergenceMeasurement < double > ;
+    template class HERMES_API NonlinearConvergenceMeasurement < std::complex<double> > ;
   }
 }

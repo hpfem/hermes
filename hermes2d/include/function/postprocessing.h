@@ -70,7 +70,7 @@ namespace Hermes
       };
 
       class HERMES_API VertexBasedLimiter
-        : public Limiter<double>
+        : public Limiter < double >
       {
       public:
         VertexBasedLimiter(SpaceSharedPtr<double> space, double* solution_vector, int maximum_polynomial_order);
@@ -146,7 +146,7 @@ namespace Hermes
 
       /// Volumetric integral calculator
       template<typename Scalar>
-      class HERMES_API VolumetricIntegralCalculator : public IntegralCalculator<Scalar>
+      class HERMES_API VolumetricIntegralCalculator : public IntegralCalculator < Scalar >
       {
       public:
         VolumetricIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);
@@ -165,7 +165,7 @@ namespace Hermes
 
       /// Surface integral calculator
       template<typename Scalar>
-      class HERMES_API SurfaceIntegralCalculator : public IntegralCalculator<Scalar>
+      class HERMES_API SurfaceIntegralCalculator : public IntegralCalculator < Scalar >
       {
       public:
         SurfaceIntegralCalculator(MeshFunctionSharedPtr<Scalar> source_function, int number_of_integrals);

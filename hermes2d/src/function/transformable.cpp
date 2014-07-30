@@ -128,14 +128,14 @@ namespace Hermes
     void Transformable::push_transforms(std::set<Transformable *>& transformables, int son)
     {
       for (std::set<Transformable *>::iterator it = transformables.begin(); it != transformables.end(); ++it)
-      if (*it != nullptr)
-        (*it)->push_transform(son);
+        if (*it != nullptr)
+          (*it)->push_transform(son);
     }
     void Transformable::pop_transforms(std::set<Transformable *>& transformables)
     {
       for (std::set<Transformable *>::iterator it = transformables.begin(); it != transformables.end(); ++it)
-      if (*it != nullptr)
-        (*it)->pop_transform();
+        if (*it != nullptr)
+          (*it)->pop_transform();
     }
   }
 }

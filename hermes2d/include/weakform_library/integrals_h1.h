@@ -300,18 +300,18 @@ namespace Hermes
     // for expression without partial derivatives - the variables e, quad, o must be already
     // defined and initialized
 #define h1_integrate_expression(exp) \
-    {double3* pt = quad->get_points(o, ru->get_active_element()->get_mode()); \
+        {double3* pt = quad->get_points(o, ru->get_active_element()->get_mode()); \
     unsigned char np = quad->get_num_points(o, ru->get_active_element()->get_mode()); \
     if (ru->is_jacobian_const()){    \
     for (int i = 0; i < np; i++) \
       result += pt[i][2] * (exp); \
       result *= ru->get_const_jacobian(); \
-    } \
-    else {      \
+        } \
+        else {      \
         double* jac = ru->get_jacobian(o); \
       for (int i = 0; i < np; i++) \
         result += pt[i][2] * jac[i] * (exp); \
-    }}
+        }}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 

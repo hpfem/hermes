@@ -390,10 +390,10 @@ namespace Hermes
     }
   };
 
-  template class HERMES_API Hermes1DFunction<double>;
-  template class HERMES_API Hermes1DFunction<std::complex<double> >;
-  template class HERMES_API Hermes2DFunction<double>;
-  template class HERMES_API Hermes2DFunction<std::complex<double> >;
-  template class HERMES_API Hermes3DFunction<double>;
-  template class HERMES_API Hermes3DFunction<std::complex<double> >;
+  template class HERMES_API Hermes1DFunction < double > ;
+  template class HERMES_API Hermes1DFunction < std::complex<double> > ;
+  template class HERMES_API Hermes2DFunction < double > ;
+  template class HERMES_API Hermes2DFunction < std::complex<double> > ;
+  template class HERMES_API Hermes3DFunction < double > ;
+  template class HERMES_API Hermes3DFunction < std::complex<double> > ;
 }

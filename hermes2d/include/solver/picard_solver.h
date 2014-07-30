@@ -73,7 +73,7 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API PicardSolver :
       public Hermes::Hermes2D::Solver<Scalar>,
-      public Hermes::Solvers::PicardMatrixSolver<Scalar>
+      public Hermes::Solvers::PicardMatrixSolver < Scalar >
     {
     public:
       PicardSolver();

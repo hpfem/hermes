@@ -35,8 +35,8 @@ namespace Hermes
     AztecOOSolver<Scalar>::AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
       : IterSolver<Scalar>(m, rhs), LoopSolver<Scalar>(m, rhs), m(m), rhs(rhs), final_matrix(nullptr), P(nullptr), Q(nullptr), row_perm(nullptr), col_perm(nullptr)
     {
-        pc = nullptr;
-      }
+      pc = nullptr;
+    }
 
     template<typename Scalar>
     void AztecOOSolver<Scalar>::free()
@@ -309,9 +309,9 @@ namespace Hermes
 
       // copy the solution into sln vector
       if (col_perm)
-      for (unsigned int i = 0; i < final_matrix->size; i++) this->sln[i] = x[col_perm[i]];
+        for (unsigned int i = 0; i < final_matrix->size; i++) this->sln[i] = x[col_perm[i]];
       else
-      for (unsigned int i = 0; i < final_matrix->size; i++) this->sln[i] = x[i];
+        for (unsigned int i = 0; i < final_matrix->size; i++) this->sln[i] = x[i];
     }
 
     template<>
@@ -379,11 +379,11 @@ namespace Hermes
       if (initial_guess)
       {
         if (row_perm)
-        for (unsigned int i = 0; i < m->size; i++)
-          x[i] = initial_guess[row_perm[i]];
+          for (unsigned int i = 0; i < m->size; i++)
+            x[i] = initial_guess[row_perm[i]];
         else
-        for (unsigned int i = 0; i < m->size; i++)
-          x[i] = initial_guess[i];
+          for (unsigned int i = 0; i < m->size; i++)
+            x[i] = initial_guess[i];
       }
 
       aztec.SetLHS(&x);
@@ -424,9 +424,9 @@ namespace Hermes
 
       // copy the solution into sln vector
       if (col_perm)
-      for (unsigned int i = 0; i < final_matrix->size; i++) this->sln[i] = x[col_perm[i]];
+        for (unsigned int i = 0; i < final_matrix->size; i++) this->sln[i] = x[col_perm[i]];
       else
-      for (unsigned int i = 0; i < final_matrix->size; i++) this->sln[i] = x[i];
+        for (unsigned int i = 0; i < final_matrix->size; i++) this->sln[i] = x[i];
     }
     template<>
     void AztecOOSolver<std::complex<double> >::solve()
@@ -523,8 +523,8 @@ namespace Hermes
       return aztec.TrueResidual();
     }
 
-    template class HERMES_API AztecOOSolver<double>;
-    template class HERMES_API AztecOOSolver<std::complex<double> >;
+    template class HERMES_API AztecOOSolver < double > ;
+    template class HERMES_API AztecOOSolver < std::complex<double> > ;
   }
 }
 #endif

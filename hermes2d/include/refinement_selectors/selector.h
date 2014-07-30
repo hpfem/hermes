@@ -86,7 +86,7 @@ namespace Hermes
 
       /// A selector that selects H-refinements only. \ingroup g_selectors
       template<typename Scalar>
-      class HERMES_API HOnlySelector : public Selector<Scalar> {
+      class HERMES_API HOnlySelector : public Selector < Scalar > {
       public:
         /// Constructor.
         HOnlySelector() : Selector<Scalar>() {};
@@ -101,7 +101,7 @@ namespace Hermes
 
       /// A selector that increases order (i.e., it selects P-refinements only). \ingroup g_selectors
       template<typename Scalar>
-      class HERMES_API POnlySelector : public Selector<Scalar> {
+      class HERMES_API POnlySelector : public Selector < Scalar > {
         /// Increase along the horizontal direction in a quadrilateral or increase of an order in a triangle.
         const int order_h_inc;
         /// Increase along the vertical direction in a quadrilateral.

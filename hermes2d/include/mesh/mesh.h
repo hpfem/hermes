@@ -286,8 +286,8 @@ namespace Hermes
         /// the internal representation, or the user std::string value.
         std::map<std::string, int> conversion_table_inverse;
 
-        friend class Space<double>;
-        friend class Space<std::complex<double> >;
+        friend class Space < double > ;
+        friend class Space < std::complex<double> > ;
         friend class Mesh;
       };
 
@@ -388,14 +388,14 @@ namespace Hermes
       friend class MeshReaderH2DXML;
       friend class MeshReaderH1DXML;
       friend class MeshReaderExodusII;
-      friend class DiscreteProblem<double>;
-      friend class DiscreteProblem<std::complex<double> >;
+      friend class DiscreteProblem < double > ;
+      friend class DiscreteProblem < std::complex<double> > ;
       template<typename Scalar> friend class DiscreteProblemDGAssembler;
-      friend class WeakForm<double>;
-      friend class WeakForm<std::complex<double> >;
+      friend class WeakForm < double > ;
+      friend class WeakForm < std::complex<double> > ;
       template<typename Scalar> friend class Adapt;
-      friend class KellyTypeAdapt<double>;
-      friend class KellyTypeAdapt<std::complex<double> >;
+      friend class KellyTypeAdapt < double > ;
+      friend class KellyTypeAdapt < std::complex<double> > ;
       template<typename Scalar> friend class Solution;
       template<typename Scalar> friend class Filter;
       template<typename Scalar> friend class MeshFunction;

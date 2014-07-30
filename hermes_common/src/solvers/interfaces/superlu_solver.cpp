@@ -118,65 +118,65 @@ namespace Hermes
       : DirectSolver<Scalar>(m, rhs), m(m), rhs(rhs), local_Ai(nullptr), local_Ap(nullptr)
       , local_Ax(nullptr), local_rhs(nullptr)
     {
-        R = nullptr;
-        C = nullptr;
-        perm_r = nullptr;
-        perm_c = nullptr;
-        etree = nullptr;
+      R = nullptr;
+      C = nullptr;
+      perm_r = nullptr;
+      perm_c = nullptr;
+      etree = nullptr;
 #ifndef SLU_MT
-        *equed = '\0';
+      *equed = '\0';
 #endif
 
-        // Set the default input options:
+      // Set the default input options:
 #ifdef SLU_MT
-        // I am not sure if this will work well on Windows:
-        // http://stackoverflow.com/questions/631664/accessing-environment-variables-in-c
-        char *nt_var = getenv("OMP_NUM_THREADS");
-        if (nt_var)
-          options.nprocs = std::max(1, atoi(nt_var));
-        else
-          options.nprocs = 1;
+      // I am not sure if this will work well on Windows:
+      // http://stackoverflow.com/questions/631664/accessing-environment-variables-in-c
+      char *nt_var = getenv("OMP_NUM_THREADS");
+      if (nt_var)
+        options.nprocs = std::max(1, atoi(nt_var));
+      else
+        options.nprocs = 1;
 
-        // Rescale the matrix if neccessary.
-        options.fact = EQUILIBRATE;
-        // Not solving the transposed problem.
-        options.trans = NOTRANS;
-        // Factorize from scratch for the first time.
-        options.refact = NO;
-        // Use partial pivoting during GEM.
-        options.diag_pivot_thresh = 1.0;
-        // Let SuperLU compute the row permutations.
-        options.usepr = NO;
-        // Not yet implemented in SuperLU_MT 2.0.
-        options.drop_tol = 0.0;
-        // Assume general non-symmetric problem.
-        options.SymmetricMode = NO;
+      // Rescale the matrix if neccessary.
+      options.fact = EQUILIBRATE;
+      // Not solving the transposed problem.
+      options.trans = NOTRANS;
+      // Factorize from scratch for the first time.
+      options.refact = NO;
+      // Use partial pivoting during GEM.
+      options.diag_pivot_thresh = 1.0;
+      // Let SuperLU compute the row permutations.
+      options.usepr = NO;
+      // Not yet implemented in SuperLU_MT 2.0.
+      options.drop_tol = 0.0;
+      // Assume general non-symmetric problem.
+      options.SymmetricMode = NO;
 
-        // Default options related to the supernodal algorithm.
-        options.panel_size = sp_ienv(1);
-        options.relax = sp_ienv(2);
+      // Default options related to the supernodal algorithm.
+      options.panel_size = sp_ienv(1);
+      options.relax = sp_ienv(2);
 #else
-        /*
-        options.Fact = DOFACT;
-        options.Equil = YES;
-        options.ColPerm = COLAMD;
-        options.DiagPivotThresh = 1.0;
-        options.Trans = NOTRANS;
-        options.IterRefine = NOREFINE;
-        options.SymmetricMode = NO;
-        options.PivotGrowth = NO;
-        options.ConditionNumber = NO;
-        options.PrintStat = YES;
-        */
-        // This function is only present in the sequential SLU.
-        set_default_options(&options);
+      /*
+      options.Fact = DOFACT;
+      options.Equil = YES;
+      options.ColPerm = COLAMD;
+      options.DiagPivotThresh = 1.0;
+      options.Trans = NOTRANS;
+      options.IterRefine = NOREFINE;
+      options.SymmetricMode = NO;
+      options.PivotGrowth = NO;
+      options.ConditionNumber = NO;
+      options.PrintStat = YES;
+      */
+      // This function is only present in the sequential SLU.
+      set_default_options(&options);
 #endif
 
-        // Set to NO to suppress output.
-        options.PrintStat = YES;
+      // Set to NO to suppress output.
+      options.PrintStat = YES;
 
-        has_A = has_B = inited = false;
-      }
+      has_A = has_B = inited = false;
+    }
 
     inline SuperLuType<std::complex<double> >::Scalar to_superlu(SuperLuType<std::complex<double> >::Scalar &a, std::complex<double>b)
     {
@@ -633,8 +633,8 @@ namespace Hermes
       if (notran)
       {
         if (rowequ)
-        for (int i = 0; i < A->nrow; ++i)
-          SLU_MULT(Bmat[i], R[i]);
+          for (int i = 0; i < A->nrow; ++i)
+            SLU_MULT(Bmat[i], R[i]);
       }
       else if (colequ)
       {
@@ -738,8 +738,8 @@ namespace Hermes
         if (notran)
         {
           if (colequ)
-          for (int i = 0; i < A->nrow; ++i)
-            SLU_MULT(Xmat[i], C[i]);
+            for (int i = 0; i < A->nrow; ++i)
+              SLU_MULT(Xmat[i], C[i]);
         }
         else if (rowequ)
         {
@@ -758,8 +758,8 @@ namespace Hermes
     }
 #endif
 
-    template class HERMES_API SuperLUSolver<double>;
-    template class HERMES_API SuperLUSolver<std::complex<double> >;
+    template class HERMES_API SuperLUSolver < double > ;
+    template class HERMES_API SuperLUSolver < std::complex<double> > ;
   }
 }
 #endif

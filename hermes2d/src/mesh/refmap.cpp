@@ -96,8 +96,8 @@ namespace Hermes
       {
         unsigned short o = e->cm->order;
         for (unsigned char i = 0; i < e->get_nvert(); i++)
-        for (j = 2; j <= o; j++)
-          indices[k++] = ref_map_shapeset.get_edge_index(i, 0, j, e->get_mode());
+          for (j = 2; j <= o; j++)
+            indices[k++] = ref_map_shapeset.get_edge_index(i, 0, j, e->get_mode());
 
         if (e->is_quad()) o = H2D_MAKE_QUAD_ORDER(o, o);
         memcpy(indices + k, ref_map_shapeset.get_bubble_indices(o, e->get_mode()),
@@ -361,8 +361,8 @@ namespace Hermes
       double2x2* m = get_inv_ref_map(mo);
       double* jac = get_jacobian(mo);
       for (i = 0; i < quad->get_num_points(mo, element->get_mode()); i++)
-      if (jac[i] <= 0.0)
-        throw Hermes::Exceptions::Exception("Element #%d is concave or badly oriented.", element->id);
+        if (jac[i] <= 0.0)
+          throw Hermes::Exceptions::Exception("Element #%d is concave or badly oriented.", element->id);
 
       // next, estimate the "exact" value of the typical integral int_grad_u_grad_v
       // (with grad_u == grad_v == (1, 1)) using the maximum integration rule
@@ -578,8 +578,8 @@ namespace Hermes
       {
         int o = e->cm->order;
         for (unsigned char i = 0; i < e->get_nvert(); i++)
-        for (j = 2; j <= o; j++)
-          local_indices[k++] = shapeset.get_edge_index(i, 0, j, e->get_mode());
+          for (j = 2; j <= o; j++)
+            local_indices[k++] = shapeset.get_edge_index(i, 0, j, e->get_mode());
 
         if (e->is_quad())
           o = H2D_MAKE_QUAD_ORDER(o, o);

@@ -88,7 +88,7 @@ namespace Hermes
     };
 
     template <typename Scalar>
-    class HERMES_API DefaultNormFormVol : public NormFormVol<Scalar>
+    class HERMES_API DefaultNormFormVol : public NormFormVol < Scalar >
     {
     public:
       DefaultNormFormVol(int i, int j, NormType normType);
@@ -100,7 +100,7 @@ namespace Hermes
     };
 
     template <typename Scalar>
-    class HERMES_API DefaultNormFormSurf : public NormFormSurf<Scalar>
+    class HERMES_API DefaultNormFormSurf : public NormFormSurf < Scalar >
     {
     public:
       DefaultNormFormSurf(int i, int j, NormType normType);
@@ -112,7 +112,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class HERMES_API MatrixDefaultNormFormVol : public MatrixFormVol<Scalar>
+    class HERMES_API MatrixDefaultNormFormVol : public MatrixFormVol < Scalar >
     {
     public:
       MatrixDefaultNormFormVol(int i, int j, NormType normType);
@@ -130,7 +130,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class HERMES_API VectorDefaultNormFormVol : public VectorFormVol<Scalar>
+    class HERMES_API VectorDefaultNormFormVol : public VectorFormVol < Scalar >
     {
     public:
       VectorDefaultNormFormVol(int i, NormType normType);

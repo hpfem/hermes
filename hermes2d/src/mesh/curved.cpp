@@ -133,15 +133,15 @@ namespace Hermes
       // *** quads ***
       // calculate projection matrix of maximum order
       {
-      Element e;
-      e.nvert = 4;
-      ref_map_pss_static.set_active_element(&e);
-      short *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
-      curvMapStatic.bubble_proj_matrix_quad = calculate_bubble_projection_matrix(indices, HERMES_MODE_QUAD);
+        Element e;
+        e.nvert = 4;
+        ref_map_pss_static.set_active_element(&e);
+        short *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
+        curvMapStatic.bubble_proj_matrix_quad = calculate_bubble_projection_matrix(indices, HERMES_MODE_QUAD);
 
-      // cholesky factorization of the matrix
-      choldc(curvMapStatic.bubble_proj_matrix_quad, this->quad_bubble_np, curvMapStatic.bubble_quad_p);
-    }
+        // cholesky factorization of the matrix
+        choldc(curvMapStatic.bubble_proj_matrix_quad, this->quad_bubble_np, curvMapStatic.bubble_quad_p);
+      }
     }
 
     void CurvMapStatic::precalculate_cholesky_projection_matrix_edge()
@@ -363,11 +363,11 @@ namespace Hermes
       if (toplevel)
       {
         for (int i = 0; i < 4; i++)
-        if (curves[i])
-        {
+          if (curves[i])
+          {
           delete curves[i];
           curves[i] = nullptr;
-        }
+          }
       }
     }
 
@@ -658,8 +658,8 @@ namespace Hermes
         const double* vd = ref_map_pss.get_fn_values();
 
         for (int m = 0; m < 2; m++)   // part 0 or 1
-        for (int j = 0; j < np; j++)
-          old[m][j] += proj[k][m] * vd[j];
+          for (int j = 0; j < np; j++)
+            old[m][j] += proj[k][m] * vd[j];
 
         for (int ii = 0; ii < order - 1; ii++)
         {
@@ -670,8 +670,8 @@ namespace Hermes
           const double* ed = ref_map_pss.get_fn_values();
 
           for (int m = 0; m < 2; m++)  //part 0 or 1
-          for (int j = 0; j < np; j++)
-            old[m][j] += proj[nvert + k * (order - 1) + ii][m] * ed[j];
+            for (int j = 0; j < np; j++)
+              old[m][j] += proj[nvert + k * (order - 1) + ii][m] * ed[j];
         }
       }
     }

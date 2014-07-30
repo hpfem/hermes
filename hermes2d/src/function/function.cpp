@@ -218,7 +218,7 @@ namespace Hermes
       return toReturn;
     }
 
-    template class HERMES_API Function<double>;
-    template class HERMES_API Function<std::complex<double> >;
+    template class HERMES_API Function < double > ;
+    template class HERMES_API Function < std::complex<double> > ;
   }
 }

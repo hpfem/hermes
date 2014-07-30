@@ -30,7 +30,7 @@ namespace Hermes
   {
     /// See H2D: PicardSolver.
     template<typename Scalar>
-    class HERMES_API PicardMatrixSolver : public NonlinearMatrixSolver<Scalar>
+    class HERMES_API PicardMatrixSolver : public NonlinearMatrixSolver < Scalar >
     {
     public:
       PicardMatrixSolver();

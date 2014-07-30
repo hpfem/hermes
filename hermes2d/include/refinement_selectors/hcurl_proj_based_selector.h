@@ -29,7 +29,7 @@ namespace Hermes
       *  it is suggested to create the instance outside the adaptivity
       *  loop. */
       template<typename Scalar>
-      class HERMES_API HcurlProjBasedSelector : public ProjBasedSelector<Scalar> {
+      class HERMES_API HcurlProjBasedSelector : public ProjBasedSelector < Scalar > {
       public: //API
         /// Constructor.
         /** \param[in] cand_list A predefined list of candidates.
@@ -87,7 +87,7 @@ namespace Hermes
         /**  Overriden function. For details, see ProjBasedSelector::evaluate_error_squared_subdomain(). */
         virtual double evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, int son, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj, Scalar* rval[H2D_MAX_ELEMENT_SONS][MAX_NUMBER_FUNCTION_VALUES_FOR_SELECTORS]);
 
-        friend class ProjBasedSelector<Scalar>;
+        friend class ProjBasedSelector < Scalar > ;
       };
     }
   }

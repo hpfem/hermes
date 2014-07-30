@@ -71,7 +71,7 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API NewtonSolver :
       public Hermes::Hermes2D::Solver<Scalar>,
-      public Hermes::Solvers::NewtonMatrixSolver<Scalar>
+      public Hermes::Solvers::NewtonMatrixSolver < Scalar >
     {
     public:
       NewtonSolver();

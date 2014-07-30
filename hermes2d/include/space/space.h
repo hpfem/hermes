@@ -31,7 +31,7 @@ namespace Hermes
   {
     /// \brief Used to pass the instances of Space around.
     template<typename Scalar>
-    class HERMES_API SpaceSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
+    class HERMES_API SpaceSharedPtr : public std::tr1::shared_ptr < Hermes::Hermes2D::Space<Scalar> >
     {
     public:
       SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar>* ptr = nullptr);
@@ -508,11 +508,11 @@ namespace Hermes
       friend class Views::Orderizer;
       friend class Views::OrderView;
       template<typename T> friend class Views::VectorBaseView;
-      friend class Adapt<Scalar>;
-      friend class DiscreteProblem<Scalar>;
-      friend class DiscreteProblemDGAssembler<Scalar>;
-      friend class DiscreteProblemThreadAssembler<Scalar>;
-      friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
+      friend class Adapt < Scalar > ;
+      friend class DiscreteProblem < Scalar > ;
+      friend class DiscreteProblemDGAssembler < Scalar > ;
+      friend class DiscreteProblemThreadAssembler < Scalar > ;
+      friend class DiscreteProblemIntegrationOrderCalculator < Scalar > ;
     };
   }
 }

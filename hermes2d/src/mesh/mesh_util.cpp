@@ -243,8 +243,8 @@ namespace Hermes
     {
       this->elements = new Element*[MAX_ELEMENTS];
       for (int i = 0; i < 2; i++)
-      for (int j = 0; j < 2; j++)
-        m_sons[i][j] = nullptr;
+        for (int j = 0; j < 2; j++)
+          m_sons[i][j] = nullptr;
     }
 
     MeshHashGridElement::~MeshHashGridElement()
@@ -252,9 +252,9 @@ namespace Hermes
       if (elements)
         delete[] elements;
       for (int i = 0; i < 2; i++)
-      for (int j = 0; j < 2; j++)
-      if (m_sons[i][j])
-        delete m_sons[i][j];
+        for (int j = 0; j < 2; j++)
+          if (m_sons[i][j])
+            delete m_sons[i][j];
     }
 
     bool MeshHashGridElement::belongs(Element *element)
@@ -324,8 +324,8 @@ namespace Hermes
       if (m_active)
       {
         for (int elem_i = 0; elem_i < this->element_count; elem_i++)
-        if (RefMap::is_element_on_physical_coordinates(elements[elem_i], x, y))
-          return elements[elem_i];
+          if (RefMap::is_element_on_physical_coordinates(elements[elem_i], x, y))
+            return elements[elem_i];
 
         return nullptr;
       }

@@ -37,7 +37,7 @@ namespace Hermes
     /// \brief Provides methods of integration order calculation.
     template<typename Scalar>
     class HERMES_API DiscreteProblemIntegrationOrderCalculator :
-      public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>
+      public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta < Scalar >
     {
     private:
       DiscreteProblemIntegrationOrderCalculator(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler);

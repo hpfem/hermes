@@ -37,7 +37,7 @@ namespace Hermes
     /// \brief Encapsulation of AztecOO linear solver.
     ///
     template <typename Scalar>
-    class HERMES_API AztecOOSolver : public IterSolver<Scalar>
+    class HERMES_API AztecOOSolver : public IterSolver < Scalar >
     {
     public:
       AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);

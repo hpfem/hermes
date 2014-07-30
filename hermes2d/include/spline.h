@@ -22,7 +22,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    class HERMES_API CubicSpline : public Hermes::Hermes1DFunction<double>
+    class HERMES_API CubicSpline : public Hermes::Hermes1DFunction < double >
     {
     public:
       /// Constructor (general case).

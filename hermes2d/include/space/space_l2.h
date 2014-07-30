@@ -30,7 +30,7 @@ namespace Hermes
     /// int globalPolynomialOrder = 4;<br>
     /// Hermes::Hermes2D::L2Space<double> space(&mesh, &bcs, globalPolynomialOrder);<br>
     template<typename Scalar>
-    class HERMES_API L2Space : public Space<Scalar>
+    class HERMES_API L2Space : public Space < Scalar >
     {
     public:
       L2Space();
@@ -70,7 +70,7 @@ namespace Hermes
     /// L2MarkerWiseConstSpace represents a space of material-wise constant functions.
     /// It is, of course, discontinuous, therefore it uses L2Space as a basis.
     template<typename Scalar>
-    class HERMES_API L2MarkerWiseConstSpace : public L2Space<Scalar>
+    class HERMES_API L2MarkerWiseConstSpace : public L2Space < Scalar >
     {
     public:
       L2MarkerWiseConstSpace(MeshSharedPtr mesh);

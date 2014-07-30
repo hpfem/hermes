@@ -28,7 +28,7 @@ namespace Hermes
       */
 
       template<typename Scalar>
-      class HERMES_API DefaultJacobianMagnetostatics : public MatrixFormVol<Scalar>
+      class HERMES_API DefaultJacobianMagnetostatics : public MatrixFormVol < Scalar >
       {
       public:
         DefaultJacobianMagnetostatics(int i, int j, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
@@ -56,7 +56,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualMagnetostatics : public VectorFormVol<Scalar>
+      class HERMES_API DefaultResidualMagnetostatics : public VectorFormVol < Scalar >
       {
       public:
         DefaultResidualMagnetostatics(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,

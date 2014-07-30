@@ -249,11 +249,11 @@ namespace Hermes
           el_marker = m.e_mtl[i];
         }
         for (j = 0; j < nv - 1; j++)
-        if (idx[j] < 0 || idx[j] >= mesh->ntopvert)
-        {
+          if (idx[j] < 0 || idx[j] >= mesh->ntopvert)
+          {
           delete[] idx;
           throw Hermes::Exceptions::MeshLoadFailureException("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
-        }
+          }
 
         Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
 
@@ -457,11 +457,11 @@ namespace Hermes
       for_all_base_elements(e, mesh)
       {
         for (unsigned char i = 0; i < e->get_nvert(); i++)
-        if ((mrk = MeshUtil::get_base_edge_node(e, i)->marker))
-        {
+          if ((mrk = MeshUtil::get_base_edge_node(e, i)->marker))
+          {
           const char* nl = first ? "\n" : ",\n";  first = false;
           fprintf(f, "%s [ %d, %d, \"%s\" ]", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).marker.c_str());
-        }
+          }
       }
       fprintf(f, "\n]\n\n");
 
@@ -472,11 +472,11 @@ namespace Hermes
         if (e->is_curved())
         {
           for (unsigned char i = 0; i < e->get_nvert(); i++)
-          if (e->cm->curves[i] != nullptr)
-          {
+            if (e->cm->curves[i] != nullptr)
+            {
             fprintf(f, first ? "curves =\n[\n" : ",\n");  first = false;
             save_curve(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->curves[i]);
-          }
+            }
           if (!first) fprintf(f, "\n]\n\n");
         }
       }

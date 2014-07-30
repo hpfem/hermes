@@ -8,7 +8,7 @@ using namespace Views;
 
 #define LINEAR_NONLINEAR_SWITCH
 
-class CustomNonlinearity : public Hermes1DFunction<double>
+class CustomNonlinearity : public Hermes1DFunction < double >
 {
 public:
   CustomNonlinearity(double alpha);
@@ -25,7 +25,7 @@ protected:
   double alpha;
 };
 
-class CustomEssentialBCNonConst : public EssentialBoundaryCondition<double>
+class CustomEssentialBCNonConst : public EssentialBoundaryCondition < double >
 {
 public:
   CustomEssentialBCNonConst(std::string marker);
@@ -35,7 +35,7 @@ public:
   virtual double value(double x, double y) const;
 };
 
-class CustomInitialCondition : public ExactSolutionScalar<double>
+class CustomInitialCondition : public ExactSolutionScalar < double >
 {
 public:
   CustomInitialCondition(MeshSharedPtr mesh) : ExactSolutionScalar<double>(mesh) {};
@@ -50,7 +50,7 @@ public:
   MeshFunction<double>* clone() const;
 };
 
-class CustomWeakFormSteadyState : public WeakForm<double>
+class CustomWeakFormSteadyState : public WeakForm < double >
 {
 public:
   CustomWeakFormSteadyState(Hermes1DFunction<double>* thermal_conductivity, Hermes2DFunction<double>* heat_source);
@@ -61,7 +61,7 @@ class CustomWeakFormTimeDependent : public CustomWeakFormSteadyState
 public:
   CustomWeakFormTimeDependent(Hermes1DFunction<double>* thermal_conductivity, Hermes2DFunction<double>* heat_source, MeshFunctionSharedPtr<double> prev_sln);
 
-  class CustomMatrixFormVol : public DefaultMatrixFormVol<double>
+  class CustomMatrixFormVol : public DefaultMatrixFormVol < double >
   {
     CustomMatrixFormVol(int i, int j);
 
@@ -72,7 +72,7 @@ public:
     friend class CustomWeakFormTimeDependent;
   };
 
-  class CustomVectorFormVol : public DefaultResidualVol<double>
+  class CustomVectorFormVol : public DefaultResidualVol < double >
   {
     CustomVectorFormVol(int i);
 
@@ -83,7 +83,7 @@ public:
     friend class CustomWeakFormTimeDependent;
   };
 
-  class CustomResidualFormVol : public DefaultResidualVol<double>
+  class CustomResidualFormVol : public DefaultResidualVol < double >
   {
     CustomResidualFormVol(int i);
 

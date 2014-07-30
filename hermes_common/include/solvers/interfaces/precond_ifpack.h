@@ -36,7 +36,7 @@ namespace Hermes
     /// \brief Preconditioners built on IFPACK.
     ///
     template <typename Scalar>
-    class HERMES_API IfpackPrecond : public EpetraPrecond<Scalar>
+    class HERMES_API IfpackPrecond : public EpetraPrecond < Scalar >
     {
     public:
       /// Constructor for relaxation methods.
@@ -85,7 +85,7 @@ namespace Hermes
       const char *type;
       int overlap;
 
-      friend class AztecOOSolver<Scalar>;
+      friend class AztecOOSolver < Scalar > ;
     };
   }
 }

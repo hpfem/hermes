@@ -29,7 +29,7 @@ namespace Hermes
     /// PrecalcShapeset is a cache of precalculated shape function values.
     ///
     ///
-    class HERMES_API PrecalcShapeset : public Function<double>
+    class HERMES_API PrecalcShapeset : public Function < double >
     {
     public:
       /// Returns type of space

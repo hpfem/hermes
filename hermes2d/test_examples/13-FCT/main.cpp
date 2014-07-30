@@ -152,9 +152,9 @@ int main(int argc, char* argv[])
 
   //Initialize
   //M_c/tau
-  CSCMatrix<double> * mass_matrix = new CSCMatrix<double>;
+  CSCMatrix<double> * mass_matrix = new CSCMatrix < double > ;
   //K
-  CSCMatrix<double> * conv_matrix = new CSCMatrix<double>;
+  CSCMatrix<double> * conv_matrix = new CSCMatrix < double > ;
   double* u_L = nullptr;
   double* u_H = nullptr;
   double* ref_sln_double = nullptr;

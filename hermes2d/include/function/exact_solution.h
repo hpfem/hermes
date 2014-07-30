@@ -30,7 +30,7 @@ namespace Hermes
     /// typically an exact solution to a PDE. This can be used to compare an approximate solution
     /// with an exact solution (see DiffFilter).
     template<typename Scalar>
-    class HERMES_API ExactSolution : public Solution<Scalar>
+    class HERMES_API ExactSolution : public Solution < Scalar >
     {
     public:
       ExactSolution(MeshSharedPtr mesh);
@@ -61,7 +61,7 @@ namespace Hermes
     /// These classes are abstract (pure virtual destructor).
     /// The user is supposed to subclass them (see e.g. NIST benchmarks).
     template<typename Scalar>
-    class HERMES_API ExactSolutionScalar : public ExactSolution<Scalar>
+    class HERMES_API ExactSolutionScalar : public ExactSolution < Scalar >
     {
     public:
       ExactSolutionScalar(MeshSharedPtr mesh);
@@ -86,7 +86,7 @@ namespace Hermes
     /// Serves for postprocessing of element-wise constant values (such as the error in adaptivity).
     /// The second template parameter ValueType must be a type castable to Scalar.
     template<typename Scalar, typename ValueType>
-    class HERMES_API ExactSolutionConstantArray : public ExactSolutionScalar<Scalar>
+    class HERMES_API ExactSolutionConstantArray : public ExactSolutionScalar < Scalar >
     {
     public:
       /// Constructor.
@@ -118,7 +118,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class HERMES_API ExactSolutionVector : public ExactSolution<Scalar>
+    class HERMES_API ExactSolutionVector : public ExactSolution < Scalar >
     {
     public:
       ExactSolutionVector(MeshSharedPtr mesh);
@@ -141,7 +141,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class HERMES_API ConstantSolution : public ExactSolutionScalar<Scalar>
+    class HERMES_API ConstantSolution : public ExactSolutionScalar < Scalar >
     {
     public:
       ConstantSolution(MeshSharedPtr mesh, Scalar constant);
@@ -165,7 +165,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class HERMES_API ZeroSolution : public ExactSolutionScalar<Scalar>
+    class HERMES_API ZeroSolution : public ExactSolutionScalar < Scalar >
     {
     public:
       ZeroSolution(MeshSharedPtr mesh);
@@ -180,7 +180,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class HERMES_API ConstantSolutionVector : public ExactSolutionVector<Scalar>
+    class HERMES_API ConstantSolutionVector : public ExactSolutionVector < Scalar >
     {
     public:
       ConstantSolutionVector(MeshSharedPtr mesh, Scalar constantX, Scalar constantY);
@@ -204,7 +204,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class HERMES_API ZeroSolutionVector : public ExactSolutionVector<Scalar>
+    class HERMES_API ZeroSolutionVector : public ExactSolutionVector < Scalar >
     {
     public:
       ZeroSolutionVector(MeshSharedPtr mesh);
@@ -219,7 +219,7 @@ namespace Hermes
     };
 
     /// Eggshell function.
-    class HERMES_API ExactSolutionEggShell : public ExactSolutionScalar<double>
+    class HERMES_API ExactSolutionEggShell : public ExactSolutionScalar < double >
     {
     public:
       /// \param[in] polynomialOrder The polynomial order used for the space where the solution of the
@@ -242,7 +242,7 @@ namespace Hermes
 
     /// Function operating on previous nonlinear solutions in assembling (u_ext)
     template<typename Scalar>
-    class HERMES_API UExtFunction : public Function<Scalar>
+    class HERMES_API UExtFunction : public Function < Scalar >
     {
     public:
       /// \param[in] polynomialOrder The polynomial order used for the space where the solution of the
@@ -260,7 +260,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class HERMES_API UExtFunctionSharedPtr : public std::tr1::shared_ptr<UExtFunction<Scalar> >
+    class HERMES_API UExtFunctionSharedPtr : public std::tr1::shared_ptr < UExtFunction<Scalar> >
     {
     public:
       UExtFunctionSharedPtr(UExtFunction<Scalar>* ptr = nullptr);

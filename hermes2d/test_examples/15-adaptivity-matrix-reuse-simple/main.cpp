@@ -21,7 +21,7 @@ const double VOLUME_HEAT_SRC = 5;
 const double FIXED_BDY_TEMP = 20;
 
 /// Custom selector, selects the appropriate elements
-class CustomSelector : public Selector<double>
+class CustomSelector : public Selector < double >
 {
 public:
   /// Constructor.
@@ -36,12 +36,12 @@ public:
   virtual bool select_refinement(Element* element, int quad_order, MeshFunction<double>* rsln, ElementToRefine& refinement)
   {
     for (unsigned short i = 0; i < this->element_ids.size(); i++)
-    if (element->id == this->element_ids[i])
-    {
+      if (element->id == this->element_ids[i])
+      {
       refinement.split = H2D_REFINEMENT_H;
       refinement.refinement_polynomial_order[0] = refinement.refinement_polynomial_order[1] = refinement.refinement_polynomial_order[2] = refinement.refinement_polynomial_order[3] = P_INIT;
       return true;
-    }
+      }
     return false;
   }
 

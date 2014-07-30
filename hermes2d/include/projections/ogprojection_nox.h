@@ -107,7 +107,7 @@ namespace Hermes
         double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Jacobian matrix (same as stiffness matrix since projections are linear).
-      class ProjectionMatrixFormVol : public MatrixFormVol<Scalar>
+      class ProjectionMatrixFormVol : public MatrixFormVol < Scalar >
       {
       public:
         ProjectionMatrixFormVol(int i, int j, NormType norm_type) : MatrixFormVol<Scalar>(i, j)
@@ -221,7 +221,7 @@ namespace Hermes
       };
 
       /// Residual.
-      class ProjectionVectorFormVol : public VectorFormVol<Scalar>
+      class ProjectionVectorFormVol : public VectorFormVol < Scalar >
       {
       public:
         ProjectionVectorFormVol(int i, NormType norm_type) : VectorFormVol<Scalar>(i)

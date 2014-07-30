@@ -41,22 +41,22 @@ namespace Hermes
       return dynamic_cast<Hermes::Hermes2D::Solution<Scalar>*>(this->get());
     }
 
-    template class HERMES_API MeshFunctionSharedPtr<double>;
-    template class HERMES_API MeshFunctionSharedPtr<std::complex<double> >;
+    template class HERMES_API MeshFunctionSharedPtr < double > ;
+    template class HERMES_API MeshFunctionSharedPtr < std::complex<double> > ;
 
     template<typename Scalar>
     MeshFunction<Scalar>::MeshFunction()
       : Function<Scalar>()
     {
-        this->element = nullptr;
-      }
+      this->element = nullptr;
+    }
 
     template<typename Scalar>
     MeshFunction<Scalar>::MeshFunction(MeshSharedPtr mesh) :
       Function<Scalar>()
     {
-        this->mesh = mesh;
-      }
+      this->mesh = mesh;
+    }
 
     template<typename Scalar>
     MeshFunction<Scalar>::~MeshFunction()
@@ -283,7 +283,7 @@ namespace Hermes
       refmap.force_transform(this->sub_idx, this->ctm);
     }
 
-    template class HERMES_API MeshFunction<double>;
-    template class HERMES_API MeshFunction<std::complex<double> >;
+    template class HERMES_API MeshFunction < double > ;
+    template class HERMES_API MeshFunction < std::complex<double> > ;
   }
 }

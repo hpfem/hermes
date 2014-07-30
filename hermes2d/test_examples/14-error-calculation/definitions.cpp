@@ -46,7 +46,7 @@ double CustomNormFormDG::value(int n, double *wt, DiscontinuousFunc<double> *u, 
 }
 
 CustomExactSolutionScalar::CustomExactSolutionScalar(MeshSharedPtr mesh)
-: ExactSolutionScalar<double>(mesh)
+  : ExactSolutionScalar<double>(mesh)
 {
 }
 

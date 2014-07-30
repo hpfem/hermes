@@ -121,7 +121,7 @@ namespace Hermes
 
       /// Calculates the area of the element.
       /// \param[in] precise_for_curvature If curved elements should be evaluated exactly. \
-                                    /// This takes much longer.
+                                          /// This takes much longer.
       void calc_area(bool precise_for_curvature = false);
 
       /// Calculates the diameter.

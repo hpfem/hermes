@@ -62,7 +62,7 @@ namespace Hermes
     ///&nbsp;return -1;<br>
     /// }<br>
     template <typename Scalar>
-    class LinearSolver : public Solver<Scalar>, public Hermes::Solvers::MatrixSolver<Scalar>
+    class LinearSolver : public Solver<Scalar>, public Hermes::Solvers::MatrixSolver < Scalar >
     {
     public:
       LinearSolver(bool force_use_direct_solver = false);

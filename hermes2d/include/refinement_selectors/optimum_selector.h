@@ -31,7 +31,7 @@ namespace Hermes
       /** This is a base class for all selectors that chooses an candidate based on some
       *  evaluated criteria. Currently, the criteria is based on an error change per DOF. */
       template<typename Scalar>
-      class HERMES_API OptimumSelector : public Selector<Scalar>
+      class HERMES_API OptimumSelector : public Selector < Scalar >
       {
       public:
         /// Destructor.

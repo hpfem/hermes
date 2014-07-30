@@ -30,7 +30,7 @@ namespace Hermes
       *  it is suggested to create the instance outside the adaptivity
       *  loop. */
       template<typename Scalar>
-      class HERMES_API H1ProjBasedSelector : public ProjBasedSelector<Scalar> {
+      class HERMES_API H1ProjBasedSelector : public ProjBasedSelector < Scalar > {
       public: //API
         /// Constructor.
         /** \param[in] cand_list A predefined list of candidates.

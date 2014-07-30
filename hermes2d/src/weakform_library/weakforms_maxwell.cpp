@@ -32,12 +32,12 @@ namespace Hermes
         spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
-          this->set_area(area);
-          this->setSymFlag(sym);
+        this->set_area(area);
+        this->setSymFlag(sym);
 
-          // If spline is nullptr, initialize it to be constant 1.0.
-          if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
-        }
+        // If spline is nullptr, initialize it to be constant 1.0.
+        if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+      }
       template<typename Scalar>
       DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, std::vector<std::string> areas,
         Scalar const_coeff,
@@ -49,12 +49,12 @@ namespace Hermes
         spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
-          this->set_areas(areas);
-          this->setSymFlag(sym);
+        this->set_areas(areas);
+        this->setSymFlag(sym);
 
-          // If spline is nullptr, initialize it to be constant 1.0.
-          if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
-        }
+        // If spline is nullptr, initialize it to be constant 1.0.
+        if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+      }
 
       template<typename Scalar>
       Scalar DefaultJacobianMagnetostatics<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
@@ -135,10 +135,10 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline),
         gt(gt), order_increase(order_increase)
       {
-          this->set_area(area);
-          // If spline is nullptr, initialize it to be constant 1.0.
-          if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
-        }
+        this->set_area(area);
+        // If spline is nullptr, initialize it to be constant 1.0.
+        if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+      }
 
       template<typename Scalar>
       DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, std::vector<std::string> areas, Scalar const_coeff,
@@ -147,11 +147,11 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
-          this->set_areas(areas);
+        this->set_areas(areas);
 
-          // If spline is nullptr, initialize it to be constant 1.0.
-          if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
-        }
+        // If spline is nullptr, initialize it to be constant 1.0.
+        if (c_spline == nullptr) this->spline_coeff = new CubicSpline(1.0);
+      }
 
       template<typename Scalar>
       Scalar DefaultResidualMagnetostatics<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
@@ -193,8 +193,8 @@ namespace Hermes
         return new DefaultResidualMagnetostatics(*this);
       }
 
-      template class HERMES_API DefaultJacobianMagnetostatics<double>;
-      template class HERMES_API DefaultResidualMagnetostatics<double>;
+      template class HERMES_API DefaultJacobianMagnetostatics < double > ;
+      template class HERMES_API DefaultResidualMagnetostatics < double > ;
     }
   }
 }

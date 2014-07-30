@@ -374,194 +374,194 @@ namespace Hermes
       {
       case EXPORT_FORMAT_MATRIX_MARKET:
       {
-                                        FILE* file = fopen(filename, "w");
-                                        if (!file)
-                                          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
-                                        if (Hermes::Helpers::TypeIsReal<Scalar>::value)
-                                          fprintf(file, "%%%%MatrixMarket matrix coordinate real general\n");
-                                        else
-                                          fprintf(file, "%%%%MatrixMarket matrix coordinate complex general\n");
+        FILE* file = fopen(filename, "w");
+        if (!file)
+          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+        if (Hermes::Helpers::TypeIsReal<Scalar>::value)
+          fprintf(file, "%%%%MatrixMarket matrix coordinate real general\n");
+        else
+          fprintf(file, "%%%%MatrixMarket matrix coordinate complex general\n");
 
-                                        fprintf(file, "%d %d %d\n", this->size, this->size, this->nnz);
+        fprintf(file, "%d %d %d\n", this->size, this->size, this->nnz);
 
-                                        if (invert_storage)
-                                          this->switch_orientation();
-                                        for (unsigned int j = 0; j < this->size; j++)
-                                        {
-                                          for (int i = Ap[j]; i < Ap[j + 1]; i++)
-                                          {
-                                            Hermes::Helpers::fprint_coordinate_num(file, i_coordinate(Ai[i] + 1, j + 1, invert_storage), j_coordinate(Ai[i] + 1, j + 1, invert_storage), Ax[i], number_format);
-                                            fprintf(file, "\n");
-                                          }
-                                        }
-                                        if (invert_storage)
-                                          this->switch_orientation();
+        if (invert_storage)
+          this->switch_orientation();
+        for (unsigned int j = 0; j < this->size; j++)
+        {
+          for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          {
+            Hermes::Helpers::fprint_coordinate_num(file, i_coordinate(Ai[i] + 1, j + 1, invert_storage), j_coordinate(Ai[i] + 1, j + 1, invert_storage), Ax[i], number_format);
+            fprintf(file, "\n");
+          }
+        }
+        if (invert_storage)
+          this->switch_orientation();
 
-                                        fclose(file);
+        fclose(file);
       }
         break;
 
       case EXPORT_FORMAT_MATLAB_MATIO:
       {
 #ifdef WITH_MATIO
-                                       mat_sparse_t sparse;
-                                       sparse.nzmax = this->nnz;
-                                       if (invert_storage)
-                                         this->switch_orientation();
+        mat_sparse_t sparse;
+        sparse.nzmax = this->nnz;
+        if (invert_storage)
+          this->switch_orientation();
 
-                                       sparse.nir = this->nnz;
-                                       sparse.ir = Ai;
-                                       sparse.njc = this->size + 1;
-                                       sparse.jc = Ap;
-                                       sparse.ndata = this->nnz;
+        sparse.nir = this->nnz;
+        sparse.ir = Ai;
+        sparse.njc = this->size + 1;
+        sparse.jc = Ap;
+        sparse.ndata = this->nnz;
 
-                                       size_t dims[2];
-                                       dims[0] = this->size;
-                                       dims[1] = this->size;
+        size_t dims[2];
+        dims[0] = this->size;
+        dims[1] = this->size;
 
-                                       mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
+        mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
 
-                                       matvar_t *matvar;
+        matvar_t *matvar;
 
-                                       // For complex. No allocation here.
-                                       double* Ax_re = nullptr;
-                                       double* Ax_im = nullptr;
+        // For complex. No allocation here.
+        double* Ax_re = nullptr;
+        double* Ax_im = nullptr;
 
-                                       // For real.
-                                       if (Hermes::Helpers::TypeIsReal<Scalar>::value)
-                                       {
-                                         sparse.data = Ax;
-                                         matvar = Mat_VarCreate(var_name, MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
-                                       }
-                                       else
-                                       {
-                                         // For complex.
-                                         Ax_re = malloc_with_check<CSMatrix<Scalar>, double>(this->nnz, this);
-                                         Ax_im = malloc_with_check<CSMatrix<Scalar>, double>(this->nnz, this);
-                                         struct mat_complex_split_t z = { Ax_re, Ax_im };
+        // For real.
+        if (Hermes::Helpers::TypeIsReal<Scalar>::value)
+        {
+          sparse.data = Ax;
+          matvar = Mat_VarCreate(var_name, MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
+        }
+        else
+        {
+          // For complex.
+          Ax_re = malloc_with_check<CSMatrix<Scalar>, double>(this->nnz, this);
+          Ax_im = malloc_with_check<CSMatrix<Scalar>, double>(this->nnz, this);
+          struct mat_complex_split_t z = { Ax_re, Ax_im };
 
-                                         for (int i = 0; i < this->nnz; i++)
-                                         {
-                                           Ax_re[i] = ((std::complex<double>)(this->Ax[i])).real();
-                                           Ax_im[i] = ((std::complex<double>)(this->Ax[i])).imag();
-                                           sparse.data = &z;
-                                         }
-                                         matvar = Mat_VarCreate(var_name, MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
-                                       }
+          for (int i = 0; i < this->nnz; i++)
+          {
+            Ax_re[i] = ((std::complex<double>)(this->Ax[i])).real();
+            Ax_im[i] = ((std::complex<double>)(this->Ax[i])).imag();
+            sparse.data = &z;
+          }
+          matvar = Mat_VarCreate(var_name, MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
+        }
 
-                                       if (matvar)
-                                       {
-                                         Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
-                                         Mat_VarFree(matvar);
-                                       }
-                                       if (invert_storage)
-                                         this->switch_orientation();
-                                       free_with_check(Ax_re);
-                                       free_with_check(Ax_im);
-                                       Mat_Close(mat);
+        if (matvar)
+        {
+          Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+          Mat_VarFree(matvar);
+        }
+        if (invert_storage)
+          this->switch_orientation();
+        free_with_check(Ax_re);
+        free_with_check(Ax_im);
+        Mat_Close(mat);
 
-                                       if (!matvar)
-                                         throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+        if (!matvar)
+          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
 #endif
       }
         break;
 
       case EXPORT_FORMAT_PLAIN_ASCII:
       {
-                                      FILE* file = fopen(filename, "w");
-                                      if (!file)
-                                        throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+        FILE* file = fopen(filename, "w");
+        if (!file)
+          throw Exceptions::IOException(Exceptions::IOException::Write, filename);
 
-                                      if (invert_storage)
-                                        this->switch_orientation();
-                                      for (unsigned int j = 0; j < this->size; j++)
-                                      {
-                                        for (int i = Ap[j]; i < Ap[j + 1]; i++)
-                                        {
-                                          Helpers::fprint_coordinate_num(file, i_coordinate(Ai[i], j, invert_storage), j_coordinate(Ai[i], j, invert_storage), Ax[i], number_format);
-                                          fprintf(file, "\n");
-                                        }
-                                      }
-                                      if (invert_storage)
-                                        this->switch_orientation();
+        if (invert_storage)
+          this->switch_orientation();
+        for (unsigned int j = 0; j < this->size; j++)
+        {
+          for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          {
+            Helpers::fprint_coordinate_num(file, i_coordinate(Ai[i], j, invert_storage), j_coordinate(Ai[i], j, invert_storage), Ax[i], number_format);
+            fprintf(file, "\n");
+          }
+        }
+        if (invert_storage)
+          this->switch_orientation();
 
-                                      fclose(file);
+        fclose(file);
       }
         break;
 
       case EXPORT_FORMAT_MATLAB_SIMPLE:
       {
-                                        FILE* file = fopen(filename, "w");
-                                        if (invert_storage)
-                                          this->switch_orientation();
-                                        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n",
-                                          this->size, this->size, nnz, nnz);
-                                        for (unsigned int j = 0; j < this->size; j++)
-                                        for (int i = Ap[j]; i < Ap[j + 1]; i++)
-                                        {
-                                          fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-                                          Hermes::Helpers::fprint_num(file, Ax[i], number_format);
-                                          fprintf(file, "\n");
-                                        }
-                                        fprintf(file, "];\n");
-                                        if (invert_storage)
-                                          this->switch_orientation();
-                                        fclose(file);
+        FILE* file = fopen(filename, "w");
+        if (invert_storage)
+          this->switch_orientation();
+        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n",
+          this->size, this->size, nnz, nnz);
+        for (unsigned int j = 0; j < this->size; j++)
+          for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          {
+          fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
+          Hermes::Helpers::fprint_num(file, Ax[i], number_format);
+          fprintf(file, "\n");
+          }
+        fprintf(file, "];\n");
+        if (invert_storage)
+          this->switch_orientation();
+        fclose(file);
       }
         break;
 #ifdef WITH_BSON
       case EXPORT_FORMAT_BSON:
       {
-                               // Init bson
-                               bson bw;
-                               bson_init(&bw);
+        // Init bson
+        bson bw;
+        bson_init(&bw);
 
-                               // Matrix size.
-                               bson_append_int(&bw, "size", this->size);
-                               // Nonzeros.
-                               bson_append_int(&bw, "nnz", this->nnz);
+        // Matrix size.
+        bson_append_int(&bw, "size", this->size);
+        // Nonzeros.
+        bson_append_int(&bw, "nnz", this->nnz);
 
-                               if (invert_storage)
-                                 this->switch_orientation();
+        if (invert_storage)
+          this->switch_orientation();
 
-                               bson_append_start_array(&bw, "Ap");
-                               for (unsigned int i = 0; i < this->size; i++)
-                                 bson_append_int(&bw, "p", this->Ap[i]);
-                               bson_append_finish_array(&bw);
+        bson_append_start_array(&bw, "Ap");
+        for (unsigned int i = 0; i < this->size; i++)
+          bson_append_int(&bw, "p", this->Ap[i]);
+        bson_append_finish_array(&bw);
 
-                               bson_append_start_array(&bw, "Ai");
-                               for (unsigned int i = 0; i < this->nnz; i++)
-                                 bson_append_int(&bw, "i", this->Ai[i]);
-                               bson_append_finish_array(&bw);
+        bson_append_start_array(&bw, "Ai");
+        for (unsigned int i = 0; i < this->nnz; i++)
+          bson_append_int(&bw, "i", this->Ai[i]);
+        bson_append_finish_array(&bw);
 
-                               bson_append_start_array(&bw, "Ax");
-                               for (unsigned int i = 0; i < this->nnz; i++)
-                                 bson_append_double(&bw, "x", real(this->Ax[i]));
-                               bson_append_finish_array(&bw);
+        bson_append_start_array(&bw, "Ax");
+        for (unsigned int i = 0; i < this->nnz; i++)
+          bson_append_double(&bw, "x", real(this->Ax[i]));
+        bson_append_finish_array(&bw);
 
-                               if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
-                               {
-                                 bson_append_start_array(&bw, "Ax-imag");
-                                 for (unsigned int i = 0; i < this->nnz; i++)
-                                   bson_append_double(&bw, "x-i", imag(this->Ax[i]));
-                                 bson_append_finish_array(&bw);
-                               }
-                               bson_append_finish_array(&bw);
+        if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+        {
+          bson_append_start_array(&bw, "Ax-imag");
+          for (unsigned int i = 0; i < this->nnz; i++)
+            bson_append_double(&bw, "x-i", imag(this->Ax[i]));
+          bson_append_finish_array(&bw);
+        }
+        bson_append_finish_array(&bw);
 
-                               if (invert_storage)
-                                 this->switch_orientation();
+        if (invert_storage)
+          this->switch_orientation();
 
-                               // Done.
-                               bson_finish(&bw);
+        // Done.
+        bson_finish(&bw);
 
-                               // Write to disk.
-                               FILE *fpw;
-                               fpw = fopen(filename, "wb");
-                               const char *dataw = (const char *)bson_data(&bw);
-                               fwrite(dataw, bson_size(&bw), 1, fpw);
-                               fclose(fpw);
+        // Write to disk.
+        FILE *fpw;
+        fpw = fopen(filename, "wb");
+        const char *dataw = (const char *)bson_data(&bw);
+        fwrite(dataw, bson_size(&bw), 1, fpw);
+        fclose(fpw);
 
-                               bson_destroy(&bw);
+        bson_destroy(&bw);
       }
         break;
 #endif
@@ -593,55 +593,55 @@ namespace Hermes
       case EXPORT_FORMAT_MATLAB_MATIO:
       {
 #ifdef WITH_MATIO
-                                       mat_t    *matfp;
-                                       matvar_t *matvar;
+        mat_t    *matfp;
+        matvar_t *matvar;
 
-                                       matfp = Mat_Open(filename, MAT_ACC_RDONLY);
+        matfp = Mat_Open(filename, MAT_ACC_RDONLY);
 
-                                       if (!matfp)
-                                         throw Exceptions::IOException(Exceptions::IOException::Read, filename);
+        if (!matfp)
+          throw Exceptions::IOException(Exceptions::IOException::Read, filename);
 
-                                       matvar = Mat_VarRead(matfp, var_name);
+        matvar = Mat_VarRead(matfp, var_name);
 
-                                       if (matvar)
-                                       {
-                                         mat_sparse_t *sparse = (mat_sparse_t *)matvar->data;
+        if (matvar)
+        {
+          mat_sparse_t *sparse = (mat_sparse_t *)matvar->data;
 
-                                         this->nnz = sparse->nir;
-                                         this->Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(this->nnz, this);
-                                         this->Ai = malloc_with_check<CSMatrix<Scalar>, int>(this->nnz, this);
-                                         this->size = sparse->njc;
-                                         this->Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
+          this->nnz = sparse->nir;
+          this->Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(this->nnz, this);
+          this->Ai = malloc_with_check<CSMatrix<Scalar>, int>(this->nnz, this);
+          this->size = sparse->njc;
+          this->Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
 
-                                         void* data = nullptr;
-                                         if (Hermes::Helpers::TypeIsReal<Scalar>::value)
-                                           data = sparse->data;
-                                         else
-                                         {
-                                           std::complex<double>* complex_data = malloc_with_check<CSMatrix<Scalar>, std::complex<double> >(this->nnz, this);
-                                           double* real_array = (double*)((mat_complex_split_t*)sparse->data)->Re;
-                                           double* imag_array = (double*)((mat_complex_split_t*)sparse->data)->Im;
-                                           for (int i = 0; i < this->nnz; i++)
-                                             complex_data[i] = std::complex<double>(real_array[i], imag_array[i]);
-                                           data = (void*)complex_data;
-                                         }
-                                         memcpy(this->Ax, data, this->nnz * sizeof(Scalar));
-                                         if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
-                                           free_with_check(data);
-                                         memcpy(this->Ap, sparse->jc, this->size * sizeof(int));
-                                         this->Ap[this->size] = this->nnz;
-                                         memcpy(this->Ai, sparse->ir, this->nnz * sizeof(int));
+          void* data = nullptr;
+          if (Hermes::Helpers::TypeIsReal<Scalar>::value)
+            data = sparse->data;
+          else
+          {
+            std::complex<double>* complex_data = malloc_with_check<CSMatrix<Scalar>, std::complex<double> >(this->nnz, this);
+            double* real_array = (double*)((mat_complex_split_t*)sparse->data)->Re;
+            double* imag_array = (double*)((mat_complex_split_t*)sparse->data)->Im;
+            for (int i = 0; i < this->nnz; i++)
+              complex_data[i] = std::complex<double>(real_array[i], imag_array[i]);
+            data = (void*)complex_data;
+          }
+          memcpy(this->Ax, data, this->nnz * sizeof(Scalar));
+          if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+            free_with_check(data);
+          memcpy(this->Ap, sparse->jc, this->size * sizeof(int));
+          this->Ap[this->size] = this->nnz;
+          memcpy(this->Ai, sparse->ir, this->nnz * sizeof(int));
 
-                                         if (invert_storage)
-                                           this->switch_orientation();
-                                       }
+          if (invert_storage)
+            this->switch_orientation();
+        }
 
-                                       Mat_Close(matfp);
+        Mat_Close(matfp);
 
-                                       if (!matvar)
-                                         throw Exceptions::IOException(Exceptions::IOException::Read, filename);
+        if (!matvar)
+          throw Exceptions::IOException(Exceptions::IOException::Read, filename);
 #else
-                                       throw Exceptions::Exception("MATIO not included.");
+        throw Exceptions::Exception("MATIO not included.");
 #endif
       }
         break;
@@ -652,72 +652,72 @@ namespace Hermes
 #ifdef WITH_BSON
       case EXPORT_FORMAT_BSON:
       {
-                               FILE *fpr;
-                               fpr = fopen(filename, "rb");
+        FILE *fpr;
+        fpr = fopen(filename, "rb");
 
-                               // file size:
-                               fseek(fpr, 0, SEEK_END);
-                               int size = ftell(fpr);
-                               rewind(fpr);
+        // file size:
+        fseek(fpr, 0, SEEK_END);
+        int size = ftell(fpr);
+        rewind(fpr);
 
-                               // allocate memory to contain the whole file:
-                               char *datar = malloc_with_check<char>(size);
-                               fread(datar, size, 1, fpr);
-                               fclose(fpr);
+        // allocate memory to contain the whole file:
+        char *datar = malloc_with_check<char>(size);
+        fread(datar, size, 1, fpr);
+        fclose(fpr);
 
-                               bson br;
-                               bson_init_finished_data(&br, datar, 0);
+        bson br;
+        bson_init_finished_data(&br, datar, 0);
 
-                               bson_iterator it;
-                               bson sub;
-                               bson_find(&it, &br, "size");
-                               this->size = bson_iterator_int(&it);
-                               bson_find(&it, &br, "nnz");
-                               this->nnz = bson_iterator_int(&it);
+        bson_iterator it;
+        bson sub;
+        bson_find(&it, &br, "size");
+        this->size = bson_iterator_int(&it);
+        bson_find(&it, &br, "nnz");
+        this->nnz = bson_iterator_int(&it);
 
-                               this->Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
-                               this->Ai = malloc_with_check<CSMatrix<Scalar>, int>(nnz, this);
-                               this->Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(nnz, this);
+        this->Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
+        this->Ai = malloc_with_check<CSMatrix<Scalar>, int>(nnz, this);
+        this->Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(nnz, this);
 
-                               // coeffs
-                               bson_iterator it_coeffs;
-                               bson_find(&it_coeffs, &br, "Ap");
-                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
-                               bson_iterator_init(&it, &sub);
-                               int index_coeff = 0;
-                               while (bson_iterator_next(&it))
-                                 this->Ap[index_coeff++] = bson_iterator_int(&it);
-                               this->Ap[this->size] = this->nnz;
+        // coeffs
+        bson_iterator it_coeffs;
+        bson_find(&it_coeffs, &br, "Ap");
+        bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        int index_coeff = 0;
+        while (bson_iterator_next(&it))
+          this->Ap[index_coeff++] = bson_iterator_int(&it);
+        this->Ap[this->size] = this->nnz;
 
-                               bson_find(&it_coeffs, &br, "Ai");
-                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
-                               bson_iterator_init(&it, &sub);
-                               index_coeff = 0;
-                               while (bson_iterator_next(&it))
-                                 this->Ai[index_coeff++] = bson_iterator_int(&it);
+        bson_find(&it_coeffs, &br, "Ai");
+        bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        index_coeff = 0;
+        while (bson_iterator_next(&it))
+          this->Ai[index_coeff++] = bson_iterator_int(&it);
 
-                               bson_find(&it_coeffs, &br, "Ax");
-                               bson_iterator_subobject_init(&it_coeffs, &sub, 0);
-                               bson_iterator_init(&it, &sub);
-                               index_coeff = 0;
-                               while (bson_iterator_next(&it))
-                                 this->Ax[index_coeff++] = bson_iterator_double(&it);
+        bson_find(&it_coeffs, &br, "Ax");
+        bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        index_coeff = 0;
+        while (bson_iterator_next(&it))
+          this->Ax[index_coeff++] = bson_iterator_double(&it);
 
-                               if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
-                               {
-                                 bson_find(&it_coeffs, &br, "Ax-imag");
-                                 bson_iterator_subobject_init(&it_coeffs, &sub, 0);
-                                 bson_iterator_init(&it, &sub);
-                                 index_coeff = 0;
-                                 while (bson_iterator_next(&it))
-                                   ((std::complex<double>)this->Ax[index_coeff++]).imag(bson_iterator_double(&it));
-                               }
+        if (!Hermes::Helpers::TypeIsReal<Scalar>::value)
+        {
+          bson_find(&it_coeffs, &br, "Ax-imag");
+          bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+          bson_iterator_init(&it, &sub);
+          index_coeff = 0;
+          while (bson_iterator_next(&it))
+            ((std::complex<double>)this->Ax[index_coeff++]).imag(bson_iterator_double(&it));
+        }
 
-                               if (invert_storage)
-                                 this->switch_orientation();
+        if (invert_storage)
+          this->switch_orientation();
 
-                               bson_destroy(&br);
-                               free_with_check(datar);
+        bson_destroy(&br);
+        free_with_check(datar);
       }
 #endif
         break;
@@ -807,11 +807,11 @@ namespace Hermes
   }
 }
 
-template class HERMES_API Hermes::Algebra::CSMatrix<double>;
-template class HERMES_API Hermes::Algebra::CSMatrix<std::complex<double> >;
+template class HERMES_API Hermes::Algebra::CSMatrix < double > ;
+template class HERMES_API Hermes::Algebra::CSMatrix < std::complex<double> > ;
 
-template class HERMES_API Hermes::Algebra::CSCMatrix<double>;
-template class HERMES_API Hermes::Algebra::CSCMatrix<std::complex<double> >;
+template class HERMES_API Hermes::Algebra::CSCMatrix < double > ;
+template class HERMES_API Hermes::Algebra::CSCMatrix < std::complex<double> > ;
 
-template class HERMES_API Hermes::Algebra::CSRMatrix<double>;
-template class HERMES_API Hermes::Algebra::CSRMatrix<std::complex<double> >;
+template class HERMES_API Hermes::Algebra::CSRMatrix < double > ;
+template class HERMES_API Hermes::Algebra::CSRMatrix < std::complex<double> > ;

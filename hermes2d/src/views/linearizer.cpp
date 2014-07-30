@@ -103,8 +103,8 @@ namespace Hermes
       void LinearizerMultidimensional<LinearizerDataDimensions>::check_data(MeshFunctionSharedPtr<double>* sln)
       {
         for (int k = 0; k < LinearizerDataDimensions::dimension; k++)
-        if (!sln[k])
-          throw Exceptions::Exception("Linearizer: too few solutions, probably wrong template argument.");
+          if (!sln[k])
+            throw Exceptions::Exception("Linearizer: too few solutions, probably wrong template argument.");
       }
 
       template<typename LinearizerDataDimensions>
@@ -759,15 +759,15 @@ namespace Hermes
         return count;
       }
 
-      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >;
-      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t>;
-      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t>;
-      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>;
+      template class HERMES_API LinearizerMultidimensional < ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> > ;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator < ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t > ;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator < ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t > ;
+      template class HERMES_API LinearizerMultidimensional<ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator < ScalarLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t > ;
 
-      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >;
-      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t>;
-      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t>;
-      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE > >::Iterator<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t>;
+      template class HERMES_API LinearizerMultidimensional < VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> > ;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator < VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::triangle_t > ;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE> >::Iterator < VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::vertex_t > ;
+      template class HERMES_API LinearizerMultidimensional<VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE > >::Iterator < VectorLinearizerDataDimensions<LINEARIZER_DATA_TYPE>::edge_t > ;
     }
   }
 }

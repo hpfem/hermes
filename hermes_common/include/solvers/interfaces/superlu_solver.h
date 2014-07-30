@@ -74,7 +74,7 @@ namespace Hermes
 
     /** Type for storing number in SuperLU real structures */
     template<>
-    struct SuperLuType<double>
+    struct SuperLuType < double >
     {
       /** Type for storing scalar number in SuperLU real structures */
       typedef double Scalar;
@@ -82,7 +82,7 @@ namespace Hermes
 
     /** Type for storing number in SuperLU complex structures */
     template<>
-    struct SuperLuType<std::complex<double> >
+    struct SuperLuType < std::complex<double> >
     {
       /** Type for storing scalar number in SuperLU complex structures */
       typedef struct { double r, i; } Scalar;
@@ -98,7 +98,7 @@ namespace Hermes
     /// Encapsulation of SUPERLU linear solver.
     ///
     template <typename Scalar>
-    class HERMES_API SuperLUSolver : public DirectSolver<Scalar>
+    class HERMES_API SuperLUSolver : public DirectSolver < Scalar >
     {
     public:
       /// Constructor of SuperLU solver.

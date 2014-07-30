@@ -25,11 +25,11 @@ namespace Hermes
       POnlySelector<Scalar>::POnlySelector(int max_order, int order_h_inc, int order_v_inc)
         : Selector<Scalar>(max_order), order_h_inc(order_h_inc), order_v_inc(order_v_inc)
       {
-          if (order_h_inc < 0)
-            throw Hermes::Exceptions::ValueException("horizontal increase", order_h_inc, 0);
-          if (order_v_inc < 0)
-            throw Hermes::Exceptions::ValueException("vertical increase", order_v_inc, 0);
-        }
+        if (order_h_inc < 0)
+          throw Hermes::Exceptions::ValueException("horizontal increase", order_h_inc, 0);
+        if (order_v_inc < 0)
+          throw Hermes::Exceptions::ValueException("vertical increase", order_v_inc, 0);
+      }
 
       template<typename Scalar>
       bool POnlySelector<Scalar>::select_refinement(Element* element, int order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement)
@@ -57,12 +57,12 @@ namespace Hermes
           return false;
       }
 
-      template class HERMES_API Selector<double>;
-      template class HERMES_API Selector<std::complex<double> >;
-      template class HERMES_API HOnlySelector<double>;
-      template class HERMES_API HOnlySelector<std::complex<double> >;
-      template class HERMES_API POnlySelector<double>;
-      template class HERMES_API POnlySelector<std::complex<double> >;
+      template class HERMES_API Selector < double > ;
+      template class HERMES_API Selector < std::complex<double> > ;
+      template class HERMES_API HOnlySelector < double > ;
+      template class HERMES_API HOnlySelector < std::complex<double> > ;
+      template class HERMES_API POnlySelector < double > ;
+      template class HERMES_API POnlySelector < std::complex<double> > ;
     }
   }
 }

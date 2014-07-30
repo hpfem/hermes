@@ -123,14 +123,14 @@ namespace Hermes
       VertexBasedLimiter::VertexBasedLimiter(SpaceSharedPtr<double> space, double* solution_vector, int maximum_polynomial_order)
         : Limiter<double>(space, solution_vector)
       {
-          this->init(maximum_polynomial_order);
-        }
+        this->init(maximum_polynomial_order);
+      }
 
       VertexBasedLimiter::VertexBasedLimiter(std::vector<SpaceSharedPtr<double> > spaces, double* solution_vector, int maximum_polynomial_order)
         : Limiter<double>(spaces, solution_vector)
       {
-          this->init(maximum_polynomial_order);
-        }
+        this->init(maximum_polynomial_order);
+      }
 
       void VertexBasedLimiter::set_p_coarsening_only()
       {
@@ -282,18 +282,18 @@ namespace Hermes
               std::cout << "\tcenter_value";
           }
           else
-          if (vertex_value > centroid_value_multiplied)
-          {
+            if (vertex_value > centroid_value_multiplied)
+            {
             fraction = std::min(1., (this->vertex_max_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
             if (this->get_verbose_output())
               std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][0];
-          }
-          else
-          {
-            fraction = std::min(1., (this->vertex_min_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-            if (this->get_verbose_output())
-              std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][0];
-          }
+            }
+            else
+            {
+              fraction = std::min(1., (this->vertex_min_values[component][vertex->id][0] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+              if (this->get_verbose_output())
+                std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][0];
+            }
 
           correction_factor = std::min(correction_factor, fraction);
         }
@@ -360,18 +360,18 @@ namespace Hermes
               fraction = 1.;
             }
             else
-            if (vertex_value > centroid_value_multiplied)
-            {
+              if (vertex_value > centroid_value_multiplied)
+              {
               fraction = std::min(1., (this->vertex_max_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
               if (this->get_verbose_output())
                 std::cout << "\tmax_value: " << this->vertex_max_values[component][vertex->id][i_derivative];
-            }
-            else
-            {
-              fraction = std::min(1., (this->vertex_min_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
-              if (this->get_verbose_output())
-                std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][i_derivative];
-            }
+              }
+              else
+              {
+                fraction = std::min(1., (this->vertex_min_values[component][vertex->id][i_derivative] - centroid_value_multiplied) / (vertex_value - centroid_value_multiplied));
+                if (this->get_verbose_output())
+                  std::cout << "\tmin_value: " << this->vertex_min_values[component][vertex->id][i_derivative];
+              }
 
             correction_factor = std::min(correction_factor, fraction);
           }
@@ -726,11 +726,11 @@ namespace Hermes
             for (int i = 0; i < source_functions_size; i++)
             {
               if (current_state->e[i])
-              if (current_state->e[i]->used)
-              {
+                if (current_state->e[i]->used)
+                {
                 source_functions_cloned[i]->set_active_element(current_state->e[i]);
                 source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
-              }
+                }
             }
 
             refmap->set_active_element(current_state->rep);
@@ -904,11 +904,11 @@ namespace Hermes
             for (unsigned short i = 0; i < source_functions_size; i++)
             {
               if (current_state->e[i])
-              if (current_state->e[i]->used)
-              {
+                if (current_state->e[i]->used)
+                {
                 source_functions_cloned[i]->set_active_element(current_state->e[i]);
                 source_functions_cloned[i]->set_transform(current_state->sub_idx[i]);
-              }
+                }
             }
 
             refmap->set_active_element(current_state->rep);
@@ -1000,12 +1000,12 @@ namespace Hermes
         return result;
       }
 
-      template class HERMES_API Limiter<double>;
-      template class HERMES_API VolumetricIntegralCalculator<double>;
-      template class HERMES_API SurfaceIntegralCalculator<double>;
-      template class HERMES_API Limiter<std::complex<double> >;
-      template class HERMES_API VolumetricIntegralCalculator<std::complex<double> >;
-      template class HERMES_API SurfaceIntegralCalculator<std::complex<double> >;
+      template class HERMES_API Limiter < double > ;
+      template class HERMES_API VolumetricIntegralCalculator < double > ;
+      template class HERMES_API SurfaceIntegralCalculator < double > ;
+      template class HERMES_API Limiter < std::complex<double> > ;
+      template class HERMES_API VolumetricIntegralCalculator < std::complex<double> > ;
+      template class HERMES_API SurfaceIntegralCalculator < std::complex<double> > ;
     }
   }
 }

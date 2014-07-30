@@ -142,12 +142,12 @@ namespace Hermes
       {
         bool existing_ns = false;
         for (int j = i - 1; j >= 0; j--)
-        if (current_state->e[i] == current_state->e[j])
-        {
+          if (current_state->e[i] == current_state->e[j])
+          {
           neighbor_searches[i] = neighbor_searches[j];
           existing_ns = true;
           break;
-        }
+          }
         if (!existing_ns)
         {
           NeighborSearch<Scalar>* ns;
@@ -175,11 +175,11 @@ namespace Hermes
       {
         bool existing_ns = false;
         for (int j = i - 1; j >= 0; j--)
-        if (current_state->e[i] == current_state->e[j])
-        {
+          if (current_state->e[i] == current_state->e[j])
+          {
           existing_ns = true;
           break;
-        }
+          }
         if (!existing_ns)
           delete this->neighbor_searches[i];
       }
@@ -499,7 +499,7 @@ namespace Hermes
       (*norm) += norm_value;
     }
 
-    template HERMES_API class ErrorThreadCalculator<double>;
-    template HERMES_API class ErrorThreadCalculator<std::complex<double> >;
+    template HERMES_API class ErrorThreadCalculator < double > ;
+    template HERMES_API class ErrorThreadCalculator < std::complex<double> > ;
   }
 }

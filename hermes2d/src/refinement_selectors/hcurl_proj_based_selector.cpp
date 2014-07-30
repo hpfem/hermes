@@ -14,12 +14,12 @@ namespace Hermes
       HcurlProjBasedSelector<Scalar>::HcurlProjBasedSelector(CandList cand_list, int max_order, HcurlShapeset* user_shapeset)
         : ProjBasedSelector<Scalar>(cand_list, max_order, user_shapeset == nullptr ? new HcurlShapeset() : user_shapeset, Range(), Range(0, H2DRS_MAX_HCURL_ORDER))
       {
-          if (user_shapeset != nullptr)
-          {
-            this->warn("Warning: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
-            this->warn("Warning: The functionality for cloning user shapeset is to be implemented yet.");
-          }
+        if (user_shapeset != nullptr)
+        {
+          this->warn("Warning: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
+          this->warn("Warning: The functionality for cloning user shapeset is to be implemented yet.");
         }
+      }
 
       template<typename Scalar>
       HcurlProjBasedSelector<Scalar>::~HcurlProjBasedSelector()
@@ -326,8 +326,8 @@ namespace Hermes
         }
         return total_error_squared;
       }
-      template class HERMES_API HcurlProjBasedSelector<double>;
-      template class HERMES_API HcurlProjBasedSelector<std::complex<double> >;
+      template class HERMES_API HcurlProjBasedSelector < double > ;
+      template class HERMES_API HcurlProjBasedSelector < std::complex<double> > ;
     }
   }
 }

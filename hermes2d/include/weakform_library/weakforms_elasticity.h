@@ -33,7 +33,7 @@ namespace Hermes
       /* Single-component version -- to be used for multimesh assembling */
 
       template<typename Scalar>
-      class HERMES_API DefaultJacobianElasticity_0_0 : public MatrixFormVol<Scalar>
+      class HERMES_API DefaultJacobianElasticity_0_0 : public MatrixFormVol < Scalar >
       {
       public:
         DefaultJacobianElasticity_0_0(unsigned int i, unsigned int j, double lambda, double mu);
@@ -51,7 +51,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultJacobianElasticity_0_1 : public MatrixFormVol<Scalar>
+      class HERMES_API DefaultJacobianElasticity_0_1 : public MatrixFormVol < Scalar >
       {
       public:
         DefaultJacobianElasticity_0_1(unsigned int i, unsigned int j, double lambda, double mu);
@@ -69,7 +69,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualElasticity_0_0 : public VectorFormVol<Scalar>
+      class HERMES_API DefaultResidualElasticity_0_0 : public VectorFormVol < Scalar >
       {
       public:
         DefaultResidualElasticity_0_0(unsigned int i, double lambda, double mu);
@@ -87,7 +87,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualElasticity_0_1 : public VectorFormVol<Scalar>
+      class HERMES_API DefaultResidualElasticity_0_1 : public VectorFormVol < Scalar >
       {
       public:
         DefaultResidualElasticity_0_1(unsigned int i, double lambda, double mu);
@@ -105,7 +105,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualElasticity_1_0 : public VectorFormVol<Scalar>
+      class HERMES_API DefaultResidualElasticity_1_0 : public VectorFormVol < Scalar >
       {
       public:
         DefaultResidualElasticity_1_0(unsigned int i, double lambda, double mu);
@@ -123,7 +123,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultResidualElasticity_1_1 : public VectorFormVol<Scalar>
+      class HERMES_API DefaultResidualElasticity_1_1 : public VectorFormVol < Scalar >
       {
       public:
         DefaultResidualElasticity_1_1(unsigned int i, double lambda, double mu);
@@ -141,7 +141,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultJacobianElasticity_1_1 : public MatrixFormVol<Scalar>
+      class HERMES_API DefaultJacobianElasticity_1_1 : public MatrixFormVol < Scalar >
       {
       public:
         DefaultJacobianElasticity_1_1(unsigned int i, unsigned int j, double lambda, double mu);

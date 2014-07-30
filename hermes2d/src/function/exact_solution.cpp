@@ -581,7 +581,7 @@ namespace Hermes
 
     MeshFunction<double>* ExactSolutionEggShell::clone() const
     {
-      Solution<double> * sln = new Solution<double>;
+      Solution<double> * sln = new Solution < double > ;
       sln->copy(this);
       return sln;
     }
@@ -626,30 +626,30 @@ namespace Hermes
       std::tr1::shared_ptr<Hermes::Hermes2D::UExtFunction<Scalar> >::operator=(other);
     }
 
-    template class HERMES_API UExtFunctionSharedPtr<double>;
-    template class HERMES_API UExtFunctionSharedPtr<std::complex<double> >;
+    template class HERMES_API UExtFunctionSharedPtr < double > ;
+    template class HERMES_API UExtFunctionSharedPtr < std::complex<double> > ;
 
-    template HERMES_API class ExactSolutionScalar<double>;
-    template HERMES_API class ExactSolutionScalar<std::complex<double> >;
+    template HERMES_API class ExactSolutionScalar < double > ;
+    template HERMES_API class ExactSolutionScalar < std::complex<double> > ;
 
-    template HERMES_API class ExactSolutionConstantArray<double, double>;
-    template HERMES_API class ExactSolutionConstantArray<double, int>;
-    template HERMES_API class ExactSolutionConstantArray<double, unsigned int>;
-    template HERMES_API class ExactSolutionConstantArray<double, bool>;
-    template HERMES_API class ExactSolutionConstantArray<std::complex<double>, std::complex<double> >;
+    template HERMES_API class ExactSolutionConstantArray < double, double > ;
+    template HERMES_API class ExactSolutionConstantArray < double, int > ;
+    template HERMES_API class ExactSolutionConstantArray < double, unsigned int > ;
+    template HERMES_API class ExactSolutionConstantArray < double, bool > ;
+    template HERMES_API class ExactSolutionConstantArray < std::complex<double>, std::complex<double> > ;
 
-    template HERMES_API class ExactSolutionVector<double>;
-    template HERMES_API class ExactSolutionVector<std::complex<double> >;
-    template HERMES_API class ConstantSolution<double>;
-    template HERMES_API class ConstantSolution<std::complex<double> >;
-    template HERMES_API class ConstantSolutionVector<double>;
-    template HERMES_API class ConstantSolutionVector<std::complex<double> >;
-    template HERMES_API class ZeroSolution<double>;
-    template HERMES_API class ZeroSolution<std::complex<double> >;
-    template HERMES_API class ZeroSolutionVector<double>;
-    template HERMES_API class ZeroSolutionVector<std::complex<double> >;
+    template HERMES_API class ExactSolutionVector < double > ;
+    template HERMES_API class ExactSolutionVector < std::complex<double> > ;
+    template HERMES_API class ConstantSolution < double > ;
+    template HERMES_API class ConstantSolution < std::complex<double> > ;
+    template HERMES_API class ConstantSolutionVector < double > ;
+    template HERMES_API class ConstantSolutionVector < std::complex<double> > ;
+    template HERMES_API class ZeroSolution < double > ;
+    template HERMES_API class ZeroSolution < std::complex<double> > ;
+    template HERMES_API class ZeroSolutionVector < double > ;
+    template HERMES_API class ZeroSolutionVector < std::complex<double> > ;
 
-    template HERMES_API class UExtFunction<double>;
-    template HERMES_API class UExtFunction<std::complex<double> >;
+    template HERMES_API class UExtFunction < double > ;
+    template HERMES_API class UExtFunction < std::complex<double> > ;
   }
 }

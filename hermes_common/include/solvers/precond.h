@@ -63,7 +63,7 @@ namespace Hermes
     /// \brief Abstract class for Epetra preconditioners.
     ///
     template <typename Scalar>
-    class EpetraPrecond : public Precond<Scalar>
+    class EpetraPrecond : public Precond < Scalar >
 #ifdef HAVE_EPETRA
       , public Epetra_Operator
 #endif

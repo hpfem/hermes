@@ -13,7 +13,7 @@ bool refine_elem(SpaceSharedPtr<double> space, Element* e, int ref)
     for (int j = 0; j < 4; j++)
       space->set_element_order(e->sons[j]->id, order);
   }
-  if (ref>1)
+  if (ref > 1)
   {
     for (int j = 0; j < 4; j++)
       refined = refine_elem(space, e->sons[j], ref - 1);
