@@ -48,6 +48,10 @@ const double FIXED_BDY_TEMP = 20;
 
 int main(int argc, char* argv[])
 {
+#ifdef WITH_PARALUTION
+  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
+#endif
+
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;

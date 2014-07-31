@@ -465,11 +465,11 @@ namespace Hermes
       case MultiElimination:
       {
         this->mcilu_p = new paralution::MultiColoredILU < paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar > ;
-        mcilu_p->Init(0);
+        mcilu_p->Set(0);
 
         paralution::MultiElimination<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* multiEliminationPreconditioner =
           new paralution::MultiElimination<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-        multiEliminationPreconditioner->Init(*mcilu_p, 2, 0.4);
+        multiEliminationPreconditioner->Set(*mcilu_p, 2, 0.4);
         this->paralutionPreconditioner = multiEliminationPreconditioner;
       }
         break;
@@ -479,7 +479,7 @@ namespace Hermes
           new paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
         this->saddlePoint_p_k = new paralution::FSAI < paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar > ;
         this->saddlePoint_p_s = new paralution::SPAI < paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar > ;
-        saddlePointPrecond->Init(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
+        saddlePointPrecond->Set(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
         this->paralutionPreconditioner = saddlePointPrecond;
       }
         break;
@@ -497,7 +497,7 @@ namespace Hermes
       paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* saddlePointPrecond =
         dynamic_cast<paralution::DiagJacobiSaddlePointPrecond<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>*>(this->paralutionPreconditioner);
       if (saddlePointPrecond)
-        saddlePointPrecond->Init(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
+        saddlePointPrecond->Set(*this->saddlePoint_p_k, *this->saddlePoint_p_s);
 #endif
       return (*this->paralutionPreconditioner);
     }
