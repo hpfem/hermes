@@ -1421,7 +1421,7 @@ namespace Hermes
 
       bson_iterator it_complex;
       bson_find(&it_complex, &br, "complex");
-      bool complex = bson_iterator_bool(&it_complex);
+      bool is_complex = bson_iterator_bool(&it_complex);
 
       bson_iterator it_components;
       bson_find(&it_components, &br, "components_count");
@@ -1439,7 +1439,7 @@ namespace Hermes
         bson_iterator_init(&it, &sub);
         while (bson_iterator_next(&it))
           values.push_back(bson_iterator_double(&it));
-        this->load_exact_solution(this->num_components, space, complex, values[0], values[1], values[2], values[3]);
+        this->load_exact_solution(this->num_components, space, is_complex, values[0], values[1], values[2], values[3]);
       }
       else
       {
@@ -1539,7 +1539,7 @@ namespace Hermes
 
       bson_iterator it_complex;
       bson_find(&it_complex, &br, "complex");
-      bool complex = bson_iterator_bool(&it_complex);
+      bool is_complex = bson_iterator_bool(&it_complex);
 
       bson_iterator it_components;
       bson_find(&it_components, &br, "components_count");
@@ -1557,7 +1557,7 @@ namespace Hermes
         bson_iterator_init(&it, &sub);
         while (bson_iterator_next(&it))
           values.push_back(bson_iterator_double(&it));
-        this->load_exact_solution(this->num_components, space, complex, values[0], values[1], values[2], values[3]);
+        this->load_exact_solution(this->num_components, space, is_complex, values[0], values[1], values[2], values[3]);
       }
       else
       {
