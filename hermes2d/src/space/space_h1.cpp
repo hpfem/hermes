@@ -284,11 +284,8 @@ namespace Hermes
         Curve* curve = nullptr;
         CurvMap* cm = surf_pos->base->cm;
         if (cm)
-        {
-          while (!cm->toplevel)
-            cm = cm->parent->cm;
           curve = cm->curves[surf_pos->surf_num];
-        }
+
         CurvMap::nurbs_edge(surf_pos->base, curve, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
         // Calculate.
         proj[0] = bc->value(x, y);
@@ -318,8 +315,7 @@ namespace Hermes
             surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
             if (bc->get_value_type() == BC_CONST)
-              rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())
-              * (bc->value_const - l);
+              rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode()) * (bc->value_const - l);
             // If the BC is not constant.
             else if (bc->get_value_type() == BC_FUNCTION)
             {
@@ -328,15 +324,11 @@ namespace Hermes
               Curve* curve = nullptr;
               CurvMap* cm = surf_pos->base->cm;
               if (cm)
-              {
-                while (!cm->toplevel)
-                  cm = cm->parent->cm;
                 curve = cm->curves[surf_pos->surf_num];
-              }
+
               CurvMap::nurbs_edge(surf_pos->base, curve, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y);
               // Calculate.
-              rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())
-                * (bc->value(x, y) - l);
+              rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode()) * (bc->value(x, y) - l);
             }
           }
         }
@@ -415,6 +407,17 @@ namespace Hermes
       }
 
       ncomponents = current - result;
+      if(ncomponents < max_result)
+      {
+typename Space<Scalar>::BaseComponent* reallocated_result = (typename Space<Scalar>::BaseComponent*) realloc(result, ncomponents * sizeof(typename Space<Scalar>::BaseComponent));
+        if(edge_dofs != NULL)
+        {
+          edge_dofs = reallocated_result + (edge_dofs - result);
+        }
+        return reallocated_result;
+      }
+      else
+        
       return result;
     }
 

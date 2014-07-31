@@ -74,7 +74,7 @@ namespace Hermes
       Transformable::set_active_element(e);
       ref_map_pss.set_active_element(e);
 
-      this->is_const = !element->is_curved() && (element->is_triangle() || is_parallelogram(element));
+      this->is_const = element->has_const_ref_map();
 
       // prepare the shapes and coefficients of the reference map
       unsigned short j, k = 0;
@@ -118,7 +118,7 @@ namespace Hermes
 
     void RefMap::set_element_iro_cache(Element* element)
     {
-      bool is_const = !element->is_curved() && (element->is_triangle() || is_parallelogram(element));
+      bool is_const = element->has_const_ref_map();
 
       if (is_const)
       {
@@ -222,14 +222,6 @@ namespace Hermes
 
       this->inv_ref_map_calculated = order;
       this->jacobian_calculated = order;
-    }
-
-    bool RefMap::is_parallelogram(Element* e)
-    {
-      const double eps = 1e-14;
-      assert(e->is_quad());
-      return fabs(e->vn[2]->x - (e->vn[1]->x + e->vn[3]->x - e->vn[0]->x)) < eps &&
-        fabs(e->vn[2]->y - (e->vn[1]->y + e->vn[3]->y - e->vn[0]->y)) < eps;
     }
 
     void RefMap::calc_const_inv_ref_map()
@@ -483,7 +475,7 @@ namespace Hermes
       this->second_ref_map_calculated = order;
     }
 
-    void RefMap::second_ref_map_at_point(double xi1, double xi2, double& x, double& y, double3x2& mm)
+    void RefMap::second_ref_map_at_point(double xi1, double xi2, double& x, double& y, double3x2& mm)this-
     {
       double3x2 k;
       memset(k, 0, sizeof(double3x2));
@@ -591,7 +583,7 @@ namespace Hermes
       }
 
       // Constant reference mapping.
-      if (!e->is_curved() && (e->is_triangle() || is_parallelogram(e)))
+      if (!e->is_curved() && (e->is_triangle() || e->is_parallelogram()))
       {
         double dx = e->vn[0]->x - x;
         double dy = e->vn[0]->y - y;
@@ -939,7 +931,7 @@ namespace Hermes
       this->sub_idx = sub_idx;
       stack[top] = *ctm;
       this->ctm = stack + top;
-      if (is_const)
+      if (this->is_const)
         calc_const_inv_ref_map();
       this->reinit_storage();
     }

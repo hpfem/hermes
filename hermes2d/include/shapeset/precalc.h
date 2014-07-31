@@ -100,7 +100,7 @@ namespace Hermes
 
     private:
       double*** PrecalculatedValues[H2D_NUM_MODES][H2D_NUM_FUNCTION_VALUES];
-      bool** PrecalculatedInfo[H2D_NUM_MODES][H2D_NUM_FUNCTION_VALUES];
+      bool** PrecalculatedInfo[H2D_NUM_MODES];
       friend class PrecalcShapesetAssembling;
     };
 
@@ -158,6 +158,8 @@ namespace Hermes
       static std::vector<PrecalcShapesetAssemblingStorage*> tables;
 
       PrecalcShapesetAssemblingStorage* storage;
+
+      bool attempt_to_reuse(unsigned short order) const;
     };
   }
 }

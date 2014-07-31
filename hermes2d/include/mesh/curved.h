@@ -108,19 +108,15 @@ namespace Hermes
       /// this structure defines a curved mapping of an element; it has two
       /// modes, depending on the value of 'toplevel'
       bool toplevel;
-      union
-      {
-        // if toplevel=true, this structure belongs to a base mesh element
-        // and the array 'nurbs' points to (up to four) NURBS curved edges
-        Curve* curves[H2D_MAX_NUMBER_EDGES];
-        struct
-        {
-          // if toplevel=false, this structure belongs to a refined element
-          // and 'parent' points to the base mesh element CurvMap structure;
-          Element* parent;
-          uint64_t sub_idx;
-        };
-      };
+
+      // if toplevel=true, this structure belongs to a base mesh element
+      // and the array 'nurbs' points to (up to four) NURBS curved edges
+      Curve* curves[H2D_MAX_NUMBER_EDGES];
+
+      // if toplevel=false, this structure belongs to a refined element
+      // and 'parent' points to the base mesh element CurvMap structure;
+      Element* parent;
+      uint64_t sub_idx;
 
       /// current polynomial degree of the refmap approximation
       unsigned short order;

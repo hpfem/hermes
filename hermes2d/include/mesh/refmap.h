@@ -160,8 +160,6 @@ namespace Hermes
       /// For internal use only.
       void force_transform(uint64_t sub_idx, Trf* ctm);
 
-      static bool is_parallelogram(Element* e);
-
       static void set_element_iro_cache(Element* element);
 
     private:

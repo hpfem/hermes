@@ -122,6 +122,8 @@ namespace Hermes
       {
         Element e;
         e.nvert = 3;
+        e.cm = nullptr;
+        e.id = -1;
         ref_map_pss_static.set_active_element(&e);
         short* indices = ref_map_shapeset.get_bubble_indices(ref_map_shapeset.get_max_order(), HERMES_MODE_TRIANGLE);
         curvMapStatic.bubble_proj_matrix_tri = calculate_bubble_projection_matrix(indices, HERMES_MODE_TRIANGLE);
@@ -135,6 +137,8 @@ namespace Hermes
       {
         Element e;
         e.nvert = 4;
+        e.cm = nullptr;
+        e.id = -1;
         ref_map_pss_static.set_active_element(&e);
         short *indices = ref_map_shapeset.get_bubble_indices(H2D_MAKE_QUAD_ORDER(ref_map_shapeset.get_max_order(), ref_map_shapeset.get_max_order()), HERMES_MODE_QUAD);
         curvMapStatic.bubble_proj_matrix_quad = calculate_bubble_projection_matrix(indices, HERMES_MODE_QUAD);
@@ -316,6 +320,8 @@ namespace Hermes
       coeffs = nullptr;
       ctm = nullptr;
       memset(curves, 0, sizeof(Curve*)* H2D_MAX_NUMBER_EDGES);
+      this->parent = nullptr;
+      this->sub_idx = 0;
     }
 
     CurvMap::CurvMap(const CurvMap* cm) : ref_map_pss(&ref_map_shapeset)
@@ -342,6 +348,8 @@ namespace Hermes
           else
             this->curves[i] = nullptr;
         }
+        this->parent = nullptr;
+        this->sub_idx = 0;
       }
       else
       {
@@ -365,8 +373,8 @@ namespace Hermes
         for (int i = 0; i < 4; i++)
           if (curves[i])
           {
-          delete curves[i];
-          curves[i] = nullptr;
+            delete curves[i];
+            curves[i] = nullptr;
           }
       }
     }

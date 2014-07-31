@@ -201,7 +201,7 @@ namespace Hermes
     const double* PrecalcShapesetAssembling::get_fn_values(int component) const
     {
       unsigned char mode = this->element->get_mode();
-      if (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][this->order][this->index])
+      if(this->attempt_to_reuse(this->order))
         return this->storage->PrecalculatedValues[mode][0][this->order][this->index];
       assert(this->values_valid);
       return &values[component][0][0];
@@ -210,7 +210,7 @@ namespace Hermes
     const double* PrecalcShapesetAssembling::get_dx_values(int component) const
     {
       unsigned char mode = this->element->get_mode();
-      if (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][this->order][this->index])
+      if (this->attempt_to_reuse(this->order))
         return this->storage->PrecalculatedValues[mode][1][this->order][this->index];
       assert(this->values_valid);
       return &values[component][1][0];
@@ -219,7 +219,7 @@ namespace Hermes
     const double* PrecalcShapesetAssembling::get_dy_values(int component) const
     {
       unsigned char mode = this->element->get_mode();
-      if (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][this->order][this->index])
+      if (this->attempt_to_reuse(this->order))
         return this->storage->PrecalculatedValues[mode][2][this->order][this->index];
       assert(this->values_valid);
       return &values[component][2][0];
@@ -245,6 +245,11 @@ namespace Hermes
     }
 #endif
 
+    bool PrecalcShapesetAssembling::attempt_to_reuse(unsigned short order_) const
+    {
+      return (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][order_][this->index]);
+    }
+
     const double* PrecalcShapesetAssembling::get_values(int component, unsigned short item) const
     {
       if (item == 0)
@@ -257,16 +262,16 @@ namespace Hermes
         return Function<double>::get_values(component, item);
     }
 
-    void PrecalcShapesetAssembling::precalculate(unsigned short order, unsigned short mask)
+    void PrecalcShapesetAssembling::precalculate(unsigned short order_, unsigned short mask)
     {
-      if (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1 && this->storage->PrecalculatedInfo[this->element->get_mode()][0][order][index])
+      if (this->attempt_to_reuse(order_))
         return;
       else
       {
-        Function<double>::precalculate(order, mask);
+        Function<double>::precalculate(order_, mask);
 
-        unsigned char np = this->quads[cur_quad]->get_num_points(order, this->element->get_mode());
-        double3* pt = this->quads[cur_quad]->get_points(order, this->element->get_mode());
+        unsigned char np = this->quads[cur_quad]->get_num_points(order_, this->element->get_mode());
+        double3* pt = this->quads[cur_quad]->get_points(order_, this->element->get_mode());
 
         unsigned short j, k;
 
@@ -295,40 +300,40 @@ namespace Hermes
             {
 #pragma omp critical (precalculatingPSS)
               {
-                if (!this->storage->PrecalculatedInfo[mode][0][order][index])
+                if (!this->storage->PrecalculatedInfo[mode][order_][index])
                 {
                   double* valuePointer;
                   if (mode == HERMES_MODE_TRIANGLE)
                   {
-                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_TRIANGLE][0][order][index];
+                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_TRIANGLE][0][order_][index];
                     for (short i = 0; i < np; i++)
                       valuePointer[i] = shapeset->get_fn_value_0_tri(index, pt[i][0], pt[i][1]);
 
-                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_TRIANGLE][1][order][index];
+                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_TRIANGLE][1][order_][index];
                     for (short i = 0; i < np; i++)
                       valuePointer[i] = shapeset->get_dx_value_0_tri(index, pt[i][0], pt[i][1]);
 
-                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_TRIANGLE][2][order][index];
+                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_TRIANGLE][2][order_][index];
                     for (short i = 0; i < np; i++)
                       valuePointer[i] = shapeset->get_dy_value_0_tri(index, pt[i][0], pt[i][1]);
 
-                    this->storage->PrecalculatedInfo[HERMES_MODE_TRIANGLE][0][order][index] = true;
+                    this->storage->PrecalculatedInfo[HERMES_MODE_TRIANGLE][order_][index] = true;
                   }
                   else
                   {
-                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_QUAD][0][order][index];
+                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_QUAD][0][order_][index];
                     for (short i = 0; i < np; i++)
                       valuePointer[i] = shapeset->get_fn_value_0_quad(index, pt[i][0], pt[i][1]);
 
-                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_QUAD][1][order][index];
+                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_QUAD][1][order_][index];
                     for (short i = 0; i < np; i++)
                       valuePointer[i] = shapeset->get_dx_value_0_quad(index, pt[i][0], pt[i][1]);
 
-                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_QUAD][2][order][index];
+                    valuePointer = this->storage->PrecalculatedValues[HERMES_MODE_QUAD][2][order_][index];
                     for (short i = 0; i < np; i++)
                       valuePointer[i] = shapeset->get_dy_value_0_quad(index, pt[i][0], pt[i][1]);
 
-                    this->storage->PrecalculatedInfo[HERMES_MODE_QUAD][0][order][index] = true;
+                    this->storage->PrecalculatedInfo[HERMES_MODE_QUAD][order_][index] = true;
                   }
                 }
               }
@@ -393,16 +398,18 @@ namespace Hermes
         }
 
         unsigned short local_base_size = this->max_index[i] + 1;
+        
+        this->PrecalculatedInfo[i] = malloc_with_check<bool*>(g_max);
 
         for (int j = 0; j < H2D_NUM_FUNCTION_VALUES; j++)
         {
           this->PrecalculatedValues[i][j] = malloc_with_check<double**>(g_max);
-          this->PrecalculatedInfo[i][j] = malloc_with_check<bool*>(g_max);
 
           for (int k = 0; k < g_max; k++)
           {
             this->PrecalculatedValues[i][j][k] = malloc_with_check<double*>(local_base_size);
-            this->PrecalculatedInfo[i][j][k] = calloc_with_check<bool>(local_base_size);
+            if(j == 0)
+              this->PrecalculatedInfo[i][k] = calloc_with_check<bool>(local_base_size);
 
             for (int l = 0; l < local_base_size; l++)
               this->PrecalculatedValues[i][j][k][l] = malloc_with_check<double>(np);
@@ -430,7 +437,8 @@ namespace Hermes
             for (int l = 0; l < local_base_size; l++)
               free_with_check(this->PrecalculatedValues[i][j][k][l]);
             free_with_check(this->PrecalculatedValues[i][j][k]);
-            free_with_check(this->PrecalculatedInfo[i][j][k]);
+            if(j == 0)
+              free_with_check(this->PrecalculatedInfo[i][k]);
           }
 
           free_with_check(this->PrecalculatedValues[i][j]);

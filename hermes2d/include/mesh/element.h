@@ -146,7 +146,7 @@ namespace Hermes
       // returns the edge orientation. This works for the unconstrained edges.
       bool get_edge_orientation(int ie) const;
 
-      inline ElementMode2D  get_mode() const {
+      ElementMode2D  get_mode() const {
         return (nvert == 3) ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD;
       }
 
@@ -161,6 +161,23 @@ namespace Hermes
       }
       inline unsigned char get_nvert() const {
         return this->nvert;
+      }
+
+      inline bool is_parallelogram() const
+      {
+        if (this->nvert == 3)
+          return false;
+        else if (this->id == -1)
+          return true;
+
+        const double eps = 1e-14;
+        return fabs(this->vn[2]->x - (this->vn[1]->x + this->vn[3]->x - this->vn[0]->x)) < eps &&
+          fabs(this->vn[2]->y - (this->vn[1]->y + this->vn[3]->y - this->vn[0]->y)) < eps;
+      }
+
+      inline bool has_const_ref_map() const
+      {
+        return (this->nvert == 3 || is_parallelogram()) && (!this->cm);
       }
 
       bool hsplit() const;
