@@ -77,6 +77,7 @@ int main(int argc, char* args[])
     Space<double>::ReferenceSpaceCreator refspace_creator(fine_space, ref_mesh, 0);
     SpaceSharedPtr<double> refspace = refspace_creator.create_ref_space();
 
+    // Solve the linear system. If successful, obtain the solution.
     try
     {
       linear_solver.set_space(refspace);
