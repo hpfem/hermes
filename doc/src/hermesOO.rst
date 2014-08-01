@@ -47,6 +47,8 @@ In the implementation of your programs, you need to subclass (or derive from) th
   
   class MyWeakForm : public WeakForm<double>
   
+What is necessary to say is that WeakForm is usually passed by means of shared pointers, using class template WeakFormSharedPtr (see examples for how to use this).
+  
 The important methods and attributes to note in this class are:
 
   - the constructor WeakForm(unsigned int neq = 1, bool mat_free = false)
@@ -258,15 +260,14 @@ The common method all filters must override is::
 Then there is always the method **filter_fn(...)** that comes in the following versions::
 
   // SimpleFilter - values here represent the solution values, n is the number of points.
-  virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result) = 0;
+  virtual void filter_fn(int n, const std::vector<const Scalar*>& values, Scalar* result) = 0;
   
   // DXDYFilter - contains values, dx - derivatives w.r.t. x, dy - derivatives w.r.t. y,
   // and also the resulting derivatives, should those be necessary.
-  virtual void filter_fn (int n, Hermes::vector<Scalar *> values, Hermes::vector<Scalar *> dx, Hermes::vector<Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
+  virtual void filter_fn (int n, const std::vector<Scalar *>& values, const std::vector<Scalar *>& dx, const std::vector<Scalar *>& dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
   
   // ComplexFilter - values here represent the solution values, n is the number of points,
   // note that here, the values are complex.
-  virtual void filter_fn(int n, std::complex<double>* values, double* result) = 0;
-  
-  
+  virtual void filter_fn(int n, const std::complex<double>* values, double* result) = 0;
+
   

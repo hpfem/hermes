@@ -10,7 +10,7 @@ Secondly, the Finite Element space must be set on the computational mesh. One of
     // This is a custom (derived) boundary condition. More about this in the section 
     // 'Object model - deriving your own specialized classes'.
     CustomDirichletCondition bc_essential(
-      Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"),
+      std::vector<std::string>({"Bottom", "Inner", "Outer", "Left"}),
       BDY_A_PARAM, BDY_B_PARAM, BDY_C_PARAM);
     
     // Initialize the container to pass the boundary conditions to the Space.
@@ -25,7 +25,7 @@ Secondly, the Finite Element space must be set on the computational mesh. One of
     
     // Initialize boundary conditions.
     Hermes::Hermes2D::DefaultEssentialBCConst<std::complex<double> > bc_essential
-    (Hermes::vector<std::string>("Corner_horizontal", "Corner_vertical"), 0);
+    (std::vector<std::string>({"Corner_horizontal", "Corner_vertical"}), 0);
     EssentialBCs<std::complex<double> > bcs(&bc_essential);
     
     // Create an Hcurl space.

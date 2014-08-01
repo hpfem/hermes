@@ -4,17 +4,16 @@ Linux
 Download and compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+[NEW] You can download a package directly from **`Hermes launchpad repository<https://launchpad.net/~lukas-korous/+archive/ubuntu/hermes>`_**
+
+The rest of the instructions here are for building Hermes from source.
+
 If you are using a Debian-based system, install the (required) libraries first:
 
 .. sourcecode::
     .
 
-    apt-get install git git-core cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev libxerces-c-dev xsdcxx libmatio-dev
-
-.. latexcode::
-    .
-
-    apt-get install cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev 
+    apt-get install git git-core cmake g++ freeglut3-dev libsuitesparse-dev libglew-dev libxerces-c-dev xsdcxx libmatio-dev
 
 If you want to use fast saving / loading of Hermes entities, install
 
@@ -42,33 +41,33 @@ your local copy and the master repository, and you'll become part of the Hermes
 network at Github.
 
 Once you have a local copy of the Hermes repository on your computer, change dir 
-to hermes/. There you will find a CMakeLists.txt file that contains the lines::
+to hermes/. There you will find a CMake.vars.example.Linux file that looks like this::
 
-    # OpenMP
-    # "-1" stands for using as many threads as is the number of available cores.
-    # Please be aware that the variable OMP_NUM_THREADS, that is often used for this purpose, is ignored.
-    set(NUM_THREADS -1)
-    
-    # HermesCommon
-      set(HERMES_COMMON_DEBUG     YES)
-		  set(HERMES_COMMON_RELEASE   YES)
-      ...
+    # LINUX
+      # On linux, there should be no need to set up *_ROOT directories, in the default settings, they all point to /usr/local, as should be true on Debian systems.
+      # We mainly support gcc and CLang compilers with C++11 support.
       
-    # Hermes2D:
-    set(WITH_H2D                        YES)
-      set(H2D_DEBUG               YES)
-		  set(H2D_RELEASE             YES)
-		  # Optional parts of the library.
-		  set(H2D_WITH_GLUT 					YES)
-      ...
+      # BASIC CONFIGURATION
       
-    set(WITH_SUPERLU            NO)
-    ...
+      # Global
+    # Generate static libs (instead of dynamic)
+      set(HERMES_STATIC_LIBS NO)
+      # Target path
+      set(CMAKE_INSTALL_PREFIX "/usr/local")
+      
+      # Paths for compulsory dependencies
+      set(XERCES_ROOT "/usr/local")
+      set(XSD_ROOT "/usr/local")
+      
+      # HermesCommon
+        
+        # Release and debug versions
+        set(HERMES_COMMON_DEBUG     YES)
+        set(HERMES_COMMON_RELEASE   YES)
+        ...
 
 
-Create a file called "CMake.vars" where you set all 
-these variables according to your needs. Examples of CMake.vars files can
-be found in the CMakeVars folder.
+Copy this file to "CMake.vars" and set the variables according to your needs.
 After that, type::
 
     cmake .
@@ -99,6 +98,4 @@ Install Hermes
 
 ::
 
-    cmake -DCMAKE_INSTALL_PREFIX=~/usr .
-    make
     make install

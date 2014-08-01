@@ -902,7 +902,7 @@ namespace Hermes
 
         namespace SupportClasses
         {
-          void SourceFilter::filter_fn(int n, std::vector<double*> values, double* result)
+          void SourceFilter::filter_fn(int n, const std::vector<const double*>& values, double* result)
           {
             for (int i = 0; i < n; i++)
             {

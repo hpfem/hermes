@@ -13,8 +13,7 @@
   # Paths for compulsory dependencies
   set(XERCES_ROOT "/usr/local")
   set(XSD_ROOT "/usr/local")
-  
-  
+    
   # HermesCommon
     
     # Release and debug versions

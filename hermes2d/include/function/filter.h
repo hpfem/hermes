@@ -102,7 +102,7 @@ namespace Hermes
     protected:
       std::vector<int> items;
 
-      virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result) = 0;
+      virtual void filter_fn(int n, const std::vector<const Scalar*>& values, Scalar* result) = 0;
 
       void init_components();
       virtual void precalculate(unsigned short order, unsigned short mask);
@@ -134,7 +134,7 @@ namespace Hermes
 
       int item;
 
-      virtual void filter_fn(int n, std::complex<double>* values, double* result) = 0;
+      virtual void filter_fn(int n, const std::complex<double>* values, double* result) = 0;
 
       virtual void precalculate(unsigned short order, unsigned short mask);
     };
@@ -159,7 +159,7 @@ namespace Hermes
 
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = nullptr);
 
-      virtual void filter_fn(int n, double* x, double* y, std::vector<const Scalar *> values, std::vector<const Scalar *> dx, std::vector<const Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
+      virtual void filter_fn(int n, double* x, double* y, const std::vector<const Scalar *>& values, const std::vector<const Scalar *>& dx, const std::vector<const Scalar *>& dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
 
       void init_components();
 
@@ -181,7 +181,7 @@ namespace Hermes
 
       virtual ~MagFilter();
     protected:
-      virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result);
+      virtual void filter_fn(int n, const std::vector<const Scalar*>& values, Scalar* result);
     };
 
     /// TopValFilter takes functions and puts a threshold on their highest values.
@@ -196,7 +196,7 @@ namespace Hermes
 
       virtual ~TopValFilter();
     protected:
-      virtual void filter_fn(int n, std::vector<double*> values, double* result);
+      virtual void filter_fn(int n, const std::vector<const double*>& values, double* result);
       std::vector<double> limits;
     };
 
@@ -212,7 +212,7 @@ namespace Hermes
 
       virtual ~BottomValFilter();
     protected:
-      virtual void filter_fn(int n, std::vector<double*> values, double* result);
+      virtual void filter_fn(int n, const std::vector<const double*>& values, double* result);
       std::vector<double> limits;
     };
 
@@ -228,7 +228,7 @@ namespace Hermes
 
       virtual ~ValFilter();
     protected:
-      virtual void filter_fn(int n, std::vector<double*> values, double* result);
+      virtual void filter_fn(int n, const std::vector<const double*>& values, double* result);
       std::vector<double> low_limits;
       std::vector<double> high_limits;
     };
@@ -243,7 +243,7 @@ namespace Hermes
       virtual ~DiffFilter();
 
     protected:
-      virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result);
+      virtual void filter_fn(int n, const std::vector<const Scalar*>& values, Scalar* result);
     };
 
     /// Calculates the sum of two functions.
@@ -256,7 +256,7 @@ namespace Hermes
       virtual ~SumFilter();
 
     protected:
-      virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result);
+      virtual void filter_fn(int n, const std::vector<const Scalar*>& values, Scalar* result);
     };
 
     /// Calculates the square of a function.
@@ -269,7 +269,7 @@ namespace Hermes
       virtual ~SquareFilter();
 
     protected:
-      virtual void filter_fn(int n, std::vector<Scalar*> values, Scalar* result);
+      virtual void filter_fn(int n, const std::vector<const Scalar*>& values, Scalar* result);
     };
 
     /// Calculates absolute value of a real solution.
@@ -282,7 +282,7 @@ namespace Hermes
       virtual ~AbsFilter();
 
     protected:
-      virtual void filter_fn(int n, std::vector<double*> values, double* result);
+      virtual void filter_fn(int n, const std::vector<const double*>& values, double* result);
     };
 
     /// Removes the imaginary part from a function.
@@ -296,7 +296,7 @@ namespace Hermes
       virtual MeshFunction<double>* clone() const;
 
     protected:
-      virtual void filter_fn(int n, std::complex<double>* values, double* result);
+      virtual void filter_fn(int n, const std::complex<double>* values, double* result);
     };
 
     /// ImagFilter puts the imaginary part of the input function to the Real part of the
@@ -309,7 +309,7 @@ namespace Hermes
 
       virtual MeshFunction<double>* clone() const;
     protected:
-      virtual void filter_fn(int n, std::complex<double>* values, double* result);
+      virtual void filter_fn(int n, const std::complex<double>* values, double* result);
     };
 
     /// Computes the absolute value of a complex solution.
@@ -322,7 +322,7 @@ namespace Hermes
       virtual MeshFunction<double>* clone() const;
 
     protected:
-      virtual void filter_fn(int n, std::complex<double>* values, double* result);
+      virtual void filter_fn(int n, const std::complex<double>* values, double* result);
     };
 
     /// Computes the angle of a complex solution.
@@ -333,7 +333,7 @@ namespace Hermes
       virtual ~AngleFilter();
 
     protected:
-      virtual void filter_fn(int n, std::vector<std::complex<double>*> values, double* result);
+      virtual void filter_fn(int n, const std::vector<const std::complex<double>*>& values, double* result);
     };
 
     /// VonMisesFilter is a postprocessing filter for visualizing elastic stresses in a body.

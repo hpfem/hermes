@@ -3,12 +3,12 @@ Weak formulation
 When we already have a mesh and a space, we have to know what equations we will be solving on those. And that is where the weak formulation comes to the light.
 Of course, there is a vast mathematical background of differential equations, their weak solutions, Sobolev spaces, etc., but we assume of those, our users already have a good knowledge. Right here we are concerned with the implementation. A typical creation of a weak formulation for the use with Hermes might look like this::
  
-    // Initialize the weak formulation.
+    // Initialize the weak formulation (strictly speaking, shared pointer to the weak formulation)
     // This is a weak formulation for linear elasticity, with custom
     // parameters of the constructor.
     // There is a lot of documentation for using some predefined
     // weak forms, as well as creating your own. See the info below.
-    CustomWeakFormLinearElasticity wf(E, nu, rho*g1, "Top", f0, f1);
+    WeakFormSharedPtr<double> wf(new CustomWeakFormLinearElasticity(E, nu, rho*g1, "Top", f0, f1));
     
 More about a typical basic weak form can be found in the 'hermes-tutorial' documentation, section 'A-linear', chapter '03-poisson'.
 
@@ -64,12 +64,12 @@ The header is pretty self-explanatory::
 
     // MatrixForm.
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, 
-      Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const;
+      Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const;
         
     // A typical implementation.
     template<typename Scalar> Scalar DefaultMatrixFormVol<Scalar>::value(int n, 
       double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-      Geom<double> *e, Func<Scalar> **ext) const
+      GeomVol<double> *e, Func<Scalar> **ext) const
     {
       Scalar result = 0;
       
@@ -80,7 +80,7 @@ The header is pretty self-explanatory::
     // VectorForm.
     // Identical to MatrixForm, only the basis function is missing for obvious reasons.
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, Func<Scalar> **ext) const;
+        GeomVol<double> *e, Func<Scalar> **ext) const;
         
 In these::
     
@@ -103,9 +103,10 @@ In these::
     // the test function, represented by the class Func.
     // For more info about the class, see the developers documentation (in doxygen).
     
-    Geom<double> *e
+    GeomVol<double> *e
     // geometry attributes: coordinates, element size,
     // normal directions (for surface forms), you name it.
+    // - for volumetric forms (for surface forms one uses GeomSurf).
     // For more info about the class, see the developers documentation (in doxygen).
     
     Func<Scalar> **ext

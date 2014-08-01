@@ -31,8 +31,8 @@ Right here we focus on the calculation::
       // (stability conditions, time-adaptivity, ...).
     }
 
-In the following, some parameters are supposed to be passed as 'const', and everywhere, where one can pass an instance of Space<Scalar>*, one can pass 
-an instance of Hermes::vector<Space<Scalar>*> (Hermes::vector<const Space<Scalar>*>), if the problem is a system of equations.
+In the following, basically everywhere where one can pass an instance of Space<Scalar>*, one can pass 
+an instance of std::vector<Space<Scalar>*>, if the problem is a system of equations.
 
 We shall start from the simplest case. 
 

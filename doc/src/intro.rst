@@ -13,7 +13,7 @@ with emphasis on nonlinear, time-dependent, multi-physics problems.
 This document is organized as follows: 
 
 * Section 1 provides general information about Hermes and the computational methods it uses,
-  and how to install Hermes on various hardware platforms.
+  and how to install Hermes on various platforms.
 * Section 2 is the Getting Started Guide - to get you started in no time.
 * Section 3 is the extended documentation section, you will find developers documentation in Doxygen, 
   as well as step-by-step user documentation in tutorials and advanced examples. 

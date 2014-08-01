@@ -1245,7 +1245,7 @@ namespace Hermes
             const MaterialPropertyMaps* matprop;
             const std::string& source_area;
 
-            void filter_fn(int n, std::vector<double*> values, double* result);
+            void filter_fn(int n, const std::vector<const double*>& values, double* result);
 
             MeshFunction<double>* clone() const { return new SourceFilter(this->solutions, matprop, source_area); }
           };

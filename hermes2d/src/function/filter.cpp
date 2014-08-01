@@ -239,7 +239,7 @@ namespace Hermes
       for (int j = 0; j < this->num_components; j++)
       {
         // obtain corresponding tables
-        std::vector<Scalar*> tab;
+        std::vector<const Scalar*> tab;
         for (int i = 0; i < this->solutions.size(); i++)
         {
           int a = 0, b = 0, mask = this->items[i];
@@ -259,14 +259,14 @@ namespace Hermes
     template<typename Scalar>
     Func<Scalar>* SimpleFilter<Scalar>::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)
     {
-      std::vector<Scalar> val;
+      std::vector<const Scalar> val;
       for (int i = 0; i < this->solutions.size(); i++)
         val.push_back(this->solutions[i]->get_pt_value(x, y, use_MeshHashGrid, e)->val[0]);
 
       Func<Scalar>* toReturn = new Func<Scalar>(1, 1);
 
       Scalar result;
-      std::vector<Scalar*> values;
+      std::vector<const Scalar*> values;
       for (int i = 0; i < this->solutions.size(); i++)
         values.push_back(&val[i]);
 
@@ -457,14 +457,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void MagFilter<Scalar>::filter_fn(int n, std::vector<Scalar*> values, Scalar* result)
+    void MagFilter<Scalar>::filter_fn(int n, const std::vector<const Scalar*>& values, Scalar* result)
     {
       for (int i = 0; i < n; i++)
 
       {
         result[i] = 0;
         for (unsigned int j = 0; j < values.size(); j++)
-          result[i] += sqr(values.at(j)[i]);
+          result[i] += sqr(values[j][i]);
         result[i] = sqrt(result[i]);
       }
     };
@@ -505,16 +505,16 @@ namespace Hermes
       return filter;
     }
 
-    void TopValFilter::filter_fn(int n, std::vector<double*> values, double* result)
+    void TopValFilter::filter_fn(int n, const std::vector<const double*>& values, double* result)
     {
       for (int i = 0; i < n; i++)
       {
         result[i] = 0;
         for (unsigned int j = 0; j < values.size(); j++)
-          if (values.at(j)[i] > limits[j])
+          if (values[j][i] > limits[j])
             result[i] = limits[j];
           else
-            result[i] = values.at(j)[i];
+            result[i] = values[j][i];
       }
     };
 
@@ -548,16 +548,16 @@ namespace Hermes
       return filter;
     }
 
-    void BottomValFilter::filter_fn(int n, std::vector<double*> values, double* result)
+    void BottomValFilter::filter_fn(int n, const std::vector<const double*>& values, double* result)
     {
       for (int i = 0; i < n; i++)
       {
         result[i] = 0;
         for (unsigned int j = 0; j < values.size(); j++)
-          if (values.at(j)[i] < limits[j])
+          if (values[j][i] < limits[j])
             result[i] = limits[j];
           else
-            result[i] = values.at(j)[i];
+            result[i] = values[j][i];
       }
     };
 
@@ -591,19 +591,19 @@ namespace Hermes
       return filter;
     }
 
-    void ValFilter::filter_fn(int n, std::vector<double*> values, double* result)
+    void ValFilter::filter_fn(int n, const std::vector<const double*>& values, double* result)
     {
       for (int i = 0; i < n; i++)
       {
         result[i] = 0;
         for (unsigned int j = 0; j < values.size(); j++)
-          if (values.at(j)[i] < low_limits[j])
+          if (values[j][i] < low_limits[j])
             result[i] = low_limits[j];
           else
-            if (values.at(j)[i] > high_limits[j])
+            if (values[j][i] > high_limits[j])
               result[i] = high_limits[j];
             else
-              result[i] = values.at(j)[i];
+              result[i] = values[j][i];
       }
     };
 
@@ -639,9 +639,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiffFilter<Scalar>::filter_fn(int n, std::vector<Scalar*> values, Scalar* result)
+    void DiffFilter<Scalar>::filter_fn(int n, const std::vector<const Scalar*>& values, Scalar* result)
     {
-      for (int i = 0; i < n; i++) result[i] = values.at(0)[i] - values.at(1)[i];
+      for (int i = 0; i < n; i++) result[i] = values[0][i] - values.at(1)[i];
     };
 
     template<typename Scalar>
@@ -667,13 +667,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void SumFilter<Scalar>::filter_fn(int n, std::vector<Scalar*> values, Scalar* result)
+    void SumFilter<Scalar>::filter_fn(int n, const std::vector<const Scalar*>& values, Scalar* result)
     {
       for (int i = 0; i < n; i++)
       {
         result[i] = 0;
         for (unsigned int j = 0; j < values.size(); j++)
-          result[i] += values.at(j)[i];
+          result[i] += values[j][i];
       }
     };
 
@@ -700,17 +700,17 @@ namespace Hermes
     }
 
     template<>
-    void SquareFilter<double>::filter_fn(int n, std::vector<double *> v1, double* result)
+    void SquareFilter<double>::filter_fn(int n, const std::vector<const double *>& v1, double* result)
     {
       for (int i = 0; i < n; i++)
-        result[i] = sqr(v1.at(0)[i]);
+        result[i] = sqr(v1[0][i]);
     };
 
     template<>
-    void SquareFilter<std::complex<double> >::filter_fn(int n, std::vector<std::complex<double> *> v1, std::complex<double> * result)
+    void SquareFilter<std::complex<double> >::filter_fn(int n, const std::vector<const std::complex<double> *>& v1, std::complex<double> * result)
     {
       for (int i = 0; i < n; i++)
-        result[i] = std::norm(v1.at(0)[i]);
+        result[i] = std::norm(v1[0][i]);
     };
 
     template<typename Scalar>
@@ -740,10 +740,10 @@ namespace Hermes
       return filter;
     }
 
-    void AbsFilter::filter_fn(int n, std::vector<double*> v1, double * result)
+    void AbsFilter::filter_fn(int n, const std::vector<const double*>& v1, double * result)
     {
       for (int i = 0; i < n; i++)
-        result[i] = std::abs(v1.at(0)[i]);
+        result[i] = std::abs(v1[0][i]);
     };
 
     AbsFilter::AbsFilter(std::vector<MeshFunctionSharedPtr<double> > solutions, std::vector<int> items)
@@ -781,7 +781,7 @@ namespace Hermes
       return filter;
     }
 
-    void RealFilter::filter_fn(int n, std::complex<double>* values, double* result)
+    void RealFilter::filter_fn(int n, const std::complex<double>* values, double* result)
     {
       for (int i = 0; i < n; i++)
         result[i] = values[i].real();
@@ -807,7 +807,7 @@ namespace Hermes
     {
     }
 
-    void ImagFilter::filter_fn(int n, std::complex<double>* values, double* result)
+    void ImagFilter::filter_fn(int n, const std::complex<double>* values, double* result)
     {
       for (int i = 0; i < n; i++)
         result[i] = values[i].imag();
@@ -828,7 +828,7 @@ namespace Hermes
       return filter;
     }
 
-    void ComplexAbsFilter::filter_fn(int n, std::complex<double>* values, double* result)
+    void ComplexAbsFilter::filter_fn(int n, const std::complex<double>* values, double* result)
     {
       for (int i = 0; i < n; i++)
         result[i] = sqrt(sqr(values[i].real()) + sqr(values[i].imag()));
@@ -849,10 +849,10 @@ namespace Hermes
     {
     }
 
-    void AngleFilter::filter_fn(int n, std::vector<std::complex<double>*> v1, double* result)
+    void AngleFilter::filter_fn(int n, const std::vector<const std::complex<double>*>& v1, double* result)
     {
       for (int i = 0; i < n; i++)
-        result[i] = atan2(v1.at(0)[i].imag(), v1.at(0)[i].real());
+        result[i] = atan2(v1[0][i].imag(), v1[0][i].real());
     };
 
     AngleFilter::AngleFilter(std::vector<MeshFunctionSharedPtr<std::complex<double> > > solutions, std::vector<int> items)
