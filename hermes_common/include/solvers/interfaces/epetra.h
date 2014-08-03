@@ -36,6 +36,7 @@
 #include <EpetraExt_MatrixMatrix.h>
 #include <EpetraExt_RowMatrixOut.h>
 #include <EpetraExt_VectorOut.h>
+#include <Teuchos_TestForException.hpp>
 
 namespace Hermes
 {

@@ -202,6 +202,13 @@ project(hermes_common)
   # Add a target for a specified version of the Hermes library (REAL/COMPLEX, RELEASE/DEBUG),
   # and set its build properties (compile and link flags, installation directories).
   macro(BUILD_COMMON_LIB HERMES_COMMON_LIB BUILD_FLAGS)
+  
+    if(${CMAKE_CL_64})
+      if(WITH_MUMPS)
+        LINK_DIRECTORIES(${IFCONSOL_LIB_DIRECTORY})
+      endif()
+    endif()
+    
     if(${HERMES_STATIC_LIBS})
       add_library(${HERMES_COMMON_LIB} ${SRC} ${HEADERS})
     else()

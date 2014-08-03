@@ -43,7 +43,7 @@ Installation of MUMPS using MSVC is rather easy:
   
   - preparation
   
-    - download MUMPS from http://mumps.enseeiht.fr/MUMPS_4.10.0.tar.gz (if the link does not work, look for 4.10 version of MUMPS)
+    - download MUMPS from `<http://mumps.enseeiht.fr/MUMPS_4.10.0.tar.gz`_ (if the link does not work, look for 4.10 version of MUMPS)
     - download WinMUMPS utility from `<http://sourceforge.net/projects/winmumps/>`_.
     - download a Fortran compiler (e.g. `<http://software.intel.com/en-us/intel-fortran-studio-xe-evaluation-options)>`_.
     - download BLAS (Debug/Release, static/dynamic, 32-bit/64-bit as you like) from `<http://icl.cs.utk.edu/lapack-for-windows/lapack/index.html#libraries>`_.

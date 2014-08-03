@@ -41,9 +41,14 @@
       # MUMPS
       # Sequential version of MUMPS may be enabled by setting YES on the following line
       # and pointing to the package installation directory with MUMPS_ROOT.
+      # Winblas (any BLAS library) is also necessary.
+      # For Win64 platform, ifconsol.lib is also necessary (part of the hermes-windows repository).
       set(WITH_MUMPS NO)
         set(MUMPS_ROOT "d:/hpfem/hermes/dependencies")
         set(WINBLAS_ROOT "d:/hpfem/hermes/dependencies")
+        if(${CMAKE_CL_64}) # This means that the following is only for 64-bit build.
+          set(IFCONSOL_LIB_DIRECTORY "d:/hpfem/hermes/dependencies/lib")
+        endif(${CMAKE_CL_64})
 
       # Trilinos
       set(WITH_TRILINOS NO)
