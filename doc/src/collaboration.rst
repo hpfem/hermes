@@ -254,13 +254,3 @@ Also watch this `YouTube video <http://www.youtube.com/watch?v=OFkgSjRnay4>`_.
 by Scott Chacon.
 
 Good luck and let us know if you think that this document could be improved!
-
-
- 
-
-
-
-
-
-
-
