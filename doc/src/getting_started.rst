@@ -21,6 +21,7 @@ If something is not clear enough from the comments in the code, please see the s
 
 These examples (located in hermes2d/test_examples) are::
 
+    00-quickShow
     01-poisson
     02-poisson-newton
     03-navier-stokes
@@ -28,11 +29,15 @@ These examples (located in hermes2d/test_examples) are::
     05-hcurl-adapt
     06-system-adapt
     07-newton-heat-rk
-    08-eigenvalue
+    08-nonlinearity
     09-trilinos-nonlinear
     10-linear-advection-dg-adapt
-    11-FCT
-    12-transient-adapt
+    11-transient-adapt
+    12-picard
+    13-FCT
+    14-error-calculation
+    15-adaptivity-matrix-reuse-simple
+    16-adaptivity-matrix-reuse-layer-interior
     
 And these examples are well-documented showcase examples of how to use Hermes.
 

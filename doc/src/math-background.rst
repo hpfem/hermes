@@ -2,7 +2,7 @@ Mathematical Background
 ----------------------------------
 
 The main strength of Hermes is a modern adaptive higher-order 
-finite element technology.
+finite element technology combined with very easy-to-use implementation approaches.
 
 Features
 ~~~~~~~~
@@ -108,3 +108,31 @@ Same graphs as above but now in terms of CPU time:
    :figclass: align-center
    :alt: Image of incompressible viscous flow.
 
+
+Implementation point of view
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ * OpenMP parallelization
+ * C++ templates for unified handling of real and complex problems
+ * Own OpenGL visualization & VTK outputs of meshes, spaces, solutions
+ * User-friendly written easy-to-grasp code
+ * XML, BSON save / load of the most important classes
+ * Solvers interfaces: UMFPACK, PARALUTION, PETSc, MUMPS, …
+ * GMSH, ExodusII mesh formats
+ * Matlab, MatrixMarket matrix exports
+ * Well arranged doxygen documentation
+ * Exception safe API
+
+
+Presentation about Hermes given at ESCO 2014 conference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A number of presentations about Hermes have been given.
+  
+.. figure:: hermes2d/img/presentation.jpg
+   :align: center
+   :scale: 70% 
+   :figclass: align-center
+   :alt: Hermes presentation. 
+
+Here is a link to one of them: `<https://github.com/hpfem/hermes/tree/master-3.1/doc/HermesPresentation.pdf>`_.

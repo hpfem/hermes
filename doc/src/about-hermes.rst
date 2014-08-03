@@ -3,16 +3,14 @@ About Hermes
 
 Hermes is a free C++ library for rapid development of
 adaptive *hp*-FEM and *hp*-DG solvers for partial differential equations (PDE)
-and multiphysics PDE systems. The development team includes the 
-`hp-FEM group <http://hpfem.org/>`_ at the `University of Nevada, Reno <http://www.unr.edu>`_ 
-and their `collaborators <http://git.hpfem.org/hermes.git/blob/HEAD:/AUTHORS>`_ 
-from numerous places around the globe.
+and multiphysics PDE systems. The development team now includes mostly the department of Theory of Electrical Engineering at the University of West Bohemia in Pilsen (contact: korous@rice.zcu.cz), in the past the main development was done by the `hp-FEM group <http://hpfem.org/hermes>`_ at the `University of Nevada, Reno <http://www.unr.edu>`_.
+Information about further collaborators from numerous places around the globe can be found at `<http://www.hpfem.org/citing/>`_.
 
 A standard way to use Hermes is to write short C++ user programs 
 that use the functionality provided by the library, but for 
 those who prefer to use a graphical interface, the group located at the 
-University of West Bohemia develops a graphical Engineering tool based on Hermes2D: 
-`Agros2D <http://hpfem.org/agros2d/>`_. 
+University of West Bohemia also develops a graphical Engineering tool based on Hermes2D: 
+`Agros2D <http://agros2d.org/>`_. 
 
 .. figure:: img/agros.png
    :align: center 

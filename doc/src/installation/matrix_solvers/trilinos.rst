@@ -1,9 +1,7 @@
 Trilinos
 --------
 
-.. _Trilinos home page: http://trilinos.sandia.gov/
-.. _solvers repository: https://github.com/hpfem/solvers
-.. _manual: https://github.com/hpfem/solvers/raw/master/manuals/Trilinos10.6Tutorial.pdf
+.. _Trilinos home page: `<http://trilinos.sandia.gov/>`_.
 
 Linux
 ~~~~~
@@ -38,8 +36,9 @@ First of all - to build Trilinos, one needs LAPACK (CLAPACK) (see the optional p
 | Go to the Trilinos source directory.
 | 
 | In the following, replace {TPL_LAPACK_LIBRARIES}, {TPL_BLAS_LIBRARIES} with the full path to your lapack.lib and blas.lib without any quotes.
-| Also, replace {CMAKE_INSTALL_PREFIX} with either your dependency root, or any other folder where you want to install Trilinos packages.::
+| Also, replace {CMAKE_INSTALL_PREFIX} with either your dependency root, or any other folder where you want to install Trilinos packages.
 
+::
 
     mkdir build_dir
     cd build_dir

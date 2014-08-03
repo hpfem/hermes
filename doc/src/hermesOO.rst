@@ -1,6 +1,10 @@
 Hermes C++ object model - deriving your own specialized classes
 ---------------------------------------------------------------
 
+.. admonition:: DOXYGEN documentation
+
+    Anything that is written here can be much faster and in much more complex way read and understood from the Doxygen documentation - please, please, use it - many an hour has been spent to make Doxygen documentation a useful resource for programmers.
+
 There are several classes that represent some piece of the whole FEM discretization and calculation process that hold the custom informaion for a specific problem.
 
 Be sure to have checked the section "Typical example" that will give you an idea of the basics. This section is more technically focused.

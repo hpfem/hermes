@@ -250,7 +250,7 @@ Git and Github are very powerful tools and we covered just a tiny part
 of the story. After you familiarize yourself with the contents of
 this simple primer, read more in `Pro Git <http://progit.org/book/>`_.
 
-Also watch this `YouTube video <http://www.youtube.com/watch?v=OFkgSjRnay4>`_
+Also watch this `YouTube video <http://www.youtube.com/watch?v=OFkgSjRnay4>`_.
 by Scott Chacon.
 
 Good luck and let us know if you think that this document could be improved!

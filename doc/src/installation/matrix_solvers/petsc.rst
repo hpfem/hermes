@@ -1,9 +1,7 @@
 PETSc
 -----
 
-.. _PETSc home page: http://www.mcs.anl.gov/petsc/
-.. _solvers repository: https://github.com/hpfem/solvers
-.. _manual: https://github.com/hpfem/solvers/raw/master/manuals/petsc.pdf
+.. _PETSc home page: `<http://www.mcs.anl.gov/petsc/>`_.
 
 Linux
 ~~~~~

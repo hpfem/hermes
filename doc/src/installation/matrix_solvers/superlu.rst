@@ -1,13 +1,9 @@
 SuperLU
 --------
 
-.. _SuperLU home page: http://crd.lbl.gov/~xiaoye/SuperLU/
-.. _solvers repository: https://github.com/hpfem/solvers
-.. _manual: https://github.com/hpfem/solvers/raw/master/manuals/SuperLU.pdf
-
 Hermes currently supports two versions of the SuperLU library - the sequential
 one and the multithreaded one. Support for the MPI version will be added in the 
-future. Please visit the `SuperLU home page`_ for more information about the
+future. Please visit `<http://crd.lbl.gov/~xiaoye/SuperLU/>`_ for more information about the
 library.
 
 Linux

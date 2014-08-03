@@ -1,9 +1,7 @@
 Mumps
 -----
 
-.. _MUMPS home page: http://graal.ens-lyon.fr/MUMPS/index.php
-.. _solvers repository: https://github.com/hpfem/solvers
-.. _manual: https://github.com/hpfem/solvers/raw/master/manuals/MUMPS_4.9.2.pdf
+.. _MUMPS home page: `<http://graal.ens-lyon.fr/MUMPS/index.php>`_.
 
 Linux
 ~~~~~
@@ -46,9 +44,9 @@ Installation of MUMPS using MSVC is rather easy:
   - preparation
   
     - download MUMPS from http://mumps.enseeiht.fr/MUMPS_4.10.0.tar.gz (if the link does not work, look for 4.10 version of MUMPS)
-    - download WinMUMPS utility from http://sourceforge.net/projects/winmumps/
-    - download a Fortran compiler (e.g. http://software.intel.com/en-us/intel-fortran-studio-xe-evaluation-options)
-    - download BLAS (Debug/Release, static/dynamic, 32-bit/64-bit as you like) from http://icl.cs.utk.edu/lapack-for-windows/lapack/index.html#libraries
+    - download WinMUMPS utility from `<http://sourceforge.net/projects/winmumps/>`_.
+    - download a Fortran compiler (e.g. `<http://software.intel.com/en-us/intel-fortran-studio-xe-evaluation-options)>`_.
+    - download BLAS (Debug/Release, static/dynamic, 32-bit/64-bit as you like) from `<http://icl.cs.utk.edu/lapack-for-windows/lapack/index.html#libraries>`_.
     - you have to have Visual Studio version >= 2008
     - you have to have Python 2.6 or 2.7 available
 

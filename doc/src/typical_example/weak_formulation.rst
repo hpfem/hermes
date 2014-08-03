@@ -62,7 +62,7 @@ In this constructor::
 In those, the main methods to override are value(...), and ord(...), calculating the value and integration order respectively. It is a good idea to refer to the default forms (located in the library repository, with headers in hermes2d/include/weakform_library/*.h and the sources in hermes2d/src/weakform_library/*.cpp).
 The header is pretty self-explanatory::
 
-    // MatrixForm.
+    // MatrixFormVol - MatrixFormSurf differs in the use of GeomSurf instead of GeomVol.
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, 
       Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const;
         
@@ -77,8 +77,8 @@ The header is pretty self-explanatory::
         result += wt[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
     }
         
-    // VectorForm.
-    // Identical to MatrixForm, only the basis function is missing for obvious reasons.
+    // VectorFormVol - VectorFormSurf differs in the use of GeomSurf instead of GeomVol.
+    // Identical to MatrixFormVol, only the basis function is missing for obvious reasons.
     virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
         GeomVol<double> *e, Func<Scalar> **ext) const;
         
@@ -106,7 +106,7 @@ In these::
     GeomVol<double> *e
     // geometry attributes: coordinates, element size,
     // normal directions (for surface forms), you name it.
-    // - for volumetric forms (for surface forms one uses GeomSurf).
+    // - this is for volumetric forms (for surface forms one uses GeomSurf).
     // For more info about the class, see the developers documentation (in doxygen).
     
     Func<Scalar> **ext

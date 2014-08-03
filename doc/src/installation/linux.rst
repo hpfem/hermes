@@ -4,7 +4,19 @@ Linux
 Download and compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-[NEW] You can download a package directly from **`Hermes launchpad repository<https://launchpad.net/~lukas-korous/+archive/ubuntu/hermes>`_**
+.. figure:: ../hermes2d/img/redRow.jpg
+   :align: center
+   :scale: 100% 
+   :figclass: align-center
+
+.. admonition:: [NEW] - debian packages on Launchpad
+
+    You can download a package directly from `<https://launchpad.net/~lukas-korous/+archive/ubuntu/hermes>`_.
+
+.. figure:: ../hermes2d/img/redRow.jpg
+   :align: center
+   :scale: 100% 
+   :figclass: align-center
 
 The rest of the instructions here are for building Hermes from source.
 
@@ -26,7 +38,7 @@ For thread caching memory allocator from Google, see
     
   - TCMalloc
     
-      - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
+      - Get TCMalloc from the SVN repository at `<http://code.google.com/p/gperftools/source/checkout>`_.
       - Make & install
   
 To obtain the source code, clone the Git repository from Github::

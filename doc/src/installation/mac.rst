@@ -19,7 +19,7 @@ application which allows you to easily install and manage UNIX
 libraries and applications on your Mac) by doing the following:
 
   (a) Download and install MacPorts from 
-      http://www.macports.org/install.php.
+      `<http://www.macports.org/install.php>`_.
   (b) Do 'sudo port install suitesparse glew'.
   (c) If you don't already have git installed, do 
       'sudo port install git'.
@@ -31,7 +31,7 @@ above. Change to the directory where you want
 to download the Hermes source and clone the git repository either
 from the hpfem.org server::
 
-    git clone http://git.hpfem.org/git/hermes.git
+    git clone `<http://git.hpfem.org/git/hermes.git>`_.
 
 or from Github::
 

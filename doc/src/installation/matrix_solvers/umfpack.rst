@@ -1,7 +1,7 @@
 UMFpack
 -------
 
-.. _UMFPack home page: http://www.cise.ufl.edu/research/sparse/umfpack/
+.. _UMFPack home page: `<http://www.cise.ufl.edu/research/sparse/umfpack/>`_.
 
 Linux
 ~~~~~

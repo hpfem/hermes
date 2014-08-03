@@ -41,6 +41,6 @@ Secondly, the Finite Element space must be set on the computational mesh. One of
     // constant basis functions.
     SpaceSharedPtr<double> space(new L2Space<double>(mesh, 0));
     
-More about spaces can be found in the 'hermes-tutorial' documentation, section 'A-linear', chapter '02-space'.
+More about spaces can be found in the 'hermes-tutorial' documentation, section 'A-linear', chapter '02-space' and in the **Doxygen documentation**.
 
 More about Dirichlet boundary conditions can be found in the 'hermes-tutorial' documentation, section 'A-linear', chapter '04-bc-dirichlet', and for defining a non-constant custom boundary condition, see the chapter '07-general'.

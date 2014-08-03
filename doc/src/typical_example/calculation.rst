@@ -6,9 +6,9 @@ This is to illustrate the various classes and methods, and the best thing about 
 For details about time-dependent examples, and various aspects of that, see the 'hermes-tutorial' documentation, section 'C-transient'.
 For details about adaptive examples, and various aspects of that, see the 'hermes-tutorial' documentation, section 'D-adaptivity'.
 Right here we focus on the calculation::
-
-    double current_time = 'something';
-    double current_time_step = 'also something';
+ 
+    double current_time = 'some number';
+    double current_time_step = 'also some number';
     Time-loop
     {
       Adaptive-loop // not necessarily on each time step.
@@ -18,7 +18,7 @@ Right here we focus on the calculation::
         Space<double>* ref_space = construct_refined_space(&space);
       
         // WE ARE NOW HERE.
-        The calculation
+        // The calculation
         // WE ARE NOW HERE
         
         // do the adaptivity thing, see the adaptivity section of hermes-tutorial
@@ -116,8 +116,8 @@ Again, pretty much the same as in the LinearSolver case, but the solve() method 
     // "solver" is now an instance of RungeKutta<double>.
     solver.set_time(current_time);
     solver.set_time_tep(current_time_step);
-    // Yes! You are right, these can be used outside of the adaptivity loop!
     
+    // Yes! You are right, these can be used outside of the adaptivity loop!
     // Set the new Space.
     solver.set_space(ref_space);
     

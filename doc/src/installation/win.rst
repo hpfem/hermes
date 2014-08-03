@@ -4,7 +4,19 @@ Windows
 Download and compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-[NEW] You can download both the dependency libraries and header files, as well as Hermes libraries and header files from **`Hermes Windows binaries repository<https://github.com/l-korous/hermes-windows>`_**
+.. figure:: ../hermes2d/img/redRow.jpg
+   :align: center
+   :scale: 100% 
+   :figclass: align-center
+
+.. admonition:: [NEW] - prebuilt binaries
+
+    You can download both the dependency libraries and header files, as well as Hermes libraries and header files from `<https://github.com/l-korous/hermes-windows>`_.
+
+.. figure:: ../hermes2d/img/redRow.jpg
+   :align: center
+   :scale: 100% 
+   :figclass: align-center
 
 The rest of the instructions here are for building Hermes from source.
 
@@ -57,14 +69,14 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
 
   - XERCES
 
-    - Download Xerces 3.1.1 source code from http://xerces.apache.org/xerces-c/download.cgi.
+    - Download Xerces 3.1.1 source code from `<http://xerces.apache.org/xerces-c/download.cgi>`_.
     - Build using your favorite compiler.
     - Copy all bin files to 'bin' dependencies directory
     - Copy all header files to 'include' dependencies directory
     - Copy the lib files to 'lib' dependencies directory
 
   - XSD
-    - Download XSD library from http://www.codesynthesis.com/download/xsd/3.3/windows/i686/xsd-3.3.0-i686-windows.zip, instructions how to build the library are available at http://wiki.codesynthesis.com/Using_XSD_with_Microsoft_Visual_Studio.
+    - Download XSD library from http://www.codesynthesis.com/download/xsd/3.3/windows/i686/xsd-3.3.0-i686-windows.zip, instructions how to build the library are available at `<http://wiki.codesynthesis.com/Using_XSD_with_Microsoft_Visual_Studio>`_.
     - Copy all bin files to 'bin' dependencies directory
     - Copy all header files to 'include' dependencies directory
 
@@ -89,13 +101,13 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
     
   
 
-  - The rest is optional. If a directive WITH_BSON is *not* used, this step including all sub-steps can be skipped and you can proceed to `build Hermes <win.html#building-hermes>`_.
+  - The rest is optional. If a directive WITH_BSON is *not* used, this step including all sub-steps can be skipped and you can proceed to "**Building Hermes**".
 	
     - MATIO (1.5.2)
       
-      - Download HDF5 <http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.7/obtain5187.html>`_.
+      - Download HDF5 `<http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.7/obtain5187.html>`_.
       - Install HDF5, note the path (you will need it for MATIO)
-      - Download MATIO from <http://sourceforge.net/projects/matio/>`_.
+      - Download MATIO from `<http://sourceforge.net/projects/matio/>`_.
       - Open the sln file in the folder visual_studio
       - Add to the Include Directories under the libmatio project settings the directory where you installed HDF5's headers
       - Add to the Libraries Directories under the libmatio project settings the directory where you installed HDF5's libs
@@ -107,7 +119,7 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
     
       - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
       
-      - Download SCONS build tool from http://sourceforge.net/projects/scons/files/latest/download?source=files
+      - Download SCONS build tool from `<http://sourceforge.net/projects/scons/files/latest/download?source=files>`_.
       - Install SCONS (you need to have PYTHON installed for that), run it (e.g. issuing C:\Python27\Scripts\scons.bat) in the BSON Mongo driver root directory
       
         - Use flags --m32 and --c99 ("C:\Python27\Scripts\scons.bat --c99 --m32")
@@ -117,7 +129,7 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
     
     - TCMalloc
     
-      - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
+      - Get TCMalloc from the SVN repository at `<http://code.google.com/p/gperftools/source/checkout>`_.
       - Open gperftools.sln in your Visual Studio, build the appropriate version (default works fine - just select Debug/Release)
       - Copy Win32\"Release/Debug"\libtcmalloc_minimal.dll to 'bin' dependency directory, Win32\"Release/Debug"\libtcmalloc_minimal.lib to 'lib' dependency directory
       - Copy the contents of src/google to 'include' dependency directory
@@ -153,7 +165,7 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
     - CLAPACK
 
       - First, you need to install CLAPACK/CBLAS:
-      - Download the file clapack-3.2.1-CMAKE.tgz from http://www.netlib.org/clapack/.
+      - Download the file clapack-3.2.1-CMAKE.tgz from `<http://www.netlib.org/clapack/>`_.
       - Use cmake to configure and build the debug version of clapack.
       - Copy '\\clapack-3.2.1-CMAKE\\BLAS\\SRC\\Debug\\blas.lib', '\\clapack-3.2.1-CMAKE\\F2CLIBS\\libf2c\\Debug\\libf2c.lib', and '\\clapack-3.2.1-CMAKE\\SRC\\Debug\\lapack.lib' to 'lib' dependency directory.
       - Copy the contains of '\\clapack-3.2.1-CMAKE\\INCLUDE\\' to 'include' dependency directory.
@@ -180,7 +192,7 @@ Dependency check-list - 64-bit
 
   - XERCES
 
-    - Download Xerces 3.1.1 source code from http://xerces.apache.org/xerces-c/download.cgi.
+    - Download Xerces 3.1.1 source code from `<http://xerces.apache.org/xerces-c/download.cgi>`_.
     - Build using your favorite compiler for 64-bit.
     - Copy all bin files to 'bin' dependencies directory
     - Copy all header files to 'include' dependencies directory
@@ -188,7 +200,7 @@ Dependency check-list - 64-bit
     
     
   - XSD
-    - Download XSD library from http://www.codesynthesis.com/download/xsd/3.3/windows/i686/xsd-3.3.0-i686-windows.zip, instructions how to build the library are available at http://wiki.codesynthesis.com/Using_XSD_with_Microsoft_Visual_Studio.
+    - Download XSD library from http://www.codesynthesis.com/download/xsd/3.3/windows/i686/xsd-3.3.0-i686-windows.zip, instructions how to build the library are available at `<http://wiki.codesynthesis.com/Using_XSD_with_Microsoft_Visual_Studio>`_.
     - Build the x64 version
     - Copy all bin files to 'bin' dependencies directory
     - Copy all header files to 'include' dependencies directory
@@ -207,7 +219,7 @@ Dependency check-list - 64-bit
       - Download glew x64 precompiled binaries (http://glew.sourceforge.net/) and unpack it.
       - Copy 'my_glew_root\\bin\\glew32.dll', 'my_glew_root\\include\\GL\\\*.h', and 'my_glew_root\\lib\\glew32.lib' to 'bin', 'include\\GL', and 'lib' dependency directories respectively.
  	
-  - The rest is optional. If a directive WITH_BSON is *not* used, this step including all sub-steps can be skipped and you can proceed to `build Hermes <win.html#building-hermes>`_.
+  - The rest is optional. If a directive WITH_BSON is *not* used, this step including all sub-steps can be skipped and you can proceed to "**Building Hermes**".
   
     - MATIO (1.5.2)
       
@@ -215,7 +227,7 @@ Dependency check-list - 64-bit
       
     - TCMalloc
     
-      - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
+      - Get TCMalloc from the SVN repository at `<http://code.google.com/p/gperftools/source/checkout>`_.
       - Open gperftools.sln in your Visual Studio, build the appropriate version (default works fine - just select Debug/Release)
       - Copy x64\"Release/Debug"\libtcmalloc_minimal.dll to 'bin' dependency directory, x64\"Release/Debug"\libtcmalloc_minimal.lib to 'lib' dependency directory
       - Copy the contents of src/google to 'include' dependency directory
@@ -223,7 +235,7 @@ Dependency check-list - 64-bit
     - BSON
     
       - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
-      - Download SCONS build tool from http://sourceforge.net/projects/scons/files/latest/download?source=files
+      - Download SCONS build tool from `<http://sourceforge.net/projects/scons/files/latest/download?source=files>`_.
       - Install SCONS (you need to have PYTHON installed for that), run it (e.g. issuing C:\Python27\Scripts\scons.bat) in the BSON Mongo driver root directory
       
         - Use the flag --c99 ("C:\Python27\Scripts\scons.bat --c99")

@@ -32,15 +32,15 @@ Developer Documentation (in Doxygen)
 ------------------------------------
 The documentation is accessible online.
 
-     `Hermes - common code <http://hpfem.org/~hermes/hermes/hermes_common/doc/html/index.html>`_
+     `Hermes - common code <http://hpfem.org/~hermes/hermes/hermes_common/doc/html/index.html>`_.
 
-     `Hermes - 2D specific code <http://hpfem.org/~hermes/hermes/hermes2d/doc/html/index.html>`_
+     `Hermes - 2D specific code <http://hpfem.org/~hermes/hermes/hermes2d/doc/html/index.html>`_.
 
 
 In order to build developers documentation, install Doxygen::
 
     Linux: sudo apt-get install doxygen
-    Windows: http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.2-setup.exe
+    Windows: `<http://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.2-setup.exe>`_.
 
 There are separate Doxygen files for hermes-common (dimension-independent functionality
 such as matrix solvers) and for Hermes2D. To build the former, go to the directory 
@@ -58,7 +58,7 @@ Other Resources
 
 See the section "Citing Hermes" in this document for a representative selection of 
 books and scientific papers about Hermes. A more complete overview of publications 
-about Hermes and adaptive *hp*-FEM can be found in the `publications section <http://hpfem.org/people/>`_
+about Hermes and adaptive *hp*-FEM can be found in the `publications section <http://hpfem.org/people/>`_.
 at hpfem.org. The most recent list is probably the one 
 on `Pavel Solin's publications page <http://hpfem.org/~pavel/public/papers.html>`_.
 
