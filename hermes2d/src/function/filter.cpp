@@ -259,7 +259,7 @@ namespace Hermes
     template<typename Scalar>
     Func<Scalar>* SimpleFilter<Scalar>::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)
     {
-      std::vector<const Scalar> val;
+      std::vector<Scalar> val;
       for (int i = 0; i < this->solutions.size(); i++)
         val.push_back(this->solutions[i]->get_pt_value(x, y, use_MeshHashGrid, e)->val[0]);
 
