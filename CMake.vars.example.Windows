@@ -7,6 +7,7 @@
   # Global
   # Generate static libs (instead of dynamic)
   set(HERMES_STATIC_LIBS NO)
+  
   # Target path
   set(CMAKE_INSTALL_PREFIX "d:/hpfem/hermes/dependencies")
   

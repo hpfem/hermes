@@ -30,7 +30,11 @@ project(hermes)
 
     # Global
     # Generate static libs (instead of dynamic)
-    set(HERMES_STATIC_LIBS NO)
+    if(MSVC)
+      set(HERMES_STATIC_LIBS NO)
+    else()
+      set(HERMES_STATIC_LIBS YES)
+    endif()
       
     # HermesCommon
     # These are ignored for MSVC (where debug / release are handled differently)

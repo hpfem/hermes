@@ -5,8 +5,9 @@
 # BASIC CONFIGURATION
 
   # Global
-  # Generate static libs (instead of dynamic)
-  set(HERMES_STATIC_LIBS NO)
+  # Generate static libs (instead of dynamic - when this option is disabled, dynamic library is built and therefore you may encounter problems with static library dependencies)
+  set(HERMES_STATIC_LIBS YES)
+  
   # Target path
   set(CMAKE_INSTALL_PREFIX "/usr/local")
   
