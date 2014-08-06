@@ -135,4 +135,4 @@ A number of presentations about Hermes have been given.
    :figclass: align-center
    :alt: Hermes presentation. 
 
-Here is a link to one of them: `<https://github.com/hpfem/hermes/tree/master-3.1/doc/HermesPresentation.pdf>`_.
+Here is a link to one of them: `<https://github.com/l-korous/hermes/tree/master-3.1/doc/HermesPresentation.pdf?raw=true>`_.

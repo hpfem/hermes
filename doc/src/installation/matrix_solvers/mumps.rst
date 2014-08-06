@@ -9,17 +9,15 @@ Linux
 Using standard Debian packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For sequential version, install packages `libmumps-seq-4.9.2` and `libmumps-seq-dev`. 
-For parallel version, install `libmumps-4.9.2` and `libmumps-dev`. Newer versions 
-may be available. In Ubuntu 6.06 (Dapper)
-or newer, you can use the Synaptic package manager for that, or type::
+For sequential version, install package `libmumps-seq-dev`. 
+For parallel version, install `libmumps-dev` (this will require some changes in Hermes CMake configuration). In Ubuntu, you can use the Synaptic package manager for that, or type::
 
-   sudo apt-get install libmumps-seq-4.9.2 libmumps-seq-dev
+   sudo apt-get install libmumps-seq-dev
 
 for the sequential version and
 ::
 
-   sudo apt-get install libmumps-4.9.2 libmumps-dev
+   sudo apt-get install libmumps-dev
    
 for the parallel one.
 
