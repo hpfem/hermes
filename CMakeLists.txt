@@ -412,17 +412,16 @@ project(hermes)
     # FindLAPACK is Fortran-only so Fortran must be enabled as well.
     if(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
       if (NOT LAPACK_FOUND)
-          enable_language(Fortran)
-          find_package(LAPACK REQUIRED)
-              
-          # If no error occured, LAPACK library has been found. Save the path to
-          # it to cache, so that it will not be searched for during next 'cmake .'
-          set(LAPACK_LIBRARIES  ${LAPACK_LIBRARIES}
-                  CACHE STRING  "Path to LAPACK/BLAS libraries.")
-          set(LAPACK_FOUND      YES
-                  CACHE STRING  "Have LAPACK/BLAS libraries been found?")
+        enable_language(Fortran)
+        find_package(LAPACK REQUIRED)
+            
+        # If no error occured, LAPACK library has been found. Save the path to
+        # it to cache, so that it will not be searched for during next 'cmake .'
+        set(LAPACK_LIBRARIES  ${LAPACK_LIBRARIES}
+                CACHE STRING  "Path to LAPACK/BLAS libraries.")
+        set(LAPACK_FOUND      YES
+                CACHE STRING  "Have LAPACK/BLAS libraries been found?")
       endif (NOT LAPACK_FOUND)
-      
       add_definitions(-DWITH_BLAS)  
     endif(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
   endif(MSVC)
@@ -446,6 +445,9 @@ project(hermes)
     include_directories(${MUMPS_INCLUDE_DIR})
     set(MUMPS_LIBRARIES ${MUMPS_CPLX_LIBRARIES})
     LIST(APPEND MUMPS_LIBRARIES ${MUMPS_REAL_LIBRARIES})
+    if(NOT(MSVC))
+      LIST(APPEND MUMPS_LIBRARIES ${GFORTRAN_LIBRARY})
+    endif()
   endif(WITH_MUMPS)
 
   if(WITH_TRILINOS)
