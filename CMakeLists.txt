@@ -167,9 +167,9 @@ project(hermes)
   endif(${CMAKE_CL_64})
   
   # Allow to override the default values in CMake.vars:
-	include(CMake.vars OPTIONAL CMAKE_VARS_LOADED)
-  if(NOT(${CMAKE_VARS_LOADED}))
-    message(FATAL_ERROR "You need to have an CMake.vars file - see the documentation and the example CMake.vars.example.Windows|Linux files for instructions.")
+  include(CMake.vars OPTIONAL RESULT_VARIABLE CMAKE_VARS_LOADED)
+  if(${CMAKE_VARS_LOADED} MATCHES "NOTFOUND")
+    message(FATAL_ERROR "You need to have a CMake.vars file - see the documentation and the example CMake.vars.example.Windows|Linux files for instructions.")
   endif()
   include(../CMakeHermes.cmake OPTIONAL)
     
