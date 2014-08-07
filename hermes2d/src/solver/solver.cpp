@@ -86,7 +86,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solver<Scalar>::solve(std::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess)
+    void Solver<Scalar>::solve(std::vector<MeshFunctionSharedPtr<Scalar> > initial_guess)
     {
       Scalar* coeff_vec = new Scalar[Space<Scalar>::get_num_dofs(this->dp->get_spaces())];
       OGProjection<Scalar>::project_global(this->dp->get_spaces(), initial_guess, coeff_vec);

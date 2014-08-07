@@ -67,7 +67,7 @@ namespace Hermes
 
       /// Solve.
       /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
-      virtual void solve(std::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess);
+      virtual void solve(std::vector<MeshFunctionSharedPtr<Scalar> > initial_guess);
 
       /// set time information for time-dependent problems.
       virtual void set_time(double time);
