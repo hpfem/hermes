@@ -106,6 +106,11 @@ namespace Hermes
 
   int Api::get_integral_param_value(HermesCommonApiParam param)
   {
+    if (this->parameters.empty())
+    {
+      Hermes::Api temp_api;
+      return temp_api.get_integral_param_value(param);
+    }
     if (this->parameters.find(param) == parameters.end())
       throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
     if (this->parameters.find(param)->second->user_set)
