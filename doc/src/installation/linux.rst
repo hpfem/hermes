@@ -20,30 +20,13 @@ Download and compilation
 
 The rest of the instructions here are for building Hermes from source.
 
-If you are using a Debian-based system, install the (required) libraries first:
+If you are using a Debian-based system, install the (required) libraries first::
 
-.. sourcecode::
-    .
-
-    apt-get install git git-core cmake g++ freeglut3-dev libsuitesparse-dev libglew-dev libxerces-c-dev xsdcxx libmatio-dev
-
-If you want to use fast saving / loading of Hermes entities, install
-
-  - BSON
-  
-    - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip: `Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
-    - Compile and install using 'make install'
-
-For thread caching memory allocator from Google, see
-    
-  - TCMalloc
-    
-      - Get TCMalloc from the SVN repository at `<http://code.google.com/p/gperftools/source/checkout>`_.
-      - Make & install
+    apt-get install git git-core cmake g++ freeglut3-dev libsuitesparse-dev libglew-dev libxerces-c-dev xsdcxx libmatio-dev gfortran
   
 To obtain the source code, clone the Git repository from Github::
   
-    git clone git://github.com/hpfem/hermes.git
+    git clone https://github.com/hpfem/hermes.git
 
 These two repositories are synchronized. For more advanced users we recommend to 
 create a free account at `Github <http://github.com>`_ (if you do not have one yet),
@@ -104,6 +87,22 @@ In Eclipse:
     - Browse where your build tree is and select the root build tree directory. 
     - Keep "Copy projects into workspace" unchecked.
 
+Optional external packages
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[OPTIONAL] If you want to use fast saving / loading of Hermes entities, install
+
+  - BSON
+  
+    - Clone the BSON Mongo driver git repository from https://github.com/l-korous/mongo-c-driver.git (if you don't know how, here is a tip: `Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
+    - Compile and install using 'make install'
+
+[OPTIONAL] For thread caching memory allocator from Google, see
+    
+  - TCMalloc
+    
+      - Get TCMalloc from the SVN repository at `<http://code.google.com/p/gperftools/source/checkout>`_.
+      - Make & install
 
 Install Hermes
 ~~~~~~~~~~~~~~

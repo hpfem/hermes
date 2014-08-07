@@ -22,7 +22,7 @@ The rest of the instructions here are for building Hermes from source.
 
 To obtain the source code, clone the Git repository from Github::
   
-    git clone git://github.com/hpfem/hermes.git
+    git clone https://github.com/hpfem/hermes.git
     
 [IMPORTANT] As Hermes uses features of C++11 (such as initializer lists, nullptr_t, etc.), the only Visual Studio family compiler you can use is Visual Studio 2013 (both Express and 'Full' versions).
 
@@ -117,7 +117,7 @@ Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get th
       
     - BSON
     
-      - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
+      - Clone the BSON Mongo driver git repository from https://github.com/l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
       
       - Download SCONS build tool from `<http://sourceforge.net/projects/scons/files/latest/download?source=files>`_.
       - Install SCONS (you need to have PYTHON installed for that), run it (e.g. issuing C:\Python27\Scripts\scons.bat) in the BSON Mongo driver root directory
@@ -234,7 +234,7 @@ Dependency check-list - 64-bit
       
     - BSON
     
-      - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
+      - Clone the BSON Mongo driver git repository from `<https://github.com/l-korous/mongo-c-driver.git>`_ (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
       - Download SCONS build tool from `<http://sourceforge.net/projects/scons/files/latest/download?source=files>`_.
       - Install SCONS (you need to have PYTHON installed for that), run it (e.g. issuing C:\Python27\Scripts\scons.bat) in the BSON Mongo driver root directory
       

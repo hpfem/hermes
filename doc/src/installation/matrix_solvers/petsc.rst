@@ -20,7 +20,21 @@ following line (or append to the existing one)::
 
   set(WITH_PETSC YES)
 
-Finally execute::
+Finally execute
+
+[OPTIONAL] If you want to use fast saving / loading of Hermes entities, install
+
+  - BSON
+  
+    - Clone the BSON Mongo driver git repository from https://github.com/l-korous/mongo-c-driver.git (if you don't know how, here is a tip: `Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
+    - Compile and install using 'make install'
+
+[OPTIONAL] For thread caching memory allocator from Google, see
+    
+  - TCMalloc
+    
+      - Get TCMalloc from the SVN repository at `<http://code.google.com/p/gperftools/source/checkout>`_.
+      - Make & install::
   
   rm CMakeCache.txt
   cmake .

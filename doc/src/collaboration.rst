@@ -54,7 +54,7 @@ Once your public SSH key is registered at Github, you can
 clone the Hermes repository from your Github account to
 your local computer. This is done by typing::
 
-    git clone git@github.com:your_name/hermes.git
+    git clone https://github.com/your_name/hermes.git
 
 Now you can build Hermes as described in the Installation 
 section above. 
@@ -179,7 +179,7 @@ is to first push them to your Github fork and then send
 a pull request to the Hermes network. To push your 
 changes, type::
 
-    git push git@github.com:your_name/hermes.git test-1:test-1
+    git push https://github.com/your_name/hermes.git test-1:test-1
 
 This will push your local branch test-1 to a branch of the 
 same name at Github. Now you can go back to your Github account, 

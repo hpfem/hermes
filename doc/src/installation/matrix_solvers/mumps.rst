@@ -26,7 +26,7 @@ following line (or append to the existing one)::
 
   set(WITH_MUMPS YES)
 
-Finally execute::
+Finally execute (first line is deleting the CMake cache just to be sure we have a clean build)::
   
   rm CMakeCache.txt
   cmake .
