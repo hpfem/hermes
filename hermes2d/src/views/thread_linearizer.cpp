@@ -706,8 +706,8 @@ namespace Hermes
           while (i >= 0 && i < this->vertex_count)
           {
             if ((this->info[i][0] == p1 && this->info[i][1] == p2)
-              && (fabs(x - this->vertices[i][0]) < Hermes::HermesSqrtEpsilon)
-              && (fabs(y - this->vertices[i][1]) < Hermes::HermesSqrtEpsilon))
+              && (fabs(x - this->vertices[i][0]) < Hermes::HermesEpsilon)
+              && (fabs(y - this->vertices[i][1]) < Hermes::HermesEpsilon))
             {
               bool check_value = true;
               for (int k = 0; k < LinearizerDataDimensions::dimension; k++)

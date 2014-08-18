@@ -32,7 +32,7 @@ namespace Hermes
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
       virtual unsigned short get_max_index(ElementMode2D mode) const;
 
-      virtual unsigned char get_id() const { return 1; }
+      virtual unsigned char get_id() const { return HERMES_H1_JACOBI; }
 
       static const unsigned short max_index[H2D_NUM_MODES];
     };

@@ -132,6 +132,15 @@ namespace Hermes
       HERMES_INVALID_SPACE = -9999
     };
 
+    /// Important not to change the indices - used in an array enumeration
+    enum ShapesetType {
+      HERMES_H1_JACOBI = 0,
+      HERMES_L2_LEGENDRE = 1,
+      HERMES_L2_TAYLOR = 2,
+      HERMES_HDIV_LEGENDRE = 3,
+      HERMES_HCURL_GRADLEG = 4
+    };
+
     const char* spaceTypeToString(SpaceType spaceType);
     SpaceType spaceTypeFromString(const char* spaceTypeString);
 

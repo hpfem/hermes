@@ -46,6 +46,8 @@ namespace Hermes
 #define H2D_MAX_LOCAL_BASIS_SIZE_TRI 164
 #define H2D_MAX_LOCAL_BASIS_SIZE_QUAD 308
 #define H2D_MAX_LOCAL_BASIS_SIZE 308
+    /// Should be exactly the same as is the count of enum ShapesetType
+#define H2D_NUM_SHAPESETS 5
 
     /// \brief Defines a set of shape functions.
     ///

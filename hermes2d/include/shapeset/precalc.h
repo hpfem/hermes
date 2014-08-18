@@ -92,6 +92,7 @@ namespace Hermes
     /// \brief PrecalcShapesetAssembling common storage.
     class HERMES_API PrecalcShapesetAssemblingStorage
     {
+    public:
       PrecalcShapesetAssemblingStorage(Shapeset* shapeset);
       ~PrecalcShapesetAssemblingStorage();
       unsigned char shapeset_id;
@@ -103,6 +104,8 @@ namespace Hermes
       bool** PrecalculatedInfo[H2D_NUM_MODES];
       friend class PrecalcShapesetAssembling;
     };
+
+    HERMES_API extern PrecalcShapesetAssemblingStorage* PrecalcShapesetAssemblingTables[H2D_NUM_SHAPESETS];
 
     /// \brief PrecalcShapeset variant for fast assembling.
     class HERMES_API PrecalcShapesetAssembling : public PrecalcShapeset
@@ -155,11 +158,18 @@ namespace Hermes
     private:
       virtual void precalculate(unsigned short order, unsigned short mask);
 
-      static std::vector<PrecalcShapesetAssemblingStorage*> tables;
-
       PrecalcShapesetAssemblingStorage* storage;
 
       bool attempt_to_reuse(unsigned short order) const;
+    };
+
+    /// Intentionally not exported - for internal purposes.
+    /// Do not use,
+    class PrecalcShapesetAssemblingInternal : public PrecalcShapesetAssembling
+    {
+    public:
+      PrecalcShapesetAssemblingInternal(Shapeset* shapeset);
+      virtual ~PrecalcShapesetAssemblingInternal();
     };
   }
 }
