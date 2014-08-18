@@ -93,7 +93,7 @@ namespace Hermes
         /// Sets the criterion to use for the linearization process.
         /// This criterion is used in ThreadLinearizerMultidimensional class instances (see threadLinearizerMultidimensional array).
         /// \param[in] criterion The instance of the criterion - see the class LinearizerCriterion for details (method split_decision() for the adaptive criterion, process_[triangle|quad] for the fixed one).
-        void set_vectorizer_criterion(LinearizerCriterion criterion) { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
+        void set_vectorizer_criterion(LinearizerCriterion criterion) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

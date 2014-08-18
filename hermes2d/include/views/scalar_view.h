@@ -254,7 +254,7 @@ namespace Hermes
         void set_vertical_scaling(double sc) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_min_max_range(double min, double max) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         Linearizer* get_linearizer()  { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
-        void set_linearizer_criterion(LinearizerCriterion criterion) { throw Hermes::Exceptions::Exception("GLUT disabled."); return nullptr; }
+        void set_linearizer_criterion(LinearizerCriterion criterion) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

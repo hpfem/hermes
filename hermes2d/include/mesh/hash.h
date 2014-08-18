@@ -54,6 +54,8 @@ namespace Hermes
       /// Returns an edge node with parent id's p1 and p2 if it exists, nullptr otherwise.
       Node* peek_edge_node(int p1, int p2) const;
 
+      inline Array<Node> &get_nodes() { return nodes; }
+
     protected:
       HashTable();
       virtual ~HashTable();
