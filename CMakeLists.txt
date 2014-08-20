@@ -169,10 +169,12 @@ project(hermes)
   # Allow to override the default values in CMake.vars:
   include(CMake.vars OPTIONAL RESULT_VARIABLE CMAKE_VARS_LOADED)
   if(${CMAKE_VARS_LOADED} MATCHES "NOTFOUND")
-    message(FATAL_ERROR "You need to have a CMake.vars file - see the documentation and the example CMake.vars.example.Windows|Linux files for instructions.")
+    include(../CMakeHermes.cmake OPTIONAL RESULT_VARIABLE CMAKE_HERMES_LOADED)
+    if(${CMAKE_HERMES_LOADED} MATCHES "NOTFOUND")
+      message(FATAL_ERROR "You need to have a CMake.vars file - see the documentation and the example CMake.vars.example.Windows|Linux files for instructions.")
+    endif()
   endif()
-  include(../CMakeHermes.cmake OPTIONAL)
-    
+  
   set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
   if(WIN64)
     set(HERMES_COMMON_LIB  hermes_common_64)
