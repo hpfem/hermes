@@ -161,6 +161,7 @@ namespace Hermes
       PrecalcShapesetAssemblingStorage* storage;
 
       bool attempt_to_reuse(unsigned short order) const;
+      bool reuse_possible() const;
     };
 
     /// Intentionally not exported - for internal purposes.

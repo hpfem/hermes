@@ -87,6 +87,8 @@ namespace Hermes
         nb = this->quad_bubble_np;
       }
 
+      PrecalcShapesetAssembling ref_map_pss_static_temp(&ref_map_shapeset);
+      ref_map_pss_static_temp.set_active_element(ref_map_pss_static.get_active_element());
       for (unsigned short i = 0; i < nb; i++)
       {
         for (unsigned short j = i; j < nb; j++)
@@ -99,9 +101,9 @@ namespace Hermes
           ref_map_pss_static.set_quad_order(o, H2D_FN_VAL);
           const double* fni = ref_map_pss_static.get_fn_values();
 
-          ref_map_pss_static.set_active_shape(ij);
-          ref_map_pss_static.set_quad_order(o, H2D_FN_VAL);
-          const double* fnj = ref_map_pss_static.get_fn_values();
+          ref_map_pss_static_temp.set_active_shape(ij);
+          ref_map_pss_static_temp.set_quad_order(o, H2D_FN_VAL);
+          const double* fnj = ref_map_pss_static_temp.get_fn_values();
 
           double3* pt = g_quad_2d_std.get_points(o, mode);
           double val = 0.0;
