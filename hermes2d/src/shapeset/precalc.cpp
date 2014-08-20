@@ -246,7 +246,7 @@ namespace Hermes
 
     bool PrecalcShapesetAssembling::reuse_possible() const
     {
-      return false;// (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1);
+      return (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1);
     }
 
     const double* PrecalcShapesetAssembling::get_values(int component, unsigned short item) const
