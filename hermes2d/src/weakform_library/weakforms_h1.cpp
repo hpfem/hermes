@@ -338,26 +338,14 @@ namespace Hermes
       Scalar DefaultMatrixFormDiffusion<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
         Func<double> *v, GeomVol<double> *e, Func<Scalar> **ext) const
       {
+
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
-          for (int i = 0; i < n; i++) {
-            result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-          }
-        }
-        else {
-          if (gt == HERMES_AXISYM_X) {
-            for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-            }
-          }
-          else {
-            for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-            }
-          }
+        for (int i = 0; i < n; i++)
+        {
+          result += wt[i] * (8.854e-12*e->x[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
         }
 
-        return result * this->coeff->value(0.);
+        return result;
       }
 
       template<typename Scalar>
@@ -365,22 +353,9 @@ namespace Hermes
         GeomVol<Ord> *e, Func<Ord> **ext) const
       {
         Ord result = Ord(0);
-        if (gt == HERMES_PLANAR) {
-          for (int i = 0; i < n; i++) {
-            result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-          }
-        }
-        else {
-          if (gt == HERMES_AXISYM_X) {
-            for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-            }
-          }
-          else {
-            for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-            }
-          }
+        for (int i = 0; i < n; i++)
+        {
+          result += wt[i] * (8.854e-12*e->x[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]));
         }
 
         return result;

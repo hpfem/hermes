@@ -55,14 +55,14 @@ int main(int argc, char* argv[])
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
-  mloader.load("domain.xml", mesh);
+  mloader.load("mesh.msh", std::vector<MeshSharedPtr>({ mesh }));
 
   // Refine all elements, do it INIT_REF_NUM-times.
   for (unsigned int i = 0; i < INIT_REF_NUM; i++)
     mesh->refine_all_elements();
 
   // Initialize essential boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential({ "Bottom", "Inner", "Outer", "Left" }, FIXED_BDY_TEMP);
+  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(std::vector<std::string>({ "0", "1", "2", "3", "4", "5", "6" }), 1000);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Initialize space.
@@ -79,6 +79,8 @@ int main(int argc, char* argv[])
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(wf, space);
+  linear_solver.output_matrix();
+  linear_solver.output_rhs();
 
   // Solve the linear problem.
   try
