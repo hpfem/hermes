@@ -61,7 +61,7 @@ namespace Hermes
 
 #define GRID_SIZE 50
 
-    class MeshUtil
+    class HERMES_API MeshUtil
     {
     public:
       /// For internal use.

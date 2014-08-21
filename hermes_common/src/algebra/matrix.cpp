@@ -92,7 +92,7 @@ namespace Hermes
         for (unsigned int j = 0; j < n; j++)
         {
           double entry = mat[i * size + j];
-          if (entry > HermesEpsilon || entry < -HermesEpsilon)
+          if (entry != 0.)
           {
             if (rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
               add(rows[i], cols[j], entry);
@@ -109,7 +109,7 @@ namespace Hermes
         for (unsigned int j = 0; j < n; j++)
         {
           std::complex<double> entry = mat[i * size + j];
-          if (entry.real() > HermesEpsilon || entry.real() < -HermesEpsilon || entry.imag() > HermesEpsilon || entry.imag() < -HermesEpsilon)
+          if (entry != 0.)
           {
             if (rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
               add(rows[i], cols[j], mat[i * size + j]);
