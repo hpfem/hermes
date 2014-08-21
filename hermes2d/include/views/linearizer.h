@@ -78,7 +78,7 @@ namespace Hermes
         /// Iterator class.
         /// Use for iterating through the data structures distributed over threads
         template<typename T>
-        class Iterator
+        class HERMES_API Iterator
         {
         public:
           /// Constructor
