@@ -43,11 +43,20 @@ namespace Hermes
       template<typename Scalar> class HcurlProjBasedSelector;
     };
 
-#define H2D_MAX_LOCAL_BASIS_SIZE_TRI 164
+#ifdef HERMES_FOR_AGROS
+#define H2D_MAX_LOCAL_BASIS_SIZE_TRI 78
+#define H2D_MAX_LOCAL_BASIS_SIZE_QUAD 137
+#define H2D_MAX_LOCAL_BASIS_SIZE 137
+#define H2D_NUM_SHAPESETS 2
+#else
 #define H2D_MAX_LOCAL_BASIS_SIZE_QUAD 308
+#define H2D_MAX_LOCAL_BASIS_SIZE_TRI 164
 #define H2D_MAX_LOCAL_BASIS_SIZE 308
-    /// Should be exactly the same as is the count of enum ShapesetType
 #define H2D_NUM_SHAPESETS 5
+#endif
+
+    /// Should be exactly the same as is the count of enum ShapesetType
+
 
     /// \brief Defines a set of shape functions.
     ///
