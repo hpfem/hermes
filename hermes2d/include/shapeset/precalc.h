@@ -105,8 +105,6 @@ namespace Hermes
       friend class PrecalcShapesetAssembling;
     };
 
-    HERMES_API extern PrecalcShapesetAssemblingStorage* PrecalcShapesetAssemblingTables[H2D_NUM_SHAPESETS];
-
     /// \brief PrecalcShapeset variant for fast assembling.
     class HERMES_API PrecalcShapesetAssembling : public PrecalcShapeset
     {
