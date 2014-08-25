@@ -411,7 +411,7 @@ namespace Hermes
 
         sparse.nir = this->nnz;
         sparse.ir = Ai;
-        sparse.njc = this->size;
+        sparse.njc = this->size + 1;
         sparse.jc = Ap;
         sparse.ndata = this->nnz;
 
@@ -610,7 +610,7 @@ namespace Hermes
           this->nnz = sparse->nir;
           this->Ax = malloc_with_check<CSMatrix<Scalar>, Scalar>(this->nnz, this);
           this->Ai = malloc_with_check<CSMatrix<Scalar>, int>(this->nnz, this);
-          this->size = sparse->njc;
+          this->size = sparse->njc - 1;
           this->Ap = malloc_with_check<CSMatrix<Scalar>, int>(this->size + 1, this);
 
           void* data = nullptr;
