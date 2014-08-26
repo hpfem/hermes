@@ -21,8 +21,8 @@
 #include "function/function.h"
 #include "exceptions.h"
 #include "mixins2d.h"
-#include "discrete_problem/discrete_problem_helpers.h"
-#include "discrete_problem/discrete_problem_thread_assembler.h"
+#include "discrete_problem_helpers.h"
+#include "discrete_problem_thread_assembler.h"
 
 namespace Hermes
 {

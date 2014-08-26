@@ -57,7 +57,7 @@
 #include "mesh/traverse.h"
 
 #include "weakform/weakform.h"
-#include "discrete_problem.h"
+#include "discrete_problem/discrete_problem.h"
 #include "forms.h"
 
 #include "function/exact_solution.h"

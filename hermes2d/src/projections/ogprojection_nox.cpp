@@ -17,7 +17,7 @@
 */
 #include "projections/ogprojection_nox.h"
 #include "space.h"
-#include "discrete_problem.h"
+#include "discrete_problem/discrete_problem.h"
 #include "solver/nox_solver.h"
 #if(defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 
