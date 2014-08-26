@@ -187,7 +187,7 @@ project(hermes2d)
     src/weakform_library/weakforms_maxwell.cpp
     src/weakform_library/weakforms_neutronics.cpp
     
-    src/discrete_problem.cpp
+    src/discrete_problem/discrete_problem.cpp
     src/discrete_problem/discrete_problem_helpers.cpp    
     src/discrete_problem/discrete_problem_selective_assembler.cpp
     src/discrete_problem/discrete_problem_thread_assembler.cpp
@@ -322,7 +322,7 @@ project(hermes2d)
   
   SOURCE_GROUP(
     "Source Files\\Discrete Problem" FILES 
-    src/discrete_problem.cpp
+    src/discrete_problem/discrete_problem.cpp
     src/discrete_problem/discrete_problem_helpers.cpp
     src/discrete_problem/discrete_problem_selective_assembler.cpp
     src/discrete_problem/discrete_problem_thread_assembler.cpp
@@ -434,7 +434,7 @@ project(hermes2d)
     include/weakform_library/weakforms_maxwell.h
     include/weakform_library/weakforms_neutronics.h
     
-    include/discrete_problem.h
+    include/discrete_problem/discrete_problem.h
     include/discrete_problem/discrete_problem_helpers.h
     include/discrete_problem/discrete_problem_selective_assembler.h
     include/discrete_problem/discrete_problem_thread_assembler.h
@@ -571,7 +571,7 @@ project(hermes2d)
   
   SOURCE_GROUP(
     "Header Files\\Discrete Problem" FILES 
-    include/discrete_problem.h
+    include/discrete_problem/discrete_problem.h
     include/discrete_problem/discrete_problem_helpers.h
     include/discrete_problem/discrete_problem_selective_assembler.h
     include/discrete_problem/discrete_problem_thread_assembler.h

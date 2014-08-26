@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "discrete_problem.h"
+#include "discrete_problem/discrete_problem.h"
 #include "discrete_problem/dg/discrete_problem_dg_assembler.h"
 #include "function/exact_solution.h"
 #include "global.h"

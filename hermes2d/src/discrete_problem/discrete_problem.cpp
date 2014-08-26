@@ -15,7 +15,7 @@
 
 #include "discrete_problem/dg/discrete_problem_dg_assembler.h"
 #include "discrete_problem/discrete_problem_helpers.h"
-#include "discrete_problem.h"
+#include "discrete_problem/discrete_problem.h"
 #include "function/exact_solution.h"
 #include "mesh/traverse.h"
 #include "space/space.h"
