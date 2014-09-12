@@ -500,6 +500,10 @@ project(hermes)
     find_package(LIBIBERTY REQUIRED)
     include_directories(${LIBIBERTY_INCLUDE_DIR})
   endif()
+  
+  IF(HERMES_FOR_AGROS)
+    ADD_DEFINITIONS("-DHERMES_FOR_AGROS")
+  ENDIF(HERMES_FOR_AGROS)
 
   # Main CMakeLists.txt for each library are in the following directories.
   add_subdirectory(hermes_common)

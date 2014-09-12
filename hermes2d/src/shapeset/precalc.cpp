@@ -152,9 +152,15 @@ namespace Hermes
     }
 
     // This is a technical thing - to be able to share the storage
-    HERMES_API PrecalcShapesetAssemblingStorage* PrecalcShapesetAssemblingTables[H2D_NUM_SHAPESETS] = { nullptr, nullptr, nullptr, nullptr, nullptr };
+#ifdef HERMES_FOR_AGROS
+    static PrecalcShapesetAssemblingStorage* PrecalcShapesetAssemblingTables[H2D_NUM_SHAPESETS] = { nullptr, nullptr };
+#else
+    static PrecalcShapesetAssemblingStorage* PrecalcShapesetAssemblingTables[H2D_NUM_SHAPESETS] = { nullptr, nullptr, nullptr, nullptr, nullptr };
+#endif
 
-    PrecalcShapesetAssemblingInternal temp[H2D_NUM_SHAPESETS] = { PrecalcShapesetAssemblingInternal(new HcurlShapesetGradLeg), PrecalcShapesetAssemblingInternal(new HdivShapesetLegendre), PrecalcShapesetAssemblingInternal(new L2ShapesetLegendre), PrecalcShapesetAssemblingInternal(new L2ShapesetTaylor), PrecalcShapesetAssemblingInternal(new H1ShapesetJacobi) };
+#ifndef HERMES_FOR_AGROS
+    static PrecalcShapesetAssemblingInternal temp[H2D_NUM_SHAPESETS] = { PrecalcShapesetAssemblingInternal(new HcurlShapesetGradLeg), PrecalcShapesetAssemblingInternal(new HdivShapesetLegendre), PrecalcShapesetAssemblingInternal(new L2ShapesetLegendre), PrecalcShapesetAssemblingInternal(new L2ShapesetTaylor), PrecalcShapesetAssemblingInternal(new H1ShapesetJacobi) };
+#endif
 
     PrecalcShapesetAssemblingInternal::PrecalcShapesetAssemblingInternal(Shapeset* shapeset) : PrecalcShapesetAssembling(shapeset)
     {
@@ -165,7 +171,6 @@ namespace Hermes
       delete PrecalcShapesetAssemblingTables[(int)this->shapeset->get_id()];
       delete this->shapeset;
     }
-    //
 
     PrecalcShapesetAssembling::PrecalcShapesetAssembling(Shapeset* shapeset) : PrecalcShapeset(shapeset), storage(nullptr)
     {
@@ -246,7 +251,7 @@ namespace Hermes
 
     bool PrecalcShapesetAssembling::reuse_possible() const
     {
-      return false;// (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1);
+      return (this->index >= 0 && this->get_quad_2d()->get_id() == 1 && this->sub_idx == 0 && this->num_components == 1);
     }
 
     const double* PrecalcShapesetAssembling::get_values(int component, unsigned short item) const

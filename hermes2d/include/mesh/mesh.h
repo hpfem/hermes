@@ -32,7 +32,7 @@ namespace Hermes
     template<typename Scalar> class KellyTypeAdapt;
     struct MItem;
     struct Rect;
-    extern unsigned g_mesh_seq;
+    extern HERMES_API unsigned g_mesh_seq;
 
     namespace RefinementSelectors
     {

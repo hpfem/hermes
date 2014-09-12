@@ -14,7 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "solver/runge_kutta.h"
-#include "discrete_problem.h"
+#include "discrete_problem/discrete_problem.h"
 #include "projections/ogprojection.h"
 #include "norm_form.h"
 

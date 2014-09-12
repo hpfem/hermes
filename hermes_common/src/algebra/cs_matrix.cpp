@@ -410,9 +410,9 @@ namespace Hermes
           this->switch_orientation();
 
         sparse.nir = this->nnz;
-        sparse.ir = Ai;
-        sparse.njc = this->size;
-        sparse.jc = Ap;
+        sparse.ir = this->Ai;
+        sparse.njc = this->size + 1;
+        sparse.jc = (int *)this->Ap;
         sparse.ndata = this->nnz;
 
         size_t dims[2];

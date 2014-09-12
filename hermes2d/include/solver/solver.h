@@ -22,7 +22,7 @@
 #ifndef __H2D_SOLVER_H_
 #define __H2D_SOLVER_H_
 
-#include "discrete_problem.h"
+#include "discrete_problem/discrete_problem.h"
 #include "global.h"
 
 namespace Hermes
