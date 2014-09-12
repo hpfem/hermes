@@ -20,6 +20,7 @@
 #define __HERMES_COMMON_COMMON_H
 
 #include <complex>
+#include <vector>
 
 #include <stdexcept>
 #include <cstdarg>
@@ -50,7 +51,6 @@
 #endif
 #include <algorithm>
 #include <limits>
-#include <vector>
 #include <map>
 #include <set>
 #include <queue>
