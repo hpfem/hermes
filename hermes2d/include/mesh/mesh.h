@@ -66,7 +66,7 @@ namespace Hermes
       virtual ~Mesh();
 
       /// Initializes the mesh.
-      /// \param size[in] Hash table size; must be a power of two.
+      /// \param[in] size Hash table size; must be a power of two.
       void init(int size = H2D_DEFAULT_HASH_SIZE);
 
       /// State querying helpers.
@@ -132,10 +132,10 @@ namespace Hermes
       int get_num_edge_nodes() const;
 
       /// Get the mesh bounding box.
-      /// \param [out] bottom_left_x Bottom left corner - x coordinate.
-      /// \param [out] bottom_left_y Bottom left corner - y coordinate.
-      /// \param [out] top_right_x Top right corner - x coordinate.
-      /// \param [out] top_right_y Top right corner - y coordinate.
+      /// \param[out]  bottom_left_x Bottom left corner - x coordinate.
+      /// \param[out]  bottom_left_y Bottom left corner - y coordinate.
+      /// \param[out]  top_right_x Top right corner - x coordinate.
+      /// \param[out]  top_right_y Top right corner - y coordinate.
       void get_bounding_box(double& bottom_left_x, double& bottom_left_y, double& top_right_x, double& top_right_y);
 
       /// For internal use.
@@ -147,15 +147,15 @@ namespace Hermes
 
 #pragma region refinements
       /// Refines an element.
-      /// \param id[in] Element id number.
-      /// \param refinement[in] Ignored for triangles. If the element
+      /// \param[in] id Element id number.
+      /// \param[in] refinement Ignored for triangles. If the element
       /// is a quad, 0 means refine in both directions, 1 means refine
       /// horizontally (with respect to the reference domain), 2 means
       /// refine vertically.
       void refine_element_id(int id, int refinement = 0);
 
       /// Refines all elements.
-      /// \param refinement[in] Same meaning as in refine_element_id().
+      /// \param[in] refinement Same meaning as in refine_element_id().
       void refine_all_elements(int refinement = 0, bool mark_as_initial = false);
 
       /// Selects elements to refine according to a given criterion and
@@ -211,7 +211,7 @@ namespace Hermes
       public:
         /// Constructor.
         /// \param[in] coarse_mesh The coarse (original) mesh.
-        /// \param refinement[in] Ignored for triangles. If the element
+        /// \param[in] refinement Ignored for triangles. If the element
         /// is a quad, 0 means refine in both directions, 1 means refine
         /// horizontally (with respect to the reference domain), 2 means
         /// refine vertically.
