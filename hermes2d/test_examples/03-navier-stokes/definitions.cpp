@@ -71,16 +71,12 @@ public:
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, GeomVol<double> *e, Func<double> **ext) const{
       double result = int_grad_u_grad_v<double, double>(n, wt, u, v) / Reynolds;
-      if(!Stokes)
-        result += int_u_v<double, double>(n, wt, u, v) / time_step;
       return result;
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, GeomVol<Ord> *e, Func<Ord> **ext) const
     {
       Ord result = int_grad_u_grad_v<Ord, Ord>(n, wt, u, v) / Reynolds;
-      if(!Stokes)
-        result += int_u_v<Ord, Ord>(n, wt, u, v) / time_step;
       return result;
     }
 
@@ -185,19 +181,11 @@ public:
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<double> **ext) const{
       double result = 0;
-      if(!Stokes) {
-        Func<double>* vel_prev_time = ext[2]; // this form is used with both velocity components
-        result = int_u_v<double, double>(n, wt, vel_prev_time, v) / time_step;
-      }
       return result;
     }
 
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, GeomVol<Ord> *e, Func<Ord> **ext) const {
       Ord result = Ord(0);
-      if(!Stokes) {
-        Func<Ord>* vel_prev_time = ext[2]; // this form is used with both velocity components
-        result = int_u_v<Ord, Ord>(n, wt, vel_prev_time, v) / time_step;
-      }
       return result;
     }
     
@@ -268,8 +256,6 @@ public:
 
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, GeomVol<double> *e, Func<double> **ext) const{
       double result = int_grad_u_grad_v<double, double>(n, wt, u, v) / Reynolds;
-      if(!Stokes)
-        result += int_u_v<double, double>(n, wt, u, v) / time_step;
       return result;
     }
 
@@ -510,8 +496,7 @@ public:
         result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dx[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
-          result += wt[i] * (((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step )
-          + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
+          result += wt[i] * (xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i];
       return result;
     }
 
@@ -526,8 +511,7 @@ public:
         result += wt[i] * ((xvel_prev_newton->dx[i] * v->dx[i] + xvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dx[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
-          result += wt[i] * (((xvel_prev_newton->val[i] - xvel_prev_time->val[i]) * v->val[i] / time_step)
-          + ((xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i]));
+          result += wt[i] * (xvel_prev_newton->val[i] * xvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * xvel_prev_newton->dy[i]) * v->val[i];
       return result;
     }
     
@@ -559,8 +543,7 @@ public:
         result += wt[i] * ((yvel_prev_newton->dx[i] * v->dx[i] + yvel_prev_newton->dy[i] * v->dy[i]) / Reynolds - (p_prev_newton->val[i] * v->dy[i]));
       if(!Stokes)
         for (int i = 0; i < n; i++)
-          result += wt[i] * (((yvel_prev_newton->val[i] - yvel_prev_time->val[i]) * v->val[i] / time_step )
-          + ((xvel_prev_newton->val[i] * yvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]) * v->val[i]));
+          result += wt[i] * (xvel_prev_newton->val[i] * yvel_prev_newton->dx[i] + yvel_prev_newton->val[i] * yvel_prev_newton->dy[i]) * v->val[i];
       return result;
     }
 
@@ -648,11 +631,8 @@ public:
       };
 
       virtual double value(double x, double y) const {
-        double val_y = vel_inlet * y*(H-y) / (H/2.)/(H/2.);
-        if (current_time <= startup_time) 
-          return val_y * current_time/startup_time;
-        else 
-          return val_y;
+        double val_y = -x*(1-x);
+        return val_y / 4.;
       };
 
 protected:

@@ -2,20 +2,18 @@
 
 // Load the mesh.
 MeshSharedPtr mesh(new Mesh);
-MeshReaderH2D mloader;
-mloader.load("domain.mesh", mesh);
+MeshReaderH2DXML mloader;
+mloader.load("domain.xml", mesh);
 
 // Initial mesh refinements.
-mesh->refine_towards_boundary(BDY_OBSTACLE, 2, false);
-mesh->refine_towards_boundary(BDY_TOP, 2, true);     // '4' is the number of levels,
-mesh->refine_towards_boundary(BDY_BOTTOM, 2, true);  // 'true' stands for anisotropic refinements.
-mesh->refine_all_elements();
+for (int i = 0; i < INIT_REF; i++)
+    mesh->refine_all_elements();
 
 // Initialize boundary conditions.
-EssentialBCNonConst bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
-Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_other_vel_x({ BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE }, 0.0);
+EssentialBCNonConst bc_left_vel_x(BDY_TOP, VEL_INLET, H, STARTUP_TIME);
+Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_other_vel_x(std::vector<std::string>({ BDY_LEFT, BDY_RIGHT }), 0.0);
 Hermes::Hermes2D::EssentialBCs<double> bcs_vel_x({ &bc_left_vel_x, &bc_other_vel_x });
-Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_vel_y({ BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE }, 0.0);
+Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_vel_y(std::vector<std::string>({ BDY_LEFT, BDY_RIGHT }), 0.0);
 Hermes::Hermes2D::EssentialBCs<double> bcs_vel_y(&bc_vel_y);
 Hermes::Hermes2D::EssentialBCs<double> bcs_pressure;
 
@@ -59,9 +57,8 @@ wf->set_ext({ xvel_prev_time, yvel_prev_time });
 wf->set_u_ext_fn({fn_0, fn_1});
 
 // Initialize views.
-Views::VectorView vview("velocity[m/s]", new Views::WinGeom(0, 0, 750, 240));
-Views::ScalarView pview("pressure[Pa]", new Views::WinGeom(0, 290, 750, 240));
-vview.set_min_max_range(0, 1.6);
+Views::VectorView vview("velocity[m/s]", new Views::WinGeom(0, 0, 350, 240));
+Views::ScalarView pview("pressure[Pa]", new Views::WinGeom(0, 290, 350, 240));
 vview.fix_scale_width(80);
 //pview.set_min_max_range(-0.9, 1.0);
 pview.fix_scale_width(80);

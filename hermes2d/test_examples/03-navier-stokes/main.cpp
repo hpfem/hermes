@@ -54,8 +54,10 @@ const int P_INIT_VEL = 2;
 // P_INIT_PRESSURE because of the inf-sup condition.
 const int P_INIT_PRESSURE = 1;
 
+const int INIT_REF = 0;
+
 // Reynolds number.
-const double RE = 200.0;
+const double RE = 3.;
 
 // Inlet velocity (reached after STARTUP_TIME).
 const double VEL_INLET = 1.0;
@@ -77,10 +79,10 @@ const double NEWTON_TOL = 1e-3;
 const double H = 5;
 
 // Boundary markers.
-const std::string BDY_BOTTOM = "1";
-const std::string BDY_RIGHT = "2";
-const std::string BDY_TOP = "3";
-const std::string BDY_LEFT = "4";
+const std::string BDY_BOTTOM = "0";
+const std::string BDY_RIGHT = "3";
+const std::string BDY_TOP = "2";
+const std::string BDY_LEFT = "1";
 const std::string BDY_OBSTACLE = "5";
 
 // Weak forms.
@@ -117,14 +119,17 @@ int main(int argc, char* argv[])
 
   // Newton method setup:
   // - max allowed iterations
-  newton.set_max_allowed_iterations(10);
+  newton.set_max_allowed_iterations(10000);
   // - no damping
   newton.set_manual_damping_coeff(true, 1.0);
   // - nonlinear tolerance (absolute)
-  newton.set_tolerance(1e-3, Hermes::Solvers::ResidualNormAbsolute);
-
+  newton.set_tolerance(1e-14, Hermes::Solvers::ResidualNormAbsolute);
+  newton.output_matrix();
+  newton.output_rhs();
   // Time-stepping loop:
-  for (int ts = 1; ts <= T_FINAL / TAU; ts++)
+
+
+  for (int ts = 1; ts <= 1; ts++)
   {
     current_time += TAU;
     Hermes::Mixins::Loggable::Static::info("Time step %i, time %f.", ts, current_time);
@@ -148,5 +153,6 @@ int main(int argc, char* argv[])
     pview.show(p_prev_time);
   }
 
+  Views::View::wait();
   return 0;
 }
