@@ -336,23 +336,23 @@ namespace Hermes
 
           current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, this->local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof, H2D_MAX_LOCAL_BASIS_SIZE * 2);
         }
-      }
 
-      for (int i = 0; i < this->spaces_size; i++)
-      {
-        for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
+        for (int i = 0; i < this->spaces_size; i++)
         {
-          if (ext_asmlist[i]->dof[func_i] < 0)
-            continue;
-          delete testFunctions[i][func_i];
+          for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
+          {
+            if (ext_asmlist[i]->dof[func_i] < 0)
+              continue;
+            delete testFunctions[i][func_i];
+          }
+          delete ext_asmlist[i];
+          free_with_check(testFunctions[i]);
         }
-        delete ext_asmlist[i];
-        free_with_check(testFunctions[i]);
       }
 
       free_with_check(testFunctions);
       free_with_check(ext_asmlist);
-
+      
       if (current_rhs && DG_vector_forms_present)
       {
         for (unsigned int ww = 0; ww < wf->vfDG.size(); ww++)
