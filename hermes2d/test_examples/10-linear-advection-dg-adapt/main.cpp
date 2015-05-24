@@ -1,38 +1,31 @@
 #include "definitions.h"
 
-//  This example solves a linear advection equation using Dicontinuous Galerkin (DG) method.
-//  It is intended to show how evalutation of surface matrix forms that take basis functions defined
-//  on different elements work. It is the same example as linear-advection-dg, but with automatic adaptivity.
-//
-//  PDE: \nabla \cdot (\Beta u) = 0, where \Beta = (-x_2, x_1) / |x| represents a circular counterclockwise flow field.
-//
-//  Domain: Square (0, 1) x (0, 1).
-//
-//  BC:    Dirichlet, u = 1 where \Beta(x) \cdot n(x) < 0, that is on[0,0.5] x {0}, and g = 0 anywhere else.
-//
-//  The following parameters can be changed:
+/*
+
+Flux
+
+\begin{eqnarray}
+\int_{\partial K} \mathbf{f}\left(u\right) v \cdot \mathbf{n} & = & 	\int_{\partial K} \left(\frac{1}{2}{u^2},\ \frac{1}{2}{u^2}\right) v \cdot \mathbf{n} \\ & \approx &
+\int_{\partial K} \frac{1}{2}\left(\frac{1}{2}{u_R}^2 + \frac{1}{2}{u_L}^2,\ \frac{1}{2}{u_R}^2 + \frac{1}{2}{u_L}^2\right) v \cdot \mathbf{n} \\ & - &
+\int_{\partial K} \max \left\{|\nabla \left({u_R}^2\right)|, |\nabla \left({u_L}^2\right)|\right\} \left(u_R - u_L\right)\ v
+\end{eqnarray}
+
+*/
 
 // Number of initial uniform mesh refinements.
-const int INIT_REF = 1;
+const int INIT_REF = 3;
 // Initial polynomial degrees of mesh elements in vertical and horizontal directions.
-int P_INIT = 1;
-// This is a quantitative parameter of the adapt(...) function and
-// it has different meanings for various adaptive strategies.
-const double THRESHOLD = 0.5;
-// Use Taylor shapeset - which does not have order > 2 implemented.
-// This switches to h-adaptivity & turns on Vertex-based limiting.
-bool USE_TAYLOR_SHAPESET = false;
+int P_INIT = 0;
 
-// Error calculation & adaptivity.
-DefaultErrorCalculator<double, HERMES_L2_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
-// Stopping criterion for an adaptivity step.
-AdaptStoppingCriterionSingleElement<double> stoppingCriterion(THRESHOLD);
-// Adaptivity processor class.
-Adapt<double> adaptivity(&errorCalculator, &stoppingCriterion);
-// Predefined list of element refinement candidates.
-const CandList CAND_LIST = USE_TAYLOR_SHAPESET ? H2D_H_ANISO : H2D_HP_ANISO;
-// Stopping criterion for adaptivity.
-const double ERR_STOP = 1e-2;
+// Final time
+const double T_initial = 0.;
+const double T_final = 5.;
+
+// Time step
+const double T_step = 1.e-5;
+
+bool START_FROM_ZERO = true;
+int EVERY_NTH_STEP = 200;
 
 int main(int argc, char* args[])
 {
@@ -46,55 +39,42 @@ int main(int argc, char* args[])
     mesh->refine_all_elements();
 
   // Create an L2 space.
-  SpaceSharedPtr<double> fine_space(new L2Space<double>(mesh, USE_TAYLOR_SHAPESET ? std::max(P_INIT, 2) : P_INIT, (USE_TAYLOR_SHAPESET ? (Shapeset*)(new L2ShapesetTaylor) : (Shapeset*)(new L2ShapesetLegendre))));
+  SpaceSharedPtr<double> space(new L2Space<double>(mesh, P_INIT));
 
-  // Initialize refinement selector.
-  L2ProjBasedSelector<double> selector(CAND_LIST);
-  selector.set_error_weights(1., 1., 1.);
-
+  MeshFunctionSharedPtr<double> prev_sln(START_FROM_ZERO ? (ExactSolution<double>*)new ZeroSolution<double>(mesh) : (ExactSolution<double>*)new CustomExactSolution(mesh));
   MeshFunctionSharedPtr<double> sln(new Solution<double>);
-  MeshFunctionSharedPtr<double> refsln(new Solution<double>);
 
   // Initialize the weak formulation.
-  WeakFormSharedPtr<double> wf(new CustomWeakForm("Bdy_bottom_left", mesh));
+  WeakFormSharedPtr<double> wf(new CustomWeakForm(prev_sln, mesh));
+  wf->set_current_time_step(T_step);
+
   ScalarView view1("Solution", new WinGeom(900, 0, 450, 350));
   view1.fix_scale_width(60);
 
   // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver;
-  linear_solver.set_weak_formulation(wf);
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(wf, space);
+  linear_solver.set_verbose_output(false);
+  //linear_solver.output_matrix();
+  //linear_solver.output_rhs();
 
-  adaptivity.set_space(fine_space);
-
-  int as = 1; bool done = false;
-  do
+  double t = T_initial;
+  int time_step_counter = 0;
+  for (; t < T_final;)
   {
-    // Construct globally refined reference mesh
-    // and setup reference space->
-    Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
-    MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-
-    Space<double>::ReferenceSpaceCreator refspace_creator(fine_space, ref_mesh, 0);
-    SpaceSharedPtr<double> refspace = refspace_creator.create_ref_space();
-
-    // Solve the linear system. If successful, obtain the solution.
     try
     {
-      linear_solver.set_space(refspace);
+      t += T_step;
+      if (time_step_counter++ % EVERY_NTH_STEP == 0)
+        std::cout << "Iteration: " << time_step_counter << ", Current time : " << t << std::endl;
+
+      linear_solver.set_time(t);
+
       linear_solver.solve();
 
-      if (USE_TAYLOR_SHAPESET)
-      {
-        PostProcessing::VertexBasedLimiter limiter(refspace, linear_solver.get_sln_vector(), P_INIT);
-        refsln = limiter.get_solution();
-      }
-      else
-      {
-        Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), refspace, refsln);
-      }
+      Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), space, prev_sln);
 
-      view1.show(refsln);
-      OGProjection<double>::project_global(fine_space, refsln, sln, HERMES_L2_NORM);
+      if (time_step_counter % EVERY_NTH_STEP == 0)
+        view1.show(prev_sln);
     }
     catch (Exceptions::Exception& e)
     {
@@ -104,21 +84,8 @@ int main(int argc, char* args[])
     {
       std::cout << e.what();
     }
-
-    // Calculate element errors and total error estimate.
-    errorCalculator.calculate_errors(sln, refsln);
-    double err_est_rel = errorCalculator.get_total_error_squared() * 100;
-
-    std::cout << "Error: " << err_est_rel << "%." << std::endl;
-
-    // If err_est_rel too large, adapt the mesh->
-    if (err_est_rel < ERR_STOP)
-      done = true;
-    else
-      done = adaptivity.adapt(&selector);
-    as++;
-  } while (done == false);
-
+  }
+  
   // Wait for keyboard or mouse input.
   View::wait();
   return 0;
