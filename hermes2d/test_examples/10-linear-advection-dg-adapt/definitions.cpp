@@ -117,7 +117,7 @@ Scalar CustomWeakForm::CustomVectorFormInterface::vector_form(int n, double *wt,
     result -= wt[i] * 0.25 * (ext[0]->fn_central->val[i] * ext[0]->fn_central->val[i] + ext[0]->fn_neighbor->val[i] * ext[0]->fn_neighbor->val[i]) * v->val[i] * (e->nx[i] + e->ny[i]);
     double grad_central = std::sqrt(ext[0]->fn_central->dx[i] * ext[0]->fn_central->dx[i] + ext[0]->fn_central->dy[i] * ext[0]->fn_central->dy[i]);
     double grad_neighbor = std::sqrt(ext[0]->fn_neighbor->dx[i] * ext[0]->fn_neighbor->dx[i] + ext[0]->fn_neighbor->dy[i] * ext[0]->fn_neighbor->dy[i]);
-    result += wt[i] * 0.5 * std::max(grad_central, grad_neighbor) * (ext[0]->fn_central->val[i] - ext[0]->fn_neighbor->val[i]) * v->val[i];
+    result += wt[i] * 0.5 * std::max(ext[0]->fn_central->val[i], ext[0]->fn_neighbor->val[i]) * (ext[0]->fn_central->val[i] - ext[0]->fn_neighbor->val[i]) * v->val[i];
   }
   return result;
 }

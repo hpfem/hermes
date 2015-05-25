@@ -22,17 +22,17 @@ const double T_initial = 0.;
 const double T_final = 5.;
 
 // Time step
-const double T_step = 1.e-5;
+const double T_step = 2.5e-6;
 
-bool START_FROM_ZERO = true;
-int EVERY_NTH_STEP = 200;
+bool START_FROM_ZERO = false;
+int EVERY_NTH_STEP = 20000;
 
 int main(int argc, char* args[])
 {
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
-  mloader.load("square.mesh", mesh);
+  mloader.load("square-triangular.mesh", mesh);
 
   // Perform initial mesh refinement.
   for (int i = 0; i < INIT_REF; i++)
@@ -57,6 +57,8 @@ int main(int argc, char* args[])
   //linear_solver.output_matrix();
   //linear_solver.output_rhs();
 
+  Linearizer lin(LinearizerOutputType::FileExport);
+
   double t = T_initial;
   int time_step_counter = 0;
   for (; t < T_final;)
@@ -74,7 +76,17 @@ int main(int argc, char* args[])
       Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), space, prev_sln);
 
       if (time_step_counter % EVERY_NTH_STEP == 0)
+      {
         view1.show(prev_sln);
+        std::stringstream ss;
+        ss << "Solution-";
+        ss << time_step_counter << "(t=" << t << "s).tcp";
+        lin.save_solution_tecplot(prev_sln, ss.str().c_str(), "Sln");
+        ss.clear();
+        ss << "Solution-";
+        ss << time_step_counter << "(t=" << t << "s).vtk";
+        lin.save_solution_vtk(prev_sln, ss.str().c_str(), "Sln");
+      }
     }
     catch (Exceptions::Exception& e)
     {

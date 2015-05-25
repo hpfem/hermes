@@ -28,7 +28,7 @@ namespace Hermes
     static const std::string H2D_DG_INNER_EDGE = "-1234567";
 
     template<typename Scalar>
-    unsigned int DiscreteProblemDGAssembler<Scalar>::dg_order = 20;
+    unsigned int DiscreteProblemDGAssembler<Scalar>::dg_order = 0;
 
     template<typename Scalar>
     DiscreteProblemDGAssembler<Scalar>::DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const std::vector<SpaceSharedPtr<Scalar> > spaces, std::vector<MeshSharedPtr>& meshes)
