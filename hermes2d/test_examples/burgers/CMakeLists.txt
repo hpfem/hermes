@@ -1,4 +1,4 @@
-project(10-linear-advection-dg-adapt)
+project(10-burgers)
 
 add_executable(${PROJECT_NAME} main.cpp definitions.cpp)
 

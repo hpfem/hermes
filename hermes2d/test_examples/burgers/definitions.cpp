@@ -1,3 +1,9 @@
+// ext[0] is the previous solution.
+// u is the solution function, v is the test function currently in hand.
+// u, v, and ext[0] have values (->val[i]), derivatives (->dx[i], dy[i]), [i] is the index of the integration point (there are n integration points, in this case just one)
+// wt are integration weights
+// ext[0]->fn_central, ext[0]->fn_neighbor: on internal edges, this represents the value on the currently assembled element (central), and the neighbor.
+// 
 #include "definitions.h"
 
 // u = -x - y + t - 1
@@ -114,10 +120,9 @@ Scalar CustomWeakForm::CustomVectorFormInterface::vector_form(int n, double *wt,
 
   for (int i = 0; i < n; i++)
   {
-    result -= wt[i] * 0.25 * (ext[0]->fn_central->val[i] * ext[0]->fn_central->val[i] + ext[0]->fn_neighbor->val[i] * ext[0]->fn_neighbor->val[i]) * v->val[i] * (e->nx[i] + e->ny[i]);
-    double grad_central = std::sqrt(ext[0]->fn_central->dx[i] * ext[0]->fn_central->dx[i] + ext[0]->fn_central->dy[i] * ext[0]->fn_central->dy[i]);
-    double grad_neighbor = std::sqrt(ext[0]->fn_neighbor->dx[i] * ext[0]->fn_neighbor->dx[i] + ext[0]->fn_neighbor->dy[i] * ext[0]->fn_neighbor->dy[i]);
-    result += wt[i] * 0.5 * std::max(ext[0]->fn_central->val[i], ext[0]->fn_neighbor->val[i]) * (ext[0]->fn_central->val[i] - ext[0]->fn_neighbor->val[i]) * v->val[i];
+    result += wt[i] * 0.25 * (ext[0]->fn_central->val[i] * ext[0]->fn_central->val[i] + ext[0]->fn_neighbor->val[i] * ext[0]->fn_neighbor->val[i]) * v->val[i] * (e->nx[i] + e->ny[i]);
+    
+    result -= wt[i] * 0.5 * std::max(ext[0]->fn_central->val[i], ext[0]->fn_neighbor->val[i]) * (ext[0]->fn_neighbor->val[i] - ext[0]->fn_central->val[i]) * v->val[i];
   }
   return result;
 }
@@ -147,7 +152,8 @@ double CustomWeakForm::CustomVectorFormSurface::value(int n, double *wt, Func<do
   for (int i = 0; i < n; i++)
   {
     double exact_sln_value = -e->x[i] - e->y[i] + this->wf->get_current_time() - 1.;
-    result -= wt[i] * 0.25 * (ext[0]->val[i] * ext[0]->val[i] + exact_sln_value * exact_sln_value) * v->val[i] * (e->nx[i] + e->ny[i]);
+    result += wt[i] * 0.25 * (ext[0]->val[i] * ext[0]->val[i] + exact_sln_value * exact_sln_value) * v->val[i] * (e->nx[i] + e->ny[i]);
+    result -= wt[i] * 0.5 * std::max(ext[0]->val[i], exact_sln_value) * (exact_sln_value - ext[0]->val[i]) * v->val[i];
   }
   return result;
 }
