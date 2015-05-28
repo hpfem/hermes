@@ -20,7 +20,7 @@ IF(WITH_TRILINOS)
 	add_subdirectory("09-trilinos-nonlinear")
 ENDIF(WITH_TRILINOS)
 
-add_subdirectory("10-linear-advection-dg-adapt")
+add_subdirectory("10-burgers")
 
 add_subdirectory("11-transient-adapt")
 

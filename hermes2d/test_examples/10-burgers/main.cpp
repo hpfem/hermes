@@ -22,7 +22,7 @@ const double T_initial = 0.;
 const double T_final = 5.;
 
 // Time step
-const double T_step = 1e-5;
+const double T_step = 1e-4;
 
 bool START_FROM_ZERO = false;
 int EVERY_NTH_STEP = 2000;
@@ -80,12 +80,12 @@ int main(int argc, char* args[])
         view1.show(prev_sln);
         std::stringstream ss;
         ss << "Solution-";
-        ss << time_step_counter << ".tcp";
-        lin.save_solution_tecplot(prev_sln, ss.str().c_str(), "Sln");
+        ss << (time_step_counter / EVERY_NTH_STEP) << ".tcp";
+        //lin.save_solution_tecplot(prev_sln, ss.str().c_str(), "Sln");
         ss.clear();
         ss.str(std::string());
         ss << "Solution-";
-        ss << time_step_counter << ".vtk";
+        ss << (time_step_counter / EVERY_NTH_STEP) << ".vtk";
         lin.save_solution_vtk(prev_sln, ss.str().c_str(), "Sln");
       }
     }
