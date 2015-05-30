@@ -61,7 +61,7 @@ int main(int argc, char* args[])
 
   double t = T_initial;
   int time_step_counter = 0;
-  for (; t < T_final;)
+  for (; t <= T_final + (T_step / 2.);)
   {
     try
     {
@@ -75,7 +75,7 @@ int main(int argc, char* args[])
 
       Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), space, prev_sln);
 
-      if (time_step_counter % EVERY_NTH_STEP == 0)
+      if (time_step_counter % EVERY_NTH_STEP == 0 || t > T_final - (T_step / 2))
       {
         view1.show(prev_sln);
         std::stringstream ss;
@@ -86,7 +86,7 @@ int main(int argc, char* args[])
         ss.str(std::string());
         ss << "Solution-";
         ss << (time_step_counter / EVERY_NTH_STEP) << ".vtk";
-        lin.save_solution_vtk(prev_sln, ss.str().c_str(), "Sln");
+        lin.save_solution_vtk(prev_sln, ss.str().c_str(), "Sln", false);
       }
     }
     catch (Exceptions::Exception& e)
