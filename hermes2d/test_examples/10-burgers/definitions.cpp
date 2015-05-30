@@ -92,7 +92,7 @@ Scalar CustomWeakForm::CustomVectorFormVol::vector_form(int n, double *wt, Func<
   for (int i = 0; i < n; i++) {
     result += wt[i] * 0.5 * ext[0]->val[i] * ext[0]->val[i] * (v->dx[i] + v->dy[i]);
     double f_value = 1. - 2. * (this->wf->get_current_time() - e->x[i] - e->y[i] - 1.);
-    result + wt[i] * f_value * v->val[i];
+    result += wt[i] * f_value * v->val[i];
   }
   return result;
 }
@@ -122,7 +122,7 @@ Scalar CustomWeakForm::CustomVectorFormInterface::vector_form(int n, double *wt,
 
   for (int i = 0; i < n; i++)
   {
-    result += wt[i] * 0.25 * (ext[0]->fn_central->val[i] * ext[0]->fn_central->val[i] + ext[0]->fn_neighbor->val[i] * ext[0]->fn_neighbor->val[i]) * v->val[i] * (e->nx[i] + e->ny[i]);
+    result -= wt[i] * 0.25 * (ext[0]->fn_central->val[i] * ext[0]->fn_central->val[i] + ext[0]->fn_neighbor->val[i] * ext[0]->fn_neighbor->val[i]) * v->val[i] * (e->nx[i] + e->ny[i]);
 
     result += wt[i] * 0.5 * std::max(std::abs(ext[0]->fn_central->val[i]), std::abs(ext[0]->fn_neighbor->val[i])) * (ext[0]->fn_neighbor->val[i] - ext[0]->fn_central->val[i]) * v->val[i] * std::abs(e->nx[i] + e->ny[i]);
   }
@@ -154,7 +154,7 @@ double CustomWeakForm::CustomVectorFormSurface::value(int n, double *wt, Func<do
   for (int i = 0; i < n; i++)
   {
     double exact_sln_value = -e->x[i] - e->y[i] + this->wf->get_current_time() - 1.;
-    result += wt[i] * 0.25 * (ext[0]->val[i] * ext[0]->val[i] + exact_sln_value * exact_sln_value) * v->val[i] * (e->nx[i] + e->ny[i]);
+    result -= wt[i] * 0.25 * (ext[0]->val[i] * ext[0]->val[i] + exact_sln_value * exact_sln_value) * v->val[i] * (e->nx[i] + e->ny[i]);
     result += wt[i] * 0.5 * std::max(std::abs(ext[0]->val[i]), std::abs(exact_sln_value)) * (exact_sln_value - ext[0]->val[i]) * v->val[i] * std::abs(e->nx[i] + e->ny[i]);
   }
   return result;
