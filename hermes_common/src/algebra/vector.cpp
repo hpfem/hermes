@@ -452,7 +452,7 @@ namespace Hermes
     void SimpleVector<double>::add(unsigned int idx, double y)
     {
         if(y != 0.0)
-        {
+	        {
 #pragma omp atomic
             this->v[idx] += y;
         }

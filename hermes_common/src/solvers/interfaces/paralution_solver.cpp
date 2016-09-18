@@ -69,7 +69,18 @@ namespace Hermes
     void ParalutionMatrix<Scalar>::alloc()
     {
       CSRMatrix<Scalar>::alloc();
+
+	  // This is here because PARALUTION for some reason NULLs these at the end of SetDataPtrCSR routine.
+	  int* ap = this->Ap;
+	  int* ai = this->Ai;
+	  Scalar* ax = this->Ax;
+
       this->paralutionMatrix.SetDataPtrCSR(&this->Ap, &this->Ai, &this->Ax, "paralutionMatrix", this->nnz, this->size, this->size);
+
+	  // This is here because PARALUTION for some reason NULLs these at the end of SetDataPtrCSR routine.
+	  this->Ap = ap;
+	  this->Ai = ai;
+	  this->Ax = ax;
     }
 
     template<typename Scalar>
@@ -81,7 +92,10 @@ namespace Hermes
     ParalutionVector<Scalar>::ParalutionVector(unsigned int size) : SimpleVector<Scalar>(size), paralutionVector(new paralution::LocalVector<Scalar>)
     {
       this->alloc(size);
-      this->paralutionVector->SetDataPtr(&this->v, "paralutionVector", this->size);
+	  // This is here because PARALUTION for some reason NULLs these at the end of SetDataPtrCSR routine.
+	  Scalar* v_ = this->v;
+	  this->paralutionVector->SetDataPtr(&this->v, "paralutionVector", this->size);
+	  this->v = v_;
     }
 
     template<typename Scalar>
@@ -89,8 +103,11 @@ namespace Hermes
     {
       SimpleVector<Scalar>::alloc(n);
       this->paralutionVector->Clear();
+	  // This is here because PARALUTION for some reason NULLs these at the end of SetDataPtrCSR routine.
+	  Scalar* v_ = this->v;
       this->paralutionVector->SetDataPtr(&this->v, "vector", this->size);
-    }
+	  this->v = v_;
+	}
 
     template<typename Scalar>
     ParalutionVector<Scalar>::~ParalutionVector()

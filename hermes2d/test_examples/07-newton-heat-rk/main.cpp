@@ -43,7 +43,7 @@ const double NEWTON_TOL = 1e-5;
 // Damping factor for the Newton's method.
 const double NEWTON_DF = .8;
 // Maximum allowed number of Newton iterations.
-const int max_allowed_iterations = 100;
+const int NEWTON_MAX_ITER = 100;
 
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number
 // in the name of each method is its order. The one before last, if present, is the number of stages.

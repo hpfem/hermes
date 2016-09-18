@@ -61,7 +61,7 @@ const double ERR_STOP = 5e-2;
 // Stopping criterion for Newton on fine mesh->
 const double NEWTON_TOL = 1e-5;
 // Maximum allowed number of Newton iterations.
-const int max_allowed_iterations = 20;
+const int NEWTON_MAX_ITER = 20;
 
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number
 // in the name of each method is its order. The one before last, if present, is the number of stages.

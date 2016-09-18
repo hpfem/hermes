@@ -31,7 +31,7 @@ namespace Hermes
         throw Exceptions::NullException(2);
 
       // Initialize linear solver.
-      Hermes::Hermes2D::LinearSolver<Scalar> linear_solver(wf, space);
+      Hermes::Hermes2D::LinearSolver<Scalar> linear_solver(wf, space, true);
       linear_solver.set_verbose_output(false);
 
       // Perform Newton iteration.

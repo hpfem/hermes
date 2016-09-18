@@ -1,7 +1,5 @@
 #include "hermes2d.h"
 
-//#define USE_PARALUTION
-
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
 
@@ -54,82 +52,130 @@ const int P_INIT_VEL = 2;
 // P_INIT_PRESSURE because of the inf-sup condition.
 const int P_INIT_PRESSURE = 1;
 
-const int INIT_REF = 0;
-
 // Reynolds number.
-const double RE = 3.;
+const double RE = 200.0;
 
 // Inlet velocity (reached after STARTUP_TIME).
 const double VEL_INLET = 1.0;
-
-// Current time (used in weak forms).
-double current_time = 0;
 
 // During this time, inlet velocity increases gradually
 // from 0 to VEL_INLET, then it stays constant.
 const double STARTUP_TIME = 1.0;
 
-// Time step.
-const double TAU = 0.1;
-// Time interval length.
-const double T_FINAL = 10.0;
-// Stopping criterion for the Newton's method.
-const double NEWTON_TOL = 1e-3;
-// Domain height (necessary to define the parabolic velocity profile at inlet).
-const double H = 5;
+const double TAU = 0.01;                           // Time step.
+const double T_FINAL = 1.0;                      // Time interval length.
+const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
+const int NEWTON_MAX_ITER = 10;            // Maximum allowed number of Newton iterations.
+const double H = 5;                               // Domain height (necessary to define the parabolic
+// velocity profile at inlet).
 
 // Boundary markers.
-const std::string BDY_BOTTOM = "0";
-const std::string BDY_RIGHT = "3";
-const std::string BDY_TOP = "2";
-const std::string BDY_LEFT = "1";
+const std::string BDY_BOTTOM = "1";
+const std::string BDY_RIGHT = "2";
+const std::string BDY_TOP = "3";
+const std::string BDY_LEFT = "4";
 const std::string BDY_OBSTACLE = "5";
+
+// Current time (used in weak forms).
+double current_time = 0;
 
 // Weak forms.
 #include "definitions.cpp"
 
 int main(int argc, char* argv[])
 {
-  // This either enables PARALUTION or leaves the default UMFPACK.
-#ifdef USE_PARALUTION
   HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
+
+  // Load the mesh.
+  MeshSharedPtr mesh(new Mesh);
+  MeshReaderH2D mloader;
+  mloader.load("domain.mesh", mesh);
+
+  // Initial mesh refinements.
+  mesh->refine_towards_boundary(BDY_OBSTACLE, 2, false);
+  mesh->refine_towards_boundary(BDY_TOP, 2, true);     // '4' is the number of levels,
+  mesh->refine_towards_boundary(BDY_BOTTOM, 2, true);  // 'true' stands for anisotropic refinements.
+  mesh->refine_all_elements();
+
+  // Initialize boundary conditions.
+  EssentialBCNonConst bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
+  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_other_vel_x(std::vector<std::string>({ BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE }), 0.0);
+  Hermes::Hermes2D::EssentialBCs<double> bcs_vel_x({ &bc_left_vel_x, &bc_other_vel_x });
+  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_vel_y(std::vector<std::string>({ BDY_LEFT, BDY_BOTTOM, BDY_TOP, BDY_OBSTACLE }), 0.0);
+  Hermes::Hermes2D::EssentialBCs<double> bcs_vel_y(&bc_vel_y);
+  Hermes::Hermes2D::EssentialBCs<double> bcs_pressure;
+
+  // Spaces for velocity components and pressure.
+  SpaceSharedPtr<double> xvel_space(new H1Space<double>(mesh, &bcs_vel_x, P_INIT_VEL));
+  SpaceSharedPtr<double> yvel_space(new H1Space<double>(mesh, &bcs_vel_y, P_INIT_VEL));
+#ifdef PRESSURE_IN_L2
+  SpaceSharedPtr<double> p_space(new L2Space<double> (mesh, P_INIT_PRESSURE));
+#else
+  SpaceSharedPtr<double> p_space(new H1Space<double> (mesh, &bcs_pressure, P_INIT_PRESSURE));
 #endif
 
-#include "setup.cpp"
+  // Calculate and report the number of degrees of freedom.
+  std::vector<SpaceSharedPtr<double> > spaces({ xvel_space, yvel_space, p_space });
+
+  int ndof = Space<double>::get_num_dofs(spaces);
+
+  // Define projection norms.
+  NormType vel_proj_norm = HERMES_H1_NORM;
+#ifdef PRESSURE_IN_L2
+  NormType p_proj_norm = HERMES_L2_NORM;
+#else
+  NormType p_proj_norm = HERMES_H1_NORM;
+#endif
+
+  // Solutions for the Newton's iteration and time stepping.
+  MeshFunctionSharedPtr<double> xvel_prev_time(new ConstantSolution<double> (mesh, 0.0));
+  MeshFunctionSharedPtr<double> yvel_prev_time(new ConstantSolution<double> (mesh, 0.0));
+  MeshFunctionSharedPtr<double> p_prev_time(new ConstantSolution<double> (mesh, 0.0));
+  std::vector<MeshFunctionSharedPtr<double> > sln_prev_time = { xvel_prev_time, yvel_prev_time, p_prev_time };
+
+  // Initialize weak formulation.
+  WeakFormNSNewton wf(STOKES, RE, TAU, xvel_prev_time, yvel_prev_time);
+  UExtFunctionSharedPtr<double> fn_0(new CustomUExtFunction(0));
+  UExtFunctionSharedPtr<double> fn_1(new CustomUExtFunction(1));
+  wf.set_ext({ xvel_prev_time, yvel_prev_time });
+  wf.set_u_ext_fn({ fn_0, fn_1 });
 
   // Initialize the Newton solver.
-  Hermes::Hermes2D::NewtonSolver<double> newton(wf, spaces);
-  //newton.output_matrix();
-  newton.set_matrix_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);
-  newton.set_rhs_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);
-  //newton.output_rhs();
-  // Verbose.
+  Hermes::Hermes2D::NewtonSolver<double> newton;
   newton.get_linear_matrix_solver()->set_verbose_output(true);
-
-#ifdef USE_PARALUTION
-  // Relative tolerance of PARALUTION.
-  newton.get_linear_matrix_solver()->as_IterSolver()->set_tolerance(1e-8, Solvers::LoopSolverToleranceType::RelativeTolerance);
-  // Use GMRES.
-  newton.get_linear_matrix_solver()->as_IterSolver()->set_solver_type(Solvers::IterSolverType::BiCGStab);
-  // Max iterations -> 10000
-  newton.get_linear_matrix_solver()->as_IterSolver()->set_max_iters(10000);
-  // Use Saddle-point preconditioner.
+  newton.get_linear_matrix_solver()->as_IterSolver()->set_solver_type(Solvers::IterSolverType::GMRES);
   newton.get_linear_matrix_solver()->as_IterSolver()->set_precond(new Preconditioners::ParalutionPrecond<double>(Preconditioners::PreconditionerType::SaddlePoint));
-#endif
+  newton.get_linear_matrix_solver()->as_IterSolver()->set_tolerance(.5, Hermes::Solvers::LoopSolverToleranceType::RelativeTolerance);
 
-  // Newton method setup:
-  // - max allowed iterations
-  newton.set_max_allowed_iterations(10000);
-  // - no damping
-  newton.set_manual_damping_coeff(true, 1.0);
-  // - nonlinear tolerance (absolute)
-  newton.set_tolerance(1e-14, Hermes::Solvers::ResidualNormAbsolute);
-  newton.output_matrix();
-  newton.output_rhs();
+  newton.set_weak_formulation(&wf);
+  newton.set_spaces(spaces);
+
+  // Initialize views.
+  Views::VectorView vview("velocity[m/s]", new Views::WinGeom(0, 0, 750, 240));
+  Views::ScalarView pview("pressure[Pa]", new Views::WinGeom(0, 290, 750, 240));
+  vview.set_min_max_range(0, 1.6);
+  vview.fix_scale_width(80);
+  //pview.set_min_max_range(-0.9, 1.0);
+  pview.fix_scale_width(80);
+  if(HERMES_VISUALIZATION)
+    pview.show_mesh(true);
+
+  // Project the initial condition on the FE space to obtain initial
+  // coefficient vector for the Newton's method.
+  double* coeff_vec = new double[Space<double>::get_num_dofs(spaces)];
+  OGProjection<double> ogProjection;
+
+  ogProjection.project_global(spaces, sln_prev_time, coeff_vec, { vel_proj_norm, vel_proj_norm, p_proj_norm });
+
+  newton.set_max_allowed_iterations(NEWTON_MAX_ITER);
+  newton.set_manual_damping_coeff(true, .5);
+  newton.set_tolerance(NEWTON_TOL, Hermes::Solvers::NonlinearConvergenceMeasurementType::ResidualNormRatioToInitial);
+  newton.set_max_steps_with_reused_jacobian(0);
+
   // Time-stepping loop:
-
-
-  for (int ts = 1; ts <= 1; ts++)
+  char title[100];
+  int num_time_steps = T_FINAL / TAU;
+  for (int ts = 1; ts <= num_time_steps; ts++)
   {
     current_time += TAU;
     Hermes::Mixins::Loggable::Static::info("Time step %i, time %f.", ts, current_time);
@@ -137,22 +183,32 @@ int main(int argc, char* argv[])
     // Update time-dependent essential BCs.
     newton.set_time(current_time);
 
-    // Solve Newton.
-    newton.solve(coeff_vec);
+    // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
+    try
+    {
+      newton.solve(coeff_vec);
+    }
+    catch(Hermes::Exceptions::Exception& e)
+    {
+      e.print_msg();
+    }
 
-    // Get the solutions.
     Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), spaces, sln_prev_time);
 
-    // Visualization.
-    vview.set_title("Velocity, time %g", current_time);
-    //vview.get_vectorizer()->set_criterion(Views::LinearizerCriterionFixed(2));
-    vview.show(xvel_prev_time, yvel_prev_time);
-
-    pview.set_title("Pressure, time %g", current_time);
-    //pview.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(2));
-    pview.show(p_prev_time);
+    // Show the solution at the end of time step.
+    if(HERMES_VISUALIZATION)
+    {
+      sprintf(title, "Velocity, time %g", current_time);
+      vview.set_title(title);
+      vview.show(xvel_prev_time, yvel_prev_time);
+      sprintf(title, "Pressure, time %g", current_time);
+      pview.set_title(title);
+      pview.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(1));
+      pview.show(p_prev_time, H2D_FN_DX_0);
+    }
   }
 
-  Views::View::wait();
+  delete [] coeff_vec;
+
   return 0;
 }

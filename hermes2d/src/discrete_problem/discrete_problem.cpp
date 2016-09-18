@@ -29,29 +29,29 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_, std::vector<SpaceSharedPtr<Scalar> > spaces, bool to_set, bool dirichlet_lift_accordingly)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_, std::vector<SpaceSharedPtr<Scalar> > spaces, bool to_set, bool dirichlet_lift_accordingly, bool use_direct_for_Dirichlet_lift)
     {
-      this->init(to_set, dirichlet_lift_accordingly);
+      this->init(to_set, dirichlet_lift_accordingly, use_direct_for_Dirichlet_lift);
       this->set_spaces(spaces);
       this->set_weak_formulation(wf_);
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_, SpaceSharedPtr<Scalar> space, bool to_set, bool dirichlet_lift_accordingly)
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakFormSharedPtr<Scalar> wf_, SpaceSharedPtr<Scalar> space, bool to_set, bool dirichlet_lift_accordingly, bool use_direct_for_Dirichlet_lift)
     {
-      this->init(to_set, dirichlet_lift_accordingly);
+      this->init(to_set, dirichlet_lift_accordingly, use_direct_for_Dirichlet_lift);
       this->set_space(space);
       this->set_weak_formulation(wf_);
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(bool to_set, bool dirichlet_lift_accordingly)
+    DiscreteProblem<Scalar>::DiscreteProblem(bool to_set, bool dirichlet_lift_accordingly, bool use_direct_for_Dirichlet_lift)
     {
-      init(to_set, dirichlet_lift_accordingly);
+      init(to_set, dirichlet_lift_accordingly, use_direct_for_Dirichlet_lift);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init(bool to_set, bool dirichlet_lift_accordingly)
+    void DiscreteProblem<Scalar>::init(bool to_set, bool dirichlet_lift_accordingly, bool use_direct_for_Dirichlet_lift)
     {
       this->reassembled_states_reuse_linear_system = nullptr;
 
@@ -64,7 +64,7 @@ namespace Hermes
         this->add_dirichlet_lift = this->nonlinear;
 
       if (this->add_dirichlet_lift)
-        this->dirichlet_lift_rhs = create_vector<Scalar>(false);
+        this->dirichlet_lift_rhs = create_vector<Scalar>(use_direct_for_Dirichlet_lift);
       else
         this->dirichlet_lift_rhs = nullptr;
 

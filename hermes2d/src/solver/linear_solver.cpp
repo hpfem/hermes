@@ -43,7 +43,7 @@ namespace Hermes
     template<typename Scalar>
     LinearSolver<Scalar>::LinearSolver(WeakFormSharedPtr<Scalar> wf, SpaceSharedPtr<Scalar> space, bool force_use_direct_solver) : Solver<Scalar>(false), Hermes::Solvers::MatrixSolver<Scalar>(force_use_direct_solver)
     {
-      this->dp = new DiscreteProblem<Scalar>(wf, space, true);
+      this->dp = new DiscreteProblem<Scalar>(wf, space, true, true, true);
       this->own_dp = true;
     }
 

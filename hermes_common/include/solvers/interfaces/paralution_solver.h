@@ -73,7 +73,7 @@ namespace Hermes
       template<typename T> friend SparseMatrix<T>*  create_matrix();
     };
 
-    /// \brief Class representing the vector for UMFPACK.
+    /// \brief Class representing the vector for PARALUTION.
     template <typename Scalar>
     class HERMES_API ParalutionVector : public SimpleVector < Scalar >
     {
