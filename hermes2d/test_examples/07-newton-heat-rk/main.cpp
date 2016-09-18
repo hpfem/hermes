@@ -30,17 +30,18 @@
 //
 
 //  The following parameters can be changed:
-const bool REUSE_SOLUTION = false;
 // Polynomial degree of all mesh elements.
-const int P_INIT = 2;
+const int P_INIT = 1;
 // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM = 1;
+const int INIT_REF_NUM = 3;
 // Number of initial uniform mesh refinements towards the boundary.
-const int INIT_REF_NUM_BDY = 1;
+const int INIT_REF_NUM_BDY = 2;
 // Time step in seconds.
-double time_step = 3e+1;
+double time_step = 1e+2;
 // Stopping criterion for the Newton's method.
 const double NEWTON_TOL = 1e-5;
+// Damping factor for the Newton's method.
+const double NEWTON_DF = .8;
 // Maximum allowed number of Newton iterations.
 const int max_allowed_iterations = 100;
 
@@ -118,7 +119,8 @@ int main(int argc, char* argv[])
 
   // Initialize Runge-Kutta time stepping.
   RungeKutta<double> runge_kutta(wf, space, &bt);
-  runge_kutta.set_tolerance(NEWTON_TOL);
+  runge_kutta.set_newton_tolerance(NEWTON_TOL);
+  runge_kutta.set_newton_damping_coeff(NEWTON_DF);
   runge_kutta.set_verbose_output(true);
   runge_kutta.set_time_step(time_step);
 

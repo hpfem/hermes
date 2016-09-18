@@ -77,7 +77,6 @@ namespace Hermes
         VertexBasedLimiter(std::vector<SpaceSharedPtr<double> > spaces, double* solution_vector, int maximum_polynomial_order);
         virtual ~VertexBasedLimiter();
         std::vector<std::pair<int, double> > get_correction_factors() const;
-        void print_detailed_info(bool print_details = true);
         int maximum_polynomial_order;
         void set_p_coarsening_only();
         static bool wider_bounds_on_boundary;
@@ -109,7 +108,6 @@ namespace Hermes
 
         int mixed_derivatives_count;
         std::vector<std::pair<int, double> > correction_factors;
-        bool print_details;
       };
 
       /// Integral calculator

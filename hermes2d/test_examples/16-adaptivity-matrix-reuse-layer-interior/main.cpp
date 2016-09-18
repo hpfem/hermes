@@ -12,7 +12,7 @@ const int INIT_REF_NUM = 3;
 
 // Problem parameters.
 // Slope of the layer.
-double slope = 60;
+double slope = 30;
 
 int main(int argc, char* argv[])
 {

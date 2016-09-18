@@ -145,7 +145,7 @@ namespace Hermes
         // Checking that this is the Taylor shapeset.
         for (int i = 0; i < this->component_count; i++)
         {
-          if (this->spaces[i]->get_shapeset()->get_id() != 31)
+          if (this->spaces[i]->get_shapeset()->get_id() != HERMES_L2_TAYLOR)
             throw Exceptions::Exception("VertexBasedLimiter designed for L2ShapesetTaylor. Ignore this exception for unforeseen problems.");
         }
 
@@ -154,18 +154,11 @@ namespace Hermes
 
         // This is what is the key aspect of the necessity to use L2ShapesetTaylor (or any other one that uses P_{} also for quads).
         this->mixed_derivatives_count = (maximum_polynomial_order)*(maximum_polynomial_order + 1) / 2;
-
-        this->print_details = false;
       }
 
       VertexBasedLimiter::~VertexBasedLimiter()
       {
         deallocate_vertex_values();
-      }
-
-      void VertexBasedLimiter::print_detailed_info(bool print_details_)
-      {
-        this->print_details = print_details_;
       }
 
       std::vector<std::pair<int, double> > VertexBasedLimiter::get_correction_factors() const

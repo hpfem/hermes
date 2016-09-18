@@ -572,6 +572,17 @@ namespace Hermes
       tick_reset();
     }
 
+	TimeMeasurable::TimeMeasurable(const TimeMeasurable& other)
+	{
+#ifdef _WINDOWS //Windows
+		this->frequency = other.frequency;
+#endif
+		this->period_name = other.period_name;
+		this->last_period = other.last_period;
+		this->last_time = other.last_time;
+		this->accum = other.accum;
+	}
+
     TimeMeasurable::SysTime TimeMeasurable::get_time() const
     {
 #ifdef _WINDOWS  //Windows

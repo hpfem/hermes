@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
         runge_kutta.set_verbose_output(true);
         runge_kutta.set_time(current_time);
         runge_kutta.set_time_step(time_step);
-        runge_kutta.set_tolerance(NEWTON_TOL);
+        runge_kutta.set_newton_tolerance(NEWTON_TOL);
         runge_kutta.rk_time_step_newton(sln_time_prev, sln_time_new);
       }
       catch (Exceptions::Exception& e)
