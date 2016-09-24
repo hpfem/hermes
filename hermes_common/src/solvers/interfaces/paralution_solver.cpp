@@ -442,8 +442,8 @@ namespace Hermes
         }
 
         AMG_solver->SetSmoother(smoothers);
-        AMG_solver->SetSmootherPreIter(3);
-        AMG_solver->SetSmootherPostIter(3);
+        AMG_solver->SetSmootherPreIter(5);
+        AMG_solver->SetSmootherPostIter(5);
 
         AMG_solver->Build();
       }

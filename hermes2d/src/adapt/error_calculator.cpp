@@ -381,7 +381,7 @@ namespace Hermes
     {
       for (int i = 0; i < component_count; i++)
       {
-        this->add_error_form(new DefaultNormFormVol<Scalar>(i, i, normType));
+        this->add_error_form(new DefaultNormFormVol<Scalar>(i, i, normType, SolutionsDifference));
       }
     }
 
@@ -390,17 +390,14 @@ namespace Hermes
     {
       for (int i = 0; i < component_count; i++)
       {
-        this->add_error_form(new DefaultNormFormVol<Scalar>(i, i, normType));
+        this->add_error_form(new DefaultNormFormVol<Scalar>(i, i, normType, CoarseSolutions));
       }
     }
 
     template<typename Scalar, NormType normType>
     double DefaultNormCalculator<Scalar, normType>::calculate_norms(std::vector<MeshFunctionSharedPtr<Scalar> >& solutions)
     {
-      std::vector<MeshFunctionSharedPtr<Scalar> > zero_fine_solutions;
-      for (unsigned short i = 0; i < solutions.size(); i++)
-        zero_fine_solutions.push_back(MeshFunctionSharedPtr<Scalar>(new ZeroSolution<Scalar>(solutions[i]->get_mesh())));
-      this->calculate_errors(solutions, zero_fine_solutions, false);
+      this->calculate_errors(solutions, solutions, false);
 
       return this->get_total_error_squared();
     }
@@ -408,8 +405,7 @@ namespace Hermes
     template<typename Scalar, NormType normType>
     double DefaultNormCalculator<Scalar, normType>::calculate_norm(MeshFunctionSharedPtr<Scalar> solution)
     {
-      MeshFunctionSharedPtr<Scalar> zero_fine_solution(new ZeroSolution<Scalar>(solution->get_mesh()));
-      this->calculate_errors(solution, zero_fine_solution, false);
+      this->calculate_errors(solution, solution, false);
 
       return this->get_total_error_squared();
     }

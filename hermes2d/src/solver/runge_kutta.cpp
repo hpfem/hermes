@@ -451,7 +451,7 @@ namespace Hermes
       }
 
       // If max number of iterations was exceeded, fail.
-      if (it >= newton_max_iter)
+      if (it >= newton_max_iter && residual_norm > newton_tol)
       {
         this->tick();
         this->info("\tRunge-Kutta: time step duration: %f s.\n", this->last());

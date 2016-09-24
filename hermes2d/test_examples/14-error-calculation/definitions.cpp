@@ -16,17 +16,17 @@ static double custom_fn(int n, double *wt, DiscontinuousFunc<double> *u, Discont
   return result;
 }
 
-CustomNormFormVol::CustomNormFormVol(int i, int j) : NormFormVol<double>(i, j)
+CustomNormFormVol::CustomNormFormVol(int i, int j) : NormFormVol<double>(i, j, CoarseSolutions)
 {
   this->set_area(HERMES_ANY);
 }
 
-CustomNormFormSurf::CustomNormFormSurf(int i, int j) : NormFormSurf<double>(i, j)
+CustomNormFormSurf::CustomNormFormSurf(int i, int j) : NormFormSurf<double>(i, j, CoarseSolutions)
 {
   this->set_area(HERMES_ANY);
 }
 
-CustomNormFormDG::CustomNormFormDG(int i, int j) : NormFormDG<double>(i, j)
+CustomNormFormDG::CustomNormFormDG(int i, int j) : NormFormDG<double>(i, j, CoarseSolutions)
 {
 }
 

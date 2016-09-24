@@ -30,6 +30,6 @@ add_subdirectory("13-FCT")
 
 add_subdirectory("14-error-calculation")
 
-add_subdirectory("15-adaptivity-matrix-reuse-simple")
+# add_subdirectory("15-adaptivity-matrix-reuse-simple")
 
-add_subdirectory("16-adaptivity-matrix-reuse-layer-interior")
+# add_subdirectory("16-adaptivity-matrix-reuse-layer-interior")

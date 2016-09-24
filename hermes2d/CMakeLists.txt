@@ -622,7 +622,7 @@ project(hermes2d)
       set(_FLAGS ${BUILD_FLAGS})
       set_target_properties(${HERMES_LIB} PROPERTIES COMPILE_FLAGS ${_FLAGS})
     endif()
-
+    
     target_link_libraries(  ${HERMES_LIB}
       ${HERMES_COMMON_LIB}
       ${GLUT_LIBRARY} ${GL_LIBRARY} ${GLEW_LIBRARY} ${PTHREAD_LIBRARY}

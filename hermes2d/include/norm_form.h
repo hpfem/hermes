@@ -64,7 +64,7 @@ namespace Hermes
     class HERMES_API NormFormVol : public NormForm
     {
     public:
-      NormFormVol(int i, int j);
+      NormFormVol(int i, int j, FunctionsEvaluatedType functionType);
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomVol<double> *e) const = 0;
     };
@@ -73,7 +73,7 @@ namespace Hermes
     class HERMES_API NormFormSurf : public NormForm
     {
     public:
-      NormFormSurf(int i, int j);
+      NormFormSurf(int i, int j, FunctionsEvaluatedType functionType);
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomSurf<double> *e) const = 0;
     };
@@ -82,7 +82,7 @@ namespace Hermes
     class HERMES_API NormFormDG : public NormForm
     {
     public:
-      NormFormDG(int i, int j);
+      NormFormDG(int i, int j, FunctionsEvaluatedType functionType);
 
       virtual Scalar value(int n, double *wt, DiscontinuousFunc<Scalar> *u, DiscontinuousFunc<Scalar> *v, GeomSurf<double> *e) const = 0;
     };
@@ -91,7 +91,7 @@ namespace Hermes
     class HERMES_API DefaultNormFormVol : public NormFormVol < Scalar >
     {
     public:
-      DefaultNormFormVol(int i, int j, NormType normType);
+      DefaultNormFormVol(int i, int j, NormType normType, FunctionsEvaluatedType functionType);
 
       Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomVol<double> *e) const;
 
@@ -103,7 +103,7 @@ namespace Hermes
     class HERMES_API DefaultNormFormSurf : public NormFormSurf < Scalar >
     {
     public:
-      DefaultNormFormSurf(int i, int j, NormType normType);
+      DefaultNormFormSurf(int i, int j, NormType normType, FunctionsEvaluatedType functionType);
 
       Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, GeomSurf<double> *e) const;
 

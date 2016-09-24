@@ -224,7 +224,6 @@ project(hermes_common)
     # options. Linking of optional libraries for the different Hermeses ({1, 2, 3}D)
     # is controled in their respective CMakeLists.txt. Note that for unselected
     # TPL's, the respective variables will be empty.
-
     target_link_libraries(  ${HERMES_COMMON_LIB}
       ${EXODUSII_LIBRARIES}
       ${HDF5_LIBRARY}
@@ -301,3 +300,4 @@ project(hermes_common)
   install(FILES ${INC_STRUCTURES}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common/data_structures)
   install(FILES ${INC_ALGEBRA}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common/algebra)
   install(FILES ${INC_UTIL}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common/util)
+  

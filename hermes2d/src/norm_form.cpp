@@ -76,22 +76,22 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NormFormVol<Scalar>::NormFormVol(int i, int j) : NormForm(i, j)
+    NormFormVol<Scalar>::NormFormVol(int i, int j, FunctionsEvaluatedType functionType) : NormForm(i, j, functionType)
     {
     }
 
     template<typename Scalar>
-    NormFormSurf<Scalar>::NormFormSurf(int i, int j) : NormForm(i, j)
+    NormFormSurf<Scalar>::NormFormSurf(int i, int j, FunctionsEvaluatedType functionType) : NormForm(i, j, functionType)
     {
     }
 
     template<typename Scalar>
-    NormFormDG<Scalar>::NormFormDG(int i, int j) : NormForm(i, j)
+    NormFormDG<Scalar>::NormFormDG(int i, int j, FunctionsEvaluatedType functionType) : NormForm(i, j, functionType)
     {
     }
 
     template<typename Scalar>
-    DefaultNormFormVol<Scalar>::DefaultNormFormVol(int i, int j, NormType normType) : NormFormVol<Scalar>(i, j), normType(normType)
+    DefaultNormFormVol<Scalar>::DefaultNormFormVol(int i, int j, NormType normType, FunctionsEvaluatedType functionType) : NormFormVol<Scalar>(i, j, functionType), normType(normType)
     {
     }
 
@@ -116,7 +116,7 @@ namespace Hermes
       }
     }
     template<typename Scalar>
-    DefaultNormFormSurf<Scalar>::DefaultNormFormSurf(int i, int j, NormType normType) : NormFormSurf<Scalar>(i, j), normType(normType)
+    DefaultNormFormSurf<Scalar>::DefaultNormFormSurf(int i, int j, NormType normType, FunctionsEvaluatedType functionType) : NormFormSurf<Scalar>(i, j, functionType), normType(normType)
     {
     }
 

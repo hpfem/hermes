@@ -32,9 +32,9 @@ const bool HERMES_VISUALIZATION = true;
 // Set to "true" to enable VTK output.
 const bool VTK_VISUALIZATION = false;
 // Uniform polynomial degree of mesh elements.
-const int P_INIT = 3;
+const int P_INIT = 10;
 // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM = 3;
+const int INIT_REF_NUM = 4;
 
 // Problem parameters.
 // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -49,81 +49,91 @@ const double FIXED_BDY_TEMP = 20;
 int main(int argc, char* argv[])
 {
 #ifdef WITH_PARALUTION
-  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
+		HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
 #endif
 
-  // Load the mesh.
-  MeshSharedPtr mesh(new Mesh);
-  Hermes::Hermes2D::MeshReaderH2DXML mloader;
-  mloader.load("domain.xml", mesh);
+	// Load the mesh.
+	MeshSharedPtr mesh(new Mesh);
+	Hermes::Hermes2D::MeshReaderH2DXML mloader;
+	mloader.load("domain.xml", mesh);
 
-  // Refine all elements, do it INIT_REF_NUM-times.
-  for (unsigned int i = 0; i < INIT_REF_NUM; i++)
-    mesh->refine_all_elements();
+	// Refine all elements, do it INIT_REF_NUM-times.
+	for (unsigned int i = 0; i < INIT_REF_NUM; i++)
+		mesh->refine_all_elements();
 
-  // Initialize essential boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential({ "Bottom", "Inner", "Outer", "Left" }, FIXED_BDY_TEMP);
-  Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
+	// Initialize essential boundary conditions.
+	Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential({ "Bottom", "Inner", "Outer", "Left" }, FIXED_BDY_TEMP);
+	Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
-  // Initialize space.
-  SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT));
+	// Initialize space.
+	SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT));
+	std::cout << "Ndofs: " << space->get_num_dofs() << std::endl;
 
-  std::cout << "Ndofs: " << space->get_num_dofs() << std::endl;
+	// Initialize the weak formulation.
+	WeakFormSharedPtr<double> wf(new CustomWeakFormPoisson("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
+		new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(VOLUME_HEAT_SRC)));
 
-  // Initialize the weak formulation.
-  WeakFormSharedPtr<double> wf(new CustomWeakFormPoisson("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
-    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(VOLUME_HEAT_SRC)));
+	// Initialize the solution.
+	MeshFunctionSharedPtr<double> sln(new Solution<double>);
 
-  // Initialize the solution.
-  MeshFunctionSharedPtr<double> sln(new Solution<double>);
+	// Initialize linear solver.
+	Hermes::Hermes2D::LinearSolver<double> linear_solver(wf, space);
 
-  // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver(wf, space);
+#ifdef WITH_PARALUTION
+	linear_solver.get_linear_matrix_solver()->as_IterSolver()->set_solver_type(Hermes::Solvers::IterSolverType::BiCGStab);
+	linear_solver.get_linear_matrix_solver()->as_IterSolver()->set_precond(new Hermes::Preconditioners::ParalutionPrecond<double>(Hermes::Preconditioners::PreconditionerType::Jacobi));
+	linear_solver.get_linear_matrix_solver()->as_IterSolver()->set_tolerance(1e-8, Hermes::Solvers::AbsoluteTolerance);
+	linear_solver.get_linear_matrix_solver()->as_IterSolver()->set_verbose_output(true);
+#endif
 
-  // Solve the linear problem.
-  try
-  {
-    linear_solver.solve();
+	// Store the matrix.
+	linear_solver.output_matrix();
+	linear_solver.set_matrix_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);
 
-    // Get the solution vector.
-    double* sln_vector = linear_solver.get_sln_vector();
+	// Solve the linear problem.
+	try
+	{
+		linear_solver.solve();
 
-    // Translate the solution vector into the previously initialized Solution.
-    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
+		// Get the solution vector.
+		double* sln_vector = linear_solver.get_sln_vector();
 
-    // VTK output.
-    if (VTK_VISUALIZATION)
-    {
-      // Output solution in VTK format.
-      Hermes::Hermes2D::Views::Linearizer lin(FileExport);
-      bool mode_3D = false;
-      lin.save_solution_vtk(sln, "sln.vtk", "Temperature", mode_3D, 1);
+		// Translate the solution vector into the previously initialized Solution.
+		Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
 
-      // Output mesh and element orders in VTK format.
-      Hermes::Hermes2D::Views::Orderizer ord;
-      ord.save_mesh_vtk(space, "mesh.vtk");
-      ord.save_orders_vtk(space, "ord.vtk");
-      ord.save_markers_vtk(space, "markers.vtk");
-    }
+		// VTK output.
+		if (VTK_VISUALIZATION)
+		{
+			// Output solution in VTK format.
+			Hermes::Hermes2D::Views::Linearizer lin(FileExport);
+			bool mode_3D = false;
+			lin.save_solution_vtk(sln, "sln.vtk", "Temperature", mode_3D, 1);
 
-    if (HERMES_VISUALIZATION)
-    {
-      // Visualize the solution.
-      Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
-      Hermes::Hermes2D::Views::OrderView viewSp("Space", new Hermes::Hermes2D::Views::WinGeom(0, 400, 500, 400));
-      viewS.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(0));
-      viewS.show(sln);
-      viewSp.show(space);
-      viewS.wait_for_close();
-    }
-  }
-  catch (Exceptions::Exception& e)
-  {
-    std::cout << e.info();
-  }
-  catch (std::exception& e)
-  {
-    std::cout << e.what();
-  }
-  return 0;
+			// Output mesh and element orders in VTK format.
+			Hermes::Hermes2D::Views::Orderizer ord;
+			ord.save_mesh_vtk(space, "mesh.vtk");
+			ord.save_orders_vtk(space, "ord.vtk");
+			ord.save_markers_vtk(space, "markers.vtk");
+		}
+
+		if (HERMES_VISUALIZATION)
+		{
+			// Visualize the solution.
+			Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
+			Hermes::Hermes2D::Views::OrderView viewSp("Space", new Hermes::Hermes2D::Views::WinGeom(0, 400, 500, 400));
+			viewS.get_linearizer()->set_criterion(Views::LinearizerCriterionFixed(0));
+			viewS.show(sln);
+			viewSp.show(space);
+			viewS.wait_for_close();
+		}
+	}
+	catch (Exceptions::Exception& e)
+	{
+		std::cout << e.info();
+	}
+	catch (std::exception& e)
+	{
+		std::cout << e.what();
+	}
+	return 0;
 }
