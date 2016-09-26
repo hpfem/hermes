@@ -21,9 +21,13 @@
 
 //#define DEBUG_LINEARIZER
 
-static const int default_allocation_multiplier_vertices = 10;
+static const int default_allocation_multiplier_vertices = 8;
 static const int default_allocation_multiplier_triangles = 15;
-static const int default_allocation_multiplier_edges = 10;
+static const int default_allocation_multiplier_edges = 8;
+
+static const int default_allocation_maxsize_vertices = 500000;
+static const int default_allocation_maxsize_triangles = 1000000;
+static const int default_allocation_maxsize_edges = 500000;
 
 static const int default_allocation_minsize_vertices = 10000;
 static const int default_allocation_minsize_triangles = 15000;
@@ -153,9 +157,9 @@ namespace Hermes
       {
         int number_of_elements = mesh->get_num_elements();
 
-        this->vertex_size = std::max(default_allocation_multiplier_vertices * number_of_elements, std::max(this->vertex_size, default_allocation_minsize_vertices));
-        this->triangle_size = std::max(default_allocation_multiplier_triangles * number_of_elements, std::max(this->triangle_size, default_allocation_minsize_triangles));
-        this->edges_size = std::max(default_allocation_multiplier_edges * number_of_elements, std::max(this->edges_size, default_allocation_minsize_edges));
+        this->vertex_size = std::min(default_allocation_maxsize_vertices, std::max(default_allocation_multiplier_vertices * number_of_elements, std::max(this->vertex_size, default_allocation_minsize_vertices)));
+        this->triangle_size = std::min(default_allocation_maxsize_triangles, std::max(default_allocation_multiplier_triangles * number_of_elements, std::max(this->triangle_size, default_allocation_minsize_triangles)));
+        this->edges_size = std::min(default_allocation_maxsize_edges, std::max(default_allocation_multiplier_edges * number_of_elements, std::max(this->edges_size, default_allocation_minsize_edges)));
 
         // Set counts.
         this->vertex_count = 0;

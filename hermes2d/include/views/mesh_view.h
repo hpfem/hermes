@@ -45,6 +45,9 @@ namespace Hermes
         /// Displays element markers.
         void set_b_elem_mrk(bool set);
 
+        /// Returns the internal linearizer for the purpose of parameter settings.
+        Linearizer* get_linearizer();
+
       protected:
 
         Linearizer* lin;

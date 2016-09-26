@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
   {
     Hermes::Mixins::Loggable::Static::info("---- Adaptivity step %d:", as);
 
-    // Construct globally refined reference mesh and setup reference space->
+    // Construct globally refined reference mesh and setup reference space.
     Mesh::ReferenceMeshCreator u_ref_mesh_creator(u_mesh);
     MeshSharedPtr u_ref_mesh = u_ref_mesh_creator.create_ref_mesh();
     Mesh::ReferenceMeshCreator v_ref_mesh_creator(v_mesh);
@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
     graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
     graph_cpu_exact.save("conv_cpu_exact.dat");
 
-    // If err_est too large, adapt the mesh->
+    // If err_est too large, adapt the mesh.
     if (err_est_rel_total < ERR_STOP)
       done = true;
     else

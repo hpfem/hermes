@@ -84,7 +84,7 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
-  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
+  // HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
 
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
@@ -143,9 +143,6 @@ int main(int argc, char* argv[])
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;
   newton.get_linear_matrix_solver()->set_verbose_output(true);
-  newton.get_linear_matrix_solver()->as_IterSolver()->set_solver_type(Solvers::IterSolverType::GMRES);
-  newton.get_linear_matrix_solver()->as_IterSolver()->set_precond(new Preconditioners::ParalutionPrecond<double>(Preconditioners::PreconditionerType::SaddlePoint));
-  newton.get_linear_matrix_solver()->as_IterSolver()->set_tolerance(.5, Hermes::Solvers::LoopSolverToleranceType::RelativeTolerance);
 
   newton.set_weak_formulation(&wf);
   newton.set_spaces(spaces);

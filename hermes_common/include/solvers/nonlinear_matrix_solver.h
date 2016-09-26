@@ -108,7 +108,7 @@ namespace Hermes
       /// Default: default is the automatic damping, default coefficient if manual damping used is set by this method.
       /// \param[in] onOff on(true)-manual damping, off(false)-automatic damping.
       /// \param[in] coeff The (perpetual) damping coefficient in the case of manual damping. Ignored in the case of automatic damping.
-      void set_manual_damping_coeff(bool onOff, double coeff);
+      void set_manual_damping_coeff(bool onOff, double coeff = .0);
 
       /// Make the automatic damping start with this coefficient.
       /// This will also be the top bound for the coefficient.
@@ -300,7 +300,7 @@ namespace Hermes
 
       Scalar* previous_sln_vector;
       bool use_initial_guess_for_iterative_solvers;
-      friend class NonlinearConvergenceMeasurement < Scalar > ;
+      friend class NonlinearConvergenceMeasurement < Scalar >;
     };
   }
 

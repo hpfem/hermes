@@ -17,7 +17,7 @@ typedef std::complex<double> complex;
 //  Domain: L-shape domain
 //
 //  Meshes: you can use either "lshape3q.mesh" (quadrilateral mesh) or
-//          "lshape3t.mesh" (triangular mesh). See the mesh->load(...) command below.
+//          "lshape3t.mesh" (triangular mesh). See the mesh.load(...) command below.
 //
 //  BC: perfect conductor on boundary markers 1 and 6 (essential BC)
 //      impedance boundary condition on rest of boundary (natural BC)
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
   adaptivity.set_space(space);
   do
   {
-    // Construct globally refined reference mesh and setup reference space->
+    // Construct globally refined reference mesh and setup reference space.
     Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
     MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
     Space< ::complex >::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
     graph_dof_exact.add_values(space->get_num_dofs(), err_exact_rel);
     graph_dof_exact.save("conv_dof_exact.dat");
 
-    // If err_est_rel too large, adapt the mesh->
+    // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP)
       done = true;
     else

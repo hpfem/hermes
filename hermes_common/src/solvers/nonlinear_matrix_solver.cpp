@@ -230,7 +230,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearMatrixSolver<Scalar>::set_manual_damping_coeff(bool onOff, double coeff)
     {
-      if (coeff <= 0.0 || coeff > 1.0)
+      if (onOff && (coeff <= 0.0 || coeff > 1.0))
         throw Exceptions::ValueException("coeff", coeff, 0.0, 1.0);
       if (onOff)
       {
@@ -334,7 +334,7 @@ namespace Hermes
       {
         if (++successful_steps >= this->necessary_successful_steps_to_increase)
         {
-          double new_damping_factor = std::min(this->initial_auto_damping_factor, this->auto_damping_ratio * damping_factors_vector.back());
+          double new_damping_factor = std::min(1.0, this->auto_damping_ratio * damping_factors_vector.back());
           this->info("\t\tstep successful, new damping factor: %g.", new_damping_factor);
           damping_factors_vector.push_back(new_damping_factor);
         }

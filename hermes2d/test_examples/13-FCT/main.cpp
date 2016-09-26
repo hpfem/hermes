@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
 
       Hermes::Mixins::Loggable::Static::info("Calling get_smooth_elems()...");
       smooth_elem_ref = regEst.get_smooth_elems(space, coeff_vec_smooth);
-      // Construct reference mesh and setup reference space->
+      // Construct reference mesh and setup reference space.
       MeshSharedPtr ref_mesh(new Mesh);
       ref_mesh->copy(space->get_mesh());
       Space<double>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh, 0);
@@ -298,7 +298,7 @@ int main(int argc, char* argv[])
       double err_est_rel_total = error_calculator.get_total_error_squared() * 100;
       // Report results.
       Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", ndof, ref_ndof, err_est_rel_total);
-      // If err_est_rel too large, adapt the mesh->
+      // If err_est_rel too large, adapt the mesh.
       if ((err_est_rel_total < ERR_STOP) || (as >= ADAPSTEP_MAX)) done = true;
       else
       {

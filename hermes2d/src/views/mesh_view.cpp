@@ -26,7 +26,7 @@ namespace Hermes
     namespace Views
     {
       MeshView::MeshView(const char* title, WinGeom* wg)
-        : View(title, wg), lin(nullptr)
+        : View(title, wg), lin(new Linearizer(OpenGL))
       {
         nodes = elems = nullptr;
         b_scale = false;
@@ -36,7 +36,7 @@ namespace Hermes
       }
 
       MeshView::MeshView(char* title, WinGeom* wg)
-        : View(title, wg), lin(nullptr)
+        : View(title, wg), lin(new Linearizer(OpenGL))
       {
         nodes = elems = nullptr;
         b_scale = false;
@@ -100,6 +100,11 @@ namespace Hermes
         refresh();
         reset_view(false);
         wait_for_draw();
+      }
+
+      Linearizer* MeshView::get_linearizer()
+      {
+        return this->lin;
       }
 
       void MeshView::set_b_elem_mrk(bool set)

@@ -239,6 +239,7 @@ namespace Hermes
   template<typename Caller, typename ArrayItem>
   ArrayItem* realloc_with_check(ArrayItem*& original_array, int new_size, Caller* const caller)
   {
+    int array_item_size = sizeof(ArrayItem);
     if (new_size == 0)
       return nullptr;
 
@@ -248,7 +249,7 @@ namespace Hermes
     else
     {
       caller->free();
-      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate %i bytes.", new_size * sizeof(ArrayItem));
+      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate %i bytes.", new_size * array_item_size);
       return nullptr;
     }
   }
@@ -256,6 +257,7 @@ namespace Hermes
   template<typename ArrayItem>
   ArrayItem* realloc_with_check(ArrayItem*& original_array, int new_size)
   {
+    int array_item_size = sizeof(ArrayItem);
     if (new_size == 0)
       return nullptr;
 
@@ -264,7 +266,7 @@ namespace Hermes
       return original_array = new_array;
     else
     {
-      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate %i bytes.", new_size * sizeof(ArrayItem));
+      throw Hermes::Exceptions::Exception("Hermes::realloc_with_check() failed to reallocate %i bytes.", new_size * array_item_size);
       return nullptr;
     }
   }

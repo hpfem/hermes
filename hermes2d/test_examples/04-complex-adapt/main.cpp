@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   adaptivity.set_space(space);
   do
   {
-    // Construct globally refined reference mesh and setup reference space->
+    // Construct globally refined reference mesh and setup reference space.
     Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
     MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
     Space< ::complex>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     graph_dof_est.add_values(space->get_num_dofs(), errorCalculator.get_total_error_squared() * 100.);
     sview.show(errorCalculator.get_errorMeshFunction());
 
-    // If err_est too large, adapt the mesh->
+    // If err_est too large, adapt the mesh.
     if (errorCalculator.get_total_error_squared()  * 100. < ERR_STOP)
       done = true;
     else

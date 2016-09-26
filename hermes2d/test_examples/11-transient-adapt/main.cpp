@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
     do {
       Hermes::Mixins::Loggable::Static::info("Time step %d, adaptivity step %d:", ts, as);
 
-      // Construct globally refined reference mesh and setup reference space->
+      // Construct globally refined reference mesh and setup reference space.
       Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
       MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
       Space<double>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
       Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_ref: %d, err_est_rel: %g%%",
         Space<double>::get_num_dofs(space), Space<double>::get_num_dofs(ref_space), err_est_rel);
 
-      // If err_est too large, adapt the mesh->
+      // If err_est too large, adapt the mesh.
       if (err_est_rel < ERR_STOP) done = true;
       else
       {
