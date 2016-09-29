@@ -1,6 +1,14 @@
-[[[ IMPORTANT: Please read ]]]
-------------------------------
+IMPORTANT: Please read
+----------------------
 Information about branches:
+===========================
+
+master-3.2
+
+- current (latest) stable release branch
+- documentation available at http://hpfem.org/wp-content/uploads/doc-web/doc-lib/html/html/index.html
+-- installation
+- more info at http://hpfem.org/hermes
 
 master
 
@@ -27,13 +35,6 @@ master-1.0
 devel
 
 - PURELY FOR DEVELOPMENT PURPOSES, NOT INTENDED FOR USERS AT ALL
-------------------------------
-
-
-Hermes 2D hp-FEM library, version 3.0 (in progress)
-=====================================
-
-This is a basic README file with generic information relevant for both Hermes Common and Hermes2D.
 
 Copyright
 =========
@@ -50,7 +51,7 @@ Public License (LGPL). For details see the files `COPYING` and `COPYING.LESSER`.
 User Documentation
 ==================
 
-User Documentation is available online at http://hpfem.org/hermes/doc/index.html.
+User Documentation is available online at http://hpfem.org/wp-content/uploads/doc-web/doc-lib/html/html/index.html.
 
 Download and Installation
 =========================
