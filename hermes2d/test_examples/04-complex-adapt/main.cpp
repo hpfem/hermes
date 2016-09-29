@@ -11,8 +11,8 @@ typedef std::complex<double> complex;
 //  Domain: Rectangle of height 0.003 and width 0.004. Different
 //  materials for the wire, air, and iron (see mesh file domain2.mesh).
 //
-//  BC: Zero Dirichlet on the top and right edges, zero Neumann
-//  elsewhere.
+//  BC: Zero Dirichlet on the top and left and right edges, zero Neumann
+//  on the bottom.
 //
 //  The following parameters can be changed:
 // Number of initial uniform mesh refinements.
@@ -20,18 +20,18 @@ const int INIT_REF_NUM = 0;
 // Initial polynomial degree of all mesh elements.
 const int P_INIT = 1;
 // This is a quantitative parameter of Adaptivity.
-const double THRESHOLD = 0.95;
+const double THRESHOLD = 0.9;
 
 // Error calculation & adaptivity.
 DefaultErrorCalculator< ::complex, HERMES_H1_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
 // Stopping criterion for an adaptivity step.
-AdaptStoppingCriterionSingleElement< ::complex> stoppingCriterion(0.9);
+AdaptStoppingCriterionSingleElement< ::complex> stoppingCriterion(THRESHOLD);
 // Adaptivity processor class.
 Adapt< ::complex> adaptivity(&errorCalculator, &stoppingCriterion);
 // Predefined list of element refinement candidates.
 const CandList CAND_LIST = H2D_HP_ANISO;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 1e-3;
+const double TOTAL_ERROR_ESTIMATE_STOP = 1e-3;
 
 // Problem parameters.
 const double MU_0 = 4.0*M_PI*1e-7;
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
   EssentialBCs< ::complex> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  SpaceSharedPtr< ::complex> space(new H1Space< ::complex>(mesh, &bcs, P_INIT));
+  SpaceSharedPtr< ::complex> space(new H1Space<::complex>(mesh, &bcs, P_INIT));
   int ndof = space->get_num_dofs();
 
   // Initialize the weak formulation.
@@ -74,8 +74,8 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector< ::complex> selector(CAND_LIST);
 
   // Initialize views.
-  Views::ScalarView sview("Solution", new Views::WinGeom(0, 0, 600, 350));
-  Views::ScalarView sview2("Ref. Solution", new Views::WinGeom(0, 0, 600, 350));
+  Views::ScalarView sview("Solution (real part)", new Views::WinGeom(0, 0, 600, 350));
+  Views::ScalarView sview_error("Error function", new Views::WinGeom(0, 360, 600, 350));
   Views::OrderView oview("Polynomial orders", new Views::WinGeom(610, 0, 520, 350));
 
   // DOF and CPU convergence graphs initialization.
@@ -109,15 +109,7 @@ int main(int argc, char* argv[])
     memset(coeff_vec, 0, ndof_ref * sizeof(::complex));
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-    try
-    {
-      newton.solve(coeff_vec);
-    }
-    catch (Hermes::Exceptions::Exception& e)
-    {
-      e.print_msg();
-    }
-
+    newton.solve(coeff_vec);
     Hermes::Hermes2D::Solution< ::complex>::vector_to_solution(newton.get_sln_vector(), ref_space, ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
@@ -127,9 +119,14 @@ int main(int argc, char* argv[])
     // View the coarse mesh solution and polynomial orders.
     MeshFunctionSharedPtr<double> real_filter(new RealFilter(sln));
     MeshFunctionSharedPtr<double> rreal_filter(new RealFilter(ref_sln));
-    sview2.show(rreal_filter);
+    sview.show(rreal_filter);
+    sview.save_numbered_screenshot("sln%02d.bmp", as, true);
 
     oview.show(space);
+    oview.save_numbered_screenshot("space%02d.bmp", as, true);
+
+    oview.show(ref_space);
+    oview.save_numbered_screenshot("refSpace%02d.bmp", as, true);
 
     // Calculate element errors and total error estimate.
     errorCalculator.calculate_errors(sln, ref_sln);
@@ -137,10 +134,11 @@ int main(int argc, char* argv[])
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof_est.add_values(space->get_num_dofs(), errorCalculator.get_total_error_squared() * 100.);
-    sview.show(errorCalculator.get_errorMeshFunction());
+    sview_error.show(errorCalculator.get_errorMeshFunction());
+    sview_error.save_numbered_screenshot("errorView%02d.bmp", as, true);
 
     // If err_est too large, adapt the mesh.
-    if (errorCalculator.get_total_error_squared()  * 100. < ERR_STOP)
+    if (errorCalculator.get_total_error_squared()  * 100. < TOTAL_ERROR_ESTIMATE_STOP)
       done = true;
     else
     {

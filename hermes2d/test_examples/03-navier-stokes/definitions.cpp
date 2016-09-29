@@ -183,7 +183,7 @@ public:
     VectorFormVolVel(int i, bool Stokes, double time_step) : VectorFormVol<double>(i), Stokes(Stokes), time_step(time_step) {
     }
 
-    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, Func<double> **ext) const{
+    double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, GeomVol<double> *e, Func<double> **ext) const{
       double result = 0;
       if(!Stokes) {
         Func<double>* vel_prev_time = ext[2]; // this form is used with both velocity components
@@ -192,7 +192,7 @@ public:
       return result;
     }
 
-    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, Func<Ord> **ext) const {
+    Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, GeomVol<Ord> *e, Func<Ord> **ext) const {
       Ord result = Ord(0);
       if(!Stokes) {
         Func<Ord>* vel_prev_time = ext[2]; // this form is used with both velocity components

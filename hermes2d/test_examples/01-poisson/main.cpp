@@ -3,6 +3,9 @@
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
 
+// Optionally try out this example with PARALUTION solver.
+// #define USE_PARALUTION
+
 // This example shows how to solve a simple PDE that describes stationary
 // heat transfer in an object consisting of two materials (aluminum and
 // copper). The object is heated by constant volumetric heat sources
@@ -48,7 +51,7 @@ const double FIXED_BDY_TEMP = 20;
 
 int main(int argc, char* argv[])
 {
-#ifdef WITH_PARALUTION
+#ifdef USE_PARALUTION
 		HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
 #endif
 
@@ -79,7 +82,7 @@ int main(int argc, char* argv[])
 	// Initialize linear solver.
 	Hermes::Hermes2D::LinearSolver<double> linear_solver(wf, space);
 
-#ifdef WITH_PARALUTION
+#ifdef USE_PARALUTION
 	linear_solver.get_linear_matrix_solver()->as_IterSolver()->set_solver_type(Hermes::Solvers::IterSolverType::BiCGStab);
 	linear_solver.get_linear_matrix_solver()->as_IterSolver()->set_precond(new Hermes::Preconditioners::ParalutionPrecond<double>(Hermes::Preconditioners::PreconditionerType::Jacobi));
 	linear_solver.get_linear_matrix_solver()->as_IterSolver()->set_tolerance(1e-8, Hermes::Solvers::AbsoluteTolerance);
