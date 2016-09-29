@@ -7,7 +7,7 @@ master-3.2
 
 - current (latest) stable release branch
 - documentation available at http://hpfem.org/wp-content/uploads/doc-web/doc-lib/html/html/index.html
--- installation
+- installation (a section in the above documentation): http://hpfem.org/wp-content/uploads/doc-web/doc-lib/html/html/src/installation.html
 - more info at http://hpfem.org/hermes
 
 master
