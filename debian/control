@@ -8,7 +8,7 @@ Homepage: http://hpfem.org/hermes
 
 Package: hermes2d
 Architecture: any
-Depends: ${shlibs:Depends}, libamd2.2.0 (>= 3.4.0), libumfpack5.4.0 (>= 3.4.0), libmumps-seq-4.10.0 (>= 4.10.0), libblas3 (>= 1.2), libxerces-c3.1 (>= 3.1.0), freeglut3-dev, libglew1.5-dev
+Depends: ${shlibs:Depends}, libsuitesparse-dev (>= 3.2.0), libmumps-seq-dev, xsdcxx (>= 3.3.0), libxerces-c-dev (>= 3.1.0), freeglut3-dev, libglew1.5-dev
 Description: hp-FEM multiphysics library
  Hermes is a C++ library for rapid development of adaptive hp-FEM / hp-DG solvers. Novel hp-adaptivity algorithms help solve a large variety of problems ranging from ODE and stationary linear PDE to complex time-dependent nonlinear multiphysics PDE systems. Highlights of Hermes  Capabilities:
   - L2, H1, HCurl, HDiv Sobolev spaces, polynomial degree up to 10
