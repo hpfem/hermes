@@ -7,6 +7,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	-$(MAKE) distclean
+	cp CMake.vars.example.Linux CMake.vars
 	cmake -DCMAKE_INSTALL_PREFIX=$(CURDIR)/debian/hermes/usr .
 	touch configure-stamp
 
