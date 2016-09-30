@@ -9,7 +9,9 @@
   set(HERMES_STATIC_LIBS YES)
   
   # Target path
-  set(CMAKE_INSTALL_PREFIX "/usr/local")
+  if(NOT(CMAKE_INSTALL_PREFIX))
+	set(CMAKE_INSTALL_PREFIX "/usr/local")
+  endif()
   
   # Paths for compulsory dependencies
   set(XERCES_ROOT "/usr/local")
