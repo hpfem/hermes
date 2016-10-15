@@ -16,14 +16,15 @@
 const int INIT_REF = 1;
 // Initial polynomial degrees of mesh elements in vertical and horizontal directions.
 int P_INIT = 1;
-// This is a quantitative parameter of the adapt(...) function and
-// it has different meanings for various adaptive strategies.
-const double THRESHOLD = 0.75;
 // Use Taylor shapeset - which does not have order > 2 implemented.
 // This switches to h-adaptivity & turns on Vertex-based limiting.
 bool USE_TAYLOR_SHAPESET = true;
 
 // Error calculation & adaptivity.
+// This is a quantitative parameter of the adapt(...) function and
+// it has different meanings for various adaptive strategies.
+const double THRESHOLD = 0.75;
+// Error calculator
 DefaultErrorCalculator<double, HERMES_L2_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
 // Stopping criterion for an adaptivity step.
 AdaptStoppingCriterionSingleElement<double> stoppingCriterion(THRESHOLD);
@@ -90,6 +91,8 @@ int main(int argc, char* args[])
     // Calculate element errors and total error estimate.
     errorCalculator.calculate_errors(sln, refsln);
     double total_error_estimate = errorCalculator.get_total_error_squared() * 100;
+
+	view1.show(refsln);
 
     std::cout << "Elements: " << ref_mesh->get_num_active_elements() << ", Error: " << total_error_estimate << "%." << std::endl;
 

@@ -16,9 +16,9 @@ add_subdirectory("07-newton-heat-rk")
 
 add_subdirectory("08-nonlinearity")
 
-IF(WITH_TRILINOS)
-	add_subdirectory("09-trilinos-nonlinear")
-ENDIF(WITH_TRILINOS)
+add_subdirectory("09-sparkgap")
+
+add_subdirectory("09b-sparkgap-adaptive")
 
 add_subdirectory("10-linear-advection-dg-adapt")
 
@@ -28,7 +28,9 @@ add_subdirectory("12-picard")
 
 add_subdirectory("13-FCT")
 
-add_subdirectory("14-error-calculation")
+IF(WITH_TRILINOS)
+	add_subdirectory("14-trilinos-nonlinear")
+ENDIF(WITH_TRILINOS)
 
 # add_subdirectory("15-adaptivity-matrix-reuse-simple")
 

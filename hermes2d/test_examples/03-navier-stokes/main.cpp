@@ -161,6 +161,7 @@ int main(int argc, char* argv[])
   newton.set_matrix_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);
   //newton.output_rhs();
   newton.set_rhs_export_format(Hermes::Algebra::MatrixExportFormat::EXPORT_FORMAT_MATRIX_MARKET);
+  newton.set_sufficient_improvement_factor_jacobian(2.);
 
   // Newton method setup:
   // - max allowed iterations
