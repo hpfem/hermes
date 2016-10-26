@@ -181,8 +181,8 @@ namespace Hermes
 			//// vertices ////////////////////////////////////////////////////////////////
 
 			n = m.n_vert;
-			if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'vertices' must be a list.", filename);
-			if (n < 2) throw Hermes::Exceptions::MeshLoadFailureException("File %s: invalid number of vertices.", filename);
+			if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'vertices' must be a list.", filename.c_str());
+			if (n < 2) throw Hermes::Exceptions::MeshLoadFailureException("File %s: invalid number of vertices.", filename.c_str());
 
 			// create a hash table large enough
 			int size = HashTable::H2D_DEFAULT_HASH_SIZE;
@@ -207,8 +207,8 @@ namespace Hermes
 			//// elements ////////////////////////////////////////////////////////////////
 
 			n = m.n_el;
-			if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'elements' must be a list.", filename);
-			if (n < 1) throw Hermes::Exceptions::MeshLoadFailureException("File %s: no elements defined.", filename);
+			if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'elements' must be a list.", filename.c_str());
+			if (n < 1) throw Hermes::Exceptions::MeshLoadFailureException("File %s: no elements defined.", filename.c_str());
 
 			// create elements
 			mesh->nactive = 0;
@@ -229,7 +229,7 @@ namespace Hermes
 				if (nv < 4 || nv > 5)
 				{
 					delete[] idx;
-					throw Hermes::Exceptions::MeshLoadFailureException("File %s: element #%d: wrong number of vertex indices.", filename, i);
+					throw Hermes::Exceptions::MeshLoadFailureException("File %s: element #%d: wrong number of vertex indices.", filename.c_str(), i);
 				}
 
 				if (nv == 4) {
@@ -251,7 +251,7 @@ namespace Hermes
 					if (idx[j] < 0 || idx[j] >= mesh->ntopvert)
 					{
 						delete[] idx;
-						throw Hermes::Exceptions::MeshLoadFailureException("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
+						throw Hermes::Exceptions::MeshLoadFailureException("File %s: error creating element #%d: vertex #%d does not exist.", filename.c_str(), i, idx[j]);
 					}
 
 				Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
@@ -293,7 +293,7 @@ namespace Hermes
 
 					en = mesh->peek_edge_node(v1, v2);
 					if (en == nullptr)
-						throw Hermes::Exceptions::MeshLoadFailureException("File %s: boundary data #%d: edge %d-%d does not exist", filename, i, v1, v2);
+						throw Hermes::Exceptions::MeshLoadFailureException("File %s: boundary data #%d: edge %d-%d does not exist", filename.c_str(), i, v1, v2);
 
 					std::string bnd_marker;
 					bnd_marker = m.bdy_type[i];
@@ -322,7 +322,7 @@ namespace Hermes
 			if (m.n_curv > 0)
 			{
 				n = m.n_curv;
-				if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'curves' must be a list.", filename);
+				if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'curves' must be a list.", filename.c_str());
 
 				// load curved edges
 				for (i = 0; i < n; i++)
@@ -351,7 +351,7 @@ namespace Hermes
 			if (m.n_ref > 0)
 			{
 				n = m.n_ref;
-				if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'refinements' must be a list.", filename);
+				if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'refinements' must be a list.", filename.c_str());
 
 				// perform initial refinements
 				for (i = 0; i < n; i++)
