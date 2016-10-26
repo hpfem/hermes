@@ -1875,7 +1875,6 @@ extern double sin ( double );
 // extern double p1evl ( double, void *, int );
 // extern double floor ( double );
 extern double fabs ( double );
-extern bool isnan ( double );
 // extern int isfinite ( double );
 static double stirf ( double );
 double lgam ( double );
