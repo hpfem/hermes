@@ -112,7 +112,7 @@ namespace Hermes
       NullException(unsigned int param_idx, unsigned int item_idx);
       /// \return index of null parameter.
       unsigned int get_param_idx() const;
-      /// \return index of null item in array parameter. Returns -1 if bad parrameter is not array with null item.
+      /// \return index of null item in array parameter. Returns -1 if bad parameter is not array with null item.
       unsigned int get_item_idx() const;
       virtual ~NullException() throw() {};
       NullException(const NullException & e);
